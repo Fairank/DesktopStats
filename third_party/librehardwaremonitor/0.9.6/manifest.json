@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "provider": "LibreHardwareMonitor",
+  "version": "0.9.6",
+  "source_commit": "3d331e3370efb858411f19511373eff65a218701",
+  "release_asset_url": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/releases/download/v0.9.6/LibreHardwareMonitor.zip",
+  "release_asset_sha256": "086d9f1b5a99e643edc2cfaaac16051685b551e4c5ac0b32a57c58c0e529c001",
+  "source_url": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/tree/3d331e3370efb858411f19511373eff65a218701",
+  "files": [
+    {
+      "name": "LibreHardwareMonitorLib.dll",
+      "bytes": 1203200,
+      "sha256": "6ebc194316536ba61af5be24508ad9fcbb2ecc685e716c12e787c79530f66bf0",
+      "package": "LibreHardwareMonitorLib",
+      "version": "0.9.6",
+      "license": "MPL-2.0",
+      "source_url": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/tree/3d331e3370efb858411f19511373eff65a218701"
+    },
+    {
+      "name": "DiskInfoToolkit.dll",
+      "bytes": 903680,
+      "sha256": "1acbf51b3c10c51c986cf43021680d34a2e38d9a5ba652bcfa9a1b5f7fc09800",
+      "package": "DiskInfoToolkit",
+      "version": "1.1.2",
+      "license": "MPL-2.0",
+      "source_url": "https://github.com/Blacktempel/DiskInfoToolkit/tree/25319eae5781e75bcf141e844ceab2afe94d40ea"
+    },
+    {
+      "name": "BlackSharp.Core.dll",
+      "bytes": 32768,
+      "sha256": "cafb93afcc8d8a367e21f619673d05c06887d8964867fed1371f02ded1cd3e23",
+      "package": "BlackSharp.Core",
+      "version": "1.0.7",
+      "license": "MPL-2.0",
+      "source_url": "https://github.com/Blacktempel/BlackSharp/tree/c70b735c6cec123ee8a046ac4a0bc6c606f52cf0"
+    },
+    {
+      "name": "RAMSPDToolkit-NDD.dll",
+      "bytes": 233472,
+      "sha256": "b6882354c7c8ec186617e421507743dbfae09c5c1fc24cef76a1d0c0c26651de",
+      "package": "RAMSPDToolkit-NDD",
+      "version": "1.4.2",
+      "license": "MPL-2.0",
+      "source_url": "https://github.com/Blacktempel/RAMSPDToolkit/tree/3b47b960e0830fef344624ad5e389675d5f0a1ce"
+    },
+    {
+      "name": "HidSharp.dll",
+      "bytes": 262792,
+      "sha256": "d86690efde30ea9179f669320f39148853793b743a98b531afeaf30598e22f54",
+      "package": "HidSharp",
+      "version": "2.6.4",
+      "license": "Apache-2.0",
+      "source_url": "https://www.nuget.org/packages/HidSharp/2.6.4"
+    },
+    {
+      "name": "System.Memory.dll",
+      "bytes": 145200,
+      "sha256": "d5e8e4866f9cfa66f7765660f84b210198893e55335487afe5ebda342c0e913d",
+      "package": "System.Memory",
+      "version": "4.6.3",
+      "license": "MIT",
+      "source_url": "https://github.com/dotnet/maintenance-packages/tree/f62ca0009b038cab4725a720f386623a969d73ad"
+    },
+    {
+      "name": "System.Buffers.dll",
+      "bytes": 23816,
+      "sha256": "2d78d770c9cb997199154ae8c018b9f1d1efbc86729f7264dde6dbad2a12cac3",
+      "package": "System.Buffers",
+      "version": "4.6.1",
+      "license": "MIT",
+      "source_url": "https://github.com/dotnet/maintenance-packages/tree/6b84308c9ad012f53240d72c1d716d7e42546483"
+    },
+    {
+      "name": "System.Numerics.Vectors.dll",
+      "bytes": 110344,
+      "sha256": "20c2fa81b8c70d651099d762954f285fd4f942e63b2d7217c145dab8d4b2f4c9",
+      "package": "System.Numerics.Vectors",
+      "version": "4.6.1",
+      "license": "MIT",
+      "source_url": "https://github.com/dotnet/maintenance-packages/tree/6b84308c9ad012f53240d72c1d716d7e42546483"
+    },
+    {
+      "name": "System.Runtime.CompilerServices.Unsafe.dll",
+      "bytes": 19256,
+      "sha256": "08cbd7278b66f1e68425a82d4b97181a4130d93e3dd91831407aba7212ccdacf",
+      "package": "System.Runtime.CompilerServices.Unsafe",
+      "version": "6.1.2",
+      "license": "MIT",
+      "source_url": "https://github.com/dotnet/maintenance-packages/tree/f62ca0009b038cab4725a720f386623a969d73ad"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "LICENSE-MPL-2.0.txt",
+      "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+    },
+    {
+      "name": "LICENSE-PawnIO-Modules-LGPL-2.1.txt",
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+    },
+    {
+      "name": "LICENSE-HidSharp-Apache-2.0.txt",
+      "sha256": "b065e07179f06490c96bf946e73f821086b2f29efde395f092aea69a907eae16"
+    },
+    {
+      "name": "LICENSE-Microsoft-MIT.txt",
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
+    }
+  ],
+  "embedded_modules": {
+    "version": "0.2.2",
+    "source_commit": "e12a858d952461ee2e919897cacbff7f905fe370",
+    "source_url": "https://github.com/namazso/PawnIO.Modules/tree/e12a858d952461ee2e919897cacbff7f905fe370",
+    "provenance": "All twelve resource binaries match official 0.2.2 release hashes; upstream README still says 0.1.6."
+  },
+  "excluded": "GUI, plotting, TaskScheduler, PDB, setup/installer, drivers; no upstream executable is included."
+}

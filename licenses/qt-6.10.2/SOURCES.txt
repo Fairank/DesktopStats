@@ -1,0 +1,4 @@
+Upstream, unmodified license texts at v6.10.2:
+https://github.com/qt/qtbase/tree/v6.10.2/LICENSES
+https://github.com/qt/qtdeclarative/tree/v6.10.2/LICENSES
+https://github.com/pyside/pyside-setup/tree/v6.10.2/LICENSES

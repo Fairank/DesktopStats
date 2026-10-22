@@ -1,0 +1,78 @@
+.pragma library
+// Lucide 1.61.0; pinned commit c29c276f16590cf017126671535ad8c792be64d8.
+// Full ISC and Feather MIT notices: ../assets/lucide/LICENSE.
+// Original SVG children are byte-exact; only the parent renderer applies color/scale.
+var commit = "c29c276f16590cf017126671535ad8c792be64d8";
+var sources = {
+  "cpu": "cpu",
+  "gpu": "gpu",
+  "memory": "memory-stick",
+  "vram": "memory-stick",
+  "battery": "battery",
+  "power": "zap",
+  "network": "arrow-down-up",
+  "disk": "hard-drive",
+  "custom": "layout-grid",
+  "grid": "layout-grid",
+  "sliders": "sliders-horizontal",
+  "sensors": "activity",
+  "plus": "plus",
+  "search": "search",
+  "copy": "copy",
+  "trash": "trash",
+  "up": "chevron-up",
+  "down": "chevron-down",
+  "close": "x",
+  "check": "check",
+  "undo": "undo",
+  "redo": "redo",
+  "chevron": "chevron-right",
+  "fan": "fan",
+  "temperature": "thermometer",
+  "noise": "audio-lines",
+  "voltage": "gauge",
+  "frequency": "activity",
+  "time": "clock",
+  "download": "arrow-down-to-line",
+  "upload": "arrow-up-from-line",
+  "disk_read": "hard-drive-upload",
+  "disk_write": "hard-drive-download"
+};
+var fragments = {
+  "cpu": "\n  <path d=\"M12 20v2\" />\n  <path d=\"M12 2v2\" />\n  <path d=\"M17 20v2\" />\n  <path d=\"M17 2v2\" />\n  <path d=\"M2 12h2\" />\n  <path d=\"M2 17h2\" />\n  <path d=\"M2 7h2\" />\n  <path d=\"M20 12h2\" />\n  <path d=\"M20 17h2\" />\n  <path d=\"M20 7h2\" />\n  <path d=\"M7 20v2\" />\n  <path d=\"M7 2v2\" />\n  <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" />\n  <rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" />\n",
+  "gpu": "\n  <path d=\"M2 17h18a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H2\" />\n  <path d=\"M2 21V3\" />\n  <path d=\"M7 17v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3\" />\n  <circle cx=\"16\" cy=\"11\" r=\"2\" />\n  <circle cx=\"8\" cy=\"11\" r=\"2\" />\n",
+  "memory": "\n  <path d=\"M12 12v-2\" />\n  <path d=\"M12 18v-2\" />\n  <path d=\"M16 12v-2\" />\n  <path d=\"M16 18v-2\" />\n  <path d=\"M2 11h1.5\" />\n  <path d=\"M20 18v-2\" />\n  <path d=\"M20.5 11H22\" />\n  <path d=\"M4 18v-2\" />\n  <path d=\"M8 12v-2\" />\n  <path d=\"M8 18v-2\" />\n  <rect x=\"2\" y=\"6\" width=\"20\" height=\"10\" rx=\"2\" />\n",
+  "vram": "\n  <path d=\"M12 12v-2\" />\n  <path d=\"M12 18v-2\" />\n  <path d=\"M16 12v-2\" />\n  <path d=\"M16 18v-2\" />\n  <path d=\"M2 11h1.5\" />\n  <path d=\"M20 18v-2\" />\n  <path d=\"M20.5 11H22\" />\n  <path d=\"M4 18v-2\" />\n  <path d=\"M8 12v-2\" />\n  <path d=\"M8 18v-2\" />\n  <rect x=\"2\" y=\"6\" width=\"20\" height=\"10\" rx=\"2\" />\n",
+  "battery": "\n  <path d=\"M 22 14 L 22 10\" />\n  <rect x=\"2\" y=\"6\" width=\"16\" height=\"12\" rx=\"2\" />\n",
+  "power": "\n  <path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />\n",
+  "network": "\n  <path d=\"m3 16 4 4 4-4\" />\n  <path d=\"M7 20V4\" />\n  <path d=\"m21 8-4-4-4 4\" />\n  <path d=\"M17 4v16\" />\n",
+  "disk": "\n  <path d=\"M10 16h.01\" />\n  <path d=\"M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\" />\n  <path d=\"M21.946 12.013H2.054\" />\n  <path d=\"M6 16h.01\" />\n",
+  "custom": "\n  <rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />\n",
+  "grid": "\n  <rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" />\n",
+  "sliders": "\n  <path d=\"M10 5H3\" />\n  <path d=\"M12 19H3\" />\n  <path d=\"M14 3v4\" />\n  <path d=\"M16 17v4\" />\n  <path d=\"M21 12h-9\" />\n  <path d=\"M21 19h-5\" />\n  <path d=\"M21 5h-7\" />\n  <path d=\"M8 10v4\" />\n  <path d=\"M8 12H3\" />\n",
+  "sensors": "\n  <path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\" />\n",
+  "plus": "\n  <path d=\"M5 12h14\" />\n  <path d=\"M12 5v14\" />\n",
+  "search": "\n  <path d=\"m21 21-4.34-4.34\" />\n  <circle cx=\"11\" cy=\"11\" r=\"8\" />\n",
+  "copy": "\n  <rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\" />\n  <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\" />\n",
+  "trash": "\n  <path d=\"M10 11v6\" />\n  <path d=\"M14 11v6\" />\n  <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" />\n  <path d=\"M3 6h18\" />\n  <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />\n",
+  "up": "\n  <path d=\"m18 15-6-6-6 6\" />\n",
+  "down": "\n  <path d=\"m6 9 6 6 6-6\" />\n",
+  "close": "\n  <path d=\"M18 6 6 18\" />\n  <path d=\"m6 6 12 12\" />\n",
+  "check": "\n  <path d=\"M20 6 9 17l-5-5\" />\n",
+  "undo": "\n  <path d=\"M3 7v6h6\" />\n  <path d=\"M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13\" />\n",
+  "redo": "\n  <path d=\"M21 7v6h-6\" />\n  <path d=\"M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7\" />\n",
+  "chevron": "\n  <path d=\"m9 18 6-6-6-6\" />\n",
+  "fan": "\n  <path d=\"M10.827 16.379a6.082 6.082 0 0 1-8.618-7.002l5.412 1.45a6.082 6.082 0 0 1 7.002-8.618l-1.45 5.412a6.082 6.082 0 0 1 8.618 7.002l-5.412-1.45a6.082 6.082 0 0 1-7.002 8.618l1.45-5.412Z\" />\n  <path d=\"M12 12v.01\" />\n",
+  "temperature": "\n  <path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z\" />\n",
+  "noise": "\n  <path d=\"M2 10v3\" />\n  <path d=\"M6 6v11\" />\n  <path d=\"M10 3v18\" />\n  <path d=\"M14 8v7\" />\n  <path d=\"M18 5v13\" />\n  <path d=\"M22 10v3\" />\n",
+  "voltage": "\n  <path d=\"m12 14 4-4\" />\n  <path d=\"M3.34 19a10 10 0 1 1 17.32 0\" />\n",
+  "frequency": "\n  <path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\" />\n",
+  "time": "\n  <circle cx=\"12\" cy=\"12\" r=\"10\" />\n  <path d=\"M12 6v6l4 2\" />\n",
+  "download": "\n  <path d=\"M12 17V3\" />\n  <path d=\"m6 11 6 6 6-6\" />\n  <path d=\"M19 21H5\" />\n",
+  "upload": "\n  <path d=\"m18 9-6-6-6 6\" />\n  <path d=\"M12 3v14\" />\n  <path d=\"M5 21h14\" />\n",
+  "disk_read": "\n  <path d=\"m16 6-4-4-4 4\" />\n  <path d=\"M12 2v8\" />\n  <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" />\n  <path d=\"M6 18h.01\" />\n  <path d=\"M10 18h.01\" />\n",
+  "disk_write": "\n  <path d=\"M12 2v8\" />\n  <path d=\"m16 6-4 4-4-4\" />\n  <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" />\n  <path d=\"M6 18h.01\" />\n  <path d=\"M10 18h.01\" />\n"
+};
+function fragment(name) {
+    return Object.prototype.hasOwnProperty.call(fragments, name) ? fragments[name] : fragments.grid;
+}

@@ -1,0 +1,625 @@
+// Source | Traditional Chinese | English | Japanese | Korean | German | French | Spanish
+名称|名稱|Name|名前|이름|Name|Nom|Nombre
+尺寸|尺寸|Size|サイズ|크기|Größe|Taille|Tamaño
+显示组件|顯示元件|Show widget|ウィジェットを表示|위젯 표시|Widget anzeigen|Afficher le widget|Mostrar widget
+显示选项|顯示選項|Display options|表示オプション|표시 옵션|Anzeigeoptionen|Options d’affichage|Opciones de visualización
+桌面默认设置|桌面預設設定|Desktop defaults|デスクトップの既定値|바탕 화면 기본값|Desktop-Standardwerte|Réglages du bureau|Valores del escritorio
+常规|一般|General|一般|일반|Allgemein|Général|General
+传感器与来源|感測器與來源|Sensors and sources|センサーと取得元|센서 및 데이터 소스|Sensoren und Quellen|Capteurs et sources|Sensores y fuentes
+将替换全部设置|將取代全部設定|All settings will be replaced|すべての設定を置き換えます|모든 설정이 교체됩니다|Alle Einstellungen werden ersetzt|Tous les réglages seront remplacés|Se reemplazarán todos los ajustes
+取消全部预览|取消全部預覽|Cancel replacement|置き換えをキャンセル|교체 취소|Ersetzen abbrechen|Annuler le remplacement|Cancelar reemplazo
+应用全部设置|套用全部設定|Apply all settings|すべての設定を適用|모든 설정 적용|Alle Einstellungen anwenden|Appliquer tous les réglages|Aplicar todos los ajustes
+应用偏好|套用偏好|Apply preferences|環境設定を適用|환경 설정 적용|Präferenzen anwenden|Appliquer les préférences|Aplicar preferencias
+请应用或取消全部设置预览|請套用或取消全部設定預覽|Apply or cancel the full settings replacement|設定の置き換えを適用またはキャンセルしてください|전체 설정 교체를 적용하거나 취소하세요|Alle Einstellungen ersetzen oder abbrechen|Appliquez ou annulez le remplacement complet|Aplica o cancela el reemplazo de todos los ajustes
+即时生效|即時生效|Applies immediately|すぐに反映|즉시 적용|Sofort wirksam|Effet immédiat|Efecto inmediato
+左右布局|左右配置|Left and right layout|左右の配置|좌우 배치|Links-rechts-Anordnung|Disposition gauche-droite|Distribución izquierda-derecha
+栏设置|欄設定|Bar settings|バー設定|표시줄 설정|Leisteneinstellungen|Réglages de la barre|Ajustes de la barra
+透明度|透明度|Transparency|透明度|투명도|Transparenz|Transparence|Transparencia
+外观调整即时预览，应用后保存|外觀調整即時預覽，套用後儲存|Appearance previews instantly. Apply to save.|外観をすぐにプレビュー。適用して保存。|외관은 즉시 미리보기되며 적용하면 저장됩니다.|Aussehen sofort ansehen. Mit Anwenden speichern.|Aperçu immédiat. Appliquez pour enregistrer.|Vista previa inmediata. Aplica para guardar.
+已连接电源|已接上電源|Plugged in|電源接続中|전원 연결됨|Netzbetrieb|Branché|Conectado
+大号|大型|Large|大|크게|Groß|Grand|Grande
+玻璃浓度|玻璃濃度|Glass tint|ガラスの濃さ|유리 농도|Glastönung|Teinte du verre|Tinte del cristal
+拖动桌面组件，位置自动保存。|拖曳桌面元件，位置自動儲存。|Drag widgets; positions save automatically.|ドラッグで移動。位置は自動保存。|위젯을 드래그하면 위치가 자동 저장됩니다.|Positionen werden beim Verschieben gespeichert.|Déplacez les widgets, la position est sauvegardée.|Arrastra los widgets; la posición se guarda sola.
+在其他窗口下方，不遮挡工作。|位於其他視窗下方，不遮擋工作。|Below other windows, out of your way.|ほかのウィンドウの下に表示。|다른 창 아래에 표시되어 방해하지 않습니다.|Unter anderen Fenstern, ohne zu stören.|Sous les autres fenêtres, sans gêner.|Debajo de otras ventanas, sin estorbar.
+功率为电池侧读数，不等于充电器输入或整机功耗。|功率是電池端讀數，不等於充電器輸入或整機功耗。|Battery-side power, not charger input or total system power.|電力はバッテリー側の値で、充電器入力や全体消費電力ではありません。|전력은 배터리 측 수치이며 충전기 입력이나 전체 소비 전력이 아닙니다.|Akkuleistung, weder Ladegeräteingang noch Gesamtverbrauch.|Puissance de la batterie, pas du chargeur ni du système entier.|Potencia de la batería, no del cargador ni de todo el sistema.
+未提供的传感器显示为 —，不会估算。|未提供的感測器顯示為 —，不會估算。|Unavailable sensors show —. No estimates.|取得できない値は — と表示し、推測しません。|사용할 수 없는 센서는 —로 표시하며 추정하지 않습니다.|Fehlende Sensorwerte zeigen —, ohne Schätzung.|Les capteurs indisponibles affichent —, sans estimation.|Los sensores no disponibles muestran —, sin estimaciones.
+撤销更改|撤銷變更|Revert|変更を戻す|변경 취소|Verwerfen|Annuler|Revertir
+设置已导出|設定已匯出|Settings exported|設定を書き出しました|설정 내보냄|Einstellungen exportiert|Réglages exportés|Ajustes exportados
+最小化|最小化|Minimize|最小化|최소화|Minimieren|Réduire|Minimizar
+最大化|最大化|Maximize|最大化|최대화|Maximieren|Agrandir|Maximizar
+还原|還原|Restore|元に戻す|이전 크기로|Wiederherstellen|Restaurer|Restaurar
+关闭设置|關閉設定|Close settings|設定を閉じる|설정 닫기|Einstellungen schließen|Fermer les réglages|Cerrar ajustes
+上移|上移|Move up|上へ|위로|Nach oben|Monter|Subir
+下移|下移|Move down|下へ|아래로|Nach unten|Descendre|Bajar
+移除|移除|Remove|削除|제거|Entfernen|Retirer|Eliminar
+小组件|小元件|Widgets|ウィジェット|위젯|Widgets|Widgets|Widgets
+外观与布局|外觀與配置|Appearance & layout|外観と配置|모양 및 배치|Design & Layout|Apparence et disposition|Aspecto y diseño
+传感器|感測器|Sensors|センサー|센서|Sensoren|Capteurs|Sensores
+桌面小组件|桌面小元件|Desktop widgets|デスクトップウィジェット|데스크톱 위젯|Desktop-Widgets|Widgets du bureau|Widgets del escritorio
+只留下你关心的信息。|只留下你關心的資訊。|Keep the readings that matter.|必要な情報だけを表示。|필요한 정보만 표시하세요.|Nur die wichtigen Werte.|Gardez les mesures utiles.|Solo los datos que importan.
+桌面预览|桌面預覽|Desktop preview|デスクトップのプレビュー|데스크톱 미리보기|Desktop-Vorschau|Aperçu du bureau|Vista previa del escritorio
+按你的桌面调整大小和布局。|依照桌面調整大小與配置。|Make it fit your desktop.|デスクトップに合わせて調整。|데스크톱에 맞게 조정하세요.|Passend für deinen Desktop.|Adaptez les widgets à votre bureau.|Adáptalo a tu escritorio.
+查看真实读数与数据来源。|查看實際數值與資料來源。|Live readings and their sources.|実測値とデータソース。|실시간 수치와 데이터 출처.|Messwerte und ihre Quellen.|Mesures réelles et sources.|Lecturas reales y sus fuentes.
+组件标题|元件標題|Widget title|タイトル|위젯 제목|Widget-Titel|Titre du widget|Título del widget
+硬件预设|硬體預設|Hardware preset|ハードウェア設定|하드웨어 기본값|Hardware-Vorgabe|Préréglage matériel|Preajuste de hardware
+自由内容|自訂內容|Custom contents|カスタム内容|사용자 지정 내용|Eigene Inhalte|Contenu personnalisé|Contenido personalizado
+主数值|主要數值|Primary reading|メインの値|기본 수치|Hauptwert|Mesure principale|Dato principal
+附加信息|附加資訊|Secondary reading|追加情報|추가 정보|Zusatzwert|Mesure secondaire|Dato secundario
+组件皮肤|元件外觀|Widget skin|スキン|위젯 스킨|Widget-Stil|Style du widget|Estilo del widget
+跟随全局|跟隨全域|Use global|全体設定に従う|전체 설정 사용|Global verwenden|Réglage global|Usar ajuste global
+显示图表|顯示圖表|Show chart|グラフを表示|차트 표시|Diagramm anzeigen|Afficher le graphique|Mostrar gráfico
+放入组合面板|加入組合面板|Include in panel|パネルにまとめる|패널에 포함|In Panel aufnehmen|Inclure dans le panneau|Incluir en el panel
+单独尺寸|個別尺寸|Individual size|個別サイズ|개별 크기|Eigene Größe|Taille individuelle|Tamaño individual
+内容模式|內容模式|Content mode|内容モード|내용 모드|Inhaltsmodus|Mode de contenu|Modo de contenido
+已选指标|已選指標|Selected readings|選択した項目|선택한 항목|Gewählte Werte|Mesures choisies|Datos elegidos
+添加指标…|新增指標…|Add a reading…|項目を追加…|항목 추가…|Wert hinzufügen…|Ajouter une mesure…|Añadir un dato…
+已选择 4 项指标|已選擇 4 項指標|4 readings selected|4 項目を選択済み|4개 항목 선택됨|4 Werte gewählt|4 mesures choisies|4 datos elegidos
+可混放不同硬件。首项决定趋势图；3–4 项自动使用列表排版。|可混搭不同硬體。首項決定趨勢圖；3–4 項自動以清單顯示。|Mix any hardware. The first reading drives the chart; 3–4 readings use a list.|異なるハードウェアを組み合わせられます。先頭の項目がグラフになり、3～4 項目はリスト表示になります。|하드웨어를 자유롭게 조합하세요. 첫 항목이 차트에 표시되며 3~4개 항목은 목록으로 배치됩니다.|Hardware frei kombinieren. Der erste Wert bestimmt das Diagramm; 3–4 Werte erscheinen als Liste.|Combinez les matériels. La première mesure pilote le graphique ; 3–4 mesures forment une liste.|Combina hardware. El primer dato controla el gráfico; con 3–4 datos se usa una lista.
+组件形态|元件形式|Widget mode|表示モード|위젯 모드|Widget-Modus|Mode des widgets|Modo de widgets
+独立|獨立|Separate|個別|개별|Einzeln|Séparés|Separados
+组合|組合|Combined|一体化|통합|Kombiniert|Combinés|Combinados
+混合|混合|Mixed|混在|혼합|Gemischt|Mixte|Mixto
+小组件大小|小元件大小|Widget size|ウィジェットサイズ|위젯 크기|Widget-Größe|Taille des widgets|Tamaño de widgets
+迷你|迷你|Mini|ミニ|미니|Mini|Mini|Mini
+小号|小型|Small|小|작게|Klein|Petit|Pequeño
+标准|標準|Standard|標準|표준|Standard|Standard|Estándar
+外观模式|外觀模式|Color mode|カラーモード|색상 모드|Farbmodus|Mode couleur|Modo de color
+浅色|淺色|Light|ライト|밝게|Hell|Clair|Claro
+深色|深色|Dark|ダーク|어둡게|Dunkel|Sombre|Oscuro
+布局预设|配置預設|Layout preset|レイアウト設定|배치 프리셋|Layout-Vorlage|Disposition prédéfinie|Diseño predefinido
+选择布局…|選擇配置…|Choose a layout…|レイアウトを選択…|배치 선택…|Layout wählen…|Choisir une disposition…|Elegir un diseño…
+经典桌面|經典桌面|Classic desktop|クラシック|클래식 데스크톱|Klassischer Desktop|Bureau classique|Escritorio clásico
+单块总览|單塊總覽|One-widget overview|1 つにまとめる|하나로 요약|Einzelübersicht|Vue en un widget|Resumen en un widget
+详细监测|詳細監測|Detailed monitoring|詳細モニター|상세 모니터링|Detailübersicht|Suivi détaillé|Monitorización detallada
+轻量桌面|輕量桌面|Minimal desktop|軽量表示|가벼운 데스크톱|Schlichter Desktop|Bureau minimal|Escritorio ligero
+五块迷你卡片|五塊迷你卡片|Five mini cards|5 枚のミニカード|미니 카드 5개|Fünf Mini-Karten|Cinq mini-cartes|Cinco tarjetas pequeñas
+四项指标，一块玻璃|四項指標，一塊玻璃|Four readings in one glass card|4 項目を 1 枚のガラスカードに|유리 카드 하나에 4개 항목|Vier Werte auf einer Glaskarte|Quatre mesures sur une carte vitrée|Cuatro datos en una tarjeta de cristal
+六类硬件组合面板|六類硬體組合面板|Six hardware modules in one panel|6 種類を 1 つのパネルに|하나의 패널에 하드웨어 6종|Sechs Module in einem Panel|Six modules dans un panneau|Seis módulos en un panel
+精简内容，不主动读取独显|精簡內容，不主動讀取獨顯|Essential readings; no active GPU polling|必要な情報のみ、GPU の常時取得なし|핵심 정보만 표시, GPU 조회 중지|Wenige Werte, keine aktive GPU-Abfrage|Essentiel, sans interrogation active du GPU|Lo esencial, sin consultas activas a la GPU
+系统状态|系統狀態|System|システム|시스템|System|Système|Sistema
+小组件皮肤|小元件外觀|Widget skins|ウィジェットのスキン|위젯 스킨|Widget-Stile|Styles des widgets|Estilos de widgets
+经典卡片|經典卡片|Classic card|クラシックカード|클래식 카드|Klassische Karte|Carte classique|Tarjeta clásica
+清透玻璃|通透玻璃|Clear glass|クリアガラス|투명 유리|Klarglas|Verre transparent|Cristal transparente
+极简数字|極簡數字|Minimal numbers|ミニマル数字|미니멀 숫자|Schlichte Zahlen|Chiffres minimalistes|Números minimalistas
+各组件也能单独选择皮肤。玻璃为半透明表面，建议搭配简洁壁纸。|各元件也能個別選擇外觀。玻璃為半透明表面，建議搭配簡潔桌布。|Override the skin per widget. Glass is translucent and works best with simple wallpaper.|スキンは個別にも選べます。ガラスは半透明なので、シンプルな壁紙がおすすめです。|위젯마다 스킨을 선택할 수 있습니다. 유리 스킨은 반투명이며 단순한 배경에 잘 어울립니다.|Stile auch einzeln wählen. Glas ist halbtransparent und passt zu ruhigen Hintergründen.|Chaque widget peut avoir son style. Le verre translucide convient aux fonds sobres.|Cada widget admite su estilo. El cristal translúcido combina mejor con fondos sencillos.
+全局组件大小|全域元件大小|Global widget size|全体のサイズ|전체 위젯 크기|Globale Größe|Taille globale|Tamaño global
+不透明度|不透明度|Opacity|不透明度|불투명도|Deckkraft|Opacité|Opacidad
+独立排列|獨立排列|Separate layout|個別の配置|개별 배치|Einzelanordnung|Disposition séparée|Disposición separada
+横排|橫排|Row|横並び|가로|Zeile|Ligne|Fila
+竖排|直排|Column|縦並び|세로|Spalte|Colonne|Columna
+两列|兩欄|Two columns|2 列|2열|Zwei Spalten|Deux colonnes|Dos columnas
+组合列数|組合欄數|Panel columns|パネルの列数|패널 열 수|Panel-Spalten|Colonnes du panneau|Columnas del panel
+更新频率|更新頻率|Refresh interval|更新間隔|갱신 간격|Aktualisierung|Intervalle de mise à jour|Intervalo de actualización
+锁定桌面位置|鎖定桌面位置|Lock positions|位置を固定|위치 잠금|Positionen sperren|Verrouiller les positions|Bloquear posiciones
+登录时自动启动|登入時自動啟動|Start at login|ログイン時に起動|로그인 시 시작|Bei Anmeldung starten|Démarrer à la connexion|Iniciar al acceder
+独立组件与组合面板都能拖动。混合模式可在各组件的设置中选择“放入组合面板”。调整尺寸或布局后会重新排列。|獨立元件與組合面板皆可拖曳。混合模式可在各元件中選擇「加入組合面板」。調整大小或配置後會重新排列。|Drag individual widgets or the combined panel. In mixed mode, choose which widgets join the panel. Size and layout changes rearrange widgets.|個別ウィジェットもパネルもドラッグできます。混在モードではパネルに入れる項目を選べます。サイズや配置を変えると再整列します。|위젯과 패널을 드래그할 수 있습니다. 혼합 모드에서 패널에 넣을 위젯을 선택하세요. 크기나 배치를 바꾸면 다시 정렬됩니다.|Widgets und Panels lassen sich ziehen. Im gemischten Modus wählen Sie die Panel-Inhalte. Größen- und Layoutänderungen ordnen neu an.|Déplacez les widgets ou le panneau. En mode mixte, choisissez les widgets du panneau. Les changements de taille ou de disposition réorganisent les widgets.|Arrastra widgets o el panel. En modo mixto, elige cuáles se agrupan. Al cambiar tamaño o diseño se reorganizan.
+重新排列|重新排列|Rearrange|再整列|다시 정렬|Neu anordnen|Réorganiser|Reorganizar
+全部隐藏|全部隱藏|Hide widgets|すべて非表示|모두 숨기기|Widgets ausblenden|Masquer les widgets|Ocultar widgets
+恢复显示|恢復顯示|Show widgets|再表示|다시 표시|Widgets anzeigen|Afficher les widgets|Mostrar widgets
+导出设置|匯出設定|Export settings|設定を書き出す|설정 내보내기|Einstellungen exportieren|Exporter les réglages|Exportar ajustes
+导入设置|匯入設定|Import settings|設定を読み込む|설정 가져오기|Einstellungen importieren|Importer les réglages|Importar ajustes
+恢复默认|還原預設|Reset defaults|初期設定に戻す|기본값 복원|Zurücksetzen|Réglages par défaut|Restablecer
+预览 1.3× · 自动保存位置|預覽 1.3× · 自動儲存位置|Preview 1.3× · positions saved|プレビュー 1.3× · 位置を保存|미리보기 1.3× · 위치 저장|Vorschau 1,3× · Positionen gespeichert|Aperçu 1,3× · positions enregistrées|Vista 1,3× · posiciones guardadas
+预览 1.3× · 支持组合拖动|預覽 1.3× · 支援組合拖曳|Preview 1.3× · drag as a group|プレビュー 1.3× · まとめて移動|미리보기 1.3× · 그룹으로 이동|Vorschau 1,3× · als Gruppe ziehen|Aperçu 1,3× · déplacement groupé|Vista 1,3× · arrastre agrupado
+位置已锁定|位置已鎖定|Positions locked|位置を固定済み|위치 잠김|Positionen gesperrt|Positions verrouillées|Posiciones bloqueadas
+组件已隐藏，可在外观与布局恢复显示|元件已隱藏，可至外觀與配置恢復顯示|Widgets are hidden. Show them in Appearance & layout.|非表示です。外観と配置から再表示できます。|위젯이 숨겨졌습니다. 모양 및 배치에서 다시 표시하세요.|Widgets ausgeblendet. Im Design-Menü wieder anzeigen.|Widgets masqués. Réactivez-les dans Apparence.|Widgets ocultos. Muéstralos en Aspecto y diseño.
+从左侧添加小组件|從左側新增小元件|Enable a widget on the left|左側からウィジェットを追加|왼쪽에서 위젯을 켜세요.|Links ein Widget aktivieren|Activez un widget à gauche|Activa un widget a la izquierda
+传感器已连接|感測器已連線|Sensors connected|センサー接続済み|센서 연결됨|Sensoren verbunden|Capteurs connectés|Sensores conectados
+等待传感器|等待感測器|Waiting for sensors|センサーを待機中|센서 대기 중|Warte auf Sensoren|En attente des capteurs|Esperando sensores
+连接传感器…|正在連接感測器…|Connecting sensors…|センサーに接続中…|센서 연결 중…|Sensoren verbinden…|Connexion aux capteurs…|Conectando sensores…
+设置尚未应用|設定尚未套用|Changes not applied|変更は未適用です|변경 사항 미적용|Änderungen nicht angewendet|Modifications non appliquées|Cambios sin aplicar
+已应用到桌面|已套用至桌面|Applied to desktop|デスクトップに適用しました|데스크톱에 적용됨|Auf Desktop angewendet|Appliqué au bureau|Aplicado al escritorio
+正在应用…|正在套用…|Applying…|適用中…|적용 중…|Wird angewendet…|Application…|Aplicando…
+应用到桌面|套用至桌面|Apply to desktop|デスクトップに適用|데스크톱에 적용|Auf Desktop anwenden|Appliquer au bureau|Aplicar al escritorio
+设置已同步|設定已同步|Settings synced|設定を同期しました|설정 동기화됨|Einstellungen synchronisiert|Réglages synchronisés|Ajustes sincronizados
+未能保存，请重试|無法儲存，請重試|Could not save. Try again.|保存できません。再試行してください。|저장할 수 없습니다. 다시 시도하세요.|Speichern fehlgeschlagen. Erneut versuchen.|Échec de la sauvegarde. Réessayez.|No se pudo guardar. Inténtalo de nuevo.
+操作未完成，请重试|操作未完成，請重試|Action failed. Try again.|操作に失敗しました。再試行してください。|작업에 실패했습니다. 다시 시도하세요.|Aktion fehlgeschlagen. Erneut versuchen.|Échec de l’action. Réessayez.|La operación falló. Inténtalo de nuevo.
+设置文件过大|設定檔過大|Settings file is too large.|設定ファイルが大きすぎます。|설정 파일이 너무 큽니다.|Einstellungsdatei zu groß.|Fichier de réglages trop volumineux.|El archivo de ajustes es demasiado grande.
+无法读取设置文件|無法讀取設定檔|Could not read settings.|設定を読み込めません。|설정을 읽을 수 없습니다.|Einstellungen nicht lesbar.|Impossible de lire les réglages.|No se pueden leer los ajustes.
+设置服务未连接，请从桌面快捷方式重新打开|設定服務未連線，請從桌面捷徑重新開啟|Settings service is offline. Reopen Desktop Stats.|設定サービスが停止中です。Desktop Stats を開き直してください。|설정 서비스가 중지되었습니다. Desktop Stats를 다시 여세요.|Dienst nicht erreichbar. Desktop Stats neu öffnen.|Service indisponible. Rouvrez Desktop Stats.|Servicio no disponible. Vuelve a abrir Desktop Stats.
+显示语言|顯示語言|Language|表示言語|표시 언어|Sprache|Langue|Idioma
+温度来源|溫度來源|Temperature source|温度の取得元|온도 출처|Temperaturquelle|Source de température|Fuente de temperatura
+数据来源|資料來源|Data source|データソース|데이터 출처|Datenquelle|Source des données|Fuente de datos
+未提供|未提供|Unavailable|取得不可|사용 불가|Nicht verfügbar|Indisponible|No disponible
+温度 / 使用率|溫度 / 使用率|Temperature / usage|温度 / 使用率|온도 / 사용률|Temperatur / Auslastung|Température / utilisation|Temperatura / uso
+已用 / 总容量|已用 / 總容量|Used / total|使用量 / 合計|사용량 / 전체|Belegt / gesamt|Utilisé / total|Usado / total
+电池与供电|電池與供電|Battery & power|バッテリーと電源|배터리 및 전원|Akku & Strom|Batterie et alimentation|Batería y alimentación
+电量 / 状态|電量 / 狀態|Level / state|残量 / 状態|잔량 / 상태|Ladestand / Status|Niveau / état|Nivel / estado
+电池充 / 放电功率|電池充 / 放電功率|Battery charge / discharge power|バッテリー充放電電力|배터리 충방전 전력|Akku-Lade-/Entladeleistung|Puissance de charge/décharge|Potencia de carga/descarga
+显示|顯示|Show|表示|표시|Anzeigen|Afficher|Mostrar
+系统缩放|系統縮放|Display scaling|画面の拡大率|화면 배율|Anzeigeskalierung|Mise à l’échelle|Escala de pantalla
+文字与图形|文字與圖形|Text & graphics|文字と描画|텍스트 및 그래픽|Text & Grafik|Texte et graphismes|Texto y gráficos
+原生矢量 · 按 DPI 绘制|原生向量 · 依 DPI 繪製|Native vectors · DPI aware|ネイティブベクター · DPI 対応|네이티브 벡터 · DPI 대응|Native Vektoren · DPI-bewusst|Vecteurs natifs · adaptés au DPI|Vectores nativos · adaptados al DPI
+内存|記憶體|Memory|メモリ|메모리|Arbeitsspeicher|Mémoire|Memoria
+显存|顯示記憶體|VRAM|VRAM|VRAM|Grafikspeicher|VRAM|VRAM
+电池|電池|Battery|バッテリー|배터리|Akku|Batterie|Batería
+充放电功率|充放電功率|Battery power|充放電電力|충방전 전력|Akkuleistung|Puissance batterie|Potencia de batería
+充放电|充放電|Battery flow|充放電|충방전|Leistung|Puissance|Energía
+温度 · 使用率|溫度 · 使用率|Temperature · usage|温度 · 使用率|온도 · 사용률|Temperatur · Auslastung|Température · utilisation|Temperatura · uso
+温度 · 使用率 · 功率|溫度 · 使用率 · 功率|Temperature · usage · power|温度 · 使用率 · 電力|온도 · 사용률 · 전력|Temperatur · Auslastung · Leistung|Température · utilisation · puissance|Temperatura · uso · potencia
+使用量 · 占用率|用量 · 使用率|Capacity · usage|容量 · 使用率|용량 · 사용률|Kapazität · Auslastung|Capacité · utilisation|Capacidad · uso
+使用量 · 容量|用量 · 容量|Usage · capacity|使用量 · 容量|사용량 · 용량|Belegung · Kapazität|Utilisation · capacité|Uso · capacidad
+电量 · 供电状态|電量 · 供電狀態|Level · power state|残量 · 電源の状態|잔량 · 전원 상태|Ladestand · Stromstatus|Niveau · alimentation|Nivel · alimentación
+电池实时功率|電池即時功率|Live battery power|バッテリーの実測電力|실시간 배터리 전력|Aktuelle Akkuleistung|Puissance réelle de la batterie|Potencia real de batería
+温度|溫度|Temperature|温度|온도|Temperatur|Température|Temperatura
+使用率|使用率|Usage|使用率|사용률|Auslastung|Utilisation|Uso
+占用率|使用率|Usage|使用率|사용률|Auslastung|Utilisation|Uso
+已用容量|已用容量|Used capacity|使用容量|사용 용량|Belegte Kapazität|Capacité utilisée|Capacidad usada
+可用容量|可用容量|Available capacity|空き容量|사용 가능 용량|Freie Kapazität|Capacité disponible|Capacidad disponible
+总容量|總容量|Total capacity|合計容量|전체 용량|Gesamtkapazität|Capacité totale|Capacidad total
+电量|電量|Battery level|バッテリー残量|배터리 잔량|Ladestand|Niveau de batterie|Nivel de batería
+电压|電壓|Voltage|電圧|전압|Spannung|Tension|Voltaje
+核心 / 线程|核心 / 執行緒|Cores / threads|コア / スレッド|코어 / 스레드|Kerne / Threads|Cœurs / fils|Núcleos / hilos
+不显示|不顯示|Hide|非表示|숨기기|Ausblenden|Masquer|Ocultar
+使用率 + GPU 功率|使用率 + GPU 功率|Usage + GPU power|使用率 + GPU 電力|사용률 + GPU 전력|Auslastung + GPU-Leistung|Utilisation + puissance GPU|Uso + potencia GPU
+供电状态|供電狀態|Power state|電源の状態|전원 상태|Stromstatus|État d’alimentation|Estado de alimentación
+充 / 放电功率|充 / 放電功率|Charge / discharge power|充放電電力|충방전 전력|Lade-/Entladeleistung|Puissance de charge/décharge|Potencia de carga/descarga
+充 / 放电方向|充 / 放電方向|Charge / discharge state|充放電の状態|충방전 상태|Lade-/Entladestatus|État de charge/décharge|Estado de carga/descarga
+CPU 温度|CPU 溫度|CPU temp|CPU 温度|CPU 온도|CPU-Temp.|Temp. CPU|Temp. CPU
+CPU 使用率|CPU 使用率|CPU usage|CPU 使用率|CPU 사용률|CPU-Last|Usage CPU|Uso CPU
+GPU 温度|GPU 溫度|GPU temp|GPU 温度|GPU 온도|GPU-Temp.|Temp. GPU|Temp. GPU
+GPU 使用率|GPU 使用率|GPU usage|GPU 使用率|GPU 사용률|GPU-Last|Usage GPU|Uso GPU
+GPU 功率|GPU 功率|GPU power|GPU 電力|GPU 전력|GPU-Leist.|Puiss. GPU|Pot. GPU
+内存占用率|記憶體使用率|RAM usage|メモリ使用率|메모리 사용률|RAM-Last|Usage RAM|Uso RAM
+已用内存|已用記憶體|RAM used|使用メモリ|사용 메모리|RAM belegt|RAM utilisée|RAM usada
+可用内存|可用記憶體|RAM free|空きメモリ|여유 메모리|RAM frei|RAM libre|RAM libre
+已用显存|已用顯示記憶體|VRAM used|使用 VRAM|사용 VRAM|VRAM belegt|VRAM utilisée|VRAM usada
+显存占用率|顯示記憶體使用率|VRAM usage|VRAM 使用率|VRAM 사용률|VRAM-Last|Usage VRAM|Uso VRAM
+电池电量|電池電量|Battery level|バッテリー残量|배터리 잔량|Akku|Batterie|Batería
+电池充放电|電池充放電|Battery W|充放電電力|배터리 전력|Akku-Watt|Puiss. bat.|Pot. bat.
+电池电压|電池電壓|Voltage|バッテリー電圧|배터리 전압|Spannung|Tension|Voltaje
+等待数据|等待資料|Waiting for data|データ待機中|데이터 대기 중|Warte auf Daten|En attente des données|Esperando datos
+已接电 · 未充电|已接電 · 未充電|Plugged in · idle|外部電源 · 充電停止|전원 연결 · 충전 안 함|Netzbetrieb · lädt nicht|Branché · sans charge|Conectado · sin carga
+已接电|已接電|Plugged in|外部電源|전원 연결됨|Netzbetrieb|Branché|Conectado
+正在充电|正在充電|Charging|充電中|충전 중|Wird geladen|En charge|Cargando
+电池供电|電池供電|On battery|バッテリー駆動|배터리 사용 중|Akkubetrieb|Sur batterie|Con batería
+充电中|充電中|Charging|充電中|충전 중|Lädt|En charge|Cargando
+放电中|放電中|Discharging|放電中|방전 중|Entlädt|Décharge|Descargando
+组件设置|元件設定|Widget settings|ウィジェット設定|위젯 설정|Widget-Einstellungen|Réglages des widgets|Ajustes de widgets
+点击设置|點擊設定|Click to configure|クリックで設定|클릭하여 설정|Zum Einstellen klicken|Cliquez pour configurer|Clic para configurar
+拖动调整位置|拖曳調整位置|Drag to move|ドラッグで移動|드래그하여 이동|Zum Verschieben ziehen|Glissez pour déplacer|Arrastra para mover
+显示桌面组件|顯示桌面元件|Show desktop widgets|デスクトップに表示|데스크톱 위젯 표시|Desktop-Widgets anzeigen|Afficher les widgets|Mostrar widgets
+锁定位置|鎖定位置|Lock positions|位置を固定|위치 잠금|Positionen sperren|Verrouiller les positions|Bloquear posiciones
+退出|結束|Quit|終了|종료|Beenden|Quitter|Salir
+桌面层 · 实时监测|桌面層 · 即時監測|Desktop layer · live readings|デスクトップ層 · リアルタイム|데스크톱 레이어 · 실시간|Desktop-Ebene · Echtzeit|Couche bureau · temps réel|Capa de escritorio · tiempo real
+GPU 与显存|GPU 與顯示記憶體|GPU & VRAM|GPU と VRAM|GPU 및 VRAM|GPU & VRAM|GPU et VRAM|GPU y VRAM
+秒|秒|sec|秒|초|Sek.|s|s
+可用|可用|Free|空き|여유|Frei|Libre|Libre
+共|共|Total|合計|전체|Gesamt|Total|Total
+核|核心|cores|コア|코어|Kerne|cœurs|núcleos
+线程|執行緒|threads|スレッド|스레드|Threads|fils|hilos
+配置|設定|Configure|設定|설정|Konfigurieren|Configurer|Configurar
+设置|設定|Settings|設定|설정|Einstellungen|Réglages|Ajustes
+上移|上移|Move up|上に移動|위로 이동|Nach oben|Monter|Subir
+下移|下移|Move down|下に移動|아래로 이동|Nach unten|Descendre|Bajar
+移除|移除|Remove|削除|제거|Entfernen|Retirer|Quitar
+为|為|For|対象|대상|Für|Pour|Para
+添加指标|新增指標|add a reading|項目を追加|항목 추가|Wert hinzufügen|ajouter une mesure|añadir un dato
+全部|全部|All|すべて|전체|Alle|Tout|Todo
+处理器|處理器|Processor|プロセッサ|프로세서|Prozessor|Processeur|Procesador
+图形与显存|圖形與顯存|Graphics & VRAM|グラフィックスとVRAM|그래픽 및 VRAM|Grafik & VRAM|Graphismes et VRAM|Gráficos y VRAM
+图形处理器|圖形處理器|Graphics processor|GPU|그래픽 프로세서|Grafikprozessor|Processeur graphique|Procesador gráfico
+网络|網路|Network|ネットワーク|네트워크|Netzwerk|Réseau|Red
+磁盘|磁碟|Disk|ディスク|디스크|Datenträger|Disque|Disco
+电力与温度|電力與溫度|Power & thermals|電力と温度|전력 및 온도|Leistung & Temperatur|Puissance et température|Potencia y temperatura
+自由组合|自由組合|Custom mix|自由に組み合わせ|자유 조합|Eigene Kombination|Composition libre|Combinación libre
+添加|新增|Add|追加|추가|Hinzufügen|Ajouter|Añadir
+添加小组件|新增小工具|Add widget|ウィジェットを追加|위젯 추가|Widget hinzufügen|Ajouter un widget|Añadir widget
+添加第一个小组件|新增第一個小工具|Add your first widget|最初のウィジェットを追加|첫 위젯 추가|Erstes Widget hinzufügen|Ajouter un premier widget|Añadir primer widget
+关闭|關閉|Close|閉じる|닫기|Schließen|Fermer|Cerrar
+从一个模板开始，内容随时可改。|從範本開始，內容隨時可改。|Start with a template. Make it yours.|テンプレートから自由に編集できます。|템플릿으로 시작하고 자유롭게 바꾸세요.|Mit einer Vorlage beginnen und anpassen.|Commencez par un modèle, puis adaptez-le.|Empieza con una plantilla y personalízala.
+跨硬件自由组合，最多六项。|跨硬體自由組合，最多六項。|Mix up to six readings from any hardware.|ハードウェアを問わず最大6項目。|하드웨어에 관계없이 최대 6개 항목.|Bis zu sechs Werte frei kombinieren.|Combinez jusqu’à six mesures.|Combina hasta seis lecturas.
+搜索名称、指标或单位|搜尋名稱、指標或單位|Search names, readings or units|名前・項目・単位を検索|이름, 항목 또는 단위 검색|Namen, Werte oder Einheiten suchen|Rechercher un nom, une mesure ou une unité|Buscar nombre, lectura o unidad
+仅显示可用|僅顯示可用|Available only|取得可能のみ|사용 가능 항목만|Nur verfügbare|Disponibles uniquement|Solo disponibles
+当前设备未提供|目前裝置未提供|Not provided by this device|このデバイスでは取得不可|이 장치에서 제공하지 않음|Vom Gerät nicht bereitgestellt|Non fourni par cet appareil|Este dispositivo no lo proporciona
+没有匹配的结果|沒有相符的結果|No matching results|一致する結果はありません|일치하는 결과 없음|Keine passenden Ergebnisse|Aucun résultat|Sin resultados
+个模板|個範本|templates|テンプレート|개 템플릿|Vorlagen|modèles|plantillas
+项指标|項指標|readings|項目|개 항목|Werte|mesures|lecturas
+你的桌面，从一个小组件开始。|你的桌面，從一個小工具開始。|Your desktop starts with one widget.|ウィジェットを追加して始めましょう。|첫 위젯으로 데스크톱을 꾸며보세요.|Ein Widget für deinen Desktop.|Votre bureau commence avec un widget.|Tu escritorio empieza con un widget.
+每个小组件都可独立配置。|每個小工具都可獨立設定。|Configure each widget independently.|各ウィジェットを個別に設定。|위젯별로 설정할 수 있습니다.|Jedes Widget einzeln konfigurieren.|Configurez chaque widget séparément.|Configura cada widget por separado.
+复制小组件|複製小工具|Duplicate widget|ウィジェットを複製|위젯 복제|Widget duplizieren|Dupliquer le widget|Duplicar widget
+移除小组件|移除小工具|Remove widget|ウィジェットを削除|위젯 제거|Widget entfernen|Retirer le widget|Quitar widget
+显示内容|顯示內容|Contents|表示内容|표시 내용|Inhalt|Contenu|Contenido
+自由编辑|自由編輯|Customize readings|項目を編集|표시 항목 편집|Werte anpassen|Personnaliser les mesures|Personalizar lecturas
+已选择六项指标|已選六項指標|Six readings selected|6項目を選択済み|6개 항목 선택됨|Sechs Werte ausgewählt|Six mesures sélectionnées|Seis lecturas seleccionadas
+样式与尺寸|樣式與尺寸|Style & size|スタイルとサイズ|스타일 및 크기|Stil & Größe|Style et taille|Estilo y tamaño
+信息样式|資訊樣式|Presentation|表示形式|표시 방식|Darstellung|Présentation|Presentación
+自动|自動|Automatic|自動|자동|Automatisch|Automatique|Automático
+大数字|大數字|Large number|大きな数値|큰 숫자|Große Zahl|Grand nombre|Número grande
+详细列表|詳細清單|Detailed list|詳細リスト|상세 목록|Detaillierte Liste|Liste détaillée|Lista detallada
+圆环|圓環|Ring|リング|원형|Ring|Anneau|Anillo
+进度条|進度條|Progress bar|バー|막대|Fortschrittsbalken|Barre de progression|Barra de progreso
+每核负载|每核心負載|Per-core load|コア別負荷|코어별 부하|Last pro Kern|Charge par cœur|Carga por núcleo
+卡片比例|卡片比例|Card shape|カード形状|카드 형태|Kartenform|Format de carte|Forma de tarjeta
+方形|方形|Square|正方形|정사각형|Quadratisch|Carré|Cuadrada
+宽卡片|寬卡片|Wide|横長|넓게|Breit|Large|Ancha
+设备与单位|裝置與單位|Devices & units|デバイスと単位|장치 및 단위|Geräte & Einheiten|Appareils et unités|Dispositivos y unidades
+显卡|顯示卡|Graphics card|グラフィックスカード|그래픽 카드|Grafikkarte|Carte graphique|Tarjeta gráfica
+网卡|網路介面|Network adapter|ネットワークアダプター|네트워크 어댑터|Netzwerkadapter|Carte réseau|Adaptador de red
+物理磁盘|實體磁碟|Physical disk|物理ディスク|물리 디스크|Physischer Datenträger|Disque physique|Disco físico
+存储分区|儲存分割區|Volume|ボリューム|볼륨|Volume|Volume|Volumen
+温度单位|溫度單位|Temperature unit|温度の単位|온도 단위|Temperatureinheit|Unité de température|Unidad de temperatura
+网络单位|網路單位|Network unit|通信速度の単位|네트워크 단위|Netzwerkeinheit|Unité réseau|Unidad de red
+小数位数|小數位數|Decimal places|小数点以下の桁数|소수 자릿수|Nachkommastellen|Décimales|Decimales
+实时预览|即時預覽|Live preview|ライブプレビュー|실시간 미리보기|Live-Vorschau|Aperçu en direct|Vista previa en vivo
+实际大小|實際大小|Actual size|実際のサイズ|실제 크기|Originalgröße|Taille réelle|Tamaño real
+预览|預覽|Preview|プレビュー|미리보기|Vorschau|Aperçu|Vista previa
+桌面上|桌面上|On desktop:|デスクトップ:|바탕화면:|Auf dem Desktop:|Sur le bureau :|En el escritorio:
+个小组件|個小工具|widgets|ウィジェット|개 위젯|Widgets|widgets|widgets
+实时更新|即時更新|Updating live|リアルタイム更新|실시간 업데이트|Live-Aktualisierung|Actualisation en direct|Actualizando
+项可用|項可用|available readings|項目を取得可能|개 항목 사용 가능|verfügbare Werte|mesures disponibles|lecturas disponibles
+等待读数|等待讀數|Waiting for readings|データを待機中|데이터 대기 중|Warte auf Messwerte|En attente des mesures|Esperando lecturas
+拖动边角缩放，松手自动排列。|拖曳邊角縮放，放開自動排列。|Drag a corner to resize. Release to arrange.|角をドラッグして拡縮。離すと自動整列。|모서리를 끌어 크기를 바꾸면 자동 정렬됩니다.|An der Ecke ziehen, loslassen zum Anordnen.|Redimensionnez par le coin, puis relâchez.|Arrastra una esquina y suelta para ordenar.
+缩放小组件|縮放小工具|Resize widget|サイズを変更|위젯 크기 조절|Widget skalieren|Redimensionner le widget|Redimensionar widget
+缩放后自动排列|縮放後自動排列|Arrange after resizing|サイズ変更後に整列|크기 변경 후 자동 정렬|Nach Skalieren anordnen|Ranger après redimensionnement|Ordenar al redimensionar
+应用并排列|套用並排列|Apply & arrange|適用して整列|적용 및 정렬|Anwenden & anordnen|Appliquer et ranger|Aplicar y ordenar
+快速开始|快速開始|Quick start|クイックスタート|빠른 시작|Schnellstart|Démarrage rapide|Inicio rápido
+选择布局模板|選擇版面範本|Choose a layout|レイアウトを選択|레이아웃 선택|Layout wählen|Choisir une disposition|Elegir distribución
+材质与颜色|材質與顏色|Material & color|質感と色|질감 및 색상|Material & Farbe|Matière et couleur|Material y color
+排列与大小|排列與大小|Arrangement & size|配置とサイズ|배치 및 크기|Anordnung & Größe|Disposition et taille|Distribución y tamaño
+行为|行為|Behavior|動作|동작|Verhalten|Comportement|Comportamiento
+自适应网格|自適應網格|Adaptive grid|自動グリッド|자동 그리드|Adaptives Raster|Grille adaptative|Cuadrícula adaptable
+让桌面保持轻盈、清晰。|讓桌面保持輕盈、清晰。|Keep your desktop light and clear.|すっきり見やすいデスクトップに。|가볍고 깔끔한 바탕화면으로.|Ein klarer, leichter Desktop.|Un bureau clair et léger.|Un escritorio ligero y claro.
+CPU 频率|CPU 頻率|CPU frequency|CPU周波数|CPU 주파수|CPU-Frequenz|Fréquence CPU|Frecuencia CPU
+CPU 封装功率|CPU 封裝功率|CPU package power|CPUパッケージ電力|CPU 패키지 전력|CPU-Paketleistung|Puissance du package CPU|Potencia del paquete CPU
+物理核心|實體核心|Physical cores|物理コア|물리 코어|Physische Kerne|Cœurs physiques|Núcleos físicos
+逻辑处理器|邏輯處理器|Logical processors|論理プロセッサ|논리 프로세서|Logische Prozessoren|Processeurs logiques|Procesadores lógicos
+GPU 核心频率|GPU 核心頻率|GPU core clock|GPUコア周波数|GPU 코어 클럭|GPU-Kerntakt|Fréquence du cœur GPU|Frecuencia del núcleo GPU
+显存频率|顯存頻率|Memory clock|VRAM周波数|메모리 클럭|Grafikspeichertakt|Fréquence VRAM|Frecuencia VRAM
+GPU 风扇|GPU 風扇|GPU fan|GPUファン|GPU 팬|GPU-Lüfter|Ventilateur GPU|Ventilador GPU
+总内存|總記憶體|Total memory|メモリ総量|전체 메모리|Gesamter Arbeitsspeicher|Mémoire totale|Memoria total
+分页文件占用率|分頁檔使用率|Page file usage|ページファイル使用率|페이지 파일 사용률|Auslagerungsdatei-Auslastung|Utilisation du fichier d’échange|Uso del archivo de paginación
+已用分页文件|已用分頁檔|Used page file|ページファイル使用量|사용 중인 페이지 파일|Belegte Auslagerungsdatei|Fichier d’échange utilisé|Archivo de paginación usado
+总显存|總顯存|Total VRAM|VRAM総量|전체 VRAM|Gesamter Grafikspeicher|VRAM totale|VRAM total
+电池充电输入|電池充電輸入|Battery charging input|バッテリー充電入力|배터리 충전 입력|Batterie-Ladeleistung|Entrée de charge batterie|Entrada de carga de batería
+电池放电输出|電池放電輸出|Battery discharge output|バッテリー放電出力|배터리 방전 출력|Batterie-Entladeleistung|Sortie de décharge batterie|Salida de descarga de batería
+剩余能量|剩餘能量|Remaining energy|残りの電力量|남은 에너지|Verbleibende Energie|Énergie restante|Energía restante
+预计剩余时间|預估剩餘時間|Estimated time remaining|推定残り時間|예상 남은 시간|Geschätzte Restlaufzeit|Autonomie estimée|Autonomía estimada
+充电器输入|充電器輸入|Charger input|充電器の入力|충전기 입력|Ladegerät-Eingang|Entrée du chargeur|Entrada del cargador
+整机功耗|整機功耗|Total system power|システム全体の電力|전체 시스템 전력|Systemgesamtleistung|Puissance totale du système|Potencia total del sistema
+下载速度|下載速度|Download speed|ダウンロード速度|다운로드 속도|Downloadrate|Débit descendant|Velocidad de descarga
+上传速度|上傳速度|Upload speed|アップロード速度|업로드 속도|Uploadrate|Débit montant|Velocidad de subida
+累计接收|累計接收|Received total|受信累計|총 수신량|Insgesamt empfangen|Total reçu|Total recibido
+累计发送|累計傳送|Sent total|送信累計|총 송신량|Insgesamt gesendet|Total envoyé|Total enviado
+磁盘读取|磁碟讀取|Disk read|ディスク読み取り|디스크 읽기|Datenträger lesen|Lecture disque|Lectura de disco
+磁盘写入|磁碟寫入|Disk write|ディスク書き込み|디스크 쓰기|Datenträger schreiben|Écriture disque|Escritura de disco
+磁盘占用率|磁碟使用率|Disk usage|ディスク使用率|디스크 사용률|Speicherbelegung|Occupation du disque|Uso de disco
+已用空间|已用空間|Used space|使用済み容量|사용한 공간|Belegter Speicher|Espace utilisé|Espacio usado
+可用空间|可用空間|Free space|空き容量|사용 가능한 공간|Freier Speicher|Espace libre|Espacio libre
+磁盘容量|磁碟容量|Disk capacity|ディスク容量|디스크 용량|Datenträgerkapazität|Capacité du disque|Capacidad del disco
+电力|電力|Power|電力|전력|Leistung|Puissance|Potencia
+电力流向|電力流向|Power flow|電力の流れ|전력 흐름|Leistungsfluss|Flux de puissance|Flujo de potencia
+网络速率|網路速率|Network speed|通信速度|네트워크 속도|Netzwerkrate|Débit réseau|Velocidad de red
+网络流量|網路流量|Network traffic|通信量|네트워크 트래픽|Netzwerkverkehr|Trafic réseau|Tráfico de red
+磁盘读写|磁碟讀寫|Disk activity|ディスク動作|디스크 활동|Datenträgeraktivität|Activité disque|Actividad de disco
+存储空间|儲存空間|Storage|ストレージ|저장 공간|Speicherplatz|Stockage|Almacenamiento
+温度与功率|溫度與功率|Thermals & power|温度と電力|온도 및 전력|Temperatur & Leistung|Température et puissance|Temperatura y potencia
+系统总览|系統總覽|System overview|システム概要|시스템 개요|Systemübersicht|Vue du système|Vista del sistema
+自动选择活跃网卡|自動選擇活躍介面|Automatic active adapter|使用中のアダプターを自動選択|활성 어댑터 자동 선택|Aktiven Adapter automatisch wählen|Carte active automatique|Adaptador activo automático
+所有物理磁盘|所有實體磁碟|All physical disks|すべての物理ディスク|모든 물리 디스크|Alle physischen Datenträger|Tous les disques physiques|Todos los discos físicos
+系统分区|系統分割區|System volume|システムボリューム|시스템 볼륨|Systemvolume|Volume système|Volumen del sistema
+未连接|未連線|Disconnected|未接続|연결 끊김|Nicht verbunden|Déconnecté|Desconectado
+负载、温度和实时频率|負載、溫度與頻率|Load, temperature and frequency|負荷・温度・周波数|부하, 온도 및 주파수|Last, Temperatur und Frequenz|Charge, température et fréquence|Carga, temperatura y frecuencia
+每个逻辑处理器的实时使用率|每個邏輯處理器的即時使用率|Live usage of each logical processor|論理プロセッサごとの使用率|논리 프로세서별 실시간 사용률|Live-Last jedes logischen Prozessors|Charge de chaque processeur logique|Uso de cada procesador lógico
+显卡负载、温度和板卡功率|顯卡負載、溫度與板卡功率|GPU load, temperature and board power|GPU負荷・温度・ボード電力|GPU 부하, 온도 및 보드 전력|GPU-Last, Temperatur und Kartenleistung|Charge, température et puissance GPU|Carga, temperatura y potencia GPU
+占用率、已用和可用内存|使用率、已用與可用記憶體|Usage, used and available memory|使用率・使用量・空きメモリ|사용률, 사용 중 및 가용 메모리|Auslastung, belegter und freier RAM|Utilisation, mémoire utilisée et libre|Uso, memoria usada y disponible
+显存占用与实际容量|顯存使用與實際容量|VRAM usage and actual capacity|VRAM使用量と実際の容量|VRAM 사용량 및 실제 용량|Grafikspeicher und Kapazität|Utilisation et capacité VRAM|Uso y capacidad VRAM
+电量、预计续航和剩余能量|電量、預估續航與剩餘能量|Charge, estimated runtime and energy|充電量・推定時間・残り電力量|충전량, 예상 시간 및 에너지|Ladung, Restlaufzeit und Energie|Charge, autonomie et énergie|Carga, autonomía y energía
+分别查看充电输入与放电输出|分別查看充電輸入與放電輸出|Separate battery charge and discharge|充電と放電を分けて表示|배터리 충전과 방전을 구분|Laden und Entladen getrennt anzeigen|Charge et décharge séparées|Carga y descarga por separado
+选择网卡，查看下载与上传|選擇網路介面，查看下載與上傳|Select an adapter for download and upload|アダプターを選んで送受信を確認|어댑터를 선택해 송수신 확인|Adapter für Download und Upload wählen|Choisir la carte et voir les débits|Elige adaptador y mira las velocidades
+网卡计数器累计接收与发送|介面計數器累計接收與傳送|Adapter counters for received and sent data|アダプターの送受信累計|어댑터의 누적 송수신 데이터|Empfangs- und Sendezähler des Adapters|Compteurs de réception et d’envoi|Contadores de recepción y envío
+选择物理磁盘，查看实时读写|選擇實體磁碟，查看即時讀寫|Select a disk for live read and write rates|物理ディスクの読み書き速度|디스크를 선택해 읽기 및 쓰기 확인|Datenträger für Lese- und Schreibraten wählen|Choisir un disque et voir ses débits|Elige un disco y mira lectura y escritura
+选择分区，查看占用与剩余空间|選擇分割區，查看已用與剩餘空間|Select a volume for used and free space|ボリュームの使用量と空き容量|볼륨의 사용 공간과 여유 공간|Volume für belegten und freien Speicher wählen|Choisir un volume et voir son espace|Elige un volumen y mira su espacio
+CPU 与 GPU 的真实传感器读数|CPU 與 GPU 的實際感測值|Actual CPU and GPU sensor readings|CPUとGPUの実測値|CPU 및 GPU 실제 센서 값|Echte CPU- und GPU-Sensorwerte|Mesures réelles du CPU et du GPU|Lecturas reales de CPU y GPU
+一块卡片，自由组合六项指标|一張卡片，自由組合六項指標|One card, up to six readings|1枚のカードに最大6項目|한 카드에 최대 6개 항목|Eine Karte, bis zu sechs Werte|Une carte, jusqu’à six mesures|Una tarjeta, hasta seis lecturas
+从指标库逐项添加所需内容|從指標庫逐項新增內容|Pick readings from the library|ライブラリから必要な項目を追加|라이브러리에서 필요한 항목 선택|Werte aus der Bibliothek auswählen|Choisir les mesures dans la bibliothèque|Elige lecturas de la biblioteca
+充电输入与放电输出为电池侧实测值。充电器输入和整机功耗需要各自的传感器，未提供时显示 —。|充電輸入與放電輸出為電池側實測值。充電器輸入及整機功耗需獨立感測器，缺少時顯示 —。|Charging and discharging are measured at the battery. Charger input and total system power require separate sensors; unavailable values show —.|充放電はバッテリー側の実測値です。充電器入力と全体電力は専用センサーが必要で、取得不可は — と表示します。|충전과 방전은 배터리 측 실측값입니다. 충전기 입력과 전체 전력에는 별도 센서가 필요하며 없으면 — 로 표시합니다.|Laden und Entladen werden an der Batterie gemessen. Ladegerät-Eingang und Systemleistung brauchen eigene Sensoren; fehlende Werte erscheinen als —.|La charge et la décharge sont mesurées côté batterie. L’entrée du chargeur et la puissance totale nécessitent des capteurs distincts ; sinon —.|La carga y descarga se miden en la batería. La entrada del cargador y la potencia total requieren sensores propios; sin ellos se muestra —.
+电池侧输入，不是充电器输入。|電池側輸入，非充電器輸入。|Battery-side input, not charger input.|バッテリー側入力で、充電器入力ではありません。|충전기 입력이 아닌 배터리 측 입력입니다.|Eingang an der Batterie, kein Ladegerät-Eingang.|Entrée côté batterie, pas celle du chargeur.|Entrada a la batería, no del cargador.
+电池侧输出，不等于整机功耗。|電池側輸出，非整機功耗。|Battery-side output, not total system power.|バッテリー側出力で、全体電力ではありません。|배터리 측 출력이며 전체 전력이 아닙니다.|Batterieausgang, keine Systemgesamtleistung.|Sortie côté batterie, pas la puissance totale.|Salida de la batería, no potencia total.
+需要独立的输入功率传感器。|需要獨立輸入功率感測器。|Requires a separate input power sensor.|専用の入力電力センサーが必要です。|별도 입력 전력 센서가 필요합니다.|Benötigt einen eigenen Eingangsleistungssensor.|Nécessite un capteur de puissance d’entrée.|Requiere un sensor de potencia de entrada.
+需要整机功率传感器，不由其他功率相加。|需整機功率感測器，不加總其他功率。|Requires a system power sensor; not a sum of other readings.|全体電力センサーが必要で、他の値の合算はしません。|전체 전력 센서가 필요하며 다른 값의 합계가 아닙니다.|Benötigt einen Systemsensor; keine Summe anderer Werte.|Nécessite un capteur système ; pas une somme d’autres mesures.|Requiere sensor del sistema; no se suman otras lecturas.
+由 Windows 提供；充电或无法预测时不显示。|由 Windows 提供；充電或無法預測時不顯示。|Provided by Windows; hidden while charging or unknown.|Windowsの推定値。充電中や不明な場合は非表示。|Windows 추정값이며 충전 중이거나 알 수 없으면 숨깁니다.|Windows-Schätzung; beim Laden oder unbekannt nicht angezeigt.|Estimation Windows ; masquée pendant la charge ou si inconnue.|Estimación de Windows; oculta al cargar o si se desconoce.
+网卡计数器累计值；重启或重置网卡后会变化。|網路介面累計值；重啟或重設後會變化。|Adapter counters may reset after a restart or adapter reset.|再起動やアダプターのリセットで累計値は変わります。|재부팅 또는 어댑터 초기화 시 누적값이 바뀝니다.|Adapterzähler können nach Neustart zurückgesetzt werden.|Les compteurs peuvent être réinitialisés au redémarrage.|Los contadores pueden reiniciarse al reiniciar el adaptador.
+最多添加 24 个小组件|最多新增 24 個小工具|Up to 24 widgets|最大24個まで|최대 24개 위젯|Bis zu 24 Widgets|Jusqu’à 24 widgets|Hasta 24 widgets
+尺寸已保存并重新排列|尺寸已儲存並重新排列|Size saved and layout arranged|サイズを保存して整列しました|크기 저장 및 배치 완료|Größe gespeichert und angeordnet|Taille enregistrée et disposition ajustée|Tamaño guardado y ordenado
+尺寸已保存|尺寸已儲存|Size saved|サイズを保存しました|크기 저장됨|Größe gespeichert|Taille enregistrée|Tamaño guardado
+CPU、GPU 功率与电池充放电|CPU、GPU 功率與電池充放電|CPU/GPU power and battery flow|CPU・GPU電力とバッテリー入出力|CPU/GPU 전력 및 배터리 흐름|CPU/GPU-Leistung und Batteriefluss|Puissance CPU/GPU et flux batterie|Potencia CPU/GPU y flujo de batería
+正在采集功率|正在讀取功率|Collecting power samples|電力を計測中|전력 측정 중|Leistung wird erfasst|Mesure de puissance en cours|Midiendo potencia
+Windows 未提供此功率通道|Windows 未提供此功率通道|No Windows power channel|Windows電力チャネルなし|Windows 전력 채널 없음|Kein Windows-Leistungskanal|Canal de puissance Windows absent|Sin canal de potencia de Windows
+所选设备未连接|所選裝置未連接|Selected device disconnected|選択したデバイスは未接続|선택한 장치 연결 안 됨|Gewähltes Gerät getrennt|Appareil sélectionné déconnecté|Dispositivo seleccionado desconectado
+柔雾玻璃|柔霧玻璃|Frosted glass|すりガラス|반투명 유리|Mattglas|Verre dépoli|Vidrio esmerilado
+柔彩玻璃|柔彩玻璃|Tinted glass|カラーガラス|컬러 유리|Getöntes Glas|Verre teinté|Vidrio tintado
+石墨黑|石墨黑|Graphite|グラファイト|그래파이트|Graphit|Graphite|Grafito
+显示标题|顯示標題|Show title|タイトルを表示|제목 표시|Titel anzeigen|Afficher le titre|Mostrar título
+编辑内容与布局|編輯內容與版面|Edit contents and layout|内容と配置を編集|내용 및 배치 편집|Inhalt und Layout bearbeiten|Modifier contenu et disposition|Editar contenido y diseño
+组合面板设置|組合面板設定|Group settings|グループ設定|그룹 설정|Gruppeneinstellungen|Réglages du groupe|Ajustes del grupo
+隐藏此组件|隱藏此元件|Hide this widget|このウィジェットを非表示|이 위젯 숨기기|Dieses Widget ausblenden|Masquer ce widget|Ocultar este widget
+中号|中型|Medium|中|중간|Mittel|Moyen|Mediano
+大号|大型|Large|大|크게|Groß|Grand|Grande
+特大号|特大型|Extra large|特大|아주 크게|Sehr groß|Très grand|Extra grande
+个组件使用单独皮肤|個元件使用獨立外觀|widgets have individual skins|個に個別スキンを設定|개 위젯에 개별 스킨 사용|Widgets mit eigenem Design|widgets utilisent un thème individuel|widgets usan una apariencia propia
+全部跟随全局|全部跟隨全域|Use global skin for all|すべて共通設定に戻す|모두 전체 설정 따르기|Alle übernehmen das globale Design|Utiliser le thème global partout|Usar apariencia global para todos
+组件预览|元件預覽|Widget preview|ウィジェットのプレビュー|위젯 미리보기|Widget-Vorschau|Aperçu du widget|Vista previa del widget
+无底色|無底色|No background|背景なし|배경 없음|Ohne Hintergrund|Sans fond|Sin fondo
+材质示意|材質示意|Material illustration|マテリアルの見本|재질 예시|Materialbeispiel|Aperçu du matériau|Muestra de material
+实色底色|實色底色|Solid background|単色の背景|단색 배경|Deckender Hintergrund|Fond uni|Fondo sólido
+皮肤示意|外觀示意|Skin samples|スタイルの見本|스킨 예시|Stilbeispiele|Exemples de styles|Muestras de estilos
+极简数字只保留文字与图表，不显示底板。|極簡數字只保留文字與圖表，不顯示底板。|Minimal digits keep text and charts without a background.|ミニマル数字は文字とグラフのみを表示します。|미니멀 숫자는 배경 없이 텍스트와 그래프만 표시합니다.|Minimale Ziffern zeigen Text und Diagramme ohne Hintergrund.|Les chiffres minimalistes affichent le texte et les courbes sans fond.|Los dígitos mínimos muestran texto y gráficos sin fondo.
+玻璃示意不代表桌面已启用系统模糊。|玻璃示意不代表桌面已啟用系統模糊。|Glass samples do not confirm desktop blur is active.|ガラスの見本はデスクトップのぼかしを保証しません。|유리 예시는 바탕 화면 흐림 효과가 활성화되었음을 보장하지 않습니다.|Glasbeispiele bestätigen keinen aktiven Desktop-Weichzeichner.|Les exemples de verre ne confirment pas le flou du bureau.|Las muestras de cristal no confirman el desenfoque del escritorio.
+无底色与玻璃组合时，玻璃使用实色底色。|無底色與玻璃組合時，玻璃使用實色底色。|Combining no-background digits with glass uses a solid fallback for glass.|背景なしの数字とガラスを組み合わせると、ガラスには単色背景を使用します。|배경 없는 숫자와 유리를 조합하면 유리에 단색 배경을 사용합니다.|Bei Ziffern ohne Hintergrund mit Glas verwendet Glas einen deckenden Ersatz.|Avec des chiffres sans fond et du verre, le verre utilise un fond uni.|Al combinar dígitos sin fondo con cristal, el cristal usa un fondo sólido.
+检测频率|檢測頻率|Sampling interval|測定間隔|측정 간격|Messintervall|Intervalle de mesure|Intervalo de muestreo
+范围：0.01–5 秒|範圍：0.01–5 秒|Range: 0.01–5 s|範囲：0.01～5秒|범위: 0.01–5초|Bereich: 0,01–5 Sek.|Plage : 0,01–5 s|Rango: 0,01–5 s
+更新频率不正确|請輸入 0.01–5 秒，最多兩位小數。|Enter 0.01–5 seconds, with up to two decimal places.|0.01～5秒の範囲で、小数点以下2桁まで入力してください。|0.01–5초를 소수점 둘째 자리까지 입력하세요.|Geben Sie 0,01–5 Sekunden mit höchstens zwei Dezimalstellen ein.|Saisissez 0,01–5 secondes, avec deux décimales au maximum.|Introduzca entre 0,01 y 5 segundos, con hasta dos decimales.
+更短的间隔会增加系统开销。应用后从下一轮采样生效。|較短的間隔會增加系統負荷。套用後從下一輪取樣生效。|Shorter intervals increase system overhead. Changes take effect from the next sampling cycle.|間隔を短くするとシステム負荷が増えます。適用後、次のサンプリングから有効になります。|간격이 짧을수록 시스템 부하가 늘어납니다. 적용 후 다음 측정 주기부터 반영됩니다.|Kürzere Intervalle erhöhen die Systemlast. Änderungen gelten ab dem nächsten Messzyklus.|Des intervalles plus courts augmentent la charge du système. Les modifications prennent effet au prochain cycle de mesure.|Los intervalos más cortos aumentan la carga del sistema. Los cambios se aplican desde el siguiente ciclo de muestreo.
+硬件传感器的实际更新速度可能更慢。|硬體感測器的實際更新速度可能更慢。|Hardware sensors may update more slowly.|ハードウェアセンサーの更新は遅い場合があります。|하드웨어 센서는 더 느리게 갱신될 수 있습니다.|Hardwaresensoren aktualisieren sich möglicherweise langsamer.|Les capteurs matériels peuvent se mettre à jour plus lentement.|Los sensores de hardware pueden actualizarse más despacio.
+磁吸避让|磁吸避讓|Magnetic spacing|磁気スナップと衝突回避|자석 배치|Magnetische Platzierung|Placement magnétique|Colocación magnética
+避免组件相互重叠。松手后按设定间距落位。|避免元件互相重疊。放開後按設定間距定位。|Avoid overlapping widgets. Release to settle at the chosen spacing.|重なりを避け、離すと指定の間隔で配置します。|위젯이 겹치지 않도록 놓으면 설정한 간격으로 배치됩니다.|Verhindert überlappende Widgets. Beim Loslassen mit gewähltem Abstand platzieren.|Évite le chevauchement. Au relâchement, place les widgets avec l’espacement choisi.|Evita superposiciones. Al soltar, coloca los widgets con la separación elegida.
+组件间距|元件間距|Widget spacing|ウィジェットの間隔|위젯 간격|Widget-Abstand|Espacement des widgets|Separación de widgets
+回弹动画|回彈動畫|Spring animation|スプリングアニメーション|스프링 애니메이션|Federanimation|Animation de ressort|Animación de resorte
+间距：0–64 px|間距：0–64 px|Spacing: 0–64 px|間隔：0～64 px|간격: 0–64 px|Abstand: 0–64 px|Espacement : 0–64 px|Separación: 0–64 px
+当前工作区空间不足以保持设定间距。|目前工作區空間不足以保持設定間距。|The current work area cannot fit the requested spacing.|現在の作業領域には指定した間隔で配置できません。|현재 작업 영역에 설정한 간격으로 배치할 공간이 부족합니다.|Der aktuelle Arbeitsbereich ist für den gewählten Abstand zu klein.|L’espace de travail actuel est trop petit pour cet espacement.|El área de trabajo actual es demasiado pequeña para esa separación.
+// 0.8 candidate: selected-widget availability and honest material status.
+读数已过期|讀數已過期|Readings are stale|測定値が古くなっています|오래된 측정값|Messwerte veraltet|Mesures périmées|Lecturas desactualizadas
+系统效果已确认|系統效果已確認|System effect verified|システム効果を確認済み|시스템 효과 확인됨|Systemeffekt geprüft|Effet système vérifié|Efecto del sistema verificado
+系统效果待确认|系統效果待確認|System effect not yet verified|システム効果は未確認|시스템 효과 확인 필요|Systemeffekt noch ungeprüft|Effet système non vérifié|Efecto del sistema sin verificar
+当前使用实色回退|目前使用實色替代|Using a solid fallback|単色表示に切り替え中|단색 대체 표시 사용 중|Einfarbige Ersatzdarstellung|Affichage uni de secours|Usando un fondo sólido alternativo
+秒前|秒前|s ago|秒前|초 전|s zuvor|s auparavant|s atrás
+项未就绪|項未就緒|readings not ready|項目は未準備|개 측정값 준비 안 됨|Messwerte nicht bereit|mesures non disponibles|lecturas no listas
+多指标组件会保留可读的最小尺寸。|多指標元件會保留可讀的最小尺寸。|Widgets with many readings keep a readable minimum size.|多くの測定値を表示する場合、読みやすい最小サイズを保ちます。|측정값이 많은 위젯은 읽기 쉬운 최소 크기를 유지합니다.|Widgets mit vielen Messwerten behalten eine lesbare Mindestgröße.|Les widgets riches en mesures gardent une taille minimale lisible.|Los widgets con muchas lecturas mantienen un tamaño mínimo legible.
+玻璃透明度|玻璃透明度|Glass transparency|ガラスの透明度|유리 투명도|Glastransparenz|Transparence du verre|Transparencia del cristal
+圆角曲率|圓角曲率|Corner curvature|角の曲率|모서리 곡률|Eckenkrümmung|Courbure des coins|Curvatura de las esquinas
+实色回退时保留可读底色。|實色替代時保留可讀底色。|Solid fallback keeps a readable background.|単色表示では読みやすい背景を保ちます。|단색 대체 시 읽기 쉬운 배경을 유지합니다.|Die Ersatzdarstellung behält einen lesbaren Hintergrund.|Le fond uni de secours reste lisible.|El fondo sólido alternativo conserva la legibilidad.
+圆角曲率仅用于玻璃皮肤。|圓角曲率僅用於玻璃外觀。|Corner curvature applies to glass skins.|角の曲率はガラス外観にのみ適用されます。|모서리 곡률은 유리 스킨에 적용됩니다.|Die Eckenkrümmung gilt für Glasdesigns.|La courbure des coins concerne les styles de verre.|La curvatura se aplica a los estilos de cristal.
+系统回退为实色底色，透明度暂不生效。|系統使用實色底色，透明度暫不生效。|The system uses a solid fallback; transparency is inactive.|システムが単色表示に切り替わったため、透明度は無効です。|시스템이 단색 대체 표시를 사용해 투명도가 적용되지 않습니다.|Das System verwendet einen einfarbigen Ersatz; Transparenz ist inaktiv.|Le système utilise un fond uni de secours ; la transparence est inactive.|El sistema usa un fondo sólido alternativo; la transparencia está inactiva.
+桌面空间不足，请减少显示的组件或调整布局。|桌面空間不足，請減少顯示的元件或調整版面配置。|Not enough desktop space. Show fewer widgets or adjust the layout.|デスクトップの空間が足りません。ウィジェットを減らすか配置を調整してください。|바탕 화면 공간이 부족합니다. 위젯 수를 줄이거나 배치를 조정하세요.|Nicht genug Desktopplatz. Weniger Widgets anzeigen oder das Layout anpassen.|Espace insuffisant. Affichez moins de widgets ou adaptez la disposition.|No hay espacio suficiente. Muestra menos widgets o ajusta la distribución.
+两项控制仅用于玻璃皮肤。|兩項控制僅用於玻璃外觀。|Both controls apply to glass skins.|両方の設定はガラス外観にのみ適用されます。|두 설정은 유리 스킨에만 적용됩니다.|Beide Regler gelten für Glasdesigns.|Ces deux réglages concernent les styles de verre.|Ambos controles se aplican a los estilos de cristal.
+等待扩展传感器|等待擴充感測器|Waiting for extra sensors|拡張センサーを待機中|확장 센서 대기 중|Zusätzliche Sensoren werden erwartet|En attente des capteurs supplémentaires|Esperando sensores adicionales
+重新扫描|重新掃描|Scan again|再スキャン|다시 검색|Erneut suchen|Relancer la recherche|Volver a buscar
+搜索传感器或硬件|搜尋感測器或硬體|Search sensors or hardware|センサーやハードウェアを検索|센서 또는 하드웨어 검색|Sensoren oder Hardware suchen|Rechercher un capteur ou du matériel|Buscar sensores o hardware
+个硬件|個硬體|hardware devices|ハードウェア|개 하드웨어|Hardwaregeräte|périphériques|dispositivos
+扩展指标|擴充指標|Extra readings|拡張項目|확장 항목|Zusätzliche Messwerte|Mesures supplémentaires|Lecturas adicionales
+扩展传感器|擴充感測器|Extra sensors|拡張センサー|확장 센서|Zusätzliche Sensoren|Capteurs supplémentaires|Sensores adicionales
+更新时间|更新時間|Updated|更新時刻|업데이트|Aktualisiert|Mise à jour|Actualizado
+未绑定传感器|未綁定感測器|Unbound sensor|未設定のセンサー|연결되지 않은 센서|Nicht zugewiesener Sensor|Capteur non associé|Sensor sin asignar
+请先选择硬件传感器|請先選擇硬體感測器|Choose a hardware sensor first|ハードウェアセンサーを選択してください|먼저 하드웨어 센서를 선택하세요|Zuerst einen Hardwaresensor wählen|Choisissez un capteur matériel|Seleccione primero un sensor
+所选传感器未连接|所選感測器未連接|Selected sensor is disconnected|選択したセンサーが未接続です|선택한 센서가 연결되지 않았습니다|Gewählter Sensor nicht verbunden|Le capteur choisi est déconnecté|El sensor seleccionado está desconectado
+扩展采集器按需运行|擴充採集器按需執行|Extra sensors run on demand|拡張センサーは必要時に測定します|확장 센서는 필요할 때 실행됩니다|Zusätzliche Sensoren laufen bei Bedarf|Les capteurs supplémentaires fonctionnent à la demande|Los sensores adicionales se ejecutan cuando se necesitan
+扩展传感器读数已过期|擴充感測器讀值已過期|Extra sensor readings are stale|拡張センサーの値が古くなりました|확장 센서 값이 오래되었습니다|Zusätzliche Messwerte sind veraltet|Les mesures supplémentaires sont périmées|Las lecturas adicionales han caducado
+扩展采集器尚未安装|擴充採集器尚未安裝|Extra sensor collector is not installed|拡張測定ツールが未インストールです|확장 센서 수집기가 설치되지 않았습니다|Zusätzliche Sensorerfassung ist nicht installiert|Le collecteur supplémentaire n’est pas installé|El recopilador adicional no está instalado
+正在识别扩展传感器|正在識別擴充感測器|Discovering extra sensors|拡張センサーを検出中|확장 센서 검색 중|Zusätzliche Sensoren werden gesucht|Recherche de capteurs supplémentaires|Buscando sensores adicionales
+已连接扩展传感器|已連接擴充感測器|Extra sensors connected|拡張センサーに接続済み|확장 센서 연결됨|Zusätzliche Sensoren verbunden|Capteurs supplémentaires connectés|Sensores adicionales conectados
+此采集模式未发现支持的传感器|此採集模式未發現支援的感測器|No supported sensors found in this mode|この測定モードに対応するセンサーがありません|이 모드에서 지원되는 센서가 없습니다|In diesem Modus keine unterstützten Sensoren gefunden|Aucun capteur compatible trouvé dans ce mode|No se encontraron sensores compatibles en este modo
+扩展采集器已停止，可重新扫描|擴充採集器已停止，可重新掃描|Collector stopped; scan again to retry|測定ツールが停止しました。再スキャンできます|수집기가 중지되었습니다. 다시 검색하세요|Erfassung gestoppt; erneut suchen|Collecteur arrêté ; relancez la recherche|Recopilador detenido; vuelva a buscar
+扩展采集器响应超时|擴充採集器回應逾時|Collector timed out|測定ツールがタイムアウトしました|수집기 응답 시간이 초과되었습니다|Zeitüberschreitung der Sensorerfassung|Le collecteur ne répond plus|El recopilador no responde
+无法启动扩展采集器，可重新扫描|無法啟動擴充採集器，可重新掃描|Could not start collector; scan again to retry|測定ツールを起動できません。再スキャンできます|수집기를 시작할 수 없습니다. 다시 검색하세요|Erfassung konnte nicht starten; erneut suchen|Impossible de démarrer le collecteur ; relancez la recherche|No se pudo iniciar el recopilador; vuelva a buscar
+扩展采集器已停止|擴充採集器已停止|Collector stopped|測定ツールは停止中です|수집기 중지됨|Sensorerfassung gestoppt|Collecteur arrêté|Recopilador detenido
+扩展采集器尚未结束|擴充採集器尚未結束|Collector has not finished stopping|測定ツールの終了を待っています|수집기가 아직 종료되지 않았습니다|Sensorerfassung ist noch nicht beendet|Le collecteur ne s’est pas encore arrêté|El recopilador aún no ha terminado
+散热|散熱|Cooling|冷却|냉각|Kühlung|Refroidissement|Refrigeración
+散热风扇|散熱風扇|Cooling fans|冷却ファン|냉각 팬|Kühlungslüfter|Ventilateurs|Ventiladores
+CPU 与 GPU 风扇的实际转速|CPU 與 GPU 風扇的實際轉速|Actual CPU and GPU cooling-fan speeds|CPUとGPU冷却ファンの実回転数|CPU 및 GPU 냉각 팬의 실제 회전 속도|Tatsächliche Drehzahlen der CPU- und GPU-Lüfter|Vitesses réelles des ventilateurs CPU et GPU|Velocidades reales de los ventiladores CPU y GPU
+CPU 风扇转速|CPU 風扇轉速|CPU fan speed|CPUファン回転数|CPU 팬 회전 속도|CPU-Lüfterdrehzahl|Vitesse ventilateur CPU|Velocidad del ventilador CPU
+GPU 风扇转速|GPU 風扇轉速|GPU fan speed|GPUファン回転数|GPU 팬 회전 속도|GPU-Lüfterdrehzahl|Vitesse ventilateur GPU|Velocidad del ventilador GPU
+系统风扇转速|系統風扇轉速|System fan speed|システムファン回転数|시스템 팬 회전 속도|Systemlüfterdrehzahl|Vitesse ventilateur système|Velocidad del ventilador del sistema
+机身散热风扇的实际转速；需厂商转速传感器。|機身散熱風扇的實際轉速；需廠商轉速感測器。|Actual chassis fan speed; requires vendor tachometer telemetry.|筐体冷却ファンの実回転数です。メーカーの回転数センサーが必要です。|실제 섀시 팬 회전 속도이며 제조사 회전 센서가 필요합니다.|Tatsächliche Gehäuselüfterdrehzahl; benötigt Hersteller-Telemetrie.|Vitesse réelle du ventilateur ; nécessite un capteur constructeur.|Velocidad real del ventilador; requiere un sensor del fabricante.
+机身 GPU 侧散热风扇转速，不是风扇目标百分比。|機身 GPU 側散熱風扇轉速，不是風扇目標百分比。|Chassis GPU-side fan speed, not a requested fan percentage.|GPU側の筐体ファン回転数で、目標ファン割合ではありません。|GPU 측 섀시 팬의 회전 속도이며 목표 백분율이 아닙니다.|Drehzahl des GPU-seitigen Gehäuselüfters, kein Zielprozentsatz.|Vitesse du ventilateur côté GPU, pas une consigne en pourcentage.|Velocidad del ventilador del lado GPU, no un porcentaje objetivo.
+需要设备实际提供第三风扇转速。|需要裝置實際提供第三風扇轉速。|Requires a third fan tachometer provided by the device.|機器が第3ファンの実回転数を提供する必要があります。|기기가 세 번째 팬 회전 속도를 제공해야 합니다.|Erfordert einen tatsächlichen dritten Lüfter-Drehzahlsensor.|Nécessite une mesure réelle du troisième ventilateur.|Requiere una lectura real del tercer ventilador.
+GPU 芯片功率|GPU 晶片功率|GPU ASIC power|GPUチップ電力|GPU 칩 전력|GPU-Chipleistung|Puissance puce GPU|Potencia del chip GPU
+HWiNFO 导出的芯片功率，与板卡功率范围不同。|HWiNFO 匯出的晶片功率，與顯示卡功率範圍不同。|GPU ASIC power exported by HWiNFO; a different scope from board power.|HWiNFOで出力されたGPUチップ電力です。ボード電力とは範囲が異なります。|HWiNFO가 내보낸 GPU 칩 전력이며 보드 전력과 범위가 다릅니다.|Von HWiNFO exportierte GPU-Chipleistung; anderer Messbereich als die Karte.|Puissance puce GPU exportée par HWiNFO, distincte de la carte.|Potencia del chip GPU exportada por HWiNFO, distinta de la placa.
+// 0.9: two-dimensional layouts, status strips and details
+仅在桌面|僅在桌面|Desktop only|デスクトップのみ|바탕 화면에만|Nur auf dem Desktop|Sur le bureau uniquement|Solo en el escritorio
+位置与层级|位置與層級|Position & layer|位置と表示階層|위치 및 표시 순서|Position & Ebene|Position et niveau|Posición y nivel
+内容会随尺寸重新排版。|內容會隨尺寸重新排列。|Content rearranges as you resize.|サイズに合わせて項目を再配置します。|크기에 맞춰 내용이 다시 배치됩니다.|Der Inhalt passt sich der Größe an.|Le contenu s’adapte aux dimensions.|El contenido se adapta al tamaño.
+始终置顶|保持置頂|Always on top|常に最前面|항상 맨 위에|Immer im Vordergrund|Toujours au premier plan|Siempre delante
+宽度|寬度|Width|幅|너비|Breite|Largeur|Ancho
+尺寸未更改，请检查输入范围与布局。|尺寸未變更，請檢查輸入範圍與配置。|Size unchanged. Check the allowed range and layout.|サイズは変更されていません。入力範囲と配置を確認してください。|크기가 변경되지 않았습니다. 입력 범위와 배치를 확인하세요.|Größe unverändert. Eingabebereich und Layout prüfen.|Dimensions inchangées. Vérifiez les limites et la disposition.|El tamaño no cambió. Revisa el rango permitido y la distribución.
+屏幕顶部|螢幕頂端|Top of screen|画面上部|화면 상단|Oberer Bildschirmrand|Haut de l’écran|Parte superior de la pantalla
+放置位置|放置位置|Placement|配置位置|배치 위치|Platzierung|Placement|Ubicación
+显示器|顯示器|Display|ディスプレイ|디스플레이|Bildschirm|Écran|Pantalla
+最小尺寸|最小尺寸|Minimum size|最小サイズ|최소 크기|Mindestgröße|Taille minimale|Tamaño mínimo
+桌面层级位于其他窗口下方，不遮挡工作。|桌面層級位於其他視窗下方，不遮擋工作。|Desktop mode stays below other windows and out of your way.|デスクトップ表示では、ほかのウィンドウの下に置かれ、作業を妨げません。|바탕 화면 모드에서는 다른 창 아래에 표시되어 작업을 방해하지 않습니다.|Im Desktop-Modus bleibt das Widget unter anderen Fenstern und stört nicht.|Le mode bureau reste sous les autres fenêtres sans gêner votre travail.|El modo escritorio queda debajo de otras ventanas y no interfiere con tu trabajo.
+状态条|狀態列|Status strip|ステータスバー|상태 표시줄|Statusleiste|Barre d’état|Barra de estado
+窗口层级|視窗層級|Window layer|ウィンドウの表示階層|창 표시 순서|Fensterebene|Niveau de fenêtre|Nivel de ventana
+置顶会覆盖其他窗口的一小部分，可右击暂时隐藏。|置頂會覆蓋其他視窗的一小部分，可按右鍵暫時隱藏。|Always on top can cover part of other windows. Right-click to hide it temporarily.|最前面表示では、ほかのウィンドウの一部に重なります。右クリックで一時的に隠せます。|항상 맨 위에 표시하면 다른 창의 일부를 가릴 수 있습니다. 마우스 오른쪽 버튼으로 잠시 숨길 수 있습니다.|Im Vordergrund kann das Widget andere Fenster teilweise verdecken. Per Rechtsklick vorübergehend ausblenden.|Au premier plan, le widget peut recouvrir une partie des autres fenêtres. Un clic droit permet de le masquer temporairement.|Al estar siempre delante, el widget puede cubrir parte de otras ventanas. Haz clic derecho para ocultarlo temporalmente.
+自由尺寸|自訂尺寸|Custom size|自由なサイズ|사용자 지정 크기|Freie Größe|Dimensions libres|Tamaño libre
+自由放置|自由放置|Free placement|自由配置|자유 배치|Frei platzieren|Placement libre|Ubicación libre
+高度|高度|Height|高さ|높이|Höhe|Hauteur|Alto
+Alt 加方向键调整指标顺序。|Alt 加方向鍵調整指標順序。|Alt + arrow keys reorder readings.|Alt + 矢印キーで項目の順序を変更します。|Alt + 방향키로 항목 순서를 바꿉니다.|Alt + Pfeiltasten ändert die Reihenfolge der Werte.|Alt + flèches : réorganiser les mesures.|Alt + flechas cambia el orden de los datos.
+位置未更改：指标不能重叠或超出内容区。|位置未變更：指標不能重疊或超出內容區。|Position unchanged: readings cannot overlap or leave the content area.|位置は変更されていません。項目は重ねず、内容領域内に配置してください。|위치가 변경되지 않았습니다. 항목은 겹치거나 내용 영역을 벗어날 수 없습니다.|Position unverändert: Werte dürfen sich nicht überlappen oder außerhalb des Inhalts liegen.|Position inchangée : les mesures ne peuvent ni se chevaucher ni sortir de la zone de contenu.|La posición no cambió: los datos no pueden superponerse ni salir del área de contenido.
+列|欄|Columns|列|열|Spalten|Colonnes|Columnas
+增删指标会重新排列手动布局。|增刪指標會重新排列手動配置。|Adding or removing readings rearranges the manual layout.|項目を追加・削除すると、手動配置が再編成されます。|항목을 추가하거나 제거하면 수동 배치가 다시 정렬됩니다.|Beim Hinzufügen oder Entfernen wird die manuelle Anordnung neu erstellt.|Ajouter ou retirer des mesures réorganise la disposition manuelle.|Al añadir o quitar datos se reorganiza la distribución manual.
+手动摆放|手動擺放|Manual layout|手動配置|수동 배치|Manuell|Disposition manuelle|Distribución manual
+拖动指标改变顺序，缩放组件时自动排版。|拖曳指標變更順序，縮放元件時自動排列。|Drag readings to reorder them. Resizing the widget rearranges them automatically.|項目をドラッグして並べ替えます。ウィジェットのサイズ変更時は自動配置します。|항목을 드래그해 순서를 바꾸세요. 위젯 크기를 바꾸면 자동으로 배치됩니다.|Werte zum Sortieren ziehen. Beim Skalieren des Widgets werden sie automatisch angeordnet.|Faites glisser les mesures pour les réorganiser. Elles s’adaptent au redimensionnement du widget.|Arrastra los datos para cambiar su orden. Se reorganizan al cambiar el tamaño del widget.
+拖动摆放指标|拖曳擺放指標|Drag to position a reading|ドラッグで項目を配置|드래그하여 항목 배치|Wert zum Platzieren ziehen|Glisser pour placer une mesure|Arrastrar para colocar un dato
+拖动调整位置，拖动右下角调整大小。|拖曳調整位置，拖曳右下角調整大小。|Drag to move; drag the bottom-right corner to resize.|ドラッグで移動し、右下隅をドラッグしてサイズを変更します。|드래그해 이동하고 오른쪽 아래 모서리를 드래그해 크기를 조절하세요.|Zum Verschieben ziehen; die rechte untere Ecke zum Skalieren ziehen.|Faites glisser pour déplacer ; tirez le coin inférieur droit pour redimensionner.|Arrastra para mover; arrastra la esquina inferior derecha para cambiar el tamaño.
+方向键移动，Ctrl 加方向键缩放，Shift 微调。|方向鍵移動，Ctrl 加方向鍵縮放，Shift 微調。|Arrow keys move. Ctrl + arrows resize; Shift makes finer adjustments.|矢印キーで移動、Ctrl + 矢印キーでサイズ変更、Shift で微調整します。|방향키로 이동하고 Ctrl + 방향키로 크기를 조절하며 Shift로 미세 조정합니다.|Pfeiltasten: verschieben. Strg + Pfeiltasten: skalieren. Umschalt: Feinschritte.|Flèches : déplacer. Ctrl + flèches : redimensionner. Maj : réglage fin.|Las flechas mueven y Ctrl + flechas cambia el tamaño; Mayús permite ajustes finos.
+未能调整顺序，请重试。|未能調整順序，請再試一次。|Could not reorder. Try again.|並べ替えできませんでした。もう一度お試しください。|순서를 바꾸지 못했습니다. 다시 시도하세요.|Reihenfolge konnte nicht geändert werden. Erneut versuchen.|Réorganisation impossible. Réessayez.|No se pudo cambiar el orden. Inténtalo de nuevo.
+横向位置|水平位置|Horizontal position|横位置|가로 위치|Horizontale Position|Position horizontale|Posición horizontal
+横向排列|橫向排列|Horizontal|横並び|가로 배치|Horizontal|Horizontal|Horizontal
+纵向位置|垂直位置|Vertical position|縦位置|세로 위치|Vertikale Position|Position verticale|Posición vertical
+纵向排列|縱向排列|Vertical|縦並び|세로 배치|Vertikal|Vertical|Vertical
+组件内布局|元件內配置|Content layout|項目の配置|위젯 내부 배치|Widget-Layout|Disposition interne|Distribución interna
+网格布局|網格配置|Grid|グリッド|격자 배치|Raster|Grille|Cuadrícula
+自动适应|自動調整|Auto layout|自動配置|자동 배치|Automatisch|Automatique|Automático
+请输入 0 到 100 之间的百分比。|請輸入 0 到 100 之間的百分比。|Enter a percentage from 0 to 100.|0 から 100 の範囲でパーセントを入力してください。|0에서 100 사이의 백분율을 입력하세요.|Einen Prozentwert von 0 bis 100 eingeben.|Saisissez un pourcentage entre 0 et 100.|Introduce un porcentaje entre 0 y 100.
+编辑此组件|編輯此元件|Edit this widget|このウィジェットを編集|이 위젯 편집|Dieses Widget bearbeiten|Modifier ce widget|Editar este widget
+顶部状态条|頂端狀態列|Top status strip|トップステータスバー|상단 상태 표시줄|Obere Statusleiste|Barre d’état en haut|Barra de estado superior
+紧凑横向信息，点击查看详情|緊湊橫向資訊，點選查看詳情|Compact readings in a row; click for details|コンパクトな横並び表示。クリックで詳細を表示|간결한 가로 표시, 클릭하여 자세히 보기|Kompakte Werte in einer Zeile; Details per Klick|Mesures compactes en ligne ; cliquez pour les détails|Datos compactos en una fila; haz clic para ver detalles
+主显示器|主要顯示器|Primary display|メインディスプレイ|주 디스플레이|Hauptbildschirm|Écran principal|Pantalla principal
+添加顶部状态条|新增頂端狀態列|Add top status strip|トップステータスバーを追加|상단 상태 표시줄 추가|Obere Statusleiste hinzufügen|Ajouter une barre d’état en haut|Añadir barra de estado superior
+布局列数不正确|配置欄數不正確|Invalid layout column count|配置の列数が正しくありません|배치 열 수가 올바르지 않습니다|Ungültige Spaltenzahl|Nombre de colonnes invalide|Número de columnas no válido
+指标不能重叠|指標不能重疊|Readings cannot overlap|項目は重ねて配置できません|항목은 겹칠 수 없습니다|Werte dürfen sich nicht überlappen|Les mesures ne peuvent pas se chevaucher|Los datos no pueden superponerse
+指标位置不正确|指標位置不正確|Invalid reading position|項目の位置が正しくありません|항목 위치가 올바르지 않습니다|Ungültige Position des Werts|Position de mesure invalide|Posición del dato no válida
+指标超出内容区|指標超出內容區|Reading is outside the content area|項目が内容領域の外にあります|항목이 내용 영역을 벗어났습니다|Wert liegt außerhalb des Inhaltsbereichs|La mesure dépasse la zone de contenu|El dato está fuera del área de contenido
+每个指标都需要手动位置|每個指標都需要手動位置|Set a manual position for every reading|すべての項目に手動の位置を設定してください|모든 항목의 수동 위치를 지정하세요|Für jeden Wert eine manuelle Position festlegen|Définissez une position manuelle pour chaque mesure|Asigna una posición manual a cada dato
+不支持的显示器|不支援的顯示器|Unsupported display|対応していないディスプレイです|지원하지 않는 디스플레이입니다|Nicht unterstützter Bildschirm|Écran non pris en charge|Pantalla no compatible
+组件尺寸超出范围|元件尺寸超出範圍|Widget size is out of range|ウィジェットのサイズが範囲外です|위젯 크기가 허용 범위를 벗어났습니다|Widget-Größe außerhalb des zulässigen Bereichs|Dimensions du widget hors limites|El tamaño del widget está fuera de rango
+自由内容请选择 1–6 项指标|自訂內容請選擇 1–6 項指標|Choose 1–6 readings for custom contents|カスタム内容には1～6項目を選択してください|사용자 지정 내용은 1~6개 항목을 선택하세요|Für eigene Inhalte 1–6 Werte auswählen|Choisissez 1 à 6 mesures pour le contenu personnalisé|Elige entre 1 y 6 datos para el contenido personalizado
+下载 · 上传 · 流量|下載 · 上傳 · 流量|Download · Upload · Traffic|ダウンロード · アップロード · 通信量|다운로드 · 업로드 · 트래픽|Download · Upload · Datenvolumen|Réception · Envoi · Trafic|Descarga · Subida · Tráfico
+充电输入 · 放电输出|充電輸入 · 放電輸出|Charge input · Discharge output|充電入力 · 放電出力|충전 입력 · 방전 출력|Ladeeingang · Entladeausgang|Entrée de charge · Sortie de décharge|Entrada de carga · Salida de descarga
+把关心的指标放在一起|把關心的指標放在一起|Keep the readings you care about together|気になる項目をひとつにまとめる|관심 있는 항목을 한곳에 모으세요|Die wichtigen Werte an einem Ort|Réunissez les mesures qui vous intéressent|Reúne los datos que te interesan
+温度 · 使用率 · 频率|溫度 · 使用率 · 頻率|Temperature · Usage · Frequency|温度 · 使用率 · 周波数|온도 · 사용률 · 주파수|Temperatur · Auslastung · Takt|Température · Utilisation · Fréquence|Temperatura · Uso · Frecuencia
+电量 · 续航 · 容量|電量 · 續航 · 容量|Level · Runtime · Capacity|残量 · 駆動時間 · 容量|잔량 · 사용 시간 · 용량|Ladestand · Laufzeit · Kapazität|Niveau · Autonomie · Capacité|Nivel · Autonomía · Capacidad
+读写速度 · 存储空间|讀寫速度 · 儲存空間|Read/write speed · Storage|読み書き速度 · 保存領域|읽기/쓰기 속도 · 저장 공간|Lesen/Schreiben · Speicherplatz|Vitesse de lecture/écriture · Stockage|Velocidad de lectura/escritura · Almacenamiento
+频率|頻率|Frequency|周波数|주파수|Frequenz|Fréquence|Frecuencia
+
+新增指标会重新排列手动布局。|新增指標會重新排列手動佈局。|Adding a reading rearranges the manual layout.|指標を追加すると手動レイアウトが再配置されます。|지표를 추가하면 수동 레이아웃이 재배열됩니다.|Neue Werte ordnen das manuelle Layout neu an.|Ajouter une mesure réorganise la disposition manuelle.|Añadir una lectura reorganiza la distribución manual.
+// 0.10: canvas, inspector, batch selection and layout assistance
+无法放在这里，请避开重叠或使用自动排版。|無法放在這裡，請避開重疊或使用自動排列。|Cannot place it here. Avoid overlapping or use auto layout.|ここには配置できません。重なりを避けるか、自動配置を使ってください。|여기에 놓을 수 없습니다. 겹치지 않게 이동하거나 자동 배치를 사용하세요.|Hier nicht platzierbar. Überlappungen vermeiden oder automatisch anordnen.|Placement impossible ici. Évitez les chevauchements ou utilisez la disposition automatique.|No se puede colocar aquí. Evita superposiciones o usa la distribución automática.
+当前选择无法这样排列。|目前選取項目無法這樣排列。|The selected readings cannot be arranged this way.|選択した項目はこの配置にできません。|선택한 항목을 이 방식으로 배치할 수 없습니다.|Die gewählten Werte lassen sich so nicht anordnen.|Les mesures sélectionnées ne peuvent pas être disposées ainsi.|Los datos seleccionados no pueden distribuirse de esta forma.
+交换位置|交換位置|Swap positions|位置を交換|위치 바꾸기|Positionen tauschen|Échanger les positions|Intercambiar posiciones
+可连续选择，完成后一起添加。|可連續選取，完成後一起新增。|Select several readings, then add them together.|複数の項目を選び、まとめて追加できます。|여러 항목을 선택한 뒤 한 번에 추가하세요.|Mehrere Werte auswählen und gemeinsam hinzufügen.|Sélectionnez plusieurs mesures, puis ajoutez-les ensemble.|Selecciona varios datos y añádelos juntos.
+取消|取消|Cancel|キャンセル|취소|Abbrechen|Annuler|Cancelar
+添加所选|新增所選|Add selected|選択項目を追加|선택 항목 추가|Auswahl hinzufügen|Ajouter la sélection|Añadir selección
+完成|完成|Done|完了|완료|Fertig|Terminer|Listo
+恢复已应用|還原已套用|Revert to applied|適用済みの状態に戻す|적용된 상태로 복원|Angewendeten Stand wiederherstellen|Rétablir l’état appliqué|Restaurar lo aplicado
+检查器|檢查器|Inspector|インスペクタ|검사기|Inspektor|Inspecteur|Inspector
+更多|更多|More|その他|더 보기|Mehr|Plus|Más
+卡片|卡片|Card|カード|카드|Karte|Carte|Tarjeta
+横条|橫條|Horizontal bar|横バー|가로 바|Querleiste|Barre horizontale|Barra horizontal
+竖条|直條|Vertical bar|縦バー|세로 바|Hochleiste|Barre verticale|Barra vertical
+项已选|項已選|selected|項目を選択|개 선택됨|ausgewählt|sélectionnés|seleccionados
+拖动指标改变顺序|拖曳指標變更順序|Drag readings to reorder|ドラッグで並べ替え|항목을 드래그해 순서 변경|Werte zum Sortieren ziehen|Glissez les mesures pour les réorganiser|Arrastra los datos para reordenarlos
+对齐与均分|對齊與均分|Align & distribute|整列と均等配置|정렬 및 균등 배치|Ausrichten und verteilen|Aligner et répartir|Alinear y distribuir
+对齐选中项|對齊所選項目|Align selected readings|選択項目を整列|선택 항목 정렬|Auswahl ausrichten|Aligner la sélection|Alinear selección
+对齐到组件|對齊至元件|Align within widget|ウィジェット内で整列|위젯 내에서 정렬|Am Widget ausrichten|Aligner dans le widget|Alinear dentro del widget
+左对齐|靠左對齊|Align left|左揃え|왼쪽 정렬|Linksbündig|Aligner à gauche|Alinear a la izquierda
+水平居中|水平置中|Center horizontally|水平方向に中央揃え|가로 가운데 정렬|Horizontal zentrieren|Centrer horizontalement|Centrar horizontalmente
+右对齐|靠右對齊|Align right|右揃え|오른쪽 정렬|Rechtsbündig|Aligner à droite|Alinear a la derecha
+顶部对齐|靠上對齊|Align top|上揃え|위쪽 정렬|Oben ausrichten|Aligner en haut|Alinear arriba
+垂直居中|垂直置中|Center vertically|垂直方向に中央揃え|세로 가운데 정렬|Vertikal zentrieren|Centrer verticalement|Centrar verticalmente
+底部对齐|靠下對齊|Align bottom|下揃え|아래쪽 정렬|Unten ausrichten|Aligner en bas|Alinear abajo
+水平等间距|水平等間距|Equal horizontal spacing|横方向に等間隔|가로 간격 균등 배치|Horizontale Abstände angleichen|Espacement horizontal égal|Igualar el espacio horizontal
+垂直等间距|垂直等間距|Equal vertical spacing|縦方向に等間隔|세로 간격 균등 배치|Vertikale Abstände angleichen|Espacement vertical égal|Igualar el espacio vertical
+撤销|復原|Undo|元に戻す|실행 취소|Rückgängig|Annuler|Deshacer
+重做|重做|Redo|やり直す|다시 실행|Wiederholen|Rétablir|Rehacer
+自由摆放|自由擺放|Free layout|自由配置|자유 배치|Frei anordnen|Placement libre|Ubicación libre
+吸附|吸附|Snap|スナップ|스냅|Einrasten|Magnétisme|Ajustar
+按住 Alt 暂时关闭吸附|按住 Alt 暫時關閉吸附|Hold Alt to temporarily disable snapping|Alt を押している間はスナップを無効にします|Alt를 누르고 있으면 스냅이 일시 해제됩니다|Alt gedrückt halten, um das Einrasten vorübergehend auszuschalten|Maintenez Alt pour désactiver temporairement le magnétisme|Mantén Alt para desactivar temporalmente el ajuste
+适合|符合視窗|Fit|全体表示|화면에 맞춤|Einpassen|Ajuster|Encajar
+外观|外觀|Appearance|外観|모양|Darstellung|Apparence|Apariencia
+数据|資料|Data|データ|데이터|Daten|Données|Datos
+位置|位置|Position|位置|위치|Position|Position|Posición
+全局|全域|Global|共通|전역|Global|Global|Global
+选择一个指标查看数据来源|選取一項指標以查看資料來源|Select a reading to view its source|項目を選択してデータの取得元を確認|항목을 선택하여 데이터 출처 확인|Einen Wert auswählen, um seine Quelle zu sehen|Sélectionnez une mesure pour voir sa source|Selecciona un dato para ver su origen
+高级|進階|Advanced|詳細|고급|Erweitert|Avancé|Avanzado
+精确尺寸|精確尺寸|Exact dimensions|正確なサイズ|정확한 크기|Genaue Abmessungen|Dimensions précises|Dimensiones exactas
+拖动右下角改变组件尺寸；这些数值用于精确调整。|拖曳右下角變更元件尺寸；這些數值用於精確調整。|Drag the bottom-right corner to resize; use these values for precise adjustments.|右下隅をドラッグしてサイズ変更し、数値で微調整できます。|오른쪽 아래 모서리를 드래그해 크기를 바꾸고 숫자로 정밀 조정하세요.|Die rechte untere Ecke zum Skalieren ziehen; diese Werte dienen der Feineinstellung.|Tirez le coin inférieur droit pour redimensionner ; utilisez ces valeurs pour un réglage précis.|Arrastra la esquina inferior derecha para cambiar el tamaño; usa estos valores para ajustarlo con precisión.
+指标不能超出组件边界。|指標不能超出元件邊界。|Readings must stay within the widget.|項目はウィジェットの範囲内に配置してください。|항목은 위젯 경계 안에 있어야 합니다.|Werte müssen innerhalb des Widgets bleiben.|Les mesures doivent rester dans le widget.|Los datos deben quedar dentro del widget.
+指标区域太小，请扩大后再调整。|指標區域太小，請放大後再調整。|The reading area is too small. Enlarge it before adjusting.|項目の領域が小さすぎます。広げてから調整してください。|항목 영역이 너무 작습니다. 크기를 키운 뒤 조정하세요.|Der Wertebereich ist zu klein. Vor dem Anpassen vergrößern.|La zone de mesure est trop petite. Agrandissez-la avant de l’ajuster.|El área del dato es demasiado pequeña. Amplíala antes de ajustarla.
+指标重叠，可拖到另一项中央交换位置。|指標重疊，可拖至另一項中央交換位置。|Readings overlap. Drag to the center of another reading to swap positions.|項目が重なっています。別の項目の中央にドラッグすると位置を交換できます。|항목이 겹칩니다. 다른 항목 중앙으로 드래그하면 위치가 바뀝니다.|Werte überlappen sich. Zum Tauschen in die Mitte eines anderen Werts ziehen.|Les mesures se chevauchent. Glissez au centre d’une autre mesure pour échanger les positions.|Los datos se superponen. Arrastra al centro de otro dato para intercambiar posiciones.
+请先选择指标。|請先選取指標。|Select a reading first.|まず項目を選択してください。|먼저 항목을 선택하세요.|Zuerst einen Wert auswählen.|Sélectionnez d’abord une mesure.|Selecciona primero un dato.
+请至少选择三项指标。|請至少選取三項指標。|Select at least three readings.|項目を3つ以上選択してください。|항목을 세 개 이상 선택하세요.|Mindestens drei Werte auswählen.|Sélectionnez au moins trois mesures.|Selecciona al menos tres datos.
+空间不足，无法保持间距。|空間不足，無法保持間距。|Not enough space to maintain the gaps.|間隔を確保するためのスペースが足りません。|간격을 유지할 공간이 부족합니다.|Nicht genug Platz für gleichmäßige Abstände.|Espace insuffisant pour conserver les écarts.|No hay espacio suficiente para mantener la separación.
+位置未更改，请重试。|位置未變更，請再試一次。|Position unchanged. Try again.|位置は変更されていません。もう一度お試しください。|위치가 변경되지 않았습니다. 다시 시도하세요.|Position unverändert. Erneut versuchen.|Position inchangée. Réessayez.|La posición no cambió. Inténtalo de nuevo.
+新增指标会保留已有摆放。|新增指標會保留既有擺放。|Adding readings preserves the current layout.|項目を追加しても、既存の配置は維持されます。|항목을 추가해도 기존 배치가 유지됩니다.|Beim Hinzufügen bleibt die bestehende Anordnung erhalten.|L’ajout de mesures conserve la disposition existante.|Al añadir datos se conserva la distribución actual.
+恢复|還原|Revert|元に戻す|되돌리기|Verwerfen|Rétablir|Revertir
+展开画布|展開畫布|Expand canvas|キャンバスを展開|캔버스 펼치기|Arbeitsfläche erweitern|Agrandir la zone de travail|Ampliar el lienzo
+收起画布|收合畫布|Collapse canvas|キャンバスを折りたたむ|캔버스 접기|Arbeitsfläche einklappen|Réduire la zone de travail|Contraer el lienzo
+已添加的指标|已新增的指標|Added readings|追加済みの項目|추가한 항목|Hinzugefügte Werte|Mesures ajoutées|Datos añadidos
+当前皮肤不使用玻璃参数。|目前皮膚不使用玻璃參數。|This skin does not use glass settings.|このスキンではガラス設定を使用しません。|이 스킨은 유리 설정을 사용하지 않습니다.|Dieses Design verwendet keine Glaseinstellungen.|Ce thème n’utilise pas les réglages du verre.|Este tema no utiliza ajustes de cristal.
+拖动后仅修改此组件。|拖曳後僅修改此元件。|Dragging changes only this widget.|ドラッグすると、このウィジェットだけが変わります。|드래그하면 이 위젯만 변경됩니다.|Ziehen ändert nur dieses Widget.|Le déplacement ne modifie que ce widget.|Al arrastrar solo cambia este widget.
+玻璃默认参数|玻璃預設參數|Glass defaults|ガラスの既定値|유리 기본값|Glasvorgaben|Réglages du verre par défaut|Valores de cristal predeterminados
+默认参数仅作用于使用玻璃皮肤的组件。|預設參數僅適用於使用玻璃皮膚的元件。|Defaults apply only to widgets using glass skins.|既定値はガラススキンのウィジェットだけに適用されます。|기본값은 유리 스킨을 사용하는 위젯에만 적용됩니다.|Vorgaben gelten nur für Widgets mit Glasdesign.|Ces valeurs ne concernent que les widgets avec un thème de verre.|Estos valores solo se aplican a widgets con temas de cristal.
+透明背景，未启用系统模糊。|透明背景，未啟用系統模糊。|Transparent background; system blur is off.|背景は透明です。システムのぼかしは無効です。|배경은 투명하며 시스템 흐림 효과는 꺼져 있습니다.|Transparenter Hintergrund; Systemunschärfe ist aus.|Fond transparent ; flou système désactivé.|Fondo transparente; desenfoque del sistema desactivado.
+系统已关闭透明效果，使用实色背景。|系統已關閉透明效果，使用實色背景。|System transparency is off; using a solid background.|システムの透明効果が無効なため、単色背景を使用します。|시스템 투명 효과가 꺼져 있어 단색 배경을 사용합니다.|Systemtransparenz ist aus; einfarbiger Hintergrund.|Transparence système désactivée ; fond uni utilisé.|La transparencia del sistema está desactivada; se usa un fondo sólido.
+系统模糊尚未确认。|系統模糊尚未確認。|System blur has not been verified.|システムのぼかしは未確認です。|시스템 흐림 효과는 아직 확인되지 않았습니다.|Systemunschärfe wurde noch nicht bestätigt.|Le flou système n’a pas encore été vérifié.|El desenfoque del sistema aún no se ha verificado.
+系统模糊已确认。|系統模糊已確認。|System blur has been verified.|システムのぼかしを確認済みです。|시스템 흐림 효과가 확인되었습니다.|Systemunschärfe wurde bestätigt.|Le flou système a été vérifié.|El desenfoque del sistema se ha verificado.
+透明效果尚未确认。|透明效果尚未確認。|Transparency has not been verified.|透明効果は未確認です。|투명 효과는 아직 확인되지 않았습니다.|Transparenz wurde noch nicht bestätigt.|La transparence n’a pas encore été vérifiée.|La transparencia aún no se ha verificado.
+顶部栏|頂部列|Top bar|トップバー|상단 표시줄|Obere Leiste|Barre supérieure|Barra superior
+启用顶部栏|啟用頂部列|Enable top bar|トップバーを有効化|상단 표시줄 사용|Obere Leiste aktivieren|Activer la barre supérieure|Activar barra superior
+外观预览|外觀預覽|Appearance preview|外観プレビュー|모양 미리 보기|Darstellungsvorschau|Aperçu de l’apparence|Vista previa del aspecto
+指标设置|指標設定|Reading settings|項目の設定|측정값 설정|Messwert-Einstellungen|Réglages de la mesure|Ajustes del dato
+网速单位|網速單位|Network speed unit|通信速度の単位|네트워크 속도 단위|Einheit der Netzwerkgeschwindigkeit|Unité du débit réseau|Unidad de velocidad de red
+设备|裝置|Device|デバイス|장치|Gerät|Appareil|Dispositivo
+默认设备|預設裝置|Default device|既定のデバイス|기본 장치|Standardgerät|Appareil par défaut|Dispositivo predeterminado
+选择显示器|選擇顯示器|Choose displays|ディスプレイを選択|디스플레이 선택|Bildschirme auswählen|Choisir les écrans|Elegir pantallas
+所有显示器|所有顯示器|All displays|すべてのディスプレイ|모든 디스플레이|Alle Bildschirme|Tous les écrans|Todas las pantallas
+紧凑|緊湊|Compact|コンパクト|좁게|Kompakt|Compact|Compacto
+宽松|寬鬆|Spacious|ゆったり|넓게|Großzügig|Aéré|Amplio
+栏内指标|列內指標|Bar readings|バーの項目|표시줄 측정값|Werte in der Leiste|Mesures de la barre|Datos de la barra
+更多指标|更多指標|More readings|その他の項目|더 많은 측정값|Weitere Werte|Autres mesures|Más datos
+相关读数|相關讀數|Related readings|関連する測定値|관련 측정값|Zugehörige Werte|Mesures associées|Datos relacionados
+编辑顶部栏|編輯頂部列|Edit top bar|トップバーを編集|상단 표시줄 편집|Obere Leiste bearbeiten|Modifier la barre supérieure|Editar barra superior
+向前移动|向前移動|Move earlier|前へ移動|앞으로 이동|Nach vorn|Déplacer avant|Mover antes
+向后移动|向後移動|Move later|後ろへ移動|뒤로 이동|Nach hinten|Déplacer après|Mover después
+来源诊断|來源診斷|Source diagnostics|データソースの診断|데이터 원본 진단|Quelldiagnose|Diagnostic des sources|Diagnóstico de fuentes
+点加号选择要显示的指标。|點加號選擇要顯示的指標。|Use + to choose readings.|＋で表示する項目を選びます。|+를 눌러 표시할 측정값을 선택하세요.|Mit + die gewünschten Werte auswählen.|Utilisez + pour choisir les mesures.|Usa + para elegir los datos.
+选择至少一个显示器后应用。|選擇至少一個顯示器後套用。|Select at least one display before applying.|適用前にディスプレイを1つ以上選択してください。|적용하기 전에 디스플레이를 하나 이상 선택하세요.|Vor dem Anwenden mindestens einen Bildschirm auswählen.|Sélectionnez au moins un écran avant d’appliquer.|Selecciona al menos una pantalla antes de aplicar.
+随时查看状态，停留展开详情。|隨時查看狀態，停留展開詳細資訊。|See status at a glance. Hover for details.|状態を一目で確認。ポインターを合わせると詳細を表示。|상태를 한눈에 확인하고 마우스를 올려 세부 정보를 보세요.|Status auf einen Blick. Details beim Darüberfahren.|L’état en un coup d’œil. Survolez pour les détails.|Consulta el estado de un vistazo. Pasa el cursor para ver detalles.
+为普通应用预留屏幕顶部空间。全屏应用时让位，退出后恢复。|為一般應用程式預留螢幕頂端空間。全螢幕時讓位，離開後還原。|Reserves space above normal windows. Yields to fullscreen apps and returns afterward.|通常のウィンドウの上に領域を確保します。全画面表示中は背面に移動し、終了後に戻ります。|일반 창 위에 공간을 확보합니다. 전체 화면 앱에는 자리를 내주고 종료 후 돌아옵니다.|Reserviert Platz über normalen Fenstern. Weicht Vollbild-Apps und kehrt danach zurück.|Réserve un espace au-dessus des fenêtres. Cède la place aux apps en plein écran, puis revient.|Reserva espacio sobre las ventanas normales. Cede el paso a las apps de pantalla completa y vuelve después.
+沿用全局外观与透明度。内容过多时收入 +N，不压缩文字。|沿用全域外觀與透明度。內容過多時收入 +N，不壓縮文字。|Uses the global appearance and transparency. Extra readings go into +N without shrinking text.|全体の外観と透明度を使用します。入りきらない項目は文字を縮めず＋Nにまとめます。|전체 모양과 투명도를 사용합니다. 넘치는 항목은 글자를 줄이지 않고 +N에 넣습니다.|Verwendet globale Darstellung und Transparenz. Weitere Werte erscheinen unter +N, ohne den Text zu verkleinern.|Utilise l’apparence et la transparence globales. Les mesures en surplus sont regroupées sous +N, sans réduire le texte.|Usa el aspecto y la transparencia globales. Los datos adicionales van a +N sin reducir el texto.
+显示本轮实际返回的状态；没有证据时保留未知，不判断为权限不足。|顯示本輪實際傳回的狀態；沒有證據時保留未知，不判定為權限不足。|Shows the actual query results. An unknown cause is not labelled as insufficient permissions.|今回のクエリ結果を表示します。原因不明の場合に権限不足とは判断しません。|실제 조회 결과를 표시합니다. 원인을 모르면 권한 부족으로 판단하지 않습니다.|Zeigt tatsächliche Abfrageergebnisse. Unbekannte Ursachen werden nicht als fehlende Berechtigung eingestuft.|Affiche les résultats réels. Une cause inconnue n’est pas attribuée à un manque d’autorisations.|Muestra los resultados reales. Una causa desconocida no se atribuye a falta de permisos.
+NVMe 温度|NVMe 溫度|NVMe temperature|NVMe温度|NVMe 온도|NVMe-Temperatur|Température NVMe|Temperatura NVMe
+NVMe 备用容量|NVMe 備用容量|NVMe available spare|NVMe予備領域|NVMe 가용 예비 용량|NVMe-Reserveraum|Réserve disponible NVMe|Reserva disponible NVMe
+NVMe 寿命已用|NVMe 壽命已用|NVMe endurance used|NVMe寿命使用率|NVMe 수명 사용률|NVMe-Lebensdauer verbraucht|Endurance NVMe utilisée|Vida útil NVMe consumida
+顶部状态栏设置|頂部狀態列設定|Top bar settings|トップバーの設定|상단 표시줄 설정|Einstellungen der oberen Leiste|Réglages de la barre supérieure|Ajustes de la barra superior
+顶部状态栏详情|頂部狀態列詳細資訊|Top bar details|トップバーの詳細|상단 표시줄 세부 정보|Details der oberen Leiste|Détails de la barre supérieure|Detalles de la barra superior
+暂时隐藏|暫時隱藏|Hide temporarily|一時的に隠す|잠시 숨기기|Vorübergehend ausblenden|Masquer temporairement|Ocultar temporalmente
+关闭状态栏…|關閉狀態列…|Disable top bar…|トップバーを無効化…|상단 표시줄 끄기…|Obere Leiste deaktivieren…|Désactiver la barre supérieure…|Desactivar barra superior…
+仅数值|僅數值|Value only|数値のみ|값만|Nur Wert|Valeur seule|Solo valor
+右侧|右側|Right|右側|오른쪽|Rechts|Droite|Derecha
+图标与数值|圖示與數值|Icon and value|アイコンと数値|아이콘과 값|Symbol und Wert|Icône et valeur|Icono y valor
+左侧|左側|Left|左側|왼쪽|Links|Gauche|Izquierda
+已暂停|已暫停|Paused|一時停止中|일시 중지|Pausiert|En pause|En pausa
+布局有未应用更改|版面有未套用變更|Layout changes not applied|レイアウトの変更は未適用|배치 변경 미적용|Layoutänderungen nicht angewendet|Disposition modifiée, non appliquée|Cambios de diseño sin aplicar
+布局预览|版面預覽|Layout preview|レイアウトのプレビュー|배치 미리 보기|Layoutvorschau|Aperçu de la disposition|Vista previa del diseño
+应用顶部栏|套用頂部列|Apply top bar|トップバーに適用|상단 표시줄 적용|Obere Leiste anwenden|Appliquer la barre|Aplicar barra superior
+拖到这里|拖曳到這裡|Drop here|ここにドロップ|여기에 놓기|Hier ablegen|Déposer ici|Soltar aquí
+拖动把手排序，或移到左侧与右侧。|拖曳把手排序，或移至左側與右側。|Drag handles to reorder or move between sides.|ハンドルをドラッグして並べ替えたり左右に移動します。|핸들을 끌어 정렬하거나 좌우로 옮기세요.|Zum Sortieren oder Seitenwechsel die Griffe ziehen.|Faites glisser les poignées pour réordonner ou changer de côté.|Arrastra los controles para ordenar o cambiar de lado.
+指标间距|指標間距|Item spacing|項目の間隔|항목 간격|Elementabstand|Espacement|Espacio entre elementos
+无法显示|無法顯示|Unable to display|表示できません|표시할 수 없음|Anzeige nicht möglich|Affichage impossible|No se puede mostrar
+显示方式|顯示方式|Display style|表示スタイル|표시 방식|Anzeigestil|Style d’affichage|Estilo de visualización
+未启用|未啟用|Disabled|無効|꺼짐|Deaktiviert|Désactivé|Desactivado
+未连接显示器|未連接顯示器|Display disconnected|ディスプレイが未接続|디스플레이 연결 안 됨|Bildschirm getrennt|Écran déconnecté|Pantalla desconectada
+标签与数值|標籤與數值|Label and value|ラベルと数値|이름과 값|Beschriftung und Wert|Libellé et valeur|Etiqueta y valor
+等待显示|等待顯示|Waiting to display|表示を待機中|표시 대기 중|Warten auf Anzeige|En attente d’affichage|Esperando para mostrar
+趋势与数值|趨勢與數值|Trend and value|推移と数値|추세와 값|Verlauf und Wert|Tendance et valeur|Tendencia y valor
+运行中|執行中|Running|動作中|실행 중|Aktiv|En cours|En ejecución
+部分显示器不可用|部分顯示器無法使用|Some displays unavailable|一部のディスプレイは使用できません|일부 디스플레이 사용 불가|Einige Bildschirme nicht verfügbar|Certains écrans sont indisponibles|Algunas pantallas no están disponibles
+预览 · 尚未应用|預覽 · 尚未套用|Preview · Not applied|プレビュー · 未適用|미리 보기 · 미적용|Vorschau · Nicht angewendet|Aperçu · Non appliqué|Vista previa · Sin aplicar
+预览 · 未启用|預覽 · 未啟用|Preview · Disabled|プレビュー · 無効|미리 보기 · 꺼짐|Vorschau · Deaktiviert|Aperçu · Désactivé|Vista previa · Desactivado
+顶部栏间距应为 4–24 px|頂部列間距應為 4–24 px|Top bar spacing must be 4–24 px|トップバーの間隔は4～24 pxです|상단 표시줄 간격은 4–24 px여야 합니다|Leistenabstand muss 4–24 px betragen|L’espacement doit être de 4 à 24 px|El espacio debe ser de 4 a 24 px
+不支持的顶部栏显示样式|不支援的頂部列顯示樣式|Unsupported top bar display style|未対応のトップバー表示スタイル|지원하지 않는 상단 표시 방식|Nicht unterstützter Leistenstil|Style de barre non pris en charge|Estilo de barra no compatible
+顶部栏设置已应用|頂部列設定已套用|Top bar settings applied|トップバー設定を適用しました|상단 표시줄 설정 적용됨|Leisteneinstellungen angewendet|Réglages de la barre appliqués|Ajustes de barra aplicados
+顶部栏暂时无法显示|頂部列暫時無法顯示|Top bar temporarily unavailable|トップバーを一時的に表示できません|상단 표시줄을 표시할 수 없음|Obere Leiste vorübergehend nicht verfügbar|Barre temporairement indisponible|Barra temporalmente no disponible
+柱状与数值|柱狀與數值|Bar and value|バーと数値|막대와 값|Balken und Wert|Barre et valeur|Barra y valor
+圆环与数值|圓環與數值|Ring and value|リングと数値|링과 값|Ring und Wert|Anneau et valeur|Anillo y valor
+迷你图表|迷你圖表|Mini chart|ミニグラフ|미니 차트|Minidiagramm|Mini graphique|Minigráfico
+上下两行|上下兩行|Stacked|2行表示|두 줄|Zweizeilig|Deux lignes|Dos líneas
+紧凑数字|緊湊數字|Compact|コンパクト|간결하게|Kompakt|Compact|Compacto
+均衡|均衡|Balanced|バランス|균형|Ausgewogen|Équilibré|Equilibrado
+顶栏外观|頂欄外觀|Bar appearance|バーの外観|상단 바 모양|Leistenoptik|Apparence de la barre|Aspecto de la barra
+材质|材質|Material|素材|재질|Material|Matériau|Material
+拖动预览中的指标也可排序。|拖動預覽中的指標也可排序。|Drag readings in the preview to reorder them.|プレビューの項目をドラッグして並べ替えます。|미리 보기의 항목을 끌어 순서를 바꿀 수 있습니다.|Werte in der Vorschau zum Sortieren ziehen.|Faites glisser les mesures dans l’aperçu pour les réordonner.|Arrastra las métricas de la vista previa para ordenarlas.
+悬停查看详情，拖动调整顺序。更多指标收在 +N 中。|停留查看詳情，拖動調整順序。更多指標收在 +N 中。|Hover for details. Drag to reorder. Extra readings appear under +N.|ホバーで詳細、ドラッグで並べ替え。残りは +N に表示します。|마우스를 올려 상세 정보를 보고 끌어서 순서를 바꾸세요. 나머지는 +N에 표시됩니다.|Details beim Darüberfahren; zum Sortieren ziehen. Weitere Werte unter +N.|Survolez pour les détails, glissez pour réordonner. Autres mesures sous +N.|Pasa el cursor para ver detalles y arrastra para ordenar. Más métricas en +N.
+请先应用顶部栏的修改，再拖动实时顶部栏。|請先套用頂部欄的修改，再拖動即時頂部欄。|Apply pending bar changes before dragging the live bar.|バーの変更を適用してから実際のバーをドラッグしてください。|변경 사항을 적용한 후 실제 상단 바를 끌어 주세요.|Zuerst Änderungen anwenden, dann die Live-Leiste sortieren.|Appliquez les modifications avant de réordonner la barre active.|Aplica los cambios antes de arrastrar la barra activa.
+桌面组件|桌面元件|Desktop widgets|デスクトップウィジェット|데스크톱 위젯|Desktop-Widgets|Widgets de bureau|Widgets de escritorio
+偏好|偏好|Preferences|環境設定|환경 설정|Einstellungen|Préférences|Preferencias
+精细排版|精細排版|Fine layout|詳細レイアウト|세부 배치|Feinlayout|Mise en page détaillée|Diseño detallado
+数据来源与单位|資料來源與單位|Sources and units|データソースと単位|데이터 소스 및 단위|Quellen und Einheiten|Sources et unités|Fuentes y unidades
+顶部栏修改已撤销|頂部列修改已撤銷|Bar changes reverted|バーの変更を元に戻しました|상단 바 변경 사항을 취소했습니다|Leistenänderungen verworfen|Modifications de la barre annulées|Cambios de la barra revertidos
+项不可用|項無法使用|unavailable|件利用不可|개 사용 불가|nicht verfügbar|indisponibles|no disponibles
+设备与来源|裝置與來源|Device and source|デバイスとソース|장치 및 소스|Gerät und Quelle|Appareil et source|Dispositivo y fuente
+收起|收起|Collapse|折りたたむ|접기|Einklappen|Réduire|Contraer
+实际效果以桌面组件为准。|實際效果以桌面元件為準。|Check the actual desktop widgets for the result.|実際のデスクトップウィジェットで確認してください。|실제 데스크톱 위젯에서 확인하세요.|Das Ergebnis in den Desktop-Widgets prüfen.|Vérifiez le résultat dans les widgets du bureau.|Comprueba el resultado en los widgets del escritorio.
+双向读数|雙向讀數|Paired readings|双方向の値|양방향 수치|Gepaarte Werte|Valeurs appariées|Lecturas emparejadas
+趋势|趨勢|Trend|推移|추세|Verlauf|Tendance|Tendencia
+次采样|次取樣|samples|サンプル|개 샘플|Messwerte|échantillons|muestras
+卷容量|磁碟區容量|Volume capacity|ボリューム容量|볼륨 용량|Volume-Kapazität|Capacité du volume|Capacidad del volumen
+NVMe 健康|NVMe 健康|NVMe health|NVMeの状態|NVMe 상태|NVMe-Zustand|État NVMe|Estado NVMe
+硬件传感器|硬體感測器|Hardware sensor|ハードウェアセンサー|하드웨어 센서|Hardware-Sensor|Capteur matériel|Sensor de hardware
+单行双向|單行雙向|Paired inline|双方向・横並び|양방향 한 줄|Paar nebeneinander|Paire sur une ligne|Par en una línea
+该指标没有可配对的双向读数|此指標沒有可配對的雙向讀數|This reading has no paired channel.|この項目には対となるチャンネルがありません。|이 수치에는 짝이 되는 채널이 없습니다.|Dieser Messwert hat keinen Partnerkanal.|Cette mesure n’a pas de canal associé.|Esta lectura no tiene un canal emparejado.
+峰值|峰值|Peak|ピーク|최댓값|Spitze|Pic|Pico
+平均值|平均值|Average|平均|평균|Durchschnitt|Moyenne|Promedio
+最新|最新|Latest|最新|최신|Zuletzt|Dernier|Último
+起点|起點|Start|開始|시작|Beginn|Début|Inicio
+尚无连续读数|尚無連續讀數|No continuous readings yet|連続した読数はまだありません|아직 연속 수치가 없습니다|Noch keine fortlaufenden Messwerte|Pas encore de mesures continues|Todavía no hay lecturas continuas
+采样后将显示趋势|取樣後將顯示趨勢|Trends appear as readings arrive|測定後に推移を表示します|수집된 수치로 추세를 표시합니다|Der Verlauf erscheint mit neuen Messwerten|La tendance apparaîtra avec les mesures|La tendencia aparecerá al recibir lecturas
+当前样式|目前樣式|Current style|現在の表示|현재 스타일|Aktueller Stil|Style actuel|Estilo actual
+显露背景，轻盈边框|顯露背景，輕盈邊框|Visible background, light borders|背景を透かす軽い輪郭|배경이 비치는 가벼운 테두리|Sichtbarer Hintergrund, feine Ränder|Fond visible, contours légers|Fondo visible y bordes ligeros
+柔和底色，阅读更稳|柔和底色，閱讀更穩|Soft tint, steady contrast|やわらかな下地で読みやすく|부드러운 바탕과 안정된 대비|Sanfter Grundton, klarer Kontrast|Teinte douce, contraste stable|Tono suave y contraste estable
+淡彩衬底，柔和层次|淡彩襯底，柔和層次|Subtle color, gentle depth|淡い色で穏やかな奥行き|은은한 색과 부드러운 깊이|Dezente Farbe, sanfte Tiefe|Couleur discrète, profondeur douce|Color sutil y profundidad suave
+高对比，专注读数|高對比，專注讀數|High contrast, focused readings|高いコントラストで読数を明確に|높은 대비로 수치에 집중|Hoher Kontrast, klare Messwerte|Contraste élevé, mesures lisibles|Alto contraste y lecturas claras
+深色底板，夜间舒适|深色底板，夜間舒適|Dark surface, comfortable at night|夜間に見やすい暗い下地|밤에 편안한 어두운 바탕|Dunkle Fläche, angenehm bei Nacht|Fond sombre, confortable la nuit|Fondo oscuro, cómodo por la noche
+保留读数，隐去底板|保留讀數，隱去底板|Readings without a background|下地を省いて読数を表示|바탕 없이 수치만 표시|Messwerte ohne Hintergrundfläche|Mesures sans fond|Lecturas sin fondo

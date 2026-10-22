@@ -1,0 +1,152 @@
+{
+  "format": 1,
+  "source": "Unmodified approved FieldDock Niangao path, uniformly scaled; added status pulse",
+  "identity_source": {
+    "url": "https://github.com/Fairank/FieldDock/blob/main/branding/niangao-v1.svg",
+    "git_blob_sha": "4bc4949f8f807b54eb3801e54e3cdbb88d212588",
+    "face_path_sha256": "974330e09361a6b6bc2df3fe16f8ace94c8b09719c2e703c8d2871d2e354d27e",
+    "preservation": "Same complete black evenodd path at every size; no face redesign"
+  },
+  "generator": "tools/generate_icons.py",
+  "generator_sha256": "9b0b54315f72d9372ab37881e0b94a333a18d7a63b294d509c38b9a6c1d69752",
+  "ico_sizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    56,
+    64,
+    96,
+    128,
+    256
+  ],
+  "optical_tiers": {
+    "16/20/24": "Original face, size-specific uniform placement; thin separated blue pulse",
+    "32/40/48/56": "Original face, calibrated padding and pulse weight only",
+    "64+": "Original face, proportional composition; no bitmap enlargement"
+  },
+  "files": {
+    "niangao-source.svg": {
+      "bytes": 98417,
+      "sha256": "c45a45d8d4109a493ce20fc8b039c3e007d43cfd7f391778f089917230523625"
+    },
+    "icon-16.svg": {
+      "bytes": 98627,
+      "sha256": "6d9ea6fcfc8f959bd0865a4bf823e8b857fbb9559a216cb56b7c980a0c5bc2de"
+    },
+    "icon-16.png": {
+      "bytes": 699,
+      "sha256": "59a437e0f8b0c787d238a9a0d63bd3cf2e729c8ad564e9e41e74b3df919e6ec4"
+    },
+    "icon-20.svg": {
+      "bytes": 98616,
+      "sha256": "097080a76133ffcacd33dbca747c325af483f85756a4fe78ec4de5464d30ed1b"
+    },
+    "icon-20.png": {
+      "bytes": 909,
+      "sha256": "fec7b9a0f08c5882265667fc78f5be406fac0fdaf5e0810c65fb05f3b4cf640a"
+    },
+    "icon-24.svg": {
+      "bytes": 98635,
+      "sha256": "fc8f79ed1e7b529c205f039a1ce0bbe9b432ec2b6714cd4d3fb435b1908f5e4b"
+    },
+    "icon-24.png": {
+      "bytes": 1271,
+      "sha256": "a68f8b4d7024f544c68b6c371cc88b7567277baeac35a85b572dafb788b3b87d"
+    },
+    "icon-32.svg": {
+      "bytes": 98632,
+      "sha256": "6a75353404d514590fc9f346b44fa70ac3ef0ea7c6ecceac408b6704414a296b"
+    },
+    "icon-32.png": {
+      "bytes": 1785,
+      "sha256": "d9cb15e23d7ae61ecd62be90301a4077b4f5230be7854c45741b903e0395ca13"
+    },
+    "icon-40.svg": {
+      "bytes": 98626,
+      "sha256": "e06105efa69f5225ac054a930db4625956ed44812083956d9a31f8fbd315c9ed"
+    },
+    "icon-40.png": {
+      "bytes": 2356,
+      "sha256": "b7f97ddb57b132e4bfddc29d07c45e4dfdbad0dc224bd19ea959fcf3c849827c"
+    },
+    "icon-48.svg": {
+      "bytes": 98634,
+      "sha256": "04d88de17c59205b3b2d361de35e1154f5d081c116ee8a55fa35d3e979fee988"
+    },
+    "icon-48.png": {
+      "bytes": 2987,
+      "sha256": "ac016e5efc67ebf00c6b8f5cc5455bd29ae2070554fa2d8c8f9b7d30c738a509"
+    },
+    "icon-56.svg": {
+      "bytes": 98630,
+      "sha256": "13d4b0f1702824a32733f201db328f8cff1cb9e394ba7e68994527dd1bfc5a45"
+    },
+    "icon-56.png": {
+      "bytes": 3629,
+      "sha256": "8e76a0e31eec0f9f417998e3d25ea31998c9d019e015d5f117aa36e040e1d8fa"
+    },
+    "icon-64.svg": {
+      "bytes": 98625,
+      "sha256": "ede426af6a1dfb4c55ae4bd22509d62a3d7492a0408175287afd7f296ed5542b"
+    },
+    "icon-64.png": {
+      "bytes": 4131,
+      "sha256": "7a0a235028b8bb42765ff9f2fa5fd2980ad2ed20f04ca804a4235a4fe1ea84ea"
+    },
+    "icon-96.svg": {
+      "bytes": 98632,
+      "sha256": "02981558df28e55f871e9db30bfbf56121db2204e65445a65bc64b1f870989bd"
+    },
+    "icon-96.png": {
+      "bytes": 6590,
+      "sha256": "6dc0f22aba5ef0d64de3fd6ec683586e6e9fdd45663dd69b94249d7aeab806a0"
+    },
+    "icon-128.svg": {
+      "bytes": 98637,
+      "sha256": "0bf97d95ca315e7a8174d68a593b007d7a503eb489f33fa9174ddb6c10eb40cf"
+    },
+    "icon-128.png": {
+      "bytes": 9260,
+      "sha256": "23c8807f626b8b022240ec61ac49c631310c93f8b4a7232864020c8a24b01ea4"
+    },
+    "icon-256.svg": {
+      "bytes": 98644,
+      "sha256": "1030fc360635a5b8384608fa70cda2655d7f29610e453bf8ca24c0c5ef628852"
+    },
+    "icon-256.png": {
+      "bytes": 21029,
+      "sha256": "784a3ef753a84d6527ec51306a87d1dbd303f244eb982bbcd80e1e71c5efa857"
+    },
+    "icon-512.svg": {
+      "bytes": 98646,
+      "sha256": "9a8226a8dffcb6d2936a8562758b13ba2fbdf149ac45aac1b68445b5279ebfc4"
+    },
+    "icon-512.png": {
+      "bytes": 48130,
+      "sha256": "e767940967d7c5eab68efe4725b9917e03f46e20ce2199c3ec623a31cce4868f"
+    },
+    "icon-1024.svg": {
+      "bytes": 98651,
+      "sha256": "062079590f8b7ccf427a37d7dfc02185a68bff5110b5f6ae144407a86eba01c5"
+    },
+    "icon-1024.png": {
+      "bytes": 111393,
+      "sha256": "864323157d8273b316c12ddbeda5f5d990142b6104626ae1b7bf023995837c73"
+    },
+    "icon.svg": {
+      "bytes": 98651,
+      "sha256": "062079590f8b7ccf427a37d7dfc02185a68bff5110b5f6ae144407a86eba01c5"
+    },
+    "icon.png": {
+      "bytes": 111393,
+      "sha256": "864323157d8273b316c12ddbeda5f5d990142b6104626ae1b7bf023995837c73"
+    },
+    "icon.ico": {
+      "bytes": 54828,
+      "sha256": "f7055ffbea234389b27f397391db7b515450cc949b0feddf5410afd197f8766f"
+    }
+  }
+}

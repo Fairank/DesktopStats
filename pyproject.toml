@@ -1,0 +1,15 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".venv", "build", "dist", "qa-private"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_product.py" = ["E402"]
+"tests/test_native.py" = ["E402"]
+"tools/verify_native.py" = ["E402"]
+"tools/verify_upgrade.py" = ["E402"]
+"tests/test_extensions.py" = ["E402"]
+"tools/build.py" = ["E402"]
