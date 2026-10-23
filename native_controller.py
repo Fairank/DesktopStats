@@ -564,20 +564,43 @@ class Controller(WorkspaceTools):
             number, _display_unit, digits = display_value({} if stale else data, metric, prefs)
             binding = sensor_binding(metric, prefs)
             scope = meta.get("scope")
-            target = prefs.get(
-                SCOPE_FIELDS.get(scope),
+            target = prefs.get(SCOPE_FIELDS.get(scope)) or (
                 {
                     "gpus": "0",
                     "storages": "0",
                     "networks": data.get("network_active", ""),
                     "disks": "all",
                     "volumes": "system",
-                }.get(scope),
+                }.get(scope)
             )
             if scope == "networks" and target == "auto":
                 target = data.get("network_active", "auto")
             if scope == "volumes" and target == "system":
                 target = data.get("volume_system", "system")
+            # A dynamic selector names the current device, not a different
+            # device in every historical frame. Freeze its resolved identity
+            # for both channels; an absent device remains a real gap.
+            alias = {"networks": ("network_target", "auto", "network_active"),
+                     "volumes": ("volume_target", "system", "volume_system")}.get(scope)
+            dynamic_history = alias and (prefs.get(alias[0]) or alias[1]) == alias[1]
+            history_identity = data.get(alias[2]) if dynamic_history else None
+
+            def history_value(sample, key):
+                if dynamic_history:
+                    if isinstance(history_identity, str) and history_identity:
+                        if scope in sample:
+                            raw = sample[scope].get(history_identity, {}).get(key)
+                            # Read the exact table entry even if a device is
+                            # literally named 'auto' or 'system'. The selector
+                            # tokens must not re-resolve in this older frame.
+                            return display_value({key: raw}, key, prefs)[0]
+                        # Legacy flat frames are usable only with the same
+                        # recorded identity; never fill a missing table entry.
+                        return (display_value(sample, key, prefs)[0]
+                                if sample.get(alias[2]) == history_identity else None)
+                    if scope in data or alias[2] in data or scope in sample or alias[2] in sample:
+                        return None
+                return display_value(sample, key, prefs)[0]
             device = data.get(scope, {}).get(target, {})
             hardware_name = (
                 binding["hardware_name"]
@@ -639,7 +662,7 @@ class Controller(WorkspaceTools):
                     available=val != '—', numeric_value=display_value({} if stale else data, other, prefs)[0],
                     source=reading_source(data, other, prefs),
                     reason=translate('读数已过期', language) if stale else unavailable_reason(data, other, prefs) if val == '—' else '',
-                    history=[display_value(sample, other, prefs)[0] for sample in samples]
+                    history=[history_value(sample, other) for sample in samples]
                         if detail_id is not None and include_related else [],
                     history_times=sample_times if detail_id is not None and include_related else [])
                 channel.update(icon_effect=icon_effect, effect_level=effect_for(other),
@@ -695,7 +718,7 @@ class Controller(WorkspaceTools):
                     capacity_summary=capacity_summary,
                     related=related,
                     history=[
-                        display_value(sample, metric, prefs)[0]
+                        history_value(sample, metric)
                         for sample in (samples if include_history else ())
                     ],
                 )

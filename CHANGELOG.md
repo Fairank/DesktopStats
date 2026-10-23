@@ -1,5 +1,26 @@
 # Changes
 
+## 0.24.0-preview.1
+
+- Redesign optional menu-bar icon motion around each symbol's structure:
+  separate transfer arrows, stationary fan hubs, local heat plumes and quiet
+  inner-core feedback. Keep readable outlines and measured hit geometry stable.
+  Use elapsed time for delayed ticks; retain default-off, strength, speed and
+  reduced-motion controls without interpreting decorative rhythm as telemetry.
+- Reorganize detail panels around current readings and real recent trends,
+  followed by logical-processor load and related measurements. Use two-column
+  groups, visible header actions and sample inspection with real gaps and units.
+- Add an exact-width travelling drag preview and active-detail highlighting.
+  Preserve source hit slots during dragging; release outside the strip or use
+  the right mouse button to cancel without saving. Do not take keyboard focus
+  from the application underneath the live bar.
+- Keep automatic-network and system-volume history bound to the currently
+  named device. Preserve idle zero, pre-device gaps, paired directions and unit
+  conversions instead of splicing another device into the same chart.
+- Exercise real preferences across fresh processes, section-only apply, live
+  reordering, pending drafts and failed atomic writes. Keep the existing native
+  Windows material backends; offscreen checks do not certify desktop blur.
+
 ## 0.23.0-preview.1
 
 - Add three complete menu-bar treatments: Classic, Capsule and Instrument.

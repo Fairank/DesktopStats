@@ -3,6 +3,7 @@
 import base64
 import copy
 import os
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -375,7 +376,9 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         self.wait_scroll_layout(scroll)
         self.assertGreater(scroll.property("contentHeight"), scroll.height())
         point = scroll.mapToScene(scroll.boundingRect().center())
-        wheel = QWheelEvent(point, point, QPoint(0, 0), QPoint(0, -360), Qt.NoButton, Qt.NoModifier, Qt.ScrollUpdate, False)
+        wheel = QWheelEvent(point, self.window.mapToGlobal(point.toPoint()), QPoint(0, 0), QPoint(0, -360),
+                            Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False)
+        wheel.setTimestamp(round(time.monotonic() * 1000))
         self.app.sendEvent(self.window, wheel)
         QTest.qWait(40)
         self.assertGreater(scroll.property("contentY"), 0)
@@ -525,10 +528,13 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
                 self.assertTrue(self.find("skinDescription_" + skin).property("text"))
                 self.assertGreaterEqual(self.find("skinSampleReading_" + skin).property("font").pixelSize(), 20)
             frame = self.window.grabWindow()
+            dpr = self.window.devicePixelRatio()
+            self.assertAlmostEqual(frame.width(), self.window.width() * dpr, delta=1)
+            self.assertAlmostEqual(frame.height(), self.window.height() * dpr, delta=1)
             colors = set()
             for skin in SKINS:
                 surface = self.find("skinSampleSurface_" + skin)
-                point = surface.mapToScene(QPointF(surface.width() - 14, surface.height() / 2)) * frame.devicePixelRatio()
+                point = surface.mapToScene(QPointF(surface.width() - 14, surface.height() / 2)) * dpr
                 colors.add(frame.pixelColor(round(point.x()), round(point.y())).rgba())
             self.assertEqual(len(colors), 6, "All six actual coatings must differ on the same controlled backing")
             backgrounds = {str(self.find("skinSampleScene_" + skin).property("source")) for skin in SKINS}

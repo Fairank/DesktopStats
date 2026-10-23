@@ -25,7 +25,7 @@ _NATIVE = """
 ActionButton.qml Appearance.qml Check.qml Choice.qml ContentCanvas.qml
 ContentLayoutEditor.qml DesktopWidget.qml Details.qml FormField.qml
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
-HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml
+HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 OptionTabs.qml Preview.qml SamplingControl.qml SensorBrowser.qml SettingRow.qml
 Settings.qml SettingsGroup.qml SkinPicker.qml Theme.qml Toggle.qml TopBar.qml
@@ -85,6 +85,7 @@ REVIEWED_FILES = frozenset(
             "showcase/top-bar-styles.png",
             "showcase/top-bar-groups.png",
             "showcase/cpu-details.png",
+            "showcase/network-details.png",
             "showcase/top-bar-actions.png",
             "showcase/group-confirm.png",
             "showcase/top-bar-designs.png",

@@ -1147,7 +1147,15 @@ class TopBarManager(QObject):
                 'bar_value': 28, 'ring_value': 20}[style] + stable_value
 
     def _layout(self, host):
-        if host.rect is None:
+        binding, config, rows_snapshot = host.binding, self._config, self._rows
+
+        def current():
+            return (not self.closed and not self.paused and not host.closing
+                    and self.hosts.get(host.state._host_id) is host
+                    and host.binding is binding and binding is not None
+                    and self._config is config and self._rows is rows_snapshot)
+
+        if host.rect is None or not current():
             return
         state, rect = host.state, host.rect
         spacing = float(self._config.get("top_bar", {}).get("spacing", 12))
@@ -1202,6 +1210,8 @@ class TopBarManager(QObject):
                       state._panel_maximum, state._config, state._coating, state._spacing)
         state._rows, state._menu = visible, relative(plan.menu_hit)
         state._row_model.update(visible)
+        if not current():
+            return  # Model notifications can synchronously close/reconfigure a host.
         state._overflow = relative(plan.overflow_hit) if plan.overflow_hit else None
         state._overflow_count = len(plan.overflow_ids)
         state._panel_maximum = max(100, min(480, host.binding.work.height / scale - 16))
@@ -1216,11 +1226,15 @@ class TopBarManager(QObject):
                                     self._style.get("opacity", 94), frosted=state._coating,
                                     **glass_options(self._style))
             state.changed.emit()
+        if not current():
+            return
         native_changed = any(prior_view[4].get(key) != self._style.get(key)
                              for key in ("skin", "theme"))
         if native_changed:
             if host.material_bridge is not None:
                 host.material_bridge.request("preference_changed")
+            if not current():
+                return
             if self._panel and self._panel["host"] is host:
                 bridge = self._panel.get("material_bridge")
                 if bridge is not None:
@@ -1238,7 +1252,10 @@ class TopBarManager(QObject):
         self._rows_timer.stop()
         if not self._config.get("top_bar", {}).get("enabled") or self.paused or self.closed:
             return
+        config = self._config
         rows = self.controller.topBarRows()
+        if self.closed or self.paused or self._config is not config:
+            return
         if (
             not isinstance(rows, list)
             or len(rows) > 64
@@ -1259,8 +1276,14 @@ class TopBarManager(QObject):
                 self._hover_timer.stop()
             if self._panel and self._panel["item"] not in valid:
                 self.close_panel()
-            for host in self.hosts.values():
+            for host in tuple(self.hosts.values()):
+                if self.closed or self.paused or self._config is not config:
+                    return
+                if self.hosts.get(host.state._host_id) is not host or host.closing:
+                    continue
                 self._layout(host)
+        if self.closed or self.paused or self._config is not config:
+            return
         if self._panel:
             self._detail_data(self._panel["host"], self._panel["item"], self._panel["pinned"])
 
@@ -1275,6 +1298,8 @@ class TopBarManager(QObject):
         try:
             self.update_rows()
         except Exception as error:
+            if self.closed or self.paused:
+                return  # Preserve the deliberate shutdown/pause status.
             self._errors.append("readings: " + str(error))
             self._close_hosts()
             self._status("failed", "无法更新顶部状态栏读数。")

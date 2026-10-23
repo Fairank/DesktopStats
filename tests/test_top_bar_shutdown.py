@@ -130,6 +130,46 @@ class TopBarShutdownTests(unittest.TestCase):
         self.assertFalse(self.manager._hover_timer.isActive())
         self.assertTrue(all(window.deleted and not window.visible for window in self.windows))
 
+    def test_row_notification_shutdown_releases_both_screens_without_false_reading_failure(self):
+        self.manager.apply(config(mode="all"))
+        self.host.state._row_model.dataChanged.connect(lambda *_: self.manager.close())
+        self.controller.rows[0]["value"] = "87%"
+        self.manager._rows_tick()
+        self.assertTrue(self.manager.closed)
+        self.assertEqual(self.manager.hosts, {})
+        self.assertEqual(self.manager.retired, [])
+        self.assertEqual(self.manager._errors, [])
+        self.assertEqual(self.controller.status["state"], "disabled")
+        self.assertTrue(all(window.deleted and not window.visible for window in self.windows))
+
+    def test_row_notification_pause_retains_paused_status_instead_of_false_failure(self):
+        self.host.state._row_model.dataChanged.connect(lambda *_: self.manager.pause())
+        self.controller.rows[0]["value"] = "87%"
+        self.manager._rows_tick()
+        self.assertTrue(self.manager.paused)
+        self.assertEqual(self.manager.hosts, {})
+        self.assertEqual(self.manager._errors, [])
+        self.assertEqual(self.controller.status["state"], "paused")
+
+    def test_state_notification_close_cannot_request_material_for_a_released_generation(self):
+        self.host.state.changed.connect(self.manager.close)
+        self.manager._style = dict(self.manager._style, theme="dark")
+        self.controller.rows[0]["value"] = "87%"
+        self.manager._rows_tick()
+        self.assertTrue(self.manager.closed)
+        self.assertEqual(self.manager._errors, [])
+        self.assertEqual(self.controller.status["state"], "disabled")
+
+    def test_controller_callback_close_then_error_does_not_overwrite_completed_shutdown_status(self):
+        def stop_then_raise():
+            self.manager.close()
+            raise RuntimeError("Synthetic last read completed after shutdown")
+        self.controller.topBarRows = stop_then_raise
+        self.manager._rows_tick()
+        self.assertTrue(self.manager.closed)
+        self.assertEqual(self.manager._errors, [])
+        self.assertEqual(self.controller.status["state"], "disabled")
+
     def test_close_blocks_same_screen_replacement_and_is_reentrant_idempotent(self):
         created = len(self.windows)
 

@@ -14,6 +14,8 @@ Item {
     property bool pinned:false
     property bool dragged:false
     property bool focused:false
+    // Only decorative color transitions; never fade a native material or move a hit target.
+    property bool motionEnabled:false
     readonly property bool capsule:design==="capsule"
     readonly property bool instrument:design==="instrument"
     readonly property bool band:role==="band"
@@ -28,12 +30,16 @@ Item {
         x:root.inset;y:root.inset
         width:Math.max(0,root.width-root.inset*2);height:Math.max(0,root.height-root.inset*2)
         radius:root.capsule?Math.min(13,height/2):root.instrument?3:5
-        visible:!root.band && (root.capsule || root.instrument || root.hovered || root.pressed || root.engaged || root.focused || root.dragged)
+        visible:!root.band
         color:root.pressed?root.tone(root.ink,.13):root.engaged?root.tone(root.accent,root.capsule?.13:.09)
             :root.hovered?root.tone(root.ink,root.capsule?.10:.075)
             :root.tone(root.ink,root.capsule?.05:root.instrument?.025:0)
         border.width:root.focused || root.engaged || root.dragged?1:root.capsule || root.instrument?root.hairline:0
         border.color:root.focused || root.engaged || root.dragged?root.tone(root.accent,.7):root.tone(root.ink,root.capsule?.11:.095)
+        Behavior on color {
+            enabled:root.motionEnabled && root.visible && !!root.Window.window && root.Window.window.visible
+            ColorAnimation { duration:110; easing.type:Easing.OutCubic }
+        }
     }
     Rectangle {
         objectName:"topBarChromeBottomEdge"

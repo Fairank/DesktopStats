@@ -201,6 +201,7 @@ ColumnLayout {
                 objectName:root.sampleOnly?root.objectName+"MetricChrome_"+metric.modelData.id:"topBarPreviewMetricChrome_"+metric.modelData.id
                 anchors.fill: parent
                 design:root.barDesign;ink:root.barInk;accent:root.barAccent
+                motionEnabled:root.interactivePreview && stats.motionEnabled
                 selected:metric.modelData.id===root.selectedId
                 hovered:previewMouse.containsMouse;pressed:previewMouse.pressed
                 focused:metric.activeFocus;dragged:root.dragging && root.draggedId===metric.modelData.id
@@ -244,7 +245,7 @@ ColumnLayout {
                     color: root.barInk
                     font: overflowFont.font
                 }
-                background: TopBarChrome {objectName:root.sampleOnly?root.objectName+"OverflowChrome":"topBarPreviewOverflowChrome";role:"overflow";design:root.barDesign;ink:root.barInk;accent:root.barAccent;hovered:parent.hovered;pressed:parent.down;focused:parent.activeFocus}
+                background: TopBarChrome {objectName:root.sampleOnly?root.objectName+"OverflowChrome":"topBarPreviewOverflowChrome";role:"overflow";design:root.barDesign;ink:root.barInk;accent:root.barAccent;hovered:parent.hovered;pressed:parent.down;focused:parent.activeFocus;motionEnabled:root.interactivePreview && stats.motionEnabled}
             }
         }
         Rectangle {objectName:root.sampleOnly?root.objectName+"Insertion":"topBarPreviewInsertion";visible:root.dragging && !!root.dropPlacement;x:Math.max(1,Math.min(strip.width-2,root.insertionX));y:3;width:2;height:strip.height-6;radius:1;color:ui.accent}

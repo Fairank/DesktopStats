@@ -10,7 +10,8 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("QT_QUICK_BACKEND", "software")
 
-from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPointF, QUrl
+from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPoint, QPointF, Qt, QUrl
+from PySide6.QtGui import QWheelEvent
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtTest import QTest
 
@@ -301,13 +302,53 @@ Window { id:scene; width:336; height:96; visible:false; color:stats.theme==="dar
         self.state.details["cpu_context"] = cpu_context(32)
         self.state.details["cpu_context"]["logical_rows"][0].update(numeric_value=100, value="100 %")
         self.load()
+        grid = self.find("topBarCpuCoreGrid")
+        outer = self.find("topBarDetailScroll")
+
+        def wheel(item, direction, y=None):
+            local = QPointF(item.width() / 2, item.height() / 2 if y is None else y)
+            point = item.mapToScene(local)
+            QTest.mouseMove(self.window, point.toPoint())
+            event = QWheelEvent(point, self.window.mapToGlobal(point.toPoint()), QPoint(),
+                                QPoint(0, direction), Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False)
+            event.setTimestamp(round(time.monotonic() * 1000))
+            QCoreApplication.sendEvent(self.window, event)
+            QTest.qWait(80)
+            item.cancelFlick()
+
+        # The denser CPU context is a virtual view. First expose its complete
+        # viewport in the outer scroll, then wheel the view before querying a
+        # delegate: offscreen rows are intentionally not instantiated.
+        for _ in range(12):
+            origin = grid.mapToItem(outer, QPointF())
+            if origin.y() >= 4 and origin.y() + grid.height() <= outer.height() - 4:
+                break
+            below = origin.y() + grid.height() > outer.height() - 4
+            wheel(outer, -120 if below else 120, 8 if below else outer.height() - 8)
+        origin = grid.mapToItem(outer, QPointF())
+        self.assertGreaterEqual(origin.y(), 4)
+        self.assertLessEqual(origin.y() + grid.height(), outer.height() - 4)
+        selected = grid.property("currentIndex")
+        columns = self.window.property("coreColumns")
         for index in range(32):
+            row_top = (index // columns) * grid.property("cellHeight")
+            for _ in range(12):
+                top = grid.property("contentY")
+                if row_top >= top - .1 and row_top + grid.property("cellHeight") <= top + grid.height() + .1:
+                    break
+                wheel(grid, -120 if row_top + grid.property("cellHeight") > top + grid.height() else 120)
+            self.assertGreaterEqual(row_top, grid.property("contentY") - .1)
+            self.assertLessEqual(row_top + grid.property("cellHeight"), grid.property("contentY") + grid.height() + .1)
             value = self.find("topBarCpuLogicalValue_" + str(index))
             self.assertFalse(value.property("truncated"))
             tile = self.find("topBarCpuLogical_" + str(index))
+            self.assertEqual(tile.property("logicalIndex"), index)
+            expected = self.state.details["cpu_context"]["logical_rows"][index]["value"]
+            self.assertEqual(value.property("text"), expected.replace(" %", "%") if columns == 8 else expected)
             edge = value.mapToItem(tile, QPointF(value.width(), value.height()))
             self.assertLessEqual(edge.x(), tile.width())
             self.assertLessEqual(edge.y(), tile.height())
+        self.assertEqual(grid.property("currentIndex"), selected)
         scale = float(os.environ.get("QT_SCALE_FACTOR", "1"))
         self.assertAlmostEqual(self.window.devicePixelRatio(), scale, delta=0.01)
 

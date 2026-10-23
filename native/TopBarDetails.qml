@@ -21,7 +21,7 @@ Window {
         row.metric !== root.detail.metric
         && !root.groupRows.some(member => member.metric === row.metric)
         && !root.pairedRows.some(member => member.metric === row.metric))
-    readonly property int coreColumns: cpuCells.count > 16 ? 8 : 4
+    readonly property int coreColumns: cpuCells.count > 32 ? 8 : 4
     readonly property var relatedRows: (detail.related || []).filter(row => {
         if (!row.metric) return true
         if (root.pairedRows.some(pair => pair.metric === row.metric)) return false
@@ -51,6 +51,19 @@ Window {
     readonly property bool dark: foreground.r > 0.5
     property bool showMissing: false
     property bool showMetadata: false
+    property int chartCursorIndex: -1
+    property real chartCursorTime: NaN
+    property string chartCursorIdentity: ""
+    property string chartCursorSignature: ""
+    property point lastChartPointer: Qt.point(NaN, NaN)
+    readonly property var chartSlots: sampleSlots(chartRows.find(row=>(row.trend || row.history || []).length>0) || ({}))
+    readonly property var cursorSlot: chartCursorIndex>=0 && chartCursorIndex<chartSlots.length?chartSlots[chartCursorIndex]:null
+    readonly property var chartCursorRows: chartCursorIndex < 0 ? [] : chartRows.map((row,index) => {
+        const values=row.trend || row.history || [], sample=values[chartSampleIndex(row)]
+        const readable=row.available===true && typeof sample==="number" && Number.isFinite(sample)
+        return {label:hasPair?pairLabel(row):row.label || detail.label || "", color:pairColor(index),
+            value:readable?sampleNumber(sample,row):"—", reason:readable?"":row.reason || tr("无法读取")}
+    })
     onCpuContextChanged: syncCpuRows()
     Component.onCompleted: syncCpuRows()
 
@@ -106,6 +119,7 @@ Window {
             root.previousId = root.detail.id || ""
             metricScroll.contentY = 0
         }
+        root.reconcileChartCursor()
         history.requestPaint()
     }
     property string previousId: ""
@@ -194,6 +208,55 @@ Window {
             return {x:x,y:Math.max(0,Math.min(1,y))}
         })
     }
+    function sampleSlots(row) {
+        const values=row.trend || row.history || [], times=row.history_times || []
+        const timed=times.length===values.length && times.length>1
+            && times.every(value=>typeof value==="number" && Number.isFinite(value))
+            && times.every((value,index)=>index===0 || value>=times[index-1])
+            && times[times.length-1]>times[0]
+        return values.map((value,index)=>({index:index,
+            timestamp:timed?times[index]:null,
+            x:timed?(times[index]-times[0])/(times[times.length-1]-times[0])
+                :root.validPoint((row.trend_points || [])[index])?row.trend_points[index].x:index/Math.max(1,values.length-1)}))
+    }
+    function chartSampleIndex(row) {
+        return Number.isFinite(chartCursorTime)?sampleSlots(row).findIndex(slot=>slot.timestamp!==null && Math.abs(slot.timestamp-chartCursorTime)<.001):chartCursorIndex
+    }
+    function chartIdentity() {
+        return JSON.stringify([detail.id || "",detail.metric || "",detail.unit || "",detail.hardware_name || "",
+            chartRows.map(row=>[row.metric || row.direction || row.label || "",row.unit || detail.unit || ""])])
+    }
+    function chartSignature() {return JSON.stringify(chartRows.map(row=>row.trend || row.history || []))}
+    function clearChartCursor() {chartCursorIndex=-1;chartCursorTime=NaN;chartCursorIdentity="";chartCursorSignature=""}
+    function selectChartSample(index) {
+        if(!hasTrend || !chartSlots.length){clearChartCursor();return}
+        const slot=chartSlots[Math.max(0,Math.min(chartSlots.length-1,index))]
+        chartCursorIndex=slot.index;chartCursorTime=slot.timestamp===null?NaN:slot.timestamp
+        chartCursorIdentity=chartIdentity();chartCursorSignature=chartSignature()
+    }
+    function reconcileChartCursor() {
+        if(chartCursorIndex<0)return
+        if(!hasTrend || chartCursorIdentity!==chartIdentity()){clearChartCursor();return}
+        if(Number.isFinite(chartCursorTime)) {
+            const match=chartSlots.find(slot=>slot.timestamp!==null && Math.abs(slot.timestamp-chartCursorTime)<.001)
+            if(match)chartCursorIndex=match.index
+            else clearChartCursor()
+        } else if(chartCursorSignature!==chartSignature())clearChartCursor()
+    }
+    function pickChartSample(x) {
+        let nearest=-1,distance=Infinity
+        for(const slot of chartSlots){const next=Math.abs(3+slot.x*(history.width-6)-x);if(next<distance){nearest=slot.index;distance=next}}
+        if(nearest>=0)selectChartSample(nearest)
+    }
+    function sampleNumber(value,row) {
+        const original=String(row.number_text || ""),decimals=original.includes(".")?Math.min(3,original.length-original.indexOf(".")-1):0
+        const rounded=value.toFixed(decimals),number=Number(rounded)===value?rounded:Number(value.toPrecision(4)).toString()
+        return number+(row.unit || row.unit_text?" "+(row.unit || row.unit_text):"")
+    }
+    function chartCursorLabel() {
+        return Number.isFinite(chartCursorTime)?new Date(chartCursorTime*1000).toLocaleString(Qt.locale(),"hh:mm:ss")
+            :(chartCursorIndex+1)+" / "+chartSlots.length+" "+tr("次采样")
+    }
 
     component PlainTip: ToolTip {
         id: tip
@@ -223,12 +286,11 @@ Window {
         Layout.preferredWidth: 28; Layout.minimumHeight: 28
         Layout.preferredHeight: 28; Layout.maximumHeight: 28
         padding: 6; focusPolicy: Qt.TabFocus; hoverEnabled: true
-        contentItem: Icon { name: tool.glyph; ink: root.secondary }
+        contentItem: Icon { name: tool.glyph; ink: root.foreground }
         background: Rectangle {
-            radius: 7; color: root.tint(tool.down ? 0.12 : 0.07)
-            visible: tool.hovered || tool.visualFocus || tool.down
-            border.width: tool.visualFocus ? 1 : 0
-            border.color: root.tint(0.35)
+            radius: 7; color: root.tint(tool.down ? 0.12 : tool.hovered ? 0.075 : 0.025)
+            border.width: 1
+            border.color: tool.visualFocus ? root.pairColor(0) : root.tint(0.12)
         }
     }
 
@@ -250,7 +312,7 @@ Window {
     ColumnLayout {
         id: panelContent
         anchors.fill: parent; anchors.margins: 16
-        spacing: 12
+        spacing: 10
         RowLayout {
             Layout.fillWidth: true
             Layout.minimumHeight: 28; Layout.preferredHeight: 28; Layout.maximumHeight: 28
@@ -370,7 +432,7 @@ Window {
                 ColumnLayout {
                     id: metricContent
                     width: Math.max(0, metricScroll.width-(metricScroll.interactive?6:0))
-                    spacing: 14
+                    spacing: 16
                     Item {
                         visible: !root.hasPair && !root.hasGroup
                         Layout.fillWidth: true; Layout.preferredHeight: 44
@@ -400,17 +462,18 @@ Window {
                     GridLayout {
                         objectName:"topBarDetailGroupValues"
                         visible:root.hasGroup
-                        Layout.fillWidth:true;columns:root.groupRows.length===3?3:2;uniformCellWidths:true;columnSpacing:12;rowSpacing:12
+                        Layout.fillWidth:true;columns:2;uniformCellWidths:true;columnSpacing:16;rowSpacing:12
                         Repeater {
                             model:root.groupRows
                             ColumnLayout {
-                                id:selectedMember;required property var modelData
-                                Layout.fillWidth:true;Layout.minimumWidth:0;spacing:6
+                                id:selectedMember;required property var modelData;required property int index
+                                Layout.columnSpan:root.groupRows.length===3 && index===0?2:1
+                                Layout.fillWidth:true;Layout.minimumWidth:0;spacing:5
                                 RowLayout {Layout.fillWidth:true;spacing:5
-                                    Icon {name:selectedMember.modelData.icon || "sensors";ink:root.secondary;Layout.preferredWidth:13;Layout.preferredHeight:13}
-                                    Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.label || "";textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
+                                    Icon {name:selectedMember.modelData.icon || "sensors";ink:root.secondary;Layout.preferredWidth:14;Layout.preferredHeight:14}
+                                    Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.label || "";textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:11;elide:Text.ElideRight}
                                 }
-                                Text {objectName:"topBarGroupDetail_"+selectedMember.modelData.metric;Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.value || "—";textFormat:Text.PlainText;color:selectedMember.modelData.available?root.foreground:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:20;font.weight:Font.Medium;font.features:{"tnum":1};elide:Text.ElideRight}
+                                Text {objectName:"topBarGroupDetail_"+selectedMember.modelData.metric;Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.value || "—";textFormat:Text.PlainText;color:selectedMember.modelData.available?root.foreground:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:root.groupRows.length===3 && selectedMember.index===0?30:23;font.weight:Font.Medium;font.features:{"tnum":1};elide:Text.ElideRight}
                                 HoverHandler {id:selectedMemberHover}
                                 PlainTip {visible:selectedMemberHover.hovered;text:root.readingTip(selectedMember.modelData)}
                             }
@@ -495,6 +558,252 @@ Window {
                         }
                     }
                     ColumnLayout {
+                        objectName: "topBarDetailHistorySection"
+                        Layout.fillWidth: true; spacing: 9
+                        RowLayout {
+                            visible: root.hasTrend
+                            Layout.fillWidth: true; spacing: 10
+                            Text {
+                                visible: !root.hasPair
+                                Layout.fillWidth: true
+                                text: root.tr("趋势"); textFormat: Text.PlainText
+                                color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11
+                            }
+                            RowLayout {
+                                visible: root.hasPair
+                                Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 14
+                                Repeater {
+                                    model: root.pairedRows
+                                    RowLayout {
+                                        required property var modelData
+                                        required property int index
+                                        Layout.minimumWidth: 0; spacing: 5
+                                        Rectangle { implicitWidth: 6; implicitHeight: 6; radius: 3; color: root.seriesColor(parent.index) }
+                                        Text {
+                                            objectName: "topBarPairTrendLabel_" + parent.index
+                                            Layout.fillWidth: true; Layout.minimumWidth: 0
+                                            text: root.pairLabel(parent.modelData); textFormat: Text.PlainText
+                                            color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                }
+                                Item { Layout.fillWidth: true; Layout.minimumWidth: 0 }
+                            }
+                            Text {
+                                visible: root.hasTrend && root.chartScale.valid
+                                text: root.detail.unit || ""; textFormat: Text.PlainText
+                                color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
+                            }
+                        }
+                        Item {
+                            id: chartArea
+                            objectName: "topBarDetailChartArea"
+                            Layout.fillWidth: true; Layout.preferredHeight: root.hasTrend ? 122 : 48
+                            activeFocusOnTab: true
+                            Accessible.role: Accessible.Chart
+                            Accessible.name: root.tr("历史趋势")
+                            Accessible.description: root.hasTrend?root.chartCursorRows.map(row=>row.label+" "+row.value).join(", "):root.tr("尚无连续读数")
+                            Keys.onShortcutOverride: event=>{if(event.key===Qt.Key_Escape && root.chartCursorIndex>=0)event.accepted=true}
+                            Keys.onPressed:event=>{
+                                if(!root.hasTrend){event.accepted=false;return}
+                                if(event.key===Qt.Key_Left)root.selectChartSample(root.chartCursorIndex<0?root.chartSlots.length-1:root.chartCursorIndex-1)
+                                else if(event.key===Qt.Key_Right)root.selectChartSample(root.chartCursorIndex+1)
+                                else if(event.key===Qt.Key_Home)root.selectChartSample(0)
+                                else if(event.key===Qt.Key_End)root.selectChartSample(root.chartSlots.length-1)
+                                else if(event.key===Qt.Key_Escape && root.chartCursorIndex>=0)root.clearChartCursor()
+                                else {event.accepted=false;return}
+                                event.accepted=true
+                            }
+                            Canvas {
+                                id: history
+                                objectName: "topBarDetailTrend"
+                                visible: root.hasTrend
+                                width: root.chartScale.valid ? parent.width-52 : parent.width
+                                height: 100
+                                antialiasing: true
+                                onVisibleChanged: requestPaint()
+                                onWidthChanged: requestPaint()
+                                onHeightChanged: requestPaint()
+                                onPaint: {
+                                    const ctx = getContext("2d")
+                                    ctx.clearRect(0, 0, width, height)
+                                    if (!root.hasTrend) return
+                                    const px=3, py=6, pw=width-6, ph=height-12
+                                    ctx.lineWidth=.6; ctx.strokeStyle=root.tint(root.dark?.15:.11)
+                                    for(let i=0;i<3;i++) {
+                                        const y=py+i*ph/2
+                                        ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px+pw,y);ctx.stroke()
+                                    }
+                                    ctx.strokeStyle=root.tint(root.dark?.055:.04)
+                                    for(let i=1;i<4;i++) {
+                                        const x=px+i*pw/4
+                                        ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x,py+ph);ctx.stroke()
+                                    }
+                                    for(let index=0;index<root.chartRows.length;index++) {
+                                        const row=root.chartRows[index]
+                                        if(!root.trendReadable(row))continue
+                                        const color=root.hasPair?root.pairColor(index):root.pairColor(0)
+                                        const points=root.chartPoints(row)
+                                        let segment=[],last=null
+                                        const drawSegment=function() {
+                                            if(segment.length<2){segment=[];return}
+                                            ctx.beginPath();ctx.moveTo(segment[0].x,py+ph)
+                                            for(const point of segment)ctx.lineTo(point.x,point.y)
+                                            ctx.lineTo(segment[segment.length-1].x,py+ph);ctx.closePath()
+                                            ctx.fillStyle=color;ctx.globalAlpha=.065;ctx.fill();ctx.globalAlpha=1
+                                            ctx.beginPath();ctx.moveTo(segment[0].x,segment[0].y)
+                                            for(let n=1;n<segment.length;n++)ctx.lineTo(segment[n].x,segment[n].y)
+                                            ctx.lineWidth=1.6;ctx.lineJoin="bevel";ctx.lineCap="butt";ctx.strokeStyle=color;ctx.stroke()
+                                            segment=[]
+                                        }
+                                        for(const point of points) {
+                                            if(!root.validPoint(point)){drawSegment();continue}
+                                            const pixel={x:px+point.x*pw,y:py+point.y*ph}
+                                            segment.push(pixel);last=pixel
+                                        }
+                                        drawSegment()
+                                        if(points.length<=8)for(const point of points)if(root.validPoint(point)) {
+                                            ctx.beginPath();ctx.arc(px+point.x*pw,py+point.y*ph,1.7,0,Math.PI*2)
+                                            ctx.fillStyle=color;ctx.fill()
+                                        }
+                                        if(last){ctx.beginPath();ctx.arc(last.x,last.y,2.4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
+                                    }
+                                }
+                                HoverHandler {
+                                    id:chartHover
+                                    onPointChanged:{
+                                        if(!hovered)return
+                                        const next=point.scenePosition
+                                        if(next.x===root.lastChartPointer.x && next.y===root.lastChartPointer.y)return
+                                        root.lastChartPointer=next
+                                        root.pickChartSample(point.position.x)
+                                    }
+                                    onHoveredChanged:{if(!hovered){root.lastChartPointer=Qt.point(NaN,NaN);if(!chartArea.activeFocus)root.clearChartCursor()}}
+                                }
+                                TapHandler {onTapped:eventPoint=>{chartArea.forceActiveFocus();root.pickChartSample(eventPoint.position.x)}}
+                            }
+                            Repeater {
+                                model: root.hasTrend && root.chartScale.valid ? 3 : 0
+                                Text {
+                                    id: axisText
+                                    required property int index
+                                    readonly property real numericValue:index===0?root.chartScale.high:index===2?root.chartScale.low:root.chartScale.high/2+root.chartScale.low/2
+                                    objectName: "topBarTrendAxis_"+index
+                                    x:history.width+8; y:6+index*(history.height-12)/2-height/2
+                                    width:44
+                                    text:root.axisNumber(numericValue)
+                                    textFormat:Text.PlainText; color:root.secondary
+                                    font.family:root.barState.fontFamily;font.pixelSize:10;font.features:{"tnum":1}
+                                    elide:Text.ElideRight
+                                    HoverHandler {id:axisHover}
+                                    PlainTip {visible:axisHover.hovered;text:axisText.numericValue+" "+(root.detail.unit || "")}
+                                }
+                            }
+                            Text {
+                                visible:root.hasTrend
+                                x:3;y:103
+                                text:root.tr("起点");textFormat:Text.PlainText
+                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
+                            }
+                            Text {
+                                visible:root.hasTrend
+                                x:history.width-width-3;y:103
+                                text:root.tr("最新");textFormat:Text.PlainText
+                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
+                            }
+                            Column {
+                                visible:!root.hasTrend
+                                anchors.verticalCenter:parent.verticalCenter
+                                spacing:3
+                                Text {text:root.tr("尚无连续读数");textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:11}
+                                Text {text:root.tr("采样后将显示趋势");textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10}
+                            }
+                            Rectangle {
+                                objectName:"topBarDetailCursorLine"
+                                visible:root.hasTrend && !!root.cursorSlot
+                                x:root.cursorSlot?3+root.cursorSlot.x*(history.width-6):0
+                                y:6;width:1;height:history.height-12;color:root.tint(.35)
+                            }
+                            Repeater {
+                                model:root.chartCursorIndex>=0?root.chartRows:[]
+                                Rectangle {
+                                    required property var modelData;required property int index
+                                    readonly property var selectedPoint:root.chartPoints(modelData)[root.chartSampleIndex(modelData)]
+                                    visible:modelData.available===true && root.validPoint(selectedPoint)
+                                    x:root.validPoint(selectedPoint)?3+selectedPoint.x*(history.width-6)-3:0
+                                    y:root.validPoint(selectedPoint)?6+selectedPoint.y*(history.height-12)-3:0
+                                    width:6;height:6;radius:3;color:root.pairColor(index)
+                                }
+                            }
+                            Rectangle {
+                                id:cursorBubble
+                                objectName:"topBarDetailCursorReadout"
+                                visible:root.hasTrend && root.chartCursorIndex>=0
+                                x:Math.max(3,Math.min(chartArea.width-width,root.cursorSlot?3+root.cursorSlot.x*(history.width-6)+10:3))
+                                y:8;width:Math.min(234,chartArea.width-3);height:cursorContent.implicitHeight+16
+                                radius:7;color:root.dark?"#fa292e36":"#faffffff"
+                                border.width:1;border.color:root.tint(.15)
+                                ColumnLayout {
+                                    id:cursorContent;x:8;y:8;width:parent.width-16;spacing:4
+                                    Text {objectName:"topBarDetailCursorTime";Layout.fillWidth:true;text:root.chartCursorLabel();color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
+                                    Repeater {
+                                        model:root.chartCursorRows
+                                        RowLayout {
+                                            required property var modelData;required property int index
+                                            Layout.fillWidth:true;spacing:6
+                                            Rectangle {implicitWidth:5;implicitHeight:5;radius:2.5;color:parent.modelData.color}
+                                            Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:parent.modelData.label;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
+                                            Text {objectName:"topBarDetailCursorValue_"+parent.index;text:parent.modelData.value;color:root.foreground;font.family:root.barState.fontFamily;font.pixelSize:11;font.weight:Font.Medium;font.features:{"tnum":1}}
+                                        }
+                                    }
+                                    Text {objectName:"topBarDetailCursorReason";Layout.fillWidth:true;visible:!!text;text:root.chartCursorRows.filter(row=>!!row.reason).map(row=>row.reason).filter((value,index,values)=>values.indexOf(value)===index).join(" · ");color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+                                }
+                            }
+                        }
+                        RowLayout {
+                            Layout.fillWidth:true
+                            Text {
+                                objectName:"topBarDetailHistoryCount"
+                                Layout.fillWidth:true
+                                text:root.sampleCount+" "+root.tr("次采样");textFormat:Text.PlainText
+                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
+                            }
+                            Text {
+                                objectName:"topBarDetailHistoryElapsed"
+                                text:root.spanText();textFormat:Text.PlainText;visible:!!text
+                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
+                            }
+                        }
+                        GridLayout {
+                            objectName:"topBarHistorySummary"
+                            visible:root.hasTrend
+                            Layout.fillWidth:true;columns:2;uniformCellWidths:true;columnSpacing:20;rowSpacing:4
+                            Repeater {
+                                model:root.hasPair?root.pairedRows:[root.detail,root.detail]
+                                ColumnLayout {
+                                    required property var modelData
+                                    required property int index
+                                    Layout.fillWidth:true;Layout.minimumWidth:0;spacing:3
+                                    Text {
+                                        Layout.fillWidth:true;Layout.minimumWidth:0
+                                        text:root.hasPair?root.pairLabel(parent.modelData)+" · "+root.tr("峰值"):root.tr(parent.index===0?"峰值":"平均值")
+                                        textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight
+                                    }
+                                    Text {
+                                        id: summaryValue
+                                        objectName:"topBarHistorySummaryValue_"+parent.index
+                                        Layout.fillWidth:true;Layout.minimumWidth:0
+                                        text:root.summaryNumber(parent.modelData,root.hasPair || parent.index===0?"peak":"mean")
+                                        textFormat:Text.PlainText;color:root.foreground;font.family:root.barState.fontFamily;font.pixelSize:13;font.weight:Font.Medium;elide:Text.ElideRight
+                                        HoverHandler {id:summaryHover}
+                                        PlainTip {visible:summaryHover.hovered;text:summaryValue.text}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ColumnLayout {
                         objectName: "topBarCpuContext"
                         visible: root.hasCpuContext
                         Layout.fillWidth: true; spacing: 9
@@ -523,7 +832,7 @@ Window {
                             objectName: "topBarCpuCoreGrid"
                             visible: cpuCells.count > 0
                             Layout.fillWidth: true
-                            Layout.preferredHeight: Math.min(208, Math.ceil(cpuCells.count / root.coreColumns) * cellHeight)
+                            Layout.preferredHeight: Math.min(Math.floor(208/cellHeight)*cellHeight, Math.ceil(cpuCells.count / root.coreColumns) * cellHeight)
                             Layout.minimumHeight: 0; Layout.maximumHeight: 208
                             model: cpuCells; clip: true; reuseItems: true; cacheBuffer: 0
                             cellWidth: Math.max(1, (width - 5) / root.coreColumns)
@@ -622,183 +931,6 @@ Window {
                             }
                         }
                     }
-                    ColumnLayout {
-                        objectName: "topBarDetailHistorySection"
-                        Layout.fillWidth: true; spacing: 9
-                        RowLayout {
-                            visible: root.hasTrend
-                            Layout.fillWidth: true; spacing: 10
-                            Text {
-                                visible: !root.hasPair
-                                Layout.fillWidth: true
-                                text: root.tr("趋势"); textFormat: Text.PlainText
-                                color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11
-                            }
-                            RowLayout {
-                                visible: root.hasPair
-                                Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 14
-                                Repeater {
-                                    model: root.pairedRows
-                                    RowLayout {
-                                        required property var modelData
-                                        required property int index
-                                        Layout.minimumWidth: 0; spacing: 5
-                                        Rectangle { implicitWidth: 6; implicitHeight: 6; radius: 3; color: root.seriesColor(parent.index) }
-                                        Text {
-                                            objectName: "topBarPairTrendLabel_" + parent.index
-                                            Layout.fillWidth: true; Layout.minimumWidth: 0
-                                            text: root.pairLabel(parent.modelData); textFormat: Text.PlainText
-                                            color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
-                                            elide: Text.ElideRight
-                                        }
-                                    }
-                                }
-                                Item { Layout.fillWidth: true; Layout.minimumWidth: 0 }
-                            }
-                            Text {
-                                visible: root.hasTrend && root.chartScale.valid
-                                text: root.detail.unit || ""; textFormat: Text.PlainText
-                                color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
-                            }
-                        }
-                        Item {
-                            id: chartArea
-                            Layout.fillWidth: true; Layout.preferredHeight: root.hasTrend ? 108 : 48
-                            Canvas {
-                                id: history
-                                objectName: "topBarDetailTrend"
-                                visible: root.hasTrend
-                                width: root.chartScale.valid ? parent.width-52 : parent.width
-                                height: 88
-                                antialiasing: true
-                                onVisibleChanged: requestPaint()
-                                onWidthChanged: requestPaint()
-                                onHeightChanged: requestPaint()
-                                onPaint: {
-                                    const ctx = getContext("2d")
-                                    ctx.clearRect(0, 0, width, height)
-                                    if (!root.hasTrend) return
-                                    const px=3, py=6, pw=width-6, ph=height-12
-                                    ctx.lineWidth=.6; ctx.strokeStyle=root.tint(root.dark?.15:.11)
-                                    for(let i=0;i<3;i++) {
-                                        const y=py+i*ph/2
-                                        ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px+pw,y);ctx.stroke()
-                                    }
-                                    ctx.strokeStyle=root.tint(root.dark?.055:.04)
-                                    for(let i=1;i<4;i++) {
-                                        const x=px+i*pw/4
-                                        ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x,py+ph);ctx.stroke()
-                                    }
-                                    for(let index=0;index<root.chartRows.length;index++) {
-                                        const row=root.chartRows[index]
-                                        if(!root.trendReadable(row))continue
-                                        const color=root.hasPair?root.pairColor(index):root.pairColor(0)
-                                        const points=root.chartPoints(row)
-                                        let segment=[],last=null
-                                        const drawSegment=function() {
-                                            if(segment.length<2){segment=[];return}
-                                            ctx.beginPath();ctx.moveTo(segment[0].x,py+ph)
-                                            for(const point of segment)ctx.lineTo(point.x,point.y)
-                                            ctx.lineTo(segment[segment.length-1].x,py+ph);ctx.closePath()
-                                            ctx.fillStyle=color;ctx.globalAlpha=.065;ctx.fill();ctx.globalAlpha=1
-                                            ctx.beginPath();ctx.moveTo(segment[0].x,segment[0].y)
-                                            for(let n=1;n<segment.length;n++)ctx.lineTo(segment[n].x,segment[n].y)
-                                            ctx.lineWidth=1.6;ctx.lineJoin="round";ctx.lineCap="round";ctx.strokeStyle=color;ctx.stroke()
-                                            segment=[]
-                                        }
-                                        for(const point of points) {
-                                            if(!root.validPoint(point)){drawSegment();continue}
-                                            const pixel={x:px+point.x*pw,y:py+point.y*ph}
-                                            segment.push(pixel);last=pixel
-                                        }
-                                        drawSegment()
-                                        if(points.length<=8)for(const point of points)if(root.validPoint(point)) {
-                                            ctx.beginPath();ctx.arc(px+point.x*pw,py+point.y*ph,1.7,0,Math.PI*2)
-                                            ctx.fillStyle=color;ctx.fill()
-                                        }
-                                        if(last){ctx.beginPath();ctx.arc(last.x,last.y,2.4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
-                                    }
-                                }
-                            }
-                            Repeater {
-                                model: root.hasTrend && root.chartScale.valid ? 3 : 0
-                                Text {
-                                    id: axisText
-                                    required property int index
-                                    readonly property real numericValue:index===0?root.chartScale.high:index===2?root.chartScale.low:root.chartScale.high/2+root.chartScale.low/2
-                                    objectName: "topBarTrendAxis_"+index
-                                    x:history.width+8; y:6+index*(history.height-12)/2-height/2
-                                    width:44
-                                    text:root.axisNumber(numericValue)
-                                    textFormat:Text.PlainText; color:root.secondary
-                                    font.family:root.barState.fontFamily;font.pixelSize:10;font.features:{"tnum":1}
-                                    elide:Text.ElideRight
-                                    HoverHandler {id:axisHover}
-                                    PlainTip {visible:axisHover.hovered;text:axisText.numericValue+" "+(root.detail.unit || "")}
-                                }
-                            }
-                            Text {
-                                visible:root.hasTrend
-                                x:3;y:91
-                                text:root.tr("起点");textFormat:Text.PlainText
-                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
-                            }
-                            Text {
-                                visible:root.hasTrend
-                                x:history.width-width-3;y:91
-                                text:root.tr("最新");textFormat:Text.PlainText
-                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
-                            }
-                            Column {
-                                visible:!root.hasTrend
-                                anchors.verticalCenter:parent.verticalCenter
-                                spacing:3
-                                Text {text:root.tr("尚无连续读数");textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:11}
-                                Text {text:root.tr("采样后将显示趋势");textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10}
-                            }
-                        }
-                        RowLayout {
-                            Layout.fillWidth:true
-                            Text {
-                                objectName:"topBarDetailHistoryCount"
-                                Layout.fillWidth:true
-                                text:root.sampleCount+" "+root.tr("次采样");textFormat:Text.PlainText
-                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
-                            }
-                            Text {
-                                objectName:"topBarDetailHistoryElapsed"
-                                text:root.spanText();textFormat:Text.PlainText;visible:!!text
-                                color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
-                            }
-                        }
-                        GridLayout {
-                            objectName:"topBarHistorySummary"
-                            visible:root.hasTrend
-                            Layout.fillWidth:true;columns:2;uniformCellWidths:true;columnSpacing:20;rowSpacing:4
-                            Repeater {
-                                model:root.hasPair?root.pairedRows:[root.detail,root.detail]
-                                ColumnLayout {
-                                    required property var modelData
-                                    required property int index
-                                    Layout.fillWidth:true;Layout.minimumWidth:0;spacing:3
-                                    Text {
-                                        Layout.fillWidth:true;Layout.minimumWidth:0
-                                        text:root.hasPair?root.pairLabel(parent.modelData)+" · "+root.tr("峰值"):root.tr(parent.index===0?"峰值":"平均值")
-                                        textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight
-                                    }
-                                    Text {
-                                        id: summaryValue
-                                        objectName:"topBarHistorySummaryValue_"+parent.index
-                                        Layout.fillWidth:true;Layout.minimumWidth:0
-                                        text:root.summaryNumber(parent.modelData,root.hasPair || parent.index===0?"peak":"mean")
-                                        textFormat:Text.PlainText;color:root.foreground;font.family:root.barState.fontFamily;font.pixelSize:13;font.weight:Font.Medium;elide:Text.ElideRight
-                                        HoverHandler {id:summaryHover}
-                                        PlainTip {visible:summaryHover.hovered;text:summaryValue.text}
-                                    }
-                                }
-                            }
-                        }
-                    }
                     Text {
                         objectName: "topBarDetailReason"
                         Layout.fillWidth: true; visible: !!root.detail.reason
@@ -851,8 +983,8 @@ Window {
                         Button {
                             id: missingToggle
                             objectName: "topBarDetailMissingToggle"
-                            Layout.fillWidth: true; implicitHeight: 28
-                            padding: 0; checkable: true; checked: root.showMissing; hoverEnabled: true
+                            Layout.fillWidth: true; implicitHeight: 32
+                            padding: 7; checkable: true; checked: root.showMissing; hoverEnabled: true
                             onClicked: root.showMissing = checked
                             Accessible.name: root.missingRows.length + " " + root.tr("项不可用")
                             contentItem: RowLayout {
@@ -864,7 +996,7 @@ Window {
                                 }
                                 Icon { name: "chevron"; ink: root.secondary; rotation: root.showMissing ? 270 : 90; Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                             }
-                            background: Rectangle { radius: 6; color: root.tint(0.05); visible: missingToggle.hovered || missingToggle.visualFocus; border.width: missingToggle.visualFocus ? 1 : 0; border.color: root.tint(0.3) }
+                            background: Rectangle { radius: 7; color: root.tint(missingToggle.hovered?0.06:0.02); border.width: 1; border.color: missingToggle.visualFocus?root.pairColor(0):root.tint(0.1) }
                         }
                         ColumnLayout {
                             Layout.fillWidth: true; visible: root.showMissing; spacing: 10
@@ -898,7 +1030,7 @@ Window {
                         Button {
                             id: metadataToggle
                             objectName: "topBarDetailMetadataToggle"
-                            Layout.fillWidth: true; implicitHeight: 28; padding: 0
+                            Layout.fillWidth: true; implicitHeight: 32; padding: 7
                             checkable: true; checked: root.showMetadata; hoverEnabled: true
                             onClicked: root.showMetadata = checked
                             Accessible.name: root.tr("设备与来源")
@@ -914,7 +1046,7 @@ Window {
                                 }
                                 Icon { name: "chevron"; ink: root.secondary; rotation: root.showMetadata ? 270 : 90; Layout.preferredWidth: 12; Layout.preferredHeight: 12 }
                             }
-                            background: Rectangle { radius: 6; color: root.tint(0.05); visible: metadataToggle.hovered || metadataToggle.visualFocus; border.width: metadataToggle.visualFocus ? 1 : 0; border.color: root.tint(0.3) }
+                            background: Rectangle { radius: 7; color: root.tint(metadataToggle.hovered?0.06:0.02); border.width: 1; border.color: metadataToggle.visualFocus?root.pairColor(0):root.tint(0.1) }
                             PlainTip { visible: metadataToggle.hovered; text: [root.detail.hardware_name, root.detail.source].filter(value => !!value).join("\n") }
                         }
                         ColumnLayout {
@@ -941,6 +1073,6 @@ Window {
     }
     Connections {
         target: root.barState
-        function onChanged() { history.requestPaint() }
+        function onChanged() { history.requestPaint(); Qt.callLater(root.reconcileChartCursor) }
     }
 }

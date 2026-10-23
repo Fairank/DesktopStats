@@ -19,6 +19,9 @@ Window {
     property string dropPlacement: ""
     property real insertionX: 0
     property var dragSlots: []
+    property var draggedRow: ({})
+    property real dragGrabOffset: 0
+    property real dragPointerX: 0
     property real operationAnchorX: 0
 
     visible: false
@@ -31,7 +34,7 @@ Window {
     function tint(alpha) {
         return Qt.rgba(foreground.r, foreground.g, foreground.b, alpha)
     }
-    function beginDrag(identifier) {
+    function beginDrag(identifier, point) {
         cancelDrag()
         dragHeld=true;draggedId=identifier
         const slots=[]
@@ -40,10 +43,16 @@ Window {
             slots.push({id:item.modelData.id,x:item.x,width:item.width,placement:item.modelData.placement || "right"})
         }
         dragSlots=slots
+        const source=slots.find(slot=>slot.id===identifier)
+        const itemIndex=slots.findIndex(slot=>slot.id===identifier)
+        draggedRow=itemIndex>=0?metrics.itemAt(itemIndex).modelData:({})
+        dragPointerX=point?point.x:source?source.x:0
+        dragGrabOffset=source?dragPointerX-source.x:0
         barState.leaveBar()
     }
-    function cancelDrag() {dragHeld=false;dragging=false;draggedId="";dropBeforeId="";dropPlacement="";dragSlots=[]}
+    function cancelDrag() {dragHeld=false;dragging=false;draggedId="";dropBeforeId="";dropPlacement="";dragSlots=[];draggedRow=({})}
     function updateDrop(point) {
+        dragPointerX=point.x
         dropPlacement="";dropBeforeId=""
         if(point.x<0 || point.x>width || point.y<0 || point.y>height)return
         const hovered=dragSlots.find(slot=>point.x>=slot.x && point.x<=slot.x+slot.width)
@@ -63,6 +72,7 @@ Window {
     }
     onVisibleChanged:if(!visible)cancelDrag()
     onWidthChanged:if(dragHeld)cancelDrag()
+    onHeightChanged:if(dragHeld)cancelDrag()
     Shortcut {sequence:"Escape";enabled:root.dragHeld;onActivated:root.cancelDrag()}
 
     component PlainTip: ToolTip {
@@ -122,6 +132,7 @@ Window {
             objectName:"topBarMenuChrome"
             anchors.fill: parent
             design:root.barDesign;role:"menu";ink:root.foreground;accent:root.barAccent
+            motionEnabled:root.barState.motionEnabled
             hovered:menuButton.hovered;pressed:menuButton.down
         }
         onClicked: root.barState.menu()
@@ -148,13 +159,15 @@ Window {
             y: modelData.y
             width: frozenSlot?frozenSlot.width:modelData.width
             height: modelData.height
-            opacity:root.dragging && root.draggedId===modelData.id?.5:1
 
             TopBarChrome {
                 objectName:"topBarMetricChrome_"+metric.modelData.id
                 anchors.fill: parent
+                opacity:root.dragging && root.draggedId===metric.modelData.id?.35:1
                 design:root.barDesign;ink:root.foreground;accent:root.barAccent
+                motionEnabled:root.barState.motionEnabled
                 hovered:metricMouse.containsMouse;pressed:metricMouse.pressed
+                selected:root.barState.detail.id===metric.modelData.id
                 pinned:root.barState.pinned && root.barState.detail.id===metric.modelData.id
                 dragged:root.dragging && root.draggedId===metric.modelData.id
             }
@@ -162,6 +175,7 @@ Window {
                 design:root.barDesign
                 motionEnabled:root.barState.motionEnabled
                 id: metricContent
+                opacity:root.dragging && root.draggedId===metric.modelData.id?0:1
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.leftMargin: 6
@@ -181,14 +195,18 @@ Window {
                 property point pressPoint:Qt.point(0,0)
                 onEntered: if(!root.dragHeld)root.barState.hoverMetric(metric.modelData.id)
                 onExited: if(!root.dragging)root.barState.leaveBar()
-                onPressed:function(mouse){if(mouse.button===Qt.LeftButton){root.beginDrag(metric.modelData.id);pressPoint=mapToItem(root.contentItem,mouse.x,mouse.y)}}
+                property bool canceledByRight: false
+                onPressed:function(mouse){
+                    if(mouse.button===Qt.RightButton && root.dragHeld){root.cancelDrag();canceledByRight=true;return}
+                    if(mouse.button===Qt.LeftButton){canceledByRight=false;pressPoint=mapToItem(root.contentItem,mouse.x,mouse.y);root.beginDrag(metric.modelData.id,pressPoint)}
+                }
                 onPositionChanged:function(mouse){
                     if(!pressed || !root.dragHeld)return
                     const point=mapToItem(root.contentItem,mouse.x,mouse.y)
                     if(!root.dragging && Math.hypot(point.x-pressPoint.x,point.y-pressPoint.y)>=6)root.dragging=true
                     if(root.dragging)root.updateDrop(point)
                 }
-                onReleased:function(mouse){if(mouse.button===Qt.LeftButton){if(!root.dragHeld)return;if(root.dragging)root.finishDrag();else{root.cancelDrag();root.barState.clickMetric(metric.modelData.id)}}else{root.cancelDrag();root.barState.menu()}}
+                onReleased:function(mouse){if(mouse.button===Qt.LeftButton){if(!root.dragHeld)return;if(root.dragging)root.finishDrag();else{root.cancelDrag();root.barState.clickMetric(metric.modelData.id)}}else{root.cancelDrag();if(!canceledByRight)root.barState.menu();canceledByRight=false}}
                 onCanceled:root.cancelDrag()
             }
             PlainTip {
@@ -223,7 +241,9 @@ Window {
             objectName:"topBarOverflowChrome"
             anchors.fill: parent
             design:root.barDesign;role:"overflow";ink:root.foreground;accent:root.barAccent
+            motionEnabled:root.barState.motionEnabled
             hovered:overflowMouse.containsMouse;pressed:overflowMouse.pressed
+            selected:root.barState.detail.id==="__overflow__"
             pinned:root.barState.pinned && root.barState.detail.id==="__overflow__"
         }
         Text {
@@ -253,6 +273,30 @@ Window {
         objectName:"topBarLiveInsertion"
         visible:root.dragging && !!root.dropPlacement
         x:Math.max(1,Math.min(root.width-2,root.insertionX));y:4
-        width:2;height:Math.max(0,root.height-8);radius:1;color:root.foreground
+        width:2;height:Math.max(0,root.height-8);radius:1;color:root.barAccent
+    }
+    // An exact-width travelling copy makes the insertion target understandable.
+    // Frozen source slots and immediate pointer tracking avoid a moving hit area.
+    Item {
+        id:dragPreview
+        objectName:"topBarDragPreview"
+        readonly property var slot:root.dragSlots.find(value=>value.id===root.draggedId)
+        visible:root.dragging && !!slot
+        x:Math.max(0,Math.min(root.width-width,root.dragPointerX-root.dragGrabOffset))
+        y:Number.isFinite(root.draggedRow.y)?root.draggedRow.y:0
+        width:slot?slot.width:0
+        height:Number.isFinite(root.draggedRow.height)?root.draggedRow.height:0
+        Rectangle {
+            anchors.fill:parent;anchors.margins:1
+            radius:root.barDesign==="capsule"?Math.min(13,height/2):6
+            color:root.foreground.r>.5?"#303a48":"#f7faff"
+            border.color:root.barAccent;border.width:1
+        }
+        TopBarGroupContent {
+            anchors.left:parent.left;anchors.leftMargin:6;anchors.verticalCenter:parent.verticalCenter
+            width:implicitWidth;height:implicitHeight
+            row:root.draggedRow;design:root.barDesign;ink:root.foreground;muted:root.secondary
+            fontFamily:root.barState.fontFamily;motionEnabled:false
+        }
     }
 }
