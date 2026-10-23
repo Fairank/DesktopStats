@@ -9,7 +9,7 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("QT_QUICK_BACKEND", "software")
 os.environ.setdefault("QML_DISABLE_DISK_CACHE", "1")
-os.environ.setdefault("DESKTOP_STATS_DATA", str(Path(__file__).resolve().parents[1] / "qa-private/redesign39/metric-effects/profile"))
+os.environ.setdefault("DESKTOP_STATS_DATA", str(Path(__file__).resolve().parents[1] / "qa-private/redesign40/metric-effects/profile"))
 
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QUrl
 from PySide6.QtGui import QWindow
@@ -92,7 +92,7 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
 ''' + child + "\n}"
         code=code.replace("ICON_COUNT",str(count))
         self.component = QQmlComponent(self.engine)
-        self.component.setData(code.encode(), QUrl.fromLocalFile(str(ROOT / "qa-private/redesign39/metric-fixture.qml")))
+        self.component.setData(code.encode(), QUrl.fromLocalFile(str(ROOT / "qa-private/redesign40/metric-fixture.qml")))
         self.window = self.component.create()
         self.assertIsNotNone(self.window, [error.toString() for error in self.component.errors()])
         self.assertIsInstance(self.window, QQuickWindow)
@@ -176,6 +176,7 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
                 frame = self.frame(0)
                 self.assertEqual(self.pixels(self.crop(frame)), self.pixels(self.crop(frame, origin=56)))
                 self.assertFalse(self.find("icon").property("animationRunning"))
+                self.assertFalse(any(item.objectName().startswith("metricIconTemperatureHalo_") for item in self.items()))
                 self.assertEqual((self.find("icon").implicitWidth(), self.find("icon").implicitHeight()), (18, 18))
 
     def test_transport_moves_only_the_actual_arrow_and_keeps_tray_and_disk_body_fixed(self):
@@ -200,27 +201,120 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
             self.assertEqual(self.pixels(self.crop(first, x=fixed_x, width=8)), self.pixels(self.crop(second, x=fixed_x, width=8)))
             self.assertNotEqual(self.pixels(self.crop(first, x=active_x, width=8)), self.pixels(self.crop(second, x=active_x, width=8)))
 
-    def test_heat_bursts_change_geometry_with_stationary_thermometer_and_continuous_loop(self):
+    def test_thermometer_column_is_real_temperature_and_never_an_electric_discharge(self):
         self.load()
-        self.configure("temperature", "cpu_temp", "heat")
-        first, second = self.frame(.12), self.frame(.38)
-        self.assertNotEqual(self.pixels(self.crop(first, x=11, y=0, width=7, height=10)),
-                            self.pixels(self.crop(second, x=11, y=0, width=7, height=10)))
-        self.assertEqual(self.pixels(self.crop(first, y=11, height=7)), self.pixels(self.crop(second, y=11, height=7)))
-        discharge=self.find("metricIconWarmDischarge")
-        self.assertEqual(discharge.height(),10)
-        self.assertTrue(discharge.clip())
-        # Loader resizes its direct child to18DIP. The actual atlas clipping
-        # must remain on the inner child for every perimeter burst, not just
-        # one lucky pair of frames away from the lower bulb.
-        bulb=self.pixels(self.crop(first,y=11,height=7))
-        upper_frames=[]
+        for dark in (False, True):
+            self.window.setProperty("dark", dark)
+            for size in (11, 18):
+                icon=self.find("icon")
+                icon.setWidth(size)
+                icon.setHeight(size)
+                for metric in ("cpu_temp", "gpu_temp", "storage_temp", "external_0"):
+                    for effect in ("auto", "heat", "flow", "pulse", "spin"):
+                        self.configure("temperature", metric, effect)
+                        heights, images=[], []
+                        for value in (.16, .48, .8):  # 20, 60 and100 Celsius, normalized by125.
+                            self.window.setProperty("reading", value)
+                            icon.setProperty("previousTick",1000)
+                            for now in range(1100,2901,100):
+                                self.evaluate(icon,f"advanceClock({now})")
+                            frame=self.frame(.355)
+                            self.assertEqual(icon.property("resolvedEffect"),"heat")
+                            self.assertEqual(icon.property("effect"),effect)
+                            self.assertTrue(self.find("metricIconHeat").isVisible())
+                            self.assertAlmostEqual(self.find("metricIconTemperatureColumn").height(),10*value,delta=.02)
+                            heights.append(self.find("metricIconTemperatureColumn").height())
+                            images.append(self.pixels(self.crop(frame,width=size,height=size)))
+                            self.assertFalse(icon.property("thermalContext"))
+                            self.assertFalse(icon.property("electricEnabled"))
+                            self.assertFalse(self.find("metricIconThermalArcs").property("active"))
+                            self.assertFalse(self.find("metricIconEnergyArc").property("active"))
+                            self.assertFalse(self.find("metricIconTransport").property("active"))
+                            self.assertFalse(self.find("metricIconScalarActivity").property("active"))
+                            self.assertFalse(any(item.objectName().startswith("metricDischargeCell_") for item in self.items()))
+                            self.assertTrue(all("metric-motion" not in str(item.property("source")) for item in self.items()))
+                        self.assertEqual(len(set(images)),3,(dark,size,metric,effect))
+                        self.assertLess(heights[0],heights[1])
+                        self.assertLess(heights[1],heights[2])
+
+    def test_thermometer_smooths_real_column_changes_without_quantizing_or_scaling_by_strength(self):
+        self.load()
+        self.configure("temperature","cpu_temp","heat")
+        icon=self.find("icon")
+        self.window.setProperty("reading",.16)
+        icon.setProperty("previousTick",1000)
+        for now in range(1100,2901,100):
+            self.evaluate(icon,f"advanceClock({now})")
+        self.assertAlmostEqual(icon.property("displayedTemperature"),.16,delta=.001)
+        self.assertFalse(icon.property("animationRunning"))  # A settled cold column needs no clock.
+        self.window.setProperty("reading",.8)
+        self.assertAlmostEqual(icon.property("displayedTemperature"),.16,delta=.001)
+        icon.setProperty("previousTick",1000)
+        self.evaluate(icon,"advanceClock(1100)")
+        middle=icon.property("displayedTemperature")
+        self.assertGreater(middle,.16)
+        self.assertLess(middle,.8)
+        for now in range(1200,2901,100):
+            self.evaluate(icon,f"advanceClock({now})")
+        self.assertAlmostEqual(icon.property("displayedTemperature"),.8,delta=.001)
+        for strength in (.01,.5,1):
+            self.window.setProperty("strength",strength)
+            self.assertAlmostEqual(self.find("metricIconTemperatureColumn").height(),8,delta=.02)
+        self.window.setProperty("reading",.16)
+        self.assertGreater(icon.property("displayedTemperature"),.16)
+        icon.setProperty("previousTick",1000)
+        self.evaluate(icon,"advanceClock(1100)")
+        self.assertLess(icon.property("displayedTemperature"),.8)
+        for now in range(1200,2901,100):
+            self.evaluate(icon,f"advanceClock({now})")
+        self.assertFalse(icon.property("animationRunning"))
+        self.assertIsNone(icon.property("clockSubscription"))
+        self.window.setProperty("reading",0)
+        self.assertEqual(self.find("metricIconTemperatureColumn").height(),0)
+        self.assertFalse(icon.property("animationRunning"))
+
+    def test_thermometer_halo_never_moves_the_column_or_paints_outside_the_glyph(self):
+        self.load()
+        self.configure("temperature","cpu_temp","heat")
+        self.settle_level(.8)
+        first=self.frame(0)
+        column=self.find("metricIconTemperatureColumn")
+        geometry=tuple(column.property(key) for key in ("x","y","width","height"))
+        frames=[]
         for index in range(48):
             current=self.frame(index/48)
-            self.assertEqual(self.pixels(self.crop(current,y=11,height=7)),bulb,index)
-            upper_frames.append(self.pixels(self.crop(current,y=0,height=10)))
-        self.assertGreater(len(set(upper_frames)),3)
+            self.assertEqual(tuple(column.property(key) for key in ("x","y","width","height")),geometry)
+            # The plain thermometer has no discharge above, below or to either side.
+            for x,y,width,height in ((-3,-4,24,4),(-3,18,24,4),(-3,0,3,18),(18,0,3,18)):
+                self.assertEqual(self.pixels(self.crop(first,x=x,y=y,width=width,height=height)),
+                    self.pixels(self.crop(current,x=x,y=y,width=width,height=height)),(index,x,y))
+            frames.append(self.pixels(self.crop(current)))
+        self.assertGreater(len(set(frames)),1)  # Only the restrained warm halo breathes.
         self.assertEqual(self.pixels(self.frame(0)), self.pixels(self.frame(1)))
+
+    def test_thermometer_composite_uses_only_its_real_thermal_channel_and_stops_when_missing(self):
+        self.load()
+        self.configure("temperature","storage_temp","auto")
+        icon=self.find("icon")
+        self.window.setProperty("channels",dict(profile="storage",available=True,load=.9,thermal=.64,energy=.9))
+        self.window.setProperty("valid",False)  # Explicit current secondary thermal is independent of primary.
+        self.assertTrue(icon.property("thermometerEnabled"))
+        icon.setProperty("previousTick",1000)
+        for now in range(1100,2901,100):
+            self.evaluate(icon,f"advanceClock({now})")
+        self.assertAlmostEqual(icon.property("displayedTemperature"),.64,delta=.001)
+        self.assertFalse(icon.property("electricEnabled"))
+        self.assertFalse(icon.property("thermalArcActive"))
+        first=self.frame(.355)
+        self.window.setProperty("channels",dict(profile="storage",available=True,load=.1,thermal=.64,energy=.1))
+        self.assertEqual(self.pixels(self.crop(first)),self.pixels(self.crop(self.frame(.355))))
+        for state in (dict(profile="storage",available=True,load=.9,thermal=None,energy=.9),
+                      dict(profile="storage",available=False,thermal=.64)):
+            self.window.setProperty("channels",state)
+            self.assertFalse(icon.property("thermometerEnabled"))
+            self.assertFalse(icon.property("animationRunning"))
+            self.assertIsNone(icon.property("clockSubscription"))
+            self.assertEqual(self.pixels(self.crop(self.frame(.355))),self.pixels(self.crop(self.frame(.355),origin=56)))
 
     def test_pulse_changes_core_ink_without_dimming_outer_glyph(self):
         self.load()

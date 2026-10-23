@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.25.0-preview.1",
-  "archive_root": "DesktopStats-0.25.0-preview.1-source/",
+  "version": "0.25.0-preview.2",
+  "archive_root": "DesktopStats-0.25.0-preview.2-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 11254,
-      "sha256": "c3e05ba32650985074ed6e719377a4c8084e60c7bd6cfd6fa7305e7b0b64e793"
+      "bytes": 11808,
+      "sha256": "f1322dfcec9d096cd9624cd002b6187808c3dbf234914bc24b19f3ac9097b7a9"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 10624,
-      "sha256": "62cce1a6892a86737847bf3b81d2e6ebd976b10bab27e1bdd4e09299372ff384"
+      "bytes": 10698,
+      "sha256": "bb47048b052f738899978842a2638951dc6ab44de39d07fff7c2046ca708117e"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -554,8 +554,8 @@
     },
     {
       "path": "docs/USER_GUIDE.md",
-      "bytes": 40197,
-      "sha256": "e5cbf11f2887b8522cb5c1ede21714c63c2cdd9ee6d9835e7c695543ef992480"
+      "bytes": 40313,
+      "sha256": "14c17a7c669a7a0787c38c7e5595c61ad3c2e94d343b3ea0efa0977b39212881"
     },
     {
       "path": "energy_sensor.py",
@@ -929,8 +929,8 @@
     },
     {
       "path": "locales.txt",
-      "bytes": 144577,
-      "sha256": "a8a3d70db5221cb02c1518982a0973551622d11b01b703ce44ea345688ce074c"
+      "bytes": 145636,
+      "sha256": "de5891ea6b65e90353e88aa531bc642b293cc64476a41b4d1ec19986515b07c9"
     },
     {
       "path": "localization.py",
@@ -1069,8 +1069,8 @@
     },
     {
       "path": "native/MetricIcon.qml",
-      "bytes": 33551,
-      "sha256": "34037b5d1d109106dbd4e6ec802cc9928e94128d12a9addbd5fd195bf0f386df"
+      "bytes": 36184,
+      "sha256": "f91904703f9c15c1661c360447a5e5ffba76fe1ddcdbeaee813fc74c58f25734"
     },
     {
       "path": "native/OptionTabs.qml",
@@ -1154,8 +1154,8 @@
     },
     {
       "path": "native/TopBarItemInspector.qml",
-      "bytes": 32354,
-      "sha256": "d5a8cb55052d58b381a1a0e3b35fd43211cc36fe8d15e8090bf82b604a0012e2"
+      "bytes": 32538,
+      "sha256": "5bb7eda874b2ddb17ba8fc3b5727da218f3698080cef6cad5c06461d5520712a"
     },
     {
       "path": "native/TopBarMetricContent.qml",
@@ -1260,7 +1260,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "2c6d4fc8c0b6079eea46883cc07aa77903ae8ff16eb1908e63230e93b1d29bd8"
+      "sha256": "02dfaed09d98ef217364e1d44c66f9c989a5d22e6e4b9b176bf1ecaecaa8d599"
     },
     {
       "path": "pyproject.toml",
@@ -1554,8 +1554,8 @@
     },
     {
       "path": "tests/test_metric_icon_effects.py",
-      "bytes": 49406,
-      "sha256": "6cc031ab7eac79964624ad2c75fba62b2087e79b6a150c7cec7b1e30528908c4"
+      "bytes": 55581,
+      "sha256": "f92573e7dc4c7011c93fdbc44709a16d7c7c313380bc06f261cc9e240a8c6344"
     },
     {
       "path": "tests/test_metric_state_feedback_qml.py",

@@ -3,7 +3,7 @@ import QtQuick.Window
 import "IconData.js" as IconData
 import "MetricEffectClock.js" as EffectClock
 
-// Optional decoration. Neither rhythm nor geometry is a sensor scale.
+// Optional feedback. Fill follows normalized readings; motion is decorative, never an alarm.
 Item {
     id: root
     property string name: "sensors"
@@ -29,6 +29,7 @@ Item {
     property real displayedInbound: 0
     property real displayedOutbound: 0
     property real displayedSpin: 0
+    property real displayedTemperature: 0
     property real loadPhase: 0
     property real thermalPhase: 0
     property real thermalArcPhase: 0
@@ -62,7 +63,17 @@ Item {
     readonly property var inboundTarget: channelTarget("inbound")
     readonly property var outboundTarget: channelTarget("outbound")
     readonly property var spinTarget: channelTarget("spin")
-    readonly property real targetActivity: compositeActive ? Math.max(supportsLoad && loadTarget || 0,
+    readonly property bool thermometerGlyph: name === "temperature"
+    readonly property var thermometerTarget: compositeActive ? thermalTarget : levelValid ? level : null
+    readonly property bool thermometerEnabled: thermometerGlyph && exposed && windowVisible && motionEnabled
+        && (compositeActive ? stateAvailable : available) && thermometerTarget !== null
+        && effectControlsValid && intensity > 0 && !["off", "spin"].includes(resolvedEffect)
+    readonly property bool thermometerChanging: thermometerEnabled
+        && Math.abs(displayedTemperature - thermometerTarget) > .001
+    readonly property real thermometerWarmth: Math.max(0, Math.min(1, (displayedTemperature - .28) / .55))
+    readonly property real targetActivity: thermometerGlyph
+        ? thermometerEnabled && (thermometerTarget > .28 || thermometerChanging) ? Math.max(.001, thermometerTarget) : 0
+        : compositeActive ? Math.max(supportsLoad && loadTarget || 0,
         supportsThermal && (thermalTarget>.28?thermalTarget:0) || 0,supportsEnergy && energyTarget || 0,
         supportsInbound && inboundTarget || 0,supportsOutbound && outboundTarget || 0,name==="fan" && spinTarget || 0)
         : levelValid ? resolvedEffect==="heat" && level<=.28?0:level : 0
@@ -73,27 +84,34 @@ Item {
     readonly property bool outboundActive: animationRunning && compositeActive && supportsOutbound && outboundTarget > 0
     readonly property bool spinChannelActive: animationRunning && compositeActive && name==="fan" && spinTarget > 0
     // A decorative thermal response range, never a hardware warning threshold.
-    readonly property real heatPresentation:compositeActive?displayedThermal:resolvedEffect==="heat"?displayedLevel:0
+    readonly property real heatPresentation:thermometerGlyph?displayedTemperature
+        :compositeActive?displayedThermal:resolvedEffect==="heat"?displayedLevel:0
     readonly property real thermalArcStrength:Math.max(0,Math.min(1,(heatPresentation-.28)/.55))
     readonly property real thermalArcDuration:2400/(.82+.36*thermalArcStrength)
     readonly property bool processorGlyph:["cpu","gpu"].includes(name)
-    readonly property bool thermalContext:animationRunning && name!=="fan"
+    readonly property bool thermalContext:animationRunning && !thermometerGlyph && name!=="fan"
         && (compositeActive?supportsThermal && thermalTarget!==null:resolvedEffect==="heat")
     readonly property bool thermalArcActive:thermalContext && thermalArcStrength>0
     readonly property real heatPhase:compositeActive?thermalArcPhase:phase
     readonly property real heatBaseDuration:compositeActive?thermalArcDuration:cycleDuration*speed
     readonly property real thermalCharge:heatPhase<.2?smooth01(heatPhase/.2)
         :heatPhase<.32?1:1-smooth01((heatPhase-.32)/.68)
-    readonly property bool electricEnabled:animationRunning && (compositeActive?energyActive:energyFlow)
+    readonly property bool electricEnabled:animationRunning && !thermometerGlyph && (compositeActive?energyActive:energyFlow)
     readonly property real electricActivity:compositeActive?displayedEnergy:displayedLevel
     readonly property real electricPhase:compositeActive?energyPhase:phase
     readonly property real electricBaseDuration:compositeActive?1800/(.55+1.2*displayedEnergy):cycleDuration*speed
     readonly property string resolvedEffect: {
         if (compositeActive) return "hardware"
+        // Old manually saved flow/pulse choices cannot turn a thermometer into
+        // an electrical quantity. Explicit automatic-off still stays off.
+        if (thermometerGlyph && ["heat", "flow", "pulse", "spin"].includes(effect)) return "heat"
         if(name==="fan" && ["heat","flow","spin","pulse"].includes(effect))return "spin"
         if (["heat", "flow", "spin", "pulse"].includes(effect)) return effect
         if (effect !== "auto") return "off"
-        if (automaticEffect!=="") return ["heat","flow","spin","pulse","off"].includes(automaticEffect)?automaticEffect:"off"
+        if (automaticEffect!=="") {
+            if (!["heat","flow","spin","pulse","off"].includes(automaticEffect)) return "off"
+            return thermometerGlyph && ["heat", "flow", "pulse", "spin"].includes(automaticEffect) ? "heat" : automaticEffect
+        }
         if (name==="temperature") return "heat"
         if (name==="fan") return "spin"
         if (["power","voltage","network","download","upload","disk_read","disk_write"].includes(name)) return "flow"
@@ -165,6 +183,9 @@ Item {
         :energyFlow?energyColors:resolvedEffect==="flow"?(outgoing?outboundColors:inboundColors):loadColors
     readonly property color loadColor: paletteColor(loadColors,displayedLoad)
     readonly property color thermalColor: paletteColor(thermalColors,displayedThermal)
+    readonly property color thermometerColor: paletteColor(darkSurface
+        ? ["#f5d470", "#ffc14b", "#ff9b38", "#ff703c", "#ff4855"]
+        : ["#ad7909", "#ca8008", "#dd650e", "#df431f", "#ca2340"], displayedTemperature)
     readonly property color energyColor: paletteColor(energyColors,displayedEnergy)
     readonly property color inboundColor: paletteColor(inboundColors,displayedInbound)
     readonly property color outboundColor: paletteColor(outboundColors,displayedOutbound)
@@ -234,6 +255,7 @@ Item {
         if (!animationRunning) {previousTick = now;resetFeedback();return}
         const elapsed = Math.max(0, Math.min(136, now - previousTick))
         previousTick = now
+        if (thermometerEnabled) displayedTemperature=converge(displayedTemperature,thermometerTarget,elapsed)
         if(compositeActive) {
             displayedLoad=converge(displayedLoad,loadTarget,elapsed)
             displayedThermal=converge(displayedThermal,thermalTarget,elapsed)
@@ -269,6 +291,10 @@ Item {
         syncClock()
     }
     onCompositeActiveChanged: resetFeedback()
+    onThermometerEnabledChanged: displayedTemperature=thermometerEnabled?thermometerTarget:0
+    onThermometerTargetChanged: {
+        if (!thermometerEnabled || !(thermometerTarget > 0)) displayedTemperature=thermometerEnabled?thermometerTarget:0
+    }
     onLoadTargetChanged: {if(!(loadTarget>0)){displayedLoad=0;loadPhase=0}}
     onThermalTargetChanged: {if(!(thermalTarget>0)){displayedThermal=0;thermalPhase=0;thermalArcPhase=0}}
     onEnergyTargetChanged: {if(!(energyTarget>0)){displayedEnergy=0;energyPhase=0}}
@@ -389,8 +415,6 @@ Item {
                         visible:root.thermalArcActive
                         DischargeAtlas {
                             objectName:"metricIconWarmDischarge"
-                            height:root.name==="temperature"?10:18
-                            clip:root.name==="temperature"
                             warm:true;amount:root.thermalArcStrength;phaseValue:root.heatPhase
                         }
                     }
@@ -424,7 +448,7 @@ Item {
                 Loader {
                     objectName:"metricIconTransport"
                     anchors.fill:parent
-                    active:root.animationRunning && root.compositeActive && (root.supportsInbound || root.supportsOutbound)
+                    active:!root.thermometerGlyph && root.animationRunning && root.compositeActive && (root.supportsInbound || root.supportsOutbound)
                     sourceComponent:Item {
                         Repeater {
                             model:2
@@ -450,7 +474,7 @@ Item {
                 Loader {
                     objectName:"metricIconScalarActivity"
                     anchors.fill:parent
-                    active:root.animationRunning && root.resolvedEffect==="pulse" && !root.corePulse
+                    active:!root.thermometerGlyph && root.animationRunning && root.resolvedEffect==="pulse" && !root.corePulse
                     sourceComponent:DischargeAtlas {
                         objectName:"metricIconPulseStroke"
                         amount:root.displayedLevel;phaseValue:root.phase
@@ -481,16 +505,30 @@ Item {
         Item {
             id:heatLayer;objectName:"metricIconHeat"
             readonly property int paintCount:0
-            anchors.fill:parent;visible:root.thermalContext && root.name==="temperature"
-            readonly property real activity:root.heatPresentation
+            anchors.fill:parent;visible:root.thermometerEnabled
+            readonly property real activity:root.displayedTemperature
             readonly property real alpha:root.channelOpacity(activity)
-            Rectangle {
-                objectName:"metricIconHeatMercury";x:7.8;y:12.3;width:2.4;height:2.4;radius:1.2;antialiasing:true
-                color:root.compositeActive?root.thermalColor:root.accentColor;opacity:heatLayer.alpha
+            // Local, soft warmth belongs to temperature. No atlas, travelling
+            // highlight or electrical discharge is created for this glyph.
+            readonly property real haloAlpha:alpha*root.thermometerWarmth*(.88+.12*root.wave)
+            Repeater {
+                model:heatLayer.visible?3:0
+                Rectangle {
+                    required property int index
+                    objectName:"metricIconTemperatureHalo_"+index
+                    width:6-index*1.15;height:width;x:9-width/2;y:13.5-height/2
+                    radius:width/2;antialiasing:true;color:root.thermometerColor
+                    opacity:heatLayer.haloAlpha*(.035+.025*index)
+                }
             }
             Rectangle {
-                x:8.45;width:1.1;height:2+5*heatLayer.activity;y:12.6-height;radius:.55;antialiasing:true
-                color:root.compositeActive?root.thermalColor:root.accentColor;opacity:heatLayer.alpha
+                objectName:"metricIconHeatMercury";x:7.5;y:12;width:3;height:3;radius:1.5;antialiasing:true
+                color:root.thermometerColor;opacity:heatLayer.alpha
+            }
+            Rectangle {
+                objectName:"metricIconTemperatureColumn"
+                x:8.45;width:1.1;height:10*heatLayer.activity;y:13.5-height;radius:.55;antialiasing:true
+                color:root.thermometerColor;opacity:heatLayer.alpha
             }
         }
         Rectangle {

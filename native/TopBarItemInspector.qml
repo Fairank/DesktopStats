@@ -28,6 +28,7 @@ Item {
         if(row.auto_effect==="off")return ui.t("此读数不表示实时活动，硬件联动保持静态。")
         const members=row.grouped===true?row.group_rows || []:[row]
         if(members.length && members.every(member=>member.icon==="fan"))return ui.t("按实际转速旋转；停转或缺测时静止。")
+        if(members.length && members.every(member=>member.icon==="temperature"))return ui.t("温柱随实际温度变化，高温时呈现黄红热晕；温度计不显示电流。")
         if(members.length && members.every(member=>member.icon==="frequency"))return ui.t("按实际频率变化，不用其他读数代替。")
         const profiles=members.map(member=>(member.hardware_state || {}).profile || "")
         if(profiles.length && profiles.every(profile=>["memory","volume"].includes(profile)))return ui.t("用填充和扫光显示实际占用量。")

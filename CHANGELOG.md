@@ -1,5 +1,15 @@
 # Changes
 
+## 0.25.0-preview.2
+
+- Separate thermometer feedback from processor overload effects. Temperature
+  symbols use a real temperature column and a local yellow/red thermal glow,
+  without electrical discharge, including previously saved manual effects.
+  Retain the accepted independent thermal/power arcs on CPU and GPU symbols.
+- Keep temperature feedback device-scoped, unit-independent and optional;
+  missing readings, disabled motion and reduced-motion settings retain the
+  static thermometer. Clarify the temperature-specific settings description.
+
 ## 0.25.0-preview.1
 
 - Correct optional icon effects that used the current reading only as an on/off
