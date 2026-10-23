@@ -128,14 +128,18 @@ class HistoryStore:
         self._lock = threading.RLock()
         self._pending = OrderedDict()
         self._source_times = OrderedDict()
+        self._source_clock = None
         self._max_pending = max_pending
         self._connection = None
         self._read_connection = None
+        self._read_discard_pending = False
         self._query_lock = threading.Lock()
         self._schema_ready = False
         self._next_write = float("-inf")
         self._last_cleanup = float("-inf")
         self._closed = False
+        self._failures = OrderedDict()
+        self._ready_detail = "Local history is up to date"
         self._status = dict(state="idle", detail="History has not been written yet",
                             error="", api="", errorcode=None, write_transactions=0,
                             failure_count=0, dropped_buckets=0)
@@ -160,10 +164,69 @@ class HistoryStore:
     def _failure(self, error, api):
         code = next((value for name in ("sqlite_errorcode", "winerror", "errno")
                      if type(value := getattr(error, name, None)) is int), None)
-        self._status.update(state="unavailable", detail="Local history storage is unavailable",
-                            error=type(error).__name__, api=api, errorcode=code,
-                            failure_count=self._status["failure_count"] + 1)
-        self._next_write = max(self._next_write, self._clock() + 5)
+        self._failures[api] = dict(error=type(error).__name__, api=api, errorcode=code)
+        self._failures.move_to_end(api)
+        self._status["failure_count"] += 1
+        self._refresh_status()
+        # The reader owns a separate connection. Its failures must not keep
+        # extending the retry gate of a healthy sampling-worker connection.
+        if api != "sqlite3.history.read":
+            self._next_write = max(self._next_write, self._clock() + 5)
+
+    def _refresh_status(self):
+        if self._failures:
+            self._status.update(state="unavailable", detail="Local history storage is unavailable",
+                                **next(reversed(self._failures.values())))
+        else:
+            self._status.update(state="ready", detail=self._ready_detail,
+                                error="", api="", errorcode=None)
+
+    def _recover(self, api, detail=None):
+        self._failures.pop(api, None)
+        if detail is not None:
+            self._ready_detail = detail
+        self._refresh_status()
+
+    def _observe_clock(self, wall):
+        now = self._clock()
+        previous = self._source_clock
+        self._source_clock = now, wall
+        if previous is not None:
+            elapsed = now - previous[0]
+            if elapsed < 0 or wall - previous[1] < elapsed - 2:
+                # Provider timestamps are UTC wall times. A system clock
+                # correction starts a new de-duplication epoch; an ordinary
+                # delayed sample does not, because the clock itself advanced.
+                self._source_times.clear()
+
+    def _close_reader(self):
+        connection = self._read_connection
+        if connection is not None:
+            connection.close()
+        self._read_connection = None
+        self._read_discard_pending = False
+
+    def _finish_read(self, error=None):
+        """End one snapshot; a damaged reader must be closed before reuse."""
+        connection = self._read_connection
+        if connection is not None:
+            try:
+                connection.rollback()
+            except (OSError, sqlite3.Error) as cleanup_error:
+                if error is None:
+                    error = cleanup_error
+        if error is not None:
+            self._read_discard_pending = connection is not None
+            try:
+                self._close_reader()
+            except (OSError, sqlite3.Error):
+                # Retain exactly this reference for a later close retry. The
+                # original read error takes precedence over cleanup failures.
+                pass
+            self._failure(error, "sqlite3.history.read")
+            return False
+        self._recover("sqlite3.history.read")
+        return True
 
     def _add(self, metric, value, timestamp, scope="", identifier=""):
         unit = METRICS[metric]["unit"]
@@ -217,6 +280,7 @@ class HistoryStore:
         with self._lock:
             if self._closed:
                 return False
+            self._observe_clock(wall)
             for metric in self.metrics:
                 self._observe(metric, sample, timestamp)
             for scope in self.scopes:
@@ -267,9 +331,8 @@ class HistoryStore:
                 self._schema_ready = True
                 self._last_cleanup = now if now - self._last_cleanup >= 3600 else self._last_cleanup
                 self._pending.clear()
-                self._status.update(state="ready", detail="Local history is up to date",
-                                    error="", api="", errorcode=None,
-                                    write_transactions=self._status["write_transactions"] + 1)
+                self._status["write_transactions"] += 1
+                self._recover("sqlite3.history.write", "Local history is up to date")
                 return True
             except (OSError, sqlite3.Error) as error:
                 self._failure(error, "sqlite3.history.write")
@@ -282,6 +345,12 @@ class HistoryStore:
         ``end`` is exclusive, rounded up to the source resolution. Empty bins have
         ``mean=None`` and ``gap=True``; interpolation and last-value filling are
         deliberately absent. Values remain in their canonical registry unit.
+        Multi-point aggregation uses a fixed UTC epoch grid for each period and
+        point budget, with clipped partial edge bins. One edge-bin allowance can
+        make the grid slightly coarser than dividing duration by the budget.
+        A one-point query is the exact full-window aggregate.
+        ``read_ok`` describes this query's completeness independently of the
+        global status, which can retain a failed write or explicit clear.
         """
         if metric not in METRICS or metric.startswith("external_") or period not in PERIODS:
             raise ValueError("Unsupported history series or period")
@@ -299,11 +368,17 @@ class HistoryStore:
         if not numeric(until) or until < 0:
             raise ValueError("Invalid history end time")
         until = math.ceil(until / resolution) * resolution
-        start = until - PERIODS[period]
-        step = math.ceil(PERIODS[period] / (points * resolution)) * resolution
-        bins = [_Bucket() for _ in range(math.ceil(PERIODS[period] / step))]
+        duration = PERIODS[period]
+        start = until - duration
+        if points >= duration // resolution:
+            step = resolution
+        else:
+            step = math.ceil(duration / (max(1, points - 1) * resolution)) * resolution
+        grid_start = start if points == 1 else math.floor(start / step) * step
+        bins = [_Bucket() for _ in range(math.ceil((until - grid_start) / step))]
         summary = _Bucket()
         rows = []
+        read_ok = True
         # Start the reader's WAL snapshot and copy the unwritten tail under the
         # same short lock. Fetch/aggregate outside it, so a long history query
         # cannot stall the sampling worker or count a just-flushed batch twice.
@@ -313,6 +388,8 @@ class HistoryStore:
                 if self._closed:
                     raise RuntimeError("History store is closed")
                 try:
+                    if self._read_discard_pending:
+                        self._close_reader()
                     if self.path.exists():
                         if self._read_connection is None:
                             self._read_connection = sqlite3.connect(
@@ -327,36 +404,41 @@ class HistoryStore:
                              max(start, self._wall() - (RETENTION if resolution == 60
                                                        else SECOND_RETENTION)), until))
                 except (OSError, sqlite3.Error) as error:
-                    if self._read_connection is not None:
-                        self._read_connection.rollback()
-                    self._failure(error, "sqlite3.history.read")
+                    read_ok = False
+                    if self._read_discard_pending:
+                        self._failure(error, "sqlite3.history.read")
+                    else:
+                        self._finish_read(error)
+                    cursor = None
                 tail = [(key[1], *bucket.values()) for key, bucket in self._pending.items()
                         if key[0] == resolution and key[2:] == (metric, scope, token, canonical)
                         and max(start, self._wall() - (RETENTION if resolution == 60
                                                       else SECOND_RETENTION)) <= key[1] < until]
             if cursor is not None:
+                read_error = None
                 try:
                     rows = cursor.fetchall()
-                except sqlite3.Error as error:
-                    with self._lock:
-                        self._failure(error, "sqlite3.history.read")
-                finally:
-                    self._read_connection.rollback()
+                except (OSError, sqlite3.Error) as error:
+                    read_error = error
+                with self._lock:
+                    read_ok = self._finish_read(read_error)
+                    if not read_ok:
+                        rows = []
             rows.extend(tail)
             state = self.status
         for row in rows:
             second, *values = row
             bucket = _Bucket(*values)
-            bins[int((second - start) // step)].merge(bucket)
+            bins[int((second - grid_start) // step)].merge(bucket)
             summary.merge(bucket)
         result = []
         for index, bucket in enumerate(bins):
-            second = start + index * step
-            result.append(dict(time=second, end=min(second + step, until), gap=bucket.count == 0,
+            second = grid_start + index * step
+            result.append(dict(time=max(start, second), end=min(second + step, until), gap=bucket.count == 0,
                                **bucket.result()))
         return dict(metric=metric, scope=scope, device=token, unit=canonical, period=period,
                     start=start, end=until, resolution=step, points=result,
-                    summary=summary.result(), status=state)
+                    summary=summary.result(), status=state, read_ok=read_ok)
 
     def clear(self):
         """Explicitly clear all history, atomically with the in-memory tail.
@@ -378,12 +460,15 @@ class HistoryStore:
                     connection.execute("DELETE FROM sensor_history")
                 self._pending.clear()
                 self._source_times.clear()
+                self._source_clock = None
                 self._schema_ready = True
                 self._last_cleanup = self._clock()
                 self._next_write = self._clock() + 1
-                self._status.update(state="ready", detail="Local history has been cleared",
-                                    error="", api="", errorcode=None,
-                                    write_transactions=self._status["write_transactions"] + 1)
+                self._status["write_transactions"] += 1
+                # This committed transaction proves the writer is usable,
+                # while leaving independent reader failures visible.
+                self._failures.pop("sqlite3.history.write", None)
+                self._recover("sqlite3.history.clear", "Local history has been cleared")
                 return True
             except (OSError, sqlite3.Error) as error:
                 self._failure(error, "sqlite3.history.clear")

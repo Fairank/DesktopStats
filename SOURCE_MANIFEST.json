@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.20.0-preview.1",
-  "archive_root": "DesktopStats-0.20.0-preview.1-source/",
+  "version": "0.20.0-preview.2",
+  "archive_root": "DesktopStats-0.20.0-preview.2-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 3253,
-      "sha256": "75646f582a13d8ec4e55c83cdbea78fd5fe6dcd655affc352f89df4589b6b249"
+      "bytes": 4894,
+      "sha256": "8b2d47ec2fc853601c5d14e9c4f851133a865c8f52ce7d200dbb53414a47da8e"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4397,
-      "sha256": "11842729d5f538d2e4699c4d2460dec06bba61313dfe3fbe00a08e985dd57e29"
+      "bytes": 6013,
+      "sha256": "53b48f2254a8e41aac6bc9a3187d8286b6919c99db857b5020566e0500dcfcbf"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -393,6 +393,36 @@
       "sha256": "c45a45d8d4109a493ce20fc8b039c3e007d43cfd7f391778f089917230523625"
     },
     {
+      "path": "assets/showcase/history-dark.png",
+      "bytes": 255820,
+      "sha256": "eee912ebdcd38dd27436e4d4e30e1c38c7c9c5a0c4608de2d77e0c3c2cd94881"
+    },
+    {
+      "path": "assets/showcase/history-light.png",
+      "bytes": 255269,
+      "sha256": "7d9f6ee971c150ca14089ab1814a57d81095984b486736933805bb4cf3a5c7be"
+    },
+    {
+      "path": "assets/showcase/scene-preview.png",
+      "bytes": 281781,
+      "sha256": "9ab0d1a14bf01e55de9b5d4023d1014d52d3ec332ad501a63e6f6a4ad949759c"
+    },
+    {
+      "path": "assets/showcase/source-diagnostics.png",
+      "bytes": 295984,
+      "sha256": "91477b0ff45a3957658f94ae50bc95470260af1ba5284b719ec4a178b757e570"
+    },
+    {
+      "path": "assets/showcase/top-bar-styles.png",
+      "bytes": 321901,
+      "sha256": "5ec1a774d06bbc3f24df9178281f5bdb13f3190cc7a2a1c3ee3435213dd38870"
+    },
+    {
+      "path": "assets/showcase/widgets-editor.png",
+      "bytes": 218139,
+      "sha256": "40c43914213480c3fd62e36702839b3c7fbd1db37e9fefd130c1275da8d3853a"
+    },
+    {
       "path": "battery_sensor.py",
       "bytes": 4962,
       "sha256": "ff7f4b864e8ed99b0a37c1cb7b91112f48a344560d30d9be23ca9cdc29c8b1bc"
@@ -454,8 +484,8 @@
     },
     {
       "path": "docs/USER_GUIDE.md",
-      "bytes": 34721,
-      "sha256": "404857f90a743dc34421cd35b285db650920ba8fea5c516dd57c53aca300727b"
+      "bytes": 35205,
+      "sha256": "a8d5060e04e4fc230db10a31704c8c904cfedc42d15af68967b04d429472b27f"
     },
     {
       "path": "energy_sensor.py",
@@ -474,8 +504,8 @@
     },
     {
       "path": "history_store.py",
-      "bytes": 20432,
-      "sha256": "17fe7bf89f49f31f6f8dfd2e1e335daa0979e6497ac3a57c1b9b962c0e5f1863"
+      "bytes": 24031,
+      "sha256": "c57eb1ed2484d11460072b039f69f349a2612760524046f231093833047bf562"
     },
     {
       "path": "hooks/hook-PySide6.QtGui.py",
@@ -919,8 +949,8 @@
     },
     {
       "path": "native/HistoryPage.qml",
-      "bytes": 14209,
-      "sha256": "f5cdb3ee6f2658e4da0efc7e8716684837a3b9ae2ba5f29ce43a91efda8f46a9"
+      "bytes": 14230,
+      "sha256": "a791f8b9d27c682eee8c8853d80be4f1860a23820276d5e4024c0ef5d7294a0f"
     },
     {
       "path": "native/Icon.qml",
@@ -1039,8 +1069,8 @@
     },
     {
       "path": "native/TrendChart.qml",
-      "bytes": 15773,
-      "sha256": "d7a1fce623bbaa93a444d261b249f9d7e9546e3a371da6130463c065bedc059a"
+      "bytes": 16572,
+      "sha256": "a85481a832511c6df5c0ee4f298ca46bf7dab7b89866973f4a4b168ee7649e5a"
     },
     {
       "path": "native/ValueSlider.qml",
@@ -1125,7 +1155,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "21c0402fbbb0bdaf5d88ddca0ac7ae08a7be6d93fe9206f8e1c9759814ae7d24"
+      "sha256": "f7a4fed8bd55bc7358aa1d70beec9cf3399f0101667ad164d07ce0b321df2c79"
     },
     {
       "path": "pyproject.toml",
@@ -1321,6 +1351,11 @@
       "path": "tests/test_history_qml.py",
       "bytes": 25272,
       "sha256": "74ad916a9933ae6e0e1d88991f25d6074089e656946d43756285ef84dafb1fe6"
+    },
+    {
+      "path": "tests/test_history_recovery.py",
+      "bytes": 25722,
+      "sha256": "518396a6b0854acc31a5ce69bc3d5f39c4b5d07f11c82dc80e803ff7de35ff69"
     },
     {
       "path": "tests/test_history_store.py",
@@ -1623,6 +1658,11 @@
       "sha256": "6fdf002f4a0f275fef6201fb152069da9ee57c3b65ab0016674e8d4a6eda098e"
     },
     {
+      "path": "tests/test_workspace_recovery.py",
+      "bytes": 7566,
+      "sha256": "b45bd7744e6dbc0443734dc1c8cd4e5ce6d6bcf83db2f71cccc1b6fd9defc1e5"
+    },
+    {
       "path": "tests/test_workspace_routing.py",
       "bytes": 22018,
       "sha256": "7bbb06d787c0528503aeba1dc8ca22d877e76e049a49897e880e8afa5b7b2501"
@@ -1636,6 +1676,11 @@
       "path": "tests/test_workspace_ui.py",
       "bytes": 16488,
       "sha256": "fe9a7f69fe3879e67e12e1c1cc1eca112be6018e3d8668cbdfa85484318fce11"
+    },
+    {
+      "path": "tests/test_workspace_ui_recovery.py",
+      "bytes": 13891,
+      "sha256": "f43dce9ac89c57b21ba66b73adb01b1a13b301ed14203647b7217b1a3bf04aaa"
     },
     {
       "path": "third_party/librehardwaremonitor/0.9.6/LICENSE-HidSharp-Apache-2.0.txt",
@@ -1669,8 +1714,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 14459,
-      "sha256": "1e2f81c40d714722ad5971cd8920c9062e7565ae7cfd468d98b8aa4289f625b0"
+      "bytes": 14580,
+      "sha256": "86c4838cbde946fca0adae71199b88ab306e62fd5881648f3912734bf556aed4"
     },
     {
       "path": "tools/build_collector.py",
@@ -1679,8 +1724,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 19543,
-      "sha256": "5db41c643c80ce0a8967e3164e66d040bfd03fad7ccf55d87b3b78bf7a884eaf"
+      "bytes": 19801,
+      "sha256": "a24722e6685690b0b16af618fde0d73096a24b45a9392a00333b950e979f51d9"
     },
     {
       "path": "tools/fetch_qt_licenses.py",
@@ -1759,13 +1804,13 @@
     },
     {
       "path": "workspace_scenarios.py",
-      "bytes": 11880,
-      "sha256": "9db34b43f5c0d8cd6d6b58f294cddbcbe1346e7f60d6c3c906a7a109ea05ac45"
+      "bytes": 12160,
+      "sha256": "b84749712f58c41d142154ae6c6d0316664c7925f3b11994de51ebe66dca6103"
     },
     {
       "path": "workspace_tools.py",
-      "bytes": 16424,
-      "sha256": "d9d106fc2d48bd38094a3d5fcce63c2708273cbafd50271d1c3a0928427edbcc"
+      "bytes": 17053,
+      "sha256": "7cae379b50801587e6fb95f7bc70712f2ba89b66ad4aa5f82065532ef4a39f8d"
     }
   ],
   "manifest_note": "This manifest describes every other archive member; no self-hash."

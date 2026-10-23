@@ -156,7 +156,10 @@ class WorkspaceTools(QObject):
         summary = response["summary"]
         status = response["status"]
         bins = response["points"]
-        return dict(state="error" if status["state"] == "unavailable" else "ready" if summary["count"] else "empty",
+        # A failed clear or write remains visible in historyStatus, but must not
+        # hide data from a complete successful read of the original database.
+        readable = response.get("read_ok", status["state"] != "unavailable")
+        return dict(state="error" if not readable else "ready" if summary["count"] else "empty",
                     detail=self.tr(_HISTORY_DETAILS.get(status["detail"], status["detail"])),
                     metric=metric, label=self.tr(METRICS[metric]["label"]),
                     unit=response["unit"], start=response["start"], end=response["end"],
@@ -273,12 +276,15 @@ class WorkspaceTools(QObject):
         try:
             candidate = self._scene_store.prepare(identifier, self._draft)
             value = project(self._saved, workspace(candidate))
-            capacity = self.layout_error(value, True)
-            if capacity:
-                raise ValueError(capacity)
-            # Store a recovery scene before replacing the saved workspace.
-            with self._scene_store.previous_transaction(self._saved):
-                save(value)
+            changed = value != self._saved
+            if changed:
+                capacity = self.layout_error(value, True)
+                if capacity:
+                    raise ValueError(capacity)
+                # An already applied scene must not overwrite the useful prior
+                # workspace or rearrange windows just to discard editor drafts.
+                with self._scene_store.previous_transaction(self._saved):
+                    save(value)
         except (OSError, ValueError) as error:
             self._scene_error = self.tr(str(error)) if isinstance(error, ValueError) else self.tr("未能应用场景，请重试。")
             self.scenesChanged.emit()
@@ -287,11 +293,16 @@ class WorkspaceTools(QObject):
         self._draft = project(self._draft, workspace(value))
         self._rebase_scope_history("desktop")
         self._rebase_scope_history("topbar")
-        self.savedChanged.emit()
+        if changed:
+            self.savedChanged.emit()
         self.draftChanged.emit()
-        self.applyRequested.emit(True)
+        if changed:
+            self.applyRequested.emit(True)
         self.refreshScenes()
-        self._scene_applied = identifier
+        # The recovery entry was replaced with the workspace we just left.
+        # refreshScenes() has already found the restored workspace's real ID.
+        if identifier != "previous":
+            self._scene_applied = identifier
         self.scenesChanged.emit()
         self._applied_status("场景已应用")
         return True

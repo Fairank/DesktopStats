@@ -1,13 +1,35 @@
 # 年糕 · Desktop Stats for Windows
 
+<p align="center"><img src="assets/icon-128.png" width="64" height="64" alt="年糕图标"></p>
+
 可自由组合的原生 Windows 桌面监控组件与顶部状态栏。选择自己需要的指标，
 用卡片、横条或竖条显示；悬停顶部栏可展开图表、设备和数据来源。
 
-**0.20.0-preview.1 · 开发预览 · Windows x64 · 仅允许许可规定的非商业用途**
+**0.20.0-preview.2 · 开发预览 · Windows x64 · 仅允许许可规定的非商业用途**
 
 原创应用代码采用 [PolyForm Noncommercial 1.0.0](LICENSE)。未经另行书面授权，
 不授予商业使用、商业集成或转售的权利。第三方依赖和旧版 MIT 权利保留，
 详见 [许可范围](LICENSING.md)。公开仓库可被下载，许可证不提供技术防复制功能。
+
+## 界面预览
+
+以下是当前原生界面的离屏绘制图，全部使用合成示例数据。点击图片可查看高清原图；
+图片不作为 Windows 原生磨砂外观的验收。
+
+| 组件编辑与实时预览 | 顶部栏：屏幕、指标与显示样式 |
+| --- | --- |
+| [![组件编辑与实时预览，示例数据](assets/showcase/widgets-editor.png)](assets/showcase/widgets-editor.png) | [![顶部栏设置与显示样式，示例数据](assets/showcase/top-bar-styles.png)](assets/showcase/top-bar-styles.png) |
+| 自适应布局与精细排版，按需调整组件内容。 | 选择显示器、排列指标，网络上下行支持同框。 |
+
+| 历史趋势 · 浅色 | 历史趋势 · 深色 |
+| --- | --- |
+| [![浅色历史趋势，合成示例数据](assets/showcase/history-light.png)](assets/showcase/history-light.png) | [![深色历史趋势，合成示例数据](assets/showcase/history-dark.png)](assets/showcase/history-dark.png) |
+| 固定时间分组，保留真实的缺测和峰谷范围。 | 悬停或使用方向键查看具体时间和读数。 |
+
+| 场景：先预览，再应用 | 来源诊断：原因与下一步 |
+| --- | --- |
+| [![场景预览，合成示例数据](assets/showcase/scene-preview.png)](assets/showcase/scene-preview.png) | [![来源诊断，合成示例数据](assets/showcase/source-diagnostics.png)](assets/showcase/source-diagnostics.png) |
+| 内置方案、自存布局与上次布局恢复。 | 分开显示来源状态，接口详情按需展开。 |
 
 ## 功能
 

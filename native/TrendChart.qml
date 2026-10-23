@@ -16,6 +16,7 @@ Item {
     property string emptyText: ui.t("这段时间还没有记录")
     property bool motionEnabled: ui.motionAllowed
     property real hoverTimestamp: NaN
+    property string cursorSeriesIdentity:""
     readonly property bool hasTimeRange: Number.isFinite(rangeStart) && Number.isFinite(rangeEnd) && rangeEnd > rangeStart
     readonly property bool compatibleUnits: series.every(row => !row.unit || row.unit === root.unit)
     readonly property var finitePoints: {
@@ -106,12 +107,22 @@ Item {
         hoverTimestamp=sampleTimes[Math.max(0,Math.min(sampleTimes.length-1,index+step))]
         pointHovered(hoverTimestamp)
     }
-    onSeriesChanged: { hoverTimestamp=NaN; plot.requestPaint() }
+    function reconcileCursor(sameSeriesAllowed) {
+        const identity=JSON.stringify([unit,series.map(row=>[row.id || "",row.unit || unit])])
+        const same=sameSeriesAllowed && identity===cursorSeriesIdentity
+            && series.length>0 && series.every(row=>typeof row.id==="string" && row.id.length>0)
+        cursorSeriesIdentity=identity
+        if(!same || !hasTimeRange || !compatibleUnits || !Number.isFinite(hoverTimestamp)
+                || !series.some(row=>(row.points || []).some(point=>validPoint(point) && point.timestamp===hoverTimestamp)))
+            hoverTimestamp=NaN
+    }
+    onSeriesChanged: { reconcileCursor(true); plot.requestPaint() }
+    onUnitChanged: { reconcileCursor(false); plot.requestPaint() }
     onAxisChanged: plot.requestPaint()
     onPlotRectChanged: plot.requestPaint()
-    onRangeStartChanged: plot.requestPaint()
-    onRangeEndChanged: plot.requestPaint()
-    onCompatibleUnitsChanged: plot.requestPaint()
+    onRangeStartChanged: { reconcileCursor(true); plot.requestPaint() }
+    onRangeEndChanged: { reconcileCursor(true); plot.requestPaint() }
+    onCompatibleUnitsChanged: { reconcileCursor(true); plot.requestPaint() }
     Keys.onPressed: event => {
         if(event.key===Qt.Key_Left)moveCursor(-1)
         else if(event.key===Qt.Key_Right)moveCursor(1)

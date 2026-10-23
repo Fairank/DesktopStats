@@ -1,5 +1,30 @@
 # Changes
 
+## 0.20.0-preview.2
+
+- Keep history read, write and clear failures independent. A temporary reader
+  error must not postpone healthy writes; a successful read recovers its own
+  state without hiding another operation's error.
+- Reset source-time deduplication after a significant backwards system-clock
+  correction, while preserving cached-sample filtering and bounded write cadence.
+- Anchor history aggregation to a fixed time grid, so refreshing the window does
+  not redistribute old observations into different means. Clip partial edge bins
+  to the requested range and retain the point budget and exact summary values.
+- Reusing the current scene no longer overwrites Previous layout or rearranges
+  desktop windows. It can still discard pending workspace edits while retaining
+  unrelated preference drafts. Restoring Previous layout shows the restored
+  workspace's actual applied identity.
+- Use one bounded 8 MiB UTF-8 budget for scene reads and writes. Eight legitimate
+  complex workspaces remain readable; oversized replacements fail before changing
+  the original file. Earlier valid scene files above 1 MiB can be read again.
+- Dismiss an unconfirmed history deletion when leaving or hiding the page, and
+  preserve an inspected chart observation across refreshes while its series,
+  unit and real timestamp remain valid.
+- Keep existing history visible after a failed clear when reading still succeeds,
+  and contain reader rollback/close errors without losing their original API code.
+- Add a six-image native-interface gallery to the repository README, with
+  synthetic-data labels and reviewed source-only image assets.
+
 ## 0.20.0-preview.1
 
 - Add local history for supported CPU, memory, battery, power, fan, GPU and

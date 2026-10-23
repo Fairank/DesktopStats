@@ -54,7 +54,7 @@ Item {
         return Number.isFinite(timestamp)?new Date(timestamp*1000).toLocaleString(Qt.locale(),"MM/dd hh:mm:ss"):""
     }
     onOptionsChanged:ensureSelection()
-    onActiveChanged:if(active){ensureSelection();refresh()}
+    onActiveChanged:if(active){ensureSelection();refresh()}else clearArmed=false
     onPeriodChanged:refresh()
     Component.onCompleted:{componentReady=true;ensureSelection();refresh()}
     Connections {

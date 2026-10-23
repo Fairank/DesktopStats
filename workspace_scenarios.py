@@ -18,6 +18,9 @@ from widget_catalog import MODULES, TEMPLATES, from_template
 
 FIELDS = DESKTOP_FIELDS | {"top_bar"}
 MAX_CUSTOM = 8
+# Eight complete workspaces plus recovery can legitimately exceed 1 MiB when
+# device bindings contain UTF-8 names. Keep reads and writes under one budget.
+MAX_FILE_BYTES = 8 * 1024 * 1024
 BUILTINS = (
     dict(id="office", label="日常办公", description="轻巧的状态栏，让注意力留给工作。",
          icon="grid", accent="#3678c9", summary="1 个桌面条 · CPU · 内存 · 网络 · 电池", kind="bar",
@@ -117,7 +120,7 @@ class SceneStore:
 
     def _read(self, base):
         try:
-            if self.path.stat().st_size > 1024 * 1024:
+            if self.path.stat().st_size > MAX_FILE_BYTES:
                 raise ValueError("场景文件过大")
             data = json.loads(self.path.read_text(encoding="utf-8"))
         except FileNotFoundError:
@@ -147,11 +150,13 @@ class SceneStore:
         return name.strip()
 
     def _write(self, rows):
-        raw = json.dumps(dict(version=1, scenes=rows), ensure_ascii=False, indent=2)
+        raw = json.dumps(dict(version=1, scenes=rows), ensure_ascii=False, indent=2).encode("utf-8")
+        if len(raw) > MAX_FILE_BYTES:
+            raise ValueError("场景文件过大")
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = None
         try:
-            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=self.path.parent,
+            with tempfile.NamedTemporaryFile(mode="wb", dir=self.path.parent,
                                              prefix=".scene-", suffix=".tmp", delete=False) as stream:
                 temporary = Path(stream.name)
                 stream.write(raw)

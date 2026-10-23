@@ -77,6 +77,12 @@ REVIEWED_FILES = frozenset(
             "niangao-source.svg",
             "lucide/LICENSE",
             "lucide/provenance.json",
+            "showcase/history-light.png",
+            "showcase/history-dark.png",
+            "showcase/scene-preview.png",
+            "showcase/source-diagnostics.png",
+            "showcase/widgets-editor.png",
+            "showcase/top-bar-styles.png",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]
