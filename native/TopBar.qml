@@ -140,7 +140,7 @@ Window {
             readonly property var frozenSlot:root.dragHeld?root.dragSlots.find(slot=>slot.id===modelData.id):null
             objectName: "topBarMetric_" + modelData.id
             Accessible.role:Accessible.Button
-            Accessible.name:(modelData.label || "")+" "+(modelData.value || "—")
+            Accessible.name:((modelData.grouped?modelData.group_label:modelData.label) || "")+" "+((modelData.grouped?modelData.group_value:modelData.value) || "—")
             Accessible.onPressAction:root.barState.clickMetric(modelData.id)
             x: frozenSlot?frozenSlot.x:modelData.x
             y: modelData.y
@@ -155,7 +155,7 @@ Window {
                 color: root.tint(metricMouse.pressed ? 0.11 : 0.065)
                 visible: metricMouse.containsMouse || (root.barState.pinned && root.barState.detail.id === metric.modelData.id)
             }
-            TopBarMetricContent {
+            TopBarGroupContent {
                 id: metricContent
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
@@ -188,7 +188,7 @@ Window {
             }
             PlainTip {
                 visible: metricMouse.containsMouse && metricContent.labelTruncated && !root.dragHeld && !root.barState.detail.id && !root.barState.operationMessage
-                text: (metric.modelData.label || "") + "  " + (metric.modelData.value || "—")
+                text: ((metric.modelData.grouped?metric.modelData.group_label:metric.modelData.label) || "") + "  " + ((metric.modelData.grouped?metric.modelData.group_value:metric.modelData.value) || "—")
             }
         }
     }

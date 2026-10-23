@@ -50,6 +50,48 @@ def set_autostart(enabled, executable=None):
                 pass
 
 
+class _ProcessExitWaiter:
+    """Retain one process identity until its kernel object confirms termination."""
+
+    def __init__(self, pid):
+        kernel = c.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = [c.c_ulong, c.c_int, c.c_ulong]
+        kernel.OpenProcess.restype = c.c_void_p
+        kernel.WaitForSingleObject.argtypes = [c.c_void_p, c.c_ulong]
+        kernel.WaitForSingleObject.restype = c.c_ulong
+        kernel.CloseHandle.argtypes = [c.c_void_p]
+        kernel.CloseHandle.restype = c.c_int
+        self.kernel = kernel
+        self.handle = kernel.OpenProcess(0x00100000, False, pid)  # SYNCHRONIZE only.
+        if not self.handle:
+            raise OSError(c.get_last_error(), "Could not retain the running application process")
+
+    def exited(self):
+        result = self.kernel.WaitForSingleObject(self.handle, 0)
+        if result == 0:
+            return True
+        if result == 258:
+            return False
+        raise OSError(c.get_last_error(), "Could not confirm application process termination")
+
+    def close(self):
+        if self.handle:
+            if not self.kernel.CloseHandle(self.handle):
+                raise OSError(c.get_last_error(), "Could not close application process wait handle")
+            self.handle = None
+
+
+def _valid_status(status):
+    return (
+        isinstance(status, dict)
+        and status.get("ok") is True
+        and status.get("native") is True
+        and type(status.get("dirty")) is bool
+        and type(status.get("pid")) is int
+        and 0 < status["pid"] <= 0xFFFFFFFF
+    )
+
+
 def close_existing():
     from native_ipc import send
 
@@ -58,32 +100,38 @@ def close_existing():
         if _server_absent():
             return
         raise RuntimeError("无法确认当前软件已关闭；请手动退出 Desktop Stats 后重试。")
-    if (
-        not isinstance(status, dict)
-        or status.get("ok") is not True
-        or status.get("native") is not True
-        or type(status.get("dirty")) is not bool
-        or type(status.get("pid")) is not int
-        or status["pid"] <= 0
-    ):
+    if not _valid_status(status):
         raise RuntimeError("当前软件未提供可靠状态；请手动退出 Desktop Stats 后重试。")
     if status["dirty"]:
         raise RuntimeError("当前软件有未应用的设置，请先应用或撤销，再手动退出。")
-    reply = send({"command": "quit_if_clean"}, timeout=1200)
-    if (
-        not isinstance(reply, dict)
-        or reply.get("ok") is not True
-        or reply.get("quitting") is not True
-        or reply.get("dirty") is not False
-        or type(reply.get("pid")) is not int
-        or reply.get("pid") != status["pid"]
-    ):
-        raise RuntimeError("当前版本不能安全自动退出；请手动退出 Desktop Stats 后重试。")
-    for _ in range(20):
-        time.sleep(0.25)
-        if send({"command": "status"}, timeout=150) is None and _server_absent():
-            return
-    raise RuntimeError("软件仍在运行，安装尚未开始；请手动退出后重试。")
+    process = _ProcessExitWaiter(status["pid"])
+    try:
+        if process.exited():
+            raise RuntimeError("当前软件进程已改变；请重新运行安装。")
+        # Reconfirm the pipe's live instance while holding its process object.
+        # A disappeared/reused PID or new unsaved input must fail closed.
+        current = send({"command": "status"}, timeout=1200)
+        if (not _valid_status(current) or current["pid"] != status["pid"]
+                or current["dirty"] or process.exited()):
+            raise RuntimeError("当前软件实例或设置已改变；请手动退出后重试。")
+        reply = send({"command": "quit_if_clean"}, timeout=1200)
+        if (
+            not isinstance(reply, dict)
+            or reply.get("ok") is not True
+            or reply.get("quitting") is not True
+            or reply.get("dirty") is not False
+            or type(reply.get("pid")) is not int
+            or reply.get("pid") != status["pid"]
+        ):
+            raise RuntimeError("当前版本不能安全自动退出；请手动退出 Desktop Stats 后重试。")
+        for _ in range(20):
+            time.sleep(0.25)
+            if (send({"command": "status"}, timeout=150) is None
+                    and _server_absent() and process.exited()):
+                return
+        raise RuntimeError("软件仍在运行，安装尚未开始；请手动退出后重试。")
+    finally:
+        process.close()
 
 
 def _server_absent():
@@ -127,6 +175,10 @@ def owned_files():
 BUNDLE_PARTS = (
     "DesktopStats.exe",
     "LICENSE",
+    "NOTICE",
+    "LICENSING.md",
+    "THIRD_PARTY_NOTICES.md",
+    "CHANGELOG.md",
     "THIRD_PARTY_LICENSES.txt",
     "README.md",
     "_internal",
@@ -376,6 +428,9 @@ def install():
         (stage / "install-manifest.json").write_text(
             json.dumps(sorted(path.as_posix() for path in files)), encoding="utf-8"
         )
+        # Copying the bundle can take time. A user may have reopened the old
+        # app meanwhile; confirm clean termination before snapshot or swap.
+        close_existing()
         folders = tuple(dict.fromkeys((shell_folder(0x10), shell_folder(2))))
         snapshot = _snapshot_registration(folders)
         # These are same-parent, verified transaction paths. No tree is deleted.

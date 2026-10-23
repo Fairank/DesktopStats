@@ -109,7 +109,7 @@ ColumnLayout {
         id: measurements
         model: root.displayRows
         onItemAdded: fit.restart()
-        delegate: TopBarMetricContent {
+        delegate: TopBarGroupContent {
             required property var modelData
             visible: false
             row: modelData
@@ -163,7 +163,7 @@ ColumnLayout {
             width: root.rowWidth(modelData)
             height: root.barHeight
             padding: 0
-            Accessible.name: modelData.label + " " + modelData.value
+            Accessible.name: (modelData.grouped?modelData.group_label:modelData.label) + " " + (modelData.grouped?modelData.group_value:modelData.value)
             onClicked: root.selected(modelData.id)
             Keys.onShortcutOverride:function(event){if(root.dragHeld && event.key===Qt.Key_Escape)event.accepted=true}
             Keys.onPressed:function(event){
@@ -176,7 +176,7 @@ ColumnLayout {
                 }else if(event.key===Qt.Key_Escape && root.dragHeld){root.cancelDrag();event.accepted=true}
             }
             contentItem: Item {
-                TopBarMetricContent {
+                TopBarGroupContent {
                     anchors.left: parent.left
                     anchors.leftMargin: 6
                     anchors.verticalCenter: parent.verticalCenter
@@ -200,7 +200,7 @@ ColumnLayout {
                 onReleased:{if(!root.dragHeld)return;if(root.dragging)root.finishDrag();else{const id=root.draggedId;root.cancelDrag();root.selected(id)}}
                 onCanceled:root.cancelDrag()
             }
-            PlainTip { visible: previewMouse.containsMouse && !root.dragHeld; text: metric.modelData.label + "  " + metric.modelData.value }
+            PlainTip { visible: previewMouse.containsMouse && !root.dragHeld; text: (metric.modelData.grouped?metric.modelData.group_label:metric.modelData.label) + "  " + (metric.modelData.grouped?metric.modelData.group_value:metric.modelData.value) }
         }
         Row {
             x: 8 + Math.max(root.barHeight, 24) + root.itemSpacing

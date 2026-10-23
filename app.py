@@ -91,17 +91,27 @@ def main():
     if not server.start():
         send({"command": "show"})
         return
-    from legacy_migration import migrate
+    runtime = pid_file = None
+    try:
+        from legacy_migration import migrate
 
-    migrate()
-    runtime = Runtime(application, background=args.background, headless=args.headless)
-    server.runtime = runtime
-    pid_file = BASE / "app.pid"
-    pid_file.write_text(str(os.getpid()), encoding="ascii")
-    application.exec()
-    server.close()
-    if pid_file.exists() and pid_file.read_text(encoding="ascii") == str(os.getpid()):
-        pid_file.unlink()
+        migrate()
+        runtime = Runtime(application, background=args.background, headless=args.headless)
+        server.runtime = runtime
+        pid_file = BASE / "app.pid"
+        pid_file.write_text(str(os.getpid()), encoding="ascii")
+        application.exec()
+    finally:
+        try:
+            if runtime is not None and not runtime.shutting_down:
+                runtime.shutdown()
+        finally:
+            try:
+                server.close()
+            finally:
+                if (pid_file is not None and pid_file.exists()
+                        and pid_file.read_text(encoding="ascii") == str(os.getpid())):
+                    pid_file.unlink()
 
 
 if __name__ == "__main__":

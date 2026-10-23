@@ -110,6 +110,11 @@ class CloseExistingAuditTests(unittest.TestCase):
         absent = patch.object(installer, "_server_absent", return_value=True)
         self.absent = absent.start()
         self.addCleanup(absent.stop)
+        self.process = Mock()
+        self.process.exited.return_value = False
+        waiter = patch.object(installer, "_ProcessExitWaiter", return_value=self.process, create=True)
+        self.waiter = waiter.start()
+        self.addCleanup(waiter.stop)
 
     @staticmethod
     def status(**changes):
@@ -163,30 +168,35 @@ class CloseExistingAuditTests(unittest.TestCase):
         ):
             with self.subTest(ack=ack):
                 self.send.reset_mock()
-                self.send.side_effect = [self.status(), ack]
+                self.send.side_effect = [self.status(), self.status(), ack]
                 with self.assertRaises(RuntimeError):
                     installer.close_existing()
                 self.assertEqual(
                     [call.args[0]["command"] for call in self.send.call_args_list],
-                    ["status", "quit_if_clean"],
+                    ["status", "status", "quit_if_clean"],
                 )
 
     def test_success_requires_status_disappearance_and_pipe_absence(self):
         self.send.side_effect = [
             self.status(),
+            self.status(),
             dict(ok=True, quitting=True, dirty=False, pid=7007),
             self.status(),
             None,
         ]
+        self.process.exited.side_effect = [False, False, True]
         installer.close_existing()
         self.assertEqual(
             [item.args[0]["command"] for item in self.send.call_args_list],
-            ["status", "quit_if_clean", "status", "status"],
+            ["status", "status", "quit_if_clean", "status", "status"],
         )
         self.absent.assert_called_once_with()
+        self.process.close.assert_called_once_with()
 
     def test_ack_without_confirmed_termination_refuses_installation(self):
-        replies = iter([self.status(), dict(ok=True, quitting=True, dirty=False, pid=7007)])
+        replies = iter([
+            self.status(), self.status(), dict(ok=True, quitting=True, dirty=False, pid=7007)
+        ])
         self.send.side_effect = lambda *_args, **_kwargs: next(replies, None)
         self.absent.return_value = False
         with self.assertRaises(RuntimeError):
@@ -196,11 +206,99 @@ class CloseExistingAuditTests(unittest.TestCase):
     def test_boolean_ack_pid_cannot_equal_integer_pid_one(self):
         self.send.side_effect = [
             dict(self.status(), pid=1),
+            dict(self.status(), pid=1),
             dict(ok=True, quitting=True, dirty=False, pid=True),
             None,
         ]
         with self.assertRaises(RuntimeError):
             installer.close_existing()
+
+    def test_absent_pipe_does_not_prove_the_acknowledged_process_has_exited(self):
+        reads = 0
+
+        def send(command, **_kwargs):
+            nonlocal reads
+            if command["command"] == "quit_if_clean":
+                return dict(ok=True, quitting=True, dirty=False, pid=7007)
+            reads += 1
+            return self.status() if reads <= 2 else None
+
+        self.send.side_effect = send
+        self.absent.return_value = True
+        self.process.exited.return_value = False
+        with self.assertRaises(RuntimeError):
+            installer.close_existing()
+        self.process.close.assert_called_once_with()
+
+    def test_process_that_exited_before_handle_confirmation_is_not_asked_to_quit(self):
+        self.send.return_value = self.status()
+        self.process.exited.return_value = True
+        with self.assertRaises(RuntimeError):
+            installer.close_existing()
+        self.send.assert_called_once_with({"command": "status"}, timeout=1200)
+        self.process.close.assert_called_once_with()
+
+    def test_changed_or_dirty_reconfirmation_never_sends_quit_and_closes_handle(self):
+        for current in (None, dict(self.status(), pid=7008), dict(self.status(), dirty=True)):
+            with self.subTest(current=current):
+                self.send.reset_mock()
+                self.process.reset_mock()
+                self.send.side_effect = [self.status(), current]
+                with self.assertRaises(RuntimeError):
+                    installer.close_existing()
+                self.assertEqual(
+                    [item.args[0]["command"] for item in self.send.call_args_list],
+                    ["status", "status"],
+                )
+                self.process.close.assert_called_once_with()
+
+    def test_exit_during_status_reconfirmation_never_sends_quit(self):
+        self.send.side_effect = [self.status(), self.status()]
+        self.process.exited.side_effect = [False, True]
+        with self.assertRaises(RuntimeError):
+            installer.close_existing()
+        self.assertEqual(
+            [item.args[0]["command"] for item in self.send.call_args_list], ["status", "status"]
+        )
+        self.process.close.assert_called_once_with()
+
+
+class ProcessExitWaiterAuditTests(unittest.TestCase):
+    def setUp(self):
+        self.kernel = SimpleNamespace(
+            OpenProcess=Mock(return_value=123),
+            WaitForSingleObject=Mock(return_value=258),
+            CloseHandle=Mock(return_value=True),
+        )
+        self.enterContext(patch.object(installer.c, "WinDLL", return_value=self.kernel))
+        self.enterContext(patch.object(installer.c, "get_last_error", return_value=5))
+
+    def test_uses_only_synchronize_permission_and_closes_the_exact_handle_once(self):
+        process = installer._ProcessExitWaiter(7007)
+        self.kernel.OpenProcess.assert_called_once_with(0x00100000, False, 7007)
+        self.assertFalse(process.exited())
+        self.kernel.WaitForSingleObject.return_value = 0
+        self.assertTrue(process.exited())
+        process.close()
+        process.close()
+        self.kernel.CloseHandle.assert_called_once_with(123)
+        self.assertEqual(self.kernel.WaitForSingleObject.call_args.args, (123, 0))
+
+    def test_open_wait_or_close_failure_is_explicit_and_never_means_process_exit(self):
+        self.kernel.OpenProcess.return_value = 0
+        with self.assertRaises(OSError):
+            installer._ProcessExitWaiter(7007)
+        self.kernel.CloseHandle.assert_not_called()
+        self.kernel.OpenProcess.return_value = 123
+        process = installer._ProcessExitWaiter(7007)
+        self.kernel.WaitForSingleObject.return_value = 0xFFFFFFFF
+        with self.assertRaises(OSError):
+            process.exited()
+        self.kernel.CloseHandle.return_value = False
+        with self.assertRaises(OSError):
+            process.close()
+        self.kernel.CloseHandle.return_value = True
+        process.close()
 
 
 class ServerAbsentAuditTests(unittest.TestCase):
@@ -312,6 +410,10 @@ class InstallerTransactionAuditTests(unittest.TestCase):
         for relative in (
             "DesktopStats.exe",
             "LICENSE",
+            "NOTICE",
+            "LICENSING.md",
+            "THIRD_PARTY_NOTICES.md",
+            "CHANGELOG.md",
             "README.md",
             "THIRD_PARTY_LICENSES.txt",
             "_internal/Qt6Core.dll",
@@ -355,6 +457,10 @@ class InstallerTransactionAuditTests(unittest.TestCase):
         for relative in (
             "DesktopStats.exe",
             "LICENSE",
+            "NOTICE",
+            "LICENSING.md",
+            "THIRD_PARTY_NOTICES.md",
+            "CHANGELOG.md",
             "README.md",
             "THIRD_PARTY_LICENSES.txt",
             "_internal",
@@ -431,6 +537,64 @@ class InstallerTransactionAuditTests(unittest.TestCase):
         self.assertEqual(len(backups), 1)
         self.assertEqual((backups[0] / "DesktopStats.exe").read_bytes(), b"old executable")
         self.assertEqual((backups[0] / "personal.txt").read_bytes(), b"unrelated user note")
+        for name in ("NOTICE", "LICENSING.md", "THIRD_PARTY_NOTICES.md", "CHANGELOG.md"):
+            self.assertEqual((self.target / name).read_bytes(), (self.source / name).read_bytes())
+            self.assertIn(name, manifest)
+
+    def test_restart_during_staging_is_closed_before_snapshot_and_commit(self):
+        self.bundle()
+        self.old_install()
+        running = False
+        restarted = False
+        copy_file = installer.shutil.copy2
+        snapshot = installer._snapshot_registration
+        register = installer._write_registration
+
+        def close():
+            nonlocal running
+            running = False
+
+        def copy_then_restart(*args, **kwargs):
+            nonlocal running, restarted
+            result = copy_file(*args, **kwargs)
+            if not restarted:
+                running = restarted = True
+            return result
+
+        def require_stopped(method):
+            def stopped(*args, **kwargs):
+                self.assertFalse(running, "Staging allowed a restarted app to reach the commit")
+                return method(*args, **kwargs)
+            return stopped
+
+        installer.close_existing.side_effect = close
+        with (
+            patch.object(installer.shutil, "copy2", side_effect=copy_then_restart),
+            patch.object(installer, "_snapshot_registration", side_effect=require_stopped(snapshot)),
+            patch.object(installer, "_write_registration", side_effect=require_stopped(register)),
+        ):
+            installer.install()
+        self.assertTrue(restarted)
+        self.assertEqual(installer.close_existing.call_count, 2)
+
+    def test_dirty_restart_before_commit_preserves_original_registration_and_staged_bundle(self):
+        self.bundle()
+        self.old_install()
+        original = copy.deepcopy(self.registry.values)
+        links = {path: path.read_bytes() for path in self.links}
+        installer.close_existing.side_effect = [None, RuntimeError("restarted with unsaved settings")]
+        with self.assertRaisesRegex(RuntimeError, "restarted with unsaved settings"):
+            installer.install()
+        self.assertEqual((self.target / "DesktopStats.exe").read_bytes(), b"old executable")
+        self.assertEqual((self.target / "personal.txt").read_bytes(), b"unrelated user note")
+        self.assertEqual(self.registry.values, original)
+        self.assertEqual({path: path.read_bytes() for path in self.links}, links)
+        self.assertFalse(list(self.target.parent.glob(".DesktopStats.backup-*")))
+        stages = list(self.target.parent.glob(".DesktopStats.stage-*"))
+        self.assertEqual(len(stages), 1)
+        self.assertEqual((stages[0] / "DesktopStats.exe").read_bytes(),
+                         (self.source / "DesktopStats.exe").read_bytes())
+        self.spawn.assert_not_called()
 
     def test_unknown_file_conflict_refuses_without_overwriting_user_data(self):
         self.bundle()
@@ -662,6 +826,203 @@ class EarlySelfCheckAuditTests(unittest.TestCase):
         ):
             self.assertEqual(app.main(), 2)
         fake.run.assert_called_once_with("")
+
+
+class ApplicationLifecycleAuditTests(unittest.TestCase):
+    def setUp(self):
+        directory = Path(__file__).resolve().parents[1] / "qa-private" / "audit-upgrade35"
+        directory.mkdir(parents=True, exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(prefix="app-lifecycle-", dir=directory)
+        self.addCleanup(self.temp.cleanup)
+        self.profile = Path(self.temp.name)
+        self.application = Mock()
+        self.application.exec.return_value = 0
+        self.runtime = SimpleNamespace(shutting_down=False, shutdown=Mock())
+        self.server = SimpleNamespace(start=Mock(return_value=True), close=Mock(), runtime=None)
+        modules = {}
+        for name in (
+            "stats_config", "PySide6", "PySide6.QtGui", "PySide6.QtQuick",
+            "PySide6.QtWidgets", "native_card", "native_ipc", "native_runtime", "legacy_migration",
+        ):
+            modules[name] = types.ModuleType(name)
+        modules["PySide6"].__path__ = []
+        modules["stats_config"].BASE = modules["stats_config"].ASSETS = self.profile
+        modules["stats_config"].load = lambda: {"language": "zh-CN"}
+        modules["PySide6.QtGui"].QFont = modules["PySide6.QtGui"].QIcon = Mock()
+        modules["PySide6.QtQuick"].QQuickWindow = SimpleNamespace(setDefaultAlphaBuffer=Mock())
+        modules["PySide6.QtWidgets"].QApplication = Mock(return_value=self.application)
+        modules["native_card"].ui_font = lambda _language: "fake font"
+        modules["native_ipc"].send = Mock(return_value=None)
+        modules["native_runtime"].LocalServer = Mock(return_value=self.server)
+        modules["native_runtime"].Runtime = Mock(return_value=self.runtime)
+        modules["legacy_migration"].migrate = Mock()
+        self.modules = modules
+        self.enterContext(patch.dict(sys.modules, modules))
+        self.enterContext(patch.object(app.sys, "argv", ["app.py", "--headless"]))
+        self.enterContext(patch.object(app, "RotatingFileHandler", return_value=Mock()))
+        self.enterContext(patch.object(app.logging, "basicConfig"))
+        self.enterContext(patch.object(app.c, "windll", Mock(side_effect=AssertionError("No native"))))
+
+    def test_failed_migration_or_runtime_constructor_always_closes_its_server(self):
+        for name, attribute in (("legacy_migration", "migrate"), ("native_runtime", "Runtime")):
+            with self.subTest(failure=attribute):
+                self.server.close.reset_mock()
+                method = getattr(self.modules[name], attribute)
+                method.side_effect = RuntimeError("synthetic startup failure")
+                try:
+                    with self.assertRaisesRegex(RuntimeError, "synthetic startup failure"):
+                        app.main()
+                finally:
+                    method.side_effect = None
+                self.server.close.assert_called_once_with()
+                self.runtime.shutdown.assert_not_called()
+                self.assertFalse((self.profile / "app.pid").exists())
+
+    def test_event_loop_failure_shuts_down_runtime_closes_server_and_removes_own_pid(self):
+        self.application.exec.side_effect = RuntimeError("synthetic event loop failure")
+        with self.assertRaisesRegex(RuntimeError, "synthetic event loop failure"):
+            app.main()
+        self.runtime.shutdown.assert_called_once_with()
+        self.server.close.assert_called_once_with()
+        self.assertFalse((self.profile / "app.pid").exists())
+
+    def test_shutdown_failure_still_closes_server_and_removes_own_pid(self):
+        self.runtime.shutdown.side_effect = RuntimeError("synthetic shutdown failure")
+        with self.assertRaisesRegex(RuntimeError, "synthetic shutdown failure"):
+            app.main()
+        self.server.close.assert_called_once_with()
+        self.assertFalse((self.profile / "app.pid").exists())
+
+    def test_finally_preserves_replaced_pid_and_does_not_repeat_normal_shutdown(self):
+        def finish():
+            self.runtime.shutting_down = True
+            (self.profile / "app.pid").write_text("7008", encoding="ascii")
+            return 0
+
+        self.application.exec.side_effect = finish
+        app.main()
+        self.runtime.shutdown.assert_not_called()
+        self.server.close.assert_called_once_with()
+        self.assertEqual((self.profile / "app.pid").read_text(encoding="ascii"), "7008")
+
+    def test_controller_starts_only_after_runtime_constructor_setup_is_complete(self):
+        source = Path(__file__).resolve().parents[1] / "native_runtime.py"
+        tree = ast.parse(source.read_text(encoding="utf-8"))
+        runtime = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "Runtime")
+        constructor = next(
+            node for node in runtime.body if isinstance(node, ast.FunctionDef) and node.name == "__init__"
+        )
+        calls = []
+
+        class Stub:
+            def __init__(self, path):
+                self.path = path
+
+            def __getattr__(self, name):
+                return Stub(self.path + "." + name)
+
+            def __call__(self, *_args, **_kwargs):
+                calls.append(self.path)
+                if self.path == "self.floor_timer.setInterval":
+                    raise RuntimeError("synthetic late setup failure")
+                return Stub(self.path + "()")
+
+            def __iter__(self):
+                return iter(())
+
+        start = next(
+            index for index, node in enumerate(constructor.body)
+            if isinstance(node, ast.Expr) and ast.unparse(node.value) == "self.controller.start()"
+        )
+        floor = next(
+            index for index, node in enumerate(constructor.body)
+            if isinstance(node, ast.Assign) and any(
+                ast.unparse(target) == "self.floor_timer" for target in node.targets
+            )
+        )
+        fragment = ast.Module(body=constructor.body[min(start, floor):], type_ignores=[])
+        state = Stub("self")
+        state.controller = Stub("controller")
+        with self.assertRaisesRegex(RuntimeError, "synthetic late setup failure"):
+            exec(compile(fragment, str(source), "exec"), {
+                "self": state, "QTimer": lambda *_args: Stub("self.floor_timer"),
+            })
+        self.assertNotIn("controller.start", calls)
+
+    @staticmethod
+    def runtime_shutdown():
+        source = Path(__file__).resolve().parents[1] / "native_runtime.py"
+        tree = ast.parse(source.read_text(encoding="utf-8"))
+        runtime = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "Runtime")
+        shutdown = next(
+            node for node in runtime.body if isinstance(node, ast.FunctionDef) and node.name == "shutdown"
+        )
+        namespace = {}
+        exec(compile(ast.Module(body=[shutdown], type_ignores=[]), str(source), "exec"), namespace)
+        return namespace["shutdown"]
+
+    @staticmethod
+    def shutdown_state():
+        return SimpleNamespace(
+            shutting_down=False, settings_material=Mock(), settings_blur=Mock(),
+            settings_host=Mock(), top_bar=Mock(), motion={"first": None, "second": None},
+            cancel_motion=Mock(), drag_origins={}, floor_timer=Mock(), stale_timer=Mock(),
+            position_timer=Mock(), widget_mask_timer=Mock(), save_positions=Mock(),
+            controller=Mock(), widgets={"first": Mock(), "second": Mock()},
+            widget_materials={"first": Mock(), "second": Mock()}, widget_blur=Mock(),
+            details=Mock(), frame_bridge=Mock(), tray=Mock(),
+        )
+
+    def test_runtime_native_cleanup_failure_still_stops_controller_without_hiding_error(self):
+        shutdown = self.runtime_shutdown()
+        for controller_error in (None, RuntimeError("sampler cleanup pending")):
+            with self.subTest(controller_error=controller_error):
+                state = self.shutdown_state()
+                materials = list(state.widget_materials.values())
+                state.settings_material.close.side_effect = RuntimeError("native material cleanup pending")
+                state.controller.close.side_effect = controller_error
+                with self.assertRaisesRegex(RuntimeError, "native material cleanup pending") as raised:
+                    shutdown(state)
+                state.controller.close.assert_called_once_with()
+                self.assertTrue(state.shutting_down)
+                state.settings_blur.close.assert_called_once_with()
+                state.settings_host.dispose.assert_called_once_with()
+                state.top_bar.close.assert_called_once_with()
+                state.save_positions.assert_called_once_with()
+                state.tray.hide.assert_called_once_with()
+                for window in state.widgets.values():
+                    window.hide.assert_called_once_with()
+                for material in materials:
+                    material.close.assert_called_once_with()
+                self.assertEqual(state.widget_materials, {})
+                if controller_error is not None:
+                    self.assertIn("sampler cleanup pending", " ".join(raised.exception.__notes__))
+
+    def test_shutdown_keeps_failed_material_and_continues_other_window_cleanup(self):
+        shutdown = self.runtime_shutdown()
+        state = self.shutdown_state()
+        failed, succeeded = state.widget_materials.values()
+        failed.close.side_effect = RuntimeError("first widget material pending")
+        with self.assertRaisesRegex(RuntimeError, "first widget material pending"):
+            shutdown(state)
+        self.assertEqual(state.widget_materials, {"first": failed})
+        succeeded.close.assert_called_once_with()
+        state.widget_blur.close.assert_called_once_with()
+        state.details.hide.assert_called_once_with()
+        state.frame_bridge.close.assert_called_once_with()
+        state.tray.hide.assert_called_once_with()
+
+    def test_shutdown_reentry_and_repeat_never_releases_resources_twice(self):
+        shutdown = self.runtime_shutdown()
+        state = self.shutdown_state()
+        state.settings_material.close.side_effect = lambda: shutdown(state)
+        shutdown(state)
+        shutdown(state)
+        state.settings_material.close.assert_called_once_with()
+        state.controller.close.assert_called_once_with()
+        state.settings_host.dispose.assert_called_once_with()
+        state.top_bar.close.assert_called_once_with()
+        state.tray.hide.assert_called_once_with()
 
 
 class FakeClient:

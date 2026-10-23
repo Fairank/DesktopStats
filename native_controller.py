@@ -50,7 +50,14 @@ from sensor_diagnostics import reading_source, source_rows, unavailable_reason
 from skin_styles import GLASS_SKINS, effective_skin
 from stats_config import DEFAULT, MAX_WIDGETS, MODULES, SKINS, load, save, validate
 from top_bar_layout import present_metric
-from top_bar_profiles import align_pair_trends, can_gauge, detail_profile, paired_channels
+from top_bar_profiles import (
+    align_pair_trends,
+    can_gauge,
+    detail_profile,
+    group_channels,
+    paired_channels,
+    validate_group_metrics,
+)
 from widget_catalog import CATEGORIES, TEMPLATES, from_template
 from workspace_tools import WorkspaceTools
 
@@ -429,7 +436,32 @@ class Controller(WorkspaceTools):
             item["prefs"][field] = selected
             self.edit(value)
 
-    def _top_bar_rows(self, config, *, detail_id=None, include_related=True):
+    @Slot(str, 'QVariantList', result=bool)
+    def setTopBarGroupMetrics(self, identifier, metrics):
+        value = copy.deepcopy(self._draft)
+        item = next((row for row in value['top_bar']['items'] if row['id'] == identifier), None)
+        if item is None:
+            return False
+        try:
+            selected = validate_group_metrics(item['metric'], metrics)
+        except ValueError as error:
+            self.set_status(str(error))
+            return False
+        prefs = item['prefs']
+        if len(selected) == 1:
+            prefs.pop('metrics', None)
+        else:
+            prefs['metrics'] = selected
+            if (prefs.get('style') in ('duplex', 'duplex_inline')
+                    or prefs.get('style') in ('bar_value', 'ring_value') and any(
+                        not can_gauge(METRICS[metric]) for metric in selected)):
+                prefs['style'] = 'icon_value'
+        if value == self._draft:
+            return True
+        return self.edit(value)
+
+    def _top_bar_rows(self, config, *, detail_id=None, include_related=True,
+                      include_groups=True, force_history=False):
         data = self._data
         stale = bool(data) and not 0 <= time.time() - data.get("time", 0) < 35
         result = []
@@ -537,7 +569,7 @@ class Controller(WorkspaceTools):
                     capacity_summary = dict(label=label_for(used_key, prefs),
                         used_text=used_text+' '+used_unit, total_text=total_text+' '+total_unit,
                         fraction=used/total)
-            include_history = detail_id is not None or prefs.get('style') in ('trend_value', 'graph')
+            include_history = force_history or detail_id is not None or prefs.get('style') in ('trend_value', 'graph')
             result.append(
                 dict(
                     id=item["id"],
@@ -572,7 +604,38 @@ class Controller(WorkspaceTools):
                 )
             )
         preferences = {item["id"]: item["prefs"] for item in config["top_bar"]["items"]}
-        return [present_metric(row, preferences[row["id"]]) for row in result]
+        rows = [present_metric(row, preferences[row['id']]) for row in result]
+        if not include_groups:
+            return rows
+        group_options = {}
+        for row in rows:
+            prefs = preferences[row['id']]
+            selected = prefs.get('metrics', [row['metric']])
+            candidates = group_channels(row['metric'])
+            if candidates not in group_options:
+                group_options[candidates] = [dict(metric=metric, label=label_for(metric, prefs))
+                                             for metric in candidates]
+            row.update(
+                grouped=len(selected) > 1,
+                group_supported=bool(candidates),
+                group_metrics=list(selected),
+                group_options=group_options[candidates],
+                group_rows=[],
+            )
+            if len(selected) > 1:
+                child_prefs = {key: value for key, value in prefs.items() if key != 'metrics'}
+                child_items = [dict(id=row['id'] + '_group_' + str(index), metric=metric,
+                                    prefs=child_prefs)
+                               for index, metric in enumerate(selected)]
+                child_config = dict(config, top_bar=dict(config['top_bar'], items=child_items))
+                children = self._top_bar_rows(
+                    child_config, include_related=False, include_groups=False,
+                    force_history=detail_id is not None,
+                )
+                row['group_rows'] = children
+                row['group_value'] = ' · '.join(child['value'] for child in children)
+                row['group_available'] = any(child['available'] for child in children)
+        return rows
 
     @Slot(result="QVariantList")
     def topBarRows(self):

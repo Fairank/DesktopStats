@@ -1,7 +1,21 @@
 """Explain only observed source failures; absence alone never proves unsupported hardware."""
 
+from itertools import islice
+
 from external_sensor import sensor_binding
 from metrics import SCOPE_FIELDS, metric_info
+
+
+def export_has_problem(export, state):
+    """An available VSB hive does not require a second, optional hive to exist."""
+    error = export.get("error")
+    if export.get("state") in ("available", "export_absent") and not error:
+        return False
+    if (state == "available" and export.get("state") == "export_absent"
+            and isinstance(error, dict)
+            and (error.get("type") == "FileNotFoundError" or error.get("winerror") == 2)):
+        return False
+    return True
 
 
 def reading_source(data, metric, prefs=None):
@@ -224,6 +238,8 @@ def source_rows(data):
             if channel.get("state") != "available":
                 errors.append(error_text(channel))
         for export in status.get("exports", [])[:4]:
+            if not export_has_problem(export, status.get("state")):
+                continue
             errors.append(
                 " · ".join(
                     filter(
@@ -232,11 +248,10 @@ def source_rows(data):
                     )
                 )
             )
-        for channel in (
-            status.get("channel_errors", [])[:32]
-            if isinstance(status.get("channel_errors"), list)
-            else ()
-        ):
+        channels = status.get("channel_errors", [])
+        channels = islice(channels.values(), 32) if isinstance(channels, dict) else (
+            channels[:32] if isinstance(channels, list) else ())
+        for channel in channels:
             errors.append(error_text(channel))
         if identifier == "hwinfo":
             detail = {

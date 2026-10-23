@@ -1096,6 +1096,40 @@ class TopBarManager(QObject):
             self._text_widths, (key, text), lambda: measured.horizontalAdvance(text), 2048
         )
 
+    def _content_width(self, row, family, dpi):
+        """Measure one unchanged single-reading renderer in logical pixels."""
+        style = row['style']
+        short = row.get('bar_label') or row['label']
+        size = 9 if style == 'graph' else 11 if style in ('stacked', 'duplex') else 12
+        split = isinstance(row.get('number_text'), str)
+        number = row['number_text'] if split else str(row['value'])
+        unit = row.get('unit_text', '') if split else ''
+        suffix = 3 + self._measure(
+            family, 9 if style in ('graph', 'stacked') else 10,
+            QFont.Weight.Normal, unit, dpi,
+        ) if unit else 0
+        actual = self._measure(family, size, QFont.Weight.Medium, number, dpi, tabular=True) + suffix
+        reserve = row.get('number_reserve', '999.9') if split else '999.9 ' + row.get('unit', '')
+        stable_value = actual if style == 'graph' else max(
+            actual, self._measure(family, size, QFont.Weight.Medium, reserve, dpi, tabular=True) + suffix,
+        )
+        if style == 'label_value':
+            return min(110, self._measure(family, 11, QFont.Weight.Normal, short, dpi)) + 6 + stable_value
+        if style == 'stacked':
+            return max(min(66, self._measure(family, 9, QFont.Weight.Normal, short, dpi)), stable_value)
+        if style == 'graph':
+            return max(44, actual)
+        if style in ('duplex', 'duplex_inline'):
+            widths = [18 + max(
+                self._measure(family, 11, QFont.Weight.Medium, str(channel.get('number_text', '—')), dpi, tabular=True),
+                self._measure(family, 11, QFont.Weight.Medium, '999.9', dpi, tabular=True),
+            ) + (3 + self._measure(family, 9, QFont.Weight.Normal, str(channel.get('unit_text', '')), dpi)
+                 if channel.get('unit_text') else 0) for channel in row.get('paired_rows', [])[:2]]
+            return (sum(widths) + 12 * max(0, len(widths)-1)
+                    if style == 'duplex_inline' else max(widths, default=stable_value))
+        return {'value': 0, 'icon_value': 23, 'trend_value': 42,
+                'bar_value': 28, 'ring_value': 20}[style] + stable_value
+
     def _layout(self, host):
         if host.rect is None:
             return
@@ -1113,38 +1147,11 @@ class TopBarManager(QObject):
             )
             value["bar_label"] = short
             style = row["style"]
-            size = 9 if style == "graph" else 11 if style in ("stacked", "duplex") else 12
-            split = isinstance(row.get("number_text"), str)
-            number = row["number_text"] if split else str(row["value"])
-            unit = row.get("unit_text", "") if split else ""
-            suffix = 3 + self._measure(
-                family, 9 if style in ("graph", "stacked") else 10,
-                QFont.Weight.Normal, unit, dpi
-            ) if unit else 0
-            actual = self._measure(family, size, QFont.Weight.Medium, number, dpi, tabular=True) + suffix
-            reserve = row.get("number_reserve", "999.9") if split else "999.9 " + row.get("unit", "")
-            stable_value = actual if style == "graph" else max(
-                actual, self._measure(family, size, QFont.Weight.Medium, reserve, dpi, tabular=True) + suffix
-            )
-            if style == "label_value":
-                width = min(110, self._measure(family, 11, QFont.Weight.Normal, short, dpi)) + 6 + stable_value
-            elif style == "stacked":
-                width = max(min(66, self._measure(family, 9, QFont.Weight.Normal, short, dpi)), stable_value)
-            elif style == "graph":
-                width = max(44, actual)
-            elif style in ('duplex', 'duplex_inline'):
-                paired_widths = [18 +
-                    max(self._measure(family, 11, QFont.Weight.Medium, str(channel.get('number_text', '—')), dpi, tabular=True),
-                        self._measure(family, 11, QFont.Weight.Medium, '999.9', dpi, tabular=True))
-                    + (3 + self._measure(family, 9, QFont.Weight.Normal, str(channel.get('unit_text', '')), dpi)
-                       if channel.get('unit_text') else 0)
-                    for channel in row.get('paired_rows', [])[:2]]
-                width = (sum(paired_widths) + 12 * max(0, len(paired_widths)-1)
-                         if style == 'duplex_inline' else max(paired_widths, default=stable_value))
-            else:
-                width = {"value": 0, "icon_value": 23, "trend_value": 42,
-                         "bar_value": 28, "ring_value": 20}[style] + stable_value
-            key = (row["id"], style, short, row.get("unit", ""), family, dpi)
+            children = row.get('group_rows', []) if row.get('grouped') is True else []
+            width = (sum(self._content_width(child, family, dpi) for child in children)
+                     + 10 * (len(children)-1)) if children else self._content_width(value, family, dpi)
+            members = tuple((child['metric'], child.get('bar_label'), child.get('unit')) for child in children)
+            key = (row["id"], style, short, row.get("unit", ""), family, dpi, members)
             self._widths[key] = max(width, self._widths.get(key, 0))
             items.append(MetricItem(row["id"], self._widths[key], row["placement"]))
             rows.append(value)

@@ -8,7 +8,7 @@ import unicodedata
 from external_sensor import EXTERNAL_SLOTS, validate_bindings
 from metrics import METRICS
 from top_bar_layout import DISPLAY_STYLES
-from top_bar_profiles import paired_channels
+from top_bar_profiles import paired_channels, validate_group_metrics
 
 APPEARANCE_DEFAULTS = dict(follow_global=True, skin="glass", glass_transparency=50.0)
 
@@ -154,6 +154,16 @@ def validate_top_bar(value):
             if selected not in options:
                 raise ValueError("不支持的顶部栏显示样式")
             prefs[field] = selected
+        if 'metrics' in source:
+            prefs['metrics'] = validate_group_metrics(metric, source['metrics'])
+            if len(prefs['metrics']) > 1:
+                if prefs['style'] in ('duplex', 'duplex_inline'):
+                    raise ValueError('组合指标不使用双向读数样式')
+                if prefs['style'] in ('bar_value', 'ring_value') and any(
+                    METRICS[key]['unit'] != '%' or METRICS[key]['maximum'] != 100
+                    for key in prefs['metrics']
+                ):
+                    raise ValueError('组合中只有百分比指标可以使用此样式')
         for field in (
             "gpu_target",
             "network_target",

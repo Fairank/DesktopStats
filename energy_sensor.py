@@ -97,17 +97,24 @@ class CpuPackagePower:
     The object is intended to be owned and called by one sampler thread.
     """
 
-    def __init__(self, *, api=None, clock=None, retry_seconds=60):
+    def __init__(self, *, api=None, clock=None, wall_clock=None, retry_seconds=60):
         self._api = api
         self._clock = clock or time.monotonic
+        self._wall_clock = wall_clock or time.time
         self._retry_seconds = max(1.0, float(retry_seconds))
         self._query = self._counter = None
         self._last_sample = None
         self._last_value = None
+        self._sample_time = None
         self._retry_at = 0.0
         self._closed = False
         self.state = "warming_up"
         self.last_error = ""
+
+    @property
+    def sample_time(self):
+        """UTC time of the successful native observation, unchanged by cache hits."""
+        return self._sample_time
 
     def _release(self):
         if self._query is not None:
@@ -118,6 +125,7 @@ class CpuPackagePower:
         self._query = self._counter = None
         self._last_sample = None
         self._last_value = None
+        self._sample_time = None
 
     def read(self, *, allow_cached=False):
         if self._closed:
@@ -145,12 +153,18 @@ class CpuPackagePower:
             if elapsed < 0 or elapsed > 30:
                 self.state = "warming_up"
                 self._last_value = None
+                self._sample_time = None
                 return {}
             milliwatts = self._api.value(self._counter)
             if not math.isfinite(milliwatts) or not 0 <= milliwatts <= 2_000_000:
                 raise ValueError("Invalid CPU package power sample")
+            sample_time = self._wall_clock()
+            if (type(sample_time) not in (int, float) or not math.isfinite(sample_time)
+                    or sample_time < 0):
+                raise ValueError("Invalid CPU package observation time")
             self.state = "ready"
             self.last_error = ""
+            self._sample_time = sample_time
             self._last_value = {"cpu_power": milliwatts / 1000, "cpu_power_source": SOURCE}
             return dict(self._last_value)
         except (OSError, AttributeError, ValueError, TypeError) as error:

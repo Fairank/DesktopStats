@@ -50,11 +50,11 @@ Window {
     function textEditing(){const item=root.activeFocusItem;return !!item && item.cursorPosition!==undefined && item.text!==undefined}
     function undo(redo){if(widgetEditorLoader.item)widgetEditorLoader.item.cancelEditing();if(redo)stats.redoDraft();else stats.undoDraft()}
     Connections {target:stats;function onDraftChanged(){root.selectNext()}}
-    Shortcut {sequence:"Ctrl+S";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened;onActivated:root.applySettings()}
-    Shortcut {sequence:"Ctrl+N";enabled:!root.atWidgetLimit && !gallery.opened && !scenePopup.opened;onActivated:root.showGallery()}
-    Shortcut {sequence:"Ctrl+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !root.textEditing();onActivated:root.undo(false)}
-    Shortcut {sequence:"Ctrl+Shift+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !root.textEditing();onActivated:root.undo(true)}
-    Shortcut {sequence:"Escape";enabled:!gallery.opened && !scenePopup.opened;onActivated:{if(!widgetEditorLoader.item || !widgetEditorLoader.item.cancelEditing())root.hide()}}
+    Shortcut {sequence:"Ctrl+S";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:root.applySettings()}
+    Shortcut {sequence:"Ctrl+N";enabled:!root.atWidgetLimit && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:root.showGallery()}
+    Shortcut {sequence:"Ctrl+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(false)}
+    Shortcut {sequence:"Ctrl+Shift+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(true)}
+    Shortcut {sequence:"Escape";enabled:!gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:{if(root.page===4 && historyPage.cancelInspection())return;if(!widgetEditorLoader.item || !widgetEditorLoader.item.cancelEditing())root.hide()}}
     Timer {interval:3000;running:root.visible && (root.page===2 || stats.dirty);repeat:true;triggeredOnStart:true;onTriggered:stats.inspect()}
     Item {
         id:settingsBody;objectName:"settingsBackdropSource";y:root.clientY;width:root.width;height:root.clientHeight

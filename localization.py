@@ -33,6 +33,12 @@ def dictionaries():
 
 MESSAGES = dictionaries()
 FALLBACK = {
+    "组合指标": "Grouped readings",
+    "主指标": "Primary",
+    "添加同组指标": "Add a reading to this group",
+    "同一组可显示 1–4 项指标，一起拖动并查看详情。": "Show 1–4 readings together. Drag the whole group or open its details.",
+    "使用率 · 温度 · 功耗": "Usage · temperature · power",
+    "组合未更新，请重试。": "Could not update this group. Try again.",
     "设置分类": "Settings sections",
     "充放电功率表示电池侧的实时功率，未充电时可为 0 W。充电器输入和整机功耗尚无读数。CPU 封装功率未取得，不显示推测值。": "Power is measured at the battery and may be 0 W while plugged in. Charger input, total system power, and CPU package power are not estimated.",
     "设置格式不正确": "Invalid settings format",

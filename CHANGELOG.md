@@ -1,5 +1,23 @@
 # Changes
 
+## 0.21.0-preview.1
+
+- Group up to four CPU or same-device GPU readings in one menu-bar item, while
+  retaining existing display styles, units, device selection and the primary
+  reading. Reorder, hover and overflow operate on the whole group; members retain
+  independent missing-data states and their own trend units.
+- Retain the PDH CPU-power observation time across cached reads so history does
+  not count a cached value as a new hardware sample. Other providers keep their
+  own timestamps when replacing that reading.
+- Surface channel-level provider failures in diagnostics, including dictionary
+  channel reports. Preserve allowlisted API names and numeric error codes in
+  anonymous diagnostic exports without device identifiers or raw error strings.
+- Keep keyboard-selected dropdown options in view, and give chart inspection
+  priority over the settings window's Escape shortcut.
+- Wait for the actual old process to exit before installation, recheck after
+  staging, and leave an active dirty instance untouched. Clean up the server,
+  owned PID marker and sampling resources after startup or shutdown failures.
+
 ## 0.20.0-preview.2
 
 - Keep history read, write and clear failures independent. A temporary reader

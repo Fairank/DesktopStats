@@ -28,6 +28,28 @@ PAIRS = (
     (('battery_charge_watts', 'charge'), ('battery_discharge_watts', 'discharge')),
 )
 
+# A group retains one primary item, device selection and hover/drag identity.
+# Only CPU and per-device GPU channels share a sufficiently precise identity.
+MAX_GROUP_METRICS = 4
+
+
+def group_channels(metric):
+    for family in ('cpu', 'gpu'):
+        channels = PROFILES[family][1]
+        if metric in channels:
+            return channels
+    return ()
+
+
+def validate_group_metrics(metric, value):
+    if (not isinstance(value, list) or not 1 <= len(value) <= MAX_GROUP_METRICS
+            or any(type(key) is not str for key in value)
+            or value[0] != metric or len(set(value)) != len(value)):
+        raise ValueError('组合指标应保留主指标，并选择最多四项不同读数')
+    if len(value) > 1 and any(key not in group_channels(metric) for key in value):
+        raise ValueError('组合指标必须来自同一个 CPU 或 GPU')
+    return list(value)
+
 
 def paired_channels(metric):
     return next((pair for pair in PAIRS if any(key == metric for key, _ in pair)), ())

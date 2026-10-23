@@ -12,9 +12,12 @@ Window {
     property bool nativeRounded: false
     readonly property var detail: barState.detail || ({})
     readonly property bool overflowMode: detail.overflow === true
+    readonly property var groupRows:detail.grouped===true?(detail.group_rows || []).slice(0,4):[]
+    readonly property bool hasGroup:groupRows.length>1
     readonly property var relatedRows: (detail.related || []).filter(row => {
         if (!row.metric) return true
         if (root.pairedRows.some(pair => pair.metric === row.metric)) return false
+        if (root.groupRows.some(member => member.metric === row.metric)) return false
         return !root.hasCapacity || !["ram_used_gb","ram_total_gb","vram_gb","vram_total_gb","disk_used_gb","disk_total_gb"].includes(row.metric)
     }).slice(0, 12)
     readonly property var availableRows: relatedRows.filter(row => root.relatedAvailable(row))
@@ -216,7 +219,7 @@ Window {
                 id: detailTitle
                 objectName: "topBarDetailTitle"
                 Layout.fillWidth: true; Layout.minimumWidth: 0
-                text: root.hasPair && root.detail.group_label ? root.detail.group_label
+                text: (root.hasGroup || root.hasPair) && root.detail.group_label ? root.detail.group_label
                     : root.detail.label || (root.overflowMode ? root.tr("更多指标") : "")
                 textFormat: Text.PlainText; color: root.foreground
                 font.family: root.barState.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold
@@ -289,15 +292,15 @@ Window {
                         Text {
                             id: overflowLabel
                             Layout.fillWidth: true; Layout.minimumWidth: 0
-                            text: overflowRow.modelData.label || ""; textFormat: Text.PlainText
+                            text: (overflowRow.modelData.grouped?overflowRow.modelData.group_label:overflowRow.modelData.label) || ""; textFormat: Text.PlainText
                             color: root.secondary; font.family: root.barState.fontFamily
                             font.pixelSize: 12; elide: Text.ElideRight
                         }
                         Text {
                             id: overflowValue
                             Layout.maximumWidth: 128
-                            text: overflowRow.modelData.value || "—"; textFormat: Text.PlainText
-                            color: overflowRow.modelData.available ? root.foreground : root.secondary
+                            text: (overflowRow.modelData.grouped?overflowRow.modelData.group_value:overflowRow.modelData.value) || "—"; textFormat: Text.PlainText
+                            color: (overflowRow.modelData.grouped?overflowRow.modelData.group_available:overflowRow.modelData.available) ? root.foreground : root.secondary
                             font.family: root.barState.fontFamily; font.pixelSize: 12; font.weight: Font.Medium
                             elide: Text.ElideRight
                         }
@@ -317,7 +320,7 @@ Window {
                     width: Math.max(0, metricScroll.width-(metricScroll.interactive?6:0))
                     spacing: 14
                     Item {
-                        visible: !root.hasPair
+                        visible: !root.hasPair && !root.hasGroup
                         Layout.fillWidth: true; Layout.preferredHeight: 44
                         Text {
                             id: primaryValue
@@ -340,6 +343,25 @@ Window {
                             color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 12
                             x: primaryValue.width + 6
                             y: primaryValue.y + primaryValue.baselineOffset - baselineOffset
+                        }
+                    }
+                    GridLayout {
+                        objectName:"topBarDetailGroupValues"
+                        visible:root.hasGroup
+                        Layout.fillWidth:true;columns:root.groupRows.length===3?3:2;uniformCellWidths:true;columnSpacing:12;rowSpacing:12
+                        Repeater {
+                            model:root.groupRows
+                            ColumnLayout {
+                                id:selectedMember;required property var modelData
+                                Layout.fillWidth:true;Layout.minimumWidth:0;spacing:6
+                                RowLayout {Layout.fillWidth:true;spacing:5
+                                    Icon {name:selectedMember.modelData.icon || "sensors";ink:root.secondary;Layout.preferredWidth:13;Layout.preferredHeight:13}
+                                    Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.label || "";textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
+                                }
+                                Text {objectName:"topBarGroupDetail_"+selectedMember.modelData.metric;Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.value || "—";textFormat:Text.PlainText;color:selectedMember.modelData.available?root.foreground:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:20;font.weight:Font.Medium;font.features:{"tnum":1};elide:Text.ElideRight}
+                                HoverHandler {id:selectedMemberHover}
+                                PlainTip {visible:selectedMemberHover.hovered;text:root.readingTip(selectedMember.modelData)}
+                            }
                         }
                     }
                     GridLayout {

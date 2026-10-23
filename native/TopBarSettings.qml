@@ -17,6 +17,7 @@ ColumnLayout {
     readonly property var rows: { const revision = stats.sensorRevision; const draft = stats.draft; return active ? stats.topBarDraftRows() : [] }
     readonly property var selected: config.items.find(item => item.id === selectedItem)
     readonly property var selectedRow: rows.find(item => item.id === selectedItem) || ({})
+    readonly property bool groupPopupOpen:selectedInspector.groupPopupOpen
     readonly property var sensorChoices:{if(!root.active || !picker.opened)return [];const revision=stats.sensorRevision;return stats.sensorRows}
     readonly property bool sideInspector: width >= 740
     readonly property bool unapplied: JSON.stringify(config) !== JSON.stringify(stats.saved.top_bar)
@@ -312,7 +313,7 @@ ColumnLayout {
                 opacity: root.dragging && root.draggedId === modelData.id ? 0.4 : 1
                 focusPolicy: Qt.StrongFocus
                 onClicked: root.selectItem(modelData.id)
-                Accessible.name: (reading.label || "") + " " + (reading.value || "—")
+                Accessible.name: (reading.grouped?reading.group_label:reading.label || "") + " " + (reading.grouped?reading.group_value:reading.value || "—")
                 Keys.onPressed: function(event) {
                     if (event.key === Qt.Key_Delete) { stats.removeTopBarMetric(modelData.id); event.accepted = true }
                     else if (event.modifiers & Qt.AltModifier) {
@@ -345,11 +346,20 @@ ColumnLayout {
                             onCanceled: root.cancelDrag()
                         }
                     }
-                    Text { Layout.fillWidth: true; Layout.minimumWidth: 0; text: card.reading.label || ""; textFormat: Text.PlainText; color: ui.ink; font.family: ui.fontFamily; font.pixelSize: 12; elide: Text.ElideRight }
-                    TopBarMetricContent { objectName:"topBarValue_"+card.modelData.id;row: card.reading; ink: ui.ink; muted: ui.muted; fontFamily: ui.fontFamily; Layout.preferredWidth: implicitWidth; Layout.preferredHeight: implicitHeight }
+                    Text { Layout.fillWidth: true; Layout.minimumWidth: 0; text: (card.reading.grouped?card.reading.group_label:card.reading.label) || ""; textFormat: Text.PlainText; color: ui.ink; font.family: ui.fontFamily; font.pixelSize: 12; elide: Text.ElideRight }
+                    Flickable {
+                        Layout.preferredWidth:Math.min(listReading.implicitWidth,Math.max(100,card.width*.65))
+                        Layout.preferredHeight:Math.max(24,listReading.implicitHeight)
+                        contentWidth:listReading.implicitWidth;contentHeight:height;clip:true
+                        interactive:contentWidth>width;boundsBehavior:Flickable.StopAtBounds
+                        flickableDirection:Flickable.HorizontalFlick
+                        TapHandler {onTapped:{card.forceActiveFocus();root.selectItem(card.modelData.id)}}
+                        ScrollBar.horizontal:ScrollBar {policy:ScrollBar.AsNeeded;height:3}
+                        TopBarGroupContent {id:listReading;objectName:"topBarValue_"+card.modelData.id;row:card.reading;ink:ui.ink;muted:ui.muted;fontFamily:ui.fontFamily;width:implicitWidth;height:implicitHeight;y:(parent.height-height)/2}
+                    }
                 }
                 Rectangle { x: 0; y: -3; width: parent.width; height: 2; color: ui.accent; visible: root.dragging && root.dropPlacement === zone.placement && root.dropBeforeId === card.modelData.id }
-                PlainTip { visible: card.hovered && !root.dragging; text: [card.reading.label, card.reading.hardware_name, card.reading.source, card.reading.reason].filter(Boolean).join("\n") }
+                PlainTip { visible: card.hovered && !root.dragging; text: [card.reading.grouped?card.reading.group_label:card.reading.label,card.reading.grouped?card.reading.group_value:card.reading.value,card.reading.hardware_name,card.reading.source,card.reading.reason].filter(Boolean).join("\n") }
             }
         }
         Item {

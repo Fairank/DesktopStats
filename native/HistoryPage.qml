@@ -53,6 +53,11 @@ Item {
     function timeText(timestamp) {
         return Number.isFinite(timestamp)?new Date(timestamp*1000).toLocaleString(Qt.locale(),"MM/dd hh:mm:ss"):""
     }
+    function cancelInspection() {
+        if (!Number.isFinite(chart.hoverTimestamp)) return false
+        chart.hoverTimestamp = NaN
+        return true
+    }
     onOptionsChanged:ensureSelection()
     onActiveChanged:if(active){ensureSelection();refresh()}else clearArmed=false
     onPeriodChanged:refresh()

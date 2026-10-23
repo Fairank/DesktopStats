@@ -751,8 +751,15 @@ class Sampler:
                 cooling, asus_readings = {}, {}
                 self._release_asus("handle_lost", dict(self.asus.last_error))
         data.update(cooling)
+        power_timestamp, power_source = None, None
         if "cpu" in needed or inspecting:
-            data.update(self.cpu_power.read(allow_cached=config["refresh"] < 0.05))
+            power_reading = self.cpu_power.read(allow_cached=config["refresh"] < 0.05)
+            data.update(power_reading)
+            if power_reading.get("cpu_power") is not None:
+                timestamp = getattr(self.cpu_power, "sample_time", None)
+                if type(timestamp) in (int, float) and math.isfinite(timestamp):
+                    power_timestamp = timestamp
+                    power_source = power_reading.get("cpu_power_source")
             data["cpu_power_state"] = self.cpu_power.state
             error = getattr(self.cpu_power, "last_error", "")
             data["cpu_power_error"] = error if isinstance(error, str) else ""
@@ -816,6 +823,9 @@ class Sampler:
         data["metric_timestamps"] = {
             key: timestamp for key, timestamp in self.cooling.sample_times.items() if key in cooling
         }
+        if (power_timestamp is not None and "cpu_power" not in asus_readings
+                and data.get("cpu_power_source") == power_source):
+            data["metric_timestamps"]["cpu_power"] = power_timestamp
         data["metric_sources"].update({key: COOLING_SOURCE for key in cooling})
         if data.get("cpu_power") is not None:
             data["metric_sources"]["cpu_power"] = data["cpu_power_source"]

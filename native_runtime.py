@@ -166,7 +166,6 @@ class Runtime(QObject):
             self.apply(False)
             if not background:
                 QTimer.singleShot(80, lambda: self.show_settings(""))
-        self.controller.start()
         self.app.aboutToQuit.connect(self.shutdown)
         self.app.screenAdded.connect(self.screen_added)
         self.app.screenRemoved.connect(self.screen_removed)
@@ -181,6 +180,7 @@ class Runtime(QObject):
         self.stale_timer.setInterval(5000)
         self.stale_timer.timeout.connect(self.clear_stale)
         self.stale_timer.start()
+        self.controller.start()
 
     def qml_warnings(self, warnings):
         for warning in warnings:
@@ -1136,37 +1136,54 @@ class Runtime(QObject):
         output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def shutdown(self):
+        if self.shutting_down:
+            return
         self.shutting_down = True
-        if getattr(self, "settings_material", None) is not None:
-            self.settings_material.close()
-        if getattr(self, "settings_blur", None) is not None:
-            self.settings_blur.close()
-        if getattr(self, "settings_host", None) is not None:
-            self.settings_host.dispose()
-        if getattr(self, "top_bar", None) is not None:
-            self.top_bar.close()  # Unregister before QWindow/cookie destruction.
+        errors = []
+
+        def attempt(label, action):
+            try:
+                action()
+            except Exception as error:
+                errors.append((label, error))
+
+        for owner_name, method in (
+            ("settings_material", "close"), ("settings_blur", "close"),
+            ("settings_host", "dispose"), ("top_bar", "close"),
+        ):
+            owner = getattr(self, owner_name, None)
+            if owner is not None:
+                attempt(owner_name, getattr(owner, method))
         for key in list(self.motion):
-            self.cancel_motion(key, finish=True)
+            attempt("motion " + key, lambda key=key: self.cancel_motion(key, finish=True))
         self.drag_origins.clear()
-        self.floor_timer.stop()
-        self.stale_timer.stop()
-        self.position_timer.stop()
-        self.widget_mask_timer.stop()
-        self.save_positions()
-        self.controller.close()
-        for window in self.widgets.values():
-            window.hide()
-        for material in self.widget_materials.values():
-            material.close()
-        self.widget_materials.clear()
-        if self.widget_blur:
-            self.widget_blur.close()
-        if getattr(self, "details", None) is not None:
-            self.details.hide()
-        if self.frame_bridge:
-            self.frame_bridge.close()
-        if self.tray:
-            self.tray.hide()
+        for timer_name in ("floor_timer", "stale_timer", "position_timer", "widget_mask_timer"):
+            timer = getattr(self, timer_name, None)
+            if timer is not None:
+                attempt(timer_name, timer.stop)
+        attempt("save positions", self.save_positions)
+        attempt("controller", self.controller.close)
+        for key, window in list(self.widgets.items()):
+            attempt("widget " + key, window.hide)
+        for key, material in list(self.widget_materials.items()):
+            def close_material(key=key, material=material):
+                material.close()
+                if self.widget_materials.get(key) is material:
+                    self.widget_materials.pop(key)
+
+            attempt("widget material " + key, close_material)
+        for owner_name, method in (
+            ("widget_blur", "close"), ("details", "hide"),
+            ("frame_bridge", "close"), ("tray", "hide"),
+        ):
+            owner = getattr(self, owner_name, None)
+            if owner is not None:
+                attempt(owner_name, getattr(owner, method))
+        if errors:
+            original = errors[0][1]
+            for label, error in errors[1:]:
+                original.add_note("Runtime shutdown also failed (" + label + "): " + str(error))
+            raise original
 
 
 class LocalServer(QLocalServer):

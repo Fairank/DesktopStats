@@ -1,7 +1,9 @@
 """Actionable explanations and deliberately small, non-personal diagnostic exports."""
 import math
+from itertools import islice
 
-from sensor_diagnostics import source_rows
+from metrics import METRICS
+from sensor_diagnostics import export_has_problem, source_rows
 
 GOOD = {"ready", "connected", "available", "no_battery", "not_requested", "idle"}
 STATES = GOOD | {
@@ -35,6 +37,8 @@ APIS = {
     "nvmlDeviceGetPowerUsage", "nvmlDeviceGetMemoryInfo", "nvmlDeviceGetClockInfo",
     "nvmlDeviceGetFanSpeed", "nvmlErrorString",
 }
+MAX_FAILURES = 64
+_ASUS_METRICS = {"0x00120094": "cpu_temp", "0x00110013": "cpu_fan_rpm", "0x00110014": "gpu_fan_rpm"}
 
 
 def cards(data):
@@ -103,11 +107,63 @@ def safe_report(data, version):
                 result[field] = facts(value[field])
         return result
 
-    sources = {str(key): facts(value) for key, value in data.get("provider_status", {}).items()
+    def children(value, limit=32):
+        if isinstance(value, dict):
+            return islice(value.items(), limit)
+        if isinstance(value, list):
+            return (("", row) for row in islice(value, limit))
+        return ()
+
+    def source_facts(identifier, value):
+        result = facts(value)
+        failures = []
+        truncated = False
+
+        def append(row, metric=""):
+            nonlocal truncated
+            safe = facts(row)
+            if not safe:
+                return
+            if (row.get("state") in GOOD and not row.get("error") and not row.get("cleanup_error")
+                    and not any(type(row.get(key)) is int and row[key] != 0
+                                for key in ("winerror", "errno", "ntstatus", "status_code"))):
+                return
+            if isinstance(metric, str) and metric in METRICS:
+                safe["metric"] = metric
+            if len(failures) < MAX_FAILURES:
+                failures.append(safe)
+            else:
+                truncated = True
+
+        if isinstance(value, dict):
+            for field in ("device_errors", "channel_errors", "channel_status", "exports"):
+                for key, row in children(value.get(field), 4 if field == "exports" else 32):
+                    if field == "exports" and isinstance(row, dict) and not export_has_problem(row, value.get("state")):
+                        continue
+                    metric = _ASUS_METRICS.get(key, key) if identifier == "asus" else key
+                    append(row, metric if field in ("channel_errors", "channel_status") else "")
+        if identifier == "nvml":
+            # Device mapping keys and names are deliberately never copied.
+            for _, device in children(data.get("gpus"), 16):
+                if not isinstance(device, dict):
+                    continue
+                append(device.get("device_status"))
+                for metric, row in children(device.get("channel_status")):
+                    append(row, metric)
+        elif identifier == "storage_status":
+            for _, device in children(data.get("storages")):
+                append(device)
+        if failures:
+            result["failures"] = failures
+        if truncated:
+            result["failures_truncated"] = True
+        return result
+
+    sources = {str(key): source_facts(key, value) for key, value in data.get("provider_status", {}).items()
                if key in {"nvml", "asus", "hwinfo", "network", "disk", "volumes", "battery"}}
     for field in ("external_status", "storage_status", "battery_status", "sample_status"):
         if isinstance(data.get(field), dict):
-            sources[field] = facts(data[field])
+            sources[field] = source_facts(field, data[field])
     timestamp = data.get("time")
     return dict(format=1, application="Desktop Stats", version=version,
                 sample_time=timestamp if type(timestamp) in (int, float) and math.isfinite(timestamp) else None,

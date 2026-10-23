@@ -11,6 +11,12 @@ Item {
     property bool galleryOpen:false
     property bool sourceOpen:false
     property string previousItemId:""
+    property string groupError:""
+    readonly property bool groupPopupOpen:groupDialog.opened
+    readonly property var groupMetrics:row.group_metrics || (item?[item.metric]:[])
+    readonly property var groupOptions:row.group_options || []
+    readonly property var availableGroupOptions:groupOptions.filter(option=>!groupMetrics.includes(option.metric)).map(option=>({id:option.metric,label:option.label}))
+    readonly property bool hasTemperature:["°C","°F"].includes(row.unit) || (row.group_rows || []).some(member=>["°C","°F"].includes(member.unit))
     readonly property real labelColumnWidth:width>=320?92:76
     signal revealRequested(var target)
     readonly property var stylePreviewRow: {
@@ -29,9 +35,10 @@ Item {
             {id:"bar_value",label:ui.t("柱状与数值")},{id:"ring_value",label:ui.t("圆环与数值")}
         ]
     readonly property var displayStyles: {
-        const gauges=root.row.gauge_supported===undefined ? root.row.unit==="%" : root.row.gauge_supported===true
+        const gauges=root.row.grouped===true ? (root.row.group_rows || []).every(member=>member.unit==="%" && member.gauge_supported!==false)
+            : root.row.gauge_supported===undefined ? root.row.unit==="%" : root.row.gauge_supported===true
         return allDisplayStyles.filter(option=>(!["bar_value","ring_value"].includes(option.id) || gauges)
-            && (!["duplex","duplex_inline"].includes(option.id) || root.row.pair_supported===true))
+            && (!["duplex","duplex_inline"].includes(option.id) || (root.row.grouped!==true && root.row.pair_supported===true)))
     }
     readonly property var meta:{const draft=stats.draft;return item?stats.metricInfoFor("",item.metric):({})}
     readonly property string scope:meta.scope || ""
@@ -39,13 +46,14 @@ Item {
     readonly property string deviceDefault:({gpus:"0",networks:"auto",disks:"all",volumes:"system",storages:"0"})[scope] || "0"
     readonly property string selectedStyle:item ? item.prefs.style || "label_value" : "label_value"
     readonly property string selectedStyleLabel:(allDisplayStyles.find(option=>option.id===selectedStyle) || {}).label || selectedStyle
-    readonly property string displayTitle:["duplex","duplex_inline"].includes(selectedStyle) && row.group_label
+    readonly property string displayTitle:(row.grouped===true || ["duplex","duplex_inline"].includes(selectedStyle)) && row.group_label
         ? row.group_label : row.label || ui.t("指标设置")
     readonly property bool hasDevice:["gpus","networks","disks","volumes","storages"].includes(scope)
     onItemChanged: {
         const identifier=item ? item.id : ""
-        if(identifier!==previousItemId){if(focusReveal){focusReveal.stop();focusReveal.target=null}galleryOpen=false;sourceOpen=false;previousItemId=identifier}
+        if(identifier!==previousItemId){if(focusReveal){focusReveal.stop();focusReveal.target=null}galleryOpen=false;sourceOpen=false;groupDialog.close();groupError="";previousItemId=identifier}
     }
+    onVisibleChanged:if(!visible){groupDialog.close();galleryOpen=false}
     Keys.onShortcutOverride:event=>{if(root.galleryOpen && event.key===Qt.Key_Escape)event.accepted=true}
     Keys.onEscapePressed:event=>{if(root.galleryOpen){root.closeGallery();event.accepted=true}else event.accepted=false}
     implicitHeight:content.implicitHeight+24
@@ -55,9 +63,40 @@ Item {
     function chooseStyle(style){if(!item)return;stats.changeTopBarItem(item.id,"style",style);closeGallery()}
     function sampleTip(style,label) {
         const row=root.stylePreviewRow
-        return label+"\n"+(["duplex","duplex_inline"].includes(style)
+        return label+"\n"+(row.grouped===true?(row.group_rows || []).map(value=>[value.label,value.value].filter(Boolean).join(" · ")).join("\n"):["duplex","duplex_inline"].includes(style)
             ? (row.paired_rows || []).map(value=>[value.label,value.value].filter(Boolean).join(" · ")).join("\n")
             : [row.label,row.value].filter(Boolean).join(" · "))
+    }
+    function setGroup(metrics,focusMetric,action){
+        if(!item)return false
+        const accepted=stats.setTopBarGroupMetrics(item.id,metrics)
+        groupError=accepted?"":ui.t("组合未更新，请重试。")
+        if(accepted && focusMetric)Qt.callLater(()=>{
+            for(let index=0;index<groupEntries.count;index++){
+                const entry=groupEntries.itemAt(index)
+                if(entry && entry.modelData===focusMetric){entry.focusAction(action || "down");return}
+            }
+            if(groupAdd.visible)groupAdd.forceActiveFocus()
+        })
+        return accepted
+    }
+    function moveGroup(metric,delta){
+        const metrics=groupMetrics.slice(),index=metrics.indexOf(metric),target=index+delta
+        if(index<1 || target<1 || target>=metrics.length)return
+        metrics.splice(index,1);metrics.splice(target,0,metric)
+        setGroup(metrics,metric,delta<0?"up":"down")
+    }
+    function removeGroup(metric){
+        const index=groupMetrics.indexOf(metric)
+        if(index<1)return
+        const metrics=groupMetrics.filter(value=>value!==metric)
+        setGroup(metrics,metrics[Math.min(index,metrics.length-1)],"remove")
+    }
+    function groupPreset(){
+        if(!item)return
+        const family=groupOptions.some(option=>option.metric==="gpu_usage")?"gpu":"cpu"
+        const metrics=[item.metric,family+"_usage",family+"_temp",family+"_power"].filter((value,index,array)=>array.indexOf(value)===index)
+        setGroup(metrics)
     }
     Timer {id:focusReveal;interval:16;repeat:false;property var target:null;onTriggered:{const item=target;target=null;if(item && root.visible)root.revealRequested(item)}}
     component StyleSample: Flickable {
@@ -80,7 +119,7 @@ Item {
             background: null
         }
         TapHandler { onTapped: sampleViewport.activated() }
-        TopBarMetricContent {
+        TopBarGroupContent {
             id: rendered
             objectName: sampleViewport.sampleName
             x: Math.max(0,(sampleViewport.availableWidth-implicitWidth)/2)
@@ -122,6 +161,18 @@ Item {
             HoverHandler {id:currentPreviewHover}
             ToolTip.visible:currentPreviewHover.hovered;ToolTip.text:root.sampleTip(root.selectedStyle,root.selectedStyleLabel);ToolTip.delay:600
             StyleSample {objectName:"topBarCurrentStylePreview";anchors.fill:parent;anchors.margins:10;sampleStyle:root.selectedStyle;sampleName:"topBarCurrentStyleSample"}
+        }
+        Button {
+            id:groupButton;objectName:"topBarGroupButton";visible:root.row.group_supported===true
+            Layout.fillWidth:true;implicitHeight:34;leftPadding:10;rightPadding:10
+            Accessible.name:ui.t("组合指标")+" · "+root.groupMetrics.length+" / 4"
+            onClicked:{root.groupError="";groupDialog.open()}
+            background:GlassSurface {tone:"field";radius:8;focused:groupButton.activeFocus;highlighted:groupButton.hovered}
+            contentItem:RowLayout {spacing:8
+                Text {Layout.fillWidth:true;text:ui.t("组合指标");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12}
+                Text {text:root.groupMetrics.length+" / 4";color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11}
+                Icon {name:"chevron";ink:ui.muted;Layout.preferredWidth:12;Layout.preferredHeight:12}
+            }
         }
         GridLayout {Layout.fillWidth:true;columns:2;columnSpacing:12;rowSpacing:8
             RowLabel {text:ui.t("显示方式")}
@@ -179,8 +230,8 @@ Item {
         GridLayout {Layout.fillWidth:true;columns:2;columnSpacing:12;rowSpacing:8
             RowLabel {text:ui.t("小数位数")}
             Choice {objectName:"topBarPrecision";Layout.fillWidth:true;Layout.minimumWidth:128;model:[{id:"auto",label:ui.t("自动")},{id:"0",label:"0"},{id:"1",label:"1"},{id:"2",label:"2"}];value:root.item?root.item.prefs.precision || "auto":"auto";onPicked:selected=>stats.changeTopBarItem(root.item.id,"precision",selected)}
-            RowLabel {visible:["°C","°F"].includes(root.row.unit);text:ui.t("温度单位")}
-            Choice {objectName:"topBarTemperatureUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:["°C","°F"].includes(root.row.unit);model:[{id:"C",label:"°C"},{id:"F",label:"°F"}];value:root.item?root.item.prefs.temperature_unit || "C":"C";onPicked:selected=>stats.changeTopBarItem(root.item.id,"temperature_unit",selected)}
+            RowLabel {visible:root.hasTemperature;text:ui.t("温度单位")}
+            Choice {objectName:"topBarTemperatureUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:root.hasTemperature;model:[{id:"C",label:"°C"},{id:"F",label:"°F"}];value:root.item?root.item.prefs.temperature_unit || "C":"C";onPicked:selected=>stats.changeTopBarItem(root.item.id,"temperature_unit",selected)}
             RowLabel {visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);text:ui.t("网速单位")}
             Choice {objectName:"topBarNetworkUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);model:[{id:"MBps",label:"MB/s"},{id:"Mbps",label:"Mbps"}];value:root.item?root.item.prefs.network_unit || "MBps":"MBps";onPicked:selected=>stats.changeTopBarItem(root.item.id,"network_unit",selected)}
         }
@@ -207,5 +258,44 @@ Item {
             Text {Layout.fillWidth:true;text:[root.row.hardware_name,root.row.source].filter(Boolean).join(" · ") || ui.t("等待读数");textFormat:Text.PlainText;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap;lineHeight:1.2}
         }
         Text {Layout.fillWidth:true;visible:!!root.row.reason;text:root.row.reason || "";textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap;lineHeight:1.2}
+    }
+    Popup {
+        id:groupDialog;objectName:"topBarGroupDialog";parent:Overlay.overlay
+        width:Math.min(408,parent?parent.width-32:408)
+        height:Math.min(groupBody.implicitHeight+32,parent?parent.height-32:480)
+        x:parent?(parent.width-width)/2:0;y:parent?(parent.height-height)/2:0
+        padding:16;modal:true;focus:true;closePolicy:Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        background:GlassSurface {tone:"popup";radius:13}
+        onClosed:Qt.callLater(()=>{if(root.visible)groupButton.forceActiveFocus()})
+        contentItem:ScrollView {
+            id:groupScroll;contentWidth:availableWidth;clip:true
+            ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
+            ColumnLayout {
+                id:groupBody;width:groupScroll.availableWidth;spacing:12
+                RowLayout {Layout.fillWidth:true
+                    Text {Layout.fillWidth:true;text:ui.t("组合指标");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:16;font.weight:Font.DemiBold}
+                    IconButton {objectName:"topBarGroupClose";symbol:"close";label:ui.t("完成");implicitWidth:28;implicitHeight:28;onClicked:groupDialog.close()}
+                }
+                Text {Layout.fillWidth:true;text:ui.t("同一组可显示 1–4 项指标，一起拖动并查看详情。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
+                Repeater {
+                    id:groupEntries;model:root.groupMetrics
+                    RowLayout {
+                        id:groupEntry;required property string modelData;required property int index
+                        Layout.fillWidth:true;spacing:4
+                        function focusAction(action){const target=action==="up"?moveUp:action==="remove"?removeMember:moveDown;if(target.enabled)target.forceActiveFocus();else if(moveUp.enabled)moveUp.forceActiveFocus();else if(removeMember.enabled)removeMember.forceActiveFocus();else groupAdd.forceActiveFocus()}
+                        Text {text:(groupEntry.index+1).toString().padStart(2,"0");color:ui.subtle;font.family:ui.fontFamily;font.pixelSize:10;Layout.preferredWidth:22}
+                        Text {objectName:"topBarGroupLabel_"+groupEntry.modelData;Layout.fillWidth:true;Layout.minimumWidth:0;text:(root.groupOptions.find(option=>option.metric===groupEntry.modelData) || {}).label || groupEntry.modelData;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12;elide:Text.ElideRight}
+                        Text {visible:groupEntry.index===0;text:ui.t("主指标");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;Layout.rightMargin:6}
+                        IconButton {id:moveUp;objectName:"topBarGroupUp_"+groupEntry.modelData;symbol:"up";label:ui.t("向前移动");visible:groupEntry.index>0;enabled:groupEntry.index>1;implicitWidth:28;implicitHeight:30;onClicked:root.moveGroup(groupEntry.modelData,-1)}
+                        IconButton {id:moveDown;objectName:"topBarGroupDown_"+groupEntry.modelData;symbol:"down";label:ui.t("向后移动");visible:groupEntry.index>0;enabled:groupEntry.index>0 && groupEntry.index<root.groupMetrics.length-1;implicitWidth:28;implicitHeight:30;onClicked:root.moveGroup(groupEntry.modelData,1)}
+                        IconButton {id:removeMember;objectName:"topBarGroupRemove_"+groupEntry.modelData;symbol:"trash";label:ui.t("移除");visible:groupEntry.index>0;enabled:groupEntry.index>0;danger:true;implicitWidth:28;implicitHeight:30;onClicked:root.removeGroup(groupEntry.modelData)}
+                    }
+                }
+                Choice {id:groupAdd;objectName:"topBarGroupAdd";Layout.fillWidth:true;visible:root.groupMetrics.length<4 && root.availableGroupOptions.length>0;model:root.availableGroupOptions;value:"";displayText:ui.t("添加同组指标");Accessible.name:displayText;onPicked:metric=>root.setGroup(root.groupMetrics.concat([metric]),metric)}
+                Rectangle {Layout.fillWidth:true;implicitHeight:1;color:ui.line}
+                ActionButton {objectName:"topBarGroupPreset";Layout.fillWidth:true;text:ui.t("使用率 · 温度 · 功耗");quiet:true;onClicked:root.groupPreset()}
+                Text {objectName:"topBarGroupError";Layout.fillWidth:true;visible:!!root.groupError;text:root.groupError;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
+            }
+        }
     }
 }

@@ -42,6 +42,12 @@ ComboBox {
             clip: true; implicitHeight: contentHeight
             model: control.popup.visible ? control.delegateModel : null
             currentIndex: control.highlightedIndex
+            // Only keyboard/highlight changes reveal a row. Wheel scrolling
+            // without changing the highlight must retain the user's viewport.
+            onCurrentIndexChanged: Qt.callLater(() => {
+                if (control.popup.visible && currentIndex >= 0)
+                    positionViewAtIndex(currentIndex, ListView.Contain)
+            })
             ScrollIndicator.vertical: ScrollIndicator {}
         }
         background: GlassSurface { tone: "popup"; radius: 12 }

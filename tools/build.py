@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 from product_version import VERSION
 
 SOURCES = (
+    ".gitignore",
     "appearance_preview.py",
     "app.py",
     "activity_sensors.py",
@@ -147,6 +148,8 @@ SOURCES = (
     "tests/test_top_bar_display_config.py",
     "tests/test_top_bar_presentation.py",
     "tests/test_top_bar_profiles.py",
+    "tests/test_top_bar_groups.py",
+    "tests/test_top_bar_groups_qml.py",
     "tests/test_top_bar_module_qml.py",
     "tests/test_material_diagnostics.py",
     "tests/test_settings_material_lifecycle.py",
@@ -170,6 +173,8 @@ SOURCES = (
     "tests/test_workspace_recovery.py",
     "tests/test_workspace_ui_recovery.py",
     "tests/test_history_recovery.py",
+    "tests/test_history_sampling.py",
+    "tests/test_diagnostic_export.py",
     "tests/test_widget_blur.py",
     "tests/test_widget_material_geometry.py",
     "tests/test_widget_material_runtime.py",
