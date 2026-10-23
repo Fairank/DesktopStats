@@ -13,10 +13,25 @@ Item {
     property string previousItemId:""
     property string groupError:""
     readonly property bool groupPopupOpen:groupDialog.opened
+    property string groupOpeningId:""
+    property var groupBaseline:[]
+    property var groupDraftMetrics:[]
+    readonly property bool pendingGroupEdits:groupDialog.opened && JSON.stringify(groupDraftMetrics)!==JSON.stringify(groupBaseline)
     readonly property var groupMetrics:row.group_metrics || (item?[item.metric]:[])
     readonly property var groupOptions:row.group_options || []
-    readonly property var availableGroupOptions:groupOptions.filter(option=>!groupMetrics.includes(option.metric)).map(option=>({id:option.metric,label:option.label}))
+    readonly property var availableGroupOptions:groupOptions.filter(option=>!groupDraftMetrics.includes(option.metric)).map(option=>({id:option.metric,label:option.label}))
     readonly property bool hasTemperature:["°C","°F"].includes(row.unit) || (row.group_rows || []).some(member=>["°C","°F"].includes(member.unit))
+    readonly property var effectLabels:({off:ui.t("关闭"),auto:ui.t("自动"),heat:ui.t("热感"),flow:ui.t("流动"),spin:ui.t("旋转"),pulse:ui.t("呼吸")})
+    readonly property string selectedEffect:item?item.prefs.icon_effect || "off":"off"
+    readonly property var effectOptions:{
+        const icons=(row.grouped===true?row.group_rows || []:[row]).map(member=>member.icon || "")
+        const ids=["off","auto","pulse"]
+        if(icons.includes("temperature"))ids.push("heat")
+        if(icons.some(icon=>["network","download","upload","disk_read","disk_write","power","voltage"].includes(icon)))ids.push("flow")
+        if(icons.includes("fan"))ids.push("spin")
+        if(!ids.includes(selectedEffect))ids.push(selectedEffect)
+        return ids.map(id=>({id:id,label:effectLabels[id] || id}))
+    }
     readonly property real labelColumnWidth:width>=320?92:76
     signal revealRequested(var target)
     readonly property var stylePreviewRow: {
@@ -67,29 +82,44 @@ Item {
             ? (row.paired_rows || []).map(value=>[value.label,value.value].filter(Boolean).join(" · ")).join("\n")
             : [row.label,row.value].filter(Boolean).join(" · "))
     }
+    function openGroup(){
+        if(!item)return
+        groupOpeningId=item.id;groupBaseline=groupMetrics.slice();groupDraftMetrics=groupMetrics.slice();groupError=""
+        groupDialog.open()
+    }
+    function cancelGroupEditing(){groupDialog.close()}
+    function confirmGroup(){
+        if(!item || item.id!==groupOpeningId || !root.visible)return
+        if(JSON.stringify(groupMetrics)!==JSON.stringify(groupBaseline)){
+            groupError=ui.t("组合已在其他位置更改，请重新打开后调整。")
+            return
+        }
+        const accepted=stats.setTopBarGroupMetrics(groupOpeningId,groupDraftMetrics.slice())
+        if(accepted)groupDialog.close()
+        else groupError=ui.t("组合未更新，请重试。")
+    }
     function setGroup(metrics,focusMetric,action){
-        if(!item)return false
-        const accepted=stats.setTopBarGroupMetrics(item.id,metrics)
-        groupError=accepted?"":ui.t("组合未更新，请重试。")
-        if(accepted && focusMetric)Qt.callLater(()=>{
+        if(!item || item.id!==groupOpeningId || !groupDialog.opened)return false
+        groupDraftMetrics=metrics.slice();groupError=""
+        if(focusMetric)Qt.callLater(()=>{
             for(let index=0;index<groupEntries.count;index++){
                 const entry=groupEntries.itemAt(index)
                 if(entry && entry.modelData===focusMetric){entry.focusAction(action || "down");return}
             }
             if(groupAdd.visible)groupAdd.forceActiveFocus()
         })
-        return accepted
+        return true
     }
     function moveGroup(metric,delta){
-        const metrics=groupMetrics.slice(),index=metrics.indexOf(metric),target=index+delta
+        const metrics=groupDraftMetrics.slice(),index=metrics.indexOf(metric),target=index+delta
         if(index<1 || target<1 || target>=metrics.length)return
         metrics.splice(index,1);metrics.splice(target,0,metric)
         setGroup(metrics,metric,delta<0?"up":"down")
     }
     function removeGroup(metric){
-        const index=groupMetrics.indexOf(metric)
+        const index=groupDraftMetrics.indexOf(metric)
         if(index<1)return
-        const metrics=groupMetrics.filter(value=>value!==metric)
+        const metrics=groupDraftMetrics.filter(value=>value!==metric)
         setGroup(metrics,metrics[Math.min(index,metrics.length-1)],"remove")
     }
     function groupPreset(){
@@ -125,6 +155,7 @@ Item {
             x: Math.max(0,(sampleViewport.availableWidth-implicitWidth)/2)
             y: Math.max(0,(sampleViewport.availableHeight-implicitHeight)/2)
             row: Object.assign({},root.stylePreviewRow,{style:sampleViewport.sampleStyle})
+            motionEnabled:stats.motionEnabled
             ink: ui.ink; muted: ui.muted; fontFamily: ui.fontFamily
             width: implicitWidth; height: implicitHeight
         }
@@ -166,7 +197,7 @@ Item {
             id:groupButton;objectName:"topBarGroupButton";visible:root.row.group_supported===true
             Layout.fillWidth:true;implicitHeight:34;leftPadding:10;rightPadding:10
             Accessible.name:ui.t("组合指标")+" · "+root.groupMetrics.length+" / 4"
-            onClicked:{root.groupError="";groupDialog.open()}
+            onClicked:root.openGroup()
             background:GlassSurface {tone:"field";radius:8;focused:groupButton.activeFocus;highlighted:groupButton.hovered}
             contentItem:RowLayout {spacing:8
                 Text {Layout.fillWidth:true;text:ui.t("组合指标");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12}
@@ -230,11 +261,14 @@ Item {
         GridLayout {Layout.fillWidth:true;columns:2;columnSpacing:12;rowSpacing:8
             RowLabel {text:ui.t("小数位数")}
             Choice {objectName:"topBarPrecision";Layout.fillWidth:true;Layout.minimumWidth:128;model:[{id:"auto",label:ui.t("自动")},{id:"0",label:"0"},{id:"1",label:"1"},{id:"2",label:"2"}];value:root.item?root.item.prefs.precision || "auto":"auto";onPicked:selected=>stats.changeTopBarItem(root.item.id,"precision",selected)}
+            RowLabel {text:ui.t("图标动效")}
+            Choice {objectName:"topBarIconEffect";Layout.fillWidth:true;Layout.minimumWidth:128;model:root.effectOptions;value:root.selectedEffect;onPicked:selected=>stats.changeTopBarItem(root.item.id,"icon_effect",selected)}
             RowLabel {visible:root.hasTemperature;text:ui.t("温度单位")}
             Choice {objectName:"topBarTemperatureUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:root.hasTemperature;model:[{id:"C",label:"°C"},{id:"F",label:"°F"}];value:root.item?root.item.prefs.temperature_unit || "C":"C";onPicked:selected=>stats.changeTopBarItem(root.item.id,"temperature_unit",selected)}
             RowLabel {visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);text:ui.t("网速单位")}
             Choice {objectName:"topBarNetworkUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);model:[{id:"MBps",label:"MB/s"},{id:"Mbps",label:"Mbps"}];value:root.item?root.item.prefs.network_unit || "MBps":"MBps";onPicked:selected=>stats.changeTopBarItem(root.item.id,"network_unit",selected)}
         }
+        Text {Layout.fillWidth:true;visible:root.selectedEffect!=="off";text:ui.t("仅视觉反馈，不代表告警或额外传感器。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
         Rectangle {Layout.fillWidth:true;implicitHeight:1;color:ui.line}
         GridLayout {Layout.fillWidth:true;columns:2;columnSpacing:12;rowSpacing:8
             RowLabel {text:ui.t("位置")}
@@ -266,7 +300,7 @@ Item {
         x:parent?(parent.width-width)/2:0;y:parent?(parent.height-height)/2:0
         padding:16;modal:true;focus:true;closePolicy:Popup.CloseOnEscape | Popup.CloseOnPressOutside
         background:GlassSurface {tone:"popup";radius:13}
-        onClosed:Qt.callLater(()=>{if(root.visible)groupButton.forceActiveFocus()})
+        onClosed:{root.groupOpeningId="";root.groupBaseline=[];root.groupDraftMetrics=[];root.groupError="";Qt.callLater(()=>{if(root.visible)groupButton.forceActiveFocus()})}
         contentItem:ScrollView {
             id:groupScroll;contentWidth:availableWidth;clip:true
             ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
@@ -274,11 +308,11 @@ Item {
                 id:groupBody;width:groupScroll.availableWidth;spacing:12
                 RowLayout {Layout.fillWidth:true
                     Text {Layout.fillWidth:true;text:ui.t("组合指标");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:16;font.weight:Font.DemiBold}
-                    IconButton {objectName:"topBarGroupClose";symbol:"close";label:ui.t("完成");implicitWidth:28;implicitHeight:28;onClicked:groupDialog.close()}
+                    IconButton {objectName:"topBarGroupClose";symbol:"close";label:ui.t("取消");implicitWidth:28;implicitHeight:28;onClicked:groupDialog.close()}
                 }
                 Text {Layout.fillWidth:true;text:ui.t("同一组可显示 1–4 项指标，一起拖动并查看详情。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
                 Repeater {
-                    id:groupEntries;model:root.groupMetrics
+                    id:groupEntries;model:root.groupDraftMetrics
                     RowLayout {
                         id:groupEntry;required property string modelData;required property int index
                         Layout.fillWidth:true;spacing:4
@@ -287,14 +321,20 @@ Item {
                         Text {objectName:"topBarGroupLabel_"+groupEntry.modelData;Layout.fillWidth:true;Layout.minimumWidth:0;text:(root.groupOptions.find(option=>option.metric===groupEntry.modelData) || {}).label || groupEntry.modelData;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12;elide:Text.ElideRight}
                         Text {visible:groupEntry.index===0;text:ui.t("主指标");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;Layout.rightMargin:6}
                         IconButton {id:moveUp;objectName:"topBarGroupUp_"+groupEntry.modelData;symbol:"up";label:ui.t("向前移动");visible:groupEntry.index>0;enabled:groupEntry.index>1;implicitWidth:28;implicitHeight:30;onClicked:root.moveGroup(groupEntry.modelData,-1)}
-                        IconButton {id:moveDown;objectName:"topBarGroupDown_"+groupEntry.modelData;symbol:"down";label:ui.t("向后移动");visible:groupEntry.index>0;enabled:groupEntry.index>0 && groupEntry.index<root.groupMetrics.length-1;implicitWidth:28;implicitHeight:30;onClicked:root.moveGroup(groupEntry.modelData,1)}
+                        IconButton {id:moveDown;objectName:"topBarGroupDown_"+groupEntry.modelData;symbol:"down";label:ui.t("向后移动");visible:groupEntry.index>0;enabled:groupEntry.index>0 && groupEntry.index<root.groupDraftMetrics.length-1;implicitWidth:28;implicitHeight:30;onClicked:root.moveGroup(groupEntry.modelData,1)}
                         IconButton {id:removeMember;objectName:"topBarGroupRemove_"+groupEntry.modelData;symbol:"trash";label:ui.t("移除");visible:groupEntry.index>0;enabled:groupEntry.index>0;danger:true;implicitWidth:28;implicitHeight:30;onClicked:root.removeGroup(groupEntry.modelData)}
                     }
                 }
-                Choice {id:groupAdd;objectName:"topBarGroupAdd";Layout.fillWidth:true;visible:root.groupMetrics.length<4 && root.availableGroupOptions.length>0;model:root.availableGroupOptions;value:"";displayText:ui.t("添加同组指标");Accessible.name:displayText;onPicked:metric=>root.setGroup(root.groupMetrics.concat([metric]),metric)}
+                Choice {id:groupAdd;objectName:"topBarGroupAdd";Layout.fillWidth:true;visible:root.groupDraftMetrics.length<4 && root.availableGroupOptions.length>0;model:root.availableGroupOptions;value:"";displayText:ui.t("添加同组指标");Accessible.name:displayText;onPicked:metric=>root.setGroup(root.groupDraftMetrics.concat([metric]),metric)}
                 Rectangle {Layout.fillWidth:true;implicitHeight:1;color:ui.line}
                 ActionButton {objectName:"topBarGroupPreset";Layout.fillWidth:true;text:ui.t("使用率 · 温度 · 功耗");quiet:true;onClicked:root.groupPreset()}
                 Text {objectName:"topBarGroupError";Layout.fillWidth:true;visible:!!root.groupError;text:root.groupError;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
+                Text {objectName:"topBarGroupApplyNote";Layout.fillWidth:true;text:ui.t("确认后保留到草稿，点击“应用顶部栏”后生效。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
+                RowLayout {Layout.fillWidth:true;spacing:8
+                    Item {Layout.fillWidth:true}
+                    ActionButton {objectName:"topBarGroupCancel";text:ui.t("取消");quiet:true;onClicked:groupDialog.close()}
+                    ActionButton {objectName:"topBarGroupConfirm";text:ui.t("确认");accent:true;onClicked:root.confirmGroup()}
+                }
             }
         }
     }

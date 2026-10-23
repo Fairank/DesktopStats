@@ -477,6 +477,7 @@ class MetricRows(QAbstractListModel):
 
 class BarViewState(QObject):
     changed = Signal()
+    motionChanged = Signal()
     detailChanged = Signal()
     materialChanged = Signal()
     operationChanged = Signal()
@@ -499,6 +500,10 @@ class BarViewState(QObject):
         self._operation_timer.timeout.connect(self._clear_operation)
 
     hostId = Property(str, lambda self: self._host_id, constant=True)
+    motionEnabled = Property(
+        bool, lambda self: getattr(getattr(self.manager, 'controller', None), 'motionEnabled', False) is True,
+        notify=motionChanged,
+    )
     rows = Property(QObject, lambda self: self._row_model, constant=True)
     overflowRows = Property(QObject, lambda self: self._overflow_model, constant=True)
     config = Property("QVariantMap", lambda self: self._config, notify=changed)
@@ -667,6 +672,17 @@ class TopBarManager(QObject):
         self._panel_geometry_timer.setInterval(0)
         self._panel_geometry_timer.timeout.connect(self._position_panel_safely)
         self.controller.dataChanged.connect(self.queue_rows)
+        motion_signal = getattr(self.controller, 'motionChanged', None)
+        if motion_signal is not None:
+            motion_signal.connect(self._motion_changed)
+
+    @Slot()
+    def _motion_changed(self):
+        for identifier, host in tuple(self.hosts.items()):
+            if self.closed:
+                return
+            if self.hosts.get(identifier) is host:
+                host.state.motionChanged.emit()
 
     def _status(self, state, reason="", missing=()):
         self._reported_status = (state, reason, tuple(missing))

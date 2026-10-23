@@ -1,5 +1,22 @@
 # Changes
 
+## 0.22.0-preview.1
+
+- Add live per-logical-processor utilization to CPU details, with adaptive,
+  scrollable cells and related frequency, temperature, package power and fan
+  readings. Preserve valid zero, missing channels, independent sample age and
+  recovery baselines; do not invent physical-core telemetry or per-core watts.
+- Put visible adjust and remove buttons beside each menu-bar item. Give quiet
+  action buttons clear boundaries, hover, focus and disabled states.
+- Stage group membership and order locally with explicit Cancel and Confirm
+  actions. Reject conflicting external edits, retain failed submissions for retry
+  and include unconfirmed group edits in safe-exit protection.
+- Add optional heat, flow, fan rotation and pulse decorations to menu-bar icons.
+  Keep legacy configurations static by default, preserve independent device and
+  paired-channel values, and stop motion for unavailable, zero, hidden or
+  reduced-motion states. Decorative strength uses canonical units and does not
+  indicate an alarm or an additional sensor reading.
+
 ## 0.21.0-preview.1
 
 - Group up to four CPU or same-device GPU readings in one menu-bar item, while

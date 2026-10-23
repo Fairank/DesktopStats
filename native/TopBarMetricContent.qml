@@ -8,6 +8,7 @@ Item {
     property color muted: "#566272"
     property string fontFamily: "Segoe UI Variable"
     property bool reserveValueWidth: false
+    property bool motionEnabled: false
     readonly property string style: row.style || "label_value"
     readonly property bool hasLabel: style === "label_value"
     readonly property bool hasIcon: style === "icon_value"
@@ -66,10 +67,15 @@ Item {
                 TextMetrics { id: pairNumber; text: String(pairLine.modelData.number_text || "—"); font.family:root.fontFamily; font.pixelSize:11; font.weight:Font.Medium; font.features: {"tnum":1} }
                 TextMetrics { id: pairReserve; text:"999.9"; font:pairNumber.font }
                 TextMetrics { id: pairUnit; text:String(pairLine.modelData.unit_text || "");font.family:root.fontFamily;font.pixelSize:9 }
-                Icon {
+                MetricIcon {
                     width:11;height:11;y:.5
                     name: ["download","read","charge"].includes(pairLine.modelData.direction) ? "download" : "upload"
                     ink:root.muted
+                    metric: pairLine.modelData.metric || ""
+                    effect: root.row.icon_effect || "off"
+                    level: pairLine.modelData.effect_level === undefined ? null : pairLine.modelData.effect_level
+                    available: pairLine.modelData.available === true && Number.isFinite(pairLine.modelData.numeric_value)
+                    motionEnabled: root.motionEnabled
                 }
                 Text {
                     id: pairValue
@@ -126,13 +132,18 @@ Item {
         font: labelMeasure.font
         elide: Text.ElideRight
     }
-    Icon {
+    MetricIcon {
         objectName: "topBarContentIcon"
         visible: root.hasIcon
         width: 18; height: 18
         anchors.verticalCenter: parent.verticalCenter
         name: root.row.icon || "sensors"
         ink: root.row.available === true ? root.ink : root.muted
+        metric: root.row.metric || ""
+        effect: root.row.icon_effect || "off"
+        level: root.row.effect_level === undefined ? null : root.row.effect_level
+        available: root.row.available === true && Number.isFinite(root.row.numeric_value)
+        motionEnabled: root.motionEnabled
     }
     Canvas {
         id: trend

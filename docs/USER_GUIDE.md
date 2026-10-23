@@ -1,6 +1,6 @@
 # Desktop Stats for Windows
 
-Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.21.0-preview.1** adds grouped CPU/GPU menu-bar readouts and improves sampling timestamps, source diagnostics, keyboard navigation and safe upgrades. Local history, previewable workspace scenes and guided source diagnostics remain available. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
+Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.22.0-preview.1** adds per-logical-processor CPU details, explicit item actions and transactional group editing, plus optional icon motion. Local history, previewable workspace scenes and guided source diagnostics remain available. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
 
 Windows settings and menu-bar details share an alpha-zero native raster host and transparent Qt Quick foreground. They now use the WUJI Workbench material sequence: DWM transient-window backdrop (type 3), full client-frame extension, verified type readback, black native background and transparent foreground. No accent-blur fallback is substituted for these two hosts. Their foreground remains Qt Quick rather than WUJI's WebView2. Windows 11 detail corners request the system's smooth rounded clipping; unsupported or failed requests retain the rounded-mask fallback. UI symbols use one pinned Lucide set, while the original Niangao brand artwork remains unchanged. Failed native setup or background painting selects a readable solid fallback.
 
@@ -23,6 +23,14 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 ### 顶部栏组合读数
 
 选中 CPU 或 GPU 指标后，打开 **组合指标**。可一键加入使用率、温度与功耗，也可从同一硬件的读数中选择最多四项。主指标保留在首位，其余项可调整顺序或移除；清除附加项即可回到原来的单项显示。每组沿用同一个显卡选择、单位和显示样式，拖动、溢出收纳与悬停都以整组为单位。缺测项显示“—”，不会从另一块显卡借数。混合温度、功率的组合使用数字、图标或趋势等样式，不将不同单位当成同一个百分比仪表。
+
+列表每项右侧的调整按钮打开该项设置，垃圾桶移除当前项，误删可撤销。组合窗口内的修改先暂存，点击 **确认** 才提交到顶部栏草稿，再点击 **应用顶部栏** 保存；**取消**、Esc 或点窗口外部不提交。保存失败保留输入，组合在别处被更改时会提示重新打开，避免互相覆盖。
+
+### CPU 详情与可选动效
+
+悬停 CPU 组或 CPU 指标可查看逐 **逻辑处理器使用率**，编号从 CPU 0 开始。逻辑处理器可能包括同时多线程，不能当作独立物理核心；物理核心数另列。较多通道可在网格内滚动，最多展示 1024 项并明确显示截断数量。温度、频率、封装功率与 CPU 风扇按实际来源关联，不编造每核心温度或功耗。首轮采样或故障恢复时先建立基线，过期或失败读数显示原因，不以 0 代替。逐逻辑读数仅实时展示，不增加硬件轮询或持久历史。
+
+顶部栏指标设置中的 **图标动效** 默认关闭，可选择自动、热感、流动、旋转或呼吸（按指标提供适用选项）。组合的自动模式按每项读数分别呈现，网络上下行也各自判断。动效仅为视觉反馈，不代表告警或额外传感器；缺测、零活动、窗口隐藏和系统减少动画时停止，切换温度或网速单位不会改变其强度。原有静态图标与显示样式保留。
 
 ### 历史记录、场景与诊断
 

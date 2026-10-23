@@ -5,7 +5,9 @@ ToolButton {
     property string symbol: "plus"
     property string label: ""
     property bool danger: false
+    property bool outlined: false
     implicitWidth: 32; implicitHeight: 32
+    hoverEnabled: true
     focusPolicy: Qt.StrongFocus
     Theme { id: ui }
     Accessible.name: label
@@ -16,8 +18,9 @@ ToolButton {
     }
     background: GlassSurface {
         radius: 8; tone: "field"; focused: control.activeFocus
-        visible: control.hovered || control.activeFocus || control.down
-        highlighted: control.down; opacity: control.down ? 1 : .75
+        visible: control.outlined || control.hovered || control.activeFocus || control.down
+        highlighted: control.hovered || control.down
+        opacity: !control.enabled ? .4 : control.down ? 1 : control.outlined ? .85 : .75
     }
     ToolTip {
         visible: control.hovered || control.activeFocus

@@ -110,6 +110,7 @@ ColumnLayout {
         model: root.displayRows
         onItemAdded: fit.restart()
         delegate: TopBarGroupContent {
+            motionEnabled:stats.motionEnabled
             required property var modelData
             visible: false
             row: modelData
@@ -177,6 +178,7 @@ ColumnLayout {
             }
             contentItem: Item {
                 TopBarGroupContent {
+                    motionEnabled:stats.motionEnabled
                     anchors.left: parent.left
                     anchors.leftMargin: 6
                     anchors.verticalCenter: parent.verticalCenter

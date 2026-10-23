@@ -156,6 +156,7 @@ Window {
                 visible: metricMouse.containsMouse || (root.barState.pinned && root.barState.detail.id === metric.modelData.id)
             }
             TopBarGroupContent {
+                motionEnabled:root.barState.motionEnabled
                 id: metricContent
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter

@@ -8,6 +8,7 @@ Item {
     property color muted:"#566272"
     property string fontFamily:"Segoe UI Variable"
     property bool reserveValueWidth:false
+    property bool motionEnabled:false
     readonly property bool grouped:row.grouped===true && (row.group_rows || []).length>1
     readonly property var members:grouped?(row.group_rows || []).slice(0,4):[]
     readonly property var pairRows:single.pairRows
@@ -27,6 +28,7 @@ Item {
         row:root.grouped?({}):root.row
         ink:root.ink;muted:root.muted;fontFamily:root.fontFamily
         reserveValueWidth:root.reserveValueWidth
+        motionEnabled:root.motionEnabled
         width:implicitWidth;height:implicitHeight
         anchors.verticalCenter:parent.verticalCenter
     }
@@ -45,6 +47,7 @@ Item {
                 row:Object.assign({},modelData,{style:root.row.style || modelData.style || "label_value"})
                 ink:root.ink;muted:root.muted;fontFamily:root.fontFamily
                 reserveValueWidth:root.reserveValueWidth
+                motionEnabled:root.motionEnabled
                 width:implicitWidth;height:implicitHeight
                 y:(groupLine.height-height)/2
             }

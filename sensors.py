@@ -29,6 +29,16 @@ INSPECT_UNTIL = 0
 EXTERNAL_RESCAN = 0
 ASUS_RETRY_SECONDS = 60.0
 NVML_RETRY_SECONDS = 5.0
+MAX_LOGICAL_PROCESSORS = 4096
+CPU_LOGICAL_API = "psutil.cpu_percent(percpu=True)"
+
+
+def logical_processor_values(values):
+    """Preserve actual logical indices and missing slots, never clamp bad data."""
+    if not isinstance(values, (list, tuple)) or not 1 <= len(values) <= MAX_LOGICAL_PROCESSORS:
+        return []
+    return [value if type(value) in (int, float) and 0 <= value <= 100 and math.isfinite(value)
+            else None for value in values]
 
 
 class ProviderApiError(RuntimeError):
@@ -609,7 +619,36 @@ class Sampler:
                                     error=provider_error(error, "AsusTemperature"))
         self.cooling = AsusFans(getattr(self.asus, "read_status", None))
         psutil.cpu_percent()
-        psutil.cpu_percent(percpu=True)
+        self._cpu_per_core_primed = False
+        try:
+            psutil.cpu_percent(percpu=True)
+            self._cpu_per_core_primed = True
+        except (OSError, RuntimeError, psutil.Error):
+            # A per-logical baseline failure must not prevent all other sources.
+            # The next successful call only establishes its own baseline.
+            pass
+
+    def _read_logical_processors(self):
+        try:
+            values = logical_processor_values(psutil.cpu_percent(percpu=True))
+        except (OSError, RuntimeError, psutil.Error) as error:
+            self._cpu_per_core_primed = False
+            facts = provider_error(error, CPU_LOGICAL_API)
+            facts.pop("message", None)
+            return dict(cpu_per_core=[], cpu_per_core_timestamp=None,
+                        cpu_per_core_status=dict(state="query_failed", api=CPU_LOGICAL_API, error=facts))
+        primed, self._cpu_per_core_primed = self._cpu_per_core_primed, True
+        if not primed:
+            return dict(cpu_per_core=[], cpu_per_core_timestamp=None,
+                        cpu_per_core_status=dict(state="warming_up", api=CPU_LOGICAL_API, error={}))
+        if not values:
+            return dict(cpu_per_core=[], cpu_per_core_timestamp=None,
+                        cpu_per_core_status=dict(state="invalid_data", api=CPU_LOGICAL_API, error={}))
+        timestamp = time.time()
+        return dict(cpu_per_core=values, cpu_per_core_timestamp=timestamp,
+                    cpu_per_core_status=dict(
+                        state="available" if all(value is not None for value in values) else "partial",
+                        api=CPU_LOGICAL_API, error={}))
 
     def _release_asus(self, reason, error):
         """Invalidate only this provider, including cached pre-loss fan values."""
@@ -719,6 +758,8 @@ class Sampler:
             cpu_name=self.cpu,
             cpu_cores=self.cores,
             cpu_threads=self.threads,
+            cpu_per_core=[], cpu_per_core_timestamp=None,
+            cpu_per_core_status=dict(state="not_requested", api=CPU_LOGICAL_API, error={}),
         )
         inspecting = time.monotonic() < INSPECT_UNTIL
         needed = required_sources(config)
@@ -763,7 +804,11 @@ class Sampler:
             data["cpu_power_state"] = self.cpu_power.state
             error = getattr(self.cpu_power, "last_error", "")
             data["cpu_power_error"] = error if isinstance(error, str) else ""
-            data["cpu_per_core"] = psutil.cpu_percent(percpu=True)
+            data.update(self._read_logical_processors())
+            if data["cpu_per_core"]:
+                # This list is the current OS logical-processor enumeration;
+                # keep the ordinary scalar and detail topology consistent.
+                data["cpu_threads"] = len(data["cpu_per_core"])
             try:
                 frequency = psutil.cpu_freq()
                 data["cpu_frequency"] = (
@@ -771,6 +816,8 @@ class Sampler:
                 )
             except (OSError, RuntimeError, psutil.Error):
                 pass
+        else:
+            self._cpu_per_core_primed = False
         data.update(asus_readings)
         needs_gpu = "gpu" in needed or inspecting
         self._retry_nvidia_cleanup()
@@ -823,6 +870,8 @@ class Sampler:
         data["metric_timestamps"] = {
             key: timestamp for key, timestamp in self.cooling.sample_times.items() if key in cooling
         }
+        if data["cpu_per_core_timestamp"] is not None:
+            data["metric_timestamps"]["cpu_per_core"] = data["cpu_per_core_timestamp"]
         if (power_timestamp is not None and "cpu_power" not in asus_readings
                 and data.get("cpu_power_source") == power_source):
             data["metric_timestamps"]["cpu_power"] = power_timestamp

@@ -18,6 +18,7 @@ ColumnLayout {
     readonly property var selected: config.items.find(item => item.id === selectedItem)
     readonly property var selectedRow: rows.find(item => item.id === selectedItem) || ({})
     readonly property bool groupPopupOpen:selectedInspector.groupPopupOpen
+    readonly property bool pendingGroupEdits:selectedInspector.pendingGroupEdits
     readonly property var sensorChoices:{if(!root.active || !picker.opened)return [];const revision=stats.sensorRevision;return stats.sensorRows}
     readonly property bool sideInspector: width >= 740
     readonly property bool unapplied: JSON.stringify(config) !== JSON.stringify(stats.saved.top_bar)
@@ -119,7 +120,7 @@ ColumnLayout {
         if (draggedId && !config.items.some(item => item.id === draggedId)) cancelDrag()
         if (!config.items.some(item => item.id === selectedItem)) selectedItem = config.items.length ? config.items[0].id : ""
     }
-    onActiveChanged: if (!active) cancelDrag()
+    onActiveChanged: if (!active) {cancelDrag();selectedInspector.cancelGroupEditing()}
     Keys.onShortcutOverride: function(event) { if (dragging && event.key === Qt.Key_Escape) event.accepted = true }
     Keys.onEscapePressed: function(event) { if (dragging || draggedId) { cancelDrag(); event.accepted = true } }
     Timer {
@@ -348,15 +349,17 @@ ColumnLayout {
                     }
                     Text { Layout.fillWidth: true; Layout.minimumWidth: 0; text: (card.reading.grouped?card.reading.group_label:card.reading.label) || ""; textFormat: Text.PlainText; color: ui.ink; font.family: ui.fontFamily; font.pixelSize: 12; elide: Text.ElideRight }
                     Flickable {
-                        Layout.preferredWidth:Math.min(listReading.implicitWidth,Math.max(100,card.width*.65))
+                        Layout.preferredWidth:Math.min(listReading.implicitWidth,Math.max(80,card.width*.46))
                         Layout.preferredHeight:Math.max(24,listReading.implicitHeight)
                         contentWidth:listReading.implicitWidth;contentHeight:height;clip:true
                         interactive:contentWidth>width;boundsBehavior:Flickable.StopAtBounds
                         flickableDirection:Flickable.HorizontalFlick
                         TapHandler {onTapped:{card.forceActiveFocus();root.selectItem(card.modelData.id)}}
                         ScrollBar.horizontal:ScrollBar {policy:ScrollBar.AsNeeded;height:3}
-                        TopBarGroupContent {id:listReading;objectName:"topBarValue_"+card.modelData.id;row:card.reading;ink:ui.ink;muted:ui.muted;fontFamily:ui.fontFamily;width:implicitWidth;height:implicitHeight;y:(parent.height-height)/2}
+                        TopBarGroupContent {id:listReading;objectName:"topBarValue_"+card.modelData.id;row:card.reading;ink:ui.ink;muted:ui.muted;fontFamily:ui.fontFamily;motionEnabled:stats.motionEnabled;width:implicitWidth;height:implicitHeight;y:(parent.height-height)/2}
                     }
+                    IconButton {objectName:"topBarItemAdjust_"+card.modelData.id;symbol:"sliders";label:ui.t("调整");outlined:true;implicitWidth:32;implicitHeight:32;onClicked:root.selectItem(card.modelData.id)}
+                    IconButton {objectName:"topBarItemDelete_"+card.modelData.id;symbol:"trash";label:ui.t("移除");danger:true;outlined:true;implicitWidth:32;implicitHeight:32;onClicked:stats.removeTopBarMetric(card.modelData.id)}
                 }
                 Rectangle { x: 0; y: -3; width: parent.width; height: 2; color: ui.accent; visible: root.dragging && root.dropPlacement === zone.placement && root.dropBeforeId === card.modelData.id }
                 PlainTip { visible: card.hovered && !root.dragging; text: [card.reading.grouped?card.reading.group_label:card.reading.label,card.reading.grouped?card.reading.group_value:card.reading.value,card.reading.hardware_name,card.reading.source,card.reading.reason].filter(Boolean).join("\n") }

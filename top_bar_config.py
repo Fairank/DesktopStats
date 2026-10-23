@@ -8,7 +8,7 @@ import unicodedata
 from external_sensor import EXTERNAL_SLOTS, validate_bindings
 from metrics import METRICS
 from top_bar_layout import DISPLAY_STYLES
-from top_bar_profiles import paired_channels, validate_group_metrics
+from top_bar_profiles import ICON_EFFECTS, paired_channels, validate_group_metrics
 
 APPEARANCE_DEFAULTS = dict(follow_global=True, skin="glass", glass_transparency=50.0)
 
@@ -141,6 +141,7 @@ def validate_top_bar(value):
             ("precision", ("auto", "0", "1", "2")),
             ("temperature_unit", ("C", "F")),
             ("network_unit", ("MBps", "Mbps")),
+            ("icon_effect", ICON_EFFECTS),
         ):
             if field in source:
                 if source[field] not in options:

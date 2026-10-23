@@ -28,7 +28,7 @@ Window {
     onVisibleChanged:if(visible){layoutWidth=width;layoutHeight=height;resizeInProgress=false}
     Timer {id:layoutSettle;interval:120;onTriggered:{root.layoutWidth=root.width;root.layoutHeight=root.height;root.resizeInProgress=false}}
     readonly property bool pendingInput:frequency.pendingInput || (!!widgetEditorLoader.item && widgetEditorLoader.item.pendingInput)
-    readonly property bool pendingEdits: stats.dirty || pendingInput
+    readonly property bool pendingEdits: stats.dirty || pendingInput || topBarEditor.pendingGroupEdits
     readonly property bool currentPendingInput:currentScope==="preferences"?frequency.pendingInput:currentScope==="desktop" && !!widgetEditorLoader.item && widgetEditorLoader.item.pendingInput
     readonly property bool currentDirty:stats.replacementPending || !!stats.scopeDirty[currentScope] || currentPendingInput
     width:1280; height:760; minimumWidth:720; minimumHeight:600

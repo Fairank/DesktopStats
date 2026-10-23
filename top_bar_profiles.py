@@ -31,6 +31,19 @@ PAIRS = (
 # A group retains one primary item, device selection and hover/drag identity.
 # Only CPU and per-device GPU channels share a sufficiently precise identity.
 MAX_GROUP_METRICS = 4
+ICON_EFFECTS = ('off', 'auto', 'heat', 'flow', 'spin', 'pulse')
+
+
+def effect_strength(value, maximum):
+    """Bound decorative motion in canonical units, never infer missing activity."""
+    if type(value) not in (int, float) or type(maximum) not in (int, float):
+        return None
+    try:
+        if not isfinite(value) or not isfinite(maximum) or maximum <= 0:
+            return None
+    except OverflowError:
+        return None
+    return min(1.0, abs(value) / maximum)
 
 
 def group_channels(metric):

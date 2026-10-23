@@ -71,15 +71,33 @@ class GroupQmlTests(unittest.TestCase):
 
     def preset(self):
         self.click("topBarGroupPreset")
-        self.assertEqual(
-            self.item_config()["prefs"]["metrics"], ["cpu_usage", "cpu_temp", "cpu_power"]
-        )
+        self.assertEqual(self.staged(), ["cpu_usage", "cpu_temp", "cpu_power"])
+
+    def staged(self):
+        return variant(self.item("topBarSelectedInspector").property("groupDraftMetrics"))
 
     def close_group(self):
-        self.click("topBarGroupClose")
+        self.click("topBarGroupConfirm")
         self.assertFalse(self.item("topBarSettings").property("groupPopupOpen"))
 
     def choose(self, name, index):
+        target = self.item(name)
+        parent = target.parentItem()
+        inside_scroll = False
+        while parent is not None:
+            if parent.objectName() == "topBarSettingsScroll":
+                inside_scroll = True
+                break
+            parent = parent.parentItem()
+        if inside_scroll:
+            scroll = self.item("topBarSettingsScroll")
+            for _ in range(12):
+                local = target.mapToItem(scroll, target.boundingRect().center())
+                if 12 <= local.y() <= scroll.height() - 12:
+                    break
+                self.wheel(scroll, -120 if local.y() > scroll.height() - 12 else 120)
+            scroll.property("contentItem").cancelFlick()
+            QTest.qWait(35)
         self.click(name)
         QTest.keyClick(self.window, Qt.Key_Home)
         for _ in range(index):
@@ -92,6 +110,7 @@ class GroupQmlTests(unittest.TestCase):
         self.ui.change("refresh", 0.5)
         self.open_group()
         self.preset()
+        self.assertNotIn("metrics", self.item_config()["prefs"])
         for action in ("Up", "Down", "Remove"):
             self.assertFalse(self.item("topBarGroup" + action + "_cpu_usage").isVisible())
         self.assertFalse(self.item("topBarGroupUp_cpu_temp").isEnabled())
@@ -110,17 +129,15 @@ class GroupQmlTests(unittest.TestCase):
         self.open_group()
         self.preset()
         self.click("topBarGroupUp_cpu_power")
-        self.assertEqual(
-            self.item_config()["prefs"]["metrics"], ["cpu_usage", "cpu_power", "cpu_temp"]
-        )
+        self.assertEqual(self.staged(), ["cpu_usage", "cpu_power", "cpu_temp"])
         self.click("topBarGroupRemove_cpu_power")
-        self.assertEqual(self.item_config()["prefs"]["metrics"], ["cpu_usage", "cpu_temp"])
+        self.assertEqual(self.staged(), ["cpu_usage", "cpu_temp"])
         self.choose("topBarGroupAdd", 0)
-        self.assertEqual(
-            self.item_config()["prefs"]["metrics"], ["cpu_usage", "cpu_temp", "cpu_power"]
-        )
+        self.assertEqual(self.staged(), ["cpu_usage", "cpu_temp", "cpu_power"])
         self.click("topBarGroupRemove_cpu_power")
         self.click("topBarGroupRemove_cpu_temp")
+        self.assertEqual(self.staged(), ["cpu_usage"])
+        self.close_group()
         self.assertNotIn("metrics", self.item_config()["prefs"])
         self.assertEqual(
             variant(self.item("topBarSelectedInspector").property("groupMetrics")), ["cpu_usage"]
@@ -130,13 +147,14 @@ class GroupQmlTests(unittest.TestCase):
         self.open_group()
         self.preset()
         self.choose("topBarGroupAdd", 0)
-        self.assertEqual(len(self.item_config()["prefs"]["metrics"]), 4)
+        self.assertEqual(len(self.staged()), 4)
         self.assertFalse(self.item("topBarGroupAdd").isVisible())
         QTest.keyClick(self.window, Qt.Key_Escape)
         QTest.qWait(50)
         self.assertFalse(self.item("topBarSettings").property("groupPopupOpen"))
         self.assertTrue(self.window.isVisible())
-        self.assertEqual(len(self.item_config()["prefs"]["metrics"]), 4)
+        self.assertNotIn("metrics", self.item_config()["prefs"])
+        self.assertFalse(self.item("topBarSettings").property("pendingGroupEdits"))
 
     def test_group_dialog_is_closed_when_its_page_is_hidden(self):
         self.open_group()
@@ -146,7 +164,7 @@ class GroupQmlTests(unittest.TestCase):
         QTest.qWait(35)
         self.assertFalse(self.item("topBarSettings").property("groupPopupOpen"))
         self.assertTrue(self.window.isVisible())
-        self.assertEqual(len(self.item_config()["prefs"]["metrics"]), 3)
+        self.assertNotIn("metrics", self.item_config()["prefs"])
 
     def test_selected_gpu_and_temperature_unit_are_shared_by_every_member(self):
         self.ui._devices["gpus"]["1"] = dict(label="Second synthetic GPU")
@@ -157,7 +175,7 @@ class GroupQmlTests(unittest.TestCase):
         self.open_group("b_gpu_usage")
         self.click("topBarGroupPreset")
         self.assertEqual(
-            self.item_config("b_gpu_usage")["prefs"]["metrics"],
+            self.staged(),
             ["gpu_usage", "gpu_temp", "gpu_power"],
         )
         self.close_group()
@@ -181,6 +199,11 @@ class GroupQmlTests(unittest.TestCase):
         identifier = self.ui._draft["top_bar"]["items"][-1]["id"]
         self.open_group(identifier)
         self.click("topBarGroupPreset")
+        self.assertEqual(
+            self.staged(),
+            ["vram_gb", "gpu_usage", "gpu_temp", "gpu_power"],
+        )
+        self.close_group()
         self.assertEqual(
             self.item_config(identifier)["prefs"]["metrics"],
             ["vram_gb", "gpu_usage", "gpu_temp", "gpu_power"],
@@ -236,14 +259,14 @@ class GroupQmlTests(unittest.TestCase):
         self.open_group()
         self.preset()
         self.choose("topBarGroupAdd", 0)
-        for metric in self.item_config()["prefs"]["metrics"]:
+        for metric in self.staged():
             label = self.item("topBarGroupLabel_" + metric)
             point = label.mapToScene(QPointF())
             self.assertGreaterEqual(point.x(), 0)
             self.assertGreaterEqual(point.y(), 0)
             self.assertLessEqual(point.x() + label.width(), self.window.width())
             self.assertLessEqual(point.y() + label.height(), self.window.height())
-        self.click("topBarGroupRemove_" + self.item_config()["prefs"]["metrics"][-1])
+        self.click("topBarGroupRemove_" + self.staged()[-1])
         self.close_group()
         self.save.assert_not_called()
 

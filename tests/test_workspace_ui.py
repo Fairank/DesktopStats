@@ -36,8 +36,10 @@ class IntegratedWorkspaceTests(unittest.TestCase):
         # QPA offscreen uses FreeType, rather than Windows DirectWrite. Point it
         # at the actual tested UI fonts, not every optional .fon/.ttf on the PC.
         # No warning is filtered: invalid/missing fixture faces must fail here.
-        font_root = ROOT / "qa-private/workspace-ui-fonts"
-        font_root.mkdir(exist_ok=True)
+        # Parallel module workers must never truncate fonts another live
+        # FreeType face is reading. Retain this class's private copies until
+        # process exit; Qt may still reference them after the last window.
+        font_root = Path(tempfile.mkdtemp(prefix="workspace-ui-fonts-", dir=ROOT / "qa-private"))
         font_names = ("SegUIVar.ttf", "segoeui.ttf", "seguisb.ttf", "segoeuib.ttf", "msyh.ttc", "msyhbd.ttc")
         for name in font_names:
             font = Path(os.environ.get("SystemRoot", "C:/Windows")) / "Fonts" / name

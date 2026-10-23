@@ -54,6 +54,7 @@ from top_bar_profiles import (
     align_pair_trends,
     can_gauge,
     detail_profile,
+    effect_strength,
     group_channels,
     paired_channels,
     validate_group_metrics,
@@ -428,6 +429,7 @@ class Controller(WorkspaceTools):
             "storage_target",
             "placement",
             "style",
+            "icon_effect",
         ):
             return
         value = copy.deepcopy(self._draft)
@@ -459,6 +461,74 @@ class Controller(WorkspaceTools):
         if value == self._draft:
             return True
         return self.edit(value)
+
+    def _cpu_detail_context(self, data, prefs, language, stale):
+        """Current logical CPU readings, never inferred physical-core telemetry."""
+        source, api = "Windows / psutil", sensors.CPU_LOGICAL_API
+        status = data.get("cpu_per_core_status", {})
+        status = status if isinstance(status, dict) else {}
+        timestamp = data.get("cpu_per_core_timestamp", data.get("time"))
+        frame_stale = stale
+        stale = stale or not numeric(timestamp) or not 0 <= time.time() - timestamp < 35
+        values = sensors.logical_processor_values(data.get("cpu_per_core"))
+        observed = len(values)
+        raw_state = status.get("state", "available" if values else "invalid_data")
+        reasons = {
+            "query_failed": "逻辑处理器查询失败，将自动重试。",
+            "warming_up": "逻辑处理器采样正在建立基线。",
+            "not_requested": "当前未请求处理器采样。",
+            "invalid_data": "Windows 未返回逻辑处理器使用率。",
+        }
+        reason = translate("读数已过期", language) if stale and values else translate(
+            reasons.get(raw_state, "Windows 未返回逻辑处理器使用率。") if not values else "", language)
+        errors = status.get("error", {})
+        errors = errors if isinstance(errors, dict) else {}
+        if raw_state == "query_failed":
+            reason += " API " + api
+            for field, label in (("winerror", "Win32"), ("errno", "errno")):
+                if type(errors.get(field)) is int:
+                    reason += " · " + label + " " + str(errors[field])
+        readable = not stale and raw_state not in reasons
+        rows = []
+        precision = prefs.get("precision", "auto")
+        digits = int(precision) if precision in ("0", "1", "2") else 1
+        for index, sample in enumerate(values[:1024]):
+            value = sample if readable else None
+            row_reason = reason or (translate("本次逻辑处理器读数无效。", language) if value is None else "")
+            text = f"{value:.{digits}f}" if value is not None else "—"
+            if precision == "auto" and value is not None:
+                text = text.rstrip("0").rstrip(".") if "." in text else text
+            rows.append(dict(index=index, label="CPU " + str(index), available=value is not None,
+                             numeric_value=value, fraction=value / 100 if value is not None else None,
+                             value=text + " %" if value is not None else "—", reason=row_reason,
+                             source=source, timestamp=timestamp if numeric(timestamp) else None))
+        available_count = sum(value is not None for value in values) if readable else 0
+        if readable and values:
+            state = "available" if available_count == observed else "partial" if available_count else "unavailable"
+            if available_count != observed:
+                reason = translate("部分逻辑处理器本次没有有效读数。", language)
+        else:
+            state = "stale" if stale and values else raw_state if raw_state in ("warming_up", "not_requested") else "unavailable"
+
+        def count(value):
+            return value if type(value) is int and 0 < value <= sensors.MAX_LOGICAL_PROCESSORS else None
+
+        related = []
+        for metric in ("cpu_frequency", "cpu_temp", "cpu_power", "cpu_fan_rpm"):
+            value, unit = formatted({} if frame_stale else data, metric, prefs)
+            related.append(dict(metric=metric, label=translate(METRICS[metric]["label"], language),
+                                value=value + (" " + unit if value != "—" and unit else ""),
+                                available=value != "—", source=reading_source(data, metric, prefs),
+                                reason=translate("读数已过期", language) if frame_stale else translate(
+                                    unavailable_reason(data, metric, prefs), language) if value == "—" else ""))
+        return dict(hardware_name=str(data.get("cpu_name") or ""),
+                    physical_cores=count(data.get("cpu_cores")),
+                    logical_processors=observed or count(data.get("cpu_threads")),
+                    source=source, api=api, state=state, reason=reason,
+                    available=available_count > 0, available_count=available_count,
+                    timestamp=timestamp if numeric(timestamp) else None,
+                    logical_rows=rows, displayed_count=len(rows), truncated=observed > len(rows),
+                    related_rows=related)
 
     def _top_bar_rows(self, config, *, detail_id=None, include_related=True,
                       include_groups=True, force_history=False):
@@ -537,6 +607,13 @@ class Controller(WorkspaceTools):
                     )
                 )
             channels = paired_channels(metric)
+            icon_effect = prefs.get('icon_effect', 'off')
+            def effect_for(key):
+                if icon_effect == 'off' or stale:
+                    return None
+                canonical = dict(prefs, temperature_unit='C', network_unit='MBps')
+                activity, _, _ = display_value(data, key, canonical)
+                return effect_strength(activity, metric_info(key, prefs).get('maximum'))
             paired = []
             for other, direction in channels:
                 val, other_unit = formatted({} if stale else data, other, prefs)
@@ -551,6 +628,7 @@ class Controller(WorkspaceTools):
                     history=[display_value(sample, other, prefs)[0] for sample in samples]
                         if detail_id is not None and include_related else [],
                     history_times=sample_times if detail_id is not None and include_related else [])
+                channel.update(icon_effect=icon_effect, effect_level=effect_for(other))
                 paired.append(present_metric(channel))
             paired = align_pair_trends(paired)
             capacity_summary = {}
@@ -584,6 +662,8 @@ class Controller(WorkspaceTools):
                     unit=unit,
                     available=value != "—",
                     numeric_value=number,
+                    icon_effect=icon_effect,
+                    effect_level=effect_for(metric),
                     source=source,
                     reason=reason,
                     hardware_name=hardware_name,
@@ -603,6 +683,8 @@ class Controller(WorkspaceTools):
                     ],
                 )
             )
+            if family == 'cpu' and detail_id is not None and include_related:
+                result[-1]['cpu_context'] = self._cpu_detail_context(data, prefs, language, stale)
         preferences = {item["id"]: item["prefs"] for item in config["top_bar"]["items"]}
         rows = [present_metric(row, preferences[row['id']]) for row in result]
         if not include_groups:
