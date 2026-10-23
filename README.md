@@ -5,7 +5,7 @@
 可自由组合的原生 Windows 桌面监控组件与顶部状态栏。选择自己需要的指标，
 用卡片、横条或竖条显示；悬停顶部栏可展开图表、设备和数据来源。
 
-**0.24.0-preview.1 · 开发预览 · Windows x64 · 仅允许许可规定的非商业用途**
+**0.25.0-preview.1 · 开发预览 · Windows x64 · 仅允许许可规定的非商业用途**
 
 原创应用代码采用 [PolyForm Noncommercial 1.0.0](LICENSE)。未经另行书面授权，
 不授予商业使用、商业集成或转售的权利。第三方依赖和旧版 MIT 权利保留，
@@ -24,7 +24,18 @@
 
 [![顶部栏整体设计和可选动效强度、速度设置，合成示例数据](assets/showcase/top-bar-design-settings.png)](assets/showcase/top-bar-design-settings.png)
 
-可选热感、流动、风扇旋转和呼吸效果默认关闭；强度与速度连续调节，缺测、零活动和减少动画时静止。
+可选图标动效默认关闭。开启后，温度驱动黄橙红电弧，功耗驱动蓝白电流；短电弧在不同位置闪出、分叉、熄灭，风扇平滑旋转。强度与速度连续调节，缺测、零活动和减少动画时静止。
+
+选择 **图标动效 → 硬件联动** 可让同一图标显示独立的硬件通道：CPU/GPU 的负载、黄红热感与蓝色功耗反馈可以同时出现，网络和电池分别处理两个方向。电弧在十个视觉阶段之间连续过渡，逐渐增加伸展幅度、放电频率和同时出现的细丝；真实数值不分档。内存没有温度传感器时不编造发热，NVMe 损耗也不会被当成负载。
+
+[![硬件图标动态效果，原尺寸与细节参考，合成示例读数](assets/showcase/hardware-motion-dark.gif)](assets/showcase/hardware-motion-dark.gif)
+
+动画使用合成示例读数；[查看浅色动画](assets/showcase/hardware-motion-light.gif)。电弧为状态装饰，不代表检测到了物理放电。
+
+| 硬件联动 · 浅色 | 硬件联动 · 深色 |
+| --- | --- |
+| [![浅色硬件图标十状态原生绘制，合成读数](assets/showcase/hardware-feedback-light.png)](assets/showcase/hardware-feedback-light.png) | [![深色硬件图标十状态原生绘制，合成读数](assets/showcase/hardware-feedback-dark.png)](assets/showcase/hardware-feedback-dark.png) |
+| 真实控制器投影的合成数据，保留实际图标大小。 | 独立通道可以叠加，静态图只能展示一个动画时刻。 |
 
 ### 新增：CPU 详情与清楚的操作
 
@@ -68,7 +79,7 @@
 - CPU 与 GPU 支持组合读数：同一格放入最多四项指标，整组拖排，组内可调整内容和顺序。
 - CPU 详情显示逐逻辑处理器使用率，并关联频率、温度、功耗和风扇读数；缺测与过期保留说明。
 - 指标行右侧直接调整或删除；组合编辑可确认或取消。图标动效按项选择，强度和速度连续可调，默认关闭，并遵循系统减少动画设置。
-- 动效围绕图标局部结构呈现，保留清晰的静态轮廓；详情按当前读数、真实趋势、核心和相关测量排列。自动切换网卡或系统卷后，图表仍只显示当前设备的历史，不混入其他设备。
+- 动效围绕图标局部结构呈现，保留清晰的静态轮廓；彩色细节和节奏随真实读数平滑变化，不作为告警或标定转速。详情按当前读数、真实趋势、核心和相关测量排列。自动切换网卡或系统卷后，图表仍只显示当前设备的历史，不混入其他设备。
 - 网络上下行、磁盘读写、电池充放电支持同框显示。
 - 六种皮肤、连续透明度和圆角、可选标题与图表；全局默认和单组件设置独立。
 - CPU、GPU、内存、电池、网络、磁盘与部分温度、功率、风扇读数。
@@ -116,6 +127,12 @@ python -m venv .venv
 经校验的九个库，不执行下载内容；随后由本机编译原创采集器。构建需要已有的
 Windows .NET Framework 编译器；脚本不会自动安装驱动或 SDK。
 打包与依赖重建步骤见 [开发说明](docs/USER_GUIDE.md#develop-verify-and-build)。
+
+电弧图集已经包含在源码中，正常运行和打包无需重新生成。需要修改动效素材时，
+另行安装 `requirements-artwork.txt`，运行
+`python tools/generate_metric_motion.py --output assets/metric-motion-new`。
+生成器写入新的项目内目录，保留现有素材和清单；使用新资源前核对生成参数、
+实际小尺寸动画和哈希。Three 算法署名与 MIT 例外见第三方说明。
 
 The application runs locally with Python/PySide6. The packaged build needs no
 browser, Rainmeter, Python installation or cloud login. Original application code

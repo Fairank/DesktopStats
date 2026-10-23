@@ -215,7 +215,14 @@ Window { id:scene; width:336; height:96; visible:false; color:stats.theme==="dar
         icon = self.find("icon")
         self.assertEqual(icon.property("effect"), "off")
         self.assertFalse(icon.property("animationRunning"))
-        self.state.row.update(icon_effect="auto", metric="external_slot_0")
+        # Auto now supports both processor and memory glyphs. A CPU glyph with
+        # an unrelated metric string is not an unsupported visual carrier.
+        for glyph, metric in (("cpu", "cpu_usage"), ("memory", "ram_percent")):
+            self.state.row.update(icon_effect="auto", icon=glyph, metric=metric)
+            self.publish()
+            self.assertEqual(icon.property("resolvedEffect"), "pulse")
+            self.assertTrue(icon.property("animationRunning"))
+        self.state.row.update(icon_effect="auto", icon="unsupported_test_glyph", metric="external_slot_0")
         self.publish()
         self.assertEqual(icon.property("resolvedEffect"), "off")
         self.assertFalse(icon.property("animationRunning"))

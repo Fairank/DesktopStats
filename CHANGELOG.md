@@ -1,5 +1,29 @@
 # Changes
 
+## 0.25.0-preview.1
+
+- Correct optional icon effects that used the current reading only as an on/off
+  gate. Drive local color, amplitude and rhythm from normalized live readings,
+  with a short transition between samples. Retain an unambiguous static outline
+  and the user's chosen effect, intensity and speed.
+- Give heat, directional transfer, energy, fan and load feedback distinct local
+  accents that remain visible at actual menu-bar and paired-readout sizes.
+  Preserve zero, missing-data, hidden-window and reduced-motion stopping rules.
+- Shape thermal feedback as intermittent yellow/red discharge at changing
+  positions, with bright cores, natural branches and complete decay between
+  individual bursts. Real power drives an independently timed blue discharge;
+  the layers can coexist without changing the measured number or load area.
+  Keep fan feedback to a clear rotating rotor and fixed hub.
+- Add hardware-response profiles for processors, memory, transfer, batteries,
+  fans, volumes and NVMe temperature. Independent real channels can coexist;
+  missing load does not suppress a real thermal or power channel. Keep selected
+  devices and canonical units isolated. Never infer memory heat or map SSD wear
+  to current activity. Blend continuously across ten visual stages with
+  increasing displacement, branch density and burst rate, without quantizing
+  measured numbers.
+- Keep these effects opt-in. Their visual response is not a calibrated fan RPM,
+  electrical propagation simulation, temperature limit or alert severity.
+
 ## 0.24.0-preview.1
 
 - Redesign optional menu-bar icon motion around each symbol's structure:

@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.24.0-preview.1",
-  "archive_root": "DesktopStats-0.24.0-preview.1-source/",
+  "version": "0.25.0-preview.1",
+  "archive_root": "DesktopStats-0.25.0-preview.1-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 9702,
-      "sha256": "acbf300b72993cf0a93d5441e2651b0baf40e887a53cb4cd69d5a58d7b5be2c9"
+      "bytes": 11254,
+      "sha256": "c3e05ba32650985074ed6e719377a4c8084e60c7bd6cfd6fa7305e7b0b64e793"
     },
     {
       "path": "Install.cmd",
@@ -29,8 +29,8 @@
     },
     {
       "path": "LICENSING.md",
-      "bytes": 3990,
-      "sha256": "77a4df16563664a653a6d86af579a6811e4b388873fb6f23680d07758a0131e0"
+      "bytes": 4054,
+      "sha256": "65d3de0dbd9e271c50e30f44174d50431666a5aec06bb948a985cdf0a88689a6"
     },
     {
       "path": "NOTICE",
@@ -39,13 +39,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 8727,
-      "sha256": "4da5165cbc6e7e1255014934240dc0af5a3863cc70a5c2b5ac6bfe1e3ed23a40"
+      "bytes": 10624,
+      "sha256": "62cce1a6892a86737847bf3b81d2e6ebd976b10bab27e1bdd4e09299372ff384"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
-      "bytes": 1987,
-      "sha256": "0b06637489ea7d6f18454b5c73f952b9d5f27be3f6147296ca0e39d34849499f"
+      "bytes": 3725,
+      "sha256": "2570cf60aeb4c1a5081d393dd1790f36436010f6304368be6b2eb7cc60243b08"
     },
     {
       "path": "Uninstall.cmd",
@@ -388,6 +388,21 @@
       "sha256": "2c8d2bf3e42a8216d8aef065a8e0262f36ee35cb8367d4ca4cffe88d30240c73"
     },
     {
+      "path": "assets/metric-motion/arc-blue.png",
+      "bytes": 147716,
+      "sha256": "f2d3c4dafe7240307ccb7ddca00641730c52ce85373dfbad64640c1efae0e879"
+    },
+    {
+      "path": "assets/metric-motion/arc-warm.png",
+      "bytes": 141978,
+      "sha256": "47578b175bfd313f78f8d21f1c29fbee483b28b25356d8e893fcac82a6a90281"
+    },
+    {
+      "path": "assets/metric-motion/manifest.json",
+      "bytes": 5499,
+      "sha256": "34921777638f49822589cb84e1609ec5d8c95766eb3306cbb54a71c864aaddad"
+    },
+    {
       "path": "assets/niangao-source.svg",
       "bytes": 98417,
       "sha256": "c45a45d8d4109a493ce20fc8b039c3e007d43cfd7f391778f089917230523625"
@@ -401,6 +416,26 @@
       "path": "assets/showcase/group-confirm.png",
       "bytes": 68901,
       "sha256": "ab996fcb86dd7cb832262365f1d3bfa234605abcb4671fa030282e0831e7cbdb"
+    },
+    {
+      "path": "assets/showcase/hardware-feedback-dark.png",
+      "bytes": 67760,
+      "sha256": "cba6e7e70d090194e509c1818e870f7e82542b390d594c643c3a89fb955710a7"
+    },
+    {
+      "path": "assets/showcase/hardware-feedback-light.png",
+      "bytes": 66930,
+      "sha256": "09abed5823617fd708549cc087b88d13de4d00c11601be40cf880cbb39affa15"
+    },
+    {
+      "path": "assets/showcase/hardware-motion-dark.gif",
+      "bytes": 1569768,
+      "sha256": "b74eb0c6a97729d8ba9d0db8a88bb29d3b9b63184a82883c84ba309a50fc7393"
+    },
+    {
+      "path": "assets/showcase/hardware-motion-light.gif",
+      "bytes": 1568398,
+      "sha256": "536a83ed6f1ec286a51a5acb73693e000f9e7c9f8909768199c149c639c3b8f2"
     },
     {
       "path": "assets/showcase/history-dark.png",
@@ -519,8 +554,8 @@
     },
     {
       "path": "docs/USER_GUIDE.md",
-      "bytes": 39174,
-      "sha256": "aebd17453efcbf63ae14fe060bd774f83768c63ecbf02e97ad9e80ed7941a57b"
+      "bytes": 40197,
+      "sha256": "e5cbf11f2887b8522cb5c1ede21714c63c2cdd9ee6d9835e7c695543ef992480"
     },
     {
       "path": "energy_sensor.py",
@@ -878,9 +913,24 @@
       "sha256": "ffc5ee3c1dca43a6aa11ec05d67358dadc66bcf47e0196823ea754c8dfdb1229"
     },
     {
+      "path": "licenses/three-r150/LICENSE.txt",
+      "bytes": 1081,
+      "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+    },
+    {
+      "path": "licenses/three-r150/NOTICE.md",
+      "bytes": 2662,
+      "sha256": "d43ee65580db0cefa3224a62cd791f5f3a749fecd7d2cbaab654127facc9609e"
+    },
+    {
+      "path": "licenses/three-r150/SOURCES.json",
+      "bytes": 832,
+      "sha256": "2d8f157f8e483f90108a1c666c9b5ef22ba5b5341dbfcb93a0d3184a2e9eb6f2"
+    },
+    {
       "path": "locales.txt",
-      "bytes": 140096,
-      "sha256": "4a6f9bde508fab43cae3e17d21f9ede6dca1baf0cf113e7a3b374cc7cb07aef0"
+      "bytes": 144577,
+      "sha256": "a8a3d70db5221cb02c1518982a0973551622d11b01b703ce44ea345688ce074c"
     },
     {
       "path": "localization.py",
@@ -1019,8 +1069,8 @@
     },
     {
       "path": "native/MetricIcon.qml",
-      "bytes": 12542,
-      "sha256": "8d126262ae1f06c3288895c4e7ec4d78528ccb0d700b0613bdea0f59154fe861"
+      "bytes": 33551,
+      "sha256": "34037b5d1d109106dbd4e6ec802cc9928e94128d12a9addbd5fd195bf0f386df"
     },
     {
       "path": "native/OptionTabs.qml",
@@ -1094,8 +1144,8 @@
     },
     {
       "path": "native/TopBarDetails.qml",
-      "bytes": 70854,
-      "sha256": "8ddcbb9527c2d4291590f08cd581c279db14a4844691e208d18b4d9ee6f42f5f"
+      "bytes": 70985,
+      "sha256": "6bc797ac802a70a58dbf026df9789869cb074350c19eee95df4d74542cc3cb32"
     },
     {
       "path": "native/TopBarGroupContent.qml",
@@ -1104,13 +1154,13 @@
     },
     {
       "path": "native/TopBarItemInspector.qml",
-      "bytes": 30982,
-      "sha256": "fe304093bf108ed470d72c943d7724db26d3c3469fc2ce9621d8d8bfbd38c68d"
+      "bytes": 32354,
+      "sha256": "d5a8cb55052d58b381a1a0e3b35fd43211cc36fe8d15e8090bf82b604a0012e2"
     },
     {
       "path": "native/TopBarMetricContent.qml",
-      "bytes": 16339,
-      "sha256": "9c4aebadee650ec4570e1ce005614023cb862fb0616b48f44096aed84a141670"
+      "bytes": 16597,
+      "sha256": "4d8fbf717672499e6dccced8a12ad540165c8166f0fedf77f53eb794f3eb2bf0"
     },
     {
       "path": "native/TopBarPreviewStrip.qml",
@@ -1159,8 +1209,8 @@
     },
     {
       "path": "native_controller.py",
-      "bytes": 116119,
-      "sha256": "afefd194366a0e133bd3a9b7ff3a742eb45365d85d5c3565a099a96b4f2cd39c"
+      "bytes": 116753,
+      "sha256": "c264dc48a71b357724033ab9e643ca7c1008cb5b83c352fb1364863d4ebfd793"
     },
     {
       "path": "native_glass.py",
@@ -1210,7 +1260,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "b23729075aa14a3ab0d9192b5f59f09e098b6fc117a1695188bdb5007e79e26b"
+      "sha256": "2c6d4fc8c0b6079eea46883cc07aa77903ae8ff16eb1908e63230e93b1d29bd8"
     },
     {
       "path": "pyproject.toml",
@@ -1221,6 +1271,11 @@
       "path": "raster_blur_material.py",
       "bytes": 8704,
       "sha256": "55cb6c0f071ab88f285fdbf019bf8ed3e162e2b9b8792720738ce96d03c7f2a6"
+    },
+    {
+      "path": "requirements-artwork.txt",
+      "bytes": 96,
+      "sha256": "c6f1c979f317359a8bc5b093d86ada8a7e62a4b56d87c199174f97198f49f639"
     },
     {
       "path": "requirements-build.txt",
@@ -1499,8 +1554,13 @@
     },
     {
       "path": "tests/test_metric_icon_effects.py",
-      "bytes": 22756,
-      "sha256": "ffb870cde7a5eed68563fa5b43e15107f3a9fbaebf5fdfb5b037534c5173497c"
+      "bytes": 49406,
+      "sha256": "6cc031ab7eac79964624ad2c75fba62b2087e79b6a150c7cec7b1e30528908c4"
+    },
+    {
+      "path": "tests/test_metric_state_feedback_qml.py",
+      "bytes": 65512,
+      "sha256": "10455078f7fade6f71e3abfcc7a758865fe1b61b220a3d9707c2181e74794c05"
     },
     {
       "path": "tests/test_modern_menu.py",
@@ -1664,8 +1724,8 @@
     },
     {
       "path": "tests/test_top_bar_cpu_effects_qml.py",
-      "bytes": 19600,
-      "sha256": "d373b17683bbb9381b4dc410ca366b90601589be8dcc24370306fda9aead4e0a"
+      "bytes": 20107,
+      "sha256": "1fd0109071f273c34f076cbbe26dafe9982cb4d36a4f83acda467ab93a4a6dee"
     },
     {
       "path": "tests/test_top_bar_design_config.py",
@@ -1674,8 +1734,8 @@
     },
     {
       "path": "tests/test_top_bar_design_content.py",
-      "bytes": 20534,
-      "sha256": "f57026068743891d7d92ae2f2e88a046930d7a00711d1940ce501af53e900ba3"
+      "bytes": 22258,
+      "sha256": "0cbab4e2999c71b4149b8467f3d4f6539306ad147e728cbaa07b449ea60ccd1e"
     },
     {
       "path": "tests/test_top_bar_design_ui.py",
@@ -1706,6 +1766,11 @@
       "path": "tests/test_top_bar_editor_preview.py",
       "bytes": 16283,
       "sha256": "468b9c235e2a72020cc5752afc3512ed6b8cdbfbd9e113a0d821cf7361d54149"
+    },
+    {
+      "path": "tests/test_top_bar_effect_activity.py",
+      "bytes": 16478,
+      "sha256": "93212798b82f3045d056825b3f31021609b2bccd28569c02f7271632691a1f9e"
     },
     {
       "path": "tests/test_top_bar_effects.py",
@@ -1809,8 +1874,8 @@
     },
     {
       "path": "tests/test_workspace_ui.py",
-      "bytes": 16713,
-      "sha256": "16c4624ae6c496132afba7a97da74aef305172622cf1112b53f4cbb79cc67974"
+      "bytes": 17679,
+      "sha256": "7bc886b5ba79d976125e9a24173ececdef1282a0dce380c36eaeec5617a1bad5"
     },
     {
       "path": "tests/test_workspace_ui_recovery.py",
@@ -1848,9 +1913,19 @@
       "sha256": "7fa0fdefcf4f23a555521bc228a6e3cd940c0b67e7c692d0702cc96e600682f4"
     },
     {
+      "path": "third_party/threejs/r150/LightningStrike.js",
+      "bytes": 32742,
+      "sha256": "cabe777b73502e5c80171f55e9aca3b94840f5667c5a739e6696cb9dedade085"
+    },
+    {
+      "path": "third_party/threejs/r150/SimplexNoise.js",
+      "bytes": 14351,
+      "sha256": "9b8d541b77b0ddc79afaa6a1de8941452c191b8b9006f04e7b8fc422e2b263f7"
+    },
+    {
       "path": "tools/build.py",
-      "bytes": 15243,
-      "sha256": "b101b90c34cc8a871888e71f9191b8676cc24e670cc170b8636444d259df0a99"
+      "bytes": 15756,
+      "sha256": "5369249beae11e4da34aef27462b4873f2fa050d51ef5ed1fd487d597a756b75"
     },
     {
       "path": "tools/build_collector.py",
@@ -1859,8 +1934,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 20186,
-      "sha256": "a5e1932af75c0dc18fa38b8251cf7a2e63e84df8a165c46fab1b3d12866fa6e0"
+      "bytes": 20750,
+      "sha256": "fe73a83d9285e1ad8ae3bfa2af40ad2aa13e91985532bf0dae73ad5b08b133fe"
     },
     {
       "path": "tools/fetch_qt_licenses.py",
@@ -1878,9 +1953,19 @@
       "sha256": "9b0b54315f72d9372ab37881e0b94a333a18d7a63b294d509c38b9a6c1d69752"
     },
     {
+      "path": "tools/generate_metric_motion.py",
+      "bytes": 11239,
+      "sha256": "41954f0a437015f046c15b7d75f71d834f142a76d8b099f1e8185c81e6ae03c1"
+    },
+    {
       "path": "tools/test_isolated.py",
       "bytes": 4887,
       "sha256": "bc3eb49d25aca5a98a0c2d28e9250ddce85550f42106b83f06b40b08017ac33d"
+    },
+    {
+      "path": "tools/three_simplex4d.py",
+      "bytes": 9287,
+      "sha256": "e1ff50a3b2ce15d0bcec8c25b03f5c669452db84596d54992f7d498f51d93089"
     },
     {
       "path": "tools/verify_customization.py",
@@ -1913,9 +1998,14 @@
       "sha256": "113613d135210f61568892f0419eab50fd93b67f3ea053479c46a2ad04074098"
     },
     {
+      "path": "top_bar_feedback.py",
+      "bytes": 4592,
+      "sha256": "6a0a7689a2b9a352133c0f2f39fcab9e78de1551602d88330d976695c942d853"
+    },
+    {
       "path": "top_bar_layout.py",
-      "bytes": 15951,
-      "sha256": "1ff56befd5d05fb8c12023ac6f59260f913521e717d81a7d56027a36033ebac1"
+      "bytes": 16982,
+      "sha256": "c81c822aab42936e4c09de70a5645d5f01a0c612786ca63a844a3011890002b4"
     },
     {
       "path": "top_bar_profiles.py",

@@ -70,6 +70,7 @@ SOURCES = (
     "top_bar_config.py",
     "top_bar_layout.py",
     "top_bar_profiles.py",
+    "top_bar_feedback.py",
     "top_bar_runtime.py",
     "top_bar_backdrop_host.py",
     "widget_catalog.py",
@@ -77,6 +78,7 @@ SOURCES = (
     "workspace_scenarios.py",
     "requirements.txt",
     "requirements-build.txt",
+    "requirements-artwork.txt",
     "pyproject.toml",
     "LICENSE",
     "NOTICE",
@@ -84,6 +86,13 @@ SOURCES = (
     "CHANGELOG.md",
     "docs/USER_GUIDE.md",
     "THIRD_PARTY_NOTICES.md",
+    "licenses/three-r150/LICENSE.txt",
+    "licenses/three-r150/NOTICE.md",
+    "licenses/three-r150/SOURCES.json",
+    "third_party/threejs/r150/SimplexNoise.js",
+    "third_party/threejs/r150/LightningStrike.js",
+    "tools/three_simplex4d.py",
+    "tools/generate_metric_motion.py",
     "README.md",
     "Install.cmd",
     "Uninstall.cmd",
@@ -99,6 +108,8 @@ SOURCES = (
     "tests/test_top_bar_history_identity.py",
     "tests/test_top_bar_details_design.py",
     "tests/test_metric_icon_effects.py",
+    "tests/test_metric_state_feedback_qml.py",
+    "tests/test_top_bar_effect_activity.py",
     "tests/test_top_bar_drag_feedback.py",
     "tests/test_product.py",
     "tests/test_extensions.py",
@@ -317,7 +328,10 @@ def main():
                         f"\n\n===== {name} {dist.version} / {file.name} =====\n"
                         + path.read_text(encoding="utf-8", errors="replace")
                     )
-    for file in (ROOT / "licenses/qt-6.10.2").rglob("*.txt"):
+    for file in sorted([
+        *(ROOT / "licenses/qt-6.10.2").rglob("*.txt"),
+        ROOT / "licenses/three-r150/LICENSE.txt",
+    ]):
         licenses.append(
             "\n\n===== "
             + str(file.relative_to(ROOT / "licenses"))

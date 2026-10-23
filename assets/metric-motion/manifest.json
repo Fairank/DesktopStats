@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "profile": "free-midpoint-discharge",
+  "seed": [
+    39,
+    81,
+    113
+  ],
+  "upstream_commit": "9b274fef1d2b9ba0fc47410d06593e1f34f4df0e",
+  "upstream_license": "licenses/three-r150/LICENSE.txt",
+  "generator": "tools/generate_metric_motion.py",
+  "generator_sha256": "41954f0a437015f046c15b7d75f71d834f142a76d8b099f1e8185c81e6ae03c1",
+  "noise": "tools/three_simplex4d.py",
+  "noise_sha256": "e1ff50a3b2ce15d0bcec8c25b03f5c669452db84596d54992f7d498f51d93089",
+  "cell_pixels": 64,
+  "logical_cell": 32,
+  "origin": [
+    7,
+    7
+  ],
+  "frame_count": 48,
+  "stage_count": 10,
+  "loop_ms": 2400,
+  "burst_schedules": {
+    "warm": [
+      0.04,
+      0.19,
+      0.34,
+      0.48,
+      0.58,
+      0.72,
+      0.83,
+      0.92
+    ],
+    "blue": [
+      0.11,
+      0.32,
+      0.03,
+      0.62,
+      0.45,
+      0.82,
+      0.69,
+      0.94
+    ]
+  },
+  "duration_weights": [
+    1.0,
+    0.86,
+    1.06,
+    0.92,
+    0.84,
+    1.04,
+    0.89,
+    0.97
+  ],
+  "attack_fractions": [
+    0.11,
+    0.17,
+    0.08,
+    0.13,
+    0.19,
+    0.09,
+    0.15,
+    0.12
+  ],
+  "decay_starts": [
+    0.44,
+    0.57,
+    0.38,
+    0.49,
+    0.61,
+    0.46,
+    0.53,
+    0.4
+  ],
+  "artwork_environment": {
+    "python": "3.12.14",
+    "pillow": "13.0.0"
+  },
+  "stage_parameters": [
+    {
+      "stage": 1,
+      "activity": 0.1,
+      "span": 4.5,
+      "straightness": 0.74,
+      "roughness": 0.82,
+      "branch_count": 0,
+      "burst_budget": 3.0,
+      "burst_duration": 0.0595,
+      "core_width": 0.65,
+      "glow": 0.35,
+      "speed": 0.856
+    },
+    {
+      "stage": 2,
+      "activity": 0.2,
+      "span": 5.388888888888889,
+      "straightness": 0.6666666666666666,
+      "roughness": 0.8333333333333333,
+      "branch_count": 0,
+      "burst_budget": 3.5555555555555554,
+      "burst_duration": 0.064,
+      "core_width": 0.6811111111111111,
+      "glow": 0.42222222222222217,
+      "speed": 0.8919999999999999
+    },
+    {
+      "stage": 3,
+      "activity": 0.3,
+      "span": 6.277777777777778,
+      "straightness": 0.5933333333333333,
+      "roughness": 0.8466666666666666,
+      "branch_count": 0,
+      "burst_budget": 4.111111111111111,
+      "burst_duration": 0.0685,
+      "core_width": 0.7122222222222222,
+      "glow": 0.4944444444444444,
+      "speed": 0.9279999999999999
+    },
+    {
+      "stage": 4,
+      "activity": 0.4,
+      "span": 7.166666666666666,
+      "straightness": 0.52,
+      "roughness": 0.86,
+      "branch_count": 1,
+      "burst_budget": 4.666666666666666,
+      "burst_duration": 0.073,
+      "core_width": 0.7433333333333334,
+      "glow": 0.5666666666666667,
+      "speed": 0.964
+    },
+    {
+      "stage": 5,
+      "activity": 0.5,
+      "span": 8.055555555555555,
+      "straightness": 0.44666666666666666,
+      "roughness": 0.8733333333333333,
+      "branch_count": 1,
+      "burst_budget": 5.222222222222222,
+      "burst_duration": 0.0775,
+      "core_width": 0.7744444444444445,
+      "glow": 0.6388888888888888,
+      "speed": 1.0
+    },
+    {
+      "stage": 6,
+      "activity": 0.6,
+      "span": 8.944444444444445,
+      "straightness": 0.3733333333333333,
+      "roughness": 0.8866666666666666,
+      "branch_count": 1,
+      "burst_budget": 5.777777777777778,
+      "burst_duration": 0.082,
+      "core_width": 0.8055555555555556,
+      "glow": 0.7111111111111111,
+      "speed": 1.036
+    },
+    {
+      "stage": 7,
+      "activity": 0.7,
+      "span": 9.833333333333332,
+      "straightness": 0.3,
+      "roughness": 0.8999999999999999,
+      "branch_count": 2,
+      "burst_budget": 6.333333333333333,
+      "burst_duration": 0.0865,
+      "core_width": 0.8366666666666667,
+      "glow": 0.7833333333333333,
+      "speed": 1.072
+    },
+    {
+      "stage": 8,
+      "activity": 0.8,
+      "span": 10.722222222222221,
+      "straightness": 0.22666666666666657,
+      "roughness": 0.9133333333333333,
+      "branch_count": 2,
+      "burst_budget": 6.888888888888889,
+      "burst_duration": 0.091,
+      "core_width": 0.8677777777777778,
+      "glow": 0.8555555555555555,
+      "speed": 1.1079999999999999
+    },
+    {
+      "stage": 9,
+      "activity": 0.9,
+      "span": 11.61111111111111,
+      "straightness": 0.15333333333333332,
+      "roughness": 0.9266666666666666,
+      "branch_count": 3,
+      "burst_budget": 7.444444444444445,
+      "burst_duration": 0.0955,
+      "core_width": 0.898888888888889,
+      "glow": 0.9277777777777777,
+      "speed": 1.144
+    },
+    {
+      "stage": 10,
+      "activity": 1.0,
+      "span": 12.5,
+      "straightness": 0.07999999999999996,
+      "roughness": 0.94,
+      "branch_count": 3,
+      "burst_budget": 8.0,
+      "burst_duration": 0.1,
+      "core_width": 0.93,
+      "glow": 1.0,
+      "speed": 1.18
+    }
+  ],
+  "textures": [
+    {
+      "path": "assets/metric-motion/arc-warm.png",
+      "sha256": "47578b175bfd313f78f8d21f1c29fbee483b28b25356d8e893fcac82a6a90281",
+      "size": [
+        3072,
+        640
+      ],
+      "decoded_bytes": 7864320
+    },
+    {
+      "path": "assets/metric-motion/arc-blue.png",
+      "sha256": "f2d3c4dafe7240307ccb7ddca00641730c52ce85373dfbad64640c1efae0e879",
+      "size": [
+        3072,
+        640
+      ],
+      "decoded_bytes": 7864320
+    }
+  ],
+  "decoded_bytes": 15728640
+}

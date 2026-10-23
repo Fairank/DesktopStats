@@ -25,6 +25,35 @@ supplies inherited stroke color, a two-unit stroke, round caps/joins, and
 display size. It does not redraw the paths. No icon font, remote asset service,
 or network connection is required at runtime.
 
+## Three r150 noise and lightning algorithms
+
+Optional icon-discharge artwork uses adapted algorithms from **three.js r150**,
+copyright © 2010-2023 three.js authors, under the MIT License.
+
+- Fixed upstream commit: `9b274fef1d2b9ba0fc47410d06593e1f34f4df0e`
+- Original files: `third_party/threejs/r150/SimplexNoise.js` and
+  `third_party/threejs/r150/LightningStrike.js`
+- Complete MIT text: `licenses/three-r150/LICENSE.txt`
+- Original source hashes: `licenses/three-r150/SOURCES.json`
+- Translated subset and local changes: `licenses/three-r150/NOTICE.md`
+
+`tools/three_simplex4d.py` translates the used 4D noise tables, permutation
+initialization and `noise4d` routine. The original credits for Stefan Gustavson
+and Sean McCullough remain with that module. `midpoint_ray` in
+`tools/generate_metric_motion.py` adapts `LightningStrike.fractalRayRecursive`
+to deterministic artwork centerlines; it does not reproduce the mesh runtime.
+These identified upstream-derived portions retain their MIT rights, including
+commercial permissions independently granted by that license. The application
+license does not replace the MIT notice or relicense the original files.
+
+The surrounding burst choreography, palettes, Gaussian light composition and
+atlas packing are project-authored. `assets/metric-motion/manifest.json` records
+the generator, noise module, parameters and output hashes. Keep this attribution
+with the generated artwork; this does not claim that arbitrary output of MIT
+software automatically inherits its software license. Runtime playback uses
+local PNG textures in Qt; neither Three.js nor a browser is an application
+runtime dependency. Pillow is used only by the optional artwork generator.
+
 ## Other dependencies
 
 The original application uses PolyForm Noncommercial 1.0.0 from

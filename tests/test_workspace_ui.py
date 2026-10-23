@@ -150,11 +150,28 @@ class IntegratedWorkspaceTests(unittest.TestCase):
 
     def resize(self, width, height):
         self.window.resize(width, height)
-        deadline = time.monotonic() + 1
-        while self.window.property("resizeInProgress") and time.monotonic() < deadline:
+        self.app.processEvents()
+
+        def settled():
+            return (self.window.width() == width and self.window.height() == height
+                    and self.window.property("layoutWidth") == self.window.width()
+                    and self.window.property("layoutHeight") == self.window.height()
+                    and not self.window.property("resizeInProgress"))
+
+        deadline = time.monotonic() + 2
+        while not settled() and time.monotonic() < deadline:
             QTest.qWait(15)
-        self.assertFalse(self.window.property("resizeInProgress"))
-        QTest.qWait(35)
+        def geometry():
+            return (self.window.width(), self.window.height(),
+                    self.window.property("layoutWidth"), self.window.property("layoutHeight"),
+                    self.window.property("resizeInProgress"))
+        self.assertTrue(settled(), ("Resize did not reach its requested content geometry", geometry()))
+        # Finish a real owned offscreen frame so child layouts are polished,
+        # then process another event turn before calculating a click position.
+        self.window.requestUpdate()
+        self.window.grabWindow()
+        self.app.processEvents()
+        self.assertTrue(settled(), ("Content geometry changed during layout polish", geometry()))
 
     def wheel(self, item, angle=-360):
         point = item.mapToScene(item.boundingRect().center())

@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/mrdoob/three.js",
+  "tag": "r150",
+  "commit": "9b274fef1d2b9ba0fc47410d06593e1f34f4df0e",
+  "license": "MIT",
+  "runtime_bundled": false,
+  "files": [
+    {
+      "upstream_path": "LICENSE",
+      "local_path": "licenses/three-r150/LICENSE.txt",
+      "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+    },
+    {
+      "upstream_path": "examples/jsm/math/SimplexNoise.js",
+      "local_path": "third_party/threejs/r150/SimplexNoise.js",
+      "sha256": "9b8d541b77b0ddc79afaa6a1de8941452c191b8b9006f04e7b8fc422e2b263f7"
+    },
+    {
+      "upstream_path": "examples/jsm/geometries/LightningStrike.js",
+      "local_path": "third_party/threejs/r150/LightningStrike.js",
+      "sha256": "cabe777b73502e5c80171f55e9aca3b94840f5667c5a739e6696cb9dedade085"
+    }
+  ]
+}

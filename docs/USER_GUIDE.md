@@ -1,6 +1,6 @@
 # Desktop Stats for Windows
 
-Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.24.0-preview.1** refines menu-bar motion and detail inspection, keeps automatic-device history scoped to the current device, and verifies saved layouts across fresh processes. Local history, previewable workspace scenes and guided source diagnostics remain available. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
+Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.25.0-preview.1** adds colored, smoothly state-driven local icon feedback while retaining detail inspection, device-scoped histories and saved-layout checks across fresh processes. Local history, previewable workspace scenes and guided source diagnostics remain available. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
 
 Windows settings and menu-bar details share an alpha-zero native raster host and transparent Qt Quick foreground. They now use the WUJI Workbench material sequence: DWM transient-window backdrop (type 3), full client-frame extension, verified type readback, black native background and transparent foreground. No accent-blur fallback is substituted for these two hosts. Their foreground remains Qt Quick rather than WUJI's WebView2. Windows 11 detail corners request the system's smooth rounded clipping; unsupported or failed requests retain the rounded-mask fallback. UI symbols use one pinned Lucide set, while the original Niangao brand artwork remains unchanged. Failed native setup or background painting selects a readable solid fallback.
 
@@ -30,7 +30,9 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 悬停 CPU 组或 CPU 指标可查看逐 **逻辑处理器使用率**，编号从 CPU 0 开始。逻辑处理器可能包括同时多线程，不能当作独立物理核心；物理核心数另列。较多通道可在网格内滚动，最多展示 1024 项并明确显示截断数量。温度、频率、封装功率与 CPU 风扇按实际来源关联，不编造每核心温度或功耗。首轮采样或故障恢复时先建立基线，过期或失败读数显示原因，不以 0 代替。逐逻辑读数仅实时展示，不增加硬件轮询或持久历史。
 
-顶部栏指标设置中的 **图标动效** 默认关闭，可选择自动、热感、流动、旋转或呼吸（按指标提供适用选项）。组合的自动模式按每项读数分别呈现，网络上下行也各自判断。动效仅为视觉反馈，不代表告警或额外传感器；缺测、零活动、窗口隐藏和系统减少动画时停止，切换温度或网速单位不会改变其强度。原有静态图标与显示样式保留。
+顶部栏指标设置中的 **图标动效** 默认关闭，可选择硬件联动、热感、流动、旋转或呼吸（按指标提供适用选项）。硬件联动按各硬件的真实通道分别呈现，组合成员及网络上下行也各自判断。动效仅为视觉反馈，不代表告警或额外传感器；缺测、零活动、窗口隐藏和系统减少动画时停止，切换温度或网速单位不会改变其强度。原有静态图标与显示样式保留。
+
+硬件联动对 CPU/GPU 分别使用负载、温度和功耗，黄红热感与蓝色功耗电弧可同时出现。短电弧会在不同位置和方向出现、分叉、熄灭，十个视觉阶段逐步增加幅度、放电次数和重叠细丝，并在阶段之间平滑过渡；真实读数不分成十档。内存使用实际占用量，网络和磁盘分别使用两个方向，电池分别使用电量、充电和放电，风扇使用实际转速或设备报告的风扇百分比，NVMe 使用真实温度。只叠加有来源的通道；缺测不借另一块设备的值，不从内存占用推测温度，也不把 SSD 损耗作为当前负载。主使用率为零或缺失时，有真实温度或功耗的层仍可独立呈现。
 
 开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。风扇旋转和功率流动是装饰反馈，不是经过标定的转速或电流动画。
 
@@ -42,7 +44,7 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 详情先展示当前读数和最近趋势，再展示逻辑处理器负载与相关数据。组合采用主项加双列排布；小屏可继续滚动查看来源和缺测原因。图表可用鼠标或方向键逐点查看实际样本，空缺不补成零。自动网卡及系统卷的历史按当前设备身份投影，设备尚未出现的时段保留缺口；“所有物理磁盘”仍表示总吞吐。
 
-可选动效保持外轮廓稳定：传输只移动箭头、风扇轴心静止、热羽流局部上升，呼吸作用于内核。它们使用现有强度与速度设置，不代表实际电流方向、校准转速或温度告警。旧配置仍默认静止；停用动画、缺测、零活动或隐藏时停止。
+动效保留可辨认的硬件结构与固定轴心。热感使用黄、橙、红色电弧，功耗使用独立的蓝白色电弧；接收与发送分别使用青蓝及紫色，风扇为青绿，负载内核为蓝紫。颜色、活动范围和节奏根据当前原始读数平滑变化，再受所选强度与速度调节；数字仍直接显示真实读数，不被动画插值。电弧是装饰性的状态表现，不代表测到了物理放电，不是校准转速或温度告警。旧配置仍默认静止；停用动画、缺测、零活动或隐藏时停止。
 
 ### 历史记录、场景与诊断
 

@@ -1,0 +1,2 @@
+# Optional offline atlas generation only; not an application runtime dependency.
+Pillow==13.0.0

@@ -22,8 +22,19 @@ Item {
     readonly property var groupOptions:row.group_options || []
     readonly property var availableGroupOptions:groupOptions.filter(option=>!groupDraftMetrics.includes(option.metric)).map(option=>({id:option.metric,label:option.label}))
     readonly property bool hasTemperature:["°C","°F"].includes(row.unit) || (row.group_rows || []).some(member=>["°C","°F"].includes(member.unit))
-    readonly property var effectLabels:({off:ui.t("关闭"),auto:ui.t("自动"),heat:ui.t("热感"),flow:ui.t("流动"),spin:ui.t("旋转"),pulse:ui.t("呼吸")})
+    readonly property var effectLabels:({off:ui.t("关闭"),auto:ui.t("硬件联动"),heat:ui.t("热感"),flow:ui.t("流动"),spin:ui.t("旋转"),pulse:ui.t("呼吸")})
     readonly property string selectedEffect:item?item.prefs.icon_effect || "off":"off"
+    readonly property string hardwareHint:{
+        if(row.auto_effect==="off")return ui.t("此读数不表示实时活动，硬件联动保持静态。")
+        const members=row.grouped===true?row.group_rows || []:[row]
+        if(members.length && members.every(member=>member.icon==="fan"))return ui.t("按实际转速旋转；停转或缺测时静止。")
+        if(members.length && members.every(member=>member.icon==="frequency"))return ui.t("按实际频率变化，不用其他读数代替。")
+        const profiles=members.map(member=>(member.hardware_state || {}).profile || "")
+        if(profiles.length && profiles.every(profile=>["memory","volume"].includes(profile)))return ui.t("用填充和扫光显示实际占用量。")
+        if(profiles.length && profiles.every(profile=>["network","disk"].includes(profile)))return ui.t("两个方向各自变化；空闲时静止。")
+        if(profiles.length && profiles.every(profile=>profile==="battery"))return ui.t("电量决定填充，充放电决定流向。")
+        return ui.t("温度驱动暖弧，功耗驱动蓝弧；只显示有数据的效果。")
+    }
     readonly property var effectOptions:{
         const icons=(row.grouped===true?row.group_rows || []:[row]).map(member=>member.icon || "")
         const ids=["off","auto","pulse"]
@@ -272,6 +283,7 @@ Item {
             Choice {objectName:"topBarNetworkUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);model:[{id:"MBps",label:"MB/s"},{id:"Mbps",label:"Mbps"}];value:root.item?root.item.prefs.network_unit || "MBps":"MBps";onPicked:selected=>stats.changeTopBarItem(root.item.id,"network_unit",selected)}
         }
         Text {objectName:"topBarIconEffectStyleHint";Layout.fillWidth:true;visible:root.selectedEffect!=="off";text:ui.t("动效显示在“图标与数值”和双向读数的图标上。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+        Text {objectName:"topBarHardwareEffectHint";Layout.fillWidth:true;visible:root.selectedEffect==="auto";text:root.hardwareHint;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
         Text {objectName:"topBarIconEffectInactiveHint";Layout.fillWidth:true;visible:root.selectedEffect!=="off" && !root.effectStyleVisible;text:ui.t("当前显示方式不含图标，已保留动效设置。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
         ActionButton {objectName:"topBarUseIconStyle";Layout.fillWidth:true;visible:root.selectedEffect!=="off" && !root.effectStyleVisible;text:ui.t("使用图标与数值");quiet:true;onClicked:root.chooseStyle("icon_value")}
         GridLayout {

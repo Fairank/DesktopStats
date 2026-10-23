@@ -49,6 +49,7 @@ from responsive_layout import (
 from sensor_diagnostics import reading_source, source_rows, unavailable_reason
 from skin_styles import GLASS_SKINS, effective_skin
 from stats_config import DEFAULT, MAX_WIDGETS, MODULES, SKINS, load, save, validate
+from top_bar_feedback import hardware_feedback
 from top_bar_layout import present_metric
 from top_bar_profiles import (
     align_pair_trends,
@@ -649,7 +650,14 @@ class Controller(WorkspaceTools):
                 if icon_effect == 'off' or stale:
                     return None
                 canonical = dict(prefs, temperature_unit='C', network_unit='MBps')
-                activity, _, _ = display_value(data, key, canonical)
+                activity, activity_unit, _ = display_value(data, key, canonical)
+                if numeric(activity) and activity < 0:
+                    if activity_unit == '°C':
+                        return 0.0
+                    signed = activity_unit in ('V', 'A') or key == 'battery_watts'
+                    signed = signed or (key in EXTERNAL_SLOTS and activity_unit == 'W')
+                    if not signed:
+                        return None
                 return effect_strength(activity, metric_info(key, prefs).get('maximum'))
             paired = []
             for other, direction in channels:
@@ -666,7 +674,8 @@ class Controller(WorkspaceTools):
                         if detail_id is not None and include_related else [],
                     history_times=sample_times if detail_id is not None and include_related else [])
                 channel.update(icon_effect=icon_effect, effect_level=effect_for(other),
-                               effect_intensity=effect_intensity, effect_speed=effect_speed)
+                               effect_intensity=effect_intensity, effect_speed=effect_speed,
+                               hardware_state=hardware_feedback(data, other, prefs, stale=stale))
                 paired.append(present_metric(channel))
             paired = align_pair_trends(paired)
             capacity_summary = {}
@@ -704,6 +713,7 @@ class Controller(WorkspaceTools):
                     effect_level=effect_for(metric),
                     effect_intensity=effect_intensity,
                     effect_speed=effect_speed,
+                    hardware_state=hardware_feedback(data, metric, prefs, stale=stale),
                     source=source,
                     reason=reason,
                     hardware_name=hardware_name,

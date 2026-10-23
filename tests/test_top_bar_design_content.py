@@ -350,25 +350,49 @@ Window {id:scene;width:740;height:860;visible:false;color:stats.theme==="dark"?"
                               numeric_value=1200, effect_intensity=.1, effect_speed=1)
         self.load()
         icon = self.find("topBarContentIcon")
-        clock = self.find("metricIconAnimation")
-        clock.stop()
-        icon.setProperty("phase", .5)
         location = icon.mapToScene(QPointF())
         scale = self.window.devicePixelRatio()
-        before = None
         duration = icon.property("cycleDuration")
-        for intensity in (.1, 1):
-            self.state.row["effect_intensity"] = intensity
-            self.publish()
-            image = self.window.grabWindow().copy(round(location.x()*scale), round(location.y()*scale),
-                                                  round(18*scale), round(18*scale))
-            brightness = sum(image.pixelColor(x, y).red() for y in range(image.height()) for x in range(image.width()))
-            if before is None:
-                before = brightness
-            else:
-                self.assertGreater(brightness, before, "Continuous strength must visibly change the actual fan ink")
-            self.assertEqual(icon.property("cycleDuration"), duration)
-            self.assertEqual((icon.width(), icon.height(), icon.scale()), (18, 18, 1))
+        for theme in ("light", "dark"):
+            self.state.mode = theme
+            before = before_frame = before_opacity = None
+            for intensity in (.1, .5, 1):
+                self.state.row["effect_intensity"] = intensity
+                self.publish()
+                self.find("metricIconAnimation").stop()
+                icon.setProperty("phase", .5)
+                deadline = time.monotonic() + 1
+                while True:
+                    images = [item for item in self.items() if item.inherits("QQuickImage") and item.isVisible()]
+                    if images and all(self.evaluate(item, "status === Image.Ready") for item in images):
+                        break
+                    self.assertLess(time.monotonic(), deadline, "The actual fan textures must be Ready before pixel comparison")
+                    self.window.requestUpdate()
+                    QTest.qWait(5)
+                self.window.requestUpdate()
+                self.assertFalse(self.window.grabWindow().isNull())
+                self.app.processEvents()
+                frame = self.window.grabWindow()
+                self.assertAlmostEqual(frame.width(), self.window.width()*scale, delta=1)
+                self.assertAlmostEqual(frame.height(), self.window.height()*scale, delta=1)
+                image = frame.copy(round(location.x()*scale), round(location.y()*scale),
+                                   round(18*scale), round(18*scale))
+                # Stronger teal replaces some bright neutral carrier in either
+                # theme, so summed red brightness legitimately falls. Measure
+                # actual chromatic ink, not a white-on-dark-only assumption.
+                chroma = sum(max(p.red(), p.green(), p.blue())-min(p.red(), p.green(), p.blue())
+                             for y in range(image.height()) for x in range(image.width())
+                             for p in (image.pixelColor(x, y),))
+                pixels = bytes(image.constBits())
+                opacity = icon.property("rotorOpacity")
+                if before is not None:
+                    self.assertGreater(chroma, before, "Continuous strength must visibly increase the actual coloured fan ink")
+                    self.assertNotEqual(pixels, before_frame)
+                    self.assertGreater(opacity, before_opacity)
+                before, before_frame, before_opacity = chroma, pixels, opacity
+                self.assertEqual(icon.property("phase"), .5)
+                self.assertEqual(icon.property("cycleDuration"), duration)
+                self.assertEqual((icon.width(), icon.height(), icon.scale()), (18, 18, 1))
 
 
 if __name__ == "__main__":

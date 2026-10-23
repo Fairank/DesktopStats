@@ -80,6 +80,8 @@ Item {
                     name: ["download","read","charge"].includes(pairLine.modelData.direction) ? "download" : "upload"
                     ink:root.instrument && ["download","read","charge"].includes(pairLine.modelData.direction) ? root.accent : root.secondaryInk
                     metric: pairLine.modelData.metric || ""
+                    hardwareState: pairLine.modelData.hardware_state || ({})
+                    automaticEffect: pairLine.modelData.auto_effect || ""
                     effect: root.row.icon_effect || "off"
                     level: pairLine.modelData.effect_level === undefined ? null : pairLine.modelData.effect_level
                     available: pairLine.modelData.available === true && Number.isFinite(pairLine.modelData.numeric_value)
@@ -158,6 +160,8 @@ Item {
         name: root.row.icon || "sensors"
         ink: root.row.available === true ? root.ink : root.muted
         metric: root.row.metric || ""
+        hardwareState: root.row.hardware_state || ({})
+        automaticEffect: root.row.auto_effect || ""
         effect: root.row.icon_effect || "off"
         level: root.row.effect_level === undefined ? null : root.row.effect_level
         available: root.row.available === true && Number.isFinite(root.row.numeric_value)

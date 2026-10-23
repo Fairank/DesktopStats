@@ -8,6 +8,8 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from math import ceil, isfinite
 
+from external_sensor import EXTERNAL_SLOTS, sensor_binding
+
 _INT_MIN = -(2**31)
 _INT_MAX = 2**31 - 1
 _MAX_ITEMS = 64
@@ -16,8 +18,15 @@ DISPLAY_STYLES = ("label_value", "value", "icon_value", "trend_value",
 PLACEMENTS = ("left", "right")
 
 
-def metric_icon(metric: str) -> str:
+def metric_icon(metric: str, preferences=None) -> str:
     """Show the measured quantity before its hardware family; local vectors only."""
+    if metric in EXTERNAL_SLOTS:
+        binding = sensor_binding(metric, preferences)
+        return {
+            'Temperature': 'temperature', 'Fan': 'fan', 'Voltage': 'voltage',
+            'Current': 'voltage', 'Power': 'power', 'Clock': 'frequency',
+            'Load': 'grid', 'Level': 'grid',
+        }.get(binding['sensor_type'] if binding else '', 'sensors')
     parts = str(metric).strip().casefold().split("_")
     words = set(parts)
     for quantities, icon in (
@@ -49,6 +58,18 @@ def metric_icon(metric: str) -> str:
     if family in ("cpu", "gpu", "battery"):
         return family
     return "sensors"
+
+
+def scalar_feedback_mode(metric, preferences):
+    """Use the validated sensor type, never free-form names or guessed direction."""
+    if metric not in EXTERNAL_SLOTS:
+        return ''
+    binding = sensor_binding(metric, preferences)
+    return {
+        'Temperature': 'heat', 'Fan': 'spin', 'Voltage': 'flow',
+        'Current': 'flow', 'Power': 'flow', 'Clock': 'pulse',
+        'Load': 'pulse', 'Level': 'pulse', 'Throughput': 'pulse',
+    }.get(binding['sensor_type'] if binding else '', 'off')
 
 
 def present_metric(row: Mapping, prefs: Mapping | None = None) -> dict:
@@ -132,7 +153,8 @@ def present_metric(row: Mapping, prefs: Mapping | None = None) -> dict:
         available=any(channel.get('available') is True for channel in pairs) if pairs else row.get('available', False),
         style=style,
         placement=placement,
-        icon=metric_icon(row.get("metric", "")),
+        icon=metric_icon(row.get("metric", ""), prefs),
+        auto_effect=scalar_feedback_mode(row.get("metric", ""), prefs),
         trend=values,
         trend_points=points,
         trend_available=available,

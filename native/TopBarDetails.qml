@@ -322,6 +322,8 @@ Window {
                 name: ({network:"network",disk_io:"disk",volume:"disk",storage:"disk",cooling:"fan",memory:"memory",cpu:"cpu",gpu:"gpu",battery:"battery",power:"power"})[root.detail.family] || root.detail.icon || "sensors"; ink: root.secondary
                 Layout.preferredWidth: 16; Layout.preferredHeight: 16
                 metric: root.detail.metric || ""
+                hardwareState: root.detail.hardware_state || ({})
+                automaticEffect: root.detail.auto_effect || ""
                 effect: root.detail.icon_effect || "off"
                 level: root.detail.effect_level === undefined ? null : root.detail.effect_level
                 intensity: root.detail.effect_intensity === undefined ? 0.5 : root.detail.effect_intensity

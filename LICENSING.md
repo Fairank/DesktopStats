@@ -22,6 +22,7 @@ for the third-party material identified below. The license is a restriction on
 permitted purposes, not download protection or an OSI-approved open-source license.
 
 - **Third-party software:** Qt/PySide/Shiboken, Python, psutil, Lucide/Feather,
+  the identified Three r150 noise/lightning algorithm portions,
   the sensor libraries, their embedded resources and other dependencies retain
   their respective licenses. LICENSE does not relicense them, limit their
   independent commercial use or replace their notices. See

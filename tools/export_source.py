@@ -77,6 +77,9 @@ REVIEWED_FILES = frozenset(
             "niangao-source.svg",
             "lucide/LICENSE",
             "lucide/provenance.json",
+            "metric-motion/arc-warm.png",
+            "metric-motion/arc-blue.png",
+            "metric-motion/manifest.json",
             "showcase/history-light.png",
             "showcase/history-dark.png",
             "showcase/scene-preview.png",
@@ -90,6 +93,10 @@ REVIEWED_FILES = frozenset(
             "showcase/group-confirm.png",
             "showcase/top-bar-designs.png",
             "showcase/top-bar-design-settings.png",
+            "showcase/hardware-feedback-light.png",
+            "showcase/hardware-feedback-dark.png",
+            "showcase/hardware-motion-light.gif",
+            "showcase/hardware-motion-dark.gif",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]
@@ -100,6 +107,11 @@ REVIEWED_FILES = frozenset(
     ]
     + [
         "licenses/qt-6.10.2/SOURCES.txt",
+        "licenses/three-r150/LICENSE.txt",
+        "licenses/three-r150/NOTICE.md",
+        "licenses/three-r150/SOURCES.json",
+        "third_party/threejs/r150/SimplexNoise.js",
+        "third_party/threejs/r150/LightningStrike.js",
         "licenses/legacy/DesktopStats-through-0.18-MIT.txt",
         "hooks/hook-PySide6.QtGui.py",
         "hooks/hook-PySide6.QtQml.py",
