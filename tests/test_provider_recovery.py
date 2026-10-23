@@ -151,7 +151,13 @@ class RecoveryTests(unittest.TestCase):
         self.assertFalse(self.sampler.sample()["provider_status"]["nvml"]["requested"])
         self.needed.add("gpu")
         self.gpu.close.side_effect = None
-        self.sampler.sample()
+        self.assert_healthy_other_sources(self.sampler.sample())
+        self.assertEqual(self.gpu_factory.call_count, 1)
+        self.assertEqual(self.gpu.close.call_count, 1)
+        self.now += 5
+        self.assert_healthy_other_sources(self.sampler.sample())
+        self.assertIsNone(self.sampler._nvml_cleanup)
+        self.assertEqual(self.gpu.close.call_count, 2)
         self.assertEqual(self.gpu_factory.call_count, 2)
 
     def test_valid_zero_and_other_gpu_device_prevent_false_disconnect(self):

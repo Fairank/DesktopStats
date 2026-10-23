@@ -37,6 +37,14 @@ class ProviderApiError(RuntimeError):
         super().__init__(f"{api} returned status {status}")
 
 
+class ProviderCleanupPending(RuntimeError):
+    """An expected initialization failure still owns an initialized provider."""
+
+    def __init__(self, source, original, cleanup_error):
+        self.source, self.original, self.cleanup_error = source, original, cleanup_error
+        super().__init__("NVML initialization failed with cleanup pending")
+
+
 def provider_error(error, api):
     """Bounded diagnostic facts, without guessing why an API failed."""
     result = dict(api=getattr(error, "api", api), type=type(error).__name__,
@@ -184,29 +192,72 @@ class Nvidia:
         self.lib = c.CDLL(str(Path(os.environ["WINDIR"]) / "System32/nvml.dll"))
         self.handle = c.c_void_p()
         self.lib.nvmlDeviceGetHandleByIndex_v2.argtypes = [c.c_uint, c.POINTER(c.c_void_p)]
-        status = self.lib.nvmlInit_v2()
-        if status:
-            raise ProviderApiError("nvmlInit_v2", status)
-        status = self.lib.nvmlDeviceGetHandleByIndex_v2(0, c.byref(self.handle))
-        if status:
-            self.lib.nvmlShutdown()
-            raise ProviderApiError("nvmlDeviceGetHandleByIndex_v2", status)
-        count = c.c_uint()
-        self.handles = {"0": self.handle}
-        if self.lib.nvmlDeviceGetCount_v2(c.byref(count)) == 0:
-            for index in range(1, min(count.value, 16)):
-                handle = c.c_void_p()
-                if self.lib.nvmlDeviceGetHandleByIndex_v2(index, c.byref(handle)) == 0:
-                    self.handles[str(index)] = handle
-        name = c.create_string_buffer(128)
+        self._call("nvmlInit_v2")
+        self._initialized = True
+        self.handles = {}
+        self.device_status = {}
+        self._device_retry_at = {}
         self.name = "NVIDIA GPU"
-        if self.lib.nvmlDeviceGetName(self.handle, name, 128) == 0:
-            self.name = name.value.decode("utf-8", errors="replace")
+        try:
+            count = c.c_uint()
+            self._call("nvmlDeviceGetCount_v2", c.byref(count))
+            for index in range(min(count.value, 16)):
+                self._acquire_handle(index)
+        except BaseException as error:
+            # Cleanup must also run for coding errors, which remain visible.
+            try:
+                self.close()
+            except (OSError, RuntimeError, AttributeError) as cleanup_error:
+                logging.exception("NVML initialization cleanup failed")
+                if isinstance(error, (OSError, RuntimeError, AttributeError)):
+                    raise ProviderCleanupPending(self, error, cleanup_error) from error
+                # Preserve the original coding error; the sampler may retain
+                # this cleanup owner before re-raising it, never auto-retry it.
+                error._nvml_cleanup_owner = self
+                error._nvml_cleanup_error = cleanup_error
+            raise
+
+    def _call(self, api, *arguments):
+        try:
+            status = int(getattr(self.lib, api)(*arguments))
+        except (OSError, RuntimeError, AttributeError) as error:
+            error.api = api
+            raise
+        if status:
+            raise ProviderApiError(api, status)
+
+    def _acquire_handle(self, index):
+        key, handle = str(index), c.c_void_p()
+        if self._query(self.device_status, key, "nvmlDeviceGetHandleByIndex_v2", (index,), "",
+                       index, c.byref(handle)):
+            if handle.value:
+                self.handles[key] = handle
+                self._device_retry_at.pop(key, None)
+                if key == "0":
+                    self.handle = handle
+                return
+            self.device_status[key].update(state="invalid_value", reason="null_device_handle")
+        # Native exception text may contain paths or other incidental content.
+        # Keep the API and numeric facts, which are sufficient for diagnostics.
+        self.device_status[key].get("error", {}).pop("message", None)
+        self._device_retry_at[key] = time.monotonic() + NVML_RETRY_SECONDS
 
     def read(self):
+        now = time.monotonic()
+        for key, deadline in list(getattr(self, "_device_retry_at", {}).items()):
+            if now >= deadline:
+                self._acquire_handle(int(key))
         devices = {}
-        for key, handle in self.handles.items():
-            devices[key] = self.read_device(handle)
+        statuses = getattr(self, "device_status", {})
+        for key in dict.fromkeys([*statuses, *self.handles]):
+            status = dict(statuses.get(key, {}))
+            if key in self.handles:
+                devices[key] = self.read_device(self.handles[key])
+            else:
+                status["retry_in_seconds"] = max(0.0, self._device_retry_at[key] - now)
+                devices[key] = dict(label="NVIDIA GPU " + key, gpu_source="NVIDIA NVML", channel_status={})
+            if status:
+                devices[key]["device_status"] = status
         first = devices.get("0", {})
         return dict(first, gpus=devices)
 
@@ -290,7 +341,9 @@ class Nvidia:
                       status_code=code, status_text=self._status_text(code))
         return code == 0
     def close(self):
-        self.lib.nvmlShutdown()
+        if getattr(self, "_initialized", True):
+            self._call("nvmlShutdown")
+            self._initialized = False
 
 
 class RegistryReadings(dict):
@@ -533,6 +586,8 @@ class Sampler:
         self.threads = psutil.cpu_count() or 0
         self.asus = None
         self.nvidia = None
+        self._nvml_cleanup = None
+        self._nvml_cleanup_retry = 0.0
         self.storage = StorageHealth(BASE)
         self.battery = Battery()
         self.cpu_power = CpuPackagePower()
@@ -594,9 +649,42 @@ class Sampler:
                                 reason=reason, error=error or {})
         if source is not None:
             try:
-                source.close()
-            except Exception:
+                if source.close() is False:
+                    self._retain_nvidia_cleanup(source)
+            except Exception as cleanup_error:
+                self._retain_nvidia_cleanup(source, cleanup_error)
                 logging.exception("NVML cleanup failed")
+
+    def _retain_nvidia_cleanup(self, source, error=None):
+        """At most one retired NVML owner; initialization stays blocked."""
+        self._nvml_cleanup = source
+        self._nvml_cleanup_retry = time.monotonic() + NVML_RETRY_SECONDS
+        self.nvml_retry = max(self.nvml_retry, self._nvml_cleanup_retry)
+        facts = provider_error(error, "nvmlShutdown") if error is not None else dict(
+            api="nvmlShutdown", reason="cleanup_pending")
+        facts.pop("message", None)
+        self.nvml_status.update(cleanup_pending=True, cleanup_error=facts)
+        if self.nvml_status.get("state") == "idle":
+            self.nvml_status["state"] = "waiting_retry"
+
+    def _retry_nvidia_cleanup(self):
+        source = getattr(self, "_nvml_cleanup", None)
+        if source is None or time.monotonic() < self._nvml_cleanup_retry:
+            return
+        try:
+            if source.close() is False:
+                self._retain_nvidia_cleanup(source)
+                return
+        except Exception as error:
+            self._retain_nvidia_cleanup(source, error)
+            logging.exception("NVML cleanup retry failed")
+            return
+        self._nvml_cleanup = None
+        self._nvml_cleanup_retry = 0.0
+        self.nvml_status.pop("cleanup_pending", None)
+        self.nvml_status.pop("cleanup_error", None)
+        if self.nvml_status.get("reason") == "not_requested":
+            self.nvml_status["state"] = "idle"
 
     def _provider_status(self, name, requested):
         source = self.asus if name == "asus" else self.nvidia
@@ -612,6 +700,9 @@ class Sampler:
         deadline = getattr(self, name + "_retry", 0)
         status["retry_in_seconds"] = max(0.0, deadline - time.monotonic()) if (
             status["state"] == "waiting_retry") else 0.0
+        if name == "nvml" and getattr(self, "_nvml_cleanup", None) is not None:
+            status["cleanup_retry_in_seconds"] = max(
+                0.0, self._nvml_cleanup_retry - time.monotonic())
         return status
 
     def sample(self):
@@ -675,14 +766,28 @@ class Sampler:
                 pass
         data.update(asus_readings)
         needs_gpu = "gpu" in needed or inspecting
-        if needs_gpu and self.nvidia is None and time.monotonic() >= self.nvml_retry:
+        self._retry_nvidia_cleanup()
+        if (needs_gpu and self.nvidia is None and getattr(self, "_nvml_cleanup", None) is None
+                and time.monotonic() >= self.nvml_retry):
             try:
                 self.nvidia = Nvidia()
                 self.nvml_status = dict(state="connected", reason="", error={})
+            except ProviderCleanupPending as error:
+                self.nvml_retry = time.monotonic() + 60
+                self.nvml_status = dict(state="waiting_retry", reason="initialization_failed",
+                                        error=provider_error(error.original, "Nvidia"))
+                self._retain_nvidia_cleanup(error.source, error.cleanup_error)
             except (OSError, RuntimeError, AttributeError) as error:
                 self.nvml_retry = time.monotonic() + 60
                 self.nvml_status = dict(state="waiting_retry", reason="initialization_failed",
                                         error=provider_error(error, "Nvidia"))
+            except BaseException as error:
+                owner = getattr(error, "_nvml_cleanup_owner", None)
+                if owner is not None:
+                    self.nvml_status = dict(state="failed", reason="initialization_error",
+                                            error=provider_error(error, "Nvidia"))
+                    self._retain_nvidia_cleanup(owner, error._nvml_cleanup_error)
+                raise
         if not needs_gpu and self.nvidia:
             self._release_nvidia("not_requested", retry_seconds=0)
         if self.nvidia:
@@ -727,6 +832,8 @@ class Sampler:
                 if type(timestamp) in (int, float) and math.isfinite(timestamp):
                     data["metric_timestamps"][key] = timestamp
         data.update(self.battery.read())
+        if isinstance(data.get("battery_status"), dict):
+            data["provider_status"]["battery"] = data["battery_status"]
         data.update(self.storage.read("storage" in needed or inspecting))
         for metric in ("storage_temp", "storage_spare_percent", "storage_wear_percent"):
             if data.get("storages", {}).get("0", {}).get(metric) is not None:
@@ -793,7 +900,7 @@ class Sampler:
         self._closed = True
         getattr(self, "_hwinfo_cache", {}).clear()
         complete = True
-        for name in ("storage", "external", "cooling", "asus", "nvidia", "cpu_power"):
+        for name in ("storage", "external", "cooling", "asus", "nvidia", "_nvml_cleanup", "cpu_power"):
             source = getattr(self, name, None)
             if source is not None:
                 try:
@@ -802,6 +909,8 @@ class Sampler:
                         logging.error("Sensor cleanup still pending: %s", name)
                         continue
                 except Exception:
+                    complete = False
                     logging.exception("Sensor cleanup failed: %s", name)
+                    continue
                 setattr(self, name, None)
         return complete

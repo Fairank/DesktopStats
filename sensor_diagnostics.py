@@ -38,6 +38,7 @@ def error_text(error):
         ("sensor", ""),
         ("winerror", "Win32"),
         ("errno", "errno"),
+        ("ntstatus", "NTSTATUS"),
         ("status_code", "status"),
         ("status_text", ""),
         ("reason", ""),
@@ -46,7 +47,12 @@ def error_text(error):
         ("message", ""),
     ):
         if error.get(field) is not None:
-            facts.append((label + " " if label else "") + str(error[field])[:240])
+            value = (
+                hex(error[field] & 0xFFFFFFFF)
+                if field == "ntstatus" and type(error[field]) is int
+                else str(error[field])[:240]
+            )
+            facts.append((label + " " if label else "") + value)
     nested = error.get("error")
     if isinstance(nested, dict):
         facts.extend(
@@ -101,6 +107,9 @@ def unavailable_reason(data, metric, prefs=None):
         return "已识别传感器，但采集库本轮返回空值；尚不能确定硬件原因。"
     if meta["source"] == "gpu":
         device = data.get("gpus", {}).get(target or "0", data)
+        status = device.get("device_status", {})
+        if status and status.get("state") != "available":
+            return "NVML 此设备句柄查询未成功，将自动重试。" + error_text(status)
         channel = device.get("channel_status", {}).get(metric, {})
         if channel:
             detail = error_text(channel)
@@ -159,6 +168,8 @@ def unavailable_reason(data, metric, prefs=None):
         if metric == "battery_time_minutes" and data.get("charging"):
             return "电池正在充电，Windows 此时未给出放电剩余时间。"
         status = data.get("battery_status", {})
+        if status.get("error"):
+            return "Windows 电池接口查询失败，将自动重试。" + error_text(status["error"])
         if status.get("ntstatus"):
             return "Windows 电池接口失败，NTSTATUS " + hex(status["ntstatus"] & 0xFFFFFFFF)
         return "Windows 电池接口本轮没有提供此值；不能当作 0 W 或充电器输入。"
@@ -195,6 +206,9 @@ def source_rows(data):
         errors = []
         if identifier == "nvml":
             for device_id, device in list(data.get("gpus", {}).items())[:16]:
+                state = device.get("device_status", {})
+                if state and state.get("state") != "available":
+                    errors.append("GPU " + device_id + " · " + error_text(state))
                 for metric, channel in device.get("channel_status", {}).items():
                     if channel.get("state") != "available":
                         errors.append(
@@ -202,6 +216,8 @@ def source_rows(data):
                         )
         if status.get("error"):
             errors.append(error_text(status["error"]))
+        if status.get("cleanup_error"):
+            errors.append("Cleanup · " + error_text(status["cleanup_error"]))
         for error in list(status.get("device_errors", {}).values())[:32]:
             errors.append(error_text(error))
         for channel in list(status.get("channel_status", {}).values())[:32]:
@@ -232,6 +248,13 @@ def source_rows(data):
             }.get(status.get("state"), status.get("detail", ""))
         else:
             detail = status.get("detail") or status.get("reason", "")
+            if identifier == "battery" and not detail:
+                detail = {
+                    "ready": "Windows 电池接口本轮查询成功。",
+                    "no_battery": "Windows 本轮查询成功，未发现电池。",
+                    "query_failed": "本轮 Windows 电池查询失败；将自动重试。",
+                    "waiting_retry": "Windows 电池来源正在等待重试。",
+                }.get(status.get("state"), "")
             if identifier in ("network", "disk", "volumes") and not detail:
                 detail = {
                     "query_failed": "本轮 Windows 活动查询失败；将自动重试。",
@@ -245,6 +268,7 @@ def source_rows(data):
                 label={
                     "asus": "ASUS ACPI",
                     "nvml": "NVIDIA NVML",
+                    "battery": "Windows 电池接口",
                     "hwinfo": "HWiNFO VSB",
                     "network": "Windows 网络计数器",
                     "disk": "Windows 磁盘计数器",

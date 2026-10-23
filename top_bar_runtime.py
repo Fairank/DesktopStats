@@ -632,7 +632,7 @@ class TopBarManager(QObject):
         self._injected = adapter is not None
         self._window_factory = window_factory
         self.hosts, self.retired, self._components = {}, [], {}
-        self.closed = self.paused = self._applying = False
+        self.closed = self.paused = self._applying = self._closing = False
         self._config, self._rows, self._widths, self._errors = {}, [], {}, []
         self._coating, self._style = False, {}
         self._reported_status = ("disabled", "", ())
@@ -774,6 +774,8 @@ class TopBarManager(QObject):
                 return
             self.update_rows()
             for name, screen in targets:
+                if self.closed or self.paused:
+                    return
                 if self.retired:
                     self._status(
                         "partial" if self.hosts else "failed", "顶部状态栏清理未完成。", missing
@@ -790,7 +792,15 @@ class TopBarManager(QObject):
                         host = self._new_host(screen, name)
                         self.hosts[name] = host
                     self._sync_host(host)
+                    if self.closed or self.paused:
+                        return
                 except Exception as error:
+                    if self.closed or self.paused:
+                        self._status(
+                            "failed" if self.retired else "disabled" if self.closed else "paused",
+                            "顶部状态栏清理未完成。" if self.retired else "",
+                        )
+                        return
                     self._errors.append(name + ": " + str(error))
                     if name in self.hosts:
                         self._drop(name)
@@ -821,6 +831,8 @@ class TopBarManager(QObject):
             self._applying = False
 
     def _new_host(self, screen, native_id):
+        if self.closed or self.paused:
+            raise AppBarError("Top bar stopped before preparing its own window")
         state = BarViewState(self, native_id)
         state._config = self._style
         state._coating = self._coating
@@ -829,9 +841,15 @@ class TopBarManager(QObject):
         # with that new Shell. It must not be registered a second time later.
         host = Host(screen, state, window, shell_epoch=self._shell_epoch + int(self._shell_pending))
         try:
+            if self.closed or self.paused:
+                raise AppBarError("Top bar stopped while creating its own window")
             host.material_bridge = self._material_bridge(window, state)
+            if self.closed or self.paused:
+                raise AppBarError("Top bar stopped while creating its material")
             host.binding = self.adapter.prepare(window, screen)
             self._bind_material(host.material_bridge, host.binding)
+            if self.closed or self.paused:
+                raise AppBarError("Top bar stopped while retaining its own window")
             if host.binding.screen_name.casefold() != native_id.casefold():
                 raise AppBarError("Selected native display changed while preparing the top bar")
             host.session = self.adapter.session(host.binding)
@@ -1001,8 +1019,12 @@ class TopBarManager(QObject):
             bind(binding)
 
     def _sync_host(self, host, *, shell_recreated=False):
+        if self.closed or self.paused or host.closing:
+            return
         binding = host.binding
         self.adapter.snapshot(binding)
+        if self.closed or self.paused or host.closing:
+            return
         height = self._config["top_bar"]["height"]
         if shell_recreated:
             result = host.session.shell_recreated(self._shell_epoch)
@@ -1016,6 +1038,8 @@ class TopBarManager(QObject):
             result = host.session.register(binding.monitor, dpi=binding.dpi, height_dip=height)
         else:
             proposed = self.adapter.proposed_band(binding, height)
+            if self.closed or self.paused or host.closing:
+                return
             if (
                 proposed == host.rect
                 and binding.dpi == host.applied_dpi
@@ -1025,6 +1049,8 @@ class TopBarManager(QObject):
                 self._layout(host)
                 return
             result = host.session.relayout(binding.monitor, dpi=binding.dpi, height_dip=height)
+        if self.closed or self.paused or host.closing:
+            return
         if not result.ready:
             raise AppBarError("; ".join(result.errors) or "AppBar reservation is not ready")
         host.rect = result.physical_rect
@@ -1035,6 +1061,8 @@ class TopBarManager(QObject):
             height,
         )
         self._layout(host)
+        if self.closed or self.paused or host.closing:
+            return
         self.adapter.show(binding, activate=False)
 
     @staticmethod
@@ -1233,7 +1261,7 @@ class TopBarManager(QObject):
                 or any(flags.get("fullscreen") is True for flags in self._notifications.values()))
 
     def hover(self, host_id, item):
-        if (host_id not in self.hosts or self._fullscreen_active()
+        if (self.closed or host_id not in self.hosts or self._fullscreen_active()
                 or self._panel and self._panel["pinned"]):
             return
         if item != OVERFLOW and not any(row["id"] == item for row in self._rows):
@@ -1268,7 +1296,7 @@ class TopBarManager(QObject):
 
     def click(self, host_id, item):
         host = self.hosts.get(host_id)
-        if host is None or self._fullscreen_active():
+        if self.closed or host is None or self._fullscreen_active():
             return
         if (
             self._panel
@@ -1310,35 +1338,53 @@ class TopBarManager(QObject):
             host.state.detailChanged.emit()
         return True
 
+    def _details_allowed(self, host):
+        return (not self.closed and not self.paused and not host.closing
+                and self.hosts.get(host.state._host_id) is host
+                and host.binding is not None and not self._fullscreen_active())
+
     def _show_panel(self, host, item, pinned):
         self._hover_timer.stop()
         self._close_timer.stop()
         self._pending_hover = None
-        if self.closed or self._fullscreen_active():
+        if not self._details_allowed(host):
             return
         if item != OVERFLOW and not any(row["id"] == item for row in self._rows):
             return
         if self._panel and (self._panel["host"] is not host or self._panel["pinned"] != pinned):
             self.close_panel()
+            if self._panel is not None:
+                return  # A synchronous cleanup callback owns this replacement.
         self._retry_retired()
+        if not self._details_allowed(host):
+            return
         if self.retired:
             self._status("partial", "顶部状态栏清理未完成。")
             return
         if not self._detail_data(host, item, pinned):
             return
-        if self.closed or self._fullscreen_active():
+        if not self._details_allowed(host):
             return
-        window = bridge = panel = None
+        window = bridge = panel = pending = None
+        failed = False
         try:
             if self._panel is None:
                 window = self._make_window("details", host.state, host.screen, pinned)
+                pending = dict(host=host, item=item, pinned=pinned, window=window,
+                               binding=None, material_bridge=None)
+                if not self._details_allowed(host):
+                    return
                 bridge = self._material_bridge(window, host.state, "details")
-                binding = self.adapter.prepare(window, host.screen)
-                self._bind_material(bridge, binding)
-                self._panel = dict(
-                    host=host, item=item, pinned=pinned, window=window, binding=binding,
-                    material_bridge=bridge,
-                )
+                pending["material_bridge"] = bridge
+                if not self._details_allowed(host):
+                    return
+                # Keep the exact returned lease locally before bind() can emit
+                # callbacks or fail. A late record must never revive _panel.
+                pending["binding"] = self.adapter.prepare(window, host.screen)
+                self._bind_material(bridge, pending["binding"])
+                if not self._details_allowed(host) or self._panel is not None:
+                    return
+                self._panel, pending = pending, None
                 if self._native_windows():
                     window.widthChanged.connect(self._queue_panel_geometry)
                     window.heightChanged.connect(self._queue_panel_geometry)
@@ -1346,37 +1392,47 @@ class TopBarManager(QObject):
                 self._panel["item"] = item
             panel = self._panel
             self._position_panel()
-            if self.closed or self._panel is not panel:
-                return
-            if self._fullscreen_active():
-                self.close_panel()
+            if not self._details_allowed(host) or self._panel is not panel:
+                if self._panel is panel:
+                    self.close_panel()
                 return
             if window is not None:
                 prepare = getattr(bridge, "prepare_before_show", None)
                 if callable(prepare):
                     prepare()
-            if self.closed or self._panel is not panel:
-                return
-            if self._fullscreen_active():
-                self.close_panel()
+            if not self._details_allowed(host) or self._panel is not panel:
+                if self._panel is panel:
+                    self.close_panel()
                 return
             self.adapter.show(panel["binding"], activate=pinned)
-            if self._panel is panel and self._fullscreen_active():
-                self.close_panel()
+            if not self._details_allowed(host) or self._panel is not panel:
+                if self._panel is panel:
+                    self.close_panel()
                 return
             QTimer.singleShot(0, self._position_panel_safely)
         except Exception as error:
+            failed = True
             self._errors.append("details: " + str(error))
-            if panel is None and self._panel is None and window is not None:
-                record = dict(window=window,
-                              binding=error.binding if isinstance(error, WindowPreparationError) else None,
-                              material_bridge=bridge)
-                if record["binding"] is not None:
-                    self._bind_material(bridge, record["binding"])
-                self._dispose_panel(record)
-            if panel is None or self._panel is panel:
+            if pending is not None and isinstance(error, WindowPreparationError):
+                pending["binding"] = error.binding
+                try:
+                    self._bind_material(bridge, pending["binding"])
+                except Exception as bind_error:
+                    self._errors.append("detail binding: " + str(bind_error))
+            if panel is not None and self._panel is panel:
                 self.close_panel()
-            self._status("partial", "无法打开指标详情。")
+        finally:
+            if pending is not None:
+                self._dispose_panel(pending)
+            if self.closed or self.paused:
+                self._status(
+                    "failed" if self.retired else "disabled" if self.closed else "paused",
+                    "顶部状态栏清理未完成。" if self.retired else "",
+                )
+            elif failed:
+                self._status("partial", "无法打开指标详情。")
+            elif pending is not None and self.retired:
+                self._status("partial" if self.hosts else "failed", "顶部状态栏清理未完成。")
 
     def _position_panel_safely(self):
         try:
@@ -1491,11 +1547,17 @@ class TopBarManager(QObject):
             self.retired.append(panel)
 
     def open_settings(self):
+        if self.closed:
+            return
         self.close_panel()
+        if self.closed:
+            return
         self.runtime.show_settings("__top_bar__")
 
     def focus_details(self):
         """An explicit tray/keyboard action, never invoked by hover/data updates."""
+        if self.closed:
+            return
         if self.paused:
             self.resume()
         if self._fullscreen_active():
@@ -1507,10 +1569,15 @@ class TopBarManager(QObject):
             self.open_settings()
 
     def menu(self, host_id):
-        if host_id not in self.hosts:
+        host = self.hosts.get(host_id)
+        if self.closed or host is None:
             return
         self.close_panel()
+        if self.closed or self.hosts.get(host_id) is not host:
+            return
         self._close_menu()
+        if self.closed or self.hosts.get(host_id) is not host:
+            return
         config = self._config or self.controller._saved
         self._menu = QMenu(theme=config.get("theme", "light"), language=config.get("language", "zh-CN"))
         tr = self.hosts[host_id].state.tr
@@ -1531,6 +1598,8 @@ class TopBarManager(QObject):
             menu.deleteLater()
 
     def pause(self):
+        if self.closed:
+            return
         self.paused = True
         self._close_hosts()
         self._status(
@@ -1538,6 +1607,8 @@ class TopBarManager(QObject):
         )
 
     def resume(self):
+        if self.closed:
+            return
         self.paused = False
         self.apply(self._config)
 
@@ -1613,15 +1684,26 @@ class TopBarManager(QObject):
 
     def _dispose(self, host):
         host.closing = True
+        hide_error = None
+        if host.binding is not None:
+            try:
+                # Hide independently of material cleanup. A failed clear must
+                # not leave a stale topmost bar covering the user's work.
+                self.adapter.hide(host.binding)
+            except Exception as error:
+                hide_error = error
+                self._errors.append(host.state._host_id + " hide: " + str(error))
         try:
             self._close_material(host)
+            if hide_error is not None:
+                raise AppBarError("Own top bar did not hide") from hide_error
             if host.session is not None:
                 result = host.session.close()
                 if not result.cleanup_complete:
                     raise AppBarError("; ".join(result.errors) or "AppBar cleanup incomplete")
             if host.binding is not None:
-                self.adapter.hide(host.binding)
                 self.adapter.release(host.binding)
+                host.binding = None
             host.window.deleteLater()
             host.state.deleteLater()
         except Exception as error:
@@ -1668,15 +1750,21 @@ class TopBarManager(QObject):
             delete()
 
     def close(self):
-        if self.closed:
+        if self._closing or self.closed and not self.retired:
             return
-        self._close_hosts()
-        self._retry_retired()
-        if self._filter_installed:
-            self.app.removeNativeEventFilter(self._filter)
-            self._filter_installed = False
+        # Native hide/clear can synchronously dispatch Qt callbacks. Close the
+        # admission gate first, while retained leases stay valid for cleanup.
         self.closed = True
-        self._status(
-            "failed" if self.retired else "disabled",
-            "顶部状态栏清理未完成。" if self.retired else "",
-        )
+        self._closing = True
+        try:
+            self._close_hosts()
+            self._retry_retired()
+            if self._filter_installed:
+                self.app.removeNativeEventFilter(self._filter)
+                self._filter_installed = False
+            self._status(
+                "failed" if self.retired else "disabled",
+                "顶部状态栏清理未完成。" if self.retired else "",
+            )
+        finally:
+            self._closing = False

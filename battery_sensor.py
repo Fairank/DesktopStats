@@ -1,6 +1,10 @@
 """Read the Windows aggregate battery state without PowerShell or administrator rights."""
 
 import ctypes as c
+import time
+
+BATTERY_API = "CallNtPowerInformation(SystemBatteryState)"
+BATTERY_RETRY_SECONDS = 60.0
 
 
 class SystemBatteryState(c.Structure):
@@ -53,21 +57,70 @@ def decode(state):
 
 class Battery:
     def __init__(self):
-        self.lib = c.WinDLL("PowrProf.dll")
-        self.lib.CallNtPowerInformation.argtypes = [
+        # One optional source must not prevent the sampler from starting.
+        self.lib = None
+        self._retry_at = 0.0
+        self._status = dict(api=BATTERY_API, state="idle", ntstatus=None)
+
+    @staticmethod
+    def _open():
+        lib = c.WinDLL("PowrProf.dll")
+        lib.CallNtPowerInformation.argtypes = [
             c.c_int,
             c.c_void_p,
             c.c_uint32,
             c.c_void_p,
             c.c_uint32,
         ]
-        self.lib.CallNtPowerInformation.restype = c.c_int32
+        lib.CallNtPowerInformation.restype = c.c_int32
+        return lib
+
+    def _failure(self, now, api, error=None, ntstatus=None):
+        facts = dict(api=api)
+        if error is not None:
+            facts["reason"] = (
+                "entrypoint_missing" if isinstance(error, AttributeError) else "OSError"
+            )
+            for field in ("errno", "winerror"):
+                value = getattr(error, field, None)
+                if type(value) is int and -(2**31) <= value < 2**32:
+                    facts[field] = value
+        if ntstatus is not None:
+            facts["ntstatus"] = ntstatus
+        self.lib = None
+        self._retry_at = now + BATTERY_RETRY_SECONDS
+        self._status = dict(api=api, state="query_failed", ntstatus=ntstatus, error=facts)
+        return dict(battery_status=dict(self._status, retry_in_seconds=BATTERY_RETRY_SECONDS))
 
     def read(self):
+        now = time.monotonic()
+        if now < self._retry_at:
+            return dict(
+                battery_status=dict(
+                    self._status, state="waiting_retry", retry_in_seconds=self._retry_at - now
+                )
+            )
         state = SystemBatteryState()
-        status = self.lib.CallNtPowerInformation(5, None, 0, c.byref(state), c.sizeof(state))
-        result = decode(state) if status == 0 else {}
-        result["battery_status"] = {"api": "CallNtPowerInformation(SystemBatteryState)", "ntstatus": int(status)}
+        api = "LoadLibraryW(PowrProf.dll)" if self.lib is None else BATTERY_API
+        try:
+            if self.lib is None:
+                try:
+                    self.lib = self._open()
+                except AttributeError as error:
+                    return self._failure(now, BATTERY_API, error)
+            api = BATTERY_API
+            status = int(
+                self.lib.CallNtPowerInformation(5, None, 0, c.byref(state), c.sizeof(state))
+            )
+        except OSError as error:
+            return self._failure(now, api, error)
+        if status != 0:
+            return self._failure(now, BATTERY_API, ntstatus=status)
+        self._status = dict(
+            api=BATTERY_API, state="ready" if state.present else "no_battery", ntstatus=0
+        )
+        result = decode(state)
+        result["battery_status"] = dict(self._status, retry_in_seconds=0.0)
         return result
 
 

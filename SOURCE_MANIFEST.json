@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.19.0-preview.1",
-  "archive_root": "DesktopStats-0.19.0-preview.1-source/",
+  "version": "0.19.0-preview.2",
+  "archive_root": "DesktopStats-0.19.0-preview.2-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 1025,
-      "sha256": "534bb725b1df708a8e6697978c00ba638c33c37beef14a2e824ad8793e5475e5"
+      "bytes": 1878,
+      "sha256": "199ce4da128a5bcbd44926ab481b7927a01f32ad18675027daf849a227b1933c"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 3820,
-      "sha256": "11326d39f7158f265bc7e22447b95b4d4853e404a7bf71a1fa92da1233993bc3"
+      "bytes": 3817,
+      "sha256": "67cee9a5c6a497a8285c02d2505c2169b23fdd20be089058cae84daff94a6166"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -394,8 +394,8 @@
     },
     {
       "path": "battery_sensor.py",
-      "bytes": 2893,
-      "sha256": "be8916f701dcffe7a17f851ca8c37234253190cdb077827ecb594cf58897e8c6"
+      "bytes": 4962,
+      "sha256": "ff7f4b864e8ed99b0a37c1cb7b91112f48a344560d30d9be23ca9cdc29c8b1bc"
     },
     {
       "path": "build_modular.py",
@@ -449,8 +449,8 @@
     },
     {
       "path": "docs/USER_GUIDE.md",
-      "bytes": 32032,
-      "sha256": "867ec9cb6ac39430d3ba453479f974ffadd25716817dd02b52c05d93da18bd79"
+      "bytes": 32153,
+      "sha256": "b3efe539d60bd992560189977cbac29140e4525a2a2c4ca6d42bc04657900da2"
     },
     {
       "path": "energy_sensor.py",
@@ -1090,7 +1090,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "022cddc3d87a5d4a29a7c9e3b4025824aac02b4b458c640cb844bfd8aeaf1e48"
+      "sha256": "04a3e7c8bded4bab28ee4a166846a74cfcbbbfcc7aa1a74941fdc06e70d69c84"
     },
     {
       "path": "pyproject.toml",
@@ -1119,13 +1119,13 @@
     },
     {
       "path": "sensor_diagnostics.py",
-      "bytes": 14023,
-      "sha256": "c5ed0346bfe8b7af3ee876767f2351be4cf674ee94d0599f1e2ea36ac3a1421e"
+      "bytes": 15420,
+      "sha256": "65f6b14a6f443fb7c05b5695405943243c876e00f89bb792378d796638b2753e"
     },
     {
       "path": "sensors.py",
-      "bytes": 36586,
-      "sha256": "28699ed23a68d9b4827316b7d5debd6519e8b474eed1cb1d428c469a702a2593"
+      "bytes": 42053,
+      "sha256": "e236ffcac491b615b9d8b6b0be438571824422a47af894df974715cb9e648437"
     },
     {
       "path": "settings_acrylic_material.py",
@@ -1374,8 +1374,8 @@
     },
     {
       "path": "tests/test_provider_recovery.py",
-      "bytes": 30197,
-      "sha256": "ebdd60f14f054a46fc6a83583892d8de98837d6ad71a96d6723c13923365809a"
+      "bytes": 30540,
+      "sha256": "cb165a512e00931143b85f89ccfd7005f4eb2dd248b068866a7f64a4a7bcd282"
     },
     {
       "path": "tests/test_raster_blur_material.py",
@@ -1421,6 +1421,11 @@
       "path": "tests/test_selfcheck.py",
       "bytes": 4035,
       "sha256": "6dd0aa1d2f442c7d2fe699c2e4f413143d211d3e34000259ccb0146f7767928f"
+    },
+    {
+      "path": "tests/test_sensor_source_isolation.py",
+      "bytes": 26000,
+      "sha256": "f32e4dd0dc5bad25a57049d0b2ab454ff7648a03faef56a115f1ed40e98b7da8"
     },
     {
       "path": "tests/test_settings_acrylic_material.py",
@@ -1538,6 +1543,11 @@
       "sha256": "b367dc7e165e29f08e0dd34b8fc49e0731a406732ec1a30387b5fd066a5fe99c"
     },
     {
+      "path": "tests/test_top_bar_shutdown.py",
+      "bytes": 17931,
+      "sha256": "0743d401acebc8498207cd8679a5eba613ff3af0608b918d0aa32d7687e08366"
+    },
+    {
       "path": "tests/test_top_bar_transactions.py",
       "bytes": 6064,
       "sha256": "6d0490342195f01e91c790d40b7635446493c72bcbd5358bf277110e21f77100"
@@ -1594,8 +1604,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 14048,
-      "sha256": "1e12e94724db24ba4b87b7dfbb6453aa0ceb3caed269040284dbb5889ff43842"
+      "bytes": 14131,
+      "sha256": "193c1fe313e0261016e73f7b94c9b054f630b00485df0c6e9012c4daa955e893"
     },
     {
       "path": "tools/build_collector.py",
@@ -1669,8 +1679,8 @@
     },
     {
       "path": "top_bar_runtime.py",
-      "bytes": 72265,
-      "sha256": "871362bb4550a63bf3fba9dc4ec3bff398dc37dca000bb7d2f27ed0f0acf03dd"
+      "bytes": 76463,
+      "sha256": "6a8cc05d3f6e44ed6b1f69d3501809aeb814b2a626a5bb695b2e7a34d8e4cc3d"
     },
     {
       "path": "widget_catalog.py",
