@@ -25,6 +25,7 @@ _NATIVE = """
 ActionButton.qml Appearance.qml Check.qml Choice.qml ContentCanvas.qml
 ContentLayoutEditor.qml DesktopWidget.qml Details.qml FormField.qml
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
+HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml
 OptionTabs.qml Preview.qml SamplingControl.qml SensorBrowser.qml SettingRow.qml
 Settings.qml SettingsGroup.qml SkinPicker.qml Theme.qml Toggle.qml TopBar.qml

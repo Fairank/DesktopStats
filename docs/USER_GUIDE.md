@@ -1,6 +1,6 @@
 # Desktop Stats for Windows
 
-Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.19.0-preview.2** isolates battery-source failures, enumerates NVIDIA devices independently and hardens top-bar shutdown and cleanup retries. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
+Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.20.0-preview.1** adds persistent local history, previewable workspace scenes and guided source diagnostics. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
 
 Windows settings and menu-bar details share an alpha-zero native raster host and transparent Qt Quick foreground. They now use the WUJI Workbench material sequence: DWM transient-window backdrop (type 3), full client-frame extension, verified type readback, black native background and transparent foreground. No accent-blur fallback is substituted for these two hosts. Their foreground remains Qt Quick rather than WUJI's WebView2. Windows 11 detail corners request the system's smooth rounded clipping; unsupported or failed requests retain the rounded-mask fallback. UI symbols use one pinned Lucide set, while the original Niangao brand artwork remains unchanged. Failed native setup or background painting selects a readable solid fallback.
 
@@ -11,7 +11,7 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 ## 安装与使用
 
 1. 解压发布包，保留 DesktopStats.exe 与 _internal 在同一目录。双击运行，或用 Install.cmd 安装。升级前先应用或撤销待保存设置；旧版本如不能安全自动退出，请从托盘退出后重试。安装先准备新目录，再换入并保留原版备份；准备、替换或注册失败会尝试回滚并明确记录未完成的步骤，配置文件保持独立。
-2. 左侧只保留 **桌面组件 / 顶部栏 / 偏好** 三个主要入口。在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
+2. 左侧保留 **桌面组件 / 顶部栏 / 历史记录 / 偏好** 四个主要入口。在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
 3. 点击 **卡片 / 横条 / 竖条** 一键选择布局。**＋添加指标** 支持连续选择，点击“添加所选”才一次加入；取消或 Esc 不更改组件。每组件最多六项，同一模板可重复添加。
 4. 默认使用自适应排列，拖动指标调整顺序。需要手工编辑时展开 **精细排版**；开启 **自由摆放** 后，拖动有边缘/中心吸附和参考线，按住 Alt 临时关闭吸附。拖到另一项中央可交换位置，拖动选中项的小角可调整其区域。
 5. 按住 Ctrl 点击多选，再使用 **对齐与均分**。重叠或空间不足的操作不会部分提交；新增指标会保留手动摆放的旧位置，没有空位时向下扩展。移除指标不重铺剩余项。
@@ -19,6 +19,18 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 7. 使用画布底部 **撤销 / 重做** 或 Ctrl+Z / Ctrl+Shift+Z 回退草稿操作。连续标题输入或滑条调整合并为一步；拖动只在松手提交，Esc 可取消当前拖动。**应用到桌面 / 应用顶部栏 / 应用偏好** 只保存当前区域；**恢复** 也只撤销当前区域。其他区域的草稿和撤销记录保留。导入或恢复默认会明确进入“将替换全部设置”预览，点击 **应用全部设置** 才整体保存；取消可回到之前的草稿。
 8. 指标清单保留完整名称和实时值，可点选、排序或移除；数据来源与单位、位置等较少使用的选项按需展开。调整皮肤、透明度或圆角时，现有桌面组件即时预览；点击固定底部的 **应用到桌面** 或 Ctrl+S 才保存。关闭整个设置窗口会恢复已保存外观，未保存草稿仍可重新打开继续修改。布局、设备、采样等其它设置在应用后生效。
 9. 在 **桌面组件 → 桌面默认设置** 调整组件的全局材质、大小、布局和磁吸；**偏好** 首屏设置语言、深浅外观、登录启动及检测间隔，**传感器与来源** 查看真实通道和来源。托盘“退出”完全关闭软件。
+
+### 历史记录、场景与诊断
+
+**历史记录** 直接选择指标及设备，再切换 10 分钟、1 小时或 24 小时。右上角可独立暂停记录，不影响实时读数；暂停保留已有记录。清空需要再次确认，作用于本机全部历史，不能撤销。顶部栏详情中的时钟按钮可直达对应指标与设备的历史；未纳入记录的通道不显示该入口。
+
+目前记录 CPU、内存、电池、已支持的功率与风扇指标，以及明确设备标识的显卡和网卡通道。扩展采集器和磁盘通道暂未纳入持久历史。设备断开后仍保留已经选择的历史，不自动混入另一设备。数据库位于独立用户数据目录的 `sensor-history.sqlite3`，不上传；磁盘上的设备标识采用哈希，不写设备名称或地址。
+
+折线连接实际区间均值，不使用平滑曲线；每段细线保留真实最低值到峰值，悬停可查看具体时间、均值及范围。空白代表缺测，零仍是有效读数。数据按来源时间戳去重，缓存重复读取不算新样本。一秒桶保留一小时，分钟汇总保留七天；正常写盘最多每秒一个批次。页面最多约每两秒查询一次，不随每个快速采样事件反复绘制。存储失败会保留错误和有界内存缓冲，实时采样继续运行；退出时尝试保存剩余记录。
+
+组件列表旁的 **场景** 提供日常办公、性能观察和电池续航方案。先点击卡片看真实组件的当前读数预览，再选择 **使用方案**；预览本身不保存。场景只替换桌面组件与顶部栏设置，保留语言、采样、登录启动等通用偏好。内置方案沿用当前屏幕和材质；自存方案恢复保存时的组件与栏设置。尚有布局草稿时会在面板内提示确认。**保存布局** 可保留最多八个自定义方案，名称最多二十个字；自定义卡片可通过垃圾桶移除，需要行内再次确认。**上次布局** 恢复场景切换前的已保存布局，不是恢复未保存输入。方案保存在独立的 `scenes.json`，不随公开源码导出。
+
+在 **偏好 → 传感器与来源 → 来源诊断**，每张卡先说明状态、明确原因和可执行的下一步，接口名和数值错误码按需展开。**重新检查** 请求新一轮读数，保留各来源的重试间隔，不安装驱动或改变权限；没有收到新样本时会明确提示。**导出诊断** 只包含软件版本及白名单内的接口状态、原因和错误码，不包含原始读数、设备标识或本地路径。
 
 在侧栏 **顶部栏** 设置系统屏幕边缘栏：可选择主屏、所有屏幕或指定屏幕，高度 28/32/40 个逻辑像素，最多 64 项指标。顶部固定开关直接启停；预览明确标出未启用状态。先选“紧凑数字 / 均衡 / 迷你图表”模板，再点单项编辑。检查器保留一个实际比例预览，点击 **显示方式** 在原页展开完整样式预览，选中即收起；位置、精度、单位和设备可直接调整，来源按需展开，错误原因直接显示。原有八种显示方式保留：标签、纯数值、图标、趋势、柱状、圆环、迷你图表、上下两行。网络速度、磁盘读写和电池侧充放电另外支持 **双向读数 / 单行双向**；两方向共用同一个所选设备和单位，缺读数显示“—”，真实零值保留。已知 0–100% 量程才推荐柱状和圆环，NVMe 已用寿命不冒充占用率。拖动列表或预览可放到左侧、右侧并排序，实时顶部栏也可直接拖排；存在未应用的顶部栏修改时，需先应用后再拖实时栏。趋势复用最近最多 40 次已有读数，不额外采集；无效读数留断点。此页应用只保存顶部栏，保留其他组件的草稿和撤销记录。
 

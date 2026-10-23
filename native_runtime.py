@@ -671,37 +671,64 @@ class Runtime(QObject):
 
     def show_settings(self, key=""):
         host = getattr(self, "settings_host", None)
-        if self.shutting_down or host is not None and host.status().get("disposed"):
+        settings = self.settings
+
+        def current():
+            return (not self.shutting_down and self.settings is settings
+                    and getattr(self, "settings_host", None) is host
+                    and (host is None or not host.status().get("disposed")))
+
+        if not current():
             return  # A queued tray/IPC request must not recreate a released host.
         if key == "__top_bar__":
             self.settings.setProperty("page", 3)
+        elif key == "__history__":
+            self.settings.setProperty("page", 4)
+        elif key.startswith("__history__:"):
+            self.settings.selectHistory(key.partition(":")[2])
         elif key:
             self.settings.selectWidget(key)
+        if not current():
+            return
         self.controller.inspect()
+        if not current():
+            return
         window = Runtime._settings_window(self)
         available = [screen.availableGeometry() for screen in self.app.screens()]
         if getattr(self, "settings_host", None) is not None:
             # The user's existing Show action may create the native host. Its
             # actual frame margins then keep the caption inside the work area.
             window.create()
+            if not current():
+                return
             margins = window.frameMargins()
             screen = self.app.primaryScreen().availableGeometry()
             if not window.isVisible():
                 window.resize(min(1280, screen.width()-48-margins.left()-margins.right()),
                               min(640, screen.height()-48-margins.top()-margins.bottom()))
+                if not current():
+                    return
                 frame = window.frameGeometry()
                 window.setFramePosition(QPoint(screen.x()+(screen.width()-frame.width())//2,
                                                screen.y()+(screen.height()-frame.height())//2))
+                if not current():
+                    return
             frame = window.frameGeometry()
             x, y = fit(frame.x(), frame.y(), frame.width(), frame.height(), available)
             window.setFramePosition(QPoint(x, y))
+            if not current():
+                return
         elif not self.settings.isVisible():
             screen = self.app.primaryScreen().availableGeometry()
             self.settings.resize(min(1280, screen.width() - 48), min(640, screen.height() - 48))
+            if not current():
+                return
             self.settings.setPosition(
                 screen.x() + (screen.width() - self.settings.width()) // 2,
                 screen.y() + (screen.height() - self.settings.height()) // 2,
             )
+            if not current():
+                return
         if getattr(self, "settings_host", None) is None:
             x, y = fit(window.x(), window.y(), window.width(), window.height(), available)
             window.setPosition(x, y)
@@ -715,9 +742,17 @@ class Runtime(QObject):
                     or getattr(self, "settings_host", None) is not window
                     or bridge.status()["closed"] or window.status().get("disposed")):
                 return
+        if not current():
+            return
         window.showNormal()
+        if not current():
+            return
         self.compose(self.settings, "settings")
+        if not current():
+            return
         window.raise_()
+        if not current():
+            return
         window.requestActivate()
 
     def apply_top_bar(self):

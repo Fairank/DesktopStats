@@ -225,6 +225,15 @@ Window {
                 PlainTip { visible: titleHover.hovered && detailTitle.truncated; text: detailTitle.text }
             }
             HeaderButton {
+                id: historyButton
+                objectName: "topBarDetailsHistory"
+                visible: root.detail.history_recordable === true
+                glyph: "time"
+                Accessible.name: root.tr("查看历史记录")
+                onClicked: root.barState.openHistory()
+                PlainTip { visible: historyButton.hovered; text: root.tr("查看历史记录") }
+            }
+            HeaderButton {
                 id: editButton
                 objectName: "topBarDetailsEdit"
                 glyph: "sliders"

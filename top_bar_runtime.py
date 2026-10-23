@@ -572,6 +572,10 @@ class BarViewState(QObject):
         self.manager.open_settings()
 
     @Slot()
+    def openHistory(self):
+        self.manager.open_history(self._host_id)
+
+    @Slot()
     def menu(self):
         self.manager.menu(self._host_id)
 
@@ -1553,6 +1557,22 @@ class TopBarManager(QObject):
         if self.closed:
             return
         self.runtime.show_settings("__top_bar__")
+
+    def open_history(self, host_id):
+        host = self.hosts.get(host_id)
+        if self.closed or host is None or host.closing:
+            return
+        item_id = host.state._detail.get("id")
+        item = next((item for item in self._config.get("top_bar", {}).get("items", [])
+                     if item["id"] == item_id), None)
+        self.close_panel()
+        if self.closed or self.hosts.get(host_id) is not host or host.closing:
+            return
+        callback = getattr(self.controller, "openHistoryMetric", None)
+        if item is not None and callable(callback):
+            callback(item["metric"], item.get("prefs", {}))
+        else:
+            self.runtime.show_settings("__history__")
 
     def focus_details(self):
         """An explicit tray/keyboard action, never invoked by hover/data updates."""

@@ -1,5 +1,26 @@
 # Changes
 
+## 0.20.0-preview.1
+
+- Add local history for supported CPU, memory, battery, power, fan, GPU and
+  per-adapter network readings, with 10-minute, 1-hour and 24-hour views. Keep
+  source timestamps, missing intervals, weighted means and real extrema; use
+  straight segments and min/max ranges rather than smoothed decorative curves.
+- Keep one-second buckets for an hour and minute rollups for seven days. Batch
+  normal writes at most once per second and isolate history failures from live
+  readings. Recording can be paused or cleared independently of layout drafts.
+- Add previewable workspace scenes, named local layouts and recovery of the
+  saved layout from before the last scene switch. Preserve unrelated preferences
+  and roll back scene recovery state if saving the new configuration fails.
+- Replace the source-text wall with actionable status cards, expandable API
+  details, a fresh-reading check and an allowlisted diagnostic export without
+  raw readings, device identifiers or local paths.
+- Route supported top-bar details directly to the correct metric and device's
+  history. Stop diagnostic timers during shutdown and reject reentrant settings
+  requests after the owning host is replaced or closed.
+- Preserve the approved Niangao artwork, existing display styles and native
+  Windows material paths. Offscreen visual checks do not verify native blur.
+
 ## 0.19.0-preview.2
 
 - Isolate Windows battery initialization and query failures from other readings;

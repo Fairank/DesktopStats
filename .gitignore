@@ -9,6 +9,11 @@ local-*
 preferences*.json
 positions.json
 native-migration.json
+sensor-history.sqlite3
+sensor-history.sqlite3-shm
+sensor-history.sqlite3-wal
+scenes.json
+.scene-recovery-*.json
 .ruff_cache/
 latest.json
 state.txt

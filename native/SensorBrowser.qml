@@ -127,20 +127,9 @@ ColumnLayout {
     Text { Layout.fillWidth:true; text:ui.t("未提供的传感器显示为 —，不会估算。"); color:ui.muted; font.family:ui.fontFamily; font.pixelSize:10; wrapMode:Text.WordWrap }
     Popup {
         id:diagnostics;objectName:"sourceDiagnosticsPopup";parent:Overlay.overlay
-        width:Math.min(620,parent.width-32);height:Math.min(480,parent.height-32)
+        width:Math.min(720,parent.width-32);height:Math.min(620,parent.height-32)
         x:(parent.width-width)/2;y:(parent.height-height)/2;padding:20;modal:true;focus:true
         background:GlassSurface {tone:"popup"}
-        ColumnLayout {anchors.fill:parent;spacing:12
-            RowLayout {Layout.fillWidth:true
-                Text {Layout.fillWidth:true;text:ui.t("来源诊断");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:16;font.weight:Font.DemiBold}
-                IconButton {symbol:"close";label:ui.t("关闭");onClicked:diagnostics.close()}
-            }
-            Text {Layout.fillWidth:true;text:ui.t("显示本轮实际返回的状态；没有证据时保留未知，不判断为权限不足。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
-            ScrollView {Layout.fillWidth:true;Layout.fillHeight:true;contentWidth:availableWidth;clip:true
-                TextArea {readOnly:true;selectByMouse:true;wrapMode:TextEdit.Wrap;textFormat:TextEdit.PlainText;padding:4;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:11;background:null
-                    text:{const revision=stats.sensorRevision;return stats.sourceDiagnostics.map(row=>[row.label+" · "+row.state,row.detail,row.errors].filter(Boolean).join("\n")).join("\n\n") || ui.t("等待读数")}
-                }
-            }
-        }
+        DiagnosticsPanel {anchors.fill:parent;closable:true;active:diagnostics.opened;onCloseRequested:diagnostics.close()}
     }
 }

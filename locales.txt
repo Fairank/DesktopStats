@@ -623,3 +623,120 @@ NVMe 健康|NVMe 健康|NVMe health|NVMeの状態|NVMe 상태|NVMe-Zustand|État
 高对比，专注读数|高對比，專注讀數|High contrast, focused readings|高いコントラストで読数を明確に|높은 대비로 수치에 집중|Hoher Kontrast, klare Messwerte|Contraste élevé, mesures lisibles|Alto contraste y lecturas claras
 深色底板，夜间舒适|深色底板，夜間舒適|Dark surface, comfortable at night|夜間に見やすい暗い下地|밤에 편안한 어두운 바탕|Dunkle Fläche, angenehm bei Nacht|Fond sombre, confortable la nuit|Fondo oscuro, cómodo por la noche
 保留读数，隐去底板|保留讀數，隱去底板|Readings without a background|下地を省いて読数を表示|바탕 없이 수치만 표시|Messwerte ohne Hintergrundfläche|Mesures sans fond|Lecturas sin fondo
+// History, scenes and guided diagnostics
+历史记录|歷史記錄|History|履歴|기록|Verlauf|Historique|Historial
+历史趋势|歷史趨勢|Historical trend|履歴の推移|기록 추이|Verlaufskurve|Évolution historique|Tendencia histórica
+10 分钟|10 分鐘|10 minutes|10 分|10분|10 Minuten|10 minutes|10 minutos
+1 小时|1 小時|1 hour|1 時間|1시간|1 Stunde|1 heure|1 hora
+24 小时|24 小時|24 hours|24 時間|24시간|24 Stunden|24 heures|24 horas
+最近记录|最近記錄|Last observation|最新の記録|최근 기록|Letzte Messung|Dernière mesure|Última medición
+最低值|最低值|Minimum|最小値|최솟값|Minimum|Minimum|Mínimo
+覆盖率|覆蓋率|Coverage|記録率|기록 범위|Abdeckung|Couverture|Cobertura
+区间范围|區間範圍|Interval range|区間の範囲|구간 범위|Intervallbereich|Plage de l’intervalle|Rango del intervalo
+指标与设备|指標與裝置|Metric and device|指標とデバイス|지표 및 장치|Messwert und Gerät|Mesure et appareil|Métrica y dispositivo
+本机|本機|This computer|このコンピュータ|이 컴퓨터|Dieser Computer|Cet ordinateur|Este equipo
+正在记录|正在記錄|Recording|記録中|기록 중|Aufzeichnung läuft|Enregistrement en cours|Grabando
+已暂停记录|已暫停記錄|Recording paused|記録を一時停止|기록 일시 중지|Aufzeichnung pausiert|Enregistrement en pause|Grabación pausada
+记录历史|記錄歷史|Record history|履歴を記録|기록 저장|Verlauf aufzeichnen|Enregistrer l’historique|Grabar historial
+正在读取记录|正在讀取記錄|Reading history|履歴を読み込み中|기록 불러오는 중|Verlauf wird geladen|Chargement de l’historique|Cargando historial
+清空记录|清空記錄|Clear history|履歴を消去|기록 지우기|Verlauf löschen|Effacer l’historique|Borrar historial
+确认清空|確認清空|Confirm deletion|消去を確認|삭제 확인|Löschen bestätigen|Confirmer la suppression|Confirmar borrado
+重试|重試|Retry|再試行|다시 시도|Erneut versuchen|Réessayer|Reintentar
+场景|場景|Scenes|シーン|장면|Szenen|Scènes|Escenas
+场景方案|場景方案|Workspace scenes|ワークスペースのシーン|작업 공간 장면|Arbeitsplatzszenen|Scènes de travail|Escenas de trabajo
+上次布局|上次佈局|Previous layout|前の配置|이전 배치|Vorheriges Layout|Disposition précédente|Distribución anterior
+日常办公|日常辦公|Everyday work|普段の作業|일상 작업|Alltag|Travail quotidien|Trabajo diario
+性能观察|效能觀察|Performance|パフォーマンス|성능 관찰|Leistung|Performances|Rendimiento
+电池续航|電池續航|Battery focus|バッテリー重視|배터리 중심|Akkubetrieb|Autonomie|Autonomía
+从一个场景开始|從一個場景開始|Start with a scene|シーンから始める|장면으로 시작하기|Mit einer Szene beginnen|Commencer par une scène|Empieza con una escena
+预览方案|預覽方案|Preview|プレビュー|미리 보기|Vorschau|Aperçu|Vista previa
+正在预览|正在預覽|Previewing|プレビュー中|미리 보는 중|In Vorschau|Aperçu actif|Vista previa activa
+使用方案|使用方案|Use scene|シーンを使用|장면 사용|Szene verwenden|Utiliser la scène|Usar escena
+已应用|已套用|Applied|適用済み|적용됨|Angewendet|Appliqué|Aplicado
+确认使用|確認使用|Use this scene|このシーンを使用|이 장면 사용|Diese Szene verwenden|Utiliser cette scène|Usar esta escena
+保存布局|儲存佈局|Save layout|配置を保存|배치 저장|Layout speichern|Enregistrer la disposition|Guardar distribución
+保存自己的工作方式|儲存自己的工作方式|Save your workspace|作業環境を保存|내 작업 공간 저장|Arbeitsplatz speichern|Enregistrer votre espace|Guarda tu espacio
+给当前布局命名|為目前佈局命名|Name this layout|配置に名前を付ける|현재 배치 이름|Layout benennen|Nommer cette disposition|Nombra esta distribución
+正常|正常|Healthy|正常|정상|Normal|Normal|Normal
+部分可用|部分可用|Partly available|一部利用可能|일부 사용 가능|Teilweise verfügbar|Partiellement disponible|Disponible en parte
+待检查|待檢查|Check needed|確認が必要|확인 필요|Prüfung nötig|À vérifier|Revisión necesaria
+无电池|無電池|No battery|バッテリーなし|배터리 없음|Kein Akku|Aucune batterie|Sin batería
+按需读取|按需讀取|On demand|必要時に取得|필요할 때 읽기|Bei Bedarf|À la demande|Bajo demanda
+建立基线|建立基線|Establishing baseline|基準を取得中|기준 설정 중|Basis wird ermittelt|Création de la référence|Creando referencia
+未发现导出|未發現匯出|No export found|エクスポート未検出|내보내기 없음|Kein Export gefunden|Aucun export trouvé|No se encontró exportación
+重新检查|重新檢查|Check again|再確認|다시 확인|Erneut prüfen|Vérifier à nouveau|Comprobar de nuevo
+正在检查…|正在檢查…|Checking…|確認中…|확인 중…|Wird geprüft…|Vérification…|Comprobando…
+导出诊断|匯出診斷|Export diagnostics|診断をエクスポート|진단 내보내기|Diagnose exportieren|Exporter le diagnostic|Exportar diagnóstico
+查看接口详情|查看介面詳情|API details|API の詳細|API 세부 정보|API-Details|Détails de l’API|Detalles de la API
+收起接口详情|收起介面詳情|Hide API details|API の詳細を閉じる|API 세부 정보 접기|API-Details ausblenden|Masquer les détails de l’API|Ocultar detalles de la API
+读数从哪里来|讀數從哪裡來|Where readings come from|測定値の取得元|측정값의 출처|Herkunft der Messwerte|Origine des mesures|Origen de las mediciones
+等待第一轮读数|等待第一輪讀數|Waiting for the first sample|最初の測定を待機中|첫 측정 대기 중|Warten auf erste Messung|En attente de la première mesure|Esperando la primera medición
+查看历史记录|查看歷史記錄|View history|履歴を表示|기록 보기|Verlauf anzeigen|Voir l’historique|Ver historial
+先看原因，再选择下一步。|先看原因，再選擇下一步。|Understand the cause, then choose the next step.|||||
+看清变化，找到值得关注的时刻。|看清變化，找到值得關注的時刻。|See changes and find the moments that matter.|||||
+先看布局，再选择适合你的工作方式。|先看佈局，再選擇適合你的工作方式。|Preview a layout and choose what suits your work.|||||
+不同单位的读数不能共用量程|不同單位的讀數不能共用量程|Readings with different units need separate scales.|||||
+个采样点|個採樣點|observations|||||
+次缺失|次缺失|missing observations|||||
+开启记录后，可在这里查看设备的变化|開啟記錄後，可在這裡查看裝置的變化|Enable recording to see changes over time.|||||
+无法读取历史记录|無法讀取歷史記錄|Could not read history.|||||
+暂无可用场景|暫無可用場景|No scenes available.|||||
+折线表示区间均值，细线保留最低值与峰值。|折線表示區間均值，細線保留最低值與峰值。|Lines show interval means; thin ranges retain minima and peaks.|||||
+曲线空白处代表缺失，不会补成 0。|曲線空白處代表缺失，不會補成 0。|Gaps represent missing readings, never zero.|||||
+清空这台电脑上的全部历史记录？此操作无法撤销。|清空這台電腦上的全部歷史記錄？此操作無法復原。|Clear all history on this computer? This cannot be undone.|||||
+记录仅保存在这台电脑上。暂停后会保留已有记录。|記錄僅儲存在這台電腦上。暫停後會保留已有記錄。|History stays on this computer. Pausing keeps existing records.|||||
+这段时间还没有记录|這段時間還沒有記錄|No records in this time range yet.|||||
+选择一个指标|選擇一個指標|Choose a metric|||||
+选择历史指标与设备|選擇歷史指標與裝置|Choose a history metric and device|||||
+历史记录与布局设置独立保存|歷史記錄與佈局設定獨立儲存|History is saved independently of layout settings.|||||
+当前读数预览 · 尚未应用|目前讀數預覽 · 尚未套用|Current readings preview · not applied|||||
+此场景没有启用的桌面组件|此場景沒有啟用的桌面元件|This scene has no enabled desktop widgets.|||||
+切换桌面组件与顶部栏，保留语言和采样设置；可用“上次布局”恢复。|切換桌面元件與頂部列，保留語言和採樣設定；可用「上次佈局」還原。|Switch widgets and the top bar while keeping language and sampling settings. Restore with Previous layout.|||||
+这会替换尚未应用的桌面与顶部栏修改。|這會替換尚未套用的桌面與頂部列修改。|This replaces unapplied widget and top-bar edits.|||||
+轻巧的状态栏，让注意力留给工作。|輕巧的狀態列，讓注意力留給工作。|A small status strip that leaves room for your work.|||||
+温度、负载与功率，放在一起看。|溫度、負載與功率，放在一起看。|See temperature, load and power together.|||||
+保留必要读数，不主动唤醒独显。|保留必要讀數，不主動喚醒獨顯。|Keep essential readings without requesting the discrete GPU.|||||
+恢复最近一次场景切换前的已保存布局。|還原最近一次場景切換前的已儲存佈局。|Restore the saved layout from before the last scene change.|||||
+你保存的桌面组件与顶部栏组合。|你儲存的桌面元件與頂部列組合。|Your saved widget and top-bar workspace.|||||
+重新检查会请求新的读数，不会自动修改权限或安装驱动。|重新檢查會請求新的讀數，不會自動修改權限或安裝驅動。|Checking requests fresh readings without changing permissions or installing drivers.|||||
+导出仅包含软件版本和接口状态，不含原始读数、设备标识或本地路径。|匯出僅包含軟體版本和介面狀態，不含原始讀數、裝置標識或本機路徑。|Exports include software version and API status, without raw readings, device identifiers or local paths.|||||
+本轮接口正常返回。|本輪介面正常返回。|The API responded normally in this sample.|||||
+重新检查后仍缺测，可导出接口状态用于排查；不会把缺测当作零。|重新檢查後仍缺測，可匯出介面狀態用於排查；不會把缺測當作零。|If readings remain missing, export API status for diagnosis. Missing values are not zero.|||||
+检查 HWiNFO 是否正在提供 VSB 导出；当前未发现相应注册表键。|檢查 HWiNFO 是否正在提供 VSB 匯出；目前未發現相應登錄機碼。|Check whether HWiNFO provides a VSB export. Its registry key was not found.|||||
+等待来源的重试间隔结束后自动恢复检查，其他正常来源继续更新。|等待來源的重試間隔結束後自動恢復檢查，其他正常來源繼續更新。|This source retries after its delay. Other healthy sources keep updating.|||||
+Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告沒有電池，這不是權限錯誤。|Windows explicitly reports no battery; this is not a permission error.|||||
+添加对应指标或重新检查时，才按需请求该来源。|新增對應指標或重新檢查時，才按需請求該來源。|This source is requested when needed by a metric or a check.|||||
+速率需要两次连续读数；不会使用中断前的旧基线。|速率需要兩次連續讀數；不會使用中斷前的舊基線。|Rates need two consecutive readings. Old baselines are discarded after an interruption.|||||
+读数已刷新；未完成来源仍保留具体原因。|讀數已重新整理；未完成來源仍保留具體原因。|Readings refreshed. Unavailable sources retain their observed failure details.|||||
+正在等待新的读数，来源保留原有重试间隔。|正在等待新的讀數，來源保留原有重試間隔。|Waiting for fresh readings while preserving source retry delays.|||||
+暂未收到新的采样；原有状态与错误信息已保留。|暫未收到新的採樣；原有狀態與錯誤資訊已保留。|No new sample yet. Existing status and errors are preserved.|||||
+诊断已导出，不含原始读数、设备标识或本地路径。|診斷已匯出，不含原始讀數、裝置標識或本機路徑。|Diagnostics exported without raw readings, device IDs or local paths.|||||
+请选择有效的指标与时间范围。|請選擇有效的指標與時間範圍。|Choose a valid metric and time range.|||||
+未能清空历史记录，请重试|未能清空歷史記錄，請重試|Could not clear history. Try again.|||||
+无法读取本地场景，原文件已保留。|無法讀取本機場景，原檔案已保留。|Could not read local scenes. The original file was kept.|||||
+未能保存场景，请重试。|未能儲存場景，請重試。|Could not save the scene. Try again.|||||
+未能应用场景，请重试。|未能套用場景，請重試。|Could not apply the scene. Try again.|||||
+未能移除场景，请重试。|未能移除場景，請重試。|Could not remove the scene. Try again.|||||
+场景已应用|場景已套用|Scene applied|||||
+等待重试|等待重試|Waiting to retry|再試行を待機|재시도 대기|Warten auf erneuten Versuch|En attente d’une nouvelle tentative|Esperando reintento
+读数过期|讀數過期|Stale readings|古い測定値|오래된 측정값|Veraltete Messwerte|Mesures périmées|Mediciones obsoletas
+1 个桌面条 · CPU · 内存 · 网络 · 电池|1 個桌面列 · CPU · 記憶體 · 網路 · 電池|1 desktop strip · CPU · Memory · Network · Battery|||||
+1 个桌面条 · 电池 · 内存|1 個桌面列 · 電池 · 記憶體|1 desktop strip · Battery · Memory|||||
+2 个小组件 · CPU · GPU · 温度 · 功率|2 個小元件 · CPU · GPU · 溫度 · 功率|2 widgets · CPU · GPU · Temperature · Power|||||
+桌面组件 · 顶部栏|桌面元件 · 頂部列|Desktop widgets · Top bar|||||
+只能移除自定义场景|只能移除自訂場景|Only custom scenes can be removed.|||||
+场景不存在|場景不存在|Scene not found.|||||
+场景内容不完整|場景內容不完整|The scene is incomplete.|||||
+场景名称需为 1–20 个字|場景名稱需為 1–20 個字|Use a scene name of 1–20 characters.|||||
+场景文件格式不正确|場景檔案格式不正確|Invalid scene file format.|||||
+场景文件过大|場景檔案過大|The scene file is too large.|||||
+场景标识不正确|場景識別碼不正確|Invalid scene identifier.|||||
+无法预览此场景，当前设置未改动。|無法預覽此場景，目前設定未變更。|Could not preview this scene. Current settings were kept.|||||
+最多保存 8 个自定义场景|最多儲存 8 個自訂場景|Save up to 8 custom scenes.|||||
+未能导出诊断，请重试|未能匯出診斷，請重試|Could not export diagnostics. Try again.|||||
+未能应用场景，旧场景恢复未完成；本地恢复副本已保留。|未能套用場景，舊場景還原未完成；本機復原副本已保留。|Could not apply the scene or complete recovery. A local recovery copy was kept.|||||
+请先应用或取消全部设置预览。|請先套用或取消全部設定預覽。|Apply or cancel the full-settings preview first.|||||
+等待第一批历史记录。|等待第一批歷史記錄。|Waiting for the first history records.|||||
+本地历史存储不可用，请检查文件访问和磁盘空间。|本機歷史儲存無法使用，請檢查檔案存取和磁碟空間。|Local history storage is unavailable. Check file access and disk space.|||||
+最近的历史记录已保存到本机。|最近的歷史記錄已儲存到本機。|Recent history has been saved on this computer.|||||
+本机历史记录已清空。|本機歷史記錄已清空。|History on this computer has been cleared.|||||

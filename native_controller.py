@@ -12,7 +12,7 @@ from collections import deque
 from dataclasses import asdict
 from pathlib import Path
 
-from PySide6.QtCore import Property, QCoreApplication, QObject, QTimer, Signal, Slot
+from PySide6.QtCore import Property, QCoreApplication, QTimer, Signal, Slot
 from PySide6.QtQml import QJSValue
 from PySide6.QtWidgets import QFileDialog
 
@@ -22,6 +22,7 @@ from configuration_scopes import SCOPE_FIELDS as CONFIGURATION_SCOPES
 from configuration_scopes import merge_scope, rebase_saved_changes, scope_dirty
 from desktop_placement import desktop_plan
 from external_sensor import EXTERNAL_SLOTS, PROVIDER, inventory_display, sensor_binding
+from history_store import DEFAULT_METRICS
 from installer import set_autostart
 from layout_assist import (
     align_layout,
@@ -51,13 +52,14 @@ from stats_config import DEFAULT, MAX_WIDGETS, MODULES, SKINS, load, save, valid
 from top_bar_layout import present_metric
 from top_bar_profiles import align_pair_trends, can_gauge, detail_profile, paired_channels
 from widget_catalog import CATEGORIES, TEMPLATES, from_template
+from workspace_tools import WorkspaceTools
 
 
 def choices(value):
     return [dict(id=key, label=label) for key, label in value.items()]
 
 
-class Controller(QObject):
+class Controller(WorkspaceTools):
     draftChanged = Signal()
     savedChanged = Signal()
     dataChanged = Signal()
@@ -125,6 +127,8 @@ class Controller(QObject):
         self.draftChanged.connect(self.previewChanged.emit)
         self.draftChanged.connect(self._update_language)
         self.draftChanged.connect(self._update_theme)
+        self.savedChanged.connect(self.historyRecordingChanged.emit)
+        self.devicesChanged.connect(self.historyOptionsChanged.emit)
 
     draft = Property("QVariantMap", lambda self: self._draft, notify=draftChanged)
     saved = Property("QVariantMap", lambda self: self._saved, notify=savedChanged)
@@ -555,6 +559,7 @@ class Controller(QObject):
                     group_label=translate(group_label, language),
                     gauge_supported=can_gauge(meta),
                     pair_supported=bool(channels),
+                    history_recordable=metric in DEFAULT_METRICS or meta.get("scope") in ("gpus", "networks"),
                     paired_rows=paired,
                     history_samples=min(40, len(self._history)),
                     history_times=sample_times if include_history else [],
@@ -2334,6 +2339,7 @@ class Controller(QObject):
         self._data = {key: value for key, value in data.items() if key != "external_catalog"}
         self._refresh_external_values()
         self._history.append(self._data)
+        self._workspace_sample_received(data)
         self._notify_reading()
         now = time.monotonic()
         revision = data.get("external_revision")
@@ -2436,6 +2442,7 @@ class Controller(QObject):
                     try:
                         data = sampler.sample()
                         self.sampleReady.emit(data)
+                        self._record_history(data)
                     except Exception:
                         logging.exception("Sensor sampling failed")
                     else:
@@ -2457,12 +2464,16 @@ class Controller(QObject):
             finally:
                 if sampler:
                     sampler.close()
+                self.close_history_backend()
 
         self.thread = threading.Thread(target=collect, name="hardware-readings", daemon=True)
         self.thread.start()
 
     def close(self):
         self._reading_notify_timer.stop()
+        self._diagnostic_timer.stop()
         self.stop.set()
         if self.thread:
             self.thread.join(timeout=4)
+        if not self.thread or not self.thread.is_alive():
+            self.close_workspace_tools()
