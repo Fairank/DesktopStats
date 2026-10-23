@@ -9,6 +9,13 @@ Item {
     property string fontFamily: "Segoe UI Variable"
     property bool reserveValueWidth: false
     property bool motionEnabled: false
+    property string design: "classic"
+    readonly property string effectiveDesign: ["capsule", "instrument"].includes(design) ? design : "classic"
+    readonly property bool instrument: effectiveDesign === "instrument"
+    readonly property bool capsule: effectiveDesign === "capsule"
+    readonly property color accent: ink.hslLightness > 0.6 ? "#67a8ff" : "#006fe6"
+    readonly property color secondaryInk: Qt.rgba(muted.r, muted.g, muted.b, capsule ? 0.86 : 1)
+    // Design changes paint only; font metrics and the runtime's width contract stay identical.
     readonly property string style: row.style || "label_value"
     readonly property bool hasLabel: style === "label_value"
     readonly property bool hasIcon: style === "icon_value"
@@ -68,14 +75,17 @@ Item {
                 TextMetrics { id: pairReserve; text:"999.9"; font:pairNumber.font }
                 TextMetrics { id: pairUnit; text:String(pairLine.modelData.unit_text || "");font.family:root.fontFamily;font.pixelSize:9 }
                 MetricIcon {
+                    objectName: "topBarPairIcon_" + pairLine.index
                     width:11;height:11;y:.5
                     name: ["download","read","charge"].includes(pairLine.modelData.direction) ? "download" : "upload"
-                    ink:root.muted
+                    ink:root.instrument && ["download","read","charge"].includes(pairLine.modelData.direction) ? root.accent : root.secondaryInk
                     metric: pairLine.modelData.metric || ""
                     effect: root.row.icon_effect || "off"
                     level: pairLine.modelData.effect_level === undefined ? null : pairLine.modelData.effect_level
                     available: pairLine.modelData.available === true && Number.isFinite(pairLine.modelData.numeric_value)
                     motionEnabled: root.motionEnabled
+                    intensity: root.row.effect_intensity === undefined ? 0.5 : root.row.effect_intensity
+                    speed: root.row.effect_speed === undefined ? 1 : root.row.effect_speed
                 }
                 Text {
                     id: pairValue
@@ -85,12 +95,20 @@ Item {
                     color:pairLine.modelData.available === true ? root.ink : root.muted
                 }
                 Text {
+                    objectName:"topBarPairUnit_"+pairLine.index
                     x:pairValue.x+pairNumber.advanceWidth+3
                     y:pairValue.y+pairValue.baselineOffset-baselineOffset
-                    text:pairUnit.text; textFormat:Text.PlainText; font:pairUnit.font; color:root.muted
+                    text:pairUnit.text; textFormat:Text.PlainText; font:pairUnit.font; color:root.secondaryInk
                 }
             }
         }
+    }
+    Rectangle {
+        objectName: "topBarDuplexDivider"
+        visible: root.isDuplexInline && root.pairRows.length > 1 && root.effectiveDesign !== "classic"
+        x: root.pairAWidth + 5.5; y: (parent.height - 8) / 2
+        width: 1; height: 8
+        color: Qt.rgba(root.muted.r, root.muted.g, root.muted.b, root.instrument ? 0.32 : 0.18)
     }
 
     TextMetrics {
@@ -128,7 +146,7 @@ Item {
         y: root.isStacked ? 0 : (parent.height - height) / 2
         text: labelMeasure.text
         textFormat: Text.PlainText
-        color: root.muted
+        color: root.secondaryInk
         font: labelMeasure.font
         elide: Text.ElideRight
     }
@@ -144,6 +162,8 @@ Item {
         level: root.row.effect_level === undefined ? null : root.row.effect_level
         available: root.row.available === true && Number.isFinite(root.row.numeric_value)
         motionEnabled: root.motionEnabled
+        intensity: root.row.effect_intensity === undefined ? 0.5 : root.row.effect_intensity
+        speed: root.row.effect_speed === undefined ? 1 : root.row.effect_speed
     }
     Canvas {
         id: trend
@@ -165,8 +185,21 @@ Item {
                 ctx.beginPath(); ctx.moveTo(width / 2 - 3, height / 2); ctx.lineTo(width / 2 + 3, height / 2); ctx.stroke()
                 return
             }
+            if (root.effectiveDesign !== "classic") {
+                ctx.strokeStyle = Qt.rgba(root.muted.r, root.muted.g, root.muted.b, root.instrument ? 0.24 : 0.14)
+                ctx.lineWidth = 1
+                ctx.beginPath(); ctx.moveTo(1, height - 0.5); ctx.lineTo(width - 1, height - 0.5); ctx.stroke()
+                if (root.instrument) {
+                    ctx.beginPath()
+                    for (let tick = 0; tick < 3; tick++) {
+                        const tx = 1 + tick * (width - 2) / 2
+                        ctx.moveTo(tx, height - 2.5); ctx.lineTo(tx, height - 0.5)
+                    }
+                    ctx.stroke()
+                }
+            }
             ctx.strokeStyle = root.ink
-            ctx.lineWidth = 1
+            ctx.lineWidth = root.capsule ? 1.25 : 1
             ctx.lineJoin = "round"
             ctx.lineCap = "round"
             let connected = false
@@ -198,15 +231,28 @@ Item {
         onPaint: {
             const ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
-            const track = Qt.rgba(root.muted.r, root.muted.g, root.muted.b, 0.26)
+            const track = Qt.rgba(root.muted.r, root.muted.g, root.muted.b, root.capsule ? 0.18 : 0.26)
             const fill = root.row.available === true ? root.ink : root.muted
             ctx.lineWidth = 1
             if (root.hasBar) {
                 ctx.fillStyle=track
-                ctx.beginPath(); ctx.roundedRect(1, 4, 20, 6, 3, 3); ctx.fill()
+                ctx.beginPath()
+                if (root.instrument) ctx.rect(1, 4, 20, 6)
+                else ctx.roundedRect(1, 4, 20, 6, 3, 3)
+                ctx.fill()
                 if (root.gaugeAvailable && root.row.gauge_fraction > 0) {
                     ctx.save(); ctx.clip(); ctx.fillStyle=fill
                     ctx.fillRect(1, 4, 20 * root.row.gauge_fraction, 6); ctx.restore()
+                }
+                if (root.instrument) {
+                    ctx.strokeStyle = Qt.rgba(root.muted.r, root.muted.g, root.muted.b, 0.55)
+                    ctx.beginPath()
+                    for (let tick = 0; tick <= 4; tick++) {
+                        const tx = 1 + tick * 5
+                        ctx.moveTo(tx, 2); ctx.lineTo(tx, 3)
+                        ctx.moveTo(tx, 11); ctx.lineTo(tx, 12)
+                    }
+                    ctx.stroke()
                 }
             } else if (root.row.metric === "battery_percent") {
                 ctx.strokeStyle = track
@@ -220,7 +266,15 @@ Item {
             } else {
                 ctx.strokeStyle = track
                 ctx.lineWidth = 2
-                ctx.beginPath(); ctx.arc(7, 7, 5, 0, Math.PI * 2); ctx.stroke()
+                ctx.beginPath()
+                if (root.instrument) {
+                    for (let quarter = 0; quarter < 4; quarter++) {
+                        const angle = quarter * Math.PI / 2
+                        ctx.moveTo(7 + Math.cos(angle + .1) * 5, 7 + Math.sin(angle + .1) * 5)
+                        ctx.arc(7, 7, 5, angle + .1, angle + Math.PI / 2 - .1)
+                    }
+                } else ctx.arc(7, 7, 5, 0, Math.PI * 2)
+                ctx.stroke()
                 if (root.gaugeAvailable && root.row.gauge_fraction > 0) {
                     ctx.strokeStyle = fill
                     ctx.lineCap = "round"
@@ -252,11 +306,12 @@ Item {
         y: valueText.y + valueText.baselineOffset - baselineOffset
         text: root.unitText
         textFormat: Text.PlainText
-        color: root.muted
+        color: root.secondaryInk
         font: unitMeasure.font
     }
     function redraw() { trend.requestPaint(); gauge.requestPaint() }
     onRowChanged: redraw()
     onInkChanged: redraw()
     onMutedChanged: redraw()
+    onDesignChanged: redraw()
 }

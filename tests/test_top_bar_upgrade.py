@@ -22,7 +22,8 @@ class BarUpgradeTests(unittest.TestCase):
         self.ui.change("glass_transparency", 38.5)
         self.ui.changeTopBarAppearance("glass_transparency", 72.25)
         appearance = self.ui._draft["top_bar"]["appearance"]
-        self.assertEqual(appearance, dict(follow_global=False, skin="frost", glass_transparency=72.25))
+        self.assertEqual(appearance, dict(follow_global=False, skin="frost",
+                                          glass_transparency=72.25, design="classic"))
         self.assertEqual(top_bar_style(self.ui._draft)["glass_transparency"], 72.25)
         self.assertEqual(self.ui._draft["glass_transparency"], 38.5)
         with patch.object(controls, "save"):

@@ -16,6 +16,7 @@ Item {
     property string emptyText: ui.t("这段时间还没有记录")
     property bool motionEnabled: ui.motionAllowed
     property real hoverTimestamp: NaN
+    property point lastPointerPosition: Qt.point(NaN,NaN)
     property string cursorSeriesIdentity:""
     readonly property bool hasTimeRange: Number.isFinite(rangeStart) && Number.isFinite(rangeEnd) && rangeEnd > rangeStart
     readonly property bool compatibleUnits: series.every(row => !row.unit || row.unit === root.unit)
@@ -233,8 +234,17 @@ Item {
     }
     HoverHandler {
         id:hover
-        onPointChanged:if(hovered && point.position.x>=root.plotRect.x && point.position.x<=root.plotRect.x+root.plotRect.width)root.pickAt(point.position.x)
-        onHoveredChanged:if(!hovered && !root.activeFocus)root.hoverTimestamp=NaN
+        objectName:"trendPlotHover"
+        onPointChanged: {
+            if(!hovered)return
+            const position=point.position
+            // HandlerPoint also changes for buttons/modifiers. A stationary
+            // notification must not replace the cursor chosen by a key.
+            if(position.x===root.lastPointerPosition.x && position.y===root.lastPointerPosition.y)return
+            root.lastPointerPosition=Qt.point(position.x,position.y)
+            if(position.x>=root.plotRect.x && position.x<=root.plotRect.x+root.plotRect.width)root.pickAt(position.x)
+        }
+        onHoveredChanged:if(!hovered){root.lastPointerPosition=Qt.point(NaN,NaN);if(!root.activeFocus)root.hoverTimestamp=NaN}
     }
     TapHandler { onTapped: {root.forceActiveFocus();root.pickAt(point.position.x)} }
     Rectangle {

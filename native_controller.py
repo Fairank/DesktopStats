@@ -228,11 +228,11 @@ class Controller(WorkspaceTools):
 
     @Slot(str, "QVariant")
     def changeTopBarAppearance(self, field, selected):
-        if field not in ("follow_global", "skin", "glass_transparency"):
+        if field not in ("follow_global", "skin", "glass_transparency", "design"):
             return
         value = copy.deepcopy(self._draft)
         appearance = value["top_bar"]["appearance"]
-        if field != "follow_global" or selected is False:
+        if field != "design" and (field != "follow_global" or selected is False):
             if appearance["follow_global"]:
                 # The first local edit starts from what the user currently sees.
                 appearance.update(
@@ -243,6 +243,18 @@ class Controller(WorkspaceTools):
                 appearance["follow_global"] = False
         appearance[field] = selected
         self.edit(value, merge_key=("top_bar_appearance", field))
+
+    @Slot(str, str, float)
+    def changeTopBarEffect(self, identifier, field, selected):
+        if field not in ("effect_intensity", "effect_speed"):
+            return
+        value = copy.deepcopy(self._draft)
+        item = next((row for row in value["top_bar"]["items"]
+                     if row["id"] == identifier), None)
+        if item is None:
+            return
+        item["prefs"][field] = selected
+        self.edit(value, merge_key=("top_bar_effect", identifier, field))
 
     @Slot(str, result=bool)
     def applyTopBarPreset(self, name):
@@ -608,6 +620,8 @@ class Controller(WorkspaceTools):
                 )
             channels = paired_channels(metric)
             icon_effect = prefs.get('icon_effect', 'off')
+            effect_intensity = prefs.get('effect_intensity', 0.5)
+            effect_speed = prefs.get('effect_speed', 1.0)
             def effect_for(key):
                 if icon_effect == 'off' or stale:
                     return None
@@ -628,7 +642,8 @@ class Controller(WorkspaceTools):
                     history=[display_value(sample, other, prefs)[0] for sample in samples]
                         if detail_id is not None and include_related else [],
                     history_times=sample_times if detail_id is not None and include_related else [])
-                channel.update(icon_effect=icon_effect, effect_level=effect_for(other))
+                channel.update(icon_effect=icon_effect, effect_level=effect_for(other),
+                               effect_intensity=effect_intensity, effect_speed=effect_speed)
                 paired.append(present_metric(channel))
             paired = align_pair_trends(paired)
             capacity_summary = {}
@@ -664,6 +679,8 @@ class Controller(WorkspaceTools):
                     numeric_value=number,
                     icon_effect=icon_effect,
                     effect_level=effect_for(metric),
+                    effect_intensity=effect_intensity,
+                    effect_speed=effect_speed,
                     source=source,
                     reason=reason,
                     hardware_name=hardware_name,

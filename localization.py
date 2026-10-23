@@ -33,6 +33,20 @@ def dictionaries():
 
 MESSAGES = dictionaries()
 FALLBACK = {
+    "经典菜单栏": "Classic menu bar",
+    "分组胶囊": "Group capsules",
+    "精密仪表": "Instrument panel",
+    "轻盈留白": "Light and open",
+    "清晰分组": "Clear grouping",
+    "精确对齐": "Precise alignment",
+    "整体外观": "Bar design",
+    "仅改变外观，保留指标与布局。": "Changes the design while keeping your readings and layout.",
+    "动效显示在“图标与数值”和双向读数的图标上。": "Effects appear on icons in Icon and value and bidirectional readouts.",
+    "当前显示方式不含图标，已保留动效设置。": "This display style has no icon. Your effect setting is retained.",
+    "图标动效为装饰，不代表告警、真实转速或额外传感器。": "Icon effects are decorative and do not represent alerts, actual RPM, or extra sensors.",
+    "强度": "Intensity",
+    "速度": "Speed",
+    "使用图标与数值": "Use icon and value",
     "调整": "Adjust",
     "确认": "Confirm",
     "使用率": "Utilization",

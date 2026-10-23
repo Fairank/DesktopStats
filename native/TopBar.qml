@@ -10,6 +10,8 @@ Window {
     required property var barState
     readonly property color foreground: barState.ink
     readonly property color secondary: barState.muted
+    readonly property string barDesign:["classic","capsule","instrument"].includes(barState.config.bar_design)?barState.config.bar_design:"classic"
+    readonly property color barAccent:foreground.r>.5?"#67a8ff":"#006fe6"
     property bool dragHeld: false
     property bool dragging: false
     property string draggedId: ""
@@ -90,6 +92,7 @@ Window {
         frosted: root.barState.coatingTranslucent
         cornerRadius: 0
     }
+    TopBarChrome {objectName:"topBarBandChrome";anchors.fill:parent;design:root.barDesign;role:"band";ink:root.foreground;accent:root.barAccent}
 
     MouseArea {
         anchors.fill: parent
@@ -115,12 +118,11 @@ Window {
         icon.height: 20
         display: AbstractButton.IconOnly
         Accessible.name: root.barState.tr("顶部栏")
-        background: Rectangle {
+        background: TopBarChrome {
+            objectName:"topBarMenuChrome"
             anchors.fill: parent
-            anchors.margins: 2
-            radius: 5
-            color: root.tint(menuButton.down ? 0.11 : 0.065)
-            visible: menuButton.hovered || menuButton.down
+            design:root.barDesign;role:"menu";ink:root.foreground;accent:root.barAccent
+            hovered:menuButton.hovered;pressed:menuButton.down
         }
         onClicked: root.barState.menu()
         MouseArea {
@@ -148,14 +150,16 @@ Window {
             height: modelData.height
             opacity:root.dragging && root.draggedId===modelData.id?.5:1
 
-            Rectangle {
+            TopBarChrome {
+                objectName:"topBarMetricChrome_"+metric.modelData.id
                 anchors.fill: parent
-                anchors.margins: 2
-                radius: 5
-                color: root.tint(metricMouse.pressed ? 0.11 : 0.065)
-                visible: metricMouse.containsMouse || (root.barState.pinned && root.barState.detail.id === metric.modelData.id)
+                design:root.barDesign;ink:root.foreground;accent:root.barAccent
+                hovered:metricMouse.containsMouse;pressed:metricMouse.pressed
+                pinned:root.barState.pinned && root.barState.detail.id===metric.modelData.id
+                dragged:root.dragging && root.draggedId===metric.modelData.id
             }
             TopBarGroupContent {
+                design:root.barDesign
                 motionEnabled:root.barState.motionEnabled
                 id: metricContent
                 anchors.left: parent.left
@@ -215,12 +219,12 @@ Window {
         y: rect.y || 0
         width: rect.width || 0
         height: rect.height || 0
-        Rectangle {
+        TopBarChrome {
+            objectName:"topBarOverflowChrome"
             anchors.fill: parent
-            anchors.margins: 2
-            radius: 5
-            color: root.tint(overflowMouse.pressed ? 0.11 : 0.065)
-            visible: overflowMouse.containsMouse
+            design:root.barDesign;role:"overflow";ink:root.foreground;accent:root.barAccent
+            hovered:overflowMouse.containsMouse;pressed:overflowMouse.pressed
+            pinned:root.barState.pinned && root.barState.detail.id==="__overflow__"
         }
         Text {
             anchors.centerIn: parent

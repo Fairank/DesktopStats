@@ -233,6 +233,21 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         self.assertGreater(self.find("topBarStyleGallery").height(), 1)
         QTest.qWait(30)  # Finish the one-shot container reveal before input.
 
+    def wait_scroll_layout(self, flick):
+        # A popup's contentItem can be visible with zero viewport height before
+        # its layout polish. Send input only after a real, stable scroll target
+        # exists; otherwise the test sends a wheel into an unfinished scene.
+        previous, stable = None, 0
+        for _ in range(60):
+            QTest.qWait(10)
+            current = (flick.width(), flick.height(), flick.property("contentHeight"))
+            ready = current[0] > 0 and current[1] > 0 and current[2] > current[1]
+            stable = stable + 1 if ready and current == previous else 0
+            previous = current
+            if stable >= 3:
+                return
+        self.fail(f"Scrollable viewport did not finish layout: {previous}")
+
     def publish(self):
         self.state.changed.emit()
         QTest.qWait(20)
@@ -357,6 +372,7 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         self.window.resize(320, 280)
         QTest.qWait(20)
         scroll = self.find("topBarDetailScroll")
+        self.wait_scroll_layout(scroll)
         self.assertGreater(scroll.property("contentHeight"), scroll.height())
         point = scroll.mapToScene(scroll.boundingRect().center())
         wheel = QWheelEvent(point, point, QPoint(0, 0), QPoint(0, -360), Qt.NoButton, Qt.NoModifier, Qt.ScrollUpdate, False)
@@ -562,6 +578,7 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         self.proof("skin-popup-small")
         scroll = self.find("skinPickerOptionsScroll")
         flick = scroll.property("contentItem")
+        self.wait_scroll_layout(flick)
         before = flick.property("contentY")
         point = scroll.mapToScene(scroll.boundingRect().center())
         event = QWheelEvent(point, point, QPoint(0, 0), QPoint(0, -360), Qt.NoButton, Qt.NoModifier, Qt.ScrollUpdate, False)

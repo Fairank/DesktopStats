@@ -29,7 +29,7 @@ HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePrev
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 OptionTabs.qml Preview.qml SamplingControl.qml SensorBrowser.qml SettingRow.qml
 Settings.qml SettingsGroup.qml SkinPicker.qml Theme.qml Toggle.qml TopBar.qml
-TopBarDetails.qml TopBarItemInspector.qml TopBarMetricContent.qml TopBarGroupContent.qml
+TopBarDetails.qml TopBarItemInspector.qml TopBarMetricContent.qml TopBarGroupContent.qml TopBarChrome.qml
 TopBarPreviewStrip.qml TopBarSettings.qml ValueSlider.qml WidgetEditor.qml
 WidgetInspector.qml WidgetPreview.qml WindowChrome.qml
 """.split()
@@ -87,6 +87,8 @@ REVIEWED_FILES = frozenset(
             "showcase/cpu-details.png",
             "showcase/top-bar-actions.png",
             "showcase/group-confirm.png",
+            "showcase/top-bar-designs.png",
+            "showcase/top-bar-design-settings.png",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]

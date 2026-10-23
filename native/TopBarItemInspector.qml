@@ -8,6 +8,7 @@ Item {
     property int index:-1
     property int count:0
     property bool narrow:false
+    property string design:"classic"
     property bool galleryOpen:false
     property bool sourceOpen:false
     property string previousItemId:""
@@ -60,6 +61,7 @@ Item {
     readonly property string deviceField:({gpus:"gpu_target",networks:"network_target",disks:"disk_target",volumes:"volume_target",storages:"storage_target"})[scope] || "gpu_target"
     readonly property string deviceDefault:({gpus:"0",networks:"auto",disks:"all",volumes:"system",storages:"0"})[scope] || "0"
     readonly property string selectedStyle:item ? item.prefs.style || "label_value" : "label_value"
+    readonly property bool effectStyleVisible:["icon_value","duplex","duplex_inline"].includes(selectedStyle)
     readonly property string selectedStyleLabel:(allDisplayStyles.find(option=>option.id===selectedStyle) || {}).label || selectedStyle
     readonly property string displayTitle:(row.grouped===true || ["duplex","duplex_inline"].includes(selectedStyle)) && row.group_label
         ? row.group_label : row.label || ui.t("指标设置")
@@ -156,6 +158,7 @@ Item {
             y: Math.max(0,(sampleViewport.availableHeight-implicitHeight)/2)
             row: Object.assign({},root.stylePreviewRow,{style:sampleViewport.sampleStyle})
             motionEnabled:stats.motionEnabled
+            design:root.design
             ink: ui.ink; muted: ui.muted; fontFamily: ui.fontFamily
             width: implicitWidth; height: implicitHeight
         }
@@ -262,13 +265,36 @@ Item {
             RowLabel {text:ui.t("小数位数")}
             Choice {objectName:"topBarPrecision";Layout.fillWidth:true;Layout.minimumWidth:128;model:[{id:"auto",label:ui.t("自动")},{id:"0",label:"0"},{id:"1",label:"1"},{id:"2",label:"2"}];value:root.item?root.item.prefs.precision || "auto":"auto";onPicked:selected=>stats.changeTopBarItem(root.item.id,"precision",selected)}
             RowLabel {text:ui.t("图标动效")}
-            Choice {objectName:"topBarIconEffect";Layout.fillWidth:true;Layout.minimumWidth:128;model:root.effectOptions;value:root.selectedEffect;onPicked:selected=>stats.changeTopBarItem(root.item.id,"icon_effect",selected)}
+            Choice {objectName:"topBarIconEffect";Layout.fillWidth:true;Layout.minimumWidth:128;model:root.effectOptions;value:root.selectedEffect;hoverEnabled:true;onPicked:selected=>stats.changeTopBarItem(root.item.id,"icon_effect",selected);ToolTip.visible:hovered;ToolTip.text:ui.t("动效显示在“图标与数值”和双向读数的图标上。");ToolTip.delay:600}
             RowLabel {visible:root.hasTemperature;text:ui.t("温度单位")}
             Choice {objectName:"topBarTemperatureUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:root.hasTemperature;model:[{id:"C",label:"°C"},{id:"F",label:"°F"}];value:root.item?root.item.prefs.temperature_unit || "C":"C";onPicked:selected=>stats.changeTopBarItem(root.item.id,"temperature_unit",selected)}
             RowLabel {visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);text:ui.t("网速单位")}
             Choice {objectName:"topBarNetworkUnit";Layout.fillWidth:true;Layout.minimumWidth:128;visible:!!root.item && ["net_download","net_upload"].includes(root.item.metric);model:[{id:"MBps",label:"MB/s"},{id:"Mbps",label:"Mbps"}];value:root.item?root.item.prefs.network_unit || "MBps":"MBps";onPicked:selected=>stats.changeTopBarItem(root.item.id,"network_unit",selected)}
         }
-        Text {Layout.fillWidth:true;visible:root.selectedEffect!=="off";text:ui.t("仅视觉反馈，不代表告警或额外传感器。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+        Text {objectName:"topBarIconEffectStyleHint";Layout.fillWidth:true;visible:root.selectedEffect!=="off";text:ui.t("动效显示在“图标与数值”和双向读数的图标上。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+        Text {objectName:"topBarIconEffectInactiveHint";Layout.fillWidth:true;visible:root.selectedEffect!=="off" && !root.effectStyleVisible;text:ui.t("当前显示方式不含图标，已保留动效设置。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+        ActionButton {objectName:"topBarUseIconStyle";Layout.fillWidth:true;visible:root.selectedEffect!=="off" && !root.effectStyleVisible;text:ui.t("使用图标与数值");quiet:true;onClicked:root.chooseStyle("icon_value")}
+        GridLayout {
+            Layout.fillWidth:true;visible:root.selectedEffect!=="off"
+            columns:3;columnSpacing:8;rowSpacing:2
+            Text {text:ui.t("强度");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11}
+            ValueSlider {
+                objectName:"topBarEffectIntensity";Layout.fillWidth:true;Layout.minimumWidth:80
+                from:0;to:1;value:root.item && root.item.prefs.effect_intensity!==undefined?root.item.prefs.effect_intensity:0.5
+                Accessible.name:ui.t("强度")
+                onMoved:stats.changeTopBarEffect(root.item.id,"effect_intensity",value)
+            }
+            Text {Layout.minimumWidth:38;text:Math.round((root.item && root.item.prefs.effect_intensity!==undefined?root.item.prefs.effect_intensity:0.5)*100)+"%";color:ui.ink;font.family:ui.fontFamily;font.pixelSize:11;horizontalAlignment:Text.AlignRight}
+            Text {text:ui.t("速度");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11}
+            ValueSlider {
+                objectName:"topBarEffectSpeed";Layout.fillWidth:true;Layout.minimumWidth:80
+                from:0.5;to:2;value:root.item && root.item.prefs.effect_speed!==undefined?root.item.prefs.effect_speed:1
+                Accessible.name:ui.t("速度")
+                onMoved:stats.changeTopBarEffect(root.item.id,"effect_speed",value)
+            }
+            Text {Layout.minimumWidth:38;text:(root.item && root.item.prefs.effect_speed!==undefined?root.item.prefs.effect_speed:1).toFixed(2)+"×";color:ui.ink;font.family:ui.fontFamily;font.pixelSize:11;horizontalAlignment:Text.AlignRight}
+        }
+        Text {objectName:"topBarIconEffectDecorationHint";Layout.fillWidth:true;visible:root.selectedEffect!=="off";text:ui.t("图标动效为装饰，不代表告警、真实转速或额外传感器。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
         Rectangle {Layout.fillWidth:true;implicitHeight:1;color:ui.line}
         GridLayout {Layout.fillWidth:true;columns:2;columnSpacing:12;rowSpacing:8
             RowLabel {text:ui.t("位置")}

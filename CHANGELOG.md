@@ -1,5 +1,24 @@
 # Changes
 
+## 0.23.0-preview.1
+
+- Add three complete menu-bar treatments: Classic, Capsule and Instrument.
+  Share the same chrome between the real bar and its live previews, including
+  group boundaries, hover, pinned details, dragging and the overflow control.
+  Choose treatments directly from miniature live bars; material inheritance,
+  metric order, units, targets and existing display formats remain independent.
+- Refine the ten metric formats with consistent numeric alignment, secondary
+  units, paired directions and quantity-specific gauges. Preserve the exact
+  measured widths and native hit regions at 28/32/40 logical pixels.
+- Refine optional icon decorations and add continuous intensity and speed
+  controls. Keep movement local, below 30 updates per second, and stop it when
+  hidden, minimized, missing, inactive or reduced-motion is requested. Treat
+  GPU fan percentages as fan motion in automatic mode, without implying RPM.
+- Preserve default static legacy configurations and the existing native
+  material path. Offscreen examples demonstrate layout, not Windows blur.
+- Keep a history cursor chosen by the keyboard when pointer notifications
+  arrive without movement; actual mouse motion resumes sample inspection.
+
 ## 0.22.0-preview.1
 
 - Add live per-logical-processor utilization to CPU details, with adaptive,

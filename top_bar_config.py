@@ -10,7 +10,10 @@ from metrics import METRICS
 from top_bar_layout import DISPLAY_STYLES
 from top_bar_profiles import ICON_EFFECTS, paired_channels, validate_group_metrics
 
-APPEARANCE_DEFAULTS = dict(follow_global=True, skin="glass", glass_transparency=50.0)
+BAR_DESIGNS = ("classic", "capsule", "instrument")
+APPEARANCE_DEFAULTS = dict(
+    follow_global=True, skin="glass", glass_transparency=50.0, design="classic"
+)
 
 
 def top_bar_style(config):
@@ -27,6 +30,8 @@ def top_bar_style(config):
     # readable material so the entire native band has a visible affordance.
     if style.get("skin") == "minimal":
         style["skin"] = "glass"
+    # Visual grouping is independent of the material inheritance switch.
+    style["bar_design"] = appearance.get("design", "classic")
     return style
 
 
@@ -87,6 +92,8 @@ def validate_top_bar(value):
             raise ValueError("顶部栏材质开关不正确")
         if appearance["skin"] not in ("glass", "frost", "tint", "card", "graphite"):
             raise ValueError("不支持的顶部栏材质")
+        if appearance["design"] not in BAR_DESIGNS:
+            raise ValueError("不支持的顶部栏整体样式")
         level = appearance["glass_transparency"]
         if type(level) not in (int, float) or not 0 <= level <= 100 or not math.isfinite(level):
             raise ValueError("顶部栏透明度应为 0–100%")
@@ -147,6 +154,17 @@ def validate_top_bar(value):
                 if source[field] not in options:
                     raise ValueError("不支持的顶部栏显示格式")
                 prefs[field] = source[field]
+        for field, minimum, maximum in (
+            ("effect_intensity", 0.0, 1.0),
+            ("effect_speed", 0.5, 2.0),
+        ):
+            if field in source:
+                selected = source[field]
+                if (type(selected) not in (int, float)
+                        or not minimum <= selected <= maximum
+                        or not math.isfinite(selected)):
+                    raise ValueError("不支持的顶部栏动效参数")
+                prefs[field] = float(selected)
         for field, options, default in (
             ("placement", ("left", "right"), "right"),
             ("style", DISPLAY_STYLES, "label_value"),

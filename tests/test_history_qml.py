@@ -19,6 +19,7 @@ from PySide6.QtCore import (
     Property,
     QCoreApplication,
     QEvent,
+    QMetaObject,
     QObject,
     QPoint,
     QPointF,
@@ -357,6 +358,39 @@ Window {id:scene;width:%d;height:%d;visible:false;color:stats.theme==="dark"?"#2
         self.assertEqual(chart.property("hoverTimestamp"), 100)
         QTest.keyClick(self.window, Qt.Key_Escape)
         self.assertNotEqual(chart.property("hoverTimestamp"), chart.property("hoverTimestamp"))
+
+    def test_stationary_pointer_notifications_preserve_keyboard_then_real_motion_resumes_hover(self):
+        chart = self.load("chart", width=440, height=280)
+        self.window.setProperty("chartSeries", [dict(id="a", unit="W", points=[
+            dict(timestamp=100, value=2), dict(timestamp=117, value=7.5),
+            dict(timestamp=200, value=1)])])
+        self.window.requestActivate()
+        QTest.qWait(30)
+        plot = chart.property("plotRect")
+        point = QPoint(int(chart.x()+plot.x()+.17*plot.width()),
+                       int(chart.y()+plot.y()+plot.height()/2))
+        QTest.mouseMove(self.window, point)
+        QTest.mouseClick(self.window, Qt.LeftButton, Qt.NoModifier, point)
+        QTest.qWait(10)
+        self.assertTrue(self.window.isActive())
+        self.assertTrue(chart.hasActiveFocus())
+        self.assertEqual(chart.property("hoverTimestamp"), 117)
+        QTest.keyClick(self.window, Qt.Key_Home)
+        self.assertEqual(chart.property("hoverTimestamp"), 100)
+        hover = self.find("trendPlotHover")
+        self.assertTrue(QMetaObject.invokeMethod(hover, "pointChanged", Qt.DirectConnection))
+        self.assertEqual(chart.property("hoverTimestamp"), 100)
+        # Real movement still inspects the nearest actual sample, including gaps.
+        target = QPoint(int(chart.x()+plot.x()+.95*plot.width()), point.y())
+        QTest.mouseMove(self.window, target)
+        QTest.qWait(10)
+        self.assertEqual(chart.property("hoverTimestamp"), 200)
+        QTest.keyClick(self.window, Qt.Key_Escape)
+        self.assertTrue(QMetaObject.invokeMethod(hover, "pointChanged", Qt.DirectConnection))
+        self.assertNotEqual(chart.property("hoverTimestamp"), chart.property("hoverTimestamp"))
+        QTest.mouseMove(self.window, point)
+        QTest.qWait(10)
+        self.assertEqual(chart.property("hoverTimestamp"), 117)
 
     def test_different_units_cannot_claim_a_shared_scale(self):
         chart = self.load("chart")

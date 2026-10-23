@@ -262,6 +262,8 @@ Window {
                 metric: root.detail.metric || ""
                 effect: root.detail.icon_effect || "off"
                 level: root.detail.effect_level === undefined ? null : root.detail.effect_level
+                intensity: root.detail.effect_intensity === undefined ? 0.5 : root.detail.effect_intensity
+                speed: root.detail.effect_speed === undefined ? 1 : root.detail.effect_speed
                 available: root.detail.available === true && Number.isFinite(root.detail.numeric_value)
                 motionEnabled: root.barState.motionEnabled === true
             }

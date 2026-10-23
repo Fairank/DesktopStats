@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.22.0-preview.1",
-  "archive_root": "DesktopStats-0.22.0-preview.1-source/",
+  "version": "0.23.0-preview.1",
+  "archive_root": "DesktopStats-0.23.0-preview.1-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 7089,
-      "sha256": "180b7bba1cfcc725f7ef4bb0e7ffc82ea0dc04b0ba7eb8a2142bfb021adf2d51"
+      "bytes": 8322,
+      "sha256": "66dd39e04d2a42930b761de53b5439ee005861a9f96c606e0927c49cb6a4fb37"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 7493,
-      "sha256": "a6b418073884bada7af0af30e3c870b16869768e5740697f4c43a4b1c8dabd33"
+      "bytes": 8341,
+      "sha256": "6ddbb421b4f8313ecb87e939c48eca4381b16b956d6ba4586b708c4f87089681"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -428,6 +428,16 @@
       "sha256": "29bd2367df36e2b73f082954ac5d9aaf8786cb88d028be0969069d413f4f169b"
     },
     {
+      "path": "assets/showcase/top-bar-design-settings.png",
+      "bytes": 395369,
+      "sha256": "e16c6fd21ee25e19d7aa4fde527dab9ae5833b0febd35c6b150ac91f17e18594"
+    },
+    {
+      "path": "assets/showcase/top-bar-designs.png",
+      "bytes": 117891,
+      "sha256": "6bae06916a4fcae54c08f3635ae427d16c343db3708bbba61c925438a205c5a3"
+    },
+    {
       "path": "assets/showcase/top-bar-groups.png",
       "bytes": 297038,
       "sha256": "39119832b225c7ec2836adc2113d6cb677bf3f5f0611792ae27fb2daf8b91ce3"
@@ -504,8 +514,8 @@
     },
     {
       "path": "docs/USER_GUIDE.md",
-      "bytes": 37252,
-      "sha256": "785b619742bd6a121e49381dabda651f3ddd6d9d43ef73ed268d28ad1b6dcab5"
+      "bytes": 38112,
+      "sha256": "7737db4146375ba3494061067d5c3012ac6e9dd6e4486d8e4d6558cf2b4e4fef"
     },
     {
       "path": "energy_sensor.py",
@@ -869,8 +879,8 @@
     },
     {
       "path": "localization.py",
-      "bytes": 6489,
-      "sha256": "7079ea9904c5bc2394109d0bbe8c525bd83a277610a8fcbd567091643404abb1"
+      "bytes": 7427,
+      "sha256": "54f58ae7db652684f5950559f02e4a8aed610681afd49d6807139051e81341ff"
     },
     {
       "path": "magnet_layout.py",
@@ -999,8 +1009,8 @@
     },
     {
       "path": "native/MetricIcon.qml",
-      "bytes": 3958,
-      "sha256": "344e4e4224d5744d0c2ce509242f8fc2812ca73cd3cad3e3792329042fed180a"
+      "bytes": 4903,
+      "sha256": "4a8006a1fcd1a4c24935f227402e603682fed1594c2bad64bbe922168f4c2f89"
     },
     {
       "path": "native/OptionTabs.qml",
@@ -1064,43 +1074,48 @@
     },
     {
       "path": "native/TopBar.qml",
-      "bytes": 10438,
-      "sha256": "0a259dfcaa7ca42defd498328ac46d7135bb213c2903fab259d52fa6a2c416b3"
+      "bytes": 11143,
+      "sha256": "29cf7e3a7aeb44f7831d449feb5296ef59878bd665face73aa3a460fa6a4f8ce"
+    },
+    {
+      "path": "native/TopBarChrome.qml",
+      "bytes": 2855,
+      "sha256": "a0dfbb7eba28f1930c8a045187f74e1a5caf9b63c00b2c82d9f65a11c52d0408"
     },
     {
       "path": "native/TopBarDetails.qml",
-      "bytes": 60088,
-      "sha256": "9a96933623e507819304300b4c6d9a0f9c5f6007592479457e1e1b6b9a46ce34"
+      "bytes": 60290,
+      "sha256": "13343182e740032e0b719ee420bea08e8aae6bc5c27d8c8fcbc867a132d8a7c6"
     },
     {
       "path": "native/TopBarGroupContent.qml",
-      "bytes": 2175,
-      "sha256": "d8ec55a3939f207dce9d05876a471fd51632f91ea8f846ee61ba166bee1e2d65"
+      "bytes": 2757,
+      "sha256": "20a6656d4df82cefb4b539455f7ac21085d7ec69d255e1689aa11eaf2fd4f65f"
     },
     {
       "path": "native/TopBarItemInspector.qml",
-      "bytes": 28135,
-      "sha256": "6f69c56963ed5b1ac5cc5503eb51057a682d64057e56c0f2964893ba3d3a0a23"
+      "bytes": 30982,
+      "sha256": "fe304093bf108ed470d72c943d7724db26d3c3469fc2ce9621d8d8bfbd38c68d"
     },
     {
       "path": "native/TopBarMetricContent.qml",
-      "bytes": 13072,
-      "sha256": "e5a78b269297d809f9f6736bb9751ae889b0346c4a264ee6103ec51c2bd7d12c"
+      "bytes": 16339,
+      "sha256": "9c4aebadee650ec4570e1ce005614023cb862fb0616b48f44096aed84a141670"
     },
     {
       "path": "native/TopBarPreviewStrip.qml",
-      "bytes": 11906,
-      "sha256": "34850e5a79d6f40984fa6c5e28fecdf50a48741fc0410f9ac61ede698dfc7f61"
+      "bytes": 13430,
+      "sha256": "dc3c0fc92c6f4ba4a3c370dd1856a6146fefa155bc3bec11af015fe8f639c378"
     },
     {
       "path": "native/TopBarSettings.qml",
-      "bytes": 32572,
-      "sha256": "96797f92883000c0b5d6b32c66fc99743db5abc93be3cadac7bdeea11829e747"
+      "bytes": 37388,
+      "sha256": "60f934a05240870cc3f3739b8c47ff42c358090459868fd0b1775454d3be00a2"
     },
     {
       "path": "native/TrendChart.qml",
-      "bytes": 16572,
-      "sha256": "a85481a832511c6df5c0ee4f298ca46bf7dab7b89866973f4a4b168ee7649e5a"
+      "bytes": 17104,
+      "sha256": "78def112f660f951149764ba9b37312e1e4cda492fc8d115058eb29aba96e053"
     },
     {
       "path": "native/ValueSlider.qml",
@@ -1134,8 +1149,8 @@
     },
     {
       "path": "native_controller.py",
-      "bytes": 113611,
-      "sha256": "ca3bbde64582677d68c8128a8bce5dcccb713b2beb00d1fd04e6cf55a35015a7"
+      "bytes": 114472,
+      "sha256": "5f133eb8af5a57a58dd7223b2a112317db331c17500164469a271aace9031915"
     },
     {
       "path": "native_glass.py",
@@ -1185,7 +1200,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "c06bc0d74e1d73fc7d289e22bdaea5aeaa60b50a40a20f8dde23863311fbd7ee"
+      "sha256": "01491400420ec6e9804ed51c98b2f4601f650cd5ef9582de357aa0bcfc50e747"
     },
     {
       "path": "pyproject.toml",
@@ -1389,8 +1404,8 @@
     },
     {
       "path": "tests/test_history_qml.py",
-      "bytes": 25272,
-      "sha256": "74ad916a9933ae6e0e1d88991f25d6074089e656946d43756285ef84dafb1fe6"
+      "bytes": 27165,
+      "sha256": "6992f5b758d681a3a7f384d1e6176c55f2e658634e120ef4f9a7e11f04957c85"
     },
     {
       "path": "tests/test_history_recovery.py",
@@ -1619,8 +1634,8 @@
     },
     {
       "path": "tests/test_top_bar_action_ui.py",
-      "bytes": 15081,
-      "sha256": "f262803dfa6f9bad19eb3cb09b8576c449cdc213bbaa37328ebcfe53112d4f61"
+      "bytes": 16148,
+      "sha256": "9dd94f030e141c5902245ee18f507e3334d77917660de0631fc8047da48583ba"
     },
     {
       "path": "tests/test_top_bar_backdrop_host.py",
@@ -1636,6 +1651,21 @@
       "path": "tests/test_top_bar_cpu_effects_qml.py",
       "bytes": 17075,
       "sha256": "1d75f5151d8de89dc268a64617eb8c73bba182595b30de6e67330cc295a5e16d"
+    },
+    {
+      "path": "tests/test_top_bar_design_config.py",
+      "bytes": 7100,
+      "sha256": "8be5962b7c336837b901d0e27f28a67b7034a93e4fa9a6ab2363416c3fbb8bda"
+    },
+    {
+      "path": "tests/test_top_bar_design_content.py",
+      "bytes": 20534,
+      "sha256": "f57026068743891d7d92ae2f2e88a046930d7a00711d1940ce501af53e900ba3"
+    },
+    {
+      "path": "tests/test_top_bar_design_ui.py",
+      "bytes": 13813,
+      "sha256": "3bc25e590e7884541d429a44fad2f63d99d9e014add2f6c827b0ef0179f38617"
     },
     {
       "path": "tests/test_top_bar_detail_presentation.py",
@@ -1674,8 +1704,8 @@
     },
     {
       "path": "tests/test_top_bar_module_qml.py",
-      "bytes": 37540,
-      "sha256": "41ea094912cbeacafb0f63830818b476cb11cbd853307e0e2b6992364142c791"
+      "bytes": 38388,
+      "sha256": "342ef98cdae82b67ce1949666e8571aabbea314da32780232b4098ca53a3b99d"
     },
     {
       "path": "tests/test_top_bar_monitor_selection.py",
@@ -1709,8 +1739,8 @@
     },
     {
       "path": "tests/test_top_bar_upgrade.py",
-      "bytes": 7535,
-      "sha256": "d4b395bc9855e0ddc120d7d31957df2a0b84bf364ac977d80c30fa2c8d132a02"
+      "bytes": 7595,
+      "sha256": "4c40be3b2b07141d69cb904ce126346e4ee036067b121864ed11e7a24de392ad"
     },
     {
       "path": "tests/test_widget_blur.py",
@@ -1784,8 +1814,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 14905,
-      "sha256": "c5e23e96231da285aa926eb2623a62df4564a4a9c9b417f0248a1671058526fc"
+      "bytes": 15031,
+      "sha256": "f39e094c17f364c0c95d0f6c017acf43c118876c32c2afcd5d15156b4aaa4399"
     },
     {
       "path": "tools/build_collector.py",
@@ -1794,8 +1824,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 20008,
-      "sha256": "d09bb21715f4c5a18c7969d5f6596bb97df23c89d569712f0a70b5cdab929d27"
+      "bytes": 20121,
+      "sha256": "e8b8224066a60c4ad3f4d8f417adafe4c4b3788a953962e14a33252929169d17"
     },
     {
       "path": "tools/fetch_qt_licenses.py",
@@ -1844,8 +1874,8 @@
     },
     {
       "path": "top_bar_config.py",
-      "bytes": 7840,
-      "sha256": "a373a0fea6879d82798980cc878e29c6bedaacc2b89d881d500c1bea879aab2d"
+      "bytes": 8672,
+      "sha256": "113613d135210f61568892f0419eab50fd93b67f3ea053479c46a2ad04074098"
     },
     {
       "path": "top_bar_layout.py",

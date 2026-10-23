@@ -15,7 +15,7 @@ os.environ.setdefault("QT_QUICK_BACKEND", "software")
 
 from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QPointF, Qt, QUrl
 from PySide6.QtQml import QQmlComponent
-from PySide6.QtTest import QTest
+from PySide6.QtTest import QSignalSpy, QTest
 
 from tests import test_top_bar_groups_qml as groups
 
@@ -168,6 +168,29 @@ class TopBarActionUiTests(unittest.TestCase):
     def test_each_row_has_bounded_adjust_and_delete_and_can_undo_removal(self):
         self.resize(740, 700)
         self.click("nav_3")
+
+        def reveal_action(name):
+            # isVisible() does not include ancestor clipping. The GPU row is
+            # initially below this narrow viewport after the design selector.
+            scroll = self.item("topBarSettingsScroll")
+            for _ in range(12):
+                target = self.item(name)
+                local = target.mapToItem(scroll, QPointF())
+                if 4 <= local.y() and local.y() + target.height() <= scroll.height() - 4:
+                    break
+                self.wheel(
+                    scroll, -120 if local.y() + target.height() > scroll.height() - 4 else 120
+                )
+            scroll.property("contentItem").cancelFlick()
+            QTest.qWait(35)
+            target = self.item(name)
+            local = target.mapToItem(scroll, QPointF())
+            self.assertGreaterEqual(local.x(), 0, name)
+            self.assertLessEqual(local.x() + target.width(), scroll.width(), name)
+            self.assertGreaterEqual(local.y(), 4, name)
+            self.assertLessEqual(local.y() + target.height(), scroll.height() - 4, name)
+            return target
+
         for identifier in ("b_cpu_usage", "b_gpu_usage"):
             card = self.item("topBarItem_" + identifier)
             for action in ("Adjust", "Delete"):
@@ -178,18 +201,16 @@ class TopBarActionUiTests(unittest.TestCase):
                 self.assertGreaterEqual(left.x(), 0)
                 self.assertLessEqual(left.x() + button.width(), card.width() + 0.1)
                 self.assertLessEqual(left.y() + button.height(), card.height() + 0.1)
+        adjust = reveal_action("topBarItemAdjust_b_gpu_usage")
+        adjusted = QSignalSpy(adjust.clicked)
         self.click("topBarItemAdjust_b_gpu_usage")
+        self.assertEqual(adjusted.count(), 1)
         self.assertEqual(self.item("topBarSettings").property("selectedItem"), "b_gpu_usage")
         # Scroll back to the row after the narrow inspector reveal.
-        scroll = self.item("topBarSettingsScroll")
-        for _ in range(10):
-            target = self.item("topBarItemDelete_b_gpu_usage")
-            if 0 < target.mapToItem(scroll, target.boundingRect().center()).y() < scroll.height():
-                break
-            self.wheel(scroll, 240)
-        scroll.property("contentItem").cancelFlick()
-        QTest.qWait(30)
+        remove = reveal_action("topBarItemDelete_b_gpu_usage")
+        removed = QSignalSpy(remove.clicked)
         self.click("topBarItemDelete_b_gpu_usage")
+        self.assertEqual(removed.count(), 1)
         self.assertFalse(
             any(row["id"] == "b_gpu_usage" for row in self.ui._draft["top_bar"]["items"])
         )

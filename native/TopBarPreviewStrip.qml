@@ -11,9 +11,13 @@ ColumnLayout {
     property bool barEnabled: false
     property bool unapplied: false
     property var appearanceConfig: stats.draft
+    property bool sampleOnly:false
+    property bool interactivePreview:true
+    readonly property string barDesign:["classic","capsule","instrument"].includes(appearanceConfig.bar_design)?appearanceConfig.bar_design:"classic"
     readonly property bool darkMaterial: appearanceConfig.theme==="dark" || appearanceConfig.skin==="graphite"
     readonly property color barInk: appearanceConfig.skin==="glass" ? (darkMaterial?"#f5f6f8":"#1f242b") : (darkMaterial?"#f4f6f9":"#202833")
     readonly property color barMuted: appearanceConfig.skin==="glass" ? (darkMaterial?"#b8bdc7":"#303945") : (darkMaterial?"#b8c2cf":"#566272")
+    readonly property color barAccent:barInk.r>.5?"#67a8ff":"#006fe6"
     property bool freezeModel: false
     property string selectedId: ""
     property int shown: 0
@@ -110,7 +114,8 @@ ColumnLayout {
         model: root.displayRows
         onItemAdded: fit.restart()
         delegate: TopBarGroupContent {
-            motionEnabled:stats.motionEnabled
+            design:root.barDesign
+            motionEnabled:root.interactivePreview && stats.motionEnabled
             required property var modelData
             visible: false
             row: modelData
@@ -120,9 +125,10 @@ ColumnLayout {
         }
     }
     RowLayout {
+        visible:!root.sampleOnly
         Layout.fillWidth: true
         Text {
-            objectName: "topBarPreviewState"
+            objectName: root.sampleOnly?root.objectName+"State":"topBarPreviewState"
             Layout.fillWidth: true
             text: !root.barEnabled ? ui.t("预览 · 未启用") : root.unapplied ? ui.t("预览 · 尚未应用") : ui.t("布局预览")
             textFormat: Text.PlainText
@@ -141,7 +147,7 @@ ColumnLayout {
     }
     Item {
         id: strip
-        objectName: "topBarAppearancePreview"
+        objectName: root.sampleOnly?root.objectName+"Strip":"topBarAppearancePreview"
         Layout.fillWidth: true
         implicitHeight: root.barHeight
         MaterialSurface {
@@ -150,6 +156,8 @@ ColumnLayout {
             frosted: stats.coatingAllowed
             cornerRadius: 0
         }
+        TopBarChrome {objectName:root.sampleOnly?root.objectName+"BandChrome":"topBarPreviewBandChrome";anchors.fill:parent;role:"band";design:root.barDesign;ink:root.barInk;accent:root.barAccent}
+        TopBarChrome {x:8;width:Math.max(root.barHeight,24);height:root.barHeight;role:"menu";design:root.barDesign;ink:root.barInk;accent:root.barAccent}
         Image {
             x: 8 + (Math.max(root.barHeight, 24) - width) / 2
             anchors.verticalCenter: parent.verticalCenter
@@ -160,9 +168,10 @@ ColumnLayout {
         component PreviewMetric: ToolButton {
             id: metric
             required property var modelData
-            objectName: "topBarPreviewMetric_" + modelData.id
+            objectName: root.sampleOnly?root.objectName+"Metric_"+modelData.id:"topBarPreviewMetric_"+modelData.id
             width: root.rowWidth(modelData)
             height: root.barHeight
+            enabled:root.interactivePreview
             padding: 0
             Accessible.name: (modelData.grouped?modelData.group_label:modelData.label) + " " + (modelData.grouped?modelData.group_value:modelData.value)
             onClicked: root.selected(modelData.id)
@@ -178,7 +187,8 @@ ColumnLayout {
             }
             contentItem: Item {
                 TopBarGroupContent {
-                    motionEnabled:stats.motionEnabled
+                    design:root.barDesign
+                    motionEnabled:root.interactivePreview && stats.motionEnabled
                     anchors.left: parent.left
                     anchors.leftMargin: 6
                     anchors.verticalCenter: parent.verticalCenter
@@ -187,12 +197,13 @@ ColumnLayout {
                     ink: root.barInk; muted: root.barMuted; fontFamily: ui.fontFamily
                 }
             }
-            background: Rectangle {
+            background: TopBarChrome {
+                objectName:root.sampleOnly?root.objectName+"MetricChrome_"+metric.modelData.id:"topBarPreviewMetricChrome_"+metric.modelData.id
                 anchors.fill: parent
-                anchors.margins: 2
-                radius: 5
-                color: metric.modelData.id === root.selectedId ? ui.cardSelected : previewMouse.containsMouse ? ui.hover : "transparent"
-                border.width:metric.activeFocus?1:0;border.color:ui.accent
+                design:root.barDesign;ink:root.barInk;accent:root.barAccent
+                selected:metric.modelData.id===root.selectedId
+                hovered:previewMouse.containsMouse;pressed:previewMouse.pressed
+                focused:metric.activeFocus;dragged:root.dragging && root.draggedId===metric.modelData.id
             }
             MouseArea {
                 id:previewMouse;anchors.fill:parent;hoverEnabled:true;cursorShape:root.dragging?Qt.ClosedHandCursor:Qt.OpenHandCursor
@@ -217,10 +228,11 @@ ColumnLayout {
             spacing: root.itemSpacing
             Repeater { id:rightMetrics;model: root.rightRows; delegate: PreviewMetric {} }
             ToolButton {
-                objectName: "topBarPreviewOverflow"
+                objectName: root.sampleOnly?root.objectName+"Overflow":"topBarPreviewOverflow"
                 visible: root.hiddenCount > 0
                 width: root.overflowWidth(root.hiddenCount)
                 height: root.barHeight
+                enabled:root.interactivePreview
                 padding: 0
                 Accessible.name: ui.t("更多指标")
                 onClicked: if (root.hiddenCount > 0) root.selected(root.displayRows[root.shown].id)
@@ -232,10 +244,10 @@ ColumnLayout {
                     color: root.barInk
                     font: overflowFont.font
                 }
-                background: Rectangle { radius: 5; color: parent.hovered ? ui.hover : "transparent" }
+                background: TopBarChrome {objectName:root.sampleOnly?root.objectName+"OverflowChrome":"topBarPreviewOverflowChrome";role:"overflow";design:root.barDesign;ink:root.barInk;accent:root.barAccent;hovered:parent.hovered;pressed:parent.down;focused:parent.activeFocus}
             }
         }
-        Rectangle {objectName:"topBarPreviewInsertion";visible:root.dragging && !!root.dropPlacement;x:Math.max(1,Math.min(strip.width-2,root.insertionX));y:3;width:2;height:strip.height-6;radius:1;color:ui.accent}
+        Rectangle {objectName:root.sampleOnly?root.objectName+"Insertion":"topBarPreviewInsertion";visible:root.dragging && !!root.dropPlacement;x:Math.max(1,Math.min(strip.width-2,root.insertionX));y:3;width:2;height:strip.height-6;radius:1;color:ui.accent}
     }
-    Text {Layout.fillWidth:true;text:ui.t("拖动预览中的指标也可排序。");textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+    Text {Layout.fillWidth:true;visible:!root.sampleOnly;text:ui.t("拖动预览中的指标也可排序。");textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
 }
