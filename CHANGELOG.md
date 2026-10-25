@@ -1,5 +1,21 @@
 # Changes
 
+## 0.26.0-preview.1
+
+- Recover hidden or minimized menu-bar details on the next click or hover.
+  A retained pinned record no longer counts as a visible window. Clear only
+  the failed request's own unpublished state, so a creation failure can retry.
+- Guard detail replacement and delayed placement by request generation as
+  well as window identity. An earlier callback or exception cannot close or
+  retarget the newer metric, even when both requests reuse the same window.
+- Invalidate old fullscreen observations only after a verified replacement
+  Shell process. Keep the guard for same-process display-scaling broadcasts
+  and unavailable metadata; apply fresh registration-time notifications before
+  showing the bar. No polling or user-window content inspection is added.
+- Add a bounded, read-only detail diagnostic snapshot to local status replies.
+  Distinguish fullscreen suppression, pending hover, and actual host/client
+  visibility without collecting metric readings or creating a window.
+
 ## 0.25.0-preview.2
 
 - Separate thermometer feedback from processor overload effects. Temperature

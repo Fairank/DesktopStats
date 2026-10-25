@@ -414,10 +414,17 @@ class AppBarSession:
         if self._registered:
             self.needs_relayout = True
 
-    def shell_recreated(self, epoch):
-        """Only for a verified new Shell generation. Duplicate epochs are no-ops."""
+    def shell_recreated(self, epoch, *, invalidate_fullscreen=False):
+        """Re-register once per epoch; only verified process changes discard state.
+
+        A TaskbarCreated broadcast can be a same-Shell DPI change. The caller
+        must explicitly prove a different known Shell process identity before
+        passing invalidate_fullscreen=True. New notifications remain the
+        caller's responsibility before first show.
+        """
         self._guard()
         _require(type(epoch) is int and epoch > 0, "Positive Shell generation required")
+        _require(type(invalidate_fullscreen) is bool, "Explicit fullscreen invalidation required")
         if epoch <= self._shell_epoch:
             return self._result(self._state == "READY")
         _require(self._claimed and self._monitor is not None, "No retained AppBar to recreate")
@@ -427,6 +434,8 @@ class AppBarSession:
             self.backend.shell_registration_lost(self.token, self._owner)
             self._registered = False
             self._shell_epoch = epoch
+            if invalidate_fullscreen:
+                self._fullscreen = False
             return self._reserve(self._monitor, self._dpi, self._height_dip)
         except Exception as error:
             return self._fail(error)

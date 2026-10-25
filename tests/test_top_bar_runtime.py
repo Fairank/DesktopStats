@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QMetaObject, QObject, QPoint, QPointF, QRect, Qt, Signal
+from PySide6.QtCore import QMetaObject, QObject, QPoint, QPointF, QRect, Qt, QTimer, Signal
 from PySide6.QtGui import QFont, QFontDatabase, QWheelEvent
 from PySide6.QtQml import QQmlEngine, qmlRegisterType
 from PySide6.QtQuickControls2 import QQuickStyle
@@ -227,6 +227,9 @@ class Window:
 
     def height(self):
         return self._height
+
+    def isVisible(self):
+        return self.visible
 
     def deleteLater(self):
         self.deleted = True
@@ -529,6 +532,93 @@ class TopBarRuntimeTests(unittest.TestCase):
         self.assertEqual(self.manager._panel["item"], "b_0")
         self.manager.click("DISPLAY1", "b_0")
         self.assertIsNone(self.manager._panel)
+
+    def test_first_click_recovers_a_hidden_pinned_record_instead_of_only_closing_it(self):
+        self.manager.apply(config())
+        self.manager.click("DISPLAY1", "b_0")
+        old = self.manager._panel
+        old["window"].visible = False  # Shell/Qt can hide a retained owned HWND.
+        self.manager.click("DISPLAY1", "b_0")
+        panel = self.manager._panel
+        self.assertIsNotNone(panel)
+        self.assertTrue(panel["pinned"])
+        self.assertTrue(panel["window"].isVisible())
+        self.assertEqual(panel["item"], "b_0")
+        self.assertEqual(panel["host"].state._detail["mode"], "pinned")
+        self.manager.click("DISPLAY1", "b_0")
+        self.assertIsNone(self.manager._panel)  # A genuinely visible pin still toggles.
+
+    def _assert_failed_detail_open_clears_own_state_and_can_retry(self, stage):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        owner, method = {
+            "create": (self.manager, "_make_window"),
+            "material": (self.manager, "_material_bridge"),
+            "prepare": (self.adapter, "prepare"),
+            "show": (self.adapter, "show"),
+        }[stage]
+        with patch.object(owner, method, side_effect=AppBarError("synthetic " + stage)):
+            self.manager.click("DISPLAY1", "b_0")
+        self.assertIsNone(self.manager._panel)
+        self.assertEqual(host.state._detail, {}, "A failed open must not claim a pinned item")
+        self.assertEqual(self.manager.retired, [])
+        self.assertTrue(any("synthetic " + stage in error for error in self.manager._errors))
+        self.manager.click("DISPLAY1", "b_0")
+        self.assertIsNotNone(self.manager._panel)
+        self.assertTrue(self.manager._panel["window"].isVisible())
+        self.assertEqual(host.state._detail["id"], "b_0")
+        self.assertEqual(host.state._detail["mode"], "pinned")
+
+    def test_detail_create_failure_clears_pinned_feedback_and_allows_retry(self):
+        self._assert_failed_detail_open_clears_own_state_and_can_retry("create")
+
+    def test_detail_material_failure_clears_pinned_feedback_and_allows_retry(self):
+        self._assert_failed_detail_open_clears_own_state_and_can_retry("material")
+
+    def test_detail_prepare_failure_clears_pinned_feedback_and_allows_retry(self):
+        self._assert_failed_detail_open_clears_own_state_and_can_retry("prepare")
+
+    def test_detail_show_failure_clears_pinned_feedback_and_allows_retry(self):
+        self._assert_failed_detail_open_clears_own_state_and_can_retry("show")
+
+    def test_failed_outer_creation_cannot_clear_a_reentrant_replacement_panel(self):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        original = self.manager._make_window
+
+        def create(kind, state, screen, pinned):
+            self.manager._make_window = original  # Only the outer construction fails.
+            self.manager.click("DISPLAY1", "b_1")
+            raise AppBarError("synthetic outer constructor failure")
+
+        with patch.object(self.manager, "_make_window", side_effect=create):
+            self.manager.click("DISPLAY1", "b_0")
+        panel = self.manager._panel
+        self.assertIsNotNone(panel)
+        self.assertTrue(panel["window"].isVisible())
+        self.assertEqual(panel["item"], "b_1")
+        self.assertEqual(host.state._detail["id"], "b_1")
+        self.assertEqual(host.state._detail["mode"], "pinned")
+        self.assertEqual(self.manager.retired, [])
+
+    def test_reentrant_detail_publication_cannot_retarget_the_newer_panel(self):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        events = []
+
+        def replace_request():
+            if not events:
+                events.append("newer request")
+                self.manager.click("DISPLAY1", "b_1")
+
+        host.state.detailChanged.connect(replace_request)
+        self.manager.click("DISPLAY1", "b_0")
+        panel = self.manager._panel
+        self.assertIsNotNone(panel)
+        self.assertTrue(panel["window"].isVisible())
+        self.assertEqual(panel["item"], "b_1")
+        self.assertEqual(host.state._detail["id"], "b_1")
+        self.assertEqual(events, ["newer request"])
 
     def test_overflow_details_contains_every_hidden_metric_and_no_duplicate_units(self):
         self.a.physical = PixelRect(0, 0, 500, 800)
@@ -1783,6 +1873,97 @@ class QmlTopBarTests(unittest.TestCase):
         QTest.qWait(5)
         self.assertEqual(self.settings, ["__top_bar__"])
         self.assertIsNone(self.manager._panel)
+
+    def test_actual_hover_recovers_a_hidden_pinned_detail_without_an_extra_click(self):
+        QTest.mouseClick(self.host.window, Qt.LeftButton, Qt.NoModifier, self.point())
+        old = self.manager._panel
+        self.assertIsNotNone(old)
+        self.assertTrue(old["pinned"])
+        old["window"].hide()
+        self.assertIs(self.manager._panel, old)
+        QTest.mouseMove(self.host.window, QPoint(-10, -10))
+        QTest.mouseMove(self.host.window, self.point())
+        for _ in range(100):
+            panel = self.manager._panel
+            if panel is not None and panel is not old and panel["window"].isVisible():
+                break
+            QTest.qWait(10)
+        panel = self.manager._panel
+        self.assertIsNotNone(panel, self.manager._errors)
+        self.assertIsNot(panel, old)
+        self.assertFalse(panel["pinned"])
+        self.assertEqual(panel["item"], "b_0")
+        self.assertTrue(panel["window"].isVisible())
+        self.assertTrue(panel["window"].flags() & Qt.WindowDoesNotAcceptFocus)
+        self.assertEqual(self.host.state._detail["mode"], "hover")
+        QTest.qWait(300)
+        self.assertIs(self.manager._panel, panel)
+        self.assertTrue(panel["window"].isVisible())
+
+    def _assert_actual_reentrant_switch_keeps_the_same_visible_record(self, stage):
+        QTest.mouseClick(self.host.window, Qt.LeftButton, Qt.NoModifier, self.point())
+        QTest.qWait(20)  # Settle the first open before injecting another operation.
+        panel = self.manager._panel
+        self.assertIsNotNone(panel)
+        self.assertTrue(panel["window"].isVisible())
+        events = []
+        original_place, original_show = self.adapter.place_panel, self.adapter.show
+
+        def switch_to_newer_item():
+            events.append(stage)
+            QTest.mouseClick(self.host.window, Qt.LeftButton, Qt.NoModifier, self.point("b_1"))
+            self.assertIs(self.manager._panel, panel, "The callback must really reuse the existing record")
+            self.assertEqual(panel["item"], "b_1")
+
+        def place(binding, anchor, work, dpi):
+            original_place(binding, anchor, work, dpi)
+            if not events:
+                switch_to_newer_item()
+                if stage == "deferred":
+                    raise AppBarError("synthetic obsolete deferred placement failure")
+
+        def show(binding, *, activate=False):
+            original_show(binding, activate=activate)
+            if not events:
+                switch_to_newer_item()
+
+        if stage == "show":
+            self.adapter.show = show
+        else:
+            self.adapter.place_panel = place
+        if stage == "deferred":
+            sequence = self.manager._detail_serial
+            QTimer.singleShot(0, lambda: self.manager._position_panel_safely(panel, sequence))
+        else:
+            # A different visible item starts the outer request; b_1 supersedes it.
+            QTest.mouseClick(self.host.window, Qt.LeftButton, Qt.NoModifier, self.point("b_2"))
+        for _ in range(100):
+            if events:
+                break
+            QTest.qWait(10)
+        QTest.qWait(25)
+        self.assertEqual(events, [stage])
+        self.assertIs(self.manager._panel, panel)
+        self.assertEqual(panel["item"], "b_1")
+        self.assertEqual(self.host.state._detail["id"], "b_1")
+        self.assertTrue(panel["pinned"] and panel["window"].isVisible())
+        self.assertEqual(panel["window"].findChild(QObject, "topBarDetailValue").property("text"), "21%")
+        if stage == "deferred":
+            self.assertTrue(any("obsolete deferred placement" in error for error in self.manager._errors))
+        else:
+            self.assertEqual(self.manager._errors, [])
+        QTest.qWait(300)
+        self.assertIs(self.manager._panel, panel)
+        self.assertTrue(panel["window"].isVisible())
+
+    def test_actual_placement_reentry_cannot_close_the_newer_item_on_the_same_record(self):
+        self._assert_actual_reentrant_switch_keeps_the_same_visible_record("placement")
+
+    def test_actual_show_reentry_cannot_close_the_newer_item_on_the_same_record(self):
+        self._assert_actual_reentrant_switch_keeps_the_same_visible_record("show")
+
+    def test_actual_deferred_placement_exception_cannot_close_newer_item_on_same_record(self):
+        self._assert_actual_reentrant_switch_keeps_the_same_visible_record("deferred")
 
     def test_actual_bar_to_details_pointer_region_and_keyboard_escape(self):
         self.hover_until_open(self.point())

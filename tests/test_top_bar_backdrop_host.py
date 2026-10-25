@@ -288,6 +288,52 @@ class DetailHostIntegrationTests(unittest.TestCase):
         self.assertTrue(state.detailCoatingTranslucent)
         self.assertEqual(state.materialReports["details"]["material"], "desktop-acrylic")
 
+    def _assert_first_click_recovers_retained_panel(self, state):
+        point = self.case.point()
+        QTest.mouseClick(self.case.host.window, Qt.LeftButton, Qt.NoModifier, point)
+        self.assertIsNotNone(self.manager._panel, self.manager._errors)
+        old_host, old_quick = self.hosts[-1]
+        QTest.qWait(20)
+        self.assertTrue(old_host.isVisible() and old_quick.isVisible())
+        if state == "host-hidden":
+            old_host.hide()
+            self.assertFalse(old_host.isVisible())
+        elif state == "client-hidden":
+            old_quick.hide()
+            # The production host mirrors its child's hidden state synchronously.
+            self.assertFalse(old_host.isVisible())
+            self.assertFalse(old_quick.isVisible())
+        else:
+            old_host.setWindowState(Qt.WindowMinimized)
+            self.assertEqual(old_host.windowState(), Qt.WindowMinimized)
+        QTest.mouseClick(self.case.host.window, Qt.LeftButton, Qt.NoModifier, point)
+        self.assertIsNotNone(self.manager._panel, self.manager._errors)
+        panel = self.manager._panel
+        host = panel["window"]
+        quick = host.quick_client
+        QTest.qWait(35)
+        self.assertTrue(panel["pinned"])
+        self.assertTrue(host.isVisible())
+        self.assertTrue(quick.isVisible())
+        self.assertNotEqual(host.windowState(), Qt.WindowMinimized)
+        self.assertEqual(host.size(), quick.size())
+        self.assertEqual(self.case.host.state._detail["mode"], "pinned")
+        self.assertEqual(self.manager.retired, [])
+        QTest.qWait(300)
+        self.assertIs(self.manager._panel, panel)
+        self.assertTrue(host.isVisible() and quick.isVisible())
+        QTest.mouseClick(self.case.host.window, Qt.LeftButton, Qt.NoModifier, point)
+        self.assertIsNone(self.manager._panel)
+
+    def test_first_real_click_recovers_a_hidden_pinned_raster_host(self):
+        self._assert_first_click_recovers_retained_panel("host-hidden")
+
+    def test_first_real_click_recovers_a_hidden_quick_child_and_its_raster_host(self):
+        self._assert_first_click_recovers_retained_panel("client-hidden")
+
+    def test_first_real_click_recovers_a_minimized_pinned_raster_host(self):
+        self._assert_first_click_recovers_retained_panel("minimized")
+
     def test_dynamic_content_size_and_close_do_not_leave_an_empty_host(self):
         # Leave genuine height headroom for this first assertion. The complete
         # trend/summary layout can already reach the 480-DIP work-area cap, in

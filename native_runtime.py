@@ -1260,6 +1260,20 @@ class LocalServer(QLocalServer):
                 self.runtime.diagnose(message["path"])
                 response = {"ok": True}
             elif self.runtime and action == "status":
+                try:
+                    manager = getattr(self.runtime, "top_bar", None)
+                    snapshot = getattr(manager, "detail_diagnostics", None)
+                    top_bar_details = snapshot() if callable(snapshot) else {
+                        "available": False,
+                        "errors": [{"scope": "snapshot", "code": "manager_unavailable"}],
+                    }
+                except Exception:
+                    # A deleted Qt wrapper must not hide the basic status used
+                    # by the existing exact-identity, clean-exit safeguards.
+                    top_bar_details = {
+                        "available": False,
+                        "errors": [{"scope": "snapshot", "code": "snapshot_failed"}],
+                    }
                 response = {
                     "ok": True,
                     "version": self.runtime.controller.version,
@@ -1270,6 +1284,7 @@ class LocalServer(QLocalServer):
                     or bool(self.runtime.settings.property("pendingEdits")),
                     "pid": os.getpid(),
                     "top_bar": dict(self.runtime.controller._top_bar_status),
+                    "top_bar_details": top_bar_details,
                     "settings_material": dict(self.runtime.controller._material),
                     "settings_material_context": (
                         self.runtime.settings_material.status()

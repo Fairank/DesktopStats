@@ -334,6 +334,54 @@ class AppBarTests(unittest.TestCase):
         self.assertTrue(self.session.notify_window_position().ok)
         self.assertEqual(self.windows.calls[-1][0], bars.ABM_WINDOWPOSCHANGED)
 
+    def test_recreation_preserves_fullscreen_unless_explicit_new_shell_invalidation(self):
+        self.assertTrue(self.session.register(self.monitor).ready)
+        self.assertTrue(self.session.fullscreen(True).ok)
+        self.windows.registered = False
+        # Same Shell/DPI broadcast and unknown identity preserve fullscreen.
+        result = self.session.shell_recreated(1)
+        self.assertTrue(result.ready)
+        self.assertTrue(result.fullscreen)
+        self.assertEqual(self.windows.moves[-1][0], 1)
+        self.windows.registered = False
+        # Only a caller-proven different known Shell process permits reset.
+        result = self.session.shell_recreated(2, invalidate_fullscreen=True)
+        self.assertTrue(result.ready)
+        self.assertFalse(result.fullscreen)
+        self.assertEqual(self.windows.moves[-1][0], c.c_void_p(-1).value)
+        self.assertTrue(self.session.fullscreen(True).ok)  # New Shell notification.
+        self.assertTrue(self.session._fullscreen)
+        self.assertTrue(self.session.fullscreen(False).ok)
+        self.assertFalse(self.session._fullscreen)
+
+    def test_duplicate_epoch_and_position_relayout_cannot_clear_current_fullscreen(self):
+        self.assertTrue(self.session.register(self.monitor).ready)
+        self.windows.registered = False
+        self.assertTrue(self.session.shell_recreated(1).ready)
+        self.assertTrue(self.session.fullscreen(True).ok)
+        count = len(self.windows.calls)
+        self.assertTrue(self.session.shell_recreated(1, invalidate_fullscreen=True).fullscreen)
+        self.assertEqual(len(self.windows.calls), count)
+        self.assertTrue(self.session.relayout(dpi=144).fullscreen)
+        self.assertTrue(self.session._fullscreen)
+        self.assertEqual(self.windows.moves[-1][0], 1)
+
+    def test_invalid_recreation_flag_has_no_native_effect_and_failure_retains_cleanup(self):
+        self.assertTrue(self.session.register(self.monitor).ready)
+        self.assertTrue(self.session.fullscreen(True).ok)
+        count = len(self.windows.calls)
+        with self.assertRaises(bars.AppBarError):
+            self.session.shell_recreated(1, invalidate_fullscreen=1)
+        self.assertEqual(len(self.windows.calls), count)
+        self.assertTrue(self.session._fullscreen)
+        self.windows.registered = False
+        self.windows.fail_message = bars.ABM_NEW
+        result = self.session.shell_recreated(1, invalidate_fullscreen=True)
+        self.assertFalse(result.ok)
+        self.assertTrue(result.cleanup_complete)
+        self.assertFalse(self.windows.visible)
+        self.assertFalse(self.session._registered)
+
     def test_invalid_request_and_cross_thread_call_have_no_new_native_effect(self):
         for kwargs in (
             dict(dpi=True),
