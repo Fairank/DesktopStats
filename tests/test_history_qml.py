@@ -84,6 +84,7 @@ class HistoryController(QObject):
         self.reject_recording = False
         self.requests = []
         self.actions = []
+        self.status_reads = 0
         self.response = synthetic_history()
         self.options = [
             dict(id="cpu:local", label="CPU 使用率", unit="%", device_id="local", scope="cpu", device_label="本机处理器", icon="cpu", available=True),
@@ -98,7 +99,10 @@ class HistoryController(QObject):
     material = Property("QVariantMap", lambda self: {}, constant=True)
     motionEnabled = Property(bool, lambda self: False, constant=True)
     historyMetricChoices = Property("QVariantList", lambda self: self.options, notify=historyOptionsChanged)
-    historyStatus = Property("QVariantMap", lambda self: self.status, notify=historyChanged)
+    @Property("QVariantMap", notify=historyChanged)
+    def historyStatus(self):
+        self.status_reads += 1
+        return self.status
     historyRecording = Property(bool, lambda self: self.recording, notify=historyRecordingChanged)
 
     @Slot(str, str, result="QVariantMap")
@@ -254,6 +258,45 @@ Window {id:scene;width:%d;height:%d;visible:false;color:stats.theme==="dark"?"#2
             self.controller.historyChanged.emit()
         QTest.qWait(150)
         self.assertEqual(len(self.controller.requests), before)
+
+    def test_inactive_hidden_and_minimized_history_do_not_read_store_status(self):
+        page = self.load()
+        self.assertTrue(page.property("uiActive"))
+        self.assertGreater(self.controller.status_reads, 0)
+        timer = self.find("historyRefreshTimer")
+
+        def check_quiet():
+            QTest.qWait(20)
+            before = self.controller.status_reads
+            self.controller.requests.clear()
+            for _ in range(40):
+                self.controller.historyChanged.emit()
+            QTest.qWait(35)
+            self.assertFalse(page.property("uiActive"))
+            self.assertFalse(timer.property("running"))
+            self.assertEqual(self.controller.status_reads, before)
+            self.assertEqual(self.controller.requests, [])
+            self.assertEqual(self.controller.actions, [])
+
+        page.setProperty("active", False)
+        check_quiet()
+        page.setProperty("period", "1h")
+        page.setProperty("active", True)
+        QTest.qWait(35)
+        self.assertTrue(page.property("uiActive"))
+        self.assertEqual(self.controller.requests[-1], ("cpu:local", "1h"))
+        self.window.hide()
+        check_quiet()
+        self.window.show()
+        QTest.qWait(35)
+        self.assertTrue(page.property("uiActive"))
+        self.window.showMinimized()
+        check_quiet()
+        self.window.showNormal()
+        QTest.qWait(35)
+        self.assertTrue(page.property("uiActive"))
+        self.assertTrue(timer.property("running"))
+        self.assertEqual(self.controller.requests[-1], ("cpu:local", "1h"))
 
     def test_range_toggle_and_recording_use_only_their_explicit_actions(self):
         self.load()

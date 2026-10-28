@@ -175,12 +175,14 @@ class TopBarDiagnosticsTests(unittest.TestCase):
         self.assertEqual(state["session_active_count"], 1)
         self.assertEqual(state["pending_enter_count"], 1)
         self.assertEqual(state["pending_exit_count"], 1)
+        self.assertEqual(state["policy"], "window_order_only")
+        self.assertIs(state["blocks_user_details"], False)
         self.host.session._fullscreen = False
         self.manager._notifications = {"a": {"fullscreen": False}}
         self.manager._dispatching_fullscreen = False
         self.assertIs(self.read()["fullscreen"]["effective"], False)
 
-    def test_unknown_or_uninspected_fullscreen_state_does_not_claim_safe_admission(self):
+    def test_unknown_or_uninspected_fullscreen_state_does_not_claim_known_ordering(self):
         self.host.session._fullscreen = "not a boolean"
         self.assertIsNone(self.read()["fullscreen"]["effective"])
         self.host.session._fullscreen = False
@@ -213,7 +215,9 @@ class TopBarDiagnosticsTests(unittest.TestCase):
     def test_last_attempt_is_a_small_allowlisted_record_not_raw_exception_or_paths(self):
         self.manager._detail_attempt = dict(seq=41, kind="click", phase="prepare_native",
                                            outcome="failed", reason="operation_failed",
-                                           error="private exception", path="C:/private/settings.json")
+                                           error="private exception", path="C:/private/settings.json",
+                                           publication={"device": "private device", "value": object()},
+                                           cancelled_hover=True)
         expected = dict(seq=41, kind="click", phase="prepare_native", outcome="failed", reason="operation_failed")
         self.assertEqual(self.read()["last_attempt"], expected)
         self.manager._detail_attempt.update(seq=2**63, kind="C:/private", phase="traceback",

@@ -2513,14 +2513,18 @@ class Controller(WorkspaceTools):
 
     @Slot(dict)
     def receive(self, data):
-        inventory = copy.deepcopy(self._devices)
+        inventory_changes = {}
         for scope in ("gpus", "networks", "disks", "volumes", "storages"):
             if scope in data:
-                inventory[scope] = {
+                labels = {
                     key: dict(label=value.get("label", key)) for key, value in data[scope].items()
                 }
-        if inventory != self._devices:
-            self._devices = inventory
+                if labels != self._devices.get(scope):
+                    inventory_changes[scope] = labels
+        if inventory_changes:
+            # Live values change far more often than device labels. Retain the
+            # unchanged scopes instead of recursively copying the whole tree.
+            self._devices = {**self._devices, **inventory_changes}
             self.devicesChanged.emit()
         # Keep the full discovery tree out of every 100 Hz QML paint/history
         # conversion. Only bound readings go to desktop cards; the virtualized

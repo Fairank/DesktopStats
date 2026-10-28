@@ -31,7 +31,6 @@ Item {
     property real displayedSpin: 0
     property real displayedTemperature: 0
     property real loadPhase: 0
-    property real thermalPhase: 0
     property real thermalArcPhase: 0
     property real energyPhase: 0
     property real inboundPhase: 0
@@ -138,7 +137,7 @@ Item {
     readonly property real feedbackStrength: intensity * activityStrength
     readonly property real intensityGain: effectControlsValid?intensity*(1.8-.8*intensity):0
     readonly property real accentOpacity: intensityGain * (0.85 + 0.15 * displayedLevel)
-    readonly property real cycleDuration: resolvedEffect === "spin" ? 3000/(speed*(.55+1.2*displayedLevel))
+    readonly property real cycleDuration: resolvedEffect === "spin" ? 2750/(speed*(.55+1.2*displayedLevel))
         : 2400/(speed*(.82+.36*displayedLevel))
     readonly property real wave: 0.5 - 0.5 * Math.cos(phase * Math.PI * 2)
     readonly property bool darkSurface: ink.r * .2126 + ink.g * .7152 + ink.b * .0722 > .55
@@ -183,9 +182,10 @@ Item {
         :energyFlow?energyColors:resolvedEffect==="flow"?(outgoing?outboundColors:inboundColors):loadColors
     readonly property color loadColor: paletteColor(loadColors,displayedLoad)
     readonly property color thermalColor: paletteColor(thermalColors,displayedThermal)
-    readonly property color thermometerColor: paletteColor(darkSurface
+    readonly property var thermometerColors: darkSurface
         ? ["#f5d470", "#ffc14b", "#ff9b38", "#ff703c", "#ff4855"]
-        : ["#ad7909", "#ca8008", "#dd650e", "#df431f", "#ca2340"], displayedTemperature)
+        : ["#ad7909", "#ca8008", "#dd650e", "#df431f", "#ca2340"]
+    readonly property color thermometerColor: paletteColor(thermometerColors, displayedTemperature)
     readonly property color energyColor: paletteColor(energyColors,displayedEnergy)
     readonly property color inboundColor: paletteColor(inboundColors,displayedInbound)
     readonly property color outboundColor: paletteColor(outboundColors,displayedOutbound)
@@ -239,7 +239,7 @@ Item {
         return Math.abs(next-target)<.001?target:next
     }
     function resetFeedback() {
-        phase=0;loadPhase=0;thermalPhase=0;thermalArcPhase=0;energyPhase=0;inboundPhase=0;outboundPhase=0;spinPhase=0
+        phase=0;loadPhase=0;thermalArcPhase=0;energyPhase=0;inboundPhase=0;outboundPhase=0;spinPhase=0
         displayedLoad=animationRunning && compositeActive?(loadTarget || 0):0
         displayedThermal=animationRunning && compositeActive?(thermalTarget || 0):0
         displayedEnergy=animationRunning && compositeActive?(energyTarget || 0):0
@@ -266,12 +266,11 @@ Item {
             displayedLevel=Math.max(loadActive?displayedLoad:0,thermalActive?displayedThermal:0,energyActive?displayedEnergy:0,
                 inboundActive?displayedInbound:0,outboundActive?displayedOutbound:0,spinChannelActive?displayedSpin:0)
             loadPhase=loadActive?(loadPhase+elapsed*speed*(.55+1.2*displayedLoad)/2200)%1:0
-            thermalPhase=thermalActive?(thermalPhase+elapsed*speed*(.55+1.2*displayedThermal)/2400)%1:0
             thermalArcPhase=thermalArcActive?(thermalArcPhase+elapsed*speed/thermalArcDuration)%1:0
             energyPhase=energyActive?(energyPhase+elapsed*speed*(.82+.36*displayedEnergy)/2400)%1:0
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(.82+.36*displayedInbound)/2400)%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(.82+.36*displayedOutbound)/2400)%1:0
-            spinPhase=spinChannelActive?(spinPhase+elapsed*speed*(.35+1.65*displayedSpin)/3600)%1:0
+            spinPhase=spinChannelActive?(spinPhase+elapsed*speed*(.35+1.65*displayedSpin)/3300)%1:0
         } else displayedLevel=converge(displayedLevel,level,elapsed)
         phase = (phase + elapsed / cycleDuration) % 1
     }
@@ -296,7 +295,7 @@ Item {
         if (!thermometerEnabled || !(thermometerTarget > 0)) displayedTemperature=thermometerEnabled?thermometerTarget:0
     }
     onLoadTargetChanged: {if(!(loadTarget>0)){displayedLoad=0;loadPhase=0}}
-    onThermalTargetChanged: {if(!(thermalTarget>0)){displayedThermal=0;thermalPhase=0;thermalArcPhase=0}}
+    onThermalTargetChanged: {if(!(thermalTarget>0)){displayedThermal=0;thermalArcPhase=0}}
     onEnergyTargetChanged: {if(!(energyTarget>0)){displayedEnergy=0;energyPhase=0}}
     onInboundTargetChanged: {if(!(inboundTarget>0)){displayedInbound=0;inboundPhase=0}}
     onOutboundTargetChanged: {if(!(outboundTarget>0)){displayedOutbound=0;outboundPhase=0}}
@@ -365,7 +364,8 @@ Item {
         readonly property real frameBlend:framePosition-Math.floor(framePosition)
         property url atlasSource:warm?root.warmAtlasSource:root.blueAtlasSource
         width:18;height:18
-        opacity:root.channelOpacity(amount)*Math.min(1,amount*10)*layerOpacity
+        opacity:Math.min(1,root.channelOpacity(amount)*(["cpu","gpu"].includes(root.name)?1.08:1))
+            *Math.min(1,amount*10)*layerOpacity
         Item {
             x:-7;y:-7;width:32;height:32;clip:true
             Repeater {
@@ -487,11 +487,11 @@ Item {
             sourceComponent:Item {
                 VectorPart {
                     objectName:"metricIconRotorStructure";fragment:root.glyphParts[0] || ""
-                    strokeWidth:1.6;rotation:(root.compositeActive?root.spinPhase:root.phase)*360
+                    strokeWidth:1.8;rotation:(root.compositeActive?root.spinPhase:root.phase)*360
                     opacity:1-Math.pow(1-root.rotorOpacity,6)
                 }
                 AccentPart {
-                    objectName:"metricIconRotor";fragment:root.glyphParts[0] || "";strokeWidth:1.6
+                    objectName:"metricIconRotor";fragment:root.glyphParts[0] || "";strokeWidth:1.8
                     colors:root.compositeActive?root.spinColors:root.manualColors
                     amount:root.compositeActive?root.displayedSpin:root.displayedLevel
                     rotation:(root.compositeActive?root.spinPhase:root.phase)*360;opacity:root.rotorOpacity
@@ -507,18 +507,18 @@ Item {
             readonly property int paintCount:0
             anchors.fill:parent;visible:root.thermometerEnabled
             readonly property real activity:root.displayedTemperature
-            readonly property real alpha:root.channelOpacity(activity)
+            readonly property real alpha:Math.min(1,root.channelOpacity(activity)*1.08)
             // Local, soft warmth belongs to temperature. No atlas, travelling
             // highlight or electrical discharge is created for this glyph.
-            readonly property real haloAlpha:alpha*root.thermometerWarmth*(.88+.12*root.wave)
+            readonly property real haloAlpha:alpha*root.thermometerWarmth*(.82+.18*root.wave)
             Repeater {
                 model:heatLayer.visible?3:0
                 Rectangle {
                     required property int index
                     objectName:"metricIconTemperatureHalo_"+index
-                    width:6-index*1.15;height:width;x:9-width/2;y:13.5-height/2
+                    width:6.6-index*1.25;height:width;x:9-width/2;y:13.5-height/2
                     radius:width/2;antialiasing:true;color:root.thermometerColor
-                    opacity:heatLayer.haloAlpha*(.035+.025*index)
+                    opacity:heatLayer.haloAlpha*(.045+.03*index)
                 }
             }
             Rectangle {
@@ -527,7 +527,7 @@ Item {
             }
             Rectangle {
                 objectName:"metricIconTemperatureColumn"
-                x:8.45;width:1.1;height:10*heatLayer.activity;y:13.5-height;radius:.55;antialiasing:true
+                x:8.35;width:1.3;height:10*heatLayer.activity;y:13.5-height;radius:.65;antialiasing:true
                 color:root.thermometerColor;opacity:heatLayer.alpha
             }
         }
@@ -546,7 +546,7 @@ Item {
             y:root.name==="gpu"?10:root.name==="disk"?10.5:horizontal?6:11.2-height
             radius:.35;antialiasing:true;clip:true
             color:root.compositeActive?root.loadColor:root.accentColor
-            opacity:root.channelOpacity(activity)*(["cpu","gpu"].includes(root.name)?.42:.88+.12*localWave)
+            opacity:root.channelOpacity(activity)*(["cpu","gpu"].includes(root.name)?.5:.88+.12*localWave)
             Rectangle {
                 objectName:"metricIconLoadHighlight"
                 readonly property real progress:root.compositeActive?root.loadPhase:root.phase

@@ -622,6 +622,8 @@ class Host:
     applied_dpi: int | None = None
     applied_height: int | None = None
     shell_epoch: int = 0
+    fullscreen_observed: bool | None = None
+    fullscreen_notice_serial: int = -1
     geometry_key: object = None
     geometry: object = None
     material_bridge: object = None
@@ -663,6 +665,7 @@ class TopBarManager(QObject):
         )
         self._panel = self._pending_hover = None
         self._detail_serial, self._detail_attempt = 0, {}
+        self._detail_request_host = None
         self._notifications, self._shell_pending, self._shell_epoch = {}, False, 0
         self._shell_identity, self._shell_identity_observed = None, False
         self._shell_notice_serial = 0
@@ -822,7 +825,8 @@ class TopBarManager(QObject):
                     fullscreen=dict(effective=fullscreen, dispatching=dispatching,
                                     session_active_count=session_flags.count(True),
                                     pending_enter_count=pending_flags.count(True), pending_exit_count=pending_flags.count(False),
-                                    truncated=truncated), hover=hover, panel=panel,
+                                    truncated=truncated, policy="window_order_only", blocks_user_details=False),
+                    hover=hover, panel=panel,
                     close_timer_active=qt_flag(self._close_timer, "isActive", "close_timer"),
                     geometry_timer_active=qt_flag(self._panel_geometry_timer, "isActive", "geometry_timer"),
                     retired_count=min(len(self.retired), 2147483647), last_attempt=last, errors=errors)
@@ -1211,6 +1215,9 @@ class TopBarManager(QObject):
             return
         height = self._config["top_bar"]["height"]
         if shell_recreated:
+            if (invalidate_fullscreen
+                    and getattr(host, "fullscreen_notice_serial", -1) < self._shell_notice_serial):
+                host.fullscreen_observed = None
             result = (host.session.shell_recreated(sync_epoch, invalidate_fullscreen=True)
                       if invalidate_fullscreen else host.session.shell_recreated(sync_epoch))
             if not current():
@@ -1257,8 +1264,6 @@ class TopBarManager(QObject):
         if fresh_fullscreen is not None:
             if not host.session.fullscreen(fresh_fullscreen).ok:
                 raise AppBarError("Could not update AppBar fullscreen order")
-            if fresh_fullscreen:
-                self.close_panel()
         if not current():
             return
         self.adapter.show(binding, activate=False)
@@ -1483,19 +1488,22 @@ class TopBarManager(QObject):
             self._status("failed", "无法更新顶部状态栏读数。")
 
     def _fullscreen_active(self):
-        # The panel is shared across displays. Honor the Shell's entering
-        # notification immediately, as well as each retained session's state;
-        # waiting for the coalesced refresh would allow a late hover to reopen.
+        # This observes Shell ordering state, not permission for user interaction.
+        # ABN_FULLSCREENAPP has no screen/window identity and its close notice
+        # may be missing. It must never permanently disable visible bar input.
         return (self._dispatching_fullscreen
                 or any(getattr(host.session, "_fullscreen", False) for host in self.hosts.values())
                 or any(flags.get("fullscreen") is True for flags in self._notifications.values()))
 
     def hover(self, host_id, item):
-        if (self.closed or host_id not in self.hosts or self._fullscreen_active()
+        host = self.hosts.get(host_id)
+        if (not self._details_allowed(host)
                 or self._panel and self._panel["pinned"] and self._panel_visible(self._panel)):
             return
         if item != OVERFLOW and not any(row["id"] == item for row in self._rows):
             return
+        sequence = self._new_detail_attempt("hover", host_id)
+        self._trace_detail(sequence, "hover_wait")
         self._close_timer.stop()
         target = (host_id, item)
         if (
@@ -1504,6 +1512,7 @@ class TopBarManager(QObject):
             and self._panel["item"] == item
             and self._panel_visible(self._panel)
         ):
+            self._trace_detail(sequence, "show_returned", "no_op", "already_open")
             return
         if target != self._pending_hover:
             self._pending_hover = target
@@ -1527,10 +1536,9 @@ class TopBarManager(QObject):
 
     def click(self, host_id, item):
         host = self.hosts.get(host_id)
-        if self.closed or host is None or self._fullscreen_active():
-            sequence = self._new_detail_attempt("click")
-            self._trace_detail(sequence, "request", "blocked",
-                               "closed" if self.closed else "host_missing" if host is None else "fullscreen")
+        if not self._details_allowed(host):
+            sequence = self._new_detail_attempt("click", host_id)
+            self._trace_detail(sequence, "request", "blocked", self._detail_block_reason(host))
             return
         if (
             self._panel
@@ -1543,8 +1551,9 @@ class TopBarManager(QObject):
         else:
             self._show_panel(host, item, True)
 
-    def _new_detail_attempt(self, kind):
+    def _new_detail_attempt(self, kind, host_id=None):
         self._detail_serial += 1
+        self._detail_request_host = host_id
         self._detail_attempt = dict(seq=self._detail_serial, kind=kind, phase="request",
                                     outcome="pending", reason="none")
         return self._detail_serial
@@ -1572,7 +1581,7 @@ class TopBarManager(QObject):
         except (RuntimeError, AttributeError, TypeError):
             return False
 
-    def _detail_data(self, host, item, pinned):
+    def _detail_data(self, host, item, pinned, *, request=None):
         if item == OVERFLOW:
             items = [dict(row) for row in self._rows if row["id"] in host.overflow_ids]
             selected = dict(
@@ -1599,16 +1608,34 @@ class TopBarManager(QObject):
             host.state._overflow_model.update(items)
         if changed:
             host.state._detail = selected
+        if request is not None:
+            request["publication"] = host.state._detail
+        if changed:
             host.state.detailChanged.emit()
         return True
 
+    def _detail_block_reason(self, host):
+        if self.closed:
+            return "closed"
+        if self.paused:
+            return "paused"
+        if host is None:
+            return "host_missing"
+        if host.closing:
+            return "host_closing"
+        if self.hosts.get(host.state._host_id) is not host:
+            return "host_replaced"
+        if host.binding is None:
+            return "binding_missing"
+        return None
+
     def _details_allowed(self, host):
-        return (not self.closed and not self.paused and not host.closing
-                and self.hosts.get(host.state._host_id) is host
-                and host.binding is not None and not self._fullscreen_active())
+        return self._detail_block_reason(host) is None
 
     def _show_panel(self, host, item, pinned):
-        sequence = self._new_detail_attempt("click" if pinned else "hover")
+        sequence = self._new_detail_attempt("click" if pinned else "hover",
+                                            host.state._host_id if host is not None else None)
+        request = self._detail_attempt
 
         def current():
             return sequence == self._detail_serial and self._details_allowed(host)
@@ -1617,7 +1644,7 @@ class TopBarManager(QObject):
         self._close_timer.stop()
         self._pending_hover = None
         if not self._details_allowed(host):
-            self._trace_detail(sequence, "request", "blocked", "fullscreen" if self._fullscreen_active() else "host_missing")
+            self._trace_detail(sequence, "request", "blocked", self._detail_block_reason(host))
             return
         if item != OVERFLOW and not any(row["id"] == item for row in self._rows):
             self._trace_detail(sequence, "request", "blocked", "unknown_row")
@@ -1636,11 +1663,11 @@ class TopBarManager(QObject):
             self._status("partial", "顶部状态栏清理未完成。")
             return
         self._trace_detail(sequence, "data")
-        if not self._detail_data(host, item, pinned):
+        if not self._detail_data(host, item, pinned, request=request):
             return
         if not current():
+            self._clear_detail_publication(host, sequence, request)
             return
-        published = host.state._detail
         window = bridge = panel = pending = None
         failed = False
         try:
@@ -1709,15 +1736,7 @@ class TopBarManager(QObject):
         finally:
             if pending is not None:
                 self._dispose_panel(pending)
-            # Only this request may undo its own publication. Disposal and
-            # detailChanged can synchronously open a newer replacement.
-            if (sequence == self._detail_serial and self._panel is None
-                    and host.state._detail is published):
-                host.state._detail = {}
-                host.state._detail_coating = False
-                host.state.materialChanged.emit()
-                if sequence == self._detail_serial:
-                    host.state.detailChanged.emit()
+            self._clear_detail_publication(host, sequence, request)
             if self.closed or self.paused:
                 self._status(
                     "failed" if self.retired else "disabled" if self.closed else "paused",
@@ -1727,6 +1746,22 @@ class TopBarManager(QObject):
                 self._status("partial", "无法打开指标详情。")
             elif pending is not None and self.retired and sequence == self._detail_serial:
                 self._status("partial" if self.hosts else "failed", "顶部状态栏清理未完成。")
+
+    def _clear_detail_publication(self, host, sequence, request):
+        # A fullscreen transition can invalidate an automatic hover without
+        # replacing it. Clear its own data, including cancellation during emit,
+        # while preserving any newer publication or panel on this host.
+        if sequence != self._detail_serial and not request.get("cancelled_hover"):
+            return
+        state, published = host.state, request.get("publication")
+        if (published is None or state._detail is not published
+                or self._panel is not None and self._panel["host"].state is state):
+            return
+        empty = {}
+        state._detail, state._detail_coating = empty, False
+        state.materialChanged.emit()
+        if state._detail is empty:
+            state.detailChanged.emit()
 
     def _position_panel_safely(self, expected=None, sequence=None):
         panel = self._panel if expected is None else expected
@@ -1880,8 +1915,6 @@ class TopBarManager(QObject):
             return
         if self.paused:
             self.resume()
-        if self._fullscreen_active():
-            return
         if self.hosts and self._rows:
             host = next(iter(self.hosts.values()))
             self.click(host.state._host_id, self._rows[0]["id"])
@@ -1951,8 +1984,17 @@ class TopBarManager(QObject):
             if wparam == ABN_POSCHANGED:
                 flags["position"] = True
             elif wparam == ABN_FULLSCREENAPP:
+                previous = getattr(host, "fullscreen_observed", None)
+                if previous is None:
+                    previous = flags.get("fullscreen", getattr(host.session, "_fullscreen", False))
+                # Retain the last receipt across queue hand-off: the session
+                # may not yet have consumed this host's notification batch.
+                host.fullscreen_observed = bool(lparam)
+                host.fullscreen_notice_serial = self._shell_notice_serial
                 flags["fullscreen"] = bool(lparam)
                 flags["fullscreen_notice"] = self._shell_notice_serial
+                if bool(lparam) and previous is not True:
+                    self._fullscreen_enter(host)
         elif message == WM_ACTIVATE:
             flags["activation"] = bool(wparam & 0xFFFF)
         elif message == WM_WINDOWPOSCHANGED:
@@ -1964,6 +2006,28 @@ class TopBarManager(QObject):
         else:
             return
         self.refresh()
+
+    def _fullscreen_enter(self, host):
+        """Cancel older automatic hover, without vetoing later user intent."""
+        host_id = host.state._host_id
+        if self._pending_hover and self._pending_hover[0] == host_id:
+            self._pending_hover = None
+            self._hover_timer.stop()
+        if (self._detail_request_host == host_id
+                and self._detail_attempt.get("kind") == "hover"):
+            self._detail_attempt["cancelled_hover"] = True
+            sequence = self._new_detail_attempt("hover")
+            self._trace_detail(sequence, "hover_wait", "closed", "fullscreen")
+        panel = self._panel
+        if panel and panel["host"] is host and not panel["pinned"]:
+            sequence = self._detail_serial
+            # Never release an HWND from within the Shell's native callback.
+            QTimer.singleShot(0, lambda: self._dismiss_fullscreen_hover(panel, sequence))
+
+    def _dismiss_fullscreen_hover(self, panel, sequence):
+        if (sequence == self._detail_serial and self._panel is panel
+                and not panel["pinned"]):
+            self.close_panel()
 
     def _refresh(self):
         if self.closed or self.paused:
@@ -2011,8 +2075,6 @@ class TopBarManager(QObject):
                         raise AppBarError("Owned top bar window was destroyed before unregister")
                     if "fullscreen" in flags and not reset_fullscreen:
                         result = host.session.fullscreen(flags["fullscreen"])
-                        if flags["fullscreen"]:
-                            self.close_panel()
                         if not result.ok:
                             raise AppBarError("Could not update AppBar fullscreen order")
                     if "activation" in flags:

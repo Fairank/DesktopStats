@@ -666,24 +666,28 @@ class TopBarRuntimeTests(unittest.TestCase):
         self.assertFalse(self.manager.retired)
         self.assertEqual(len(self.manager.hosts), 1)
 
-    def test_fullscreen_closes_details_and_paused_state_waits_for_explicit_resume(self):
+    def test_fullscreen_orders_bar_preserves_pin_and_pause_waits_for_explicit_resume(self):
         self.manager.apply(config())
         self.manager.click("DISPLAY1", "b_0")
+        panel = self.manager._panel
         host = self.manager.hosts["DISPLAY1"]
         self.manager.native_message(
             host.binding.hwnd, self.adapter.callback_message, ABN_FULLSCREENAPP, 1
         )
         self.manager._refresh()
-        self.assertIsNone(self.manager._panel)
+        self.assertIs(self.manager._panel, panel)
+        self.assertTrue(self.manager._panel_visible(panel))
         self.assertIn(("fullscreen", "DISPLAY1", True), self.adapter.events)
         self.manager.pause()
+        self.assertIsNone(self.manager._panel)
+        self.assertTrue(panel["window"].deleted)
         self.manager.apply(config())
         self.assertFalse(self.manager.hosts)
         self.manager.focus_details()
         self.assertTrue(self.manager.hosts)
         self.assertTrue(self.manager._panel["pinned"])
 
-    def test_fullscreen_blocks_late_hover_click_focus_and_direct_show_until_exit(self):
+    def test_fullscreen_order_does_not_veto_fresh_hover_click_focus_or_direct_show(self):
         self.manager.apply(config(mode="all"))
         self.manager.click("DISPLAY1", "b_0")
         host = self.manager.hosts["DISPLAY1"]
@@ -692,17 +696,25 @@ class TopBarRuntimeTests(unittest.TestCase):
         )
         self.manager._refresh()
         self.assertTrue(host.session._fullscreen)
-        created, shows = len(self.windows), list(self.adapter.shows)
+        self.manager.close_panel()
         self.manager.hover("DISPLAY2", "b_1")
-        self.assertFalse(self.manager._hover_timer.isActive())
-        self.manager._pending_hover = ("DISPLAY2", "b_1")
+        self.assertTrue(self.manager._hover_timer.isActive())
         self.manager._open_hover()
+        self.assertEqual(self.manager._panel["item"], "b_1")
+        self.assertFalse(self.manager._panel["pinned"])
+        self.assertTrue(self.manager._panel_visible(self.manager._panel))
         self.manager.click("DISPLAY2", "b_1")
+        self.assertTrue(self.manager._panel["pinned"])
+        self.assertTrue(self.manager._panel_visible(self.manager._panel))
+        self.manager.close_panel()
         self.manager.focus_details()
-        self.manager._show_panel(self.manager.hosts["DISPLAY2"], OVERFLOW, False)
-        self.assertIsNone(self.manager._panel)
-        self.assertEqual(len(self.windows), created)
-        self.assertEqual(self.adapter.shows, shows)
+        self.assertIs(self.manager._panel["host"], host)
+        self.assertEqual(self.manager._panel["item"], "b_0")
+        self.assertTrue(self.manager._panel["pinned"])
+        self.manager._show_panel(self.manager.hosts["DISPLAY2"], "b_1", False)
+        self.assertEqual(self.manager._panel["item"], "b_1")
+        self.assertFalse(self.manager._panel["pinned"])
+        self.assertTrue(self.manager._panel_visible(self.manager._panel))
         self.assertEqual(self.settings, [])
         self.manager.native_message(
             host.binding.hwnd, self.adapter.callback_message, ABN_FULLSCREENAPP, 0
@@ -711,26 +723,33 @@ class TopBarRuntimeTests(unittest.TestCase):
         self.assertFalse(host.session._fullscreen)
         self.manager.click("DISPLAY2", "b_1")
         self.assertEqual(self.manager._panel["item"], "b_1")
+        self.assertTrue(self.manager._panel["pinned"])
 
-    def test_queued_fullscreen_blocks_other_screen_before_notification_refresh(self):
+    def test_queued_fullscreen_order_allows_new_other_screen_intent_before_refresh(self):
         self.manager.apply(config(mode="all"))
         host = self.manager.hosts["DISPLAY2"]
         self.manager.native_message(
             host.binding.hwnd, self.adapter.callback_message, ABN_FULLSCREENAPP, 1
         )
-        created, shows = len(self.windows), list(self.adapter.shows)
         self.manager.hover("DISPLAY1", "b_0")
-        self.assertFalse(self.manager._hover_timer.isActive())
+        self.assertTrue(self.manager._hover_timer.isActive())
         self.manager.click("DISPLAY1", "b_0")
+        panel = self.manager._panel
+        self.assertTrue(self.manager._panel_visible(panel))
+        self.assertTrue(panel["pinned"])
+        self.manager._refresh()
+        self.assertIs(self.manager._panel, panel)
+        self.assertTrue(host.session._fullscreen)
+        self.manager.close_panel()
         self.manager.focus_details()
-        self.assertIsNone(self.manager._panel)
-        self.assertEqual(len(self.windows), created)
-        self.assertEqual(self.adapter.shows, shows)
+        self.assertTrue(self.manager._panel["pinned"])
+        self.assertTrue(self.manager._panel_visible(self.manager._panel))
 
-    def test_fullscreen_session_is_recorded_before_close_callback_can_reopen(self):
+    def test_fullscreen_hover_cleanup_callback_can_open_new_other_screen_pin(self):
         self.manager.apply(config(mode="all"))
-        self.manager.click("DISPLAY1", "b_0")
+        self.manager._show_panel(self.manager.hosts["DISPLAY1"], "b_0", False)
         old_panel = self.manager._panel
+        old_binding = old_panel["binding"]
         attempts = []
 
         def close_and_try_open():
@@ -740,20 +759,31 @@ class TopBarRuntimeTests(unittest.TestCase):
         old_panel["material_bridge"] = SimpleNamespace(
             close=close_and_try_open, deleteLater=lambda: None
         )
-        created = len(self.windows)
         self.manager.native_message(
             old_panel["host"].binding.hwnd,
             self.adapter.callback_message,
             ABN_FULLSCREENAPP,
             1,
         )
+        # Native receipt queues disposal; it must not destroy an HWND inline.
+        self.assertEqual(attempts, [])
+        self.assertIs(self.manager._panel, old_panel)
         self.manager._refresh()
+        QTest.qWait(1)
         self.assertEqual(attempts, [True])
-        self.assertIsNone(self.manager._panel)
-        self.assertEqual(len(self.windows), created)
+        self.assertIsNot(self.manager._panel, old_panel)
+        self.assertIs(self.manager._panel["host"], self.manager.hosts["DISPLAY2"])
+        self.assertEqual(self.manager._panel["item"], "b_1")
+        self.assertTrue(self.manager._panel["pinned"])
+        self.assertTrue(self.manager._panel_visible(self.manager._panel))
         self.assertFalse(old_panel["window"].visible)
+        self.assertTrue(old_panel["window"].deleted)
+        self.assertIsNone(old_panel["binding"])
+        self.assertIsNot(self.manager._panel["binding"], old_binding)
+        self.assertEqual(self.adapter.events.count(("release", "details", "DISPLAY1")), 1)
+        self.assertEqual(self.manager.retired, [])
 
-    def test_fullscreen_exit_callback_cannot_open_during_another_screen_enter_batch(self):
+    def test_explicit_click_from_exit_callback_survives_other_screen_enter_batch(self):
         self.manager.apply(config(mode="all"))
         first, second = self.manager.hosts["DISPLAY1"], self.manager.hosts["DISPLAY2"]
         first.session.fullscreen(True)
@@ -770,15 +800,15 @@ class TopBarRuntimeTests(unittest.TestCase):
             self.manager.native_message(
                 host.binding.hwnd, self.adapter.callback_message, ABN_FULLSCREENAPP, int(opened)
             )
-        created, shows = len(self.windows), list(self.adapter.shows)
         self.manager._refresh()
-        self.assertIsNone(self.manager._panel)
-        self.assertEqual(len(self.windows), created)
-        self.assertEqual(self.adapter.shows, shows)
+        self.assertIs(self.manager._panel["host"], first)
+        self.assertEqual(self.manager._panel["item"], "b_0")
+        self.assertTrue(self.manager._panel["pinned"])
+        self.assertTrue(self.manager._panel_visible(self.manager._panel))
         self.assertTrue(second.session._fullscreen)
         self.assertFalse(self.manager._dispatching_fullscreen)
 
-    def test_fullscreen_received_during_panel_position_prevents_first_show(self):
+    def test_fullscreen_received_during_explicit_panel_position_preserves_first_show(self):
         self.manager.apply(config())
         host = self.manager.hosts["DISPLAY1"]
         position = self.adapter.place_panel
@@ -790,14 +820,22 @@ class TopBarRuntimeTests(unittest.TestCase):
             )
 
         self.adapter.place_panel = position_and_notify
-        shows = list(self.adapter.shows)
+        shows = len(self.adapter.shows)
         self.manager.click("DISPLAY1", "b_0")
-        self.assertIsNone(self.manager._panel)
-        self.assertEqual(self.adapter.shows, shows)
-        self.assertFalse(self.windows[-1].visible)
-        self.assertTrue(self.windows[-1].deleted)
+        panel = self.manager._panel
+        binding = panel["binding"]
+        self.assertTrue(self.manager._panel_visible(panel))
+        self.assertTrue(panel["pinned"])
+        self.assertEqual(self.adapter.shows[shows:], [("details", True)])
+        QTest.qWait(1)
+        self.manager._refresh()
+        self.assertIs(self.manager._panel, panel)
+        self.assertIs(panel["binding"], binding)
+        self.assertTrue(host.session._fullscreen)
+        self.assertFalse(panel["window"].deleted)
+        self.assertEqual(self.manager.retired, [])
 
-    def test_fullscreen_received_inside_show_hides_only_that_panel_immediately(self):
+    def test_fullscreen_inside_automatic_show_defers_exact_hover_panel_disposal(self):
         self.manager.apply(config())
         host = self.manager.hosts["DISPLAY1"]
         show = self.adapter.show
@@ -810,27 +848,52 @@ class TopBarRuntimeTests(unittest.TestCase):
 
         self.adapter.show = show_and_notify
         self.manager._show_panel(host, "b_0", False)
+        panel = self.manager._panel
+        self.assertIsNotNone(panel)
+        self.assertTrue(panel["window"].visible)
+        self.assertFalse(panel["window"].deleted)
+        QTest.qWait(1)
         self.assertIsNone(self.manager._panel)
-        self.assertFalse(self.windows[-1].visible)
-        self.assertTrue(self.windows[-1].deleted)
+        self.assertFalse(panel["window"].visible)
+        self.assertTrue(panel["window"].deleted)
+        self.assertIsNone(panel["binding"])
+        self.assertEqual(self.adapter.events.count(("release", "details", "DISPLAY1")), 1)
         self.assertEqual(self.manager.retired, [])
 
-    def test_fullscreen_received_during_material_prepare_prevents_first_show(self):
+    def test_fullscreen_during_explicit_material_prepare_keeps_preparation_before_show(self):
         self.manager.apply(config())
         host = self.manager.hosts["DISPLAY1"]
-        material = SimpleNamespace(
-            close=Mock(), deleteLater=Mock(),
-            prepare_before_show=lambda: self.manager.native_message(
+        order = []
+
+        def prepare():
+            order.append("material_prepare")
+            self.manager.native_message(
                 host.binding.hwnd, self.adapter.callback_message, ABN_FULLSCREENAPP, 1
-            ),
-        )
-        shows = list(self.adapter.shows)
+            )
+
+        material = SimpleNamespace(close=Mock(), deleteLater=Mock(), prepare_before_show=Mock(side_effect=prepare))
+        show = self.adapter.show
+
+        def show_after_preparation(binding, *, activate=False):
+            self.assertEqual(order, ["material_prepare"])
+            self.assertIs(self.manager._panel["binding"], binding)
+            order.append("show")
+            show(binding, activate=activate)
+
+        self.adapter.show = show_after_preparation
         with patch.object(self.manager, "_material_bridge", return_value=material):
             self.manager.click("DISPLAY1", "b_0")
-        self.assertIsNone(self.manager._panel)
-        self.assertEqual(self.adapter.shows, shows)
-        self.assertTrue(self.windows[-1].deleted)
+        panel = self.manager._panel
+        self.assertEqual(order, ["material_prepare", "show"])
+        self.assertTrue(self.manager._panel_visible(panel))
+        self.assertTrue(panel["pinned"])
+        material.prepare_before_show.assert_called_once_with()
+        material.close.assert_not_called()
+        self.manager.close_panel()
+        self.assertTrue(panel["window"].deleted)
+        self.assertIsNone(panel["binding"])
         material.close.assert_called_once()
+        material.deleteLater.assert_called_once()
 
     def test_failed_detail_material_close_hides_and_retains_exact_record_until_retry(self):
         self.manager.apply(config())

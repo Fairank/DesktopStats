@@ -106,6 +106,33 @@ class PerformanceContractTests(unittest.TestCase):
         self.assertEqual({row["id"] for row in first["presets"]}, set(presets.CATALOG_INFO))
         self.assertTrue(all("config" not in entry for entry in presets.CATALOG_INFO.values()))
 
+    def test_repeated_live_values_do_not_deepcopy_unchanged_device_inventory(self):
+        sample = dict(time=1.0, cpu_usage=20,
+                      gpus={"gpu0": {"label": "Synthetic GPU", "gpu_usage": 10}},
+                      networks={"nic0": {"label": "Synthetic Network", "net_download": 1}})
+        self.ui.receive(sample)
+        inventory = self.ui._devices
+        notifications = []
+        self.ui.devicesChanged.connect(lambda: notifications.append(True))
+        original = copy.deepcopy
+        with patch.object(controls.copy, "deepcopy", wraps=original) as deep:
+            for index in range(80):
+                self.ui.receive(dict(sample, time=index + 2.0, cpu_usage=index))
+            inventory_copies = [call for call in deep.call_args_list
+                                if call.args and call.args[0] is inventory]
+        self.assertEqual(inventory_copies, [])
+        self.assertIs(self.ui._devices, inventory)
+        self.assertEqual(notifications, [])
+        self.assertEqual(self.ui._data["cpu_usage"], 79)
+        self.assertEqual(self.ui._history[-1]["cpu_usage"], 79)
+        self.ui.receive(dict(time=83.0, gpus={"gpu0": {"label": "Renamed GPU"}}))
+        self.assertEqual(self.ui._devices["gpus"]["gpu0"]["label"], "Renamed GPU")
+        self.assertIs(self.ui._devices["networks"], inventory["networks"])
+        self.assertEqual(inventory["gpus"]["gpu0"]["label"], "Synthetic GPU")
+        self.ui.receive(dict(time=84.0, gpus={}))
+        self.assertEqual(self.ui._devices["gpus"], {})
+        self.assertEqual(len(notifications), 2)
+
     def test_unrelated_style_geometry_and_device_edits_do_not_notify_catalog_or_language(self):
         before = copy.deepcopy(self.ui.catalog)
         with patch.object(self.ui, "_build_catalog", wraps=self.ui._build_catalog) as build:

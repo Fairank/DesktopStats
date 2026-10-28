@@ -179,6 +179,19 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
                 self.assertFalse(any(item.objectName().startswith("metricIconTemperatureHalo_") for item in self.items()))
                 self.assertEqual((self.find("icon").implicitWidth(), self.find("icon").implicitHeight()), (18, 18))
 
+    def test_thermometer_palette_is_reused_across_samples_and_refreshes_for_theme(self):
+        self.load()
+        self.configure("temperature", "cpu_temp", "heat")
+        icon = self.find("icon")
+        palette = icon.property("thermometerColors")
+        self.assertTrue(palette.isArray())
+        for value in (.35, .6, .9):
+            self.settle_level(value)
+            self.assertTrue(palette.strictlyEquals(icon.property("thermometerColors")))
+        self.window.setProperty("dark", True)
+        self.app.processEvents()
+        self.assertFalse(palette.strictlyEquals(icon.property("thermometerColors")))
+
     def test_transport_moves_only_the_actual_arrow_and_keeps_tray_and_disk_body_fixed(self):
         self.load()
         for glyph, metric, direction, body_y in (("download", "net_download", 1, 15),

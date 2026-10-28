@@ -1,12 +1,15 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 
 Item {
     id:root
     objectName:"historyPage"
     property var controller:stats
     property bool active:visible
+    readonly property bool uiActive:active && root.Window.window !== null
+        && root.Window.window.visible && root.Window.window.visibility !== Window.Minimized
     property string selectedId:""
     property string period:"10m"
     property var result:({state:"empty",points:[]})
@@ -14,7 +17,7 @@ Item {
     property bool clearArmed:false
     property bool componentReady:false
     readonly property var options:controller?controller.historyMetricChoices:[]
-    readonly property var status:controller?controller.historyStatus:({})
+    readonly property var status:controller && uiActive?controller.historyStatus:({})
     readonly property bool recording:controller && controller.historyRecording===true
     readonly property var choices:options.map(row=>({id:row.id,label:row.label+(row.device_label?" · "+row.device_label:"")}))
     readonly property var lastPoint:(result.points || []).filter(point=>point && typeof point.timestamp==="number" && Number.isFinite(point.timestamp) && typeof point.value==="number" && Number.isFinite(point.value)).slice(-1)[0]
@@ -46,7 +49,7 @@ Item {
         }
     }
     function refresh() {
-        if(!componentReady || !active || !controller || !selectedId)return
+        if(!componentReady || !uiActive || !controller || !selectedId)return
         const response=controller.historyQuery(selectedId,period)
         result=response || {state:"error",detail:ui.t("无法读取历史记录"),points:[]}
     }
@@ -59,15 +62,15 @@ Item {
         return true
     }
     onOptionsChanged:ensureSelection()
-    onActiveChanged:if(active){ensureSelection();refresh()}else clearArmed=false
+    onUiActiveChanged:if(uiActive){ensureSelection();refresh()}else clearArmed=false
     onPeriodChanged:refresh()
     Component.onCompleted:{componentReady=true;ensureSelection();refresh()}
     Connections {
         target:root.controller
-        function onHistoryChanged(){if(root.active && !poll.running)poll.start()}
-        function onHistoryRecordingChanged(){if(root.active)root.refresh()}
+        function onHistoryChanged(){if(root.uiActive && !poll.running)poll.start()}
+        function onHistoryRecordingChanged(){if(root.uiActive)root.refresh()}
     }
-    Timer {id:poll;objectName:"historyRefreshTimer";interval:2000;repeat:true;running:root.active;onTriggered:root.refresh()}
+    Timer {id:poll;objectName:"historyRefreshTimer";interval:2000;repeat:true;running:root.uiActive;onTriggered:root.refresh()}
 
     ScrollView {
         id:scroll

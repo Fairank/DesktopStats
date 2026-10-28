@@ -6,17 +6,28 @@ from pathlib import Path
 from types import SimpleNamespace as NS
 
 
+class SingleShotQueue:
+    """No Qt/event loop: preserve deferred callbacks without invoking them inline."""
+
+    pending = []
+
+    @classmethod
+    def singleShot(cls, delay, callback):
+        cls.pending.append((delay, callback))
+
+
 def manager_type():
     path = Path(__file__).resolve().parents[1] / "top_bar_runtime.py"
     module = ast.parse(path.read_text(encoding="utf-8-sig"))
     owner = next(node for node in module.body if isinstance(node, ast.ClassDef)
                  and node.name == "TopBarManager")
-    names = {"_read_shell_identity", "_sync_host", "_refresh", "native_message", "_fullscreen_active"}
+    names = {"_read_shell_identity", "_sync_host", "_refresh", "native_message", "_fullscreen_active",
+             "_fullscreen_enter", "_dismiss_fullscreen_hover", "_new_detail_attempt", "_trace_detail"}
     methods = [node for node in owner.body if isinstance(node, ast.FunctionDef) and node.name in names]
     assert len(methods) == len(names)
     namespace = dict(AppBarError=RuntimeError, ABN_POSCHANGED=1, ABN_FULLSCREENAPP=2,
                      WM_ACTIVATE=6, WM_WINDOWPOSCHANGED=71, WM_DPICHANGED=736,
-                     WM_DISPLAYCHANGE=126, WM_NCDESTROY=130)
+                     WM_DISPLAYCHANGE=126, WM_NCDESTROY=130, QTimer=SingleShotQueue)
     exec(compile(ast.Module(body=methods, type_ignores=[]), str(path), "exec"), namespace)
     return type("ManagerMethods", (), {name: namespace[name] for name in names})
 
@@ -89,6 +100,11 @@ class ShellRecoveryTests(unittest.TestCase):
         manager.hosts = {}
         manager.panel_closes = 0
         manager.close_panel = self.close_panel
+        manager._panel = manager._pending_hover = manager._detail_request_host = None
+        manager._detail_serial = 0
+        manager._detail_attempt = dict(seq=0, kind="none", phase="request", outcome="pending", reason="none")
+        manager._hover_timer = NS(stop=lambda: None)
+        SingleShotQueue.pending.clear()
         manager._layout = lambda host: None
         manager.refresh = lambda: None
         manager._status = lambda *args: None
@@ -185,7 +201,8 @@ class ShellRecoveryTests(unittest.TestCase):
         self.manager._refresh()
         self.assertTrue(self.manager._fullscreen_active())
         self.assertEqual(self.manager.adapter.shown_fullscreen[-1], (101, True))
-        self.assertGreater(self.manager.panel_closes, 0)
+        self.assertEqual(self.manager.panel_closes, 0)
+        self.assertEqual(SingleShotQueue.pending, [])
 
     def test_newer_exit_during_registration_wins_over_queued_new_enter(self):
         self.shell((20, 200))
@@ -331,8 +348,8 @@ class ShellRecoveryTests(unittest.TestCase):
                 self.assertEqual(registrations, [])
                 self.assertEqual(manager.adapter.shown_fullscreen, shown_before)
 
-    def test_fresh_fullscreen_cleanup_closing_manager_never_shows_after_callback(self):
-        for stage in ("fullscreen_cleanup", "reserve_before_relayout"):
+    def test_fresh_fullscreen_order_callback_closing_manager_never_shows_or_relayouts(self):
+        for stage in ("fullscreen_apply", "reserve_before_relayout"):
             with self.subTest(stage=stage):
                 case = ShellRecoveryTests()
                 case.setUp()
@@ -353,8 +370,15 @@ class ShellRecoveryTests(unittest.TestCase):
                     return original_relayout(*args, **kwargs)
 
                 host.session.relayout = relayout
-                manager.close_panel = close_manager
-                if stage == "fullscreen_cleanup":
+                if stage == "fullscreen_apply":
+                    fullscreen = host.session.fullscreen
+
+                    def order_then_close(opened):
+                        result = fullscreen(opened)
+                        close_manager()
+                        return result
+
+                    host.session.fullscreen = order_then_close
                     host.session.on_recreate = case.fullscreen  # Fresh enter during ABM_NEW.
                 else:
                     # A real height/DPI change would otherwise reserve again
@@ -365,8 +389,9 @@ class ShellRecoveryTests(unittest.TestCase):
                 self.assertEqual(host.session.resets, [(1, True)])
                 self.assertEqual(cleanups, [True])
                 self.assertTrue(manager.closed)
-                if stage == "fullscreen_cleanup":
+                if stage == "fullscreen_apply":
                     self.assertTrue(host.session._fullscreen)
+                self.assertEqual(manager.panel_closes, 0, "Shell ordering must not close pinned details")
                 self.assertEqual(relayouts, [], "Closing during reservation must stop before relayout")
                 self.assertEqual(manager.adapter.shown_fullscreen, shown_before)
                 self.assertEqual(manager._errors, [])

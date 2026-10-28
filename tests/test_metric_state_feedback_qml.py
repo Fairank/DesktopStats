@@ -256,7 +256,7 @@ Window {id:scene;width:96;height:64;visible:false;color:dark?"#20242b":"white";
             self.assertAlmostEqual(self.icon.property("displayed" + channel.capitalize()), expected, delta=.002)
 
     def hardware_frame(self, phase=.075):
-        for channel in ("load", "thermal", "energy", "inbound", "outbound", "spin", "thermalArc"):
+        for channel in ("load", "energy", "inbound", "outbound", "spin", "thermalArc"):
             self.assertTrue(self.icon.setProperty(channel + "Phase", phase))
         # This is an explicitly chosen active burst time, not an assertion that
         # intermittent discharges are coloured at every arbitrary phase.

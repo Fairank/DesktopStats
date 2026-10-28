@@ -161,6 +161,7 @@ SOURCES = (
     "tests/test_appbar_platform.py",
     "tests/test_shell_identity.py",
     "tests/test_top_bar_shell_recovery.py",
+    "tests/test_top_bar_interaction_policy.py",
     "tests/test_top_bar_diagnostics.py",
     "tests/test_top_bar_layout.py",
     "tests/test_top_bar_runtime.py",

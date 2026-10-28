@@ -1,5 +1,27 @@
 # Changes
 
+## 0.26.0-preview.2
+
+- Stop treating the Shell's fullscreen ordering notification as a global veto
+  on menu-bar details. A visible bar accepts a new click, hover or explicit
+  details action even while either display retains a fullscreen observation.
+  Continue applying the native AppBar ordering notifications independently.
+- On a fresh entering transition, cancel only the affected host's older
+  automatic hover. Defer its window cleanup outside the native callback and
+  bind it to the exact panel and request generation. New pointer intent and
+  pinned details survive delayed or duplicate notifications and other displays.
+- Distinguish observed fullscreen ordering from detail admission in the local
+  diagnostic snapshot. Preserve lifecycle, pause, HWND ownership, failed-cleanup
+  and material preparation checks; do not infer which other app is fullscreen.
+- Refine optional thermometer warmth, fan rotation and CPU/GPU core feedback
+  for slightly clearer movement at menu-bar sizes. Keep real temperature column
+  heights, independent power/heat layers and the existing off/reduced-motion
+  and missing-data rules; add no animation timers, nodes or image assets.
+- Retain unchanged device inventories between readings instead of deep-copying
+  them on every sample. Stop hidden or minimized history pages querying the
+  store and resume their selected view on exposure. Keep every raw sample and
+  the configured detection interval.
+
 ## 0.26.0-preview.1
 
 - Recover hidden or minimized menu-bar details on the next click or hover.
