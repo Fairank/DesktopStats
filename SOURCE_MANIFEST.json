@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.26.0-preview.4",
-  "archive_root": "DesktopStats-0.26.0-preview.4-source/",
+  "version": "0.26.0-preview.5",
+  "archive_root": "DesktopStats-0.26.0-preview.5-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 16814,
-      "sha256": "ac81adec1a3b3c0c76463e23a11bfadf71e9acda081ef8b85344213d30b8d129"
+      "bytes": 17672,
+      "sha256": "3a88c4e8c76fba708173baedffa79a1bbc037ebcb2a87f9422c691b17ec1bb97"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 11973,
-      "sha256": "01ac1ed0008ed5706e31dac6aa7b1d869e715cd1255e507480c9a6fe145c5335"
+      "bytes": 12444,
+      "sha256": "082c707670683e121a9403bf58cf4d8a07e2858d69cf8a6db758edc7a2eb6b2a"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -54,8 +54,8 @@
     },
     {
       "path": "VISUAL-GUIDE.md",
-      "bytes": 7814,
-      "sha256": "c353c9848583aea91c4cbc5096b1f95cf07a60291ed0d653982fe2b964404d2b"
+      "bytes": 8329,
+      "sha256": "a3dcb315c98dd2b50eda434533657423354686ca979a0e664e1b0069cfea792c"
     },
     {
       "path": "activity_sensors.py",
@@ -411,6 +411,16 @@
       "path": "assets/niangao-source.svg",
       "bytes": 98417,
       "sha256": "c45a45d8d4109a493ce20fc8b039c3e007d43cfd7f391778f089917230523625"
+    },
+    {
+      "path": "assets/shaders/metric-discharge.frag",
+      "bytes": 914,
+      "sha256": "78e507de38fff2a90bd05f06767cedbd4e5efa2d58eae28d1419f89721f62460"
+    },
+    {
+      "path": "assets/shaders/metric-discharge.frag.qsb",
+      "bytes": 2692,
+      "sha256": "f785c79ca3e00c71183d9aa9773d444c0db9f7996deab41f1746e5a0d47a0ff7"
     },
     {
       "path": "assets/showcase/cpu-details.png",
@@ -1084,8 +1094,8 @@
     },
     {
       "path": "native/MetricIcon.qml",
-      "bytes": 37776,
-      "sha256": "1bec72b938aab58ee6c03c1f62c46f937dd77a58a0174321369f2ad40a9b9569"
+      "bytes": 39000,
+      "sha256": "482a278c6ce4635c1a4f46039b4da253251b564b166b0c48429e321377d79f73"
     },
     {
       "path": "native/OptionTabs.qml",
@@ -1275,7 +1285,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "21c5eeba3f65c20346adcc69b8f9a5ee41661ba9e42c8eb3059c449c2e529214"
+      "sha256": "6651148bee459df57ba989a0c6408432882b69435c5a56deca33ef33b46d700d"
     },
     {
       "path": "profile_paths.py",
@@ -1579,8 +1589,8 @@
     },
     {
       "path": "tests/test_metric_icon_effects.py",
-      "bytes": 60253,
-      "sha256": "124884df6ab3d460cb883c58c2970a6833f5cce255a52e0cf31ea80aa6be0a6a"
+      "bytes": 62149,
+      "sha256": "7439b644766207d50eae80405b928f4c265d0759017657bb5c59b45bfc02504b"
     },
     {
       "path": "tests/test_metric_state_feedback_qml.py",
@@ -1724,8 +1734,8 @@
     },
     {
       "path": "tests/test_source_export.py",
-      "bytes": 17081,
-      "sha256": "c0febc46e5b509ae0204dafe590b6f97393cfe99254a83b37ebbf3469b1ccdef"
+      "bytes": 17945,
+      "sha256": "81a3cc206653ece0b6291bd0dc84c83a2397574cbfccf5ff255c4194c619fe4a"
     },
     {
       "path": "tests/test_stale_readings.py",
@@ -1989,8 +1999,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 20853,
-      "sha256": "5fa35e0d5ac7c60376b798ed9e2401ad84a9313a85fb75068c67f2509aeccc9b"
+      "bytes": 20960,
+      "sha256": "edba89e159fc13affb72da9343f29d78b2216b905a4899e0c3cd0d6fd0d9ffd8"
     },
     {
       "path": "tools/fetch_qt_licenses.py",

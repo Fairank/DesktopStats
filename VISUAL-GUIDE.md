@@ -48,6 +48,11 @@
 旋转按绘制帧推进，转速变化不会重启动画。偶发慢帧下限制单次旋转幅度，减少突然跳步或反转错觉。
 其他特效维持独立的更新节奏；没有活动风扇时，使用原有的低频共享时钟，避免让所有通道一起加速。
 
+支持的显卡绘图后端把同一电弧的四个图像格合成一次绘制；软件绘图或着色器失败时使用原来的图像路径。
+这项优化保留电流的颜色、细节、透明叠加顺序和动画频率，不改变硬件读数或采样间隔。
+着色器源码与 Qt 绘图资源位于 `assets/shaders/`；使用 PySide6 配套的 Qt 6.10.2 `qsb` 可重建：
+`qsb --glsl "100 es,120,150" --hlsl 50 --msl 12 -o assets/shaders/metric-discharge.frag.qsb assets/shaders/metric-discharge.frag`。
+
 扩展采集器现在接收 LibreHardwareMonitor 实际提供的 **Noise / dBA** 通道，
 单位遵循其 [0.9.6 传感器定义](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/v0.9.6/LibreHardwareMonitorLib/Hardware/ISensor.cs)。
 在 **添加指标 → 全部指标** 中选择发现的噪声传感器即可加入顶部栏或组件；

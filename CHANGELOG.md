@@ -1,5 +1,15 @@
 # Changes
 
+## 0.26.0-preview.5
+
+- Composite the existing four arc-atlas cells in one RHI shader quad, preserving
+  premultiplied source-over order, inherited opacity, stage/frame interpolation,
+  atlas artwork and cadence. Retain the original four-image path for software
+  rendering and shader errors. Include the original GLSL and generated Qt asset.
+- Stop calculating unrelated phases in composite fan ticks. Keep the existing
+  per-frame rotor, positive-reading continuity, speed controls and stopping rules.
+- Preserve configuration, data collection intervals, device sources and history.
+
 ## 0.26.0-preview.4
 
 - Move continuous fan rotation to frame-driven updates in the existing shared

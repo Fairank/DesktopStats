@@ -80,6 +80,8 @@ REVIEWED_FILES = frozenset(
             "metric-motion/arc-warm.png",
             "metric-motion/arc-blue.png",
             "metric-motion/manifest.json",
+            "shaders/metric-discharge.frag",
+            "shaders/metric-discharge.frag.qsb",
             "showcase/history-light.png",
             "showcase/history-dark.png",
             "showcase/scene-preview.png",
@@ -202,6 +204,7 @@ _BINARY_SUFFIXES = frozenset(
     }
 )
 _TEXT_SUFFIXES = {
+    ".frag",
     ".py",
     ".qml",
     ".js",

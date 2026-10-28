@@ -13,7 +13,7 @@ os.environ.setdefault("QML_DISABLE_DISK_CACHE", "1")
 os.environ.setdefault("DESKTOP_STATS_DATA", str(Path(__file__).resolve().parents[1] / "qa-private/redesign40/metric-effects/profile"))
 
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QUrl
-from PySide6.QtGui import QWindow
+from PySide6.QtGui import QShader, QWindow
 from PySide6.QtQml import QQmlComponent, QQmlEngine, QQmlExpression, qmlContext
 from PySide6.QtQuick import QQuickWindow
 from PySide6.QtTest import QTest
@@ -399,6 +399,39 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
             self.assertAlmostEqual(self.find("metricIconPulseCore").height(),.44,delta=.02)
             self.assertEqual(self.find("metricIconGlyph").property("opacity"), 1)
         self.assertEqual(states, [False, True])
+
+    def test_composite_fan_advances_only_its_rotor_without_unused_phases(self):
+        self.load()
+        self.configure("fan", "cpu_fan_rpm", "auto")
+        self.window.setProperty("channels", dict(profile="fan", available=True, spin=.8))
+        self.find("metricIconAnimation").stop()
+        icon = self.find("icon")
+        icon.setProperty("previousTick", 1000)
+        before = icon.property("spinPhase")
+        for now in range(1016, 1321, 16):
+            self.evaluate(icon, f"advanceClock({now})")
+        self.assertNotEqual(icon.property("spinPhase"), before)
+        for name in ("phase", "loadPhase", "thermalArcPhase", "energyPhase", "inboundPhase", "outboundPhase"):
+            self.assertEqual(icon.property(name), 0, name)
+
+    def test_software_discharge_fallback_keeps_four_original_cells(self):
+        self.load()
+        self.configure("power", "cpu_power", "flow")
+        self.settle_level(.8)
+        self.frame(.145)
+        loader = self.find("metricDischargeShaderLoader")
+        self.assertFalse(loader.property("active"))
+        self.assertEqual(len([item for item in self.items() if item.objectName().startswith("metricDischargeCell_")]), 4)
+        self.assertFalse(any(item.objectName() == "metricDischargeShader" for item in self.items()))
+
+    def test_discharge_package_has_real_fragment_shaders_for_supported_rhi_backends(self):
+        shader = QShader.fromSerialized((ROOT / "assets/shaders/metric-discharge.frag.qsb").read_bytes())
+        self.assertTrue(shader.isValid())
+        self.assertEqual(shader.stage(), QShader.FragmentStage)
+        sources = {(key.source(), key.sourceVersion().version()) for key in shader.availableShaders()}
+        for source in ((QShader.SpirvShader, 100), (QShader.GlslShader, 150),
+                       (QShader.HlslShader, 50), (QShader.MslShader, 12)):
+            self.assertIn(source, sources)
 
     def test_rotor_moves_around_stationary_hub_and_preserves_frame_geometry(self):
         self.load()

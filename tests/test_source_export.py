@@ -142,6 +142,21 @@ class SourceExportTests(unittest.TestCase):
             self.assertTrue(any(name.endswith("assets/test.png") for name in names))
             self.assertTrue(any(name.endswith("assets/test.ico") for name in names))
 
+    def test_reviewed_original_shader_source_and_render_asset_roundtrip(self):
+        names = ("assets/shaders/metric-discharge.frag", "assets/shaders/metric-discharge.frag.qsb")
+        for name in names:
+            self.write(name, (PROJECT / name).read_bytes())
+        with patch.object(export, "REVIEWED_FILES", frozenset({"assets/icon.svg", *names})):
+            self.run_export()
+        with zipfile.ZipFile(self.output) as archive:
+            for name in names:
+                self.assertEqual(archive.read("DesktopStats-0.19.0-preview.1-source/"+name),
+                                 (PROJECT / name).read_bytes())
+
+    def test_fragment_shader_source_is_scanned_for_private_data(self):
+        with self.assertRaises(export.ExportError):
+            export._scan("assets/shaders/example.frag", b"// C:/"+b"Users/"+b"PrivateOwner/local-project")
+
     def test_renamed_executable_magic_is_rejected_as_source_or_image(self):
         for name, payload in (
             ("app.py", b"MZ\x00not source"),

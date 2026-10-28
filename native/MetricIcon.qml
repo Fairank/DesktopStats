@@ -268,6 +268,7 @@ Item {
             displayedSpin=converge(displayedSpin,spinTarget,elapsed)
             displayedLevel=spinChannelActive?displayedSpin:0
             spinPhase=spinChannelActive?(spinPhase+Math.min(.1,elapsed*fanRotationsPerSecond/1000))%1:0
+            return
         } else if(compositeActive) {
             displayedLoad=converge(displayedLoad,loadTarget,elapsed)
             displayedThermal=converge(displayedThermal,thermalTarget,elapsed)
@@ -363,8 +364,8 @@ Item {
         }
     }
 
-    // The whole window shares one clock. Image sources never depend on phase,
-    // stage or theme; 4 retained quads blend adjacent stage/phase cells.
+    // The whole window shares one clock. RHI combines the same four weighted
+    // cells in one quad; software/error paths retain the original image blend.
     component DischargeAtlas: Item {
         id:atlas
         property real amount:0
@@ -381,10 +382,28 @@ Item {
         width:18;height:18
         opacity:Math.min(1,root.channelOpacity(amount)*(["cpu","gpu"].includes(root.name)?1.08:1))
             *Math.min(1,amount*10)*layerOpacity
+        readonly property bool shaderSupported: GraphicsInfo.api === GraphicsInfo.OpenGL
+            || GraphicsInfo.api === GraphicsInfo.Direct3D11 || GraphicsInfo.api === GraphicsInfo.Direct3D12
+            || GraphicsInfo.api === GraphicsInfo.Vulkan || GraphicsInfo.api === GraphicsInfo.Metal
+        property bool shaderFailed: false
+        function disableShader() { shaderFailed = true }
+        Loader {
+            id: shaderLayer; objectName: "metricDischargeShaderLoader"
+            x:-7;y:-7;width:32;height:32
+            active:atlas.shaderSupported && !atlas.shaderFailed
+            sourceComponent: ShaderEffect {
+                objectName:"metricDischargeShader"
+                property var source: Image {source:atlas.atlasSource;visible:false;cache:true;smooth:true}
+                property real stagePosition:atlas.stagePosition
+                property real framePosition:atlas.framePosition
+                fragmentShader:Qt.resolvedUrl("../assets/shaders/metric-discharge.frag.qsb")
+                onStatusChanged:if(status===ShaderEffect.Error)Qt.callLater(atlas.disableShader)
+            }
+        }
         Item {
-            x:-7;y:-7;width:32;height:32;clip:true
+            x:-7;y:-7;width:32;height:32;clip:true;visible:!shaderLayer.active
             Repeater {
-                model:4
+                model:shaderLayer.active?0:4
                 Image {
                     required property int index
                     objectName:"metricDischargeCell_"+index
