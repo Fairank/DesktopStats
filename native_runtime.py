@@ -48,7 +48,7 @@ from settings_acrylic_material import SettingsAcrylicMaterial
 from settings_backdrop_host import SettingsBackdropHost
 from settings_blur_material import SettingsBlurMaterial
 from settings_material_bridge import SettingsMaterialBridge
-from stats_config import ASSETS, CONFIG, MODULES, SKINS, load
+from stats_config import ASSETS, CONFIG, MODULES, PROFILE_PATHS, SKINS, load
 from top_bar_runtime import TopBarManager
 from widget_catalog import TEMPLATES
 from widget_material_geometry import backdrop_shapes, rounded_mask
@@ -1279,6 +1279,16 @@ class LocalServer(QLocalServer):
                     "version": self.runtime.controller.version,
                     "widgets": len(self.runtime.widgets),
                     "native": True,
+                    "profile": PROFILE_PATHS.status(),
+                    "motion_enabled": bool(self.runtime.controller.motionEnabled),
+                    "top_bar_configuration": [
+                        {key: item[key] for key in ("id", "metric")} | {
+                            "style": item["prefs"]["style"],
+                            "icon_effect": item["prefs"].get("icon_effect", "off"),
+                            "metrics": item["prefs"].get("metrics", [item["metric"]]),
+                        }
+                        for item in self.runtime.controller._saved["top_bar"]["items"]
+                    ],
                     "settings_visible": Runtime._settings_window(self.runtime).isVisible(),
                     "dirty": self.runtime.controller.dirty
                     or bool(self.runtime.settings.property("pendingEdits")),

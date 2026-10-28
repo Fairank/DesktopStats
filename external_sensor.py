@@ -15,6 +15,7 @@ MAX_TIMESTAMP = 253402300799
 SENSOR_TYPES = {
     "Temperature": dict(unit="°C", raw_unit="°C", digits=1, maximum=125, kind="line"),
     "Fan": dict(unit="RPM", raw_unit="RPM", digits=0, maximum=12000, kind="line"),
+    "Noise": dict(unit="dBA", raw_unit="dBA", digits=1, maximum=130, kind="line"),
     "Voltage": dict(unit="V", raw_unit="V", digits=3, maximum=25, kind="line"),
     "Current": dict(unit="A", raw_unit="A", digits=3, maximum=100, kind="line"),
     "Power": dict(unit="W", raw_unit="W", digits=1, maximum=400, kind="line"),

@@ -234,7 +234,7 @@ class TopBarActivityIntegrationTests(unittest.TestCase):
 
     def test_external_sensor_types_route_without_guessing_a_name_or_device(self):
         expected = {
-            'Temperature': ('temperature', 'heat'), 'Fan': ('fan', 'spin'),
+            'Temperature': ('temperature', 'heat'), 'Fan': ('fan', 'spin'), 'Noise': ('noise', 'off'),
             'Voltage': ('voltage', 'flow'), 'Current': ('voltage', 'flow'),
             'Power': ('power', 'flow'), 'Clock': ('frequency', 'pulse'),
             'Load': ('grid', 'pulse'), 'Level': ('grid', 'pulse'),

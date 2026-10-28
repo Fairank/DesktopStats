@@ -269,6 +269,7 @@ namespace DesktopStats.Collector
             {
                 case "Temperature": unit = "°C"; return true;
                 case "Fan": unit = "RPM"; return true;
+                case "Noise": unit = "dBA"; return true; // LHM v0.9.6 ISensor.cs: A-weighted level.
                 case "Voltage": unit = "V"; return true;
                 case "Current": unit = "A"; return true;
                 case "Power": unit = "W"; return true;
@@ -280,7 +281,7 @@ namespace DesktopStats.Collector
                 case "Throughput": unit = "B/s"; return true;
                 case "Factor": unit = ""; return true;
                 case "Energy": unit = "mWh"; return true; // Raw; parent normalizes explicitly.
-                default: unit = null; return false; // No Control/Noise guesses.
+                default: unit = null; return false; // No Control or unknown-type guesses.
             }
         }
 
@@ -368,7 +369,8 @@ namespace DesktopStats.Collector
                 string unit;
                 if (!TryUnit("Energy", out unit) || unit != "mWh") throw new Exception("Energy unit");
                 if (!TryUnit("Throughput", out unit) || unit != "B/s") throw new Exception("Throughput unit");
-                if (TryUnit("Control", out unit) || TryUnit("Noise", out unit) || TryUnit("Unknown", out unit))
+                if (!TryUnit("Noise", out unit) || unit != "dBA") throw new Exception("Noise unit");
+                if (TryUnit("Control", out unit) || TryUnit("Unknown", out unit))
                     throw new Exception("Unsupported type");
                 if (Finite(float.NaN) != null || Finite(float.PositiveInfinity) != null || Finite(null) != null || Finite(0f) != 0d)
                     throw new Exception("Finite values");
@@ -397,8 +399,11 @@ namespace DesktopStats.Collector
                 fixture.hardware.Add(new HardwareRow { id = "/test/battery", name = "Synthetic battery", type = "Battery", parent_id = null });
                 fixture.sensors.Add(new SensorRow { id = "/test/battery/energy/0", name = "Synthetic capacity", hardware_id = "/test/battery", hardware_name = "Synthetic battery", hardware_type = "Battery", type = "Energy", unit = "mWh", value = 12345d, min = 12000d, max = 13000d });
                 fixture.sensors.Add(new SensorRow { id = "/test/battery/power/0", name = "Synthetic idle", hardware_id = "/test/battery", hardware_name = "Synthetic battery", hardware_type = "Battery", type = "Power", unit = "W", value = 0d, min = 0d, max = 15d });
+                fixture.hardware.Add(new HardwareRow { id = "/test/acoustic", name = "Synthetic acoustic sensor", type = "SuperIO", parent_id = null });
+                fixture.sensors.Add(new SensorRow { id = "/test/acoustic/noise/0", name = "Synthetic noise level", hardware_id = "/test/acoustic", hardware_name = "Synthetic acoustic sensor", hardware_type = "SuperIO", type = "Noise", unit = "dBA", value = 42.5d, min = 0d, max = 130d });
                 string line = SerializeBounded(fixture);
-                if (line.IndexOf("\n", StringComparison.Ordinal) >= 0 || line.IndexOf("\"unit\":\"mWh\"", StringComparison.Ordinal) < 0)
+                if (line.IndexOf("\n", StringComparison.Ordinal) >= 0 || line.IndexOf("\"unit\":\"mWh\"", StringComparison.Ordinal) < 0
+                    || line.IndexOf("\"unit\":\"dBA\"", StringComparison.Ordinal) < 0)
                     throw new Exception("NDJSON");
                 // Deliberately bypass SafeLabel only in this synthetic stress case
                 // to prove the transport cap independently of normal 128-char labels.

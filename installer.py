@@ -12,6 +12,7 @@ import winreg
 from pathlib import Path
 
 from product_version import VERSION
+from profile_paths import POINTER_NAME, resolve_profile_paths
 
 DIRECTORY = Path(os.environ["LOCALAPPDATA"]) / "Programs/DesktopStats"
 REGISTRY = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\DesktopStats"
@@ -381,9 +382,25 @@ def _write_registration(target, folders):
             winreg.SetValueEx(key, name, 0, winreg.REG_SZ, value)
         for name in ("NoModify", "NoRepair"):
             winreg.SetValueEx(key, name, 0, winreg.REG_DWORD, 1)
+    set_autostart(_installed_autostart(target), target)
+
+
+def _installed_autostart(target):
+    """Read the committed installation's selection, never the installer process's legacy profile."""
+    selected = resolve_profile_paths(frozen=True, executable=target)
+    if selected.source == "installed_pointer":
+        for name in ("preferences.json", "preferences.backup.json"):
+            try:
+                value = json.loads((selected.directory / name).read_text(encoding="utf-8"))
+                enabled = value.get("autostart")
+                if type(enabled) is bool:
+                    return enabled
+            except (OSError, ValueError, TypeError, AttributeError):
+                continue
+        raise RuntimeError("所选配置没有有效的启动设置；安装已回滚，请检查原配置。")
     from stats_config import load
 
-    set_autostart(load()["autostart"], target)
+    return load()["autostart"]
 
 
 def install():
@@ -394,6 +411,9 @@ def install():
         raise RuntimeError("请从解压后的新发布包运行安装，不能覆盖当前正在执行的安装目录。")
     files, directories = _bundle_files(source_root)
     old_owned = _old_manifest(DIRECTORY)
+    # Validate an existing explicit selection before closing the old app or
+    # copying files. A corrupt pointer must never silently revert to defaults.
+    resolve_profile_paths(frozen=True, executable=DIRECTORY / "DesktopStats.exe")
     close_existing()
     DIRECTORY.parent.mkdir(parents=True, exist_ok=True)
     stage, backup = _sibling("stage"), _sibling("backup")
@@ -412,7 +432,7 @@ def install():
             originals, original_directories = _files(DIRECTORY)
             for relative, file in originals.items():
                 key = relative.as_posix().casefold()
-                if key in old_owned or key == "install-manifest.json":
+                if (key in old_owned and key != POINTER_NAME.casefold()) or key == "install-manifest.json":
                     continue
                 target = stage / relative
                 if key in new_owned or target.exists():

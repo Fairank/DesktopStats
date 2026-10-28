@@ -137,7 +137,13 @@ Item {
     readonly property real feedbackStrength: intensity * activityStrength
     readonly property real intensityGain: effectControlsValid?intensity*(1.8-.8*intensity):0
     readonly property real accentOpacity: intensityGain * (0.85 + 0.15 * displayedLevel)
-    readonly property real cycleDuration: resolvedEffect === "spin" ? 2750/(speed*(.55+1.2*displayedLevel))
+    // Decorative fan speed is continuous and separate from the measured RPM.
+    // At 2x it stays below 3.2 turns/s to avoid a four-blade stroboscopic reversal
+    // at the shared 34ms presentation cadence. No extra animation timer.
+    readonly property real fanActivity:Math.max(0,Math.min(1,compositeActive?displayedSpin:displayedLevel))
+    readonly property real fanRotationsPerSecond:speed*(.08+1.52*(1-Math.exp(-3*fanActivity))/(1-Math.exp(-3)))
+    readonly property real fanTrailStrength:Math.max(0,Math.min(1,(fanActivity-.2)/.6))
+    readonly property real cycleDuration: resolvedEffect === "spin" ? 1000/fanRotationsPerSecond
         : 2400/(speed*(.82+.36*displayedLevel))
     readonly property real wave: 0.5 - 0.5 * Math.cos(phase * Math.PI * 2)
     readonly property bool darkSurface: ink.r * .2126 + ink.g * .7152 + ink.b * .0722 > .55
@@ -270,7 +276,7 @@ Item {
             energyPhase=energyActive?(energyPhase+elapsed*speed*(.82+.36*displayedEnergy)/2400)%1:0
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(.82+.36*displayedInbound)/2400)%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(.82+.36*displayedOutbound)/2400)%1:0
-            spinPhase=spinChannelActive?(spinPhase+elapsed*speed*(.35+1.65*displayedSpin)/3300)%1:0
+            spinPhase=spinChannelActive?(spinPhase+elapsed*fanRotationsPerSecond/1000)%1:0
         } else displayedLevel=converge(displayedLevel,level,elapsed)
         phase = (phase + elapsed / cycleDuration) % 1
     }
@@ -485,6 +491,11 @@ Item {
         Loader {
             anchors.fill:parent;active:root.spinActive
             sourceComponent:Item {
+                VectorPart {
+                    objectName:"metricIconRotorTrail";fragment:root.glyphParts[0] || ""
+                    strokeWidth:1.8;rotation:(root.compositeActive?root.spinPhase:root.phase)*360-16
+                    opacity:root.rotorOpacity*.18*root.fanTrailStrength
+                }
                 VectorPart {
                     objectName:"metricIconRotorStructure";fragment:root.glyphParts[0] || ""
                     strokeWidth:1.8;rotation:(root.compositeActive?root.spinPhase:root.phase)*360

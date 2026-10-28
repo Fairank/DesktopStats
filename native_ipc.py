@@ -5,11 +5,11 @@ import json
 
 from PySide6.QtNetwork import QLocalSocket
 
-from stats_config import BASE
+from stats_config import IPC_PROFILE_KEY
 
 
 def name():
-    return "DesktopStatsNative-" + hashlib.sha256(str(BASE).encode()).hexdigest()[:20]
+    return "DesktopStatsNative-" + hashlib.sha256(IPC_PROFILE_KEY.encode()).hexdigest()[:20]
 
 
 def send(command, timeout=1800):

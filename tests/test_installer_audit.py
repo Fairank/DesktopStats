@@ -434,6 +434,48 @@ class InstallerTransactionAuditTests(unittest.TestCase):
             json.dumps(["DesktopStats.exe", "LICENSE", "source/obsolete.py"]), encoding="utf-8"
         )
 
+    def pointer(self):
+        profile = self.base / 'selected/DesktopStats'
+        profile.mkdir(parents=True)
+        identity = '3802912c-27ae-4083-b272-21175873969a'
+        (profile / '.desktopstats-profile.json').write_text(json.dumps(dict(schema=1, profile_id=identity)))
+        (profile / 'preferences.json').write_text(json.dumps(dict(autostart=True, unknown='retained')))
+        path = self.target / 'profile-location.json'
+        path.write_text(json.dumps(dict(schema=1, profile_id=identity, directory=str(profile))))
+        return path, profile
+
+    def test_explicit_profile_survives_upgrade_and_controls_its_own_autostart(self):
+        self.bundle()
+        self.old_install()
+        pointer, profile = self.pointer()
+        before = pointer.read_bytes()
+        preferences = (profile / 'preferences.json').read_bytes()
+        # Older manifests may have registered this local metadata as owned.
+        manifest = self.target / 'install-manifest.json'
+        names = json.loads(manifest.read_text()) + ['profile-location.json']
+        manifest.write_text(json.dumps(names))
+        with patch.dict(installer.os.environ, {'USERPROFILE': str(self.base)}):
+            installer.os.environ.pop('DESKTOP_STATS_DATA', None)
+            installer.install()
+        self.assertEqual(pointer.read_bytes(), before)
+        self.assertEqual((profile / 'preferences.json').read_bytes(), preferences)
+        self.assertIn('--background', self.registry.values[installer.RUN_KEY]['DesktopStats'][0])
+        sys.modules['stats_config'].load.assert_not_called()
+
+    def test_broken_pointer_fails_before_close_copy_or_reverting_to_legacy(self):
+        self.bundle()
+        self.old_install()
+        pointer, profile = self.pointer()
+        (profile / '.desktopstats-profile.json').write_text('{}')
+        with patch.dict(installer.os.environ, {'USERPROFILE': str(self.base)}):
+            installer.os.environ.pop('DESKTOP_STATS_DATA', None)
+            with self.assertRaises(RuntimeError):
+                installer.install()
+        self.assertTrue(pointer.is_file())
+        self.assertEqual((self.target / 'DesktopStats.exe').read_bytes(), b'old executable')
+        installer.close_existing.assert_not_called()
+        self.spawn.assert_not_called()
+
     def test_nonfrozen_install_refuses_before_touching_installation(self):
         with patch.object(installer.sys, "frozen", False):
             with self.assertRaises(RuntimeError):

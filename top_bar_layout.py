@@ -23,7 +23,7 @@ def metric_icon(metric: str, preferences=None) -> str:
     if metric in EXTERNAL_SLOTS:
         binding = sensor_binding(metric, preferences)
         return {
-            'Temperature': 'temperature', 'Fan': 'fan', 'Voltage': 'voltage',
+            'Temperature': 'temperature', 'Fan': 'fan', 'Noise': 'noise', 'Voltage': 'voltage',
             'Current': 'voltage', 'Power': 'power', 'Clock': 'frequency',
             'Load': 'grid', 'Level': 'grid',
         }.get(binding['sensor_type'] if binding else '', 'sensors')
@@ -66,7 +66,7 @@ def scalar_feedback_mode(metric, preferences):
         return ''
     binding = sensor_binding(metric, preferences)
     return {
-        'Temperature': 'heat', 'Fan': 'spin', 'Voltage': 'flow',
+        'Temperature': 'heat', 'Fan': 'spin', 'Noise': 'off', 'Voltage': 'flow',
         'Current': 'flow', 'Power': 'flow', 'Clock': 'pulse',
         'Load': 'pulse', 'Level': 'pulse', 'Throughput': 'pulse',
     }.get(binding['sensor_type'] if binding else '', 'off')

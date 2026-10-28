@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QApplication
 
 from native_controller import Controller
 from native_runtime import LocalServer
-from stats_config import DEFAULT
+from stats_config import DEFAULT, PROFILE_PATHS
 
 
 class RuntimeStatusTests(unittest.TestCase):
@@ -38,6 +38,12 @@ class RuntimeStatusTests(unittest.TestCase):
                     server.read(client)
                 reply = json.loads(client.write.call_args.args[0])
                 self.assertTrue(reply["ok"])
+                self.assertEqual(reply["profile"], PROFILE_PATHS.status())
+                self.assertEqual(set(reply["profile"]), {"source", "profile_id", "storage_fingerprint"})
+                self.assertIs(reply["motion_enabled"], True)
+                self.assertEqual(len(reply["top_bar_configuration"]), len(DEFAULT["top_bar"]["items"]))
+                for item in reply["top_bar_configuration"]:
+                    self.assertEqual(set(item), {"id", "metric", "style", "icon_effect", "metrics"})
                 self.assertIs(reply["settings_minimized"], minimized)
                 self.assertIs(reply["settings_active"], False)
                 self.assertIs(reply["settings_visible"], False)

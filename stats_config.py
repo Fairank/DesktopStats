@@ -3,7 +3,6 @@
 import copy
 import json
 import math
-import os
 import re
 import sys
 import unicodedata
@@ -12,17 +11,15 @@ from pathlib import Path
 from external_sensor import EXTERNAL_SLOTS, validate_bindings
 from localization import LANGUAGES
 from metrics import METRICS
+from profile_paths import resolve_profile_paths
 from skin_styles import SKINS
 from top_bar_config import default_top_bar, validate_top_bar
 from widget_catalog import GLASS_DEFAULTS, MODULES, TEMPLATES, from_template, widget_defaults
 
 ASSETS = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
-BASE = Path(
-    os.environ.get(
-        "DESKTOP_STATS_DATA",
-        str(Path(os.environ.get("LOCALAPPDATA", Path.home())) / "DesktopStats"),
-    )
-)
+PROFILE_PATHS = resolve_profile_paths()
+BASE = PROFILE_PATHS.directory
+IPC_PROFILE_KEY = PROFILE_PATHS.ipc_key
 BASE.mkdir(parents=True, exist_ok=True)
 CONFIG = BASE / "preferences.json"
 BACKUP = BASE / "preferences.backup.json"

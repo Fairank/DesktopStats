@@ -4,6 +4,7 @@ import copy
 import ctypes as c
 import math
 import struct
+import time
 import unittest
 from contextlib import ExitStack
 from types import SimpleNamespace
@@ -11,6 +12,7 @@ from unittest.mock import Mock, patch
 
 import sensors
 from cooling_sensor import FAN_ENDPOINTS, SOURCE, AsusFans, decode_asus_fan
+from sensor_diagnostics import cooling_noise_rows
 from stats_config import DEFAULT
 
 
@@ -331,6 +333,61 @@ class CoolingSamplerIntegrationTests(unittest.TestCase):
         self.assertNotIn("gpu_fan_rpm", sample)
         self.assertEqual(sample["metric_sources"], {})
         self.asus.read_status.assert_not_called()
+
+
+class CoolingNoiseContextTests(unittest.TestCase):
+    def test_real_controller_detail_uses_discovered_acoustic_inventory_without_new_probe(self):
+        import native_controller as controls
+        with patch.object(controls, 'load', return_value=copy.deepcopy(DEFAULT)):
+            ui = controls.Controller()
+        try:
+            ui._saved['top_bar']['items'] = [dict(id='b_fan', metric='cpu_fan_rpm', prefs={})]
+            ui.receive(dict(time=time.time(), cpu_fan_rpm=5200,
+                            external_sensors={}, external_status=dict(state='ready'),
+                            external_catalog={'/sound': dict(type='Noise', unit='dBA', value=38.6,
+                                                             name='Case sound', hardware_name='Case')}))
+            self.assertNotIn('/sound', ui._data['external_sensors'])
+            detail = ui.topBarDetailRow('b_fan')
+            self.assertEqual(detail['number_text'], '5200')
+            acoustic = next(row for row in detail['related'] if row['label'].startswith('环境噪声'))
+            self.assertEqual(acoustic['value'], '38.6 dBA')
+            self.assertTrue(acoustic['available'])
+        finally:
+            ui.close()
+            ui.deleteLater()
+
+    def test_no_rpm_to_db_guess_and_explicit_collection_scope(self):
+        row, = cooling_noise_rows(dict(cpu_fan_rpm=12000, gpu_fan_rpm=12000))
+        self.assertFalse(row['available'])
+        self.assertEqual(row['value'], '—')
+        self.assertIn('未发现 Noise / dBA', row['reason'])
+        self.assertIn('不能据此判断硬件不支持', row['reason'])
+
+    def test_only_observed_noise_channels_with_canonical_units_and_finite_values(self):
+        sensor = dict(type='Noise', unit='dBA', name='Case sound', hardware_name='Case', value=0)
+        for value in (0, 38.6, 140):
+            data = dict(external_sensors={'/sound': dict(sensor, value=value)}, external_status={'state': 'ready'})
+            row, = cooling_noise_rows(data)
+            self.assertTrue(row['available'])
+            self.assertEqual(row['value'], f'{value:.1f} dBA')
+            self.assertIn('Case', row['source'])
+        for change in (dict(type='Fan'), dict(unit='RPM')):
+            row, = cooling_noise_rows(dict(external_sensors={'/sound': dict(sensor, **change)}))
+            self.assertFalse(row['available'])
+        for value in (None, True, -1, float('nan'), float('inf')):
+            row, = cooling_noise_rows(dict(external_sensors={'/sound': dict(sensor, value=value)}))
+            self.assertFalse(row['available'])
+            self.assertEqual(row['value'], '—')
+
+    def test_stale_provider_failure_and_bounded_inventory(self):
+        sensor = dict(type='Noise', unit='dBA', name='Case sound', value=38.6)
+        data = dict(external_sensors={str(i): sensor for i in range(20)}, external_status={'state': 'ready'})
+        self.assertEqual(len(cooling_noise_rows(data)), 6)
+        self.assertTrue(all(not row['available'] and row['reason'] == '读数已过期'
+                            for row in cooling_noise_rows(data, stale=True)))
+        data['external_status'] = dict(state='error', detail='Observed provider error')
+        self.assertTrue(all(not row['available'] and row['reason'] == 'Observed provider error'
+                            for row in cooling_noise_rows(data)))
 
 
 if __name__ == "__main__":

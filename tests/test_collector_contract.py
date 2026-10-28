@@ -20,7 +20,7 @@ class CollectorContractTests(unittest.TestCase):
             capture_output=True, timeout=15, creationflags=subprocess.CREATE_NO_WINDOW,
         )
 
-    def test_synthetic_protocol_preserves_raw_energy_and_real_zero(self):
+    def test_synthetic_protocol_preserves_raw_energy_real_zero_and_noise_dba(self):
         result = self.run_synthetic("--self-test")
         self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8", "replace"))
         lines = result.stdout.decode("utf-8").splitlines()
@@ -29,11 +29,14 @@ class CollectorContractTests(unittest.TestCase):
         self.assertEqual((payload["schema"], payload["provider"], payload["version"]),
                          (1, "LibreHardwareMonitor", "0.9.6"))
         self.assertIsInstance(payload["timestamp"], (int, float))
-        energy, power = payload["sensors"]
+        energy, power, noise = payload["sensors"]
         self.assertEqual((energy["unit"], energy["value"], energy["min"], energy["max"]),
                          ("mWh", 12345, 12000, 13000))
         self.assertEqual((power["unit"], power["value"]), ("W", 0))
         self.assertEqual(energy["hardware_id"], payload["hardware"][0]["id"])
+        self.assertEqual((noise["type"], noise["unit"], noise["value"], noise["min"], noise["max"]),
+                         ("Noise", "dBA", 42.5, 0, 130))
+        self.assertEqual(noise["hardware_id"], payload["hardware"][1]["id"])
         self.assertLess(len(result.stdout), 2 * 1024 * 1024)
         self.assertIn(b"hardware was not opened", result.stderr)
 

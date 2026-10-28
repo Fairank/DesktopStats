@@ -927,7 +927,7 @@ Window { id:scene;width:360;height:100;visible:false;color:"white";
         with patch.object(controls, "load", return_value=validate(copy.deepcopy(DEFAULT))):
             ui = controls.Controller()
         self.addCleanup(ui.close)
-        expected = {"Temperature": ("temperature", "heat"), "Fan": ("fan", "spin"),
+        expected = {"Temperature": ("temperature", "heat"), "Fan": ("fan", "spin"), "Noise": ("noise", "off"),
                     "Voltage": ("voltage", "flow"), "Current": ("voltage", "flow"),
                     "Power": ("power", "flow"), "Clock": ("frequency", "pulse"),
                     "Load": ("grid", "pulse"), "Level": ("grid", "pulse"),

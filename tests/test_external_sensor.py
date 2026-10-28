@@ -3,6 +3,7 @@
 import copy
 import math
 import unittest
+from unittest.mock import patch
 
 from external_sensor import (
     EXTERNAL_SLOTS,
@@ -12,11 +13,13 @@ from external_sensor import (
     PROVIDER,
     SENSOR_TYPES,
     binding_meta,
+    inventory_display,
     parse_snapshot,
     sensor_binding,
     validate_bindings,
 )
 from metrics import METRICS, display_value, metric_info, metric_value, numeric, required_sources
+from top_bar_layout import metric_icon, scalar_feedback_mode
 
 
 def binding(sensor_id="/gpu/0/fan/0", sensor_type="Fan", name="Case Fan", hardware="GPU 0"):
@@ -49,7 +52,7 @@ def snapshot(sensor_type="Fan", value=1234, *, sensor_id="/gpu/0/fan/0", unit=No
 class ExternalBindingTests(unittest.TestCase):
     def test_six_slots_and_explicit_units_are_fixed(self):
         self.assertEqual(EXTERNAL_SLOTS, tuple(f"external_{n}" for n in range(1, 7)))
-        expected = dict(Temperature="°C", Fan="RPM", Voltage="V", Current="A", Power="W",
+        expected = dict(Temperature="°C", Fan="RPM", Noise="dBA", Voltage="V", Current="A", Power="W",
                         Clock="MHz", Load="%", Data="GB", SmallData="MB", Throughput="B/s",
                         Level="%", Energy="Wh", Factor="")
         self.assertEqual({key: spec["unit"] for key, spec in SENSOR_TYPES.items()}, expected)
@@ -304,6 +307,93 @@ class ExternalMetricTests(unittest.TestCase):
         config["widgets"]["one"]["enabled"] = True
         config["visible"] = False
         self.assertEqual(required_sources(config), set())
+
+
+class NoiseSensorTests(unittest.TestCase):
+    identifier = "/gpu/0/noise/0"
+
+    def prefs(self):
+        return dict(sensor_bindings={"external_1": binding(self.identifier, "Noise", "Acoustic level")})
+
+    def parsed(self, value, unit="dBA"):
+        return parse_snapshot(snapshot("Noise", value, sensor_id=self.identifier, unit=unit))
+
+    def test_noise_has_real_dba_units_reference_scale_and_typed_static_icon(self):
+        prefs = self.prefs()
+        self.assertEqual(SENSOR_TYPES["Noise"],
+                         dict(unit="dBA", raw_unit="dBA", digits=1, maximum=130, kind="line"))
+        self.assertEqual(validate_bindings(prefs["sensor_bindings"]), prefs["sensor_bindings"])
+        self.assertEqual((binding_meta("external_1", prefs)["unit"],
+                          binding_meta("external_1", prefs)["maximum"]), ("dBA", 130))
+        self.assertEqual(metric_icon("external_1", prefs), "noise")
+        self.assertEqual(scalar_feedback_mode("external_1", prefs), "off")
+        fan_prefs = dict(sensor_bindings={"external_1": binding(name="Noise dBA acoustic")})
+        self.assertEqual(metric_icon("external_1", fan_prefs), "fan")
+
+    def test_noise_raw_values_zero_and_null_keep_their_meaning_without_clamping(self):
+        for value, text in ((42.56, "42.6"), (0, "0.0"), (None, "—"), (175.25, "175.2"), (-1, "-1.0")):
+            with self.subTest(value=value):
+                parsed = self.parsed(value)
+                channel = parsed["sensors"][self.identifier]
+                self.assertEqual(channel["value"], value)
+                self.assertEqual(channel["available"], value is not None)
+                self.assertEqual(parsed["rejected_count"], 0)
+                self.assertEqual(inventory_display(self.identifier, channel), (text, "dBA"))
+                self.assertEqual(display_value(dict(external_sensors=parsed["sensors"]),
+                                               "external_1", self.prefs()), (value, "dBA", 1))
+
+    def test_wrong_noise_units_or_missing_channel_cannot_be_invented_from_rpm(self):
+        for unit in ("dB", "dBC", "RPM", "", None):
+            with self.subTest(unit=unit):
+                payload = snapshot("Noise", 40, sensor_id=self.identifier)
+                payload["sensors"][0]["unit"] = unit
+                result = parse_snapshot(payload)
+                self.assertEqual(result["sensors"], {})
+                self.assertEqual(result["rejected_count"], 1)
+        data = dict(cpu_fan_rpm=9000, external_1=75, external_sensors={})
+        self.assertIsNone(metric_value(data, "external_1", self.prefs()))
+        data["external_sensors"][self.identifier] = dict(type="Fan", unit="RPM", value=9000)
+        self.assertIsNone(metric_value(data, "external_1", self.prefs()))
+        channel = dict(self.parsed(42.5)["sensors"][self.identifier], unit="dB")
+        self.assertEqual(inventory_display(self.identifier, channel), ("—", "dBA"))
+        self.assertIsNone(metric_value(dict(external_sensors={self.identifier: channel}),
+                                      "external_1", self.prefs()))
+
+    def test_actual_controller_projects_fresh_noise_values_and_missing_as_static_dba(self):
+        import time
+
+        from PySide6.QtCore import QCoreApplication
+
+        import native_controller as controls
+        from stats_config import DEFAULT, validate
+
+        application = QCoreApplication.instance() or QCoreApplication([])
+        self.assertIsNotNone(application)
+        value = copy.deepcopy(DEFAULT)
+        value["top_bar"].update(enabled=True, items=[dict(id="b_noise", metric="external_1",
+            prefs=dict(self.prefs(), style="icon_value", icon_effect="auto"))])
+        with patch.object(controls, "load", return_value=validate(value)), \
+                patch.object(controls, "save", side_effect=AssertionError("No persistence")), \
+                patch("ctypes.WinDLL", side_effect=AssertionError("No hardware/native API"), create=True), \
+                patch("subprocess.Popen", side_effect=AssertionError("No collector/process")):
+            controller = controls.Controller()
+            try:
+                for reading in (42.56, 0, 175.25, None):
+                    parsed = self.parsed(reading)
+                    controller.receive(dict(time=time.time(), cpu_fan_rpm=9000,
+                        external_catalog=parsed["sensors"], external_sensors=parsed["sensors"]))
+                    row = controller.topBarRows()[0]
+                    self.assertEqual(row["numeric_value"], reading)
+                    self.assertEqual(row["available"], reading is not None)
+                    self.assertEqual((row["icon"], row["auto_effect"]), ("noise", "off"))
+                    if reading is not None:
+                        self.assertEqual(row["unit_text"], "dBA")
+                        self.assertEqual(row["number_text"], f"{reading:.1f}")
+                    else:
+                        self.assertEqual(row["value"], "—")
+                    self.assertEqual(controller._history[-1]["external_sensors"][self.identifier]["value"], reading)
+            finally:
+                controller.close()
 
 
 if __name__ == "__main__":

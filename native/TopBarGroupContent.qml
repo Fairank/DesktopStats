@@ -12,6 +12,11 @@ Item {
     property string design:"classic"
     readonly property bool grouped:row.grouped===true && (row.group_rows || []).length>1
     readonly property var members:grouped?(row.group_rows || []).slice(0,4):[]
+    // Replacing a JS row array would recreate animated delegates on every sample.
+    // Only membership changes replace the model; readings remain live bindings.
+    readonly property string memberIdentity:JSON.stringify(members.map(member=>member.metric || ""))
+    property var memberSlots:[]
+    onMemberIdentityChanged:memberSlots=members.map(member=>member.metric || "")
     readonly property var pairRows:single.pairRows
     readonly property bool labelTruncated: {
         if(!grouped)return single.labelTruncated
@@ -42,12 +47,12 @@ Item {
         anchors.verticalCenter:parent.verticalCenter
         Repeater {
             id:entries
-            model:root.members
+            model:root.memberSlots
             TopBarMetricContent {
-                required property var modelData
                 required property int index
-                objectName:"topBarGroupMember_"+(modelData.metric || "")
-                row:Object.assign({},modelData,{style:root.row.style || modelData.style || "label_value"})
+                readonly property var memberData:root.members[index] || ({})
+                objectName:"topBarGroupMember_"+(memberData.metric || "")
+                row:Object.assign({},memberData,{style:root.row.style || memberData.style || "label_value"})
                 ink:root.ink;muted:root.muted;fontFamily:root.fontFamily
                 reserveValueWidth:root.reserveValueWidth
                 motionEnabled:root.motionEnabled

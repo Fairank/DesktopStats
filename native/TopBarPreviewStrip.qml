@@ -31,6 +31,15 @@ ColumnLayout {
     readonly property var visibleRows: displayRows.slice(0, shown)
     readonly property var leftRows: visibleRows.filter(row => row.placement === "left")
     readonly property var rightRows: visibleRows.filter(row => row.placement !== "left")
+    readonly property string measureIdentity:JSON.stringify(displayRows.map(row=>row.id))
+    readonly property string leftIdentity:JSON.stringify(leftRows.map(row=>row.id))
+    readonly property string rightIdentity:JSON.stringify(rightRows.map(row=>row.id))
+    property var measureSlots:[]
+    property var leftSlots:[]
+    property var rightSlots:[]
+    onMeasureIdentityChanged:measureSlots=displayRows.map(row=>row.id)
+    onLeftIdentityChanged:leftSlots=leftRows.map(row=>row.id)
+    onRightIdentityChanged:rightSlots=rightRows.map(row=>row.id)
     readonly property int hiddenCount: displayRows.length - shown
     signal selected(string identifier)
     signal reordered(string identifier, string before, string placement)
@@ -111,14 +120,14 @@ ColumnLayout {
     }
     Repeater {
         id: measurements
-        model: root.displayRows
+        model: root.measureSlots
         onItemAdded: fit.restart()
         delegate: TopBarGroupContent {
             design:root.barDesign
             motionEnabled:root.interactivePreview && stats.motionEnabled
-            required property var modelData
+            required property int index
             visible: false
-            row: modelData
+            row: root.displayRows[index] || ({})
             reserveValueWidth: true
             fontFamily: ui.fontFamily
             onImplicitWidthChanged: fit.restart()
@@ -167,7 +176,7 @@ ColumnLayout {
         }
         component PreviewMetric: ToolButton {
             id: metric
-            required property var modelData
+            property var modelData:({})
             objectName: root.sampleOnly?root.objectName+"Metric_"+modelData.id:"topBarPreviewMetric_"+modelData.id
             width: root.rowWidth(modelData)
             height: root.barHeight
@@ -220,14 +229,14 @@ ColumnLayout {
             x: 8 + Math.max(root.barHeight, 24) + root.itemSpacing
             anchors.verticalCenter: parent.verticalCenter
             spacing: root.itemSpacing
-            Repeater { id:leftMetrics;model: root.leftRows; delegate: PreviewMetric {} }
+            Repeater { id:leftMetrics;model: root.leftSlots; delegate: PreviewMetric {required property int index;modelData:root.leftRows[index] || ({})} }
         }
         Row {
             anchors.right: parent.right
             anchors.rightMargin: 8
             anchors.verticalCenter: parent.verticalCenter
             spacing: root.itemSpacing
-            Repeater { id:rightMetrics;model: root.rightRows; delegate: PreviewMetric {} }
+            Repeater { id:rightMetrics;model: root.rightSlots; delegate: PreviewMetric {required property int index;modelData:root.rightRows[index] || ({})} }
             ToolButton {
                 objectName: root.sampleOnly?root.objectName+"Overflow":"topBarPreviewOverflow"
                 visible: root.hiddenCount > 0

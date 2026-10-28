@@ -25,8 +25,11 @@ Item {
     readonly property bool isGraph: style === "graph"
     readonly property bool isStacked: style === "stacked"
     readonly property bool isDuplexInline: style === "duplex_inline"
-    readonly property bool isDuplex: style === "duplex" || isDuplexInline
+    readonly property bool isDuplex: style === "duplex" || style === "duplex_inline"
     readonly property var pairRows: isDuplex ? (row.paired_rows || []).slice(0, 2) : []
+    readonly property string pairIdentity:JSON.stringify(pairRows.map(pair=>[pair.metric || "",pair.direction || ""]))
+    property var pairSlots:[]
+    onPairIdentityChanged:pairSlots=pairRows.map((pair,index)=>index)
     readonly property bool twoRows: isGraph || isStacked || (isDuplex && !isDuplexInline)
     // The controller owns formatting; legacy rows retain their full value.
     readonly property bool splitValue: typeof row.number_text === "string"
@@ -60,31 +63,31 @@ Item {
         y:root.isDuplexInline ? (root.height-12)/2 : 0
         Repeater {
             id: pairRepeater
-            model: root.pairRows
+            model: root.pairSlots
             delegate: Item {
                 id: pairLine
-                required property var modelData
                 required property int index
+                readonly property var pairData:root.pairRows[index] || ({})
                 objectName: "topBarPair_" + index
                 implicitWidth: 18 + Math.max(pairNumber.advanceWidth, root.reserveValueWidth ? pairReserve.advanceWidth : 0)
-                    + (pairLine.modelData.unit_text ? 3 + pairUnit.advanceWidth : 0)
+                    + (pairLine.pairData.unit_text ? 3 + pairUnit.advanceWidth : 0)
                 width: implicitWidth; height: 12
                 x:root.isDuplexInline && index===1 ? root.pairAWidth+12 : 0
                 y:root.isDuplexInline ? 0 : index*12
-                TextMetrics { id: pairNumber; text: String(pairLine.modelData.number_text || "—"); font.family:root.fontFamily; font.pixelSize:11; font.weight:Font.Medium; font.features: {"tnum":1} }
+                TextMetrics { id: pairNumber; text: String(pairLine.pairData.number_text || "—"); font.family:root.fontFamily; font.pixelSize:11; font.weight:Font.Medium; font.features: {"tnum":1} }
                 TextMetrics { id: pairReserve; text:"999.9"; font:pairNumber.font }
-                TextMetrics { id: pairUnit; text:String(pairLine.modelData.unit_text || "");font.family:root.fontFamily;font.pixelSize:9 }
+                TextMetrics { id: pairUnit; text:String(pairLine.pairData.unit_text || "");font.family:root.fontFamily;font.pixelSize:9 }
                 MetricIcon {
                     objectName: "topBarPairIcon_" + pairLine.index
                     width:11;height:11;y:.5
-                    name: ["download","read","charge"].includes(pairLine.modelData.direction) ? "download" : "upload"
-                    ink:root.instrument && ["download","read","charge"].includes(pairLine.modelData.direction) ? root.accent : root.secondaryInk
-                    metric: pairLine.modelData.metric || ""
-                    hardwareState: pairLine.modelData.hardware_state || ({})
-                    automaticEffect: pairLine.modelData.auto_effect || ""
+                    name: ["download","read","charge"].includes(pairLine.pairData.direction) ? "download" : "upload"
+                    ink:root.instrument && ["download","read","charge"].includes(pairLine.pairData.direction) ? root.accent : root.secondaryInk
+                    metric: pairLine.pairData.metric || ""
+                    hardwareState: pairLine.pairData.hardware_state || ({})
+                    automaticEffect: pairLine.pairData.auto_effect || ""
                     effect: root.row.icon_effect || "off"
-                    level: pairLine.modelData.effect_level === undefined ? null : pairLine.modelData.effect_level
-                    available: pairLine.modelData.available === true && Number.isFinite(pairLine.modelData.numeric_value)
+                    level: pairLine.pairData.effect_level === undefined ? null : pairLine.pairData.effect_level
+                    available: pairLine.pairData.available === true && Number.isFinite(pairLine.pairData.numeric_value)
                     motionEnabled: root.motionEnabled
                     intensity: root.row.effect_intensity === undefined ? 0.5 : root.row.effect_intensity
                     speed: root.row.effect_speed === undefined ? 1 : root.row.effect_speed
@@ -94,7 +97,7 @@ Item {
                     objectName:"topBarPairNumber_"+pairLine.index
                     x:18; y:(parent.height-height)/2
                     text:pairNumber.text; textFormat:Text.PlainText; font:pairNumber.font
-                    color:pairLine.modelData.available === true ? root.ink : root.muted
+                    color:pairLine.pairData.available === true ? root.ink : root.muted
                 }
                 Text {
                     objectName:"topBarPairUnit_"+pairLine.index

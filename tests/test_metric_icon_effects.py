@@ -1,5 +1,6 @@
 """Only MetricIcon: actual 18 px offscreen renders, independent synthetic configuration."""
 
+import math
 import os
 import time
 import unittest
@@ -409,6 +410,34 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
         hub = self.find("metricIconHub")
         self.assertEqual(hub.property("rotation"), 0)
         self.assertEqual((self.find("icon").width(), self.find("icon").height(), self.find("icon").scale()), (18, 18, 1))
+
+    def test_fan_speed_is_distinct_and_fast_without_stroboscopic_reversal_or_phase_reset(self):
+        self.load()
+        self.configure("fan", "cpu_fan_rpm", "spin")
+        rates = []
+        for level in (.1, .43, .9, 1.0):
+            icon = self.settle_level(level)
+            rates.append(icon.property("fanRotationsPerSecond"))
+        self.assertTrue(all(first < second for first, second in zip(rates, rates[1:])))
+        self.assertLess(rates[0], .6)
+        self.assertGreater(rates[2], 1.5)
+        self.assertGreater(rates[2], 2.5 * (.35+1.65*.9)/3.3)
+        self.assertGreater(self.find("metricIconRotorTrail").opacity(), 0)
+        icon.setProperty("phase", .29)
+        durations = []
+        for speed in (.5, 1, 2):
+            self.window.setProperty("tempo", speed)
+            self.app.processEvents()
+            self.assertAlmostEqual(icon.property("phase"), .29)
+            self.assertLessEqual(icon.property("fanRotationsPerSecond"), 3.2)
+            self.assertAlmostEqual(icon.property("fanRotationsPerSecond"),
+                speed*(.08+1.52*(1-math.exp(-3))/(1-math.exp(-3))))
+            durations.append(icon.property("cycleDuration"))
+        self.assertAlmostEqual(durations[0], durations[-1]*4)
+        self.window.setProperty("choice", "off")
+        self.app.processEvents()
+        self.assertFalse(icon.property("animationRunning"))
+        self.assertFalse(any(item.objectName()=="metricIconRotorTrail" for item in self.items()))
 
     def test_energy_trace_leaves_voltage_needle_fixed_and_does_not_rebuild_svg(self):
         self.load()

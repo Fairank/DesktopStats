@@ -46,7 +46,7 @@ from responsive_layout import (
     minimum_dimensions,
     responsive_plan,
 )
-from sensor_diagnostics import reading_source, source_rows, unavailable_reason
+from sensor_diagnostics import cooling_noise_rows, reading_source, source_rows, unavailable_reason
 from skin_styles import GLASS_SKINS, effective_skin
 from stats_config import DEFAULT, MAX_WIDGETS, MODULES, SKINS, load, save, validate
 from top_bar_feedback import hardware_feedback
@@ -642,6 +642,8 @@ class Controller(WorkspaceTools):
                         else "",
                     )
                 )
+            if family == 'cooling' and detail_id is not None and include_related:
+                related.extend(cooling_noise_rows(dict(data, external_sensors=self._external_rows), stale=stale))
             channels = paired_channels(metric)
             icon_effect = prefs.get('icon_effect', 'off')
             effect_intensity = prefs.get('effect_intensity', 0.5)

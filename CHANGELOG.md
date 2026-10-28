@@ -1,5 +1,30 @@
 # Changes
 
+## 0.26.0-preview.3
+
+- Add a validated installed profile pointer and stable production IPC identity,
+  so launch contexts can share one explicitly selected profile. Explicit test
+  data directories remain isolated. Invalid pointers fail clearly; no automatic
+  profile merging, migration or silent reset. Preserve pointers on upgrades and
+  read autostart from the selected profile. Add path-free identity diagnostics.
+- Make high fan speeds visibly faster with smooth speed changes and a subtle
+  retained rotor trail. Preserve the shared clock, phase and stop/reduced-motion
+  rules; bound the visual rate to avoid four-blade stroboscopic reversal.
+- Pass through genuine LibreHardwareMonitor Noise / dBA channels, expose them
+  with a sound icon and cooling-detail context. Missing sources remain explicit;
+  do not infer sound pressure from RPM or enable a microphone or extra drivers.
+- Keep group, duplex and settings-preview icon delegates alive across ordinary
+  readings. Replace their models only when ordered membership changes; numeric
+  values and hardware channels continue updating through live bindings. Preserve
+  animation phases and clock subscriptions between samples, with smooth target
+  changes and the existing zero/missing/hidden/reduced-motion stopping rules.
+- Avoid a transient non-duplex state when switching between two-line and inline
+  paired readouts. Keep drag freezing, structural changes and layout measuring
+  separate from ordinary value updates, without adding animation timers.
+- Add a visual guide and reproducible light/dark GIFs covering hardware effects,
+  display styles, optional controls and material limitations. Demonstrations use
+  synthetic data and offscreen QML; they are not native rendering benchmarks.
+
 ## 0.26.0-preview.2
 
 - Stop treating the Shell's fullscreen ordering notification as a global veto

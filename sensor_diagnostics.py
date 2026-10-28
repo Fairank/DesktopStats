@@ -3,7 +3,37 @@
 from itertools import islice
 
 from external_sensor import sensor_binding
-from metrics import SCOPE_FIELDS, metric_info
+from metrics import SCOPE_FIELDS, metric_info, numeric
+
+
+def cooling_noise_rows(data, *, stale=False):
+    """Observed acoustic channels, never an RPM-derived estimate or a microphone probe."""
+    result = []
+    status = data.get("external_status", {})
+    current = not stale and status.get("state") in (None, "ready", "empty")
+    for sensor in islice(data.get("external_sensors", {}).values(), 4096):
+        if sensor.get("type") != "Noise" or sensor.get("unit") != "dBA":
+            continue
+        value = sensor.get("value")
+        available = current and numeric(value) and value >= 0
+        name = " · ".join(str(sensor.get(key) or "")[:128] for key in ("hardware_name", "name"))
+        result.append(dict(
+            label="环境噪声 · " + (sensor.get("name") or "传感器"),
+            value=f"{value:.1f} dBA" if available else "—", available=available,
+            source="LibreHardwareMonitor · " + name,
+            reason=("读数已过期" if stale else status.get("detail")
+                    if not current else "已识别噪声传感器，但本轮没有有效的 dBA 读数。") if not available else "",
+        ))
+        if len(result) == 6:
+            break
+    if result:
+        return result
+    detail = str(status.get("detail") or "")[:700]
+    return [dict(label="环境噪声", value="—", available=False,
+                 source="LibreHardwareMonitor · Noise / dBA",
+                 reason=("读数已过期" if stale else detail + " 本轮扩展清单未发现 Noise / dBA 通道。"
+                         "仅查询当前启用的采集来源，不能据此判断硬件不支持；"
+                         "未启用麦克风，也未按风扇转速估算噪声。"))]
 
 
 def export_has_problem(export, state):

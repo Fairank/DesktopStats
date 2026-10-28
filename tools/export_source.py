@@ -97,6 +97,8 @@ REVIEWED_FILES = frozenset(
             "showcase/hardware-feedback-dark.png",
             "showcase/hardware-motion-light.gif",
             "showcase/hardware-motion-dark.gif",
+            "showcase/motion-continuity-light.gif",
+            "showcase/motion-continuity-dark.gif",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]

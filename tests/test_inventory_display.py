@@ -37,10 +37,11 @@ def channel(sensor_type="Temperature", **values):
 
 
 class InventoryDisplayTests(unittest.TestCase):
-    def test_all_thirteen_types_use_canonical_units_and_display_precision(self):
+    def test_all_fourteen_types_use_canonical_units_and_display_precision(self):
         expected = {
             "Temperature": ("12.3", "°C"),
             "Fan": ("12", "RPM"),
+            "Noise": ("12.3", "dBA"),
             "Voltage": ("12.346", "V"),
             "Current": ("12.346", "A"),
             "Power": ("12.3", "W"),
