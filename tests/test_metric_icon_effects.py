@@ -449,6 +449,50 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
             self.assertEqual(self.find("lucideImage").property("source"), source)
             self.assertEqual(self.find("metricIconGlyph").property("rotation"), 0)
 
+    def test_fan_uses_frame_driver_and_other_effects_keep_background_cadence(self):
+        self.load()
+        self.configure("cpu", "cpu_usage", "pulse")
+        icon = self.find("icon")
+        self.find("metricIconAnimation").stop()
+        result = self.evaluate(icon, '''(function() {
+            const entry=clockSubscription.entry, owner=entry.clock;
+            let fast=0,slow=0;
+            const ordinary=EffectClock.subscribe(clockHost,function(){slow++});
+            const rotor=EffectClock.subscribe(clockHost,function(){fast++},true);
+            const frame=owner.frameDriven && !owner.enabled;
+            const base=owner.currentTime;
+            for(let index=1;index<=120;index++)owner.tick(base+index*16);
+            EffectClock.unsubscribe(rotor);
+            const background=!owner.frameDriven && !owner.enabled;
+            EffectClock.unsubscribe(ordinary);
+            return [frame,background,fast,slow,owner===clockSubscription.entry.clock].join(",");
+        })()''')
+        self.assertEqual(result, "true,true,120,56,true")
+        self.configure("fan", "cpu_fan_rpm", "spin")
+        frame = self.find("metricEffectFrameDriver")
+        background = self.find("metricEffectBackgroundDriver")
+        self.find("metricIconAnimation").start()
+        self.assertTrue(frame.property("running"))
+        self.assertFalse(background.property("running"))
+        self.find("metricIconAnimation").stop()
+
+    def test_delayed_fan_frames_keep_forward_steps_below_four_blade_half_pitch(self):
+        self.load()
+        self.configure("fan", "cpu_fan_rpm", "spin")
+        icon = self.settle_level(1)
+        self.window.setProperty("tempo", 2)
+        self.find("metricIconAnimation").stop()
+        icon.setProperty("phase", .93)
+        icon.setProperty("previousTick", 1000)
+        now = 1000
+        for delta in (16, 48, 136, 1000, 16):
+            previous = icon.property("phase")
+            now += delta
+            self.evaluate(icon, f"advanceClock({now})")
+            step = (icon.property("phase")-previous) % 1 * 360
+            self.assertGreater(step, 0)
+            self.assertLessEqual(step, 36.00001)
+
     def test_auto_resolves_real_quantity_and_invalid_zero_hidden_reduced_minimized_all_stop(self):
         self.load()
         for glyph, metric, effect in (*CASES, ("fan", "gpu_fan_percent", "spin")):
@@ -879,7 +923,13 @@ Window {id:scene;width:300;height:300;visible:false;color:dark?"#20242b":"#f6f8f
             self.assertTrue(all(icon.property("phase") > 0 for icon in icons))
             self.assertEqual(len(self.window.findChildren(QObject)), before_nodes)
             self.assertEqual([item.property("source") for item in self.items() if item.property("source") is not None], before_sources)
-            self.assertLessEqual(count[0], 17, self.perf_results)
+            if effect == "spin":
+                self.assertTrue(self.find("metricEffectFrameDriver").property("running"))
+                self.assertFalse(self.find("metricEffectBackgroundDriver").property("running"))
+                self.assertLessEqual(count[0], ticks[0]+3, self.perf_results)
+            else:
+                self.assertFalse(self.find("metricEffectFrameDriver").property("running"))
+                self.assertLessEqual(count[0], 17, self.perf_results)
         self.assertFalse(any("Canvas" in item.metaObject().className() for item in self.items()))
         self.window.hide()
         self.assertTrue(all(not icon.property("animationRunning") and icon.property("phase") == 0 for icon in icons))

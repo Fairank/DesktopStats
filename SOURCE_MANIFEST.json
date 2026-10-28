@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.26.0-preview.3",
-  "archive_root": "DesktopStats-0.26.0-preview.3-source/",
+  "version": "0.26.0-preview.4",
+  "archive_root": "DesktopStats-0.26.0-preview.4-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 16023,
-      "sha256": "f4bb70c9979d02d8b1e03ab44896945b4cee53b0893b3c3d345542ecce574224"
+      "bytes": 16814,
+      "sha256": "ac81adec1a3b3c0c76463e23a11bfadf71e9acda081ef8b85344213d30b8d129"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 11757,
-      "sha256": "f5d72a6eb2e4e07f89420528a6193c9912b234673e886dfa54100a26c6de3dc6"
+      "bytes": 11973,
+      "sha256": "01ac1ed0008ed5706e31dac6aa7b1d869e715cd1255e507480c9a6fe145c5335"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -54,8 +54,8 @@
     },
     {
       "path": "VISUAL-GUIDE.md",
-      "bytes": 7535,
-      "sha256": "26009b24e15c39f611bfb145d88620957b4421697366537d1429ca650d93f0db"
+      "bytes": 7814,
+      "sha256": "c353c9848583aea91c4cbc5096b1f95cf07a60291ed0d653982fe2b964404d2b"
     },
     {
       "path": "activity_sensors.py",
@@ -1079,13 +1079,13 @@
     },
     {
       "path": "native/MetricEffectClock.js",
-      "bytes": 3113,
-      "sha256": "18ce03673ce8235f3847aca2d513a03ec018b0eecdc24acfdab438495919ad8e"
+      "bytes": 5591,
+      "sha256": "55b7eb039c404cd52c2c8247d6be61107a2ec0b13ebd5cb2f059a15187af8d6c"
     },
     {
       "path": "native/MetricIcon.qml",
-      "bytes": 37007,
-      "sha256": "e708f85d8e7c1190f4eeec5936d1567e9e54584e70afcee192c1ff172aad7f0a"
+      "bytes": 37776,
+      "sha256": "1bec72b938aab58ee6c03c1f62c46f937dd77a58a0174321369f2ad40a9b9569"
     },
     {
       "path": "native/OptionTabs.qml",
@@ -1275,7 +1275,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "50c388aabe40a8d7a0107ab17d80b633c2d23c222b7fb663bddd32a8d914b699"
+      "sha256": "21c5eeba3f65c20346adcc69b8f9a5ee41661ba9e42c8eb3059c449c2e529214"
     },
     {
       "path": "profile_paths.py",
@@ -1579,13 +1579,13 @@
     },
     {
       "path": "tests/test_metric_icon_effects.py",
-      "bytes": 57691,
-      "sha256": "494598c0eb178342f7df552fcb7847a964382c32f67fa2885a16a37a4271a486"
+      "bytes": 60253,
+      "sha256": "124884df6ab3d460cb883c58c2970a6833f5cce255a52e0cf31ea80aa6be0a6a"
     },
     {
       "path": "tests/test_metric_state_feedback_qml.py",
-      "bytes": 65528,
-      "sha256": "575be87041973de3fc054ab4bafa2363ad5c42a035f1e45bdde6dee161e48cd7"
+      "bytes": 65527,
+      "sha256": "7b16a7e9c0bbf36c7d4a2fdffd8947edc9f19f495e2ff1d5163ac30fe1f59921"
     },
     {
       "path": "tests/test_modern_menu.py",

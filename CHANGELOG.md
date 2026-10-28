@@ -1,5 +1,18 @@
 # Changes
 
+## 0.26.0-preview.4
+
+- Move continuous fan rotation to frame-driven updates in the existing shared
+  per-window clock. Keep other effects at their previous bounded cadence; use
+  the original background timer when no continuous rotor is subscribed. The
+  two drivers run exclusively and retire with the last active subscriber.
+- Preserve phase and subscriptions during positive readings and speed changes.
+  Bound delayed rotor steps below the four-blade half pitch to avoid apparent
+  reversals, without restarting a duration-based animation on every sample.
+- Rotate the retained fan layers with one parent transform and update only its
+  relevant feedback channel per frame. Preserve the existing icons, palettes,
+  strength/speed settings, stopping rules and sensor sampling frequency.
+
 ## 0.26.0-preview.3
 
 - Add a validated installed profile pointer and stable production IPC identity,

@@ -139,7 +139,7 @@ Item {
     readonly property real accentOpacity: intensityGain * (0.85 + 0.15 * displayedLevel)
     // Decorative fan speed is continuous and separate from the measured RPM.
     // At 2x it stays below 3.2 turns/s to avoid a four-blade stroboscopic reversal
-    // at the shared 34ms presentation cadence. No extra animation timer.
+    // during occasional delayed frames. No per-icon animation timer.
     readonly property real fanActivity:Math.max(0,Math.min(1,compositeActive?displayedSpin:displayedLevel))
     readonly property real fanRotationsPerSecond:speed*(.08+1.52*(1-Math.exp(-3*fanActivity))/(1-Math.exp(-3)))
     readonly property real fanTrailStrength:Math.max(0,Math.min(1,(fanActivity-.2)/.6))
@@ -262,7 +262,13 @@ Item {
         const elapsed = Math.max(0, Math.min(136, now - previousTick))
         previousTick = now
         if (thermometerEnabled) displayedTemperature=converge(displayedTemperature,thermometerTarget,elapsed)
-        if(compositeActive) {
+        if(compositeActive && name === "fan") {
+            // A rotor needs one smoothed channel and one transform per frame;
+            // unrelated thermal/electrical phases belong to slower listeners.
+            displayedSpin=converge(displayedSpin,spinTarget,elapsed)
+            displayedLevel=spinChannelActive?displayedSpin:0
+            spinPhase=spinChannelActive?(spinPhase+Math.min(.1,elapsed*fanRotationsPerSecond/1000))%1:0
+        } else if(compositeActive) {
             displayedLoad=converge(displayedLoad,loadTarget,elapsed)
             displayedThermal=converge(displayedThermal,thermalTarget,elapsed)
             displayedEnergy=converge(displayedEnergy,energyTarget,elapsed)
@@ -276,9 +282,10 @@ Item {
             energyPhase=energyActive?(energyPhase+elapsed*speed*(.82+.36*displayedEnergy)/2400)%1:0
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(.82+.36*displayedInbound)/2400)%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(.82+.36*displayedOutbound)/2400)%1:0
-            spinPhase=spinChannelActive?(spinPhase+elapsed*fanRotationsPerSecond/1000)%1:0
         } else displayedLevel=converge(displayedLevel,level,elapsed)
-        phase = (phase + elapsed / cycleDuration) % 1
+        // Four identical blades repeat every quarter-turn; bound a delayed
+        // rotor step below half that pitch so it cannot appear to reverse.
+        phase = (phase + (spinActive?Math.min(.1,elapsed/cycleDuration):elapsed/cycleDuration)) % 1
     }
     function syncClock() {
         if (clockSubscription && (!clockSubscription.active || !animationRunning
@@ -287,9 +294,10 @@ Item {
             clockSubscription = null
         }
         if (animationRunning && clockHost && !clockSubscription) {
-            previousTick = Date.now()
-            clockSubscription = EffectClock.subscribe(clockHost, now => root.advanceClock(now))
+            clockSubscription = EffectClock.subscribe(clockHost, now => root.advanceClock(now), name === "fan")
+            previousTick = EffectClock.timestamp(clockSubscription)
         }
+        EffectClock.setCadence(clockSubscription, name === "fan")
     }
     onAnimationRunningChanged: {
         resetFeedback()
@@ -307,6 +315,7 @@ Item {
     onOutboundTargetChanged: {if(!(outboundTarget>0)){displayedOutbound=0;outboundPhase=0}}
     onSpinTargetChanged: {if(!(spinTarget>0)){displayedSpin=0;spinPhase=0}}
     onClockHostChanged: syncClock()
+    onNameChanged: syncClock()
     Component.onCompleted: syncClock()
     Component.onDestruction: EffectClock.unsubscribe(clockSubscription)
     Icon {
@@ -491,21 +500,24 @@ Item {
         Loader {
             anchors.fill:parent;active:root.spinActive
             sourceComponent:Item {
-                VectorPart {
-                    objectName:"metricIconRotorTrail";fragment:root.glyphParts[0] || ""
-                    strokeWidth:1.8;rotation:(root.compositeActive?root.spinPhase:root.phase)*360-16
-                    opacity:root.rotorOpacity*.18*root.fanTrailStrength
-                }
-                VectorPart {
-                    objectName:"metricIconRotorStructure";fragment:root.glyphParts[0] || ""
-                    strokeWidth:1.8;rotation:(root.compositeActive?root.spinPhase:root.phase)*360
-                    opacity:1-Math.pow(1-root.rotorOpacity,6)
-                }
-                AccentPart {
-                    objectName:"metricIconRotor";fragment:root.glyphParts[0] || "";strokeWidth:1.8
-                    colors:root.compositeActive?root.spinColors:root.manualColors
-                    amount:root.compositeActive?root.displayedSpin:root.displayedLevel
-                    rotation:(root.compositeActive?root.spinPhase:root.phase)*360;opacity:root.rotorOpacity
+                Item {
+                    objectName:"metricIconRotorAssembly";anchors.fill:parent
+                    rotation:(root.compositeActive?root.spinPhase:root.phase)*360
+                    VectorPart {
+                        objectName:"metricIconRotorTrail";fragment:root.glyphParts[0] || ""
+                        strokeWidth:1.8;rotation:-16
+                        opacity:root.rotorOpacity*.18*root.fanTrailStrength
+                    }
+                    VectorPart {
+                        objectName:"metricIconRotorStructure";fragment:root.glyphParts[0] || ""
+                        strokeWidth:1.8;opacity:1-Math.pow(1-root.rotorOpacity,6)
+                    }
+                    AccentPart {
+                        objectName:"metricIconRotor";fragment:root.glyphParts[0] || "";strokeWidth:1.8
+                        colors:root.compositeActive?root.spinColors:root.manualColors
+                        amount:root.compositeActive?root.displayedSpin:root.displayedLevel
+                        opacity:root.rotorOpacity
+                    }
                 }
                 VectorPart {
                     objectName:"metricIconHub";fragment:root.glyphParts.slice(1).join("");strokeWidth:2.4

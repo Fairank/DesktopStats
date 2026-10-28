@@ -1005,7 +1005,7 @@ Window { id:scene;width:360;height:100;visible:false;color:"white";
         for level in (.1, .5, .9):
             self.settle(level)
             self.icon.setProperty("phase", 0)
-            self.advance(100)
+            self.advance(16)
             steps.append(self.icon.property("phase"))
         self.assertLess(steps[0], steps[1])
         self.assertLess(steps[1], steps[2])
