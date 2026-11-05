@@ -8,14 +8,26 @@ Item {
     id: root
     property var appearance: ({})
     property color ink: "#69788c"
-    readonly property string geometryKey: Shapes.key(appearance, ink)
-    readonly property url svgSource: Shapes.source(geometryKey)
+    readonly property bool classic: appearance && appearance.icon_set === "classic"
+    readonly property string geometryKey: classic ? "" : Shapes.key(appearance, ink)
+    readonly property url svgSource: classic ? "" : Shapes.source(geometryKey)
     implicitWidth: 18
     implicitHeight: 18
+
+    Loader {
+        objectName: "hardwareClassicGlyphLoader"
+        anchors.fill: parent
+        active: root.classic
+        sourceComponent: Icon {
+            name: root.appearance.kind === "gpu" ? "gpu" : "cpu"
+            ink: root.ink
+        }
+    }
 
     Image {
         objectName: "hardwareGlyphImage"
         anchors.fill: parent
+        visible: !root.classic
         source: root.svgSource
         opacity: root.ink.a
         sourceSize.width: Math.max(1, Math.ceil(root.width * Screen.devicePixelRatio))

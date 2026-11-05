@@ -1,4 +1,7 @@
 .pragma library
+.import "HardwareSolid.js" as Solid
+.import "HardwareMiniature.js" as Miniature
+.import "HardwareSoft.js" as Soft
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
@@ -55,7 +58,8 @@ function key(appearance, ink) {
     if (!motif) series = ""
     const defaults = {intel: "#2479b5", amd: "#c65b56", nvidia: "#729b42", unknown: "#77818f"}
     return [kind, vendor, board, style, count, shroud,
-        hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif].join("|")
+        hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
+        choice(input.icon_set, ["outline", "solid", "miniature", "soft"], "outline")].join("|")
 }
 
 function path(d, ink, width, opacity) {
@@ -197,14 +201,20 @@ function gpu(style, count, shroud, board, ink, accent, motif) {
 
 function source(geometryKey) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
-    if (parts.length !== 10) return source(key({}, "#69788c"))
+    if (parts.length !== 11) return source(key({}, "#69788c"))
     // Validate public input again; no untrusted text is inserted into XML.
     const canonical = key({kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9]}, parts[7])
+        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10]}, parts[7])
     if (canonical !== geometryKey) return source(canonical)
     const ink = parts[7], accent = parts[6]
-    const body = parts[0] === "cpu" ? cpu(parts[3], ink, accent)
-        : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])
+    const outlineBody = parts[10] === "outline" ? (parts[0] === "cpu" ? cpu(parts[3], ink, accent)
+        : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
+    const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
+        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9]}
+    const body = parts[10] === "solid" ? Solid.body(state)
+        : parts[10] === "miniature" ? Miniature.body(state)
+        : parts[10] === "soft" ? Soft.body(state)
+        : outlineBody
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
         + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>'
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg)

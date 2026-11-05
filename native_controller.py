@@ -209,7 +209,7 @@ class Controller(WorkspaceTools):
 
     @Slot(str, "QVariant")
     def changeTopBar(self, field, selected):
-        if field not in ("enabled", "monitor_mode", "height", "screens", "spacing"):
+        if field not in ("enabled", "monitor_mode", "height", "screens", "spacing", "hardware_icon_style"):
             return
         # QVariant parameters retain a JavaScript array as QJSValue. Convert
         # this explicit list boundary before validation/deepcopy, not into the
@@ -713,6 +713,7 @@ class Controller(WorkspaceTools):
             appearance = metric_appearance(data, metric, prefs, scope=scope,
                                            target=target, external=bool(binding))
             if appearance:
+                appearance["icon_set"] = config["top_bar"].get("hardware_icon_style", "classic")
                 appearance["features"] = [translate(feature, language) for feature in appearance["features"]]
             result.append(
                 dict(

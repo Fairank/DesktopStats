@@ -5,6 +5,23 @@ meaning, live temperature, load colours or the existing motion clock. These are
 stylised illustrations, not product photos, official logos or manufacturing drawings.
 Small brand accents are UI colours, not a claim about a card's physical colour.
 
+## Selectable icon versions
+
+Top bar → Appearance → Hardware icons offers five versions:
+
+- `classic`: the original generic Lucide glyphs; the default for existing settings.
+- `outline`: the previous original line drawings, preserved as an explicit option.
+- `solid`: simplified physical objects, filled metal shrouds and clear fan wells.
+- `miniature`: visible top/side thickness and fixed geometric shadows, without filters.
+- `soft`: rounder, two-tone objects with broad shapes and five separated fan blades.
+
+The three new versions use a short card for a confirmed single fan, a longer card
+for two and a slimmer, long card for three. Contacts and brackets remain small.
+They consume the same identity map and real readings. Choosing a version changes
+the draft and shared preview; the existing top-bar Apply action persists it.
+The source-export tools include a synthetic offscreen comparison renderer,
+`tools/render_hardware_styles.py`, which never opens a desktop window.
+
 ## Matching and truthfulness
 
 - CPU manufacturer and GPU chip vendor are different from the manufacturer of a
@@ -45,7 +62,9 @@ No new NVML query is introduced into the sampling path.
 
 The appearance is independent of dynamic `hardware_state` and the icon effect
 switch. QML retains a single static SVG image per active hardware glyph, with a
-stable geometry key. The existing load/thermal/electrical layers keep their own
+stable geometry key that includes the selected version. Same-value samples do
+not rebuild the image. Only the selected version produces a texture; the other
+versions do not run animations or load image sets. The existing load/thermal/electrical layers keep their own
 values and clock, including hidden/minimised pause behaviour. Unknown/non-CPU/GPU
 metrics keep their existing glyphs. The original Lucide data stays unchanged.
 The 64px details illustration exists only while its metadata is expanded and its

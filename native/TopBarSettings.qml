@@ -265,6 +265,23 @@ ColumnLayout {
             }
         }
     }
+    SettingRow {
+        id: hardwareIconSetting
+        objectName: "topBarHardwareIconSetting"
+        Layout.fillWidth: true; visible: root.appearanceEditing
+        label: ui.t("硬件图标")
+        note: ui.t("切换外观版本，自动匹配规则和读数保持一致。")
+        Choice {
+            objectName: "topBarHardwareIconChoice"
+            width: Math.min(220, Math.max(150, hardwareIconSetting.width * .36))
+            implicitHeight: 34; Accessible.name: ui.t("硬件图标")
+            model: [{id:"classic",label:ui.t("经典通用")},{id:"outline",label:ui.t("结构线稿")},
+                    {id:"solid",label:ui.t("精简实物")},{id:"miniature",label:ui.t("微型实物")},
+                    {id:"soft",label:ui.t("柔和双色")}]
+            value: root.config.hardware_icon_style || "classic"
+            onPicked: selected => stats.changeTopBar("hardware_icon_style", selected)
+        }
+    }
     Flow {
         parent: barOptions
         Layout.fillWidth:true;spacing:6

@@ -1121,7 +1121,8 @@ Window {
                                         text: {
                                             const appearance = appearanceSummary.appearance
                                             const confidence = appearance.confidence
-                                            const parts = [root.tr(confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
+                                            const parts = [root.tr(appearance.icon_set === "classic" ? "经典通用"
+                                                : confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
                                             if (["model", "brand"].includes(confidence) && typeof appearance.label === "string" && appearance.label.trim())
                                                 parts.push(appearance.label.trim())
                                             if (appearance.kind === "gpu" && confidence === "model"
@@ -1135,7 +1136,8 @@ Window {
                                     Text {
                                         objectName: "topBarDetailAppearanceSeries"
                                         Layout.fillWidth: true; visible: !!text
-                                        text: ["model", "series"].includes(appearanceSummary.appearance.confidence)
+                                        text: appearanceSummary.appearance.icon_set !== "classic"
+                                            && ["model", "series"].includes(appearanceSummary.appearance.confidence)
                                             && typeof appearanceSummary.appearance.series_label === "string"
                                             ? appearanceSummary.appearance.series_label.trim() : ""
                                         textFormat: Text.PlainText
@@ -1144,7 +1146,8 @@ Window {
                                     Text {
                                         objectName: "topBarDetailAppearanceFeatures"
                                         Layout.fillWidth: true; visible: !!text
-                                        text: appearanceSummary.appearance.features && typeof appearanceSummary.appearance.features.filter === "function"
+                                        text: appearanceSummary.appearance.icon_set !== "classic"
+                                            && appearanceSummary.appearance.features && typeof appearanceSummary.appearance.features.filter === "function"
                                             ? appearanceSummary.appearance.features.filter(value => typeof value === "string" && value.trim()).slice(0, 2).join("\n") : ""
                                         textFormat: Text.PlainText
                                         color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap

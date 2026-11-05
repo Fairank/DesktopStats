@@ -16,6 +16,7 @@ Item {
     property var hardwareAppearance: ({})
     readonly property bool hasHardwareAppearance: processorGlyph
         && hardwareAppearance && hardwareAppearance.kind === name
+        && hardwareAppearance.icon_set !== "classic"
     property bool available: false
     property bool motionEnabled: false
     property real intensity: 0.5

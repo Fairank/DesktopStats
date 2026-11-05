@@ -11,6 +11,7 @@ from top_bar_layout import DISPLAY_STYLES
 from top_bar_profiles import ICON_EFFECTS, paired_channels, validate_group_metrics
 
 BAR_DESIGNS = ("classic", "capsule", "instrument")
+HARDWARE_ICON_STYLES = ("classic", "outline", "solid", "miniature", "soft")
 APPEARANCE_DEFAULTS = dict(
     follow_global=True, skin="glass", glass_transparency=50.0, design="classic"
 )
@@ -42,6 +43,7 @@ def default_top_bar():
         screens=[],
         height=32,
         spacing=12,
+        hardware_icon_style="classic",
         appearance=copy.deepcopy(APPEARANCE_DEFAULTS),
         items=[
             dict(
@@ -80,9 +82,15 @@ def validate_top_bar(value):
         "spacing",
         "items",
         "appearance",
+        "hardware_icon_style",
     }:
         raise ValueError("顶部栏设置不正确")
     out = default_top_bar()
+    if "hardware_icon_style" in value:
+        selected = value["hardware_icon_style"]
+        if type(selected) is not str or selected not in HARDWARE_ICON_STYLES:
+            raise ValueError("不支持的顶部栏显示样式")
+        out["hardware_icon_style"] = selected
     if "appearance" in value:
         appearance = value["appearance"]
         if not isinstance(appearance, dict) or set(appearance) - set(APPEARANCE_DEFAULTS):

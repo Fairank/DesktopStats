@@ -2,6 +2,12 @@
 
 ## Unreleased — hardware appearances
 
+- Keep the previous drawings as the optional Outline version. Add Solid,
+  Miniature and Soft two-tone versions with compact single-fan, longer dual-fan
+  and slimmer triple-fan card proportions, real hubs and simplified curved vanes.
+- Add a five-version hardware-icon selector to top-bar Appearance settings.
+  Existing preferences default to Classic, preserving original glyphs. Switching
+  versions updates the shared preview and follows the existing scoped Apply flow.
 - Add original static CPU/GPU silhouettes, including reviewed desktop processor
   packages and exact-model single/dual/triple-fan layouts. Keep temperature,
   usage, electrical effects and their shared clock independent of appearance.

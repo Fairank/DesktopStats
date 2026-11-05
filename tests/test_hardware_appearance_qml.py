@@ -1,6 +1,7 @@
 """Static hardware shapes and existing feedback; synthetic offscreen Qt only."""
 import base64
 import copy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -216,6 +217,7 @@ Window {
         import native_controller as controls
         from stats_config import DEFAULT, validate
         config = copy.deepcopy(DEFAULT)
+        config["top_bar"]["hardware_icon_style"] = "outline"
         config["top_bar"]["items"] = [dict(id="b_chosen", metric="gpu_usage", prefs=dict(
             gpu_target="1", style="icon_value", icon_effect="off"))]
         with patch.object(controls, "load", return_value=validate(config)):
@@ -321,6 +323,103 @@ Window {
         self.window.setProperty("hostMinimized", False)
         QTest.qWait(15)
         self.assertIsNotNone(loader.property("item"))
+
+    def test_previous_outline_version_keeps_its_exact_svg_drawings(self):
+        # Captured from the previous committed version, before theme routing.
+        from hardware_appearance import appearance_for
+        cases = (
+            ("cpu", "Intel Core i7-13700KF", "d33938b0fe7fe4348270d16d0f4453659c2cf781ab8cc2f2d5e4fd01a39ab987"),
+            ("cpu", "AMD Ryzen 9 9950X", "518fd3f81f7c61acdf24c61eecf29432760fc7c677d1d95761875f6ee007abbd"),
+            ("gpu", "DUAL-RTX4060-O8G", "b08a961cb281d10a62d105d9a2e8a306afdeb1195b3805767145549d30f9cfbe"),
+            ("gpu", "TUF-RTX4070TIS-O16G-GAMING", "19827c993b8a33978631ac6d2919a07de67e1324b73a05f2ad2631b04cc199d0"),
+            ("gpu", "NVIDIA GeForce RTX 4070", "8c9cc5541d145f68bb67bae0d7b1d80cc559dac6c989e95e0dac0df394df6a68"),
+        )
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        glyph.setProperty("ink", "#303a48")
+        for kind, name, expected in cases:
+            self.assign("appearance", dict(appearance_for(kind, name), icon_set="outline"))
+            self.assertEqual(hashlib.sha256(self.svg(glyph).encode()).hexdigest(), expected)
+
+    def test_three_new_versions_render_only_the_confirmed_number_of_physical_fans(self):
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        distinct = []
+        for style in ("solid", "miniature", "soft"):
+            for count in (1, 2, 3, 0, None, "2", True):
+                self.assign("appearance", dict(gpu(count), icon_set=style))
+                svg = self.svg(glyph)
+                tree = ET.fromstring(svg)
+                hubs = [node for node in tree.iter() if node.get("class") == "hardware-fan-hub"]
+                self.assertEqual(len(hubs), count if type(count) is int and count in (1, 2, 3) else 0)
+                for node in tree.iter():
+                    self.assertNotIn(node.tag.split("}")[-1], ("image", "filter", "text", "script", "animate"))
+                if type(count) is int and count == 2:
+                    distinct.append(svg)
+            for silhouette in ("gpu_neutral", "gpu_integrated"):
+                self.assign("appearance", dict(gpu(3, style=silhouette), icon_set=style))
+                self.assertFalse(any(node.get("class") == "hardware-fan-hub"
+                                     for node in ET.fromstring(self.svg(glyph)).iter()))
+        self.assertEqual(len(set(distinct)), 3)
+
+    def test_version_switch_preserves_existing_feedback_phase_and_clock(self):
+        self.load_icon()
+        icon = self.find("appearanceMetric")
+        glyph = self.find("metricHardwareGlyphLoader").property("item")
+        pointer = getCppPointer(glyph)[0]
+        subscription = icon.property("clockSubscription")
+        self.find("metricIconAnimation").stop()
+        icon.setProperty("loadPhase", .413)
+        sources = []
+        for style in ("outline", "solid", "miniature", "soft"):
+            self.assign("appearance", dict(gpu(2), icon_set=style))
+            self.assertEqual(getCppPointer(self.find("metricHardwareGlyphLoader").property("item"))[0], pointer)
+            self.assertTrue(subscription.strictlyEquals(icon.property("clockSubscription")))
+            self.assertAlmostEqual(icon.property("loadPhase"), .413)
+            self.assertAlmostEqual(icon.property("thermalTarget"), .4)
+            self.assertEqual(self.find("metricEffectClock").property("subscriberCount"), 1)
+            source = glyph.property("svgSource")
+            changes = QSignalSpy(glyph.svgSourceChanged)
+            self.assign("appearance", dict(gpu(2), icon_set=style))
+            self.assertEqual(changes.count(), 0)
+            sources.append(source.toString())
+        self.assertEqual(len(set(sources)), 4)
+
+    def test_classic_version_uses_original_metric_glyph_and_a_lazy_detail_glyph(self):
+        self.load_icon()
+        self.assign("appearance", dict(gpu(2), icon_set="classic"))
+        icon = self.find("appearanceMetric")
+        self.assertFalse(icon.property("hasHardwareAppearance"))
+        self.assertIsNone(self.find("metricHardwareGlyphLoader").property("item"))
+        self.assertTrue(self.find("metricIconGlyph").isVisible())
+        control = self.find("controlGlyph")
+        self.assertEqual(control.property("svgSource").toString(), "")
+        loader = control.findChild(QObject, "hardwareClassicGlyphLoader")
+        self.assertIsNotNone(loader.property("item"))
+        self.assertEqual(loader.property("item").property("name"), "gpu")
+        self.assertAlmostEqual(icon.property("thermalTarget"), .4)
+        self.assign("appearance", dict(kind="cpu", style="am5", icon_set="classic"))
+        self.assertEqual(loader.property("item").property("name"), "cpu")
+
+    def test_classic_detail_caption_does_not_claim_a_matching_physical_drawing(self):
+        self.state = fixture.ModuleState()
+        self.state.details.update(family="gpu", icon="gpu", hardware_name="Synthetic GPU",
+                                  source="Synthetic provider",
+                                  hardware_appearance=dict(gpu(2), icon_set="classic",
+                                                           series_label="Synthetic series", features=["Synthetic feature"]))
+        self.engine.rootContext().setContextProperty("stats", self.state)
+        self.component = QQmlComponent(self.engine, QUrl.fromLocalFile(str(ROOT / "native/TopBarDetails.qml")))
+        self.window = self.component.createWithInitialProperties(dict(barState=self.state))
+        self.assertIsNotNone(self.window, [row.toString() for row in self.component.errors()])
+        self.window.show()
+        self.window.setProperty("showMetadata", True)
+        QTest.qWait(20)
+        caption = self.find("topBarDetailAppearance").property("text")
+        self.assertIn("经典通用", caption)
+        self.assertNotIn("型号外观", caption)
+        self.assertIn("风扇数量: 2", caption)
+        self.assertEqual(self.find("topBarDetailAppearanceSeries").property("text"), "")
+        self.assertEqual(self.find("topBarDetailAppearanceFeatures").property("text"), "")
 
 
 if __name__ == "__main__":
