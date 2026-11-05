@@ -107,8 +107,7 @@ function gpu(state, colors) {
         +Solid.p("M"+(e-.2)+" "+(y+.3)+"L"+(e+1.65)+" "+(y-1.8)+"V"+(b-1.8)+"L"+(e-.2)+" "+(b+.1)+"Z",colors.side)
         +Solid.r(x+.6,b-.05,g.w-.35,.7,.15,colors.side)
         +Solid.r(x+g.w*.27,b+.55,g.w*.18,.65,.1,colors.gold)
-        +Solid.shell(g,Solid.family(state),colors)
-        +Solid.trim(state,g,colors)
+        +Solid.underlay(state,g,colors)+Solid.front(state,g,colors)
     result+=Solid.p("M"+(x+2.35)+" "+(y-1.5)+"H"+(e+1.0),"none",.65,colors.edge,.35)
     const cy=y+g.h*.51
     if(state.style==="gpu_blower"&&state.fan_count===1) {

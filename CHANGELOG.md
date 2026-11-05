@@ -2,6 +2,11 @@
 
 ## Unreleased — hardware appearances
 
+- Give all 14 existing GPU series a separate casing profile with distinct major
+  panel divisions, shoulders, end caps and illustration proportions. Reuse these
+  profiles across Solid, Miniature and Soft without changing Outline.
+- Add eight source-checked GPU model representatives so each existing series has
+  a confirmed exact example, without assigning fan counts to other variants.
 - Keep the previous drawings as the optional Outline version. Add Solid,
   Miniature and Soft two-tone versions with compact single-fan, longer dual-fan
   and slimmer triple-fan card proportions, real hubs and simplified curved vanes.

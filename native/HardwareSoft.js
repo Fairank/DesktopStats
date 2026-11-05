@@ -1,4 +1,5 @@
 .pragma library
+.import "HardwareSeriesShapes.js" as Series
 
 // Original soft, two-tone hardware miniatures on the 24-unit icon grid.
 // Series accents illustrate a design language, never an exact product or color.
@@ -165,6 +166,7 @@ function gpu(state, p) {
     if (state.style === "gpu_integrated") return integrated(p)
     var count = state.style === "gpu_neutral" ? -1 : state.fan_count
     if (count !== 0 && count !== 1 && count !== 2 && count !== 3) count = -1
+    if (Series.known(state)) return seriesGpu(state, p, count)
     if (count < 0) {
         // Unknown cooling: a quiet backplate with rectangular insets, never fans.
         return shell(3, 6.15, 19.1, 10.2, state, p)
@@ -195,6 +197,32 @@ function gpu(state, p) {
             + fan(8.05, 11.4, 3.65, p) + fan(17.05, 11.4, 3.65, p)
     return shell(2, 7.0, 20.5, 8.6, state, p)
         + fan(5.8, 11.45, 2.72, p) + fan(12.25, 11.45, 2.72, p) + fan(18.7, 11.45, 2.72, p)
+}
+
+function seriesGpu(state, p, count) {
+    var base = count === 1 ? {x:6.1,y:4.9,w:13.1,h:12.1,centers:[12.65],radius:4.35}
+        : count === 2 ? {x:2.8,y:6.05,w:19.5,h:10.3,centers:[8.05,17.05],radius:3.65}
+        : count === 3 ? {x:2,y:7,w:20.5,h:8.6,centers:[5.8,12.25,18.7],radius:2.72}
+        : {x:3,y:6.15,w:19.1,h:10.2,centers:[],radius:0}
+    var g = Series.geometry(state, base)
+    var colors = {caseBody:p.face,caseTop:p.hub,caseShade:p.shade,disk:p.well,
+        rim:p.base,metal:p.face,ink:p.edge,accent:p.accent,edge:p.hub,gold:p.gold,pcb:p.base}
+    var result = rect(g.x+.2,g.y+.7,g.w-.4,g.h,.8,p.base,p.edge,.45)
+        + rect(g.x-1.05,g.y+.3,.85,g.h+.7,.25,p.base,p.edge,.4)
+        + rect(g.x+g.w*.27,g.y+g.h+.7,g.w*.18,.7,.12,p.gold)
+        + rect(g.x+.65,g.y+g.h*.18,g.w-1.3,g.h*.66,.3,p.shade)
+        + Series.face(state,g,colors)
+    var cy = g.y+g.h*.51
+    if (state.style === "gpu_blower" && count === 1)
+        return result + fan(g.x+g.w-4.5,cy,3.4,p)
+    if (g.centers.length) {
+        g.centers.forEach(function(x){result += fan(x,cy,g.radius,p)})
+    } else {
+        // Unknown cooling retains a neutral vented panel, never fan openings.
+        result += rect(g.x+g.w*.14,g.y+g.h*.26,g.w*.66,g.h*.48,.7,p.shade)
+            + path("M"+(g.x+g.w*.22)+" "+(g.y+g.h*.42)+"H"+(g.x+g.w*.68),"none",p.base,.75)
+    }
+    return result
 }
 
 function body(state) {

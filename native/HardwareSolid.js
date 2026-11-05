@@ -1,4 +1,5 @@
 .pragma library
+.import "HardwareSeriesShapes.js" as Series
 
 // Original static object illustrations. The caller supplies normalized,
 // allowlisted state and owns SVG wrapping, stable keys, texture caching and
@@ -75,11 +76,31 @@ function fan(cx, cy, radius, colors) {
 }
 
 function geometry(state) {
+    return Series.geometry(state, baseGeometry(state))
+}
+
+function baseGeometry(state) {
     const count = state.style === "gpu_axial" ? state.fan_count : -1
     if (count === 1) return {x:5.2, y:6.7, w:14.5, h:9.5, centers:[12.45], radius:3.85}
     if (count === 2) return {x:3.0, y:7.1, w:18.9, h:9.2, centers:[7.8,17.1], radius:3.55}
     if (count === 3) return {x:1.9, y:7.6, w:20.7, h:8.4, centers:[5.65,12.25,18.85], radius:2.9}
     return {x:3.2, y:7.1, w:18.6, h:9.2, centers:[], radius:0}
+}
+
+function front(state, g, colors) {
+    return Series.known(state) ? Series.face(state, g, colors)
+        : shell(g, family(state), colors) + trim(state, g, colors)
+}
+
+function underlay(state, g, colors) {
+    if (!Series.known(state)) return ""
+    // Open shroud sections expose a heatsink, never an empty white hole.
+    let result = r(g.x+.65,g.y+g.h*.18,g.w-1.3,g.h*.66,.25,colors.caseShade)
+    for (let index=1; index<9; index++) {
+        const x=g.x+.65+(g.w-1.3)*index/9
+        result += p("M"+x+" "+(g.y+g.h*.23)+"V"+(g.y+g.h*.78),"none",.35,colors.rim,.18)
+    }
+    return result
 }
 
 function family(state) {
@@ -136,7 +157,7 @@ function gpu(state, colors) {
         + r(x-.9,y-.45,1.85,.65,.18,colors.rim)
         + r(x+.5,bottom-.25,g.w-1,.9,.25,colors.caseShade)
         + r(x+g.w*.27,bottom+.55,g.w*.18,.7,.1,colors.gold)
-        + shell(g,family(state),colors) + trim(state,g,colors)
+        + underlay(state,g,colors) + front(state,g,colors)
     const cy=y+g.h*.51
     if (state.style === "gpu_blower" && state.fan_count === 1) {
         result += fan(end-4.5,cy,3.55,colors)

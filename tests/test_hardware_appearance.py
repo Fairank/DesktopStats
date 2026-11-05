@@ -19,6 +19,16 @@ class HardwareAppearanceTests(unittest.TestCase):
                 self.assertEqual((match["id"], match["confidence"]), (row[0], "model"))
                 self.assertEqual(match["fan_count"], row[6])
 
+    def test_each_existing_series_has_a_reviewed_exact_representative(self):
+        covered = set()
+        for row in appearance.CATALOG:
+            match = appearance.appearance_for(row[1], row[-1][0])
+            if row[1] == "gpu":
+                self.assertEqual(match["confidence"], "model")
+                self.assertIn(match["fan_count"], (1, 2, 3))
+                covered.add(match["series_id"])
+        self.assertEqual(covered, {row["id"] for row in appearance.SERIES_CATALOG})
+
     def test_actual_intel_registry_name_matches_package(self):
         result = appearance.appearance_for("cpu", "13th Gen Intel(R) Core(TM) i7-13700KF")
         self.assertEqual((result["vendor"], result["style"], result["confidence"]),

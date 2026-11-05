@@ -9,6 +9,7 @@ The bounded cache stores immutable tuples; callers receive their own small map.
 import re
 from functools import lru_cache
 
+from hardware_model_extensions import CATALOG_EXTENSIONS, MODEL_SERIES
 from hardware_series import SERIES_CATALOG
 
 # These are restrained interface accents, not claims about a product's paint.
@@ -53,7 +54,7 @@ _ALIASES = {
 # Exact reviewed seed models, not family-wide fan-count guesses. Each row is
 # id, kind, silicon vendor, board brand, label, style, fans, shroud, URL, aliases.
 # New SKUs require an official reference and collision/mobile negative tests.
-CATALOG = (
+_SEED_CATALOG = (
     ("intel-13700kf", "cpu", "intel", "unknown", "Intel Core i7-13700KF",
      "lga_rect", None, "neutral",
      "https://www.intel.com/content/www/us/en/products/sku/230489/intel-core-i713700kf-processor-30m-cache-up-to-5-40-ghz/specifications.html",
@@ -88,6 +89,7 @@ CATALOG = (
      "https://www.sapphiretech.com/en/consumer/pulse-radeon-rx-7600-8g-gddr6",
      ("SAPPHIRE PULSE AMD Radeon RX 7600 8G GDDR6", "SAPPHIRE PULSE RX 7600")),
 )
+CATALOG = _SEED_CATALOG + CATALOG_EXTENSIONS
 
 _FIELDS = ("id", "kind", "vendor", "board_vendor", "label", "style", "fan_count",
            "shroud", "source_url", "confidence", "accent", "series_id", "series_label", "features")
@@ -130,6 +132,7 @@ _MODEL_SERIES = {
     "asus-dual-4060-oc": "asus_dual", "asus-tuf-4070tis-oc": "asus_tuf",
     "msi-ventus-4060-2x-oc": "msi_ventus", "gigabyte-windforce-4060-oc": "gigabyte_windforce",
     "zotac-solo-4060": "zotac_solo", "sapphire-pulse-7600": "sapphire_pulse",
+    **MODEL_SERIES,
 }
 _CPU_FEATURES = {"lga_rect": ("长方形金属顶盖",), "am5": ("八处边缘缺口", "中央金属顶盖")}
 _MOBILE = re.compile(r"\b(?:laptop|mobile|notebook|max q)\b|\b\d{4,5}(?:hx|hs|hk|h|u|m)\b")

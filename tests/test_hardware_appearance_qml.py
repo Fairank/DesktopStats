@@ -324,6 +324,40 @@ Window {
         QTest.qWait(15)
         self.assertIsNotNone(loader.property("item"))
 
+    def test_series_use_individual_filled_faces_without_guessing_any_fans(self):
+        from hardware_series import SERIES_CATALOG
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        for style in ("solid", "miniature", "soft"):
+            faces = []
+            for series in SERIES_CATALOG:
+                value = dict(gpu(3), icon_set=style, board_vendor=series["board_vendor"],
+                             series_id=series["id"], accent="#7e8b98")
+                self.assign("appearance", value)
+                tree = ET.fromstring(self.svg(glyph))
+                face = next(node for node in tree.iter()
+                            if node.get("class", "").split() == ["hardware-series-face", series["id"]])
+                self.assertGreaterEqual(len(list(face)), 2)
+                self.assertTrue(any(node.tag.split("}")[-1] in ("path", "rect")
+                                    and node.get("fill") not in (None, "none")
+                                    for node in face))
+                self.assertEqual(sum(node.get("class") == "hardware-fan-hub" for node in tree.iter()), 3)
+                # Remove the identifying class before comparing physical paths.
+                face.attrib.pop("class")
+                faces.append(ET.tostring(face))
+                self.assign("appearance", dict(value, fan_count=None))
+                self.assertFalse(any(node.get("class") == "hardware-fan-hub"
+                                     for node in ET.fromstring(self.svg(glyph)).iter()))
+            self.assertEqual(len(set(faces)), len(SERIES_CATALOG))
+
+    def test_conflicting_series_brand_cannot_select_another_manufacturers_face(self):
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        for style in ("solid", "miniature", "soft"):
+            self.assign("appearance", dict(gpu(2), icon_set=style, board_vendor="asus", series_id="msi_suprim"))
+            self.assertFalse(any("hardware-series-face" in node.get("class", "")
+                                 for node in ET.fromstring(self.svg(glyph)).iter()))
+
     def test_previous_outline_version_keeps_its_exact_svg_drawings(self):
         # Captured from the previous committed version, before theme routing.
         from hardware_appearance import appearance_for

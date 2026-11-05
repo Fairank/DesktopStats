@@ -21,6 +21,8 @@ import "../native" as Product
 Window {
     id:scene;visible:false;width:1440;height:84+Math.ceil(variants.length/2)*144+56;color:"#e7ebf1"
     property var variants:[]
+    property var sampleSizes:[64,32,18]
+    property var sampleXs:[20,130,220]
     property string catalogTitle:"Hardware appearances · 原创硬件外观"
     property string catalogNote:"18px actual size · 32px · 64px / Static vectors · simplified families"
     Text {x:24;y:17;text:scene.catalogTitle;font.family:"Microsoft YaHei UI"
@@ -49,18 +51,19 @@ Window {
                         elide:Text.ElideRight
                         font.family:"Microsoft YaHei UI";font.pixelSize:12;font.weight:Font.Medium;color:theme.ink}
                     Text {x:14;y:31;width:308;text:card.modelData.note;textFormat:Text.PlainText
+                        elide:Text.ElideRight
                         font.family:"Microsoft YaHei UI";font.pixelSize:10;color:theme.muted}
                     Repeater {
-                        model:[64,32,18]
+                        model:scene.sampleSizes
                         Item {
                             id:sample;required property int index;required property int modelData
-                            x:[20,130,220][index];y:50;width:78;height:76
+                            x:scene.sampleXs[index];y:50;width:78;height:76
                             Product.HardwareGlyph {
                                 objectName:"glyph_"+theme.index+"_"+card.index+"_"+sample.modelData
                                 x:0;y:(64-height)/2;width:sample.modelData;height:sample.modelData
                                 appearance:card.modelData.appearance;ink:theme.ink
                             }
-                            Text {x:0;y:64;text:sample.modelData+"px";font.family:"Segoe UI";font.pixelSize:9;color:theme.muted}
+                            Text {x:0;y:scene.sampleSizes[0]>64?70:64;text:sample.modelData+"px";font.family:"Segoe UI";font.pixelSize:9;color:theme.muted}
                         }
                     }
                 }
@@ -70,7 +73,7 @@ Window {
 }'''
 
 
-def variants(catalog):
+def variants(catalog, icon_set="outline"):
     sys.path.insert(0, str(ROOT))
     from hardware_appearance import CATALOG, appearance_for
 
@@ -79,23 +82,37 @@ def variants(catalog):
         for row in CATALOG:
             appearance = appearance_for(row[1], row[-1][0])
             assert appearance["confidence"] == "model" and appearance["id"] == row[0]
+            appearance["icon_set"] = icon_set
             note = "已确认型号 · " + (f"{appearance['fan_count']} 风扇" if row[1] == "gpu" else "已知 CPU 封装")
             result.append(dict(label=appearance["label"], note=note, appearance=appearance))
         return result
 
     from hardware_series import SERIES_CATALOG
     result = []
+    models = {}
+    if catalog == "series_models":
+        for model in CATALOG:
+            appearance = appearance_for(model[1], model[-1][0])
+            if model[1] == "gpu" and appearance["series_id"]:
+                models.setdefault(appearance["series_id"], appearance)
     for row in SERIES_CATALOG:
+        if catalog == "series_models":
+            appearance = dict(models[row["id"]], icon_set=icon_set)
+            assert appearance["confidence"] == "model"
+            result.append(dict(label=row["label"], note=str(appearance["fan_count"])+" 风扇 · "+appearance["label"],
+                               source_url=appearance["source_url"], appearance=appearance))
+            continue
         appearance = appearance_for("gpu", row["board_vendor"] + " " + row["aliases"][0] + " unidentified GPU")
         assert appearance["series_id"] == row["id"] and appearance["fan_count"] is None
         assert appearance["style"] == "gpu_neutral"
+        appearance["icon_set"] = icon_set
         result.append(dict(label=row["label"] + " · 系列示意",
                            note=" / ".join(row["features"]) + " · 未确认风扇",
                            source_url=row["source_url"], appearance=appearance))
     return result
 
 
-def render(destination, scratch, catalog):
+def render(destination, scratch, catalog, icon_set="outline"):
     os.environ.update(DESKTOP_STATS_DATA=str(scratch / "profile"), QT_QPA_PLATFORM="offscreen",
                       QT_QUICK_BACKEND="software", QSG_RENDER_LOOP="basic",
                       QT_QUICK_CONTROLS_STYLE="Basic", QML_DISABLE_DISK_CACHE="1",
@@ -120,11 +137,15 @@ def render(destination, scratch, catalog):
     component.setData(QML.encode("utf-8"), QUrl.fromLocalFile(str(ROOT / "tools/hardware-catalog.qml")))
     if component.isError():
         raise RuntimeError("; ".join(error.toString() for error in component.errors()))
-    cases = variants(catalog)
-    title = "Confirmed hardware models · 已确认型号" if catalog == "models" else "GPU cooler families · 系列外观示意"
-    note = "18px actual size · 32px · 64px / " + ("Exact catalog identities; simplified physical layouts" if catalog == "models"
+    cases = variants(catalog, icon_set)
+    title = ("Confirmed hardware models · 已确认型号" if catalog == "models" else
+             "Individual cooler series · 逐系列外观" if catalog == "series_models" else "GPU cooler families · 系列外观示意")
+    note = ("18px actual size · 40px · 128px / " if catalog == "series_models" else "18px actual size · 32px · 64px / ") + ("Exact catalog identities; simplified physical layouts" if catalog in ("models", "series_models")
                                                 else "Family cues only; fan counts UNKNOWN, no fan circles")
-    window = component.createWithInitialProperties(dict(variants=cases, catalogTitle=title, catalogNote=note))
+    sizes = [128, 40, 18] if catalog == "series_models" else [64, 32, 18]
+    window = component.createWithInitialProperties(dict(variants=cases, catalogTitle=title, catalogNote=note,
+                                                       sampleSizes=sizes,
+                                                       sampleXs=[14,180,270] if catalog == "series_models" else [20,130,220]))
     assert isinstance(window, QQuickWindow), [error.toString() for error in component.errors()]
     try:
         window.show()  # Offscreen platform asserted above; never a desktop window.
@@ -140,7 +161,7 @@ def render(destination, scratch, catalog):
         rows = []
         for theme in range(2):
             for index, case in enumerate(cases):
-                for size in (18, 32, 64):
+                for size in sizes:
                     glyph = visual.get(f"glyph_{theme}_{index}_{size}")
                     assert glyph is not None, (theme, index, size, list(visual), warnings)
                     image = glyph.findChild(QObject, "hardwareGlyphImage")
@@ -172,7 +193,8 @@ def render(destination, scratch, catalog):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "qa-private/hardware-catalog.png")
-    parser.add_argument("--catalog", choices=("models", "series"), default="models")
+    parser.add_argument("--catalog", choices=("models", "series", "series_models"), default="models")
+    parser.add_argument("--icon-set", choices=("outline", "solid", "miniature", "soft"), default="outline")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     destination = args.output.resolve()
@@ -185,7 +207,7 @@ def main():
          patch.object(ctypes, "WinDLL", side_effect=AssertionError("No native API")), \
          patch.object(subprocess, "Popen", side_effect=AssertionError("No subprocess")), \
          patch("threading.Thread.start", side_effect=AssertionError("No worker threads")):
-        result = render(destination, Path(scratch), args.catalog)
+        result = render(destination, Path(scratch), args.catalog, args.icon_set)
     print(json.dumps(result, ensure_ascii=False))
     return 0
 

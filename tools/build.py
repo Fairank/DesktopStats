@@ -36,6 +36,7 @@ SOURCES = (
     "diagnostic_actions.py",
     "history_store.py",
     "hardware_appearance.py",
+    "hardware_model_extensions.py",
     "hardware_series.py",
     "external_engine.py",
     "external_sensor.py",

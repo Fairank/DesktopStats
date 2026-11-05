@@ -26,14 +26,18 @@ The source-export tools include a synthetic offscreen comparison renderer,
 
 - CPU manufacturer and GPU chip vendor are different from the manufacturer of a
   complete graphics card. A motherboard's ASUS identity says nothing about a GPU.
-- A complete reviewed model alias selects its package/cooler silhouette. The seed
-  catalog has 3 CPU and 6 GPU models; each record has an official reference URL.
+- A complete reviewed model alias selects its package/cooler silhouette. The
+  catalog has 3 CPU and 14 GPU models; each record has an official reference URL.
 - A separate catalog recognises 14 graphics-card series across ASUS, MSI,
   GIGABYTE, ZOTAC, SAPPHIRE and PowerColor. Series motifs retain distinctive
   shroud lines and accents; two short feature descriptions and a larger static
   illustration are available in expanded details metadata. These are family
   design-language summaries based on the cited representative products, not a
   promise of identical geometry across every generation, revision or SKU.
+- Every one of those 14 series now has a reviewed exact representative SKU and
+  a dedicated static casing profile: independent end caps, shoulders, large panel
+  divisions and proportions. These replace the three shared casing categories
+  in Solid, Miniature and Soft. Outline remains the preserved earlier version.
 - There are 22 recognised brand identities. Brand-only matches receive an accent
   and a neutral silhouette, never a guessed fan arrangement or cooler shroud.
 - A GPU revision, white edition, BTF version or nearby model must have its own
@@ -59,6 +63,8 @@ outline rather than claiming a precise retail cooler.
 `process_gpu.dxgi_adapters` retains four PCI identity integers that GetDesc1 already
 returned; this does not start Top 5, add an API call or resolve a retail SKU by itself.
 No new NVML query is introduced into the sampling path.
+`HardwareSeriesShapes.js` only generates geometry when the existing appearance
+key changes. It does not discover devices, infer fans, animate or poll hardware.
 
 The appearance is independent of dynamic `hardware_state` and the icon effect
 switch. QML retains a single static SVG image per active hardware glyph, with a
@@ -77,6 +83,9 @@ product page for the exact model/revision. Keep an official URL, complete aliase
 chip vendor, board manufacturer, physical fan count and an appropriate silhouette.
 Run the matcher and QML tests, including negative tests for adjacent capacities,
 revisions and mobile products. Do not use a family-wide substring to assign fans.
+Additional reviewed models live in `hardware_model_extensions.py`, with an
+explicit model-to-series map. WHITE, LIQUID, LIMITED, BP and laptop names do not
+inherit the standard model's fan count; they require their own reviewed entries.
 
 At present the stock sensor path automatically identifies chip/CPU brands; retail
 board-level matches require a complete model identity from a provider. An offline
