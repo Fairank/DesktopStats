@@ -34,10 +34,11 @@ QtObject {
     readonly property int controlHeight: 34
     readonly property int controlRadius: 8
     readonly property color ink: dark ? "#f5f6f8" : "#1f242b"
-    readonly property color muted: dark ? "#b8bdc7" : "#303945"
+    // Thin material planes need stronger text over an unknown desktop.
+    readonly property color muted: dark ? "#b8bdc7" : translucentBackdrop ? "#303945" : "#586678"
     readonly property color subtle: translucentBackdrop ? muted : dark ? "#a4aebc" : "#5c6878"
     readonly property color line: dark ? "#1cffffff" : "#13000000"
-    readonly property color controlBorder: dark ? "#48515e" : "#dfe3e8"
+    readonly property color controlBorder: dark ? "#465262" : "#d9e0e9"
     readonly property color hover: dark ? "#17ffffff" : "#0c000000"
     readonly property color pressed: dark ? "#24ffffff" : "#14000000"
     readonly property color disabledText: dark ? "#7e8998" : "#88929f"
@@ -45,11 +46,11 @@ QtObject {
     readonly property color accentFill: "#006fe6"
     readonly property color accentHover: "#0066d6"
     readonly property color accentPressed: "#0058bf"
-    readonly property color selection: dark ? "#334158" : "#e2edff"
+    readonly property color selection: dark ? "#2c3d54" : "#e8f0fc"
     readonly property color selectedLine: dark ? "#6a9ee8" : "#75a9ed"
     readonly property color field: dark ? "#2d323b" : "#ffffff"
     readonly property color group: dark ? "#2a2e35" : "#ffffff"
-    readonly property color well: dark ? "#1f2329" : "#edf0f5"
+    readonly property color well: dark ? "#202630" : "#eef2f6"
     readonly property color segment: dark ? "#1d2127" : "#e9edf3"
     readonly property color segmentSelected: dark ? "#424954" : "#ffffff"
     readonly property color tile: dark ? "#2d323b" : "#ffffff"

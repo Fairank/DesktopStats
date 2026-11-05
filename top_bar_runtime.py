@@ -503,7 +503,8 @@ class BarViewState(QObject):
         self._overflow_model = MetricRows(self)
         self._colors = {}
         self._spacing = 12.0
-        self._detail, self._coating, self._overflow_count, self._panel_maximum = {}, False, 0, 480.0
+        self._detail, self._coating, self._overflow_count, self._panel_maximum = {}, False, 0, 680.0
+        self._panel_width = 368.0
         self._policy_allowed, self._material_reports = None, {}
         self._native_material, self._detail_coating = False, False
         self._operation_message = ""
@@ -541,6 +542,7 @@ class BarViewState(QObject):
     detail = Property("QVariantMap", lambda self: self._detail, notify=detailChanged)
     pinned = Property(bool, lambda self: self._detail.get("mode") == "pinned", notify=detailChanged)
     panelMaximumHeight = Property(float, lambda self: self._panel_maximum, notify=changed)
+    panelMaximumWidth = Property(float, lambda self: self._panel_width, notify=changed)
     materialReports = Property("QVariantMap", lambda self: self._material_reports, notify=materialChanged)
     operationMessage = Property(str, lambda self: self._operation_message, notify=operationChanged)
 
@@ -1602,21 +1604,27 @@ class TopBarManager(QObject):
             value["group_start"] = value["placement"] not in groups
             groups.add(value["placement"])
             visible.append(value)
+        previous_style = state._config
         prior_view = (state._menu, state._overflow, state._overflow_count,
-                      state._panel_maximum, state._config, state._coating, state._spacing)
+                      state._panel_maximum, state._panel_width, state._config, state._coating, state._spacing)
         state._rows, state._menu = visible, relative(plan.menu_hit)
         state._row_model.update(visible)
         if not current():
             return  # Model notifications can synchronously close/reconfigure a host.
         state._overflow = relative(plan.overflow_hit) if plan.overflow_hit else None
         state._overflow_count = len(plan.overflow_ids)
-        state._panel_maximum = max(100, min(480, host.binding.work.height / scale - 16))
+        # Size the Quick client itself to the physical work area. Native
+        # placement remains a final guard, rather than clipping a larger scene.
+        work = host.binding.work
+        panel_top = max(work.top + 8, rect.bottom + math.ceil(6 * scale))
+        state._panel_maximum = max(1, min(680, (work.bottom - panel_top - 8) / scale))
+        state._panel_width = max(1, min(368, (work.width - 16) / scale))
         state._config = self._style
         state._coating = self._coating if state._policy_allowed is None else state._policy_allowed
         state._spacing = spacing
         host.overflow_ids = plan.overflow_ids
         current_view = (state._menu, state._overflow, state._overflow_count,
-                        state._panel_maximum, state._config, state._coating, state._spacing)
+                        state._panel_maximum, state._panel_width, state._config, state._coating, state._spacing)
         if current_view != prior_view or not state._colors:
             state._colors = palette(effective_skin(self._style), self._style.get("theme") == "dark",
                                     self._style.get("opacity", 94), frosted=state._coating,
@@ -1624,7 +1632,7 @@ class TopBarManager(QObject):
             state.changed.emit()
         if not current():
             return
-        native_changed = any(prior_view[4].get(key) != self._style.get(key)
+        native_changed = any(previous_style.get(key) != self._style.get(key)
                              for key in ("skin", "theme"))
         if native_changed:
             if host.material_bridge is not None:

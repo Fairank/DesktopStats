@@ -1,5 +1,35 @@
 # Changes
 
+## 0.27.0-preview.1
+
+- Organize top-bar editing around one live preview and separate Content & layout
+  and Appearance tasks. Keep all three designs, material inheritance, continuous
+  transparency, existing layouts and optional version-12 hardware effects.
+- Show the widget list and desktop actions only when editing desktop widgets.
+  Open a saved bar-only profile on the top-bar page when settings are first
+  created, while preserving explicit history/widget routes and session navigation.
+- Align page content and clarify Saved / Unapplied changes, scoped Apply and
+  Discard changes. Keep uncommitted inputs, undo and whole-settings replacement
+  boundaries; disable save actions when the current scope has no changes.
+- Put on-demand software rankings before expandable CPU logical-processor
+  details. Explain missing data directly and keep source limitations and technical
+  information available separately. Stop top-bar ranking demand outside its
+  visible viewport or when its native host is minimized.
+- Pause preview animation subscriptions, optional inspection and history-page
+  queries while settings are hidden or minimized. Restore the latest readings
+  without discarding group edits, selection or scroll positions. Cosmetic edits
+  do not request extra hardware inspection; ordinary sampling is unchanged.
+- Retain the machine-specific, read-only ASUS CPU temperature session bridge.
+  Add an opt-in Restore CPU temperature at startup preference, disabled by
+  default. With an existing ASUS service, request administrator authorization
+  once per app session; defer during fullscreen use and do not prompt again in
+  that session after cancellation. The bridge exits with its owning app, has no
+  startup entry, and does not establish support for every CPU or PC.
+- Reuse the application's title controls on the settings Raster host. On the
+  tested Windows/Qt path, the native caption background covered the entire
+  extended glass frame. An owned-window desktop comparison verified actual
+  background blur with the frameless host; the working bar/detail paths remain.
+
 ## 0.26.1-preview.9
 
 - Refine optional desktop widgets with clearer hardware headings and static

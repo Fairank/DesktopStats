@@ -217,7 +217,10 @@ class TopBarActionUiTests(unittest.TestCase):
             for action in ("Adjust", "Delete"):
                 button = self.item("topBarItem" + action + "_" + identifier)
                 self.assertTrue(button.isVisible())
-                self.assertTrue(button.property("outlined"))
+                self.assertFalse(button.property("outlined"))
+                self.assertTrue(button.property("label"))
+                button.forceActiveFocus(Qt.TabFocusReason)
+                self.assertTrue(button.property("background").isVisible())
                 left = button.mapToItem(card, QPointF())
                 self.assertGreaterEqual(left.x(), 0)
                 self.assertLessEqual(left.x() + button.width(), card.width() + 0.1)
@@ -259,7 +262,7 @@ class TopBarActionUiTests(unittest.TestCase):
         self.assertEqual(len(self.item_config()["prefs"]["metrics"]), 4)
         self.assertFalse(self.item("topBarSettings").property("groupPopupOpen"))
 
-    def test_quiet_button_has_a_real_edge_and_distinct_hover_disabled_and_focus(self):
+    def test_quiet_button_is_clear_at_rest_with_distinct_hover_disabled_and_focus(self):
         component = QQmlComponent(self.engine)
         component.setData(
             b"""import QtQuick
@@ -296,7 +299,7 @@ Product.ActionButton {objectName:"disabledSample";x:30;y:90;width:180;text:"Seco
                 image.pixelColor(x, round(47 * dpr)).rgba()
                 for x in range(math.floor(30 * dpr), math.ceil(32 * dpr))
             ]
-            self.assertTrue(any(pixel != color(image, 25, 47).rgba() for pixel in edge))
+            self.assertTrue(all(pixel == color(image, 25, 47).rgba() for pixel in edge))
             quiet_idle = color(image, 42, 47)
             disabled_idle = color(image, 42, 107)
             QTest.mouseMove(window, QPoint(42, 47))
@@ -305,10 +308,15 @@ Product.ActionButton {objectName:"disabledSample";x:30;y:90;width:180;text:"Seco
             self.assertNotEqual(color(image, 42, 47).rgba(), quiet_idle.rgba())
             self.assertNotEqual(color(image, 42, 47).rgba(), disabled_idle.rgba())
             self.assertFalse(disabled.isEnabled())
-            quiet.forceActiveFocus()
+            QTest.mouseMove(window, QPoint(340, 160))
+            quiet.forceActiveFocus(Qt.TabFocusReason)
             QTest.qWait(25)
             self.assertTrue(quiet.hasActiveFocus())
-            self.assertTrue(quiet.property("background").isVisible())
+            self.assertTrue(quiet.property("visualFocus"))
+            image = window.grabWindow()
+            focus_edge = [image.pixelColor(x, round(47 * dpr)).rgba()
+                          for x in range(math.floor(27 * dpr), math.ceil(31 * dpr))]
+            self.assertTrue(any(pixel != color(image, 25, 47).rgba() for pixel in focus_edge))
         finally:
             window.hide()
             window.destroy()

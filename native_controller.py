@@ -21,6 +21,7 @@ import sensors
 from compact_labels import label_options
 from configuration_scopes import SCOPE_FIELDS as CONFIGURATION_SCOPES
 from configuration_scopes import merge_scope, rebase_saved_changes, scope_dirty
+from cpu_temperature import is_requested as cpu_temperature_requested
 from desktop_placement import desktop_plan
 from external_sensor import EXTERNAL_SLOTS, PROVIDER, inventory_display, sensor_binding
 from history_store import DEFAULT_METRICS
@@ -34,7 +35,7 @@ from layout_assist import (
 )
 from localization import LANGUAGES, MESSAGES, translate
 from material_policy import render_policy
-from metrics import METRICS, SCOPE_FIELDS, display_value, metric_info, numeric
+from metrics import METRICS, SCOPE_FIELDS, display_value, metric_info, numeric, required_sources
 from native_card import formatted
 from native_layout import LayoutCapacityError, effective_size, grid_plan, minimum_size, windows
 from presets import CATALOG_INFO, catalogue
@@ -294,6 +295,9 @@ class Controller(WorkspaceTools):
             else:
                 value["top_bar"] = copy.deepcopy(self._draft["top_bar"])
             value = validate(value)
+            if enabled is None and value == self._saved:
+                self._applied_status("设置已同步")
+                return True
             save(value)
         except Exception:
             logging.exception("Top bar settings commit failed")
@@ -2290,6 +2294,9 @@ class Controller(WorkspaceTools):
         before = self._saved
         try:
             value = validate(merge_scope(self._saved, self._draft, scope) if scope else self._draft)
+            if value == before and not force_rearrange and self._replacement_backup is None:
+                self._applied_status("设置已同步")
+                return True
             rearrange = any(
                 before[k] != value[k] for k in ("mode", "layout", "size", "group_columns")
             )
@@ -2502,6 +2509,46 @@ class Controller(WorkspaceTools):
     @Slot()
     def quit(self):
         self.quitRequested.emit()
+
+    @Slot(str, str, result=bool)
+    def previewNeedsInspection(self, scope, key):
+        """Discover extra readings for the current editor, never a whole draft.
+
+        Disabled widgets and bars still have a live editor preview. This small
+        request view changes no saved/draft flags and runs only on UI-state
+        changes. Ordinary CPU sampling already includes frequency and logical
+        processors; the shared CPU-temperature channel has its own demand gate.
+        """
+        preview = dict(visible=True, widgets={}, widget_order=[],
+                       top_bar=dict(enabled=False, items=[]))
+        if scope == "desktop":
+            prefs = self._draft["widgets"].get(key)
+            if prefs is None:
+                return False
+            preview["widgets"] = {key: dict(prefs, enabled=True)}
+            preview["widget_order"] = [key]
+        elif scope == "topbar":
+            preview["top_bar"] = dict(self._draft["top_bar"], enabled=True)
+        else:
+            return False
+
+        if required_sources(preview) - required_sources(self._saved):
+            return True
+        if cpu_temperature_requested(preview) and not cpu_temperature_requested(self._saved):
+            return True
+
+        def binding_ids(config):
+            prefs = [config["widgets"][identifier]
+                     for identifier in config.get("widget_order", config["widgets"])
+                     if config.get("visible", True) and config["widgets"][identifier]["enabled"]]
+            if config["top_bar"]["enabled"]:
+                prefs.extend(item["prefs"] for item in config["top_bar"]["items"])
+            return {binding["sensor_id"] for row in prefs
+                    for binding in row.get("sensor_bindings", {}).values()}
+
+        # A newly chosen channel retains the existing discovery/fresh-catalog
+        # path even when another channel already uses that provider family.
+        return bool(binding_ids(preview) - binding_ids(self._saved))
 
     @Slot()
     def inspect(self):

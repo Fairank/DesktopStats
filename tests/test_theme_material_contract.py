@@ -345,7 +345,7 @@ class ThemeMaterialTests(unittest.TestCase):
 
         try:
             window.setProperty("nativeHosted", True)
-            window.setProperty("page", 1)
+            window.setProperty("page", 0)
             window.resize(960, 640)
             window.show()
             for mode in ("light", "dark"):
@@ -359,6 +359,7 @@ class ThemeMaterialTests(unittest.TestCase):
                 nav = find("sidebarNavigationReadingSurface")
                 widgets = find("sidebarWidgetsReadingSurface")
                 footer = find("sidebarFooterReadingSurface")
+                self.assertTrue(widgets.isVisible())
                 covered(find("sidebarBrandContent"), brand)
                 for name in ("nav_0", "nav_1", "nav_3"):
                     covered(find(name), nav)
@@ -385,7 +386,8 @@ class ThemeMaterialTests(unittest.TestCase):
                 painter.end()
                 # Sample a real, unhovered navigation background, clear of text.
                 x = int(window.property("railWidth")) - 17
-                point = canvas.pixelColor(x, 114)
+                _, nav_y, _, nav_height = bounds(find("nav_3"))
+                point = canvas.pixelColor(x, round(nav_y + nav_height / 2))
                 expected = composite(
                     self.theme.property("railReading"),
                     composite(self.theme.property("railTop"), underlay),
@@ -393,11 +395,14 @@ class ThemeMaterialTests(unittest.TestCase):
                 for actual, wanted in zip((point.redF(), point.greenF(), point.blueF()), expected):
                     self.assertAlmostEqual(actual, wanted, delta=2 / 255)
                 # The inter-group gap is still the original thin WUJI coating.
+                _, brand_y, _, brand_height = bounds(brand)
+                _, navigation_y, _, _ = bounds(nav)
+                gap_y = round((brand_y + brand_height + navigation_y) / 2)
                 self.assertAlmostEqual(
-                    raw.pixelColor(40, 80).alpha(), 82 if mode == "light" else 184, delta=1
+                    raw.pixelColor(40, gap_y).alpha(), 82 if mode == "light" else 184, delta=1
                 )
                 self.assertAlmostEqual(
-                    raw.pixelColor(int(window.property("railWidth")) + 6, 80).alpha(),
+                    raw.pixelColor(int(window.property("railWidth")) + 6, gap_y).alpha(),
                     163 if mode == "light" else 214,
                     delta=1,
                 )
@@ -407,6 +412,10 @@ class ThemeMaterialTests(unittest.TestCase):
                     self.assertTrue(directory.is_relative_to((ROOT / "qa-private").resolve()))
                     directory.mkdir(parents=True, exist_ok=True)
                     self.assertTrue(canvas.save(str(directory / ("sidebar-" + mode + ".png"))))
+                window.setProperty("page", 1)
+                QTest.qWait(30)
+                self.assertFalse(widgets.isVisible())
+                window.setProperty("page", 0)
         finally:
             window.hide()
             window.deleteLater()

@@ -51,6 +51,7 @@ class BarTransparencyControlsTests(unittest.TestCase):
         self.window.resize(1100, 960)
         self.window.show()
         QTest.qWait(50)
+        self.click(self.find("topBarAppearanceTab"))
 
     def tearDown(self):
         self.window.hide()

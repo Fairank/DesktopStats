@@ -8,6 +8,7 @@ Item {
     objectName:"historyPage"
     property var controller:stats
     property bool active:visible
+    property bool alignContentLeft:false
     readonly property bool uiActive:active && root.Window.window !== null
         && root.Window.window.visible && root.Window.window.visibility !== Window.Minimized
     property string selectedId:""
@@ -80,7 +81,7 @@ Item {
         ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
         ColumnLayout {
             id:content
-            width:Math.min(880,scroll.availableWidth-6);x:Math.max(0,(scroll.availableWidth-width)/2)
+            width:Math.min(880,scroll.availableWidth-6);x:root.alignContentLeft?0:Math.max(0,(scroll.availableWidth-width)/2)
             spacing:22
             RowLayout {
                 Layout.fillWidth:true;spacing:12

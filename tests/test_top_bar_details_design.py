@@ -176,7 +176,7 @@ class DetailsDesignTests(unittest.TestCase):
             QPointF(3 + slot["x"] * (chart.width() - 6), chart.height() / 2)
         ).toPoint()
 
-    def test_cpu_trend_precedes_cores_and_headers_keep_discoverable_edges(self):
+    def test_cpu_trend_precedes_collapsed_cores_and_header_tools_keep_focus_targets(self):
         self.state.details = present_metric(
             dict(
                 id="b_cpu",
@@ -200,6 +200,10 @@ class DetailsDesignTests(unittest.TestCase):
         cores = self.find("topBarCpuContext")
         self.assertLess(trend.mapToScene(QPointF()).y(), cores.mapToScene(QPointF()).y())
         self.assertEqual(self.window.property("coreColumns"), 4)
+        self.assertEqual(self.find("topBarCpuCoreGrid").property("count"), 0)
+        self.assertFalse(self.find("topBarCpuDetailsBody").isVisible())
+        self.click("topBarCpuDetailsToggle")
+        self.assertTrue(self.find("topBarCpuDetailsBody").isVisible())
         self.assertEqual(self.find("topBarCpuCoreGrid").property("count"), 24)
         for name in ("topBarDetailsHistory", "topBarDetailsEdit", "topBarDetailsClose"):
             button = self.find(name)
@@ -209,6 +213,11 @@ class DetailsDesignTests(unittest.TestCase):
             expression = QQmlExpression(qmlContext(background), background, "border.width")
             self.assertEqual(expression.evaluate()[0], 1)
             self.assertFalse(expression.hasError())
+            button.forceActiveFocus(Qt.TabFocusReason)
+            QTest.qWait(10)
+            focused = QQmlExpression(qmlContext(background), background, "border.color")
+            self.assertGreater(focused.evaluate()[0].alpha(), 0)
+            self.assertFalse(focused.hasError())
 
     def test_exact_hover_gap_and_keyboard_cursor_survive_layout_and_same_time_refresh(self):
         self.load()

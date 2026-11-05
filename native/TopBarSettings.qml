@@ -14,6 +14,9 @@ ColumnLayout {
     property string selectedItem: ""
     property string addingPlacement: "right"
     property bool barOptionsOpen: false
+    property string editingTask: "content"
+    property bool editingReady: false
+    readonly property bool appearanceEditing: editingTask === "appearance"
     property bool placementOpen: false
     readonly property var config: stats.draft.top_bar
     property var rows:[]
@@ -29,13 +32,11 @@ ColumnLayout {
     readonly property string appearanceSkin: (appearance.follow_global ? stats.draft.skin : appearance.skin) === "minimal" ? "glass" : (appearance.follow_global ? stats.draft.skin : appearance.skin)
     readonly property real appearanceTransparency: appearance.follow_global ? stats.draft.glass_transparency : appearance.glass_transparency
     readonly property string selectedDesign:appearance.design || "classic"
-    readonly property bool compactDesigns:width<660
     readonly property var designOptions:[
         {id:"classic",label:ui.t("经典菜单栏"),note:ui.t("轻盈留白")},
         {id:"capsule",label:ui.t("分组胶囊"),note:ui.t("清晰分组")},
         {id:"instrument",label:ui.t("精密仪表"),note:ui.t("精确对齐")}
     ]
-    property var designExampleRows:[]
     readonly property var previewConfig: {
         const value=Object.assign({},stats.draft)
         if(appearance.follow_global===false){value.skin=appearance.skin;value.glass_transparency=appearance.glass_transparency}
@@ -52,24 +53,21 @@ ColumnLayout {
     property string dropBeforeId: ""
     property point dragScenePoint: Qt.point(0, 0)
     signal revealInspector(var item)
-    spacing: 18
+    spacing: 16
     Theme { id: ui }
 
     function rowFor(identifier) { return rows.find(row => row.id === identifier) || ({}) }
     function refreshRows(){if(!active){rows=[];return}if(readingsActive)rows=stats.topBarDraftRows()}
     function refreshSensorChoices(){if(!active || !picker || !picker.opened){sensorChoices=[];return}if(readingsActive)sensorChoices=stats.sensorRows}
-    onReadingsActiveChanged:{refreshRows();refreshSensorChoices();if(readingsActive)Qt.callLater(root.refreshDesignExamples)}
-    Component.onCompleted:refreshRows()
-    Connections {target:stats;enabled:root.readingsActive && root.active;function onSensorsChanged(){root.refreshRows();root.refreshSensorChoices()}function onDraftChanged(){root.refreshRows();root.refreshSensorChoices()}}
-    function refreshDesignExamples(){
-        if(!active || !readingsActive)return
-        const examples=rows.slice(0,2).map(row=>{
-            const leaf=row.grouped && (row.group_rows || []).length?row.group_rows[0]:row
-            return Object.assign({},leaf,{grouped:false,group_rows:[],style:"icon_value",placement:"right"})
-        })
-        if(JSON.stringify(examples)!==JSON.stringify(designExampleRows))designExampleRows=examples
+    onReadingsActiveChanged:{refreshRows();refreshSensorChoices()}
+    Component.onCompleted:{editingReady=true;refreshRows()}
+    onEditingTaskChanged:{
+        if(!editingReady)return
+        cancelDrag()
+        if(appearanceEditing){selectedInspector.cancelGroupEditing();picker.close()}
+        if(scrollHost)scrollHost.contentY=0
     }
-    Timer {objectName:"topBarDesignSamplesTimer";interval:2000;running:root.active && root.readingsActive;repeat:true;triggeredOnStart:true;onTriggered:root.refreshDesignExamples()}
+    Connections {target:stats;enabled:root.readingsActive && root.active;function onSensorsChanged(){root.refreshRows();root.refreshSensorChoices()}function onDraftChanged(){root.refreshRows();root.refreshSensorChoices()}}
     function chooseMetric(identifier) {
         if(identifier && stats.addTopBarMetric(identifier)){
             const items=stats.draft.top_bar.items
@@ -146,9 +144,8 @@ ColumnLayout {
     onConfigChanged: {
         if (draggedId && !config.items.some(item => item.id === draggedId)) cancelDrag()
         if (!config.items.some(item => item.id === selectedItem)) selectedItem = config.items.length ? config.items[0].id : ""
-        Qt.callLater(root.refreshDesignExamples)
     }
-    onActiveChanged: {refreshRows();refreshSensorChoices();if (!active) {cancelDrag();selectedInspector.cancelGroupEditing();designExampleRows=[]}else Qt.callLater(root.refreshDesignExamples)}
+    onActiveChanged: {refreshRows();refreshSensorChoices();if (!active) {cancelDrag();selectedInspector.cancelGroupEditing()}}
     Keys.onShortcutOverride: function(event) { if (dragging && event.key === Qt.Key_Escape) event.accepted = true }
     Keys.onEscapePressed: function(event) { if (dragging || draggedId) { cancelDrag(); event.accepted = true } }
     Timer {
@@ -191,8 +188,8 @@ ColumnLayout {
                     Layout.fillWidth: true; spacing: 10
                     Text { objectName: "topBarTitle"; text: ui.t("顶部栏"); textFormat: Text.PlainText; color: ui.ink; font.family: ui.fontFamily; font.pixelSize: 23; font.weight: Font.DemiBold }
                     Item { Layout.fillWidth: true }
-                    Text { text: ui.t("即时生效"); color: ui.muted; font.family: ui.fontFamily; font.pixelSize: ui.metaSize }
-                    Toggle { objectName: "topBarEnabled"; checked: stats.saved.top_bar.enabled; Accessible.name: ui.t("启用顶部栏"); onToggled: stats.setTopBarEnabled(checked) }
+                    Text { text: ui.t("显示顶部栏"); color: ui.muted; font.family: ui.fontFamily; font.pixelSize: ui.metaSize }
+                    Toggle { objectName: "topBarEnabled"; checked: stats.saved.top_bar.enabled; Accessible.name: ui.t("显示顶部栏"); onToggled: stats.setTopBarEnabled(checked); ToolTip.visible:hovered;ToolTip.text:ui.t("显示开关立即生效，布局更改应用后保存。");ToolTip.delay:600 }
                 }
                 RowLayout {
                     Layout.fillWidth: true; spacing: 10
@@ -217,6 +214,8 @@ ColumnLayout {
     }
     TopBarPreviewStrip {
         objectName:"topBarMainPreview"
+        showHelp:false
+        interactivePreview:root.active && root.readingsActive
         Layout.fillWidth: true
         rows: root.rows; barHeight: root.config.height; itemSpacing: root.config.spacing
         barEnabled: stats.saved.top_bar.enabled; unapplied: root.unapplied; selectedId: root.selectedItem
@@ -224,43 +223,45 @@ ColumnLayout {
         onSelected: identifier => root.selectItem(identifier)
         onReordered:(identifier,before,placement)=>{if(stats.placeTopBarMetric(identifier,before,placement))root.selectedItem=identifier}
     }
-    ColumnLayout {
-        objectName:"topBarDesignSelector";Layout.fillWidth:true;spacing:8
-        RowLayout {Layout.fillWidth:true;spacing:12
-            Text {text:ui.t("整体外观");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12;font.weight:Font.Medium}
-            Text {Layout.fillWidth:true;text:ui.t("仅改变外观，保留指标与布局。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
-        }
-        GridLayout {
-            Layout.fillWidth:true;columns:root.compactDesigns?1:3;uniformCellWidths:true;columnSpacing:8;rowSpacing:8
-            Repeater {model:root.designOptions
-                ItemDelegate {
-                    id:designTile;required property var modelData
-                    readonly property bool chosen:root.selectedDesign===modelData.id
-                    objectName:"topBarDesign_"+modelData.id
-                    Layout.fillWidth:true;Layout.minimumWidth:0;implicitHeight:root.compactDesigns?56:98;padding:9
-                    focusPolicy:Qt.StrongFocus
-                    Accessible.role:Accessible.RadioButton;Accessible.checked:chosen
-                    Accessible.name:modelData.label+" · "+modelData.note
-                    onClicked:stats.changeTopBarAppearance("design",modelData.id)
-                    background:Rectangle {radius:9;color:designTile.chosen?ui.cardSelected:designTile.hovered?ui.cardHover:ui.card;border.width:1;border.color:designTile.activeFocus?ui.accent:designTile.chosen?ui.selectedLine:ui.line}
-                    contentItem:GridLayout {columns:root.compactDesigns?2:1;columnSpacing:12;rowSpacing:6
-                        TopBarPreviewStrip {
-                            objectName:"topBarDesignSample_"+designTile.modelData.id
-                            Layout.row:root.compactDesigns?0:0;Layout.column:root.compactDesigns?1:0
-                            Layout.rowSpan:root.compactDesigns?2:1
-                            Layout.fillWidth:true;Layout.preferredHeight:32
-                            sampleOnly:true;interactivePreview:false;barHeight:32;itemSpacing:8
-                            rows:width>=260?root.designExampleRows:root.designExampleRows.slice(0,1)
-                            appearanceConfig:Object.assign({},root.previewConfig,{bar_design:designTile.modelData.id})
-                        }
-                        RowLayout {Layout.row:root.compactDesigns?0:1;Layout.column:0;Layout.preferredWidth:root.compactDesigns?108:-1;Layout.fillWidth:!root.compactDesigns;spacing:6
-                            Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:designTile.modelData.label;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12;font.weight:designTile.chosen?Font.DemiBold:Font.Medium;elide:Text.ElideRight}
-                            Rectangle {implicitWidth:10;implicitHeight:10;radius:5;color:designTile.chosen?ui.accent:"transparent";border.width:1;border.color:designTile.chosen?ui.accent:ui.controlBorder}
-                        }
-                        Text {Layout.row:root.compactDesigns?1:2;Layout.column:0;Layout.preferredWidth:root.compactDesigns?108:-1;Layout.fillWidth:!root.compactDesigns;Layout.minimumWidth:0;text:designTile.modelData.note;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
-                    }
-                    ToolTip.visible:hovered;ToolTip.text:Accessible.name;ToolTip.delay:600
+    OptionTabs {
+        objectName:"topBarTaskTabs"
+        Layout.alignment:Qt.AlignLeft
+        options:[{id:"content",label:ui.t("内容与排列"),objectName:"topBarContentTab"},
+                 {id:"appearance",label:ui.t("外观"),objectName:"topBarAppearanceTab"}]
+        value:root.editingTask
+        onPicked:selected=>root.editingTask=selected
+    }
+    GridLayout {
+        objectName:"topBarDesignSelector"
+        visible:root.appearanceEditing
+        Layout.fillWidth:true;columns:width>=420?3:1;columnSpacing:8;rowSpacing:8
+        Repeater {
+            model:root.designOptions
+            Button {
+                id:designTile;required property var modelData
+                objectName:"topBarDesign_"+modelData.id
+                readonly property bool chosen:root.selectedDesign===modelData.id
+                Layout.fillWidth:true;Layout.minimumWidth:0;implicitHeight:56;padding:10
+                focusPolicy:Qt.StrongFocus;hoverEnabled:true
+                Accessible.name:modelData.label
+                Accessible.checkable:true;Accessible.checked:chosen
+                onClicked:stats.changeTopBarAppearance("design",modelData.id)
+                background:Rectangle {
+                    radius:ui.controlRadius
+                    color:designTile.chosen?ui.selection:designTile.down?ui.pressed:designTile.hovered?ui.hover:ui.field
+                    border.width:designTile.visualFocus || designTile.chosen?1:0
+                    border.color:designTile.visualFocus?ui.accent:ui.selectedLine
                 }
+                contentItem:RowLayout {
+                    spacing:8
+                    ColumnLayout {
+                        Layout.fillWidth:true;Layout.minimumWidth:0;spacing:3
+                        Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:designTile.modelData.label;color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12;font.weight:designTile.chosen?Font.DemiBold:Font.Medium;elide:Text.ElideRight}
+                        Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:designTile.modelData.note;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
+                    }
+                    Rectangle {implicitWidth:10;implicitHeight:10;radius:5;color:designTile.chosen?ui.accent:"transparent";border.width:1;border.color:designTile.chosen?ui.accent:ui.controlBorder}
+                }
+                ToolTip.visible:hovered;ToolTip.text:Accessible.name;ToolTip.delay:600
             }
         }
     }
@@ -308,7 +309,7 @@ ColumnLayout {
     }
     Text { parent: barOptions; Layout.fillWidth: true; visible: root.config.monitor_mode === "selected" && !root.config.screens.length; text: ui.t("选择至少一个显示器后应用。"); textFormat: Text.PlainText; color: ui.muted; font.family: ui.fontFamily; font.pixelSize: 11; wrapMode: Text.WordWrap }
     ColumnLayout {
-        objectName:"topBarAppearanceSettings";Layout.fillWidth:true;spacing:10
+        objectName:"topBarAppearanceSettings";visible:root.appearanceEditing;Layout.fillWidth:true;spacing:10
         RowLayout {
             Layout.fillWidth:true;spacing:10
             Text {Layout.fillWidth:true;text:ui.t("顶栏外观");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:13;font.weight:Font.DemiBold}
@@ -329,23 +330,6 @@ ColumnLayout {
         }
         Text {Layout.fillWidth:true;text:ui.t("拖动即可预览，应用后保存。")+(root.appearance.follow_global?" "+ui.t("单独调整时自动取消跟随全局。"):"");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
     }
-    GridLayout {
-        parent: metricsListColumn
-        objectName:"topBarMetricsHeading"
-        readonly property bool singleLine:width>=600
-        Layout.fillWidth:true;Layout.minimumWidth:0;Layout.row:0;Layout.column:0
-        columns:singleLine?3:2;columnSpacing:8;rowSpacing:6
-        RowLayout {
-            Layout.row:0;Layout.column:0;Layout.columnSpan:parent.singleLine?1:2
-            Layout.fillWidth:true;Layout.minimumWidth:0;spacing:6
-            Text { Layout.minimumWidth:0; text:ui.t("栏内指标"); color:ui.ink; font.family:ui.fontFamily; font.pixelSize:14; font.weight:Font.DemiBold; elide:Text.ElideRight }
-            Text { text:root.config.items.length+" / 64"; color:ui.muted; font.family:ui.fontFamily; font.pixelSize:11 }
-            Item { Layout.fillWidth:true }
-        }
-        ActionButton { objectName:"topBarPlacementToggle"; Layout.row:parent.singleLine?0:1;Layout.column:parent.singleLine?1:0;Layout.alignment:Qt.AlignLeft;text:ui.t("左右布局"); quiet:!root.placementOpen; implicitHeight:32; onClicked:root.placementOpen=!root.placementOpen }
-        ActionButton { id:addMetricButton;objectName:"topBarAddMetric";Layout.row:parent.singleLine?0:1;Layout.column:parent.singleLine?2:1;Layout.alignment:Qt.AlignRight;text:"＋ "+ui.t("添加指标");quiet:true;implicitHeight:32;enabled:root.config.items.length<64;onClicked:{root.addingPlacement="right";picker.open()} }
-    }
-    Text { parent:metricsListColumn;Layout.fillWidth:true;Layout.row:1;Layout.column:0;text:ui.t("拖动把手排序，或移到左侧与右侧。");textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap }
     component MetricZone: ColumnLayout {
         id: zone
         required property string placement
@@ -424,10 +408,10 @@ ColumnLayout {
                         flickableDirection:Flickable.HorizontalFlick
                         TapHandler {onTapped:{card.forceActiveFocus();root.selectItem(card.modelData.id)}}
                         ScrollBar.horizontal:ScrollBar {policy:ScrollBar.AsNeeded;height:3}
-                        TopBarGroupContent {id:listReading;objectName:"topBarValue_"+card.modelData.id;row:card.reading;ink:ui.ink;muted:ui.muted;fontFamily:ui.fontFamily;motionEnabled:stats.motionEnabled;width:implicitWidth;height:implicitHeight;y:(parent.height-height)/2}
+                        TopBarGroupContent {id:listReading;objectName:"topBarValue_"+card.modelData.id;row:card.reading;ink:ui.ink;muted:ui.muted;fontFamily:ui.fontFamily;motionEnabled:root.active && root.readingsActive && stats.motionEnabled;width:implicitWidth;height:implicitHeight;y:(parent.height-height)/2}
                     }
-                    IconButton {objectName:"topBarItemAdjust_"+card.modelData.id;symbol:"sliders";label:ui.t("调整");outlined:true;implicitWidth:32;implicitHeight:32;onClicked:root.selectItem(card.modelData.id)}
-                    IconButton {objectName:"topBarItemDelete_"+card.modelData.id;symbol:"trash";label:ui.t("移除");danger:true;outlined:true;implicitWidth:32;implicitHeight:32;onClicked:stats.removeTopBarMetric(card.modelData.id)}
+                    IconButton {objectName:"topBarItemAdjust_"+card.modelData.id;symbol:"sliders";label:ui.t("调整");implicitWidth:32;implicitHeight:32;onClicked:root.selectItem(card.modelData.id)}
+                    IconButton {objectName:"topBarItemDelete_"+card.modelData.id;symbol:"trash";label:ui.t("移除");danger:true;implicitWidth:32;implicitHeight:32;onClicked:stats.removeTopBarMetric(card.modelData.id)}
                 }
                 Rectangle { x: 0; y: -3; width: parent.width; height: 2; color: ui.accent; visible: root.dragging && root.dropPlacement === zone.placement && root.dropBeforeId === card.modelData.id }
                 PlainTip { visible: card.hovered && !root.dragging; text: [card.reading.grouped?card.reading.group_label:card.reading.label,card.reading.grouped?card.reading.group_value:card.reading.value,card.reading.hardware_name,card.reading.source,card.reading.reason].filter(Boolean).join("\n") }
@@ -443,11 +427,30 @@ ColumnLayout {
     }
     GridLayout {
         id: metricsBody
+        visible:!root.appearanceEditing
         Layout.fillWidth: true; columns: root.sideInspector ? 2 : 1; columnSpacing: 20; rowSpacing: 16
         GridLayout {
             id:metricsListColumn
             Layout.fillWidth: true; Layout.minimumWidth: 0; Layout.alignment: Qt.AlignTop
             columns: 1; rowSpacing: 12
+            GridLayout {
+                id:metricsHeading
+                objectName:"topBarMetricsHeading"
+                readonly property bool singleLine:width>=metricsHeadingTitle.implicitWidth+metricsHeadingCount.implicitWidth+metricsHeadingLabel.spacing+placementToggle.implicitWidth+addMetricButton.implicitWidth+columnSpacing*2
+                Layout.fillWidth:true;Layout.minimumWidth:0;Layout.maximumWidth:Infinity;Layout.row:0;Layout.column:0
+                columns:singleLine?3:2;columnSpacing:8;rowSpacing:6
+                RowLayout {
+                    id:metricsHeadingLabel
+                    Layout.row:0;Layout.column:0;Layout.columnSpan:parent.singleLine?1:2
+                    Layout.fillWidth:true;Layout.minimumWidth:0;spacing:6
+                    Text { id:metricsHeadingTitle;Layout.minimumWidth:0; text:ui.t("栏内指标"); color:ui.ink; font.family:ui.fontFamily;font.pixelSize:14;font.weight:Font.DemiBold;elide:Text.ElideRight }
+                    Text { id:metricsHeadingCount;text:root.config.items.length+" / 64";color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11 }
+                    Item { Layout.fillWidth:true }
+                }
+                ActionButton { id:placementToggle;objectName:"topBarPlacementToggle"; Layout.row:parent.singleLine?0:1;Layout.column:parent.singleLine?1:0;Layout.alignment:Qt.AlignLeft;text:ui.t("左右布局"); quiet:!root.placementOpen; implicitHeight:32; onClicked:root.placementOpen=!root.placementOpen }
+                ActionButton { id:addMetricButton;objectName:"topBarAddMetric";Layout.row:parent.singleLine?0:1;Layout.column:parent.singleLine?2:1;Layout.alignment:Qt.AlignRight;text:"＋ "+ui.t("添加指标");quiet:true;implicitHeight:32;enabled:root.config.items.length<64;onClicked:{root.addingPlacement="right";picker.open()} }
+            }
+            Text { Layout.fillWidth:true;Layout.row:1;Layout.column:0;text:ui.t("拖动把手排序，或移到左侧与右侧。");textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap }
             MetricZone { id: leftZone; placement: "left"; Layout.fillWidth: true; Layout.row: items.length ? 2 : 3; Layout.column: 0 }
             MetricZone { id: rightZone; placement: "right"; Layout.fillWidth: true; Layout.row: leftZone.items.length ? 3 : 2; Layout.column: 0 }
         }
@@ -458,12 +461,12 @@ ColumnLayout {
             Layout.alignment: Qt.AlignTop
             implicitHeight: selectedInspector.implicitHeight
             visible: !!root.selected
-            TopBarItemInspector { id: selectedInspector; objectName: "topBarSelectedInspector"; readingsActive:root.active && root.readingsActive; design:root.selectedDesign; width: parent.width; y: root.sideInspector ? Math.max(0, Math.min(Math.max(0, metricsBody.height - height), root.viewportY + root.stickyHeaderInset + 8 - metricsBody.y)) : 0; item: root.selected || null; row: root.selectedRow; index: root.config.items.findIndex(item => item.id === root.selectedItem); count: root.config.items.length; narrow: !root.sideInspector; onRevealRequested:target=>root.revealInspector(target) }
+            TopBarItemInspector { id: selectedInspector; objectName: "topBarSelectedInspector"; readingsActive:root.active && root.readingsActive && !root.appearanceEditing; design:root.selectedDesign; width: parent.width; y: root.sideInspector ? Math.max(0, Math.min(Math.max(0, metricsBody.height - height), root.viewportY + root.stickyHeaderInset + 8 - metricsBody.y)) : 0; item: root.selected || null; row: root.selectedRow; index: root.config.items.findIndex(item => item.id === root.selectedItem); count: root.config.items.length; narrow: !root.sideInspector; onRevealRequested:target=>root.revealInspector(target) }
         }
     }
-    Text { Layout.fillWidth: true; text: ui.t("悬停查看详情，拖动调整顺序。更多指标收在 +N 中。"); textFormat: Text.PlainText; color: ui.muted; font.family: ui.fontFamily; font.pixelSize: 11; wrapMode: Text.WordWrap }
-    ActionButton { objectName:"topBarOptionsToggle"; text:(root.barOptionsOpen ? "− " : "+ ")+ui.t("栏设置")+" · "+root.config.height+" px"; quiet:true; onClicked:root.barOptionsOpen=!root.barOptionsOpen }
-    ColumnLayout { id:barOptions; objectName:"topBarSecondarySettings"; Layout.fillWidth:true; visible:root.barOptionsOpen; spacing:16 }
+    Text { visible:!root.appearanceEditing;Layout.fillWidth: true; text: ui.t("悬停查看详情，拖动调整顺序。更多指标收在 +N 中。"); textFormat: Text.PlainText; color: ui.muted; font.family: ui.fontFamily; font.pixelSize: 11; wrapMode: Text.WordWrap }
+    ActionButton { visible:!root.appearanceEditing;objectName:"topBarOptionsToggle"; text:(root.barOptionsOpen ? "− " : "+ ")+ui.t("栏设置")+" · "+root.config.height+" px"; quiet:true; onClicked:root.barOptionsOpen=!root.barOptionsOpen }
+    ColumnLayout { id:barOptions; objectName:"topBarSecondarySettings"; Layout.fillWidth:true; visible:root.barOptionsOpen && !root.appearanceEditing; spacing:16 }
     Rectangle {
         parent: fixedHeader
         visible: root.dragging

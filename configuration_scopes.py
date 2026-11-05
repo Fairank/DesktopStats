@@ -6,7 +6,9 @@ DESKTOP_FIELDS = frozenset({
     "mode", "layout", "size", "group_columns", "visible", "locked", "magnet_enabled",
     "magnet_gap", "magnet_bounce", "reflow_on_resize",
 })
-PREFERENCE_FIELDS = frozenset({"language", "theme", "autostart", "refresh", "history_enabled"})
+PREFERENCE_FIELDS = frozenset({
+    "language", "theme", "autostart", "refresh", "history_enabled", "cpu_temperature_prompt_on_start",
+})
 SCOPE_FIELDS = {
     "desktop": DESKTOP_FIELDS,
     "preferences": PREFERENCE_FIELDS,

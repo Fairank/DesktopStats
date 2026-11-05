@@ -14,6 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent, qmlRegisterType
 from PySide6.QtWidgets import QSystemTrayIcon
 
 from appearance_preview import project_appearance, project_top_bar_appearance
+from cpu_temperature_launcher import CpuTemperatureLauncher, foreground_fullscreen
 from desktop_placement import desktop_plan
 from localization import best_language, translate
 from magnet_layout import contained, separated, settle
@@ -147,6 +148,10 @@ class Runtime(QObject):
         self.controller.detailsRequested.connect(self.show_details)
         self.controller.quitRequested.connect(self.app.quit)
         self.controller.dataChanged.connect(self.first_reading)
+        self.cpu_temperature_launcher = CpuTemperatureLauncher(
+            headless=headless or application.platformName() != "windows"
+        )
+        self.controller.dataChanged.connect(self.maybe_start_cpu_temperature)
         self.tray = None
         if not headless:
             self.tray = QSystemTrayIcon(QIcon(str(ASSETS / "assets/icon.ico")), self)
@@ -278,6 +283,14 @@ class Runtime(QObject):
 
     def clear_stale(self):
         self.controller.expire_readings()
+
+    def maybe_start_cpu_temperature(self):
+        if self.shutting_down:
+            return
+        launcher = getattr(self, "cpu_temperature_launcher", None)
+        if launcher is not None:
+            launcher.update(self.controller._saved, self.controller._data,
+                            fullscreen=lambda: foreground_fullscreen(getattr(self, "top_bar", None)))
 
     def update_menu(self):
         if not self.tray:
@@ -715,9 +728,6 @@ class Runtime(QObject):
             self.settings.selectWidget(key)
         if not current():
             return
-        self.controller.inspect()
-        if not current():
-            return
         window = Runtime._settings_window(self)
         available = [screen.availableGeometry() for screen in self.app.screens()]
         if getattr(self, "settings_host", None) is not None:
@@ -1142,6 +1152,10 @@ class Runtime(QObject):
             "composition": self.composition,
             "settings_visible": self.settings.isVisible(),
             "sensor_timestamp": self.controller._data.get("time"),
+            "cpu_temperature_startup": (
+                self.cpu_temperature_launcher.status()
+                if getattr(self, "cpu_temperature_launcher", None) is not None else {}
+            ),
             "readings": {
                 key: value
                 for key, value in self.controller._data.items()
@@ -1173,6 +1187,7 @@ class Runtime(QObject):
                 errors.append((label, error))
 
         for owner_name, method in (
+            ("cpu_temperature_launcher", "close"),
             ("settings_material", "close"), ("settings_blur", "close"),
             ("settings_host", "dispose"), ("top_bar", "close"),
         ):
@@ -1320,6 +1335,10 @@ class LocalServer(QLocalServer):
                     "pid": os.getpid(),
                     "top_bar": dict(self.runtime.controller._top_bar_status),
                     "top_bar_details": top_bar_details,
+                    "cpu_temperature_startup": (
+                        self.runtime.cpu_temperature_launcher.status()
+                        if getattr(self.runtime, "cpu_temperature_launcher", None) is not None else {}
+                    ),
                     "settings_material": dict(self.runtime.controller._material),
                     "settings_material_context": (
                         self.runtime.settings_material.status()

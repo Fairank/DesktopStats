@@ -12,6 +12,7 @@ ColumnLayout {
     property bool unapplied: false
     property var appearanceConfig: stats.draft
     property bool sampleOnly:false
+    property bool showHelp:true
     property bool interactivePreview:true
     readonly property string barDesign:["classic","capsule","instrument"].includes(appearanceConfig.bar_design)?appearanceConfig.bar_design:"classic"
     readonly property bool darkMaterial: appearanceConfig.theme==="dark" || appearanceConfig.skin==="graphite"
@@ -261,5 +262,5 @@ ColumnLayout {
         }
         Rectangle {objectName:root.sampleOnly?root.objectName+"Insertion":"topBarPreviewInsertion";visible:root.dragging && !!root.dropPlacement;x:Math.max(1,Math.min(strip.width-2,root.insertionX));y:3;width:2;height:strip.height-6;radius:1;color:ui.accent}
     }
-    Text {Layout.fillWidth:true;visible:!root.sampleOnly;text:ui.t("拖动预览中的指标也可排序。");textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
+    Text {Layout.fillWidth:true;visible:!root.sampleOnly && root.showHelp;text:ui.t("拖动预览中的指标也可排序。");textFormat:Text.PlainText;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;wrapMode:Text.WordWrap}
 }

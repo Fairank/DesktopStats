@@ -11,12 +11,16 @@ Window {
     property int page: 0
     property string selectedKey: root.draftConfig.widget_order[0] || ""
     property bool nativeHosted:false
-    readonly property int titlebarHeight:nativeHosted?0:34
+    property var frameWindow:null
+    readonly property int titlebarHeight:34
     readonly property int clientY:titlebarHeight
     readonly property real clientHeight:Math.max(0,height-clientY)
     readonly property int replacementBannerHeight:stats.replacementPending?40:0
     readonly property string currentScope:page===3?"topbar":page===1 || page===2 || page===4?"preferences":"desktop"
     readonly property int railWidth: layoutWidth<900?184:200
+    readonly property int contentGutter: layoutWidth-railWidth<580?20:28
+    property bool previewInspectionNeeded:false
+    property bool inspectionRefreshQueued:false
     readonly property bool atWidgetLimit: root.draftConfig.widget_order.length >= 24
     property bool editorReady: false
     // Keep editor instances and uncommitted input alive during native resize.
@@ -37,27 +41,49 @@ Window {
     color:"transparent"; title:"Desktop Stats"
     flags:nativeHosted?Qt.Widget:Qt.Window | Qt.FramelessWindowHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
     Theme {id:ui}
-    Component.onCompleted:Qt.callLater(()=>root.editorReady=true)
+    Component.onCompleted:{
+        const saved=stats.saved || ({})
+        if(root.page===0 && saved.top_bar && saved.top_bar.enabled===true
+                && !Object.values(saved.widgets || ({})).some(widget=>widget && widget.enabled===true))root.page=3
+        root.scheduleInspectionRefresh()
+        Qt.callLater(()=>root.editorReady=true)
+    }
     onClosing:function(close){close.accepted=false;root.hide()}
-    onSelectedKeyChanged:Qt.callLater(root.revealSelected)
+    onSelectedKeyChanged:{root.previewInspectionNeeded=false;root.scheduleInspectionRefresh();Qt.callLater(root.revealSelected)}
+    onPageChanged:{root.previewInspectionNeeded=false;root.scheduleInspectionRefresh()}
+    onUiActiveChanged:{if(!uiActive)previewInspectionNeeded=false;root.scheduleInspectionRefresh()}
+    function refreshInspectionDemand(){
+        inspectionRefreshQueued=false
+        previewInspectionNeeded=uiActive && page!==2 && typeof stats.previewNeedsInspection==="function"
+            && stats.previewNeedsInspection(currentScope,selectedKey)
+    }
+    function scheduleInspectionRefresh(){
+        if(inspectionRefreshQueued)return
+        inspectionRefreshQueued=true
+        Qt.callLater(root.refreshInspectionDemand)
+    }
     function selectWidget(key){if(root.draftConfig.widget_order.includes(key))selectedKey=key;page=0;Qt.callLater(root.revealSelected)}
     function selectHistory(identifier){page=4;if(identifier)historyPage.choose(identifier)}
     function showGallery(){if(!atWidgetLimit)gallery.showWidgets()}
     function selectNext(){if(!root.draftConfig.widget_order.includes(selectedKey))selectedKey=root.draftConfig.widget_order[0] || ""}
-    function restoreGalleryFocus(){const row=instanceRepeater.itemAt(root.draftConfig.widget_order.indexOf(selectedKey));if(row)row.forceActiveFocus();else addWidgetButton.forceActiveFocus()}
+    function restoreGalleryFocus(){
+        if(page!==0){const nav=navigationRepeater.itemAt(page===3?1:page===4?2:3);if(nav)nav.forceActiveFocus();return}
+        const row=instanceRepeater.itemAt(root.draftConfig.widget_order.indexOf(selectedKey))
+        if(row)row.forceActiveFocus();else addWidgetButton.forceActiveFocus()
+    }
     function applySettings(rearrange){settingsBody.forceActiveFocus();if(widgetEditorLoader.item)widgetEditorLoader.item.cancelEditing();if(stats.replacementPending)stats.applyReplacement();else if(page===3)stats.applyTopBar();else if(currentScope==="preferences")stats.applyPreferences();else if(rearrange===true)stats.rearrangeDesktop();else stats.applyDesktop()}
     function discardChanges(){settingsBody.forceActiveFocus();if(widgetEditorLoader.item)widgetEditorLoader.item.cancelEditing();if(stats.replacementPending)stats.cancelReplacement();else if(page===3)stats.revertTopBarDraft();else if(currentScope==="preferences")stats.revertPreferencesDraft();else stats.revertDesktopDraft()}
     function revealSelected(){const row=instanceRepeater.itemAt(root.draftConfig.widget_order.indexOf(selectedKey));if(row)revealInstance(row)}
     function revealInstance(item){const flick=added.contentItem;if(!flick || flick.contentY===undefined)return;const point=item.mapToItem(instanceColumn,0,0);if(point.y<flick.contentY)flick.contentY=point.y;else if(point.y+item.height>flick.contentY+added.availableHeight)flick.contentY=point.y+item.height-added.availableHeight}
     function textEditing(){const item=root.activeFocusItem;return !!item && item.cursorPosition!==undefined && item.text!==undefined}
     function undo(redo){if(widgetEditorLoader.item)widgetEditorLoader.item.cancelEditing();if(redo)stats.redoDraft();else stats.undoDraft()}
-    Connections {target:stats;function onDraftChanged(){root.selectNext()}}
+    Connections {target:stats;function onDraftChanged(){root.selectNext();root.scheduleInspectionRefresh()}function onSavedChanged(){root.scheduleInspectionRefresh()}}
     Shortcut {sequence:"Ctrl+S";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:root.applySettings()}
     Shortcut {sequence:"Ctrl+N";enabled:!root.atWidgetLimit && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:root.showGallery()}
     Shortcut {sequence:"Ctrl+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(false)}
     Shortcut {sequence:"Ctrl+Shift+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(true)}
     Shortcut {sequence:"Escape";enabled:!gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:{if(root.page===4 && historyPage.cancelInspection())return;if(!widgetEditorLoader.item || !widgetEditorLoader.item.cancelEditing())root.hide()}}
-    Timer {objectName:"settingsInspectTimer";interval:3000;running:root.uiActive && (root.page===2 || stats.dirty);repeat:true;triggeredOnStart:true;onTriggered:stats.inspect()}
+    Timer {objectName:"settingsInspectTimer";interval:3000;running:root.uiActive && (root.page===2 || root.previewInspectionNeeded);repeat:true;triggeredOnStart:true;onTriggered:stats.inspect()}
     Item {
         id:settingsBody;objectName:"settingsBackdropSource";y:root.clientY;width:root.width;height:root.clientHeight
         Rectangle {anchors.fill:parent;visible:!ui.translucentBackdrop;color:ui.fallback}
@@ -81,6 +107,7 @@ Window {
             }
             Column {anchors.fill:parent;spacing:5
               Repeater {
+                id:navigationRepeater
                 model:[{id:0,label:"桌面组件",icon:"grid"},{id:3,label:"顶部栏",icon:"topbar"},{id:4,label:"历史记录",icon:"time"},{id:1,label:"偏好",icon:"sliders"}]
                 ItemDelegate {
                     id:nav;required property var modelData;required property int index;objectName:"nav_"+modelData.id
@@ -92,16 +119,17 @@ Window {
               }
             }
         }
-        Rectangle {objectName:"sidebarWidgetsReadingSurface";x:12;y:283;width:root.railWidth-24;height:Math.min(Math.max(0,languageSelector.y-y-12),Math.max(44,added.y-y+Math.min(added.height,instanceColumn.implicitHeight)+6));radius:8;border.width:0;color:ui.railReading}
+        Rectangle {objectName:"sidebarWidgetsReadingSurface";visible:root.page===0;x:12;y:283;width:root.railWidth-24;height:Math.min(Math.max(0,languageSelector.y-y-12),Math.max(44,added.y-y+Math.min(added.height,instanceColumn.implicitHeight)+6));radius:8;border.width:0;color:ui.railReading}
         RowLayout {
             objectName:"sidebarWidgetCountContent"
+            visible:root.page===0
             x:22;y:291;width:root.railWidth-42;height:30
             Text {Layout.fillWidth:true;text:stats.catalog.instances.length+" "+ui.t("个小组件");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
             ActionButton {objectName:"openScenesButton";text:ui.t("场景");quiet:true;implicitWidth:42;implicitHeight:28;leftPadding:2;rightPadding:2;onClicked:scenePopup.open();ToolTip.visible:hovered;ToolTip.text:ui.t("场景方案")}
             ActionButton {id:addWidgetButton;objectName:"addWidgetButton";text:"＋";quiet:true;implicitWidth:28;implicitHeight:28;leftPadding:0;rightPadding:0;enabled:!root.atWidgetLimit;Accessible.name:ui.t("添加小组件");onClicked:root.showGallery();ToolTip.visible:hovered;ToolTip.text:root.atWidgetLimit?ui.t("最多添加 24 个小组件"):ui.t("添加小组件")}
         }
         ScrollView {
-            id:added;objectName:"widgetListScroll";x:12;y:331;width:root.railWidth-24;height:Math.max(1,languageSelector.y-y-20)
+            id:added;objectName:"widgetListScroll";visible:root.page===0;x:12;y:331;width:root.railWidth-24;height:Math.max(1,languageSelector.y-y-20)
             contentWidth:availableWidth;contentHeight:instanceColumn.implicitHeight;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
             Column {
                 id:instanceColumn;width:added.availableWidth;spacing:4
@@ -124,13 +152,14 @@ Window {
             id:workspace;width:root.layoutWidth-root.railWidth;height:root.layoutHeight-root.clientY-72-root.replacementBannerHeight
             Loader {id:widgetEditorLoader;anchors.fill:parent;active:!!root.draftConfig.widgets[root.selectedKey];visible:root.page===0;sourceComponent:WidgetEditor {selectedKey:root.selectedKey;active:root.uiActive && root.page===0;resizing:root.resizeInProgress;onRequestApply:root.applySettings();onRequestReadings:key=>gallery.showReadings(key);onSelectKey:key=>root.selectWidget(key)}}
             Column {visible:root.page===0 && !widgetEditorLoader.active;anchors.centerIn:parent;spacing:20;Text {text:ui.t("你的桌面，从一个小组件开始。");font.family:ui.fontFamily;font.pixelSize:18;color:ui.ink}ActionButton {anchors.horizontalCenter:parent.horizontalCenter;text:"＋ "+ui.t("添加第一个小组件");accent:true;onClicked:root.showGallery()}}
-            ScrollView {id:appearanceScroll;objectName:"editorScroll";anchors.fill:parent;anchors.margins:28;visible:root.page===1;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
-                Column {objectName:"appearanceContentColumn";width:Math.min(620,appearanceScroll.availableWidth-8);x:(appearanceScroll.availableWidth-width)/2;spacing:25
+            ScrollView {id:appearanceScroll;objectName:"editorScroll";anchors.fill:parent;anchors.margins:root.contentGutter;visible:root.page===1;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
+                Column {objectName:"appearanceContentColumn";width:Math.min(620,appearanceScroll.availableWidth-8);x:0;spacing:25
                     Text {text:ui.t("偏好");font.family:ui.fontFamily;font.pixelSize:ui.titleSize;font.weight:Font.DemiBold;color:ui.ink}
                     InspectorSection {width:parent.width;title:ui.t("常规")
                         SettingRow {Layout.fillWidth:true;label:ui.t("显示语言");Choice {objectName:"languageChoice";width:200;model:stats.catalog.languages;value:root.draftConfig.language;onPicked:selected=>stats.change("language",selected)}}
                         SettingRow {Layout.fillWidth:true;label:ui.t("外观模式");OptionTabs {options:[{id:"light",label:ui.t("浅色")},{id:"dark",label:ui.t("深色")}];value:root.draftConfig.theme;onPicked:selected=>stats.change("theme",selected)}}
                         SettingRow {Layout.fillWidth:true;label:ui.t("登录时自动启动");Toggle {objectName:"autostartToggle";checked:root.draftConfig.autostart;Accessible.name:ui.t("登录时自动启动");onToggled:stats.change("autostart",checked)}}
+                        SettingRow {Layout.fillWidth:true;label:ui.t("启动时恢复 CPU 温度");note:ui.t("需已有 ASUS 服务；每次启动提示管理员授权，全屏时延后。");Toggle {objectName:"cpuTemperatureStartupToggle";checked:root.draftConfig.cpu_temperature_prompt_on_start===true;Accessible.name:ui.t("启动时恢复 CPU 温度");onToggled:stats.change("cpu_temperature_prompt_on_start",checked)}}
                         SettingRow {Layout.fillWidth:true;label:ui.t("检测频率");note:ui.t("范围：0.01–5 秒");SamplingControl {id:frequency}}
                         Text {Layout.fillWidth:true;text:ui.t("更短的间隔会增加系统开销。应用后从下一轮采样生效。");font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:ui.muted;wrapMode:Text.WordWrap}
                     }
@@ -140,14 +169,14 @@ Window {
                     Flow {width:parent.width;spacing:8;ActionButton {objectName:"importSettingsButton";text:ui.t("导入设置");quiet:true;onClicked:stats.importSettings()}ActionButton {objectName:"exportSettingsButton";text:ui.t("导出设置");quiet:true;onClicked:stats.exportSettings()}ActionButton {objectName:"resetSettingsButton";text:ui.t("恢复默认");quiet:true;onClicked:stats.reset()}}
                 }
             }
-            Item {id:topBarHeaderHost;objectName:"topBarHeaderHost";x:28+(parent.width-56-width)/2;y:28;width:Math.min(1000,parent.width-64);height:topBarEditor.headerHeight;visible:root.page===3;z:30}
-            ScrollView {id:topBarScroll;objectName:"topBarSettingsScroll";anchors.fill:parent;anchors.margins:28;anchors.topMargin:28+topBarHeaderHost.height+16;visible:root.page===3;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
-                TopBarSettings {id:topBarEditor;width:Math.min(1000,topBarScroll.availableWidth-8);x:(topBarScroll.availableWidth-width)/2;active:root.visible && root.page===3;readingsActive:root.uiActive && root.page===3;viewportY:topBarScroll.contentItem?topBarScroll.contentItem.contentY:0;scrollHost:topBarScroll.contentItem;headerHost:topBarHeaderHost
+            Item {id:topBarHeaderHost;objectName:"topBarHeaderHost";x:root.contentGutter;y:root.contentGutter;width:Math.min(1000,parent.width-root.contentGutter*2-8);height:topBarEditor.headerHeight;visible:root.page===3;z:30}
+            ScrollView {id:topBarScroll;objectName:"topBarSettingsScroll";anchors.fill:parent;anchors.margins:root.contentGutter;anchors.topMargin:root.contentGutter+topBarHeaderHost.height+16;visible:root.page===3;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
+                TopBarSettings {id:topBarEditor;width:Math.min(1000,topBarScroll.availableWidth-8);x:0;active:root.visible && root.page===3;readingsActive:root.uiActive && root.page===3;viewportY:topBarScroll.contentItem?topBarScroll.contentItem.contentY:0;scrollHost:topBarScroll.contentItem;headerHost:topBarHeaderHost
                     onRevealInspector:item=>{const flick=topBarScroll.contentItem;if(item && flick){const top=item.mapToItem(topBarEditor,0,0).y;const bottom=top+item.height;let target=flick.contentY;if(item.height>flick.height-16 || top<target+8)target=top-8;else if(bottom>target+flick.height-8)target=bottom-flick.height+8;flick.contentY=Math.max(0,Math.min(Math.max(0,flick.contentHeight-flick.height),target))}}
                 }
             }
             ColumnLayout {
-                id:sensorPage;visible:root.page===2;width:Math.min(900,parent.width-52);height:parent.height-52;x:(parent.width-width)/2;y:26;spacing:16
+                id:sensorPage;visible:root.page===2;width:Math.min(900,parent.width-root.contentGutter*2);height:parent.height-root.contentGutter*2;x:root.contentGutter;y:root.contentGutter;spacing:16
                 RowLayout {
                     Layout.fillWidth:true;spacing:14
                     ColumnLayout {Layout.fillWidth:true;spacing:6;ActionButton {objectName:"sensorBackButton";text:"‹ "+ui.t("偏好");quiet:true;implicitHeight:28;leftPadding:0;onClicked:root.page=1}Text {text:ui.t("传感器");font.family:ui.fontFamily;font.pixelSize:25;font.weight:Font.DemiBold;color:ui.ink}Text {Layout.fillWidth:true;text:ui.t("查看真实读数与数据来源。");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}}
@@ -155,20 +184,20 @@ Window {
                 Text {Layout.fillWidth:true;text:ui.t("硬件传感器的实际更新速度可能更慢。");font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:ui.muted;wrapMode:Text.WordWrap}
                 SensorBrowser {objectName:"sensorBrowser";active:root.visible && root.page===2;readingsActive:root.uiActive && root.page===2;Layout.fillWidth:true;Layout.fillHeight:true}
             }
-            HistoryPage {id:historyPage;anchors.fill:parent;visible:root.page===4;active:root.visible && root.page===4}
+            HistoryPage {id:historyPage;anchors.fill:parent;alignContentLeft:true;visible:root.page===4;active:root.uiActive && root.page===4}
         }}
         Rectangle {objectName:"replacementPreviewBanner";x:root.railWidth;y:parent.height-72-root.replacementBannerHeight;width:parent.width-x;height:root.replacementBannerHeight;visible:stats.replacementPending;color:ui.selection
             Text {anchors.fill:parent;anchors.leftMargin:28;anchors.rightMargin:28;text:ui.t("将替换全部设置");verticalAlignment:Text.AlignVCenter;font.family:ui.fontFamily;font.pixelSize:ui.captionSize;font.weight:Font.Medium;color:ui.ink}
         }
         Rectangle {x:root.railWidth;y:parent.height-72;width:parent.width-x;height:1;color:ui.line}
-        RowLayout {x:root.railWidth+28;y:parent.height-54;width:parent.width-x-28;height:36;spacing:12
-            Text {objectName:"saveStateText";Layout.fillWidth:true;text:stats.commitError || (root.page===4?ui.t("历史记录与布局设置独立保存"):root.currentDirty?ui.t("设置尚未应用"):ui.t("设置已同步"));font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:stats.commitError?ui.ink:ui.muted;elide:Text.ElideRight;ToolTip.visible:saveHover.containsMouse && !!stats.commitError;ToolTip.text:stats.commitError;MouseArea {id:saveHover;anchors.fill:parent;hoverEnabled:true;acceptedButtons:Qt.NoButton}}
+        RowLayout {x:root.railWidth+root.contentGutter;y:parent.height-54;width:parent.width-x-root.contentGutter;height:36;spacing:12
+            Text {objectName:"saveStateText";Layout.fillWidth:true;text:stats.commitError || (root.page===4?ui.t("历史记录与布局设置独立保存"):root.currentDirty?ui.t("有未应用的更改"):ui.t("已保存"));font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:stats.commitError || root.currentDirty?ui.ink:ui.muted;elide:Text.ElideRight;ToolTip.visible:saveHover.containsMouse && !!stats.commitError;ToolTip.text:stats.commitError;MouseArea {id:saveHover;anchors.fill:parent;hoverEnabled:true;acceptedButtons:Qt.NoButton}}
             ActionButton {objectName:"historySourcesButton";visible:root.page===4;text:ui.t("传感器与来源")+"  ›";quiet:true;onClicked:root.page=2}
-            ActionButton {objectName:"revertButton";visible:root.page!==4;text:ui.t(stats.replacementPending?"取消全部预览":"恢复");quiet:true;enabled:root.currentDirty;onClicked:root.discardChanges();ToolTip.visible:hovered;ToolTip.text:ui.t("恢复已应用")}
-            ActionButton {objectName:"applyButton";visible:root.page!==4;text:ui.t(stats.replacementPending?"应用全部设置":root.page===3?"应用顶部栏":root.currentScope==="preferences"?"应用偏好":"应用到桌面");accent:true;onClicked:root.applySettings()}
+            ActionButton {objectName:"revertButton";visible:root.page!==4;text:ui.t(stats.replacementPending?"取消全部预览":"放弃更改");quiet:true;enabled:root.currentDirty;onClicked:root.discardChanges();ToolTip.visible:hovered;ToolTip.text:ui.t("恢复已应用")}
+            ActionButton {objectName:"applyButton";visible:root.page!==4;text:ui.t(stats.replacementPending?"应用全部设置":root.page===3?"应用顶部栏":root.currentScope==="preferences"?"应用偏好":"应用到桌面");enabled:root.currentDirty;accent:root.currentDirty;quiet:!root.currentDirty;onClicked:root.applySettings()}
         }
     }
-    WindowChrome {anchors.fill:parent;visible:!root.nativeHosted;enabled:visible;targetWindow:root;titleText:"Desktop Stats"}
+    WindowChrome {objectName:"settingsWindowChrome";anchors.fill:parent;targetWindow:root.frameWindow||root;titleText:"Desktop Stats"}
     Gallery {id:gallery;backdropSource:settingsBody;readingsActive:root.uiActive;onDismissed:root.restoreGalleryFocus();onChosen:key=>root.selectWidget(key)}
     Popup {
         id:scenePopup;objectName:"scenePopup";parent:Overlay.overlay
