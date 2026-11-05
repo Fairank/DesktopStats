@@ -3,7 +3,7 @@
 import copy
 import unittest
 
-from appearance_preview import project_appearance
+from appearance_preview import project_appearance, project_top_bar_appearance
 
 
 def saved_settings():
@@ -54,6 +54,25 @@ def saved_settings():
 
 
 class AppearancePreviewTests(unittest.TestCase):
+    def test_bar_preview_copies_only_design_and_coatings_not_native_or_sensor_settings(self):
+        original = copy.deepcopy(self.saved)
+        self.draft.update(skin="frost", glass_transparency=17.25, language="draft-language")
+        self.draft["top_bar"].update(enabled=True, monitor_mode="all", height=40, spacing=24,
+                                     items=[dict(metric="gpu_usage")])
+        self.draft["top_bar"]["appearance"] = dict(follow_global=False, skin="glass",
+            glass_transparency=81.125, design="capsule")
+        style = project_top_bar_appearance(self.saved, self.draft, True)
+        self.assertEqual(style["glass_transparency"], 81.125)
+        self.assertEqual(style["bar_design"], "capsule")
+        self.assertEqual(style["skin"], "glass")
+        self.assertEqual(style["language"], self.saved["language"])
+        self.assertNotIn("height", style)
+        self.assertNotIn("items", style)
+        self.assertNotIn("top_bar", style)
+        self.assertEqual(self.saved, original)
+        self.assertEqual(project_top_bar_appearance(self.saved, self.draft, False)["glass_transparency"],
+                         self.saved["glass_transparency"])
+
     def setUp(self):
         self.saved = saved_settings()
         self.draft = copy.deepcopy(self.saved)

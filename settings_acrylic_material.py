@@ -57,6 +57,26 @@ class _CtypesAcrylicAPI:
         return int(result), value.value
 
 
+    def get_caption_dark_mode(self, hwnd):
+        value = c.c_int32()
+        result = self.dwm.DwmGetWindowAttribute(HWND(hwnd), 20, c.byref(value), 4)
+        return int(result), value.value
+
+    def set_caption_dark_mode(self, hwnd, value):
+        return self._set_caption_attribute(hwnd, 20, value)
+
+    def set_caption_color(self, hwnd, value):
+        return self._set_caption_attribute(hwnd, 35, value)
+
+    def set_caption_text_color(self, hwnd, value):
+        return self._set_caption_attribute(hwnd, 36, value)
+
+    def _set_caption_attribute(self, hwnd, attribute, value):
+        selected = DWORD(value)
+        return int(self.dwm.DwmSetWindowAttribute(
+            HWND(hwnd), attribute, c.byref(selected), c.sizeof(selected)))
+
+
 class _Rejected(Exception):
     pass
 
@@ -166,7 +186,7 @@ class SettingsAcrylicMaterial:
 
     def _call(self, identity, valid, name, *args, releasing=False):
         self._guard(identity, valid, releasing=releasing)
-        if name != "get_backdrop":
+        if name not in ("get_backdrop", "get_caption_dark_mode"):
             self._pending = True  # A failing/raising mutation may still touch DWM.
             self._mutations += 1
         value = getattr(self._api, name)(identity[1], *args)

@@ -16,6 +16,7 @@ from PySide6.QtCore import Property, QCoreApplication, QTimer, Signal, Slot
 from PySide6.QtQml import QJSValue
 from PySide6.QtWidgets import QFileDialog
 
+import process_usage
 import sensors
 from compact_labels import label_options
 from configuration_scopes import SCOPE_FIELDS as CONFIGURATION_SCOPES
@@ -84,6 +85,8 @@ class Controller(WorkspaceTools):
     themeChanged = Signal()
     draftHistoryChanged = Signal()
     sampleReady = Signal(dict)
+    processUsageChanged = Signal()
+    _processUsageReady = Signal(int, object)
     applyRequested = Signal(bool)
     topBarApplyRequested = Signal()
     settingsRequested = Signal(str)
@@ -131,6 +134,11 @@ class Controller(WorkspaceTools):
         self._notified_theme = self._draft["theme"]
         self.stop = threading.Event()
         self.thread = None
+        self._process_monitor = None
+        self._process_sampling_enabled = False
+        self._process_requests, self._process_results = {}, {}
+        self._process_generation = self._process_usage_revision = 0
+        self._processUsageReady.connect(self._receive_process_usage)
         self.sampleReady.connect(self.receive)
         self.draftChanged.connect(self._update_catalog)
         self.draftChanged.connect(self.previewChanged.emit)
@@ -795,6 +803,114 @@ class Controller(WorkspaceTools):
     def topBarDetailRow(self, identifier):
         rows = self._top_bar_rows(self._saved, detail_id=identifier)
         return rows[0] if rows else {}
+
+    processUsageRevision = Property(int, lambda self: self._process_usage_revision,
+                                    notify=processUsageChanged)
+
+    def _sync_process_requests(self):
+        targets = {key: value for key, value in self._process_requests.items()
+                   if self._process_sampling_enabled and value['kind'] in process_usage.KINDS}
+        if targets and self._process_monitor is None:
+            self._process_monitor = process_usage.ProcessUsageMonitor(self._processUsageReady.emit)
+        if self._process_monitor is not None:
+            self._process_generation = self._process_monitor.set_targets(targets)
+        self._process_usage_revision += 1
+        self.processUsageChanged.emit()
+
+    @Slot(str, str, result=str)
+    def beginProcessUsage(self, metric, hardware_name):
+        if self.stop.is_set() or len(self._process_requests) >= 16:
+            return ''
+        token = uuid.uuid4().hex
+        self._process_requests[token] = dict(kind=process_usage.resource_kind(metric),
+                                             metric=metric, hardware_name=hardware_name)
+        self._sync_process_requests()
+        return token
+
+    @Slot(str, str, str)
+    def updateProcessUsage(self, token, metric, hardware_name):
+        if token not in self._process_requests or self.stop.is_set():
+            return
+        target = dict(kind=process_usage.resource_kind(metric), metric=metric, hardware_name=hardware_name)
+        if target != self._process_requests[token]:
+            self._process_requests[token] = target
+            self._process_results.pop(token, None)
+            self._sync_process_requests()
+
+    @Slot(str)
+    def endProcessUsage(self, token):
+        if token in self._process_requests:
+            self._process_requests.pop(token)
+            self._process_results.pop(token, None)
+            self._sync_process_requests()
+
+    @Slot(int, object)
+    def _receive_process_usage(self, generation, results):
+        if self.stop.is_set() or generation != self._process_generation:
+            return
+        self._process_results = {key: value for key, value in results.items()
+                                 if key in self._process_requests
+                                 and value.get('kind') == self._process_requests[key]['kind']}
+        self._process_usage_revision += 1
+        self.processUsageChanged.emit()
+
+    @Slot(str, result='QVariantMap')
+    def processUsage(self, token):
+        if token not in self._process_requests or self.stop.is_set():
+            return {}
+        target = self._process_requests[token]
+        kind, metric = target['kind'], target['metric']
+        raw = self._process_results.get(token, process_usage.empty_report(kind))
+        state, rows = raw['state'], raw.get('rows', [])
+        reason_code, reason = raw.get('reason_code', ''), ''
+        captions = {'cpu': 'CPU 使用率', 'memory': '内存工作集', 'gpu': 'GPU 使用率', 'vram': '专用显存'}
+        if not kind:
+            state, reason_code, rows = 'unavailable', 'not_attributable', []
+            reason = ('当前未启用按软件统计网速的网络事件跟踪。' if metric.startswith('net_') else
+                      '进程 I/O 包含网络等设备，不能可靠归因到所选物理磁盘。' if metric.startswith(('disk_', 'storage_')) else
+                      '此指标没有可按软件拆分的使用率。')
+        elif state not in ('warming_up', 'unavailable', 'closed') and (
+                not numeric(raw.get('timestamp')) or not 0 <= time.time()-raw['timestamp'] < 8):
+            state, reason_code, rows = 'stale', 'stale', []
+        reasons = {'warming_up': '正在采样软件占用…', 'idle': '本轮未观察到明显的软件占用。',
+                   'stale': '软件占用读数已过期，正在重新采样。', 'closed': '软件占用采集已停止。'}
+        reason = reason or reasons.get(state, '')
+        if reason_code == 'adapter_identity':
+            reason = '无法将所选显卡与 Windows 适配器唯一对应，不会使用另一块显卡的数据。'
+        elif reason_code == 'query_failed':
+            reason = 'Windows 未返回可用的软件占用读数。'
+        denied = raw.get('denied_count', 0)
+        coverage = []
+        if denied:
+            coverage.append(self.tr('部分受保护进程不可读')+f' · {denied}')
+        unidentified = raw.get('unidentified_count', 0)
+        if unidentified:
+            coverage.append(self.tr('部分进程未返回可识别名称')+f' · {unidentified}')
+        note = ('按整机 CPU 使用率排序；不代表软件的温度或功耗占比。' if kind == 'cpu' else
+                '工作集包含共享内存，同名进程合并后可能重复计入共享页。' if kind == 'memory' else
+                '同一软件按最忙的 GPU 引擎排序；不同引擎的占比不相加。' if kind == 'gpu' else
+                '专用显存包含进程间共享分配，不能将各软件数值相加作为显卡总量。' if kind == 'vram' else '')
+        language = self._saved['language']
+        projected = []
+        for row in rows[:5]:
+            value = row.get('value')
+            if not numeric(value) or value <= 0:
+                continue
+            if kind in ('memory', 'vram'):
+                size, unit = (value/2**30, 'GiB') if value >= 2**30 else (value/2**20, 'MiB')
+                value_text = (f'{size:.1f}'.rstrip('0').rstrip('.'))+' '+unit
+            else:
+                value_text = f'{value:.1f}'.rstrip('0').rstrip('.')+' %'
+            projected.append(dict(row, value_text=value_text))
+        error = raw.get('error', {})
+        technical = ' · '.join(str(error[field]) for field in ('api', 'code', 'winerror', 'errno')
+                                if error.get(field) is not None)
+        return dict(raw, state=state, reason_code=reason_code, rows=projected,
+                    title=translate('占用最多的软件', language),
+                    caption=translate(captions.get(kind, '软件占用'), language),
+                    reason=translate(reason, language), note=translate(note, language),
+                    technical=technical,
+                    coverage=' · '.join(coverage))
 
     @Slot()
     def _emit_reading(self):
@@ -2670,11 +2786,18 @@ class Controller(WorkspaceTools):
 
         self.thread = threading.Thread(target=collect, name="hardware-readings", daemon=True)
         self.thread.start()
+        self._process_sampling_enabled = True
+        self._sync_process_requests()
 
     def close(self):
         self._reading_notify_timer.stop()
         self._diagnostic_timer.stop()
         self.stop.set()
+        self._process_sampling_enabled = False
+        self._process_requests.clear()
+        self._process_results.clear()
+        if self._process_monitor is not None:
+            self._process_monitor.close()
         if self.thread:
             self.thread.join(timeout=4)
         if not self.thread or not self.thread.is_alive():

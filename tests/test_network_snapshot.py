@@ -1,17 +1,16 @@
-"""Native ABI/buffer fixtures and Activity rates without loading Windows APIs."""
+"""Native network snapshots from bounded synthetic ABI buffers, never live APIs."""
 
 import ctypes as c
+import importlib
+import importlib.util
 import os
-import threading
+import struct
 import unittest
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
-
-import network_snapshot as net
-from activity_sensors import Activity
+from unittest.mock import patch
 
 
-class Function:
+class Call:
     def __init__(self, callback):
         self.callback = callback
 
@@ -19,368 +18,414 @@ class Function:
         return self.callback(*args)
 
 
-class FakeLibrary:
-    def __init__(self):
-        self.members = [(3, "Adapter A", "Synthetic A", 3003), (4, "适配器 B", "Synthetic B", 4004)]
-        self.values = {3: (2**40, 2**41), 4: (1000, 2000)}
-        self.oper, self.admin, self.guids = {}, {}, {}
-        self.fault, self.errors = "", {}
-        self.gaa_calls, self.table_calls, self.legacy_calls, self.frees = 0, 0, 0, []
-        self.gaa_resize, self.legacy_resize = 0, 0
-        self.flags = []
-        self.owned = []
-        self.GetAdaptersAddresses = Function(self.gaa)
-        self.GetIfTable2 = Function(self.table)
-        self.FreeMibTable = Function(lambda pointer: self.frees.append(pointer.value))
-        self.GetIfTable = Function(self.legacy)
-
-    @staticmethod
-    def size(pointer, value):
-        c.cast(pointer, c.POINTER(net.U32))[0] = value
-
-    @staticmethod
-    def wide(row, field, text):
-        data = text.encode("utf-16-le", errors="surrogatepass") + b"\0\0"
-        c.memmove(c.addressof(row) + getattr(type(row), field).offset, data, len(data))
-
-    def gaa(self, family, flags, reserved, buffer, size):
-        self.gaa_calls += 1
-        self.flags.append(flags)
-        if not self.members:
-            return 232
-        phase = "gaa_probe" if buffer is None else "gaa_data"
-        if phase in self.errors:
-            return self.errors[phase]
-        if buffer is None:
-            self.size(size, net.MAX_BUFFER + 1 if self.fault == "gaa_oversize" else 4096)
-            return 111
-        if self.gaa_resize:
-            self.gaa_resize -= 1
-            self.size(size, len(buffer) * 2)
-            return 111
-        start, end = c.addressof(buffer), c.addressof(buffer) + len(buffer)
-        position = len(self.members) * c.sizeof(net.AdapterPrefix)
-        for at, (index, name, description, luid) in enumerate(self.members):
-            row = net.AdapterPrefix.from_buffer(buffer, at * c.sizeof(net.AdapterPrefix))
-            row.length, row.index, row.luid = c.sizeof(net.AdapterPrefix), index, luid
-            row.next = start + (at + 1) * c.sizeof(net.AdapterPrefix) if at + 1 < len(self.members) else None
-            for field, text in (("friendly_name", name), ("description", description)):
-                data = text.encode("utf-16-le", errors="surrogatepass") + b"\0\0"
-                setattr(row, field, start + position)
-                c.memmove(start + position, data, len(data))
-                position += len(data)
-        first = net.AdapterPrefix.from_buffer(buffer)
-        if self.fault == "gaa_short_length":
-            first.length = 8
-        elif self.fault == "gaa_long_length":
-            first.length = len(buffer) + 1
-        elif self.fault == "gaa_cycle":
-            first.next = start
-        elif self.fault == "gaa_next_outside":
-            first.next = end + 8
-        elif self.fault == "gaa_next_unaligned":
-            first.next = start + 1
-        elif self.fault == "gaa_name_outside":
-            first.friendly_name = end + 2
-        elif self.fault == "gaa_description_outside":
-            first.description = start - 2
-        elif self.fault == "gaa_unterminated":
-            first.friendly_name = end - 514
-            c.memmove(first.friendly_name, b"A\0" * 257, 514)
-        elif self.fault == "gaa_zero_luid":
-            first.luid = 0
-        self.size(size, 8 if self.fault == "gaa_short_used" else position)
-        return 0
-
-    def table(self, pointer):
-        self.table_calls += 1
-        if self.fault == "table_null":
-            c.cast(pointer, c.POINTER(c.c_void_p))[0] = None
-            return 0
-        members = self.members[:-1] if self.fault == "table_missing" else self.members
-        buffer = c.create_string_buffer(net.InterfaceTable.rows.offset + len(members) * c.sizeof(net.InterfaceRow))
-        self.owned.append(buffer)
-        net.U32.from_buffer(buffer).value = net.MAX_INTERFACES + 1 if self.fault == "table_count" else len(members)
-        for at, (index, name, description, luid) in enumerate(members):
-            row = net.InterfaceRow.from_buffer(buffer, net.InterfaceTable.rows.offset + at * c.sizeof(net.InterfaceRow))
-            row.index = members[0][0] if self.fault == "table_duplicate" else index
-            row.luid = luid + 1 if self.fault == "luid_mismatch" else luid
-            row.guid.a = self.guids.get(index, index)
-            self.wide(row, "alias", name + " changed" if self.fault == "alias_mismatch" else name)
-            self.wide(row, "description", description)
-            row.in_octets, row.out_octets = self.values[index]
-            if self.fault == "table_unterminated":
-                c.memmove(c.addressof(row) + net.InterfaceRow.alias.offset, b"A\0" * 257, 514)
-        c.cast(pointer, c.POINTER(c.c_void_p))[0] = c.addressof(buffer)
-        return self.errors.get("table", 0)
-
-    def legacy(self, buffer, size, ordered):
-        self.legacy_calls += 1
-        phase = "legacy_probe" if buffer is None else "legacy_data"
-        if phase in self.errors:
-            return self.errors[phase]
-        members = self.members[:-1] if self.fault == "legacy_missing" else self.members
-        required = net.LegacyTable.rows.offset + len(members) * c.sizeof(net.LegacyRow)
-        if buffer is None:
-            self.size(size, required)
-            return 122
-        if self.legacy_resize:
-            self.legacy_resize -= 1
-            self.size(size, len(buffer) + c.sizeof(net.LegacyRow))
-            return 122
-        net.U32.from_buffer(buffer).value = len(members)
-        for at, (index, _name, description, _luid) in enumerate(members):
-            row = net.LegacyRow.from_buffer(buffer, net.LegacyTable.rows.offset + at * c.sizeof(net.LegacyRow))
-            row.index = members[0][0] if self.fault == "legacy_duplicate" else index
-            row.oper, row.admin = self.oper.get(index, 5), self.admin.get(index, 1)
-            text = members[0][2] if self.fault == "legacy_description_duplicate" else description
-            raw = text.encode("ascii", errors="replace")
-            row.description_length = 257 if self.fault == "legacy_description_length" else len(raw)
-            c.memmove(c.addressof(row) + net.LegacyRow.description.offset, raw, len(raw))
-        self.size(size, 2 if self.fault == "legacy_short_used" else required)
-        return 0
-
-
-def reader(fake, *, clock=None):
-    return net.NetworkSnapshot(api_factory=lambda: net.NativeNetworkApi(library=fake), environ={}, clock=clock)
-
-
-class SnapshotAbiTests(unittest.TestCase):
-    def test_reviewed_x64_abi_and_pointer_types(self):
-        self.assertEqual(c.sizeof(net.Guid), 16)
-        self.assertEqual((c.sizeof(net.InterfaceRow), net.InterfaceTable.rows.offset), (1352, 8))
-        self.assertEqual((net.InterfaceRow.in_octets.offset, net.InterfaceRow.out_octets.offset), (1208, 1280))
-        self.assertEqual((c.sizeof(net.LegacyRow), net.LegacyTable.rows.offset, net.LegacyRow.oper.offset), (860, 4, 544))
-        self.assertEqual((net.AdapterPrefix.friendly_name.offset, net.AdapterPrefix.luid.offset), (72, 224))
-        self.assertIs(dict(net.AdapterPrefix._fields_)["friendly_name"], c.c_void_p)
-
-    def test_lazy_construction_disabled_first_read_and_unavailable_are_session_fallbacks(self):
-        factory, env = Mock(side_effect=AssertionError("No native initialization")), {}
-        with patch("ctypes.WinDLL", side_effect=AssertionError("No DLL")), patch.object(threading.Thread, "start", side_effect=AssertionError("No worker")):
-            snapshot = net.NetworkSnapshot(api_factory=factory, environ=env)
-            factory.assert_not_called()
-            env[net.DISABLED] = "1"
-            self.assertIsNone(snapshot.read())
-            env.clear()
-            self.assertIsNone(snapshot.read())
-        factory.assert_not_called()
-        missing = Mock(side_effect=net.NativeUnavailable)
-        snapshot = net.NetworkSnapshot(api_factory=missing, environ={})
-        self.assertIsNone(snapshot.read())
-        self.assertIsNone(snapshot.read())
-        missing.assert_called_once()
-        with self.assertRaises(net.NativeUnavailable):
-            net.NativeNetworkApi(library=SimpleNamespace())
-
-    def test_real_initialization_error_is_not_permanent_or_silently_fallback(self):
-        fake = FakeLibrary()
-        factory = Mock(side_effect=[net.SnapshotError(net.SNAPSHOT_API, 5), net.NativeNetworkApi(library=fake)])
-        snapshot = net.NetworkSnapshot(api_factory=factory, environ={})
-        with self.assertRaises(net.SnapshotError) as error:
-            snapshot.read()
-        self.assertEqual(error.exception.winerror, 5)
-        self.assertEqual(snapshot.read()["Adapter A"].bytes_recv, 2**40)
-        self.assertEqual(factory.call_count, 2)
-
-    def test_names_order_uint64_and_exact_legacy_connected_operational_rule(self):
-        fake = FakeLibrary()
-        fake.oper = {3: 4, 4: 5}
-        snapshot = reader(fake)
-        result = snapshot.read()
-        self.assertEqual(list(result), ["Adapter A", "适配器 B"])
-        self.assertEqual((result["Adapter A"].bytes_recv, result["Adapter A"].bytes_sent), (2**40, 2**41))
-        self.assertTrue(all(row.isup for row in result.values()))
-        self.assertEqual(fake.flags, [15, 15])
-        self.assertEqual(len(fake.frees), 1)
-        fake.admin[3] = 2
-        fake.oper[4] = 3
-        self.assertFalse(any(row.isup for row in snapshot.read().values()))
-        self.assertEqual(len(fake.frees), 2)
-
-    def test_success_null_oversize_duplicate_parse_and_missing_join_are_os_errors(self):
-        cases = {
-            "gaa_oversize": "GetAdaptersAddresses", "gaa_short_used": "GetAdaptersAddresses",
-            "gaa_short_length": "GetAdaptersAddresses", "gaa_long_length": "GetAdaptersAddresses",
-            "gaa_cycle": "GetAdaptersAddresses", "gaa_next_outside": "GetAdaptersAddresses",
-            "gaa_next_unaligned": "GetAdaptersAddresses", "gaa_name_outside": "GetAdaptersAddresses",
-            "gaa_description_outside": "GetAdaptersAddresses", "gaa_unterminated": "GetAdaptersAddresses",
-            "gaa_zero_luid": "GetAdaptersAddresses", "table_null": "GetIfTable2",
-            "table_count": "GetIfTable2", "table_duplicate": "GetIfTable2",
-            "table_unterminated": "GetIfTable2", "legacy_short_used": "GetIfTable",
-            "legacy_duplicate": "GetIfTable", "legacy_description_length": "GetIfTable",
-            "table_missing": net.SNAPSHOT_API, "legacy_missing": net.SNAPSHOT_API,
-            "luid_mismatch": net.SNAPSHOT_API,
-        }
-        for fault, api in cases.items():
-            with self.subTest(fault=fault):
-                fake = FakeLibrary()
-                fake.fault = fault
-                with self.assertRaises(net.SnapshotError) as error:
-                    reader(fake).read()
-                self.assertEqual((error.exception.api, error.exception.winerror), (api, 13))
-                expected_free = 0 if fault.startswith("gaa_") or fault == "table_null" else 1
-                self.assertEqual(len(fake.frees), expected_free)
-
-    def test_duplicate_gaa_index_is_invalid_not_an_ambiguity_fallback(self):
-        fake = FakeLibrary()
-        fake.members[1] = (3, "Other name", "Other description", 3003)
-        with self.assertRaises(net.SnapshotError):
-            reader(fake).read()
-        self.assertEqual(fake.table_calls, 0)
-
-    def test_member_limit_before_dereferencing_more_nodes(self):
-        with patch.object(net, "MAX_INTERFACES", 1):
-            with self.assertRaises(net.SnapshotError):
-                reader(FakeLibrary()).read()
-
-    def test_api_return_codes_and_success_owned_buffer_release(self):
-        for stage, api, code in (("gaa_probe", "GetAdaptersAddresses", 5), ("gaa_data", "GetAdaptersAddresses", 87),
-                                 ("table", "GetIfTable2", 50), ("legacy_probe", "GetIfTable", 5),
-                                 ("legacy_data", "GetIfTable", 87)):
-            with self.subTest(stage=stage):
-                fake = FakeLibrary()
-                fake.errors[stage] = code
-                with self.assertRaises(net.SnapshotError) as error:
-                    reader(fake).read()
-                self.assertEqual((error.exception.api, error.exception.winerror), (api, code))
-                # An error output from Table2 is not an owned successful buffer.
-                self.assertEqual(len(fake.frees), 1 if stage.startswith("legacy") else 0)
-
-    def test_resize_retry_is_bounded_and_empty_adapter_result_is_success(self):
-        fake = FakeLibrary()
-        fake.gaa_resize = fake.legacy_resize = 1
-        self.assertEqual(len(reader(fake).read()), 2)
-        self.assertEqual((fake.gaa_calls, fake.legacy_calls, len(fake.frees)), (3, 3, 1))
-        for attr, code in (("gaa_resize", 111), ("legacy_resize", 122)):
-            fake = FakeLibrary()
-            setattr(fake, attr, 10)
-            with self.assertRaises(net.SnapshotError) as error:
-                reader(fake).read()
-            self.assertEqual(error.exception.winerror, code)
-        fake = FakeLibrary()
-        fake.members = []
-        self.assertEqual(reader(fake).read(), {})
-        self.assertEqual(fake.table_calls, 0)
-
-    def test_identity_ambiguity_falls_back_before_unnecessary_queries_and_retries_after_60s(self):
-        for mode in ("description", "alias", "non_ascii", "alias_mismatch", "legacy_description_duplicate"):
-            with self.subTest(mode=mode):
-                fake, now = FakeLibrary(), [0.0]
-                if mode == "description":
-                    fake.members[1] = (4, "Other", "Synthetic A", 4004)
-                elif mode == "alias":
-                    fake.members[1] = (4, "Adapter A", "Synthetic B", 4004)
-                elif mode == "non_ascii":
-                    fake.members[1] = (4, "Other", "非ASCII描述", 4004)
-                else:
-                    fake.fault = mode
-                snapshot = reader(fake, clock=lambda: now[0])
-                self.assertIsNone(snapshot.read())
-                calls = fake.gaa_calls
-                if mode in ("description", "alias", "non_ascii"):
-                    self.assertEqual(fake.table_calls, 0)
-                self.assertIsNone(snapshot.read())
-                self.assertEqual(fake.gaa_calls, calls)
-                now[0] = 60
-                self.assertIsNone(snapshot.read())
-                self.assertGreater(fake.gaa_calls, calls)
-
-
-class ActivityNativeSnapshotTests(unittest.TestCase):
+class NativeNetworkTests(unittest.TestCase):
     def setUp(self):
-        self.fake, self.now = FakeLibrary(), 10.0
-        self.snapshot = reader(self.fake, clock=lambda: self.now)
-        self.activity = Activity(network_reader=self.snapshot)
-        self.clock = patch("activity_sensors.time.monotonic", side_effect=lambda: self.now)
-        self.clock.start()
-        self.addCleanup(self.clock.stop)
-        self.old_io = self.enterContext(patch("activity_sensors.psutil.net_io_counters", side_effect=AssertionError("No old query")))
-        self.old_status = self.enterContext(patch("activity_sensors.psutil.net_if_stats", side_effect=AssertionError("No old query")))
+        self.assertIsNotNone(
+            importlib.util.find_spec("network_snapshot"), "Bulk native network snapshot is missing"
+        )
+        self.module = importlib.import_module("network_snapshot")
+        self.enterContext(patch("ctypes.WinDLL", side_effect=AssertionError("No live native API")))
+        self.aliases = [
+            dict(index=7, luid=700, alias="Synthetic VPN"),
+            dict(index=9, luid=900, alias="Synthetic Wi-Fi"),
+        ]
+        self.rows = [
+            dict(index=7, luid=700, oper=1, admin=1),
+            dict(index=9, luid=900, oper=1, admin=1),
+            dict(index=99, luid=9900, oper=1, admin=1),
+        ]
+        self.calls, self.freed = [], []
+        self.buffers = []
+        self.address_error = self.table_error = 0
+        self.mutate_address = self.mutate_table = lambda *_: None
+        self.api = SimpleNamespace(
+            GetAdaptersAddresses=Call(self.addresses),
+            GetIfTable2=Call(self.table),
+            FreeMibTable=Call(self.free),
+        )
 
-    def sample(self):
-        self.now += 2
-        return self.activity.read({"network"})
+    def addresses(self, family, flags, reserved, buffer, size):
+        self.calls.append(("addresses", family, flags, c.sizeof(buffer)))
+        self.assertEqual((family, flags, reserved), (0, 15, None))
+        if self.address_error:
+            return self.address_error
+        start = c.addressof(buffer)
+        offset = len(self.aliases) * 256
+        for index, row in enumerate(self.aliases):
+            base = index * 256
+            raw = row["alias"].encode("utf-16-le") + b"\0\0"
+            struct.pack_into(
+                "<IIQ",
+                buffer,
+                base,
+                232,
+                row["index"],
+                start + (index + 1) * 256 if index + 1 < len(self.aliases) else 0,
+            )
+            struct.pack_into("<Q", buffer, base + 72, start + offset)
+            struct.pack_into("<I", buffer, base + 108, row["index"])
+            struct.pack_into("<Q", buffer, base + 224, row["luid"])
+            c.memmove(start + offset, raw, len(raw))
+            offset += len(raw)
+        c.cast(size, c.POINTER(c.c_uint32)).contents.value = offset
+        self.mutate_address(buffer, offset, size)
+        return 0
 
-    def test_no_demand_is_lazy_and_failure_clears_rates_with_specific_diagnostics(self):
-        idle = self.activity.read(set())
-        self.assertEqual(self.fake.gaa_calls, 0)
-        self.assertEqual(idle["provider_status"]["network"], dict(state="not_requested", requested=False))
-        self.assertEqual(self.sample()["provider_status"]["network"]["state"], "warming_up")
-        self.fake.values[3] = (2**40 + 2_000_000, 2**41 + 4_000_000)
-        self.assertEqual(self.sample()["net_download"], 1)
-        self.fake.errors["table"] = 5
-        failed = self.sample()
+    def table(self, output):
+        self.calls.append(("table",))
+        buffer = c.create_string_buffer(8 + len(self.rows) * 1352)
+        struct.pack_into("<I", buffer, 0, len(self.rows))
+        for index, row in enumerate(self.rows):
+            base = 8 + index * 1352
+            struct.pack_into("<QI", buffer, base, row["luid"], row["index"])
+            struct.pack_into("<I", buffer, base + 12, row.get("guid", 0))
+            struct.pack_into("<II", buffer, base + 1156, row["oper"], row["admin"])
+            # Sent/received bytes, packet pairs, errors and drops are all distinct.
+            for offset, value in {
+                1208: row.get("rx", 11),
+                1216: 12,
+                1224: 13,
+                1232: 14,
+                1240: 15,
+                1280: row.get("tx", 21),
+                1288: 22,
+                1296: 23,
+                1304: 24,
+                1312: 25,
+            }.items():
+                struct.pack_into("<Q", buffer, base + offset, value)
+        self.mutate_table(buffer, output)
+        self.buffers.append(buffer)
+        c.cast(output, c.POINTER(c.c_void_p)).contents.value = c.addressof(buffer)
+        return self.table_error
+
+    def free(self, pointer):
+        self.freed.append(pointer.value if isinstance(pointer, c.c_void_p) else pointer)
+
+    def source(self):
+        return self.module.NativeNetworkSnapshot(api=self.api)
+
+    def test_single_table_fresh_names_exact_counters_and_no_extra_interfaces(self):
+        source = self.source()
+        first = source.read()
+        self.assertEqual(set(first), {"Synthetic VPN", "Synthetic Wi-Fi"})
+        self.assertEqual(
+            first["Synthetic VPN"],
+            dict(
+                isup=True,
+                identity=(700, bytes(16)),
+                bytes_sent=21,
+                bytes_recv=11,
+                packets_sent=45,
+                packets_recv=25,
+                errin=15,
+                errout=25,
+                dropin=14,
+                dropout=24,
+            ),
+        )
+        self.aliases[0]["alias"] = "Renamed VPN"
+        self.assertIn("Renamed VPN", source.read())
+        self.assertNotIn("Synthetic VPN", source.read())
+        self.assertEqual(sum(call[0] == "table" for call in self.calls), 3)
+        self.assertEqual(len(self.freed), 3)
+
+    def test_up_requires_both_operational_and_admin_up(self):
+        self.rows[0]["admin"] = 2
+        self.rows[1]["oper"] = 5
+        self.assertFalse(any(row["isup"] for row in self.source().read().values()))
+
+    def test_activity_is_lazy_and_failure_or_no_demand_resets_rate_baseline(self):
+        from activity_sensors import Activity
+
+        source = self.source()
+        activity = Activity(network_reader=source)
+        self.assertIsNone(source._buffer)
+        self.assertIsNone(source._get_addresses)
+        with patch("activity_sensors.time.monotonic", return_value=10):
+            self.assertEqual(activity.read(set())["provider_status"]["network"]["state"], "not_requested")
+        self.assertFalse(self.calls)
+        with patch("activity_sensors.time.monotonic", return_value=11):
+            self.assertEqual(activity.read({"network"})["provider_status"]["network"]["state"], "warming_up")
+        self.rows[0]["rx"] = 1_000_011
+        with patch("activity_sensors.time.monotonic", return_value=12):
+            self.assertEqual(activity.read({"network"})["net_download"], 1)
+        self.table_error = 5
+        with patch("activity_sensors.time.monotonic", return_value=13):
+            failed = activity.read({"network"})
         self.assertEqual(failed["networks"], {})
-        self.assertIsNone(failed["network_active"])
-        self.assertNotIn("net_download", failed)
         self.assertEqual(failed["provider_status"]["network"]["error"],
-                         dict(api="GetIfTable2", reason="OSError", errno=5, winerror=5))
-        self.fake.errors.clear()
-        self.assertEqual(self.sample()["provider_status"]["network"]["state"], "warming_up")
-        self.activity.read(set())
-        self.assertEqual(self.sample()["provider_status"]["network"]["state"], "warming_up")
-        self.old_io.assert_not_called()
-        self.old_status.assert_not_called()
+                         dict(api="GetIfTable2", reason="OSError", winerror=5))
+        self.table_error = 0
+        with patch("activity_sensors.time.monotonic", return_value=14):
+            self.assertEqual(activity.read({"network"})["provider_status"]["network"]["state"], "warming_up")
+        activity.read(set())
+        with patch("activity_sensors.time.monotonic", return_value=15):
+            self.assertEqual(activity.read({"network"})["provider_status"]["network"]["state"], "warming_up")
 
-    def test_remove_rename_disconnect_counter_reset_and_same_name_replacement_rewarm(self):
-        self.fake.members = [self.fake.members[0]]
-        for change in ("counter_reset", "rename", "remove", "disconnect", "luid", "guid"):
+    def test_same_name_luid_or_guid_replacement_and_counter_reset_cannot_reuse_rates(self):
+        from activity_sensors import Activity
+
+        for change in ("luid", "guid", "counter_reset", "rename", "remove", "disconnect"):
             with self.subTest(change=change):
-                self.fake.members = [(3, "Adapter A", "Synthetic A", 3003)]
-                self.fake.values[3] = (5000, 6000)
-                self.fake.oper.clear()
-                self.fake.guids.clear()
-                self.activity = Activity(network_reader=self.snapshot)
-                self.sample()
-                self.fake.values[3] = (2_005_000, 2_006_000)
-                self.assertEqual(self.sample()["net_download"], 1)
-                if change == "counter_reset":
-                    self.fake.values[3] = (1, 2)
+                self.aliases = [dict(index=7, luid=700, alias="Synthetic VPN")]
+                self.rows = [dict(index=7, luid=700, oper=1, admin=1, rx=11, tx=21)]
+                self.address_error = 0
+                activity = Activity(network_reader=self.source())
+                with patch("activity_sensors.time.monotonic", return_value=10):
+                    activity.read({"network"})
+                self.rows[0]["rx"] = 1_000_011
+                with patch("activity_sensors.time.monotonic", return_value=11):
+                    self.assertEqual(activity.read({"network"})["net_download"], 1)
+                if change == "luid":
+                    self.aliases[0]["luid"] = self.rows[0]["luid"] = 701
+                elif change == "guid":
+                    self.rows[0]["guid"] = 123
+                elif change == "counter_reset":
+                    self.rows[0]["rx"] = self.rows[0]["tx"] = 1
                 elif change == "rename":
-                    self.fake.members = [(3, "Renamed", "Synthetic A", 3003)]
-                elif change in ("remove", "disconnect"):
-                    if change == "remove":
-                        self.fake.members = []
-                    else:
-                        self.fake.oper[3] = 0
-                    self.assertEqual(self.sample()["provider_status"]["network"]["state"], "no_devices")
-                    self.fake.members = [(3, "Adapter A", "Synthetic A", 3003)]
-                    self.fake.oper.clear()
-                elif change == "luid":
-                    self.fake.members = [(3, "Adapter A", "Synthetic A", 9009)]
-                    self.fake.values[3] = (2**50, 2**51)
+                    self.aliases[0]["alias"] = "Renamed VPN"
                 else:
-                    self.fake.guids[3] = 9009
-                    self.fake.values[3] = (2**50, 2**51)
-                reading = self.sample()
-                self.assertEqual(reading["provider_status"]["network"]["state"], "warming_up")
-                self.assertIsNone(reading["net_download"])
+                    if change == "remove":
+                        self.address_error = 232
+                    else:
+                        self.rows[0]["oper"] = 2
+                    with patch("activity_sensors.time.monotonic", return_value=12):
+                        self.assertEqual(activity.read({"network"})["provider_status"]["network"]["state"], "no_devices")
+                    self.address_error, self.rows[0]["oper"] = 0, 1
+                with patch("activity_sensors.time.monotonic", return_value=13):
+                    fresh = activity.read({"network"})
+                self.assertEqual(fresh["provider_status"]["network"]["state"], "warming_up")
+                self.assertIsNone(fresh["net_download"])
 
-    def test_ambiguity_cooldown_keeps_fallback_live_and_backend_switch_rewarms(self):
-        self.sample()
-        self.fake.fault = "alias_mismatch"
-        self.old_io.side_effect = None
-        self.old_status.side_effect = None
-        self.old_io.return_value = {"Adapter A": SimpleNamespace(bytes_recv=100, bytes_sent=200)}
-        self.old_status.return_value = {"Adapter A": SimpleNamespace(isup=True)}
-        self.assertEqual(self.sample()["provider_status"]["network"]["state"], "warming_up")
-        native_calls = self.fake.gaa_calls
-        self.old_io.return_value = {"Adapter A": SimpleNamespace(bytes_recv=2_000_100, bytes_sent=4_000_200)}
-        self.assertEqual(self.sample()["net_upload"], 2)
-        self.assertEqual(self.fake.gaa_calls, native_calls)
-        self.old_status.return_value = {"Adapter A": SimpleNamespace(isup=False)}
-        self.assertEqual(self.sample()["provider_status"]["network"]["state"], "no_devices")
-        self.assertEqual(self.old_io.call_count, 3)
-        self.fake.fault = ""
-        self.now += 60
-        self.assertEqual(self.sample()["provider_status"]["network"]["state"], "warming_up")
+    def test_ip_membership_order_preserves_initial_auto_selection_when_table_is_reversed(self):
+        self.rows.reverse()
+        result = self.source().read()
+        self.assertEqual(list(result), [row["alias"] for row in self.aliases])
+        # The first sample has no rate baseline; automatic selection breaks
+        # equal-rate ties by this order, just like psutil's GAA iteration.
+        active = {name: row for name, row in result.items() if row["isup"]}
+        self.assertEqual(max(active, key=lambda _name: 0), "Synthetic VPN")
+        import activity_sensors
 
-    def test_bad_injected_reading_is_a_local_os_error_instead_of_sampler_failure(self):
-        bad = SimpleNamespace(read=lambda: {"Adapter": SimpleNamespace(bytes_recv=float("nan"), bytes_sent=10, isup=True)})
-        result = Activity(network_reader=bad).read({"network"})
+        with (
+            patch.object(activity_sensors, "_native_network", return_value=self.source()),
+            patch(
+                "activity_sensors.psutil.net_io_counters", side_effect=AssertionError("No fallback")
+            ),
+            patch(
+                "activity_sensors.psutil.net_if_stats", side_effect=AssertionError("No fallback")
+            ),
+        ):
+            activity = activity_sensors.Activity()
+            for timestamp in (10, 11):
+                with patch("activity_sensors.time.monotonic", return_value=timestamp):
+                    self.assertEqual(activity.read({"network"})["network_active"], "Synthetic VPN")
+
+    def test_luid_join_survives_ipv4_index_zero_and_never_uses_a_foreign_row(self):
+        self.aliases[0]["index"] = 0
+        self.assertTrue(self.source().read()["Synthetic VPN"]["isup"])
+        self.rows[0]["luid"] = 701
+        with self.assertRaises(self.module.NetworkSnapshotError) as caught:
+            self.source().read()
+        self.assertEqual(caught.exception.api, "GetIfTable2")
+        self.assertEqual(caught.exception.reason, "InterfaceInventoryChanged")
+        self.assertEqual(len(self.freed), 2)
+
+    def test_no_interfaces_is_no_data_without_table_call(self):
+        self.address_error = 232
+        self.assertEqual(self.source().read(), {})
+        self.assertFalse(self.freed)
+        self.assertEqual(len(self.calls), 1)
+
+    def test_native_api_codes_and_names_survive_without_slow_fallback(self):
+        self.address_error = 5
+        with self.assertRaises(self.module.NetworkSnapshotError) as caught:
+            self.source().read()
+        self.assertEqual(
+            (caught.exception.api, caught.exception.winerror), ("GetAdaptersAddresses", 5)
+        )
+        self.assertFalse(self.freed)
+        self.address_error, self.table_error = 0, 8
+        with self.assertRaises(self.module.NetworkSnapshotError) as caught:
+            self.source().read()
+        self.assertEqual((caught.exception.api, caught.exception.winerror), ("GetIfTable2", 8))
+        self.assertEqual(len(self.freed), 1)
+
+    def test_bounded_growth_reuses_allocated_buffer(self):
+        real = self.api.GetAdaptersAddresses.callback
+
+        def grow(*args):
+            if c.sizeof(args[3]) < 32768:
+                c.cast(args[4], c.POINTER(c.c_uint32)).contents.value = 32768
+                self.calls.append(("grow", c.sizeof(args[3])))
+                return 111
+            return real(*args)
+
+        self.api.GetAdaptersAddresses.callback = grow
+        source = self.source()
+        source.read()
+        source.read()
+        self.assertEqual(sum(item[0] == "grow" for item in self.calls), 1)
+        self.assertTrue(all(item[-1] == 32768 for item in self.calls if item[0] == "addresses"))
+
+    def test_growth_limit_and_retry_limit_fail_explicitly(self):
+        for returned in (2**31, 0, 200):
+            with self.subTest(returned=returned):
+                calls = []
+
+                def overflow(*args):
+                    calls.append(1)
+                    c.cast(args[4], c.POINTER(c.c_uint32)).contents.value = returned
+                    return 111
+
+                self.api.GetAdaptersAddresses.callback = overflow
+                with self.assertRaises(self.module.NetworkSnapshotError):
+                    self.source().read()
+                self.assertLessEqual(len(calls), 4)
+
+    def test_bad_adapter_pointers_lengths_cycles_and_aliases_are_rejected(self):
+        def unterminated(buffer, used, size):
+            start = c.addressof(buffer)
+            struct.pack_into("<Q", buffer, 72, start + used - 2)
+            c.memmove(start + used - 2, b"A\0", 2)
+
+        mutations = [
+            lambda b, u, s: struct.pack_into("<Q", b, 8, c.addressof(b)),
+            lambda b, u, s: struct.pack_into("<Q", b, 8, c.addressof(b) + u - 4),
+            lambda b, u, s: struct.pack_into("<I", b, 0, 80),
+            lambda b, u, s: struct.pack_into("<Q", b, 72, c.addressof(b) + u + 2),
+            lambda b, u, s: struct.pack_into("<Q", b, 72, c.addressof(b) + 257),
+            lambda b, u, s: struct.pack_into("<Q", b, 224, 0),
+            lambda b, u, s: struct.pack_into("<Q", b, 256 + 224, 700),
+            unterminated,
+        ]
+        for mutate in mutations:
+            with self.subTest(mutation=mutate):
+                self.mutate_address = mutate
+                with self.assertRaises(self.module.NetworkSnapshotError) as caught:
+                    self.source().read()
+                self.assertEqual(caught.exception.api, "GetAdaptersAddresses")
+
+    def test_invalid_returned_adapter_size_is_not_followed(self):
+        self.mutate_address = lambda b, u, s: setattr(
+            c.cast(s, c.POINTER(c.c_uint32)).contents, "value", c.sizeof(b) + 1
+        )
+        with self.assertRaises(self.module.NetworkSnapshotError):
+            self.source().read()
+        self.assertFalse(self.freed)
+
+    def test_table_count_is_bounded_and_memory_is_freed_on_validation_failure(self):
+        self.mutate_table = lambda b, o: struct.pack_into("<I", b, 0, 5000)
+        with self.assertRaises(self.module.NetworkSnapshotError):
+            self.source().read()
+        self.assertEqual(len(self.freed), 1)
+
+    def test_unsupported_abi_does_not_call_native(self):
+        with patch.object(self.module, "POINTER_BYTES", 4):
+            with self.assertRaises(self.module.NetworkSnapshotError):
+                self.source().read()
+        self.assertFalse(self.calls)
+
+
+class NativeActivityTests(unittest.TestCase):
+    def test_disabled_default_backend_does_not_load_native_and_fallback_stays_fresh(self):
+        import activity_sensors
+
+        with (patch.dict(os.environ, {"DESKTOP_STATS_NETWORK_SNAPSHOT_DISABLED": "1"}),
+              patch("ctypes.WinDLL", side_effect=AssertionError("No native API")),
+              patch("activity_sensors.psutil.net_io_counters", return_value={}) as counters,
+              patch("activity_sensors.psutil.net_if_stats", return_value={}) as states):
+            activity = activity_sensors.Activity()
+            self.assertFalse(activity._network_initialized)
+            activity.read(set())
+            counters.assert_not_called()
+            activity.read({"network"})
+            activity.read({"network"})
+            self.assertEqual((counters.call_count, states.call_count), (2, 2))
+
+    def test_bad_injected_reading_reports_local_safe_error(self):
+        from activity_sensors import Activity
+
+        source = SimpleNamespace(read=lambda: {"Adapter": dict(bytes_recv=float("nan"), bytes_sent=1, isup=True)})
+        result = Activity(network_reader=source).read({"network"})
         self.assertEqual(result["provider_status"]["network"]["state"], "query_failed")
-        self.assertEqual(result["provider_status"]["network"]["error"]["api"], net.SNAPSHOT_API)
-        self.assertEqual(result["provider_status"]["network"]["error"]["winerror"], 13)
+        self.assertEqual(result["provider_status"]["network"]["error"],
+                         dict(api="Windows network snapshot", reason="OSError", winerror=13))
+
+    def test_provider_error_cannot_override_api_or_reason_with_private_text(self):
+        import activity_sensors
+
+        error = OSError("PRIVATE_INTERFACE_SECRET")
+        error.api, error.reason = "C:/PRIVATE/SECRET", "PRIVATE_ADAPTER_NAME"
+        failure = activity_sensors._QueryFailure("psutil.net_io_counters", error)
+        self.assertEqual(failure.facts, dict(api="psutil.net_io_counters", reason="OSError"))
+
+    def test_native_inventory_change_publishes_observed_cause(self):
+        self.assertIsNotNone(
+            importlib.util.find_spec("network_snapshot"), "Bulk native network snapshot is missing"
+        )
+        module = importlib.import_module("network_snapshot")
+        import activity_sensors
+
+        error = module.NetworkSnapshotError("GetIfTable2", reason="InterfaceInventoryChanged")
+        failure = activity_sensors._QueryFailure("GetIfTable2", error)
+        self.assertEqual(failure.facts, dict(api="GetIfTable2", reason="InterfaceInventoryChanged"))
+
+    def test_native_data_uses_current_states_and_failure_resets_rate_baseline(self):
+        self.assertIsNotNone(
+            importlib.util.find_spec("network_snapshot"), "Bulk native network snapshot is missing"
+        )
+        module = importlib.import_module("network_snapshot")
+        import activity_sensors
+
+        state = {"value": 100, "error": None}
+
+        def read():
+            if state["error"]:
+                raise state["error"]
+            return {
+                "Synthetic VPN": dict(
+                    isup=True, bytes_recv=state["value"], bytes_sent=2 * state["value"]
+                )
+            }
+
+        with (
+            patch.object(
+                activity_sensors, "_native_network", return_value=SimpleNamespace(read=read)
+            ),
+            patch(
+                "activity_sensors.psutil.net_io_counters",
+                side_effect=AssertionError("No slow fallback"),
+            ),
+            patch(
+                "activity_sensors.psutil.net_if_stats",
+                side_effect=AssertionError("No slow fallback"),
+            ),
+        ):
+            source = activity_sensors.Activity()
+            with patch("activity_sensors.time.monotonic", return_value=10):
+                self.assertEqual(
+                    source.read({"network"})["provider_status"]["network"]["state"], "warming_up"
+                )
+            state["value"] = 1000100
+            with patch("activity_sensors.time.monotonic", return_value=11):
+                result = source.read({"network"})
+                self.assertEqual((result["net_download"], result["net_upload"]), (1, 2))
+            state["error"] = module.NetworkSnapshotError("GetIfTable2", 5)
+            with patch("activity_sensors.time.monotonic", return_value=12):
+                result = source.read({"network"})
+                self.assertEqual(
+                    result["provider_status"]["network"]["error"],
+                    dict(api="GetIfTable2", reason="OSError", winerror=5),
+                )
+                self.assertEqual(result["networks"], {})
+                self.assertIsNone(result["network_active"])
+            state["error"] = None
+            with patch("activity_sensors.time.monotonic", return_value=13):
+                self.assertEqual(
+                    source.read({"network"})["provider_status"]["network"]["state"], "warming_up"
+                )
 
 
 if __name__ == "__main__":

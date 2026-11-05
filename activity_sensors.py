@@ -2,17 +2,21 @@
 
 import ctypes
 import os
+import sys
 import time
 
 import psutil
-
-from network_snapshot import NetworkSnapshot
-
 
 class _QueryFailure(RuntimeError):
     """Carry API facts without exception messages, filenames or adapter details."""
 
     def __init__(self, api, error):
+        native_api = getattr(error, "api", None)
+        native = isinstance(native_api, str) and native_api in {
+            "GetIfTable2", "GetAdaptersAddresses", "FreeMibTable",
+        }
+        if native:
+            api = native_api
         super().__init__(api)
         kind = next(
             (
@@ -28,6 +32,10 @@ class _QueryFailure(RuntimeError):
             ),
             "QueryError",
         )
+        native_reason = getattr(error, "reason", None)
+        if (native and isinstance(native_reason, str) and native_reason in {
+                "InterfaceInventoryChanged", "InvalidNativeSnapshot", "UnsupportedNativeABI"}):
+            kind = native_reason
         self.facts = dict(api=api, reason=kind)
         for field in ("errno", "winerror"):
             value = getattr(error, field, None)
@@ -40,6 +48,14 @@ def _query(api, callback, *args, **kwargs):
         return callback(*args, **kwargs)
     except (OSError, RuntimeError, psutil.Error) as error:
         raise _QueryFailure(api, error) from None
+
+
+def _native_network():
+    if sys.platform == "win32" and os.environ.get("DESKTOP_STATS_NETWORK_SNAPSHOT_DISABLED") != "1":
+        from network_snapshot import NativeNetworkSnapshot
+
+        return NativeNetworkSnapshot()
+    return None
 
 
 class Rates:
@@ -69,7 +85,8 @@ class Rates:
 
 class Activity:
     def __init__(self, *, network_reader=None):
-        self.network_reader = NetworkSnapshot() if network_reader is None else network_reader
+        self.network_reader = network_reader
+        self._network_initialized = network_reader is not None
         self._network_identities = {}
         self._network_mode = None
         self.network_rates = Rates()
@@ -78,10 +95,11 @@ class Activity:
         self.next_volumes = 0
 
     def network(self, now):
-        try:
-            snapshot = self.network_reader.read()
-        except (OSError, RuntimeError, psutil.Error) as error:
-            raise _QueryFailure(getattr(error, "api", "Windows network snapshot"), error) from None
+        if not self._network_initialized:
+            self.network_reader = _query("GetIfTable2", _native_network)
+            self._network_initialized = True
+        snapshot = (_query("GetIfTable2", self.network_reader.read)
+                    if self.network_reader is not None else None)
         if snapshot is None:
             mode, identities = "psutil", {}
             counters = _query(
@@ -98,17 +116,19 @@ class Activity:
             try:
                 amounts, identities = {}, {}
                 for name, item in snapshot.items():
-                    if (not isinstance(name, str) or type(item.isup) is not bool
+                    value = item.get if isinstance(item, dict) else lambda key: getattr(item, key, None)
+                    received, sent, up = value("bytes_recv"), value("bytes_sent"), value("isup")
+                    if (not isinstance(name, str) or type(up) is not bool
                             or any(type(value) is not int or not 0 <= value < 2**64
-                                   for value in (item.bytes_recv, item.bytes_sent))):
+                                   for value in (received, sent))):
                         raise ValueError("Invalid network reading")
-                    if item.isup and "loopback" not in name.lower():
-                        amounts[name] = (item.bytes_recv, item.bytes_sent)
-                        identity = getattr(item, "identity", None)
+                    if up and "loopback" not in name.lower():
+                        amounts[name] = (received, sent)
+                        identity = value("identity")
                         if identity is not None:
                             identities[name] = identity
             except (AttributeError, TypeError, ValueError, OverflowError):
-                error = OSError(13, "Invalid network snapshot")
+                error = OSError("Invalid network snapshot")
                 error.winerror = 13
                 raise _QueryFailure("Windows network snapshot", error) from None
         if self._network_mode is not None and self._network_mode != mode:

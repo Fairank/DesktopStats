@@ -211,6 +211,7 @@ class TopBarDetailPresentationTests(unittest.TestCase):
             return backend
 
         self.enterContext(patch("native_widget_material.WidgetBlurBackend", new=backend_factory))
+        self.enterContext(patch("native_widget_material.MenuBarAcrylicBackend", new=backend_factory))
         self.addCleanup(self.manager.close)
 
     def open_panel(self, host="DISPLAY1", item="b_0", pinned=False):
@@ -510,6 +511,177 @@ class TopBarDetailPresentationTests(unittest.TestCase):
         self.assertTrue(replacement["host"].state.detailCoatingTranslucent)
         self.assertTrue(old_panel["window"].deleted)
         self.assertEqual(old_backend.close_calls, 1)
+
+
+class DetailCompilationTests(unittest.TestCase):
+    setUpClass = classmethod(fixture.TopBarRuntimeTests.setUpClass.__func__)
+
+    def setUp(self):
+        fixture.TopBarRuntimeTests.setUp(self)
+        self.manager.apply(fixture.config())
+        self.runtime.engine = object()
+        self.manager._window_factory = None
+        self.assertTrue(callable(getattr(self.manager, '_precompile_details', None)),
+                        'Details must compile before the foreground request')
+        native = self.enterContext(patch('ctypes.WinDLL', side_effect=AssertionError('No native DLL')))
+        thread = self.enterContext(patch('threading.Thread.start', side_effect=AssertionError('No Python worker')))
+        self.addCleanup(lambda: self.assertEqual(native.call_count, 0))
+        self.addCleanup(lambda: self.assertEqual(thread.call_count, 0))
+        from PySide6.QtQml import QQmlComponent
+        self.components, self.created = [], []
+        owner = self
+
+        class CallbackSignal:
+            def __init__(self): self.callbacks = []
+            def connect(self, callback): self.callbacks.append(callback)
+            def disconnect(self, callback): self.callbacks.remove(callback)
+            def emit(self, value):
+                for callback in self.callbacks[:]:
+                    callback(value)
+
+        class Component:
+            Asynchronous = QQmlComponent.Asynchronous
+            Ready, Error, Loading = QQmlComponent.Ready, QQmlComponent.Error, QQmlComponent.Loading
+
+            def __init__(self, engine):
+                owner.components.append(self)
+                self.state, self.deleted = QQmlComponent.Null, False
+                self.statusChanged, self.mode = CallbackSignal(), None
+
+            def loadUrl(self, url, mode):
+                self.mode, self.state = mode, self.Loading
+                self.statusChanged.emit(self.state)
+
+            def status(self): return self.state
+            def isLoading(self): return self.state == self.Loading
+            def isError(self): return self.state == self.Error
+            def errors(self): return [SimpleNamespace(toString=lambda:'Synthetic QML compile failure')]
+            def deleteLater(self): self.deleted = True
+            def complete(self, error=False):
+                self.state = self.Error if error else self.Ready
+                self.statusChanged.emit(self.state)
+
+            def createWithInitialProperties(self, properties):
+                owner.assertEqual(self.state, self.Ready)
+                window = fixture.Window('details', properties['barState'], owner.a, True)
+                window.setFlag = lambda *_:None
+                window.compiler = self
+                owner.created.append(window)
+                return window
+
+        self.enterContext(patch('top_bar_runtime.QQmlComponent', Component))
+        self.baseline_prepares = len(self.adapter.created)
+
+    def test_compilation_is_shared_with_first_click_and_creates_no_window_until_ready(self):
+        self.manager._precompile_details()
+        component = self.components[0]
+        self.manager.click('DISPLAY1', 'b_0')
+        self.assertEqual(len(self.components), 1)
+        self.assertEqual(len(self.adapter.created), self.baseline_prepares)
+        self.assertIsNone(self.manager._panel)
+        component.complete()
+        self.qt.processEvents()
+        self.assertEqual(len(self.created), 1)
+        self.assertIs(self.manager._panel['window'].compiler, component)
+        self.assertIs(self.manager._components['TopBarDetails.qml'], component)
+
+    def test_latest_request_wins_while_one_component_is_loading(self):
+        self.manager.click('DISPLAY1', 'b_0')
+        self.manager.click('DISPLAY1', 'b_1')
+        self.assertEqual(len(self.components), 1)
+        self.components[0].complete()
+        self.qt.processEvents()
+        self.assertEqual(len(self.created), 1)
+        self.assertEqual(self.manager._panel['item'], 'b_1')
+
+    def test_leaving_cancels_a_loading_hover_without_cancelling_compilation(self):
+        self.manager._show_panel(self.manager.hosts['DISPLAY1'], 'b_0', False)
+        self.manager.leave()
+        self.components[0].complete()
+        self.qt.processEvents()
+        self.assertIsNone(self.manager._panel)
+        self.assertEqual(self.created, [])
+        self.assertIn('TopBarDetails.qml', self.manager._components)
+
+    def test_close_before_or_after_ready_callback_never_opens_a_late_panel(self):
+        self.manager.click('DISPLAY1', 'b_0')
+        self.components[0].complete()
+        self.manager.close_panel()
+        self.qt.processEvents()
+        self.assertIsNone(self.manager._panel)
+        self.assertEqual(self.created, [])
+
+    def test_reconfiguration_preserves_pending_and_ready_component_identity(self):
+        self.manager._precompile_details()
+        component = self.components[0]
+        self.manager.apply(fixture.config())
+        self.qt.processEvents()
+        self.assertEqual(len(self.components), 1)
+        component.complete()
+        self.manager.apply(fixture.config())
+        self.qt.processEvents()
+        self.assertIs(self.manager._components['TopBarDetails.qml'], component)
+        self.assertEqual(len(self.components), 1)
+
+    def test_compile_failure_reports_error_without_preparing_native_details(self):
+        self.manager.click('DISPLAY1', 'b_0')
+        self.components[0].complete(error=True)
+        self.qt.processEvents()
+        self.assertIsNone(self.manager._panel)
+        self.assertEqual(self.created, [])
+        self.assertEqual(len(self.adapter.created), self.baseline_prepares)
+        self.assertTrue(any('Synthetic QML compile failure' in error for error in self.manager._errors))
+
+    def test_shutdown_discards_loading_component_and_late_completion_has_no_effect(self):
+        self.manager.click('DISPLAY1', 'b_0')
+        component = self.components[0]
+        self.manager.close()
+        component.complete()
+        self.qt.processEvents()
+        self.assertTrue(component.deleted)
+        self.assertNotIn('TopBarDetails.qml', self.manager._components)
+        self.assertEqual(self.created, [])
+
+
+class RealDetailCompilationTests(unittest.TestCase):
+    setUpClass = classmethod(fixture.TopBarRuntimeTests.setUpClass.__func__)
+
+    def test_async_compile_reads_real_qml_without_creating_a_window_or_worker(self):
+        import time
+
+        from PySide6.QtGui import QGuiApplication
+        from PySide6.QtQml import QQmlComponent, QQmlEngine
+        from PySide6.QtTest import QTest
+
+        from tests import test_top_bar_module_qml as qml_fixture
+
+        qml_fixture.ModuleQmlTests.setUpClass()
+        fixture.TopBarRuntimeTests.setUp(self)
+        self.manager.apply(fixture.config())
+        engine = QQmlEngine()
+        state = qml_fixture.ModuleState()
+        engine.rootContext().setContextProperty('stats', state)
+        self.runtime.engine = engine
+        self.manager._window_factory = None
+        before = len(QGuiApplication.allWindows())
+        try:
+            with patch('ctypes.WinDLL', side_effect=AssertionError('No native API')) as native, patch('threading.Thread.start', side_effect=AssertionError('No Python worker')) as thread:
+                self.manager._precompile_details()
+                component = self.manager._detail_component or self.manager._components.get('TopBarDetails.qml')
+                self.assertIsNotNone(component)
+                deadline = time.monotonic() + 3
+                while component.status() == QQmlComponent.Loading and time.monotonic() < deadline:
+                    QTest.qWait(10)
+                self.assertEqual(component.status(), QQmlComponent.Ready,
+                                 [error.toString() for error in component.errors()])
+                self.assertIs(self.manager._components['TopBarDetails.qml'], component)
+                self.assertEqual(len(QGuiApplication.allWindows()), before)
+                self.assertIsNone(self.manager._panel)
+                native.assert_not_called()
+                thread.assert_not_called()
+        finally:
+            self.manager.close()
+            engine.deleteLater()
 
 
 if __name__ == "__main__":

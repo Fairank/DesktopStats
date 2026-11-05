@@ -7,7 +7,7 @@ Window {
     property string widgetKey:""
     property int metricIndex:0
     readonly property var state:{const fresh=stats.readings;const saved=stats.saved;return stats.detailState(widgetKey,metricIndex)}
-    width:326; height:Math.min(500,244+(state.items || []).length*35)
+    width:326; height:Math.min(600,340+(state.items || []).length*35)
     visible:false; color:"transparent"
     flags:Qt.Popup | Qt.FramelessWindowHint
     title:"Desktop Stats"
@@ -40,21 +40,35 @@ Window {
             HoverHandler { id:detailSourceHover }
         }
         Rectangle { Layout.fillWidth:true; height:1; color:ui.line }
-        ListView {
-            Layout.fillWidth:true; Layout.fillHeight:true; clip:true
-            boundsBehavior:Flickable.StopAtBounds
+        ScrollView {
+            id: detailScroll
+            objectName: "widgetDetailScroll"
+            Layout.fillWidth:true; Layout.fillHeight:true; clip:true; contentWidth:availableWidth
             ScrollBar.vertical:ScrollBar { }
-            model:root.state.items || []
-            delegate:ItemDelegate {
-                id:row
-                required property var modelData
-                required property int index
-                width:ListView.view.width; height:35
-                onClicked:root.metricIndex=index
-                background:Rectangle { radius:7; color:row.hovered || row.index===root.metricIndex?ui.hover:"transparent" }
-                contentItem:RowLayout {
-                    Text { Layout.fillWidth:true; Layout.minimumWidth:0; text:row.modelData.label; textFormat:Text.PlainText; font.family:ui.fontFamily; font.pixelSize:11; color:ui.muted; elide:Text.ElideRight }
-                    Text { text:row.modelData.value; textFormat:Text.PlainText; font.family:ui.fontFamily; font.pixelSize:13; font.weight:Font.DemiBold; color:ui.ink }
+            ColumnLayout {
+                width:detailScroll.availableWidth; spacing:10
+                ProcessUsageCard {
+                    Layout.fillWidth:true; provider:stats
+                    metric:(root.state.selected || {}).id || ""
+                    hardwareName:(root.state.selected || {}).hardware_name || ""
+                    active:root.visible && root.visibility!==Window.Minimized
+                    ink:ui.ink; muted:ui.muted; fontFamily:ui.fontFamily
+                    motionEnabled:ui.motionAllowed
+                }
+                Repeater {
+                    model:root.state.items || []
+                    delegate:ItemDelegate {
+                        id:row
+                        required property var modelData
+                        required property int index
+                        Layout.fillWidth:true; implicitHeight:35
+                        onClicked:root.metricIndex=index
+                        background:Rectangle { radius:7; color:row.hovered || row.index===root.metricIndex?ui.hover:"transparent" }
+                        contentItem:RowLayout {
+                            Text { Layout.fillWidth:true; Layout.minimumWidth:0; text:row.modelData.label; textFormat:Text.PlainText; font.family:ui.fontFamily; font.pixelSize:11; color:ui.muted; elide:Text.ElideRight }
+                            Text { text:row.modelData.value; textFormat:Text.PlainText; font.family:ui.fontFamily; font.pixelSize:13; font.weight:Font.DemiBold; color:ui.ink }
+                        }
+                    }
                 }
             }
         }

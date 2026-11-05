@@ -1,304 +1,190 @@
-"""Bounded read-only Windows network snapshots with psutil-compatible identity.
+"""Fresh Windows IP adapter membership and counters without per-interface calls.
 
-GAA keeps the original IP-adapter membership and FriendlyName order. Table2
-provides the same 64-bit counters; the legacy table retains psutil 7.2.2's
-CONNECTED/OPERATIONAL and admin-up rule. No address, DNS, service or adapter
-configuration is changed. Construction performs no native calls.
+GetAdaptersAddresses supplies the same friendly names/IP interface membership
+as psutil. GetIfTable2 also includes filter interfaces, so membership must be
+joined by LUID before publishing counters. Both native calls release the GIL.
+ABI: Windows x64 IP_ADAPTER_ADDRESSES_LH and MIB_IF_ROW2, documented at
+https://learn.microsoft.com/windows/win32/api/iptypes/ns-iptypes-ip_adapter_addresses_lh
+https://learn.microsoft.com/windows/win32/api/netioapi/ns-netioapi-mib_if_row2
 """
 
 import ctypes as c
-import os
-import time
-from collections import namedtuple
+import struct
 
-DISABLED = "DESKTOP_STATS_NETWORK_SNAPSHOT_DISABLED"
-SNAPSHOT_API = "Windows network snapshot"
-INVALID_DATA = 13
+POINTER_BYTES = c.sizeof(c.c_void_p)
+INITIAL_BUFFER = 15 * 1024
+MAX_BUFFER = 8 * 1024 * 1024
 MAX_INTERFACES = 4096
-MAX_BUFFER = 4 * 1024 * 1024
-MAX_STRING = 256
-GAA_FLAGS = 0xF
-NetworkReading = namedtuple("NetworkReading", "bytes_recv bytes_sent isup identity", defaults=(None,))
-U32, U64, U16 = c.c_uint32, c.c_uint64, c.c_uint16
+MAX_ATTEMPTS = 3
+ADAPTER_PREFIX = 232
+ROW_BYTES = 1352
+TABLE_OFFSET = 8
+U32 = c.c_uint32
 
 
-class NativeUnavailable(Exception):
-    """Initialization-only signal: platform/library/entry points are absent."""
+class NetworkSnapshotError(OSError):
+    """Bounded API facts; never retain interface names or operating-system text."""
+
+    def __init__(self, api, code=None, *, reason=None):
+        super().__init__("Native network snapshot is unavailable")
+        self.api = api
+        if type(code) is int:
+            self.winerror = code
+        self.reason = reason or (None if type(code) is int else "InvalidNativeSnapshot")
 
 
-class SnapshotError(OSError):
-    def __init__(self, api, code):
-        super().__init__(int(code), "Read-only network snapshot failed")
-        self.api, self.winerror = api, int(code)
+def _symbol(api, name, arguments, result):
+    try:
+        callback = getattr(api, name)
+        callback.argtypes, callback.restype = arguments, result
+        return callback
+    except (AttributeError, OSError) as error:
+        raise NetworkSnapshotError(name, getattr(error, "winerror", None)) from None
 
 
-class Guid(c.Structure):
-    _fields_ = [("a", U32), ("b", U16), ("d", U16), ("e", c.c_ubyte * 8)]
+class NativeNetworkSnapshot:
+    def __init__(self, api=None):
+        self._api = api
+        self._buffer = None
+        self._get_addresses = self._get_table = self._free_table = None
 
+    def _bind(self):
+        if POINTER_BYTES != 8:
+            raise NetworkSnapshotError("GetIfTable2", reason="UnsupportedNativeABI")
+        if self._get_addresses is not None:
+            return
+        try:
+            api = self._api if self._api is not None else c.WinDLL("iphlpapi", use_last_error=True)
+        except (OSError, AttributeError) as error:
+            raise NetworkSnapshotError(
+                "GetAdaptersAddresses", getattr(error, "winerror", None)
+            ) from None
+        addresses = _symbol(
+            api, "GetAdaptersAddresses", [U32, U32, c.c_void_p, c.c_void_p, c.POINTER(U32)], U32
+        )
+        table = _symbol(api, "GetIfTable2", [c.POINTER(c.c_void_p)], U32)
+        free = _symbol(api, "FreeMibTable", [c.c_void_p], None)
+        self._api, self._get_addresses, self._get_table, self._free_table = (
+            api,
+            addresses,
+            table,
+            free,
+        )
 
-class InterfaceRow(c.Structure):
-    _fields_ = [
-        ("luid", U64), ("index", U32), ("guid", Guid),
-        ("alias", U16 * 257), ("description", U16 * 257),
-        ("physical_length", U32), ("physical", c.c_ubyte * 32), ("permanent", c.c_ubyte * 32),
-        ("mtu", U32), ("type", U32), ("tunnel", U32), ("media_type", U32),
-        ("physical_medium", U32), ("access", U32), ("direction", U32), ("flags", c.c_ubyte),
-        ("oper", U32), ("admin", U32), ("media_connect", U32), ("network_guid", Guid),
-        ("connection_type", U32), ("tx_link", U64), ("rx_link", U64),
-        *[(name, U64) for name in (
-            "in_octets", "in_ucast", "in_nucast", "in_discards", "in_errors", "in_unknown",
-            "in_ucast_octets", "in_multicast_octets", "in_broadcast_octets", "out_octets",
-            "out_ucast", "out_nucast", "out_discards", "out_errors", "out_ucast_octets",
-            "out_multicast_octets", "out_broadcast_octets", "out_qlen")],
-    ]
+    def _adapters(self):
+        if self._buffer is None:
+            self._buffer = c.create_string_buffer(INITIAL_BUFFER)
+        for _ in range(MAX_ATTEMPTS):
+            capacity = c.sizeof(self._buffer)
+            size = U32(capacity)
+            # No address lists or DNS data are used by this provider.
+            code = int(self._get_addresses(0, 0xF, None, self._buffer, c.byref(size)))
+            if code == 232:  # ERROR_NO_DATA
+                return {}
+            if code == 111:  # ERROR_BUFFER_OVERFLOW
+                if not capacity < size.value <= MAX_BUFFER:
+                    raise NetworkSnapshotError("GetAdaptersAddresses", code)
+                self._buffer = c.create_string_buffer(size.value)
+                continue
+            if code:
+                raise NetworkSnapshotError("GetAdaptersAddresses", code)
+            if not ADAPTER_PREFIX <= size.value <= capacity:
+                raise NetworkSnapshotError("GetAdaptersAddresses")
+            return self._adapter_rows(size.value)
+        raise NetworkSnapshotError("GetAdaptersAddresses", 111)
 
-
-class InterfaceTable(c.Structure):
-    _fields_ = [("count", U32), ("rows", InterfaceRow * 1)]
-
-
-class LegacyRow(c.Structure):
-    _fields_ = [
-        ("name", U16 * 256),
-        *[(name, U32) for name in ("index", "type", "mtu", "speed", "physical_length")],
-        ("physical", c.c_ubyte * 8),
-        *[(name, U32) for name in (
-            "admin", "oper", "last_change", "in_octets", "in_ucast", "in_nucast",
-            "in_discards", "in_errors", "in_unknown", "out_octets", "out_ucast", "out_nucast",
-            "out_discards", "out_errors", "out_qlen", "description_length")],
-        ("description", c.c_ubyte * 256),
-    ]
-
-
-class LegacyTable(c.Structure):
-    _fields_ = [("count", U32), ("rows", LegacyRow * 1)]
-
-
-class AdapterPrefix(c.Structure):
-    # Pointer fields remain void*: c_wchar_p would dereference before validation.
-    _fields_ = [
-        ("length", U32), ("index", U32), ("next", c.c_void_p),
-        ("adapter_name", c.c_void_p), ("first_unicast", c.c_void_p),
-        ("first_anycast", c.c_void_p), ("first_multicast", c.c_void_p),
-        ("first_dns_server", c.c_void_p), ("dns_suffix", c.c_void_p),
-        ("description", c.c_void_p), ("friendly_name", c.c_void_p),
-        ("physical", c.c_ubyte * 8), ("physical_length", U32), ("flags", U32),
-        ("mtu", U32), ("type", U32), ("oper", U32), ("ipv6_index", U32),
-        ("zones", U32 * 16), ("first_prefix", c.c_void_p),
-        ("tx_link", U64), ("rx_link", U64), ("first_wins", c.c_void_p),
-        ("first_gateway", c.c_void_p), ("ipv4_metric", U32), ("ipv6_metric", U32), ("luid", U64),
-    ]
-
-
-def _bad(api):
-    raise SnapshotError(api, INVALID_DATA)
-
-
-def _utf16(data, api):
-    for offset in range(0, len(data) - 1, 2):
-        if data[offset:offset + 2] == b"\0\0":
-            # Match Windows Unicode code units without silently replacing names.
-            return data[:offset].decode("utf-16-le", errors="surrogatepass")
-    _bad(api)
-
-
-class NativeNetworkApi:
-    def __init__(self, *, library=None, loader=None):
-        if c.sizeof(c.c_void_p) != 8 or c.sizeof(InterfaceRow) != 1352:
-            raise NativeUnavailable()
-        if library is None:
-            if os.name != "nt":
-                raise NativeUnavailable()
+    def _adapter_rows(self, length):
+        start = c.addressof(self._buffer)
+        end, current = start + length, start
+        seen, aliases, result = set(), set(), {}
+        while current:
+            if (
+                current % 8
+                or current in seen
+                or len(seen) >= MAX_INTERFACES
+                or not start <= current <= end - ADAPTER_PREFIX
+            ):
+                raise NetworkSnapshotError("GetAdaptersAddresses")
+            seen.add(current)
+            raw = c.string_at(current, ADAPTER_PREFIX)
+            record_length = struct.unpack_from("<I", raw)[0]
+            if record_length < ADAPTER_PREFIX or current + record_length > end:
+                raise NetworkSnapshotError("GetAdaptersAddresses")
+            following = struct.unpack_from("<Q", raw, 8)[0]
+            name = struct.unpack_from("<Q", raw, 72)[0]
+            luid = struct.unpack_from("<Q", raw, 224)[0]
+            if not luid or luid in result or name % 2 or not start <= name <= end - 2:
+                raise NetworkSnapshotError("GetAdaptersAddresses")
+            text = c.string_at(name, min(514, (end - name) // 2 * 2))
+            terminator = next(
+                (i for i in range(0, len(text), 2) if text[i : i + 2] == b"\0\0"), None
+            )
+            if terminator is None:
+                raise NetworkSnapshotError("GetAdaptersAddresses")
             try:
-                library = (loader or c.WinDLL)("iphlpapi.dll", use_last_error=True)
-            except AttributeError as error:
-                raise NativeUnavailable() from error
-            except OSError as error:
-                if getattr(error, "winerror", None) in (126, 127):
-                    raise NativeUnavailable() from error
-                raise SnapshotError(SNAPSHOT_API, getattr(error, "winerror", None) or 13) from None
-        try:
-            self.gaa, self.table2 = library.GetAdaptersAddresses, library.GetIfTable2
-            self.free, self.legacy = library.FreeMibTable, library.GetIfTable
-        except AttributeError as error:
-            raise NativeUnavailable() from error
-        self.gaa.argtypes, self.gaa.restype = [U32, U32, c.c_void_p, c.c_void_p, c.POINTER(U32)], U32
-        self.table2.argtypes, self.table2.restype = [c.POINTER(c.c_void_p)], U32
-        self.free.argtypes, self.free.restype = [c.c_void_p], None
-        self.legacy.argtypes, self.legacy.restype = [c.c_void_p, c.POINTER(U32), c.c_int], U32
-
-    def adapters(self):
-        api, size = "GetAdaptersAddresses", U32()
-        code = self.gaa(0, GAA_FLAGS, None, None, c.byref(size))
-        if code == 232:  # ERROR_NO_DATA: no IP adapters in this enumeration.
-            return []
-        if code != 111:
-            raise SnapshotError(api, code or INVALID_DATA)
-        for _attempt in range(3):
-            if not c.sizeof(AdapterPrefix) <= size.value <= MAX_BUFFER:
-                _bad(api)
-            buffer = c.create_string_buffer(size.value)
-            code = self.gaa(0, GAA_FLAGS, None, buffer, c.byref(size))
-            if code == 111:
-                continue
-            if code:
-                raise SnapshotError(api, code)
-            if not c.sizeof(AdapterPrefix) <= size.value <= len(buffer):
-                _bad(api)
-            break
-        else:
-            raise SnapshotError(api, 111)
-        start, end = c.addressof(buffer), c.addressof(buffer) + size.value
-
-        def text(pointer):
-            if not pointer or pointer % 2 or not start <= pointer < end:
-                _bad(api)
-            length = min((MAX_STRING + 1) * 2, end - pointer)
-            return _utf16(c.string_at(pointer, length - length % 2), api)
-
-        rows, seen, indices = [], set(), set()
-        pointer = start
-        while pointer:
-            if (pointer in seen or len(rows) >= MAX_INTERFACES or pointer % 8
-                    or not start <= pointer <= end - c.sizeof(AdapterPrefix)):
-                _bad(api)
-            seen.add(pointer)
-            row = AdapterPrefix.from_address(pointer)
-            if not c.sizeof(AdapterPrefix) <= row.length <= end - pointer:
-                _bad(api)
-            if not row.index or row.index in indices:
-                _bad(api)
-            indices.add(row.index)
-            if not row.luid:
-                _bad(api)
-            rows.append((row.index, text(row.friendly_name), text(row.description), int(row.luid)))
-            pointer = row.next
-        return rows
-
-    def counters(self):
-        api, pointer, owned = "GetIfTable2", c.c_void_p(), False
-        try:
-            code = self.table2(c.byref(pointer))
-            if code:
-                raise SnapshotError(api, code)
-            owned = True
-            if not pointer or pointer.value % 8:
-                _bad(api)
-            count = U32.from_address(pointer.value).value
-            if count > MAX_INTERFACES:
-                _bad(api)
-            rows = {}
-            for index in range(count):
-                row = InterfaceRow.from_address(pointer.value + InterfaceTable.rows.offset + index * c.sizeof(InterfaceRow))
-                if not row.index or row.index in rows:
-                    _bad(api)
-                rows[row.index] = (
-                    _utf16(bytes(row.alias), api), _utf16(bytes(row.description), api),
-                    int(row.in_octets), int(row.out_octets), (int(row.luid), bytes(row.guid)),
-                )
-            return rows
-        finally:
-            if owned and pointer:
-                self.free(pointer)
-
-    def states(self):
-        api, size = "GetIfTable", U32()
-        code = self.legacy(None, c.byref(size), 0)
-        if code != 122:
-            raise SnapshotError(api, code or INVALID_DATA)
-        for _attempt in range(3):
-            if not LegacyTable.rows.offset <= size.value <= MAX_BUFFER:
-                _bad(api)
-            buffer = c.create_string_buffer(size.value)
-            code = self.legacy(buffer, c.byref(size), 0)
-            if code == 122:
-                continue
-            if code:
-                raise SnapshotError(api, code)
-            if not LegacyTable.rows.offset <= size.value <= len(buffer):
-                _bad(api)
-            break
-        else:
-            raise SnapshotError(api, 122)
-        count = U32.from_buffer(buffer).value
-        if count > MAX_INTERFACES or LegacyTable.rows.offset + count * c.sizeof(LegacyRow) > size.value:
-            _bad(api)
-        rows = {}
-        for index in range(count):
-            row = LegacyRow.from_buffer(buffer, LegacyTable.rows.offset + index * c.sizeof(LegacyRow))
-            if not row.index or row.index in rows or row.description_length > 256:
-                _bad(api)
-            description = bytes(row.description[:row.description_length]).rstrip(b"\0")
-            rows[row.index] = (description, row.oper in (4, 5) and row.admin == 1)
-        return rows
-
-    def read(self):
-        adapters = self.adapters()
-        if not adapters:
-            return {}
-        names, descriptions = set(), set()
-        for _index, name, description, _luid in adapters:
-            # psutil maps legacy descriptions to the first matching GAA name.
-            # Ambiguous/non-ASCII narrowing retains that original path instead
-            # of guessing which legacy row corresponds to which interface.
-            if (not name or not description or name in names or description in descriptions
-                    or not description.isascii()):
-                return None
-            names.add(name)
-            descriptions.add(description)
-        counters, states = self.counters(), self.states()
-        legacy_descriptions = {}
-        for description, _up in states.values():
-            legacy_descriptions[description] = legacy_descriptions.get(description, 0) + 1
-        result = {}
-        for index, name, description, luid in adapters:
-            if index not in counters or index not in states:
-                _bad(SNAPSHOT_API)
-            alias, current_description, received, sent, identity = counters[index]
-            if luid != identity[0]:
-                _bad(SNAPSHOT_API)
-            legacy_description, up = states[index]
-            encoded = description.encode("ascii")
-            if (alias != name or current_description != description or legacy_description != encoded
-                    or legacy_descriptions.get(encoded) != 1):
-                return None
-            result[name] = NetworkReading(received, sent, bool(up), identity)
+                alias = text[:terminator].decode("utf-16-le", errors="strict")
+            except UnicodeError:
+                raise NetworkSnapshotError("GetAdaptersAddresses") from None
+            if not alias or alias in aliases:
+                raise NetworkSnapshotError("GetAdaptersAddresses")
+            aliases.add(alias)
+            result[luid] = alias
+            current = following
         return result
 
-
-class NetworkSnapshot:
-    def __init__(self, *, api_factory=None, environ=None, clock=None):
-        self._factory = api_factory or NativeNetworkApi
-        self._environment = os.environ if environ is None else environ
-        self._selected, self._fallback, self._api = False, False, None
-        self._clock = clock or time.monotonic
-        self._retry_at = 0.0
+    def _counters(self, adapters):
+        pointer = c.c_void_p()
+        try:
+            code = int(self._get_table(c.byref(pointer)))
+            if code:
+                raise NetworkSnapshotError("GetIfTable2", code)
+            address = pointer.value
+            if not address or address < 4096 or address % 8:
+                raise NetworkSnapshotError("GetIfTable2")
+            count = c.cast(pointer, c.POINTER(U32)).contents.value
+            if count > MAX_INTERFACES or address + TABLE_OFFSET + count * ROW_BYTES >= 2**64:
+                raise NetworkSnapshotError("GetIfTable2")
+            found, result = set(), {}
+            for index in range(count):
+                position = address + TABLE_OFFSET + index * ROW_BYTES
+                luid = c.c_uint64.from_address(position).value
+                if luid not in adapters:
+                    continue
+                if luid in found:
+                    raise NetworkSnapshotError("GetIfTable2")
+                found.add(luid)
+                raw = c.string_at(position, ROW_BYTES)
+                oper, admin = struct.unpack_from("<II", raw, 1156)
+                rx_bytes, rx_unicast, rx_nonunicast, rx_drop, rx_error = struct.unpack_from(
+                    "<5Q", raw, 1208
+                )
+                tx_bytes, tx_unicast, tx_nonunicast, tx_drop, tx_error = struct.unpack_from(
+                    "<5Q", raw, 1280
+                )
+                result[adapters[luid]] = dict(
+                    isup=oper == 1 and admin == 1,
+                    identity=(luid, raw[12:28]),
+                    bytes_sent=tx_bytes,
+                    bytes_recv=rx_bytes,
+                    packets_sent=tx_unicast + tx_nonunicast,
+                    packets_recv=rx_unicast + rx_nonunicast,
+                    errin=rx_error,
+                    errout=tx_error,
+                    dropin=rx_drop,
+                    dropout=tx_drop,
+                )
+            if found != set(adapters):
+                # A hot-unplug between the two tables must reset the rate
+                # baseline; the next requested poll obtains a fresh snapshot.
+                raise NetworkSnapshotError("GetIfTable2", reason="InterfaceInventoryChanged")
+            # psutil publishes counters in GetAdaptersAddresses order. Keep
+            # that order for equal-rate ties and the initial automatic choice.
+            return {alias: result[alias] for alias in adapters.values()}
+        finally:
+            if pointer.value:
+                self._free_table(pointer)
 
     def read(self):
-        try:
-            if not self._selected:
-                if self._environment.get(DISABLED) == "1":
-                    self._fallback = True
-                else:
-                    try:
-                        self._api = self._factory()
-                    except NativeUnavailable:
-                        self._fallback = True
-                self._selected = True
-            if self._fallback:
-                return None
-            now = self._clock()
-            if now < self._retry_at:
-                return None
-            result = self._api.read()
-            if result is None:
-                # Only the optimization backs off. Activity still queries the
-                # original psutil sources on every requested sampling cycle.
-                self._retry_at = now + 60.0
-            return result
-        except SnapshotError:
-            raise
-        except OSError as error:
-            raise SnapshotError(SNAPSHOT_API, getattr(error, "winerror", None) or 13) from None
-        except (ValueError, TypeError, UnicodeError, OverflowError, KeyError, AttributeError):
-            _bad(SNAPSHOT_API)
+        self._bind()
+        adapters = self._adapters()
+        return self._counters(adapters) if adapters else {}

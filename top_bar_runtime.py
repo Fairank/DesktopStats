@@ -661,11 +661,14 @@ class TopBarManager(QObject):
         self.closed = self.paused = self._applying = self._closing = False
         self._config, self._rows, self._widths, self._errors = {}, [], {}, []
         self._coating, self._style = False, {}
+        self._preview_style = None
+        self._pending_appearance = None
         self._reported_status = ("disabled", "", ())
         self._font_metrics, self._text_widths, self._short_labels = (
             OrderedDict(), OrderedDict(), OrderedDict()
         )
         self._panel = self._pending_hover = None
+        self._detail_component = self._detail_wait = None
         self._detail_serial, self._detail_attempt = 0, {}
         self._detail_request_host = None
         self._notifications, self._shell_pending, self._shell_epoch = {}, False, 0
@@ -701,6 +704,9 @@ class TopBarManager(QObject):
         self._panel_geometry_timer.setSingleShot(True)
         self._panel_geometry_timer.setInterval(0)
         self._panel_geometry_timer.timeout.connect(self._position_panel_safely)
+        self._detail_compile_timer = QTimer(self)
+        self._detail_compile_timer.setSingleShot(True)
+        self._detail_compile_timer.timeout.connect(self._precompile_details)
         self.controller.dataChanged.connect(self.queue_rows)
         motion_signal = getattr(self.controller, 'motionChanged', None)
         if motion_signal is not None:
@@ -950,7 +956,7 @@ class TopBarManager(QObject):
             else:
                 self._stop_fullscreen_guard()
             self._coating = self.adapter.coating_allowed()
-            self._style = top_bar_style(config)
+            self._style = copy.deepcopy(self._preview_style) if self._preview_style is not None else top_bar_style(config)
             names = {identifier for identifier, screen in targets}
             for name in list(self.hosts):
                 if name not in names:
@@ -1019,6 +1025,14 @@ class TopBarManager(QObject):
             self._status("failed", "无法创建顶部状态栏。")
         finally:
             self._applying = False
+            pending = self._pending_appearance
+            if pending is not None and not self.closed and not self.paused:
+                self._pending_appearance = None
+                self.preview_appearance(pending[0], active=pending[1])
+            if (self.hosts and self._rows and not self.closed and not self.paused
+                    and self._window_factory is None and self._detail_component is None
+                    and 'TopBarDetails.qml' not in self._components):
+                self._detail_compile_timer.start(0)
 
     def _new_host(self, screen, native_id):
         if self.closed or self.paused:
@@ -1051,17 +1065,70 @@ class TopBarManager(QObject):
             self._dispose(host)
             raise
 
+    def _precompile_details(self):
+        """Compile only, after bars are ready. Never create a window or HWND."""
+        self._detail_compile_timer.stop()
+        if (self.closed or self.paused or not self.hosts or self._window_factory is not None
+                or self._detail_component is not None or 'TopBarDetails.qml' in self._components):
+            return
+        component = QQmlComponent(self.runtime.engine)
+        self._detail_component = component
+        component.statusChanged.connect(self._detail_component_changed)
+        component.loadUrl(QUrl.fromLocalFile(str(ASSETS / 'native/TopBarDetails.qml')),
+                          QQmlComponent.Asynchronous)
+
+    def _detail_component_changed(self, status):
+        component = self._detail_component
+        if component is None or status not in (QQmlComponent.Ready, QQmlComponent.Error):
+            return
+        component.statusChanged.disconnect(self._detail_component_changed)
+        self._detail_component = None
+        if self.closed:
+            component.deleteLater()
+            return
+        cached = self._components.setdefault('TopBarDetails.qml', component)
+        if cached is not component:
+            component.deleteLater()
+        waiting = self._detail_wait
+        if waiting is not None:
+            QTimer.singleShot(0, lambda: self._resume_compiled_detail(waiting))
+
+    def _resume_compiled_detail(self, request):
+        if self._detail_wait is not request:
+            return
+        self._detail_wait = None
+        if (request['sequence'] == self._detail_serial
+                and self._details_allowed(request['host'])):
+            self._show_panel(request['host'], request['item'], request['pinned'])
+
+    def _await_detail_component(self, host, item, pinned, sequence):
+        if self._window_factory is not None or 'TopBarDetails.qml' in self._components:
+            return False
+        self._precompile_details()
+        if self._detail_component is not None and self._detail_component.isLoading():
+            self._detail_wait = dict(host=host, item=item, pinned=pinned, sequence=sequence)
+            self._trace_detail(sequence, 'component_loading')
+            return True
+        return False
+
     def _make_window(self, kind, state, screen, pinned):
         if self._window_factory:
             return self._window_factory(kind, state, screen, pinned)
         name = "TopBar.qml" if kind == "bar" else "TopBarDetails.qml"
         if name not in self._components:
-            component = QQmlComponent(
-                self.runtime.engine, QUrl.fromLocalFile(str(ASSETS / "native" / name))
-            )
+            component = self._detail_component if kind == 'details' else None
+            if component is None:
+                component = QQmlComponent(
+                    self.runtime.engine, QUrl.fromLocalFile(str(ASSETS / "native" / name))
+                )
+            if component.isLoading():
+                raise AppBarError('Detail component is still compiling')
             if component.isError():
                 raise AppBarError("; ".join(error.toString() for error in component.errors()))
             self._components[name] = component
+        component = self._components[name]
+        if component.isError():
+            raise AppBarError('; '.join(error.toString() for error in component.errors()))
         window = self._components[name].createWithInitialProperties({"barState": state})
         if window is None:
             raise AppBarError("Could not create own top bar window")
@@ -1080,12 +1147,13 @@ class TopBarManager(QObject):
         if not self._native_windows():
             return None
         from native_platform import transparency_policy
-        from native_widget_material import WidgetBlurBackend
+        from native_widget_material import MenuBarAcrylicBackend, WidgetBlurBackend
         from settings_material_bridge import SettingsMaterialBridge
 
         quick_client = getattr(window, "quick_client", None)
         raster_details = kind == "details" and quick_client is not None
-        material = BarMaterial(WidgetBlurBackend() if not raster_details else None,
+        backend = (MenuBarAcrylicBackend() if kind == "bar" else WidgetBlurBackend()) if not raster_details else None
+        material = BarMaterial(backend,
                                self.adapter.backend.validate)
         if raster_details:
             from top_bar_backdrop_host import DetailAcrylicBackend
@@ -1180,7 +1248,7 @@ class TopBarManager(QObject):
 
         material.bridge = SettingsMaterialBridge(
             window, self, compose_once=compose, policy_reader=transparency_policy,
-            backend="desktop-acrylic" if raster_details else "system-blur",
+            backend="system-blur",
             publish=publish, release_surface=material.clear,
             wait_for_first_frame=True,
             frame_source=quick_client if raster_details else None,
@@ -1570,6 +1638,48 @@ class TopBarManager(QObject):
         if geometry_changed and self._panel and self._panel["host"] is host:
             self._position_panel_safely()
 
+    def preview_appearance(self, style, *, active=True):
+        """Repaint existing bands/details only; no AppBar or metric-model work.
+
+        Slider movement changes foreground coatings, not OS blur strength. Only
+        a skin/theme change requests one coalesced native material update.
+        """
+        if self.closed:
+            return
+        self._preview_style = copy.deepcopy(style) if active else None
+        if self.paused or self._applying:
+            self._pending_appearance = copy.deepcopy(style), active
+            return
+        self._pending_appearance = None
+        if style == self._style:
+            return
+        self._style = copy.deepcopy(style)
+        selected = self._style
+        for host in tuple(self.hosts.values()):
+            if self.closed or self.paused or self._style is not selected:
+                return
+            if self.hosts.get(host.state._host_id) is not host or host.closing:
+                continue
+            state, previous = host.state, host.state._config
+            state._config = self._style
+            state._colors = palette(effective_skin(self._style), self._style.get("theme") == "dark",
+                                    self._style.get("opacity", 94), frosted=state._coating,
+                                    **glass_options(self._style))
+            state.changed.emit()
+            if self.closed or self.paused or self._style is not selected:
+                return
+            if self.hosts.get(state._host_id) is not host or host.closing:
+                continue
+            if any(previous.get(key) != self._style.get(key) for key in ("skin", "theme")):
+                if host.material_bridge is not None:
+                    host.material_bridge.request("preference_changed")
+                if self.closed or self._style is not selected or self.hosts.get(state._host_id) is not host or host.closing:
+                    continue
+                if self._panel and self._panel["host"] is host:
+                    bridge = self._panel.get("material_bridge")
+                    if bridge is not None:
+                        bridge.request("preference_changed")
+
     @Slot()
     def queue_rows(self):
         if self.hosts and not self.closed and not self._rows_timer.isActive():
@@ -1643,6 +1753,7 @@ class TopBarManager(QObject):
     def hover(self, host_id, item):
         host = self.hosts.get(host_id)
         if (not self._details_allowed(host)
+                or self._detail_wait is not None and self._detail_wait['pinned']
                 or self._panel and self._panel["pinned"] and self._panel_visible(self._panel)):
             return
         if item != OVERFLOW and not any(row["id"] == item for row in self._rows):
@@ -1664,6 +1775,8 @@ class TopBarManager(QObject):
             self._hover_timer.start(80 if self._panel else 350)
 
     def leave(self):
+        if self._detail_wait is not None and not self._detail_wait['pinned']:
+            self._detail_wait = None
         self._pending_hover = None
         self._hover_timer.stop()
         if self._panel and not self._panel["pinned"]:
@@ -1697,6 +1810,7 @@ class TopBarManager(QObject):
             self._show_panel(host, item, True)
 
     def _new_detail_attempt(self, kind, host_id=None):
+        self._detail_wait = None
         self._detail_serial += 1
         self._detail_request_host = host_id
         self._detail_attempt = dict(seq=self._detail_serial, kind=kind, phase="request",
@@ -1799,6 +1913,8 @@ class TopBarManager(QObject):
             return
         if item != OVERFLOW and not any(row["id"] == item for row in self._rows):
             self._trace_detail(sequence, "request", "blocked", "unknown_row")
+            return
+        if self._await_detail_component(host, item, pinned, sequence):
             return
         if self._panel and (self._panel["host"] is not host or self._panel["pinned"] != pinned
                             or not self._panel_visible(self._panel)):
@@ -1989,6 +2105,7 @@ class TopBarManager(QObject):
                 panel["mask_size"] = size
 
     def close_panel(self, *, _attempt=None):
+        self._detail_wait = None
         if _attempt is None:
             sequence = self._new_detail_attempt("none")
             self._trace_detail(sequence, "close", "closed")
@@ -2297,6 +2414,7 @@ class TopBarManager(QObject):
 
     def _close_hosts(self):
         self._stop_fullscreen_guard()
+        self._detail_compile_timer.stop()
         self._close_menu()
         self.close_panel()
         self._rows_timer.stop()
@@ -2336,6 +2454,11 @@ class TopBarManager(QObject):
         self.closed = True
         self._closing = True
         try:
+            self._detail_compile_timer.stop()
+            compiling, self._detail_component = self._detail_component, None
+            if compiling is not None:
+                compiling.statusChanged.disconnect(self._detail_component_changed)
+                compiling.deleteLater()
             self._close_hosts()
             self._retry_retired()
             if self._filter_installed:

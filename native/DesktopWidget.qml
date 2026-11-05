@@ -60,7 +60,8 @@ Window {
                 cfg.widgets[modelData.key]=prefs
                 return cfg
             }
-            readings:stats.readings; history:stats.history
+            readings:stats.readings
+            history:cardPrefs.chart===false?[]:stats.history
             frosted:root.composition.coating_translucent===true
             surface:root.surfacePolicy.card_surfaces
         }

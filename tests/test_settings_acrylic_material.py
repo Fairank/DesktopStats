@@ -50,6 +50,18 @@ class FakeAPI:
     def get_backdrop(self, hwnd):
         return self.request(("get", hwnd), (0, self.actual))
 
+    def get_caption_dark_mode(self, hwnd):
+        return self.request(("caption_get", hwnd), (0, 0))
+
+    def set_caption_dark_mode(self, hwnd, value):
+        return self.request(("caption_dark", hwnd, value), 0)
+
+    def set_caption_color(self, hwnd, value):
+        return self.request(("caption_fill", hwnd, value), 0)
+
+    def set_caption_text_color(self, hwnd, value):
+        return self.request(("caption_text", hwnd, value), 0)
+
 
 class SettingsAcrylicTests(unittest.TestCase):
     def setUp(self):
@@ -332,6 +344,26 @@ class SettingsAcrylicTests(unittest.TestCase):
 
 
 class NativeWrapperTests(unittest.TestCase):
+    def test_caption_attributes_are_four_byte_colorrefs_and_exact_owned_pointer(self):
+        user, dwm = MagicMock(), MagicMock()
+        records = []
+        def set_attr(hwnd, attribute, selected, size):
+            records.append((hwnd.value, attribute, selected._obj.value, size))
+            return 0
+        def get_attr(hwnd, attribute, selected, size):
+            self.assertEqual((hwnd.value, attribute, size), (0x123456789, 20, 4))
+            selected._obj.value = 0
+            return 0
+        dwm.DwmSetWindowAttribute.side_effect = set_attr
+        dwm.DwmGetWindowAttribute.side_effect = get_attr
+        api = _CtypesAcrylicAPI(loader=lambda name, **_: user if name == "user32" else dwm)
+        self.assertEqual(api.get_caption_dark_mode(0x123456789), (0, 0))
+        for name, value in (("set_caption_dark_mode", 1), ("set_caption_color", 0x00FBF8F6),
+                            ("set_caption_text_color", 0x002B241F), ("set_caption_color", 0xFFFFFFFF)):
+            self.assertEqual(getattr(api, name)(0x123456789, value), 0)
+        self.assertEqual(records, [(0x123456789, 20, 1, 4), (0x123456789, 35, 0x00FBF8F6, 4),
+            (0x123456789, 36, 0x002B241F, 4), (0x123456789, 35, 0xFFFFFFFF, 4)])
+
     def test_abi_and_exact_attributes_use_only_dwm38(self):
         user, dwm = MagicMock(), MagicMock()
 

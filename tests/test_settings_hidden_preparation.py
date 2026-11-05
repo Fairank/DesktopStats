@@ -17,7 +17,7 @@ from PySide6.QtGui import QExposeEvent, QRegion, QSurface, QSurfaceFormat
 from PySide6.QtWidgets import QApplication
 
 from native_runtime import Runtime
-from settings_acrylic_material import SettingsAcrylicMaterial
+from raster_blur_material import ThinRasterAcrylicMaterial
 from settings_backdrop_host import SettingsBackdropHost
 from settings_material_bridge import SettingsMaterialBridge
 
@@ -195,6 +195,7 @@ class HiddenPreparationTests(unittest.TestCase):
         self.compose.return_value = copy.deepcopy(FAILED)
         self.assertFalse(self.bridge.prepare_hidden()["coating_translucent"])
         self.assertFalse(self.bridge.status()["hidden_prepared"])
+
         self.assertTrue(self.bridge.status()["hidden_fallback_prepared"])
         self.compose.return_value = dict(GOOD, material="system-blur", bool_result=1)
         self.ready()
@@ -524,10 +525,13 @@ class RuntimeHiddenPreparationTests(unittest.TestCase):
         self.runtime.app = self.app
         self.runtime.compose = Mock()
         self.api = FakeAPI()
-        self.runtime.settings_blur = SettingsAcrylicMaterial(self.api)
+        self.accent = Mock()
+        self.accent.set_blur.return_value = (1, 0)
+        self.runtime.settings_blur = ThinRasterAcrylicMaterial(self.api, self.accent,
+            paint_background=self.runtime.settings_host.paint_background)
         self.policy = Mock(return_value=dict(state="allowed", reason="allowed"))
         self.bridge = SettingsMaterialBridge(self.runtime.settings_host, self.runtime,
-            frame_source=self.runtime.settings, backend="desktop-acrylic", allow_hidden_prepare=True,
+            frame_source=self.runtime.settings, backend="system-blur", allow_hidden_prepare=True,
             compose_once=self.runtime._settings_material_request, policy_reader=self.policy,
             publish=self.runtime._publish_settings_material,
             release_surface=self.runtime._release_settings_surface)
@@ -554,12 +558,19 @@ class RuntimeHiddenPreparationTests(unittest.TestCase):
         result = self.bridge.prepare_hidden()
         self.assertTrue(result["coating_translucent"])
         self.assertFalse(result["compositing_verified"])
-        self.assertEqual([event[0] for event in self.api.events], ["set", "extend", "get"])
+        self.assertEqual(result["material"], "system-blur")
+        self.assertEqual(result["backdrop_type"], 1)
+        self.accent.set_blur.assert_called_once_with(self.bridge.status()["surface_handle"], True)
+        self.assertEqual([event[0] for event in self.api.events],
+            ["set", "extend", "get", "caption_get", "caption_dark", "caption_fill", "caption_text"])
+        self.assertTrue(result["caption_configured"])
         self.assertGreater(self.painter.fill.call_count, 0)
         self.assertTrue(self.runtime.controller._material["coating_translucent"])
         self.assertFalse(self.runtime.settings_host.isVisible())
         self.bridge.close()
-        self.assertEqual(self.api.events[-3:][0][2], 1)
+        self.assertEqual(self.api.events[-3:], [
+            ("caption_text", result["hwnd"], 0xFFFFFFFF),
+            ("caption_fill", result["hwnd"], 0xFFFFFFFF), ("caption_dark", result["hwnd"], 0)])
         self.assertIsNone(self.runtime.settings_blur.identity)
         self.assertTrue(self.runtime.settings_blur.close()["complete"])
 
@@ -578,6 +589,87 @@ class RuntimeHiddenPreparationTests(unittest.TestCase):
         self.assertFalse(captured[0]())
         self.assertFalse(self.runtime._settings_surface_current(
             self.bridge.status()["surface_handle"], self.bridge.status()["surface_serial"]))
+
+    def test_reentrant_theme_change_replays_latest_caption_before_first_show(self):
+        self.create()
+        once = []
+        nested = []
+        def change(entry):
+            if entry[0] == "caption_dark" and not once:
+                once.append(True)
+                self.runtime.controller._draft["theme"] = "dark"
+                nested.append(self.bridge.compose_now("new-theme"))
+        self.api.after = change
+        result = self.bridge.prepare_hidden()
+        self.assertEqual(nested, [None])
+        self.assertTrue(result["coating_translucent"])
+        self.assertEqual(result["caption_theme"], "dark")
+        self.assertEqual([event[2] for event in self.api.events if event[0] == "caption_dark"], [0, 1])
+        self.assertEqual(self.painter.fill.call_count, 2)
+        self.assertFalse(self.runtime.settings_host.isVisible())
+
+    def test_unsettled_reentrant_themes_have_bounded_work_and_cannot_publish_old_caption(self):
+        self.create()
+        writes = []
+        def change(entry):
+            if entry[0] == "caption_text" and entry[2] != 0xFFFFFFFF:
+                writes.append(entry)
+                draft = self.runtime.controller._draft
+                draft["theme"] = "dark" if draft["theme"] == "light" else "light"
+        self.api.after = change
+        result = self.bridge.prepare_hidden()
+        self.assertFalse(result["coating_translucent"])
+        self.assertEqual(result["fallback_reason"], "caption-theme-changed-during-request")
+        self.assertEqual(len(writes), 2)
+        self.assertTrue(result["cleanup"]["cleanup_complete"])
+        self.assertIsNone(self.runtime.settings_blur.identity)
+        self.assertFalse(self.bridge.status()["hidden_prepared"])
+
+    def test_unsettled_caption_reports_failed_cleanup_without_losing_pending_owner(self):
+        self.create()
+        def change(entry):
+            if entry[0] == "caption_text" and entry[2] != 0xFFFFFFFF:
+                draft = self.runtime.controller._draft
+                draft["theme"] = "dark" if draft["theme"] == "light" else "light"
+        self.api.after = change
+        self.accent.set_blur.side_effect = lambda handle, enabled: (1, 0) if enabled else (0, 5)
+        result = self.bridge.prepare_hidden()
+        self.assertFalse(result["ok"] or result["caption_configured"])
+        self.assertTrue(result["blur_may_remain"])
+        self.assertFalse(result["cleanup_complete"])
+        self.assertIsNotNone(self.runtime.settings_blur.identity)
+        self.api.after = None
+        self.accent.set_blur.side_effect = None
+        self.accent.set_blur.return_value = (1, 0)
+        self.assertTrue(self.runtime.settings_blur.close()["complete"])
+
+    def test_transient_caption_fallback_is_not_adopted_after_theme_stabilizes(self):
+        self.create()
+        def change(entry):
+            if entry[0] == "caption_text" and entry[2] != 0xFFFFFFFF:
+                draft = self.runtime.controller._draft
+                draft["theme"] = "dark" if draft["theme"] == "light" else "light"
+        self.api.after = change
+        result = self.bridge.prepare_hidden()
+        self.assertFalse(result["ok"])
+        self.api.after = None
+        self.assertIsNone(self.bridge._prepared_report(result["hwnd"], self.policy()))
+        host, frame = self.runtime.settings_host, self.runtime.settings
+        host.show()
+        frame.show()
+        for _ in range(4):
+            self.app.processEvents()
+        frame.exposed = True
+        QCoreApplication.sendEvent(frame, QExposeEvent(QRegion()))
+        frame.initialized = True
+        frame.sceneGraphInitialized.emit()
+        frame.frameSwapped.emit()
+        for _ in range(4):
+            self.app.processEvents()
+        self.assertTrue(self.bridge.status()["render_ready"])
+        report = self.bridge.compose_now("stable-theme")
+        self.assertTrue(report["coating_translucent"])
+        self.assertEqual(report["caption_theme"], self.runtime.controller.theme)
 
     def test_actual_runtime_show_orders_material_and_paint_before_show(self):
         observed = []
@@ -601,7 +693,8 @@ class RuntimeHiddenPreparationTests(unittest.TestCase):
         self.painter.fill.side_effect = RuntimeError("fake paint failure")
         result = self.bridge.prepare_hidden()
         self.assertFalse(result["coating_translucent"])
-        self.assertEqual(result["fallback_reason"], "native-background-paint-failed")
+        self.assertEqual(result["fallback_reason"], "raster-blur-api-error")
+        self.assertIn("Raster background paint failed", result["backend_error"])
         self.assertIsNone(self.runtime.settings_blur.identity)
         self.assertFalse(self.bridge.status()["hidden_prepared"])
 
@@ -610,7 +703,7 @@ class RuntimeHiddenPreparationTests(unittest.TestCase):
         once = []
 
         def close(entry):
-            if entry[0] == "set" and entry[2] == 3 and not once:
+            if entry[0] == "set" and entry[2] == 1 and not once:
                 once.append(True)
                 self.bridge.close()
 
