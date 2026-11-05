@@ -164,6 +164,7 @@ Item {
         ink: root.row.available === true ? root.ink : root.muted
         metric: root.row.metric || ""
         hardwareState: root.row.hardware_state || ({})
+        hardwareAppearance: root.row.hardware_appearance || ({})
         automaticEffect: root.row.auto_effect || ""
         effect: root.row.icon_effect || "off"
         level: root.row.effect_level === undefined ? null : root.row.effect_level

@@ -13,6 +13,9 @@ Item {
     property string automaticEffect: ""
     property var level: null
     property var hardwareState: ({})
+    property var hardwareAppearance: ({})
+    readonly property bool hasHardwareAppearance: processorGlyph
+        && hardwareAppearance && hardwareAppearance.kind === name
     property bool available: false
     property bool motionEnabled: false
     property real intensity: 0.5
@@ -421,8 +424,18 @@ Item {
     Icon {
         objectName: "metricIconGlyph"
         anchors.fill: parent; name: root.name; ink: root.ink
+        visible: !root.hasHardwareAppearance
         // The neutral carrier survives strength→0; active arrow/rotor layers blend in.
         opacity: root.spinActive ? Math.pow(1-root.rotorOpacity,6) : 1
+    }
+    Loader {
+        objectName: "metricHardwareGlyphLoader"
+        anchors.fill: parent
+        active: root.hasHardwareAppearance
+        sourceComponent: HardwareGlyph {
+            appearance: root.hardwareAppearance
+            ink: root.ink
+        }
     }
     // Exact Lucide subpaths separated into fixed structure and moving parts.
     component VectorPart: Image {

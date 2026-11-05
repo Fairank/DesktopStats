@@ -1,5 +1,16 @@
 # Changes
 
+## Unreleased — hardware appearances
+
+- Add original static CPU/GPU silhouettes, including reviewed desktop processor
+  packages and exact-model single/dual/triple-fan layouts. Keep temperature,
+  usage, electrical effects and their shared clock independent of appearance.
+- Recognise brand, series and exact-model identities separately. Show series
+  shroud motifs and feature summaries in expanded details, with an on-demand
+  64px illustration. Unknown fan layouts remain neutral rather than guessed.
+- Reuse existing identity strings with a bounded offline match cache. Retain PCI
+  fields already returned by DXGI without adding monitoring queries or polling.
+
 ## 0.27.0-preview.2
 
 - Restore top-bar background material after returning from administrator

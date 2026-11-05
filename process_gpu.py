@@ -263,6 +263,10 @@ def dxgi_adapters(*, factory=None, method=None):
                         name=description.name.strip(),
                         luid=f"{description.luid.high & 0xFFFFFFFF:08x}_{description.luid.low:08x}",
                         memory=description.dedicated,
+                        pci_vendor_id=description.vendor,
+                        pci_device_id=description.device,
+                        pci_subsystem_id=description.subsystem,
+                        pci_revision=description.revision,
                     )
                     try:
                         row["pci_address"] = adapter_address(row["luid"])

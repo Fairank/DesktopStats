@@ -6,6 +6,7 @@ import importlib.util
 import struct
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 
 class GpuProcessTests(unittest.TestCase):
@@ -149,6 +150,49 @@ class GpuProcessTests(unittest.TestCase):
         with self.assertRaises(self.module.CounterError):
             self.module.dxgi_adapters(factory=factory, method=method)
         self.assertEqual(releases, [456, 123])
+
+    def test_dxgi_preserves_existing_descriptor_pci_ids_without_extra_queries(self):
+        enumerated, described, releases = [], [], []
+
+        def factory(iid, result):
+            c.cast(result, c.POINTER(c.c_void_p))[0] = c.c_void_p(123)
+            return 0
+
+        def method(pointer, index, result, *args):
+            if index == 2:
+                return lambda this: releases.append(this.value)
+            if pointer.value == 123 and index == 12:
+                def enumerate_adapter(this, number, output):
+                    enumerated.append(number)
+                    if number == 2:
+                        return 0x887A0002
+                    c.cast(output, c.POINTER(c.c_void_p))[0] = c.c_void_p(456 if number == 0 else 789)
+                    return 0
+                return enumerate_adapter
+            if pointer.value in (456, 789) and index == 10:
+                def description(this, output):
+                    described.append(this.value)
+                    value = c.cast(output, c.POINTER(self.module._Description)).contents
+                    value.name = " Synthetic GPU "
+                    value.vendor, value.device = 0x1002, 0x73DF
+                    value.subsystem, value.revision = 0xE4471043, 0xFFFFFFFF
+                    value.dedicated = 8 * 2**30
+                    value.luid.high, value.luid.low = -2, 0x123
+                    value.flags = 2 if this.value == 789 else 0
+                    return 0
+                return description
+            self.fail("Unexpected COM operation")
+
+        with patch.object(self.module, "adapter_address", return_value=[1, 0, 0]) as address, \
+                patch.object(c, "WinDLL", side_effect=AssertionError("No native query")):
+            rows = self.module.dxgi_adapters(factory=factory, method=method)
+        self.assertEqual(rows, [dict(name="Synthetic GPU", luid="fffffffe_00000123",
+            memory=8 * 2**30, pci_address=[1, 0, 0], pci_vendor_id=0x1002,
+            pci_device_id=0x73DF, pci_subsystem_id=0xE4471043, pci_revision=0xFFFFFFFF)])
+        self.assertTrue(all(type(rows[0][key]) is int for key in (
+            "pci_vendor_id", "pci_device_id", "pci_subsystem_id", "pci_revision")))
+        address.assert_called_once_with("fffffffe_00000123")
+        self.assertEqual((enumerated, described, releases), ([0, 1, 2], [456, 789], [456, 789, 123]))
 
     def test_adapter_query_failure_obeys_backoff_without_repeating_enumeration(self):
         count = []

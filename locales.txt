@@ -760,3 +760,38 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 两个方向各自变化；空闲时静止。|兩個方向各自變化；閒置時靜止。|Both directions respond independently; idle directions stay still.|双方向がそれぞれ変化し、通信がない方向は静止します。|각 방향이 독립적으로 변하며 유휴 상태에서는 멈춥니다.|Beide Richtungen reagieren unabhängig; ohne Aktivität bleiben sie ruhig.|Les deux directions réagissent séparément et restent immobiles au repos.|Ambas direcciones cambian de forma independiente y quedan inmóviles sin actividad.
 电量决定填充，充放电决定流向。|電量決定填充，充放電決定流向。|Charge level sets the fill; charging and discharging set the flow.|残量で塗りの量が変わり、充放電で流れる向きが変わります。|배터리 잔량은 채움을, 충전과 방전은 흐름 방향을 정합니다.|Der Ladestand bestimmt die Füllung; Laden und Entladen bestimmen die Flussrichtung.|Le niveau de batterie règle le remplissage, la charge et la décharge le sens du flux.|El nivel de batería determina el relleno; la carga y la descarga determinan el flujo.
 按实际频率变化，不用其他读数代替。|按實際頻率變化，不用其他讀數代替。|Responds to the measured frequency without substituting other readings.|実測した周波数に連動し、ほかの値では代用しません。|측정된 주파수에 반응하며 다른 값으로 대신하지 않습니다.|Reagiert auf die gemessene Frequenz, ohne andere Messwerte einzusetzen.|Réagit à la fréquence mesurée, sans lui substituer d’autres mesures.|Responde a la frecuencia medida sin sustituirla por otras lecturas.
+型号外观|型號外觀|Model appearance|モデル外観|모델 외형|Modellansicht|Apparence du modèle|Aspecto del modelo
+品牌外观|品牌外觀|Brand appearance|ブランド外観|브랜드 외형|Markenansicht|Apparence de la marque|Aspecto de la marca
+通用外观|通用外觀|Generic appearance|汎用外観|일반 외형|Allgemeine Ansicht|Apparence générique|Aspecto genérico
+风扇数量|風扇數量|Fan count|ファン数|팬 수|Lüfteranzahl|Nombre de ventilateurs|Número de ventiladores
+系列外观|系列外觀|Series appearance|シリーズ外観|시리즈 외형|Serienansicht|Apparence de la série|Aspecto de la serie
+长方形金属顶盖|長方形金屬頂蓋|Rectangular metal lid|長方形の金属カバー|직사각형 금속 덮개|Rechteckiger Metalldeckel|Capot métallique rectangulaire|Cubierta metálica rectangular
+八处边缘缺口|八處邊緣缺口|Eight edge cutouts|縁の8か所の切り欠き|가장자리 홈 8개|Acht Randaussparungen|Huit découpes sur les bords|Ocho muescas en los bordes
+中央金属顶盖|中央金屬頂蓋|Central metal lid|中央の金属カバー|중앙 금속 덮개|Mittiger Metalldeckel|Capot métallique central|Cubierta metálica central
+几何切线饰面|幾何切線飾面|Geometric cut detailing|幾何学的なカットの装飾|기하학적 컷 장식|Geometrische Schnittakzente|Détails géométriques découpés|Detalles geométricos recortados
+简洁分区外壳|簡潔分區外殼|Simple segmented shroud|すっきりと区切られたカバー|간결하게 구분된 외장|Klar gegliederte Abdeckung|Carénage aux sections épurées|Carcasa de secciones sencillas
+硬朗工业外壳|硬朗工業外殼|Rugged industrial shroud|無骨な工業的カバー|견고한 산업적 외장|Markante industrielle Abdeckung|Carénage industriel robuste|Carcasa industrial robusta
+装甲折线|裝甲折線|Angular armor lines|装甲を思わせる折れ線|장갑을 닮은 각진 선|Kantige Panzerungslinien|Lignes anguleuses d’armure|Líneas angulares de blindaje
+斜切装甲线条|斜切裝甲線條|Beveled armor lines|斜めにカットした装甲ライン|사선 장갑 라인|Abgeschrägte Panzerungslinien|Lignes d’armure biseautées|Líneas de blindaje biseladas
+赛博文字饰面|賽博文字飾面|Cyber lettering accents|サイバー風の文字装飾|사이버풍 레터링 장식|Cyber-Schriftakzente|Lettrage d’inspiration cyber|Detalles de letras de estilo cibernético
+工业几何造型|工業幾何造型|Industrial geometric forms|工業的な幾何学形状|산업적 기하학 형태|Industrielle Geometrie|Formes géométriques industrielles|Formas geométricas industriales
+利落硬直线条|俐落硬直線條|Crisp straight lines|シャープな直線|선명한 직선|Klare gerade Linien|Lignes droites nettes|Líneas rectas definidas
+多边形切面|多邊形切面|Polygonal facets|多角形のファセット|다각형 면|Polygonale Facetten|Facettes polygonales|Facetas poligonales
+拉丝金属饰面|拉絲金屬飾面|Brushed metal finish|ヘアライン仕上げの金属表面|헤어라인 금속 마감|Gebürstete Metalloberfläche|Finition en métal brossé|Acabado de metal cepillado
+锐角动感线条|銳角動感線條|Sharp dynamic lines|鋭角的で躍動感のあるライン|역동적이고 날카로운 선|Markante dynamische Linien|Lignes vives et dynamiques|Líneas angulosas y dinámicas
+龙纹装饰|龍紋裝飾|Dragon motif|ドラゴンの装飾|용 문양 장식|Drachenmotiv|Motif de dragon|Motivo de dragón
+装甲外壳轮廓|裝甲外殼輪廓|Armored shroud outline|装甲を思わせるカバーの輪郭|장갑형 외장 윤곽|Kontur einer gepanzerten Abdeckung|Silhouette d’un carénage blindé|Contorno de carcasa blindada
+环状灯效语言|環狀燈效語言|Ring lighting motif|リング状ライティングの意匠|링 조명 모티프|Ringförmiges Lichtmotiv|Motif lumineux annulaire|Motivo de iluminación en anillo
+简洁平直外壳|簡潔平直外殼|Clean straight-edged shroud|シンプルで直線的なカバー|단정하고 직선적인 외장|Schlichte geradlinige Abdeckung|Carénage épuré aux lignes droites|Carcasa sencilla de líneas rectas
+侧边标志饰面|側邊標誌飾面|Side logo detailing|側面ロゴの装飾|측면 로고 장식|Seitliche Logoakzente|Logo décoratif latéral|Detalles de logotipo lateral
+简洁标准外壳|簡潔標準外殼|Simple conventional shroud|シンプルでオーソドックスなカバー|간결한 기본형 외장|Schlichte klassische Abdeckung|Carénage classique et épuré|Carcasa clásica y sencilla
+金属背板轮廓|金屬背板輪廓|Metal backplate outline|金属製バックプレートの輪郭|금속 백플레이트 윤곽|Kontur der Metallrückplatte|Contour de la plaque arrière métallique|Contorno de la placa trasera metálica
+简约外框轮廓|簡約外框輪廓|Minimal frame outline|シンプルな外枠の輪郭|간결한 외곽 프레임|Schlichte Rahmenkontur|Contour de cadre minimaliste|Contorno de marco minimalista
+方正框架轮廓|方正框架輪廓|Rectilinear frame outline|角張ったフレームの輪郭|반듯한 프레임 윤곽|Geradlinige Rahmenkontur|Contour de cadre rectiligne|Contorno de marco rectilíneo
+利落外壳分区|俐落外殼分區|Crisp shroud sections|明確に区切られたカバー|깔끔하게 나뉜 외장|Klare Abdeckungssegmente|Sections de carénage bien définies|Secciones de carcasa bien definidas
+一体式框架|一體式框架|Integrated frame|一体型フレーム|일체형 프레임|Integrierter Rahmen|Cadre intégré|Marco integrado
+长条灯带|長條燈帶|Linear light strip|ライン状のライトバー|선형 라이트 바|Lineare Lichtleiste|Bande lumineuse linéaire|Tira de luz lineal
+简洁低调护罩|簡潔低調護罩|Clean understated shroud|シンプルで控えめなカバー|간결하고 절제된 덮개|Schlichte dezente Abdeckung|Carénage épuré et discret|Carcasa sencilla y discreta
+灯效饰面|燈效飾面|Lighting accents|ライティングの装飾|조명 장식|Lichtakzente|Accents lumineux|Detalles luminosos
+棱角装甲饰面|稜角裝甲飾面|Angular armor detailing|角張った装甲風の装飾|각진 장갑형 장식|Kantige Panzerungsakzente|Détails d’armure anguleux|Detalles de blindaje anguloso
+多面切割装饰|多面切割裝飾|Multi-faceted detailing|多面カットの装飾|다면 컷 장식|Facettierte Verzierungen|Détails à facettes|Detalles facetados

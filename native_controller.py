@@ -24,6 +24,7 @@ from configuration_scopes import merge_scope, rebase_saved_changes, scope_dirty
 from cpu_temperature import is_requested as cpu_temperature_requested
 from desktop_placement import desktop_plan
 from external_sensor import EXTERNAL_SLOTS, PROVIDER, inventory_display, sensor_binding
+from hardware_appearance import metric_appearance
 from history_store import DEFAULT_METRICS
 from installer import set_autostart
 from layout_assist import (
@@ -709,6 +710,10 @@ class Controller(WorkspaceTools):
                         used_text=used_text+' '+used_unit, total_text=total_text+' '+total_unit,
                         fraction=used/total)
             include_history = force_history or detail_id is not None or prefs.get('style') in ('trend_value', 'graph')
+            appearance = metric_appearance(data, metric, prefs, scope=scope,
+                                           target=target, external=bool(binding))
+            if appearance:
+                appearance["features"] = [translate(feature, language) for feature in appearance["features"]]
             result.append(
                 dict(
                     id=item["id"],
@@ -728,6 +733,7 @@ class Controller(WorkspaceTools):
                     effect_intensity=effect_intensity,
                     effect_speed=effect_speed,
                     hardware_state=hardware_feedback(data, metric, prefs, stale=stale),
+                    hardware_appearance=appearance,
                     source=source,
                     reason=reason,
                     hardware_name=hardware_name,

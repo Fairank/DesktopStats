@@ -327,6 +327,7 @@ Window {
                 Layout.preferredWidth: 16; Layout.preferredHeight: 16
                 metric: root.detail.metric || ""
                 hardwareState: root.detail.hardware_state || ({})
+                hardwareAppearance: root.detail.hardware_appearance || ({})
                 automaticEffect: root.detail.auto_effect || ""
                 effect: root.detail.icon_effect || "off"
                 level: root.detail.effect_level === undefined ? null : root.detail.effect_level
@@ -1098,6 +1099,57 @@ Window {
                                 Layout.fillWidth: true; visible: !!text
                                 text: root.detail.source || ""; textFormat: Text.PlainText
                                 color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                            }
+                            RowLayout {
+                                id: appearanceSummary
+                                readonly property var appearance: root.detail.hardware_appearance || ({})
+                                Layout.fillWidth: true; spacing: 12
+                                visible: ["cpu", "gpu"].includes(appearance.kind)
+                                Loader {
+                                    objectName: "topBarDetailAppearanceLoader"
+                                    Layout.preferredWidth: 64; Layout.minimumWidth: 64; Layout.maximumWidth: 64
+                                    Layout.preferredHeight: 64; Layout.alignment: Qt.AlignTop
+                                    active: root.showMetadata && root.visible && !root.hostMinimized
+                                        && root.visibility !== Window.Minimized && appearanceSummary.visible
+                                    sourceComponent: HardwareGlyph { appearance: appearanceSummary.appearance; ink: root.secondary }
+                                }
+                                ColumnLayout {
+                                    Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 4
+                                    Text {
+                                        objectName: "topBarDetailAppearance"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: {
+                                            const appearance = appearanceSummary.appearance
+                                            const confidence = appearance.confidence
+                                            const parts = [root.tr(confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
+                                            if (["model", "brand"].includes(confidence) && typeof appearance.label === "string" && appearance.label.trim())
+                                                parts.push(appearance.label.trim())
+                                            if (appearance.kind === "gpu" && confidence === "model"
+                                                    && Number.isInteger(appearance.fan_count) && [1, 2, 3].includes(appearance.fan_count))
+                                                parts.push(root.tr("风扇数量") + ": " + appearance.fan_count)
+                                            return parts.join(" · ")
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailAppearanceSeries"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: ["model", "series"].includes(appearanceSummary.appearance.confidence)
+                                            && typeof appearanceSummary.appearance.series_label === "string"
+                                            ? appearanceSummary.appearance.series_label.trim() : ""
+                                        textFormat: Text.PlainText
+                                        color: root.foreground; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailAppearanceFeatures"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: appearanceSummary.appearance.features && typeof appearanceSummary.appearance.features.filter === "function"
+                                            ? appearanceSummary.appearance.features.filter(value => typeof value === "string" && value.trim()).slice(0, 2).join("\n") : ""
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                }
                             }
                         }
                     }
