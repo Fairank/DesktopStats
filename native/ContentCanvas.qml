@@ -9,10 +9,13 @@ Item {
     property bool resizing:false
     property var previewReadings:({})
     property var previewHistory:[]
-    function refreshPreview(){if(active && !resizing){previewReadings=stats.readings;previewHistory=stats.history}}
+    property bool previewReady:false
+    readonly property bool historyNeeded:prefs.chart!==false
+    function refreshPreview(){if(previewReady && active && !resizing){previewReadings=stats.readings;previewHistory=historyNeeded?stats.history:[]}}
     onActiveChanged:refreshPreview()
     onResizingChanged:refreshPreview()
-    Component.onCompleted:refreshPreview()
+    onHistoryNeededChanged:refreshPreview()
+    Component.onCompleted:{previewReady=true;refreshPreview()}
     Connections {target:stats;enabled:root.active && !root.resizing;function onDataChanged(){root.refreshPreview()}}
     readonly property var prefs:root.config.widgets[widgetKey] || ({})
     readonly property var contents:{const draft=root.config;return stats.widgetContentIds(widgetKey)}

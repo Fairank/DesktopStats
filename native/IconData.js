@@ -36,7 +36,8 @@ var sources = {
   "download": "arrow-down-to-line",
   "upload": "arrow-up-from-line",
   "disk_read": "hard-drive-upload",
-  "disk_write": "hard-drive-download"
+  "disk_write": "hard-drive-download",
+  "topbar": "panel-top"
 };
 var fragments = {
   "cpu": "\n  <path d=\"M12 20v2\" />\n  <path d=\"M12 2v2\" />\n  <path d=\"M17 20v2\" />\n  <path d=\"M17 2v2\" />\n  <path d=\"M2 12h2\" />\n  <path d=\"M2 17h2\" />\n  <path d=\"M2 7h2\" />\n  <path d=\"M20 12h2\" />\n  <path d=\"M20 17h2\" />\n  <path d=\"M20 7h2\" />\n  <path d=\"M7 20v2\" />\n  <path d=\"M7 2v2\" />\n  <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" />\n  <rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\" />\n",
@@ -71,7 +72,8 @@ var fragments = {
   "download": "\n  <path d=\"M12 17V3\" />\n  <path d=\"m6 11 6 6 6-6\" />\n  <path d=\"M19 21H5\" />\n",
   "upload": "\n  <path d=\"m18 9-6-6-6 6\" />\n  <path d=\"M12 3v14\" />\n  <path d=\"M5 21h14\" />\n",
   "disk_read": "\n  <path d=\"m16 6-4-4-4 4\" />\n  <path d=\"M12 2v8\" />\n  <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" />\n  <path d=\"M6 18h.01\" />\n  <path d=\"M10 18h.01\" />\n",
-  "disk_write": "\n  <path d=\"M12 2v8\" />\n  <path d=\"m16 6-4 4-4-4\" />\n  <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" />\n  <path d=\"M6 18h.01\" />\n  <path d=\"M10 18h.01\" />\n"
+  "disk_write": "\n  <path d=\"M12 2v8\" />\n  <path d=\"m16 6-4 4-4-4\" />\n  <rect width=\"20\" height=\"8\" x=\"2\" y=\"14\" rx=\"2\" />\n  <path d=\"M6 18h.01\" />\n  <path d=\"M10 18h.01\" />\n",
+  "topbar": "\n  <rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" />\n  <path d=\"M3 9h18\" />\n"
 };
 function fragment(name) {
     return Object.prototype.hasOwnProperty.call(fragments, name) ? fragments[name] : fragments.grid;

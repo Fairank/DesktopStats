@@ -20,6 +20,7 @@ EXPECTED = {
     "disk",
     "custom",
     "grid",
+    "topbar",
     "sliders",
     "sensors",
     "plus",
@@ -73,7 +74,7 @@ class LucideSourceTests(unittest.TestCase):
         self.assertEqual(set(self.manifest["mapping"]), EXPECTED)
         self.assertEqual(set(self.fragments), EXPECTED)
         self.assertEqual(self.manifest["mapping_count"], len(EXPECTED))
-        self.assertEqual(self.manifest["unique_source_count"], 30)
+        self.assertEqual(self.manifest["unique_source_count"], 31)
 
     def test_every_svg_and_fragment_matches_its_provenance(self):
         for alias, entry in self.manifest["mapping"].items():
@@ -144,6 +145,7 @@ class LucideSourceTests(unittest.TestCase):
             "vram": "memory-stick",
             "custom": "layout-grid",
             "grid": "layout-grid",
+            "topbar": "panel-top",
             "network": "arrow-down-up",
             "power": "zap",
             "up": "chevron-up",

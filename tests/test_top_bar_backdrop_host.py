@@ -4,7 +4,7 @@ import os
 import threading
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPoint, QRect, Qt
@@ -155,15 +155,19 @@ class DetailAcrylicTests(unittest.TestCase):
             paint_background=lambda: self.paint,
         )
         self.material = DetailAcrylicBackend(self.host, validate=lambda handle: None, api=self.api)
+        self.accent = Mock()
+        self.accent.set_blur.return_value = (1, 0)
+        self.material.backend._accent_api = self.accent
 
     def test_hidden_setup_uses_dwm_and_cleans_original_identity(self):
         result = self.material.apply(123, enabled=True, policy=dict(state="allowed"))
         self.assertTrue(result["blur_configured"])
-        self.assertEqual(result["material"], "desktop-acrylic")
-        self.assertEqual(result["backdrop_type"], 3)
-        self.assertNotIn("bool_result", result)  # This is DWM, not WCA compatibility blur.
+        self.assertEqual(result["material"], "system-blur")
+        self.assertEqual(result["backdrop_type"], 1)
+        self.assertEqual(result["bool_result"], 1)
+        self.accent.set_blur.assert_called_once_with(123, True)
         self.assertFalse(result["compositing_verified"])
-        self.assertEqual(self.api.events[:3], [("set", 123, 3), ("extend", 123, (-1, -1, -1, -1)), ("get", 123)])
+        self.assertEqual(self.api.events[:3], [("set", 123, 1), ("extend", 123, (-1, -1, -1, -1)), ("get", 123)])
         self.assertTrue(self.material.close()["cleanup_complete"])
         self.assertEqual(self.api.actual, 1)
 
@@ -203,6 +207,8 @@ class DetailHostIntegrationTests(unittest.TestCase):
         self.case.setUp()
         self.manager = self.case.manager
         self.api = FakeAPI()
+        self.accent = Mock()
+        self.accent.set_blur.return_value = (1, 0)
         self.guards = []
         self.hosts = []
         original_make = self.manager._make_window
@@ -230,8 +236,7 @@ class DetailHostIntegrationTests(unittest.TestCase):
         self.native_guard = patch.object(ctypes, "WinDLL", side_effect=AssertionError("Native API forbidden"))
         self.policy_guard = patch("native_platform.transparency_policy", return_value=dict(state="allowed"))
         self.api_guard = patch("settings_acrylic_material._CtypesAcrylicAPI", return_value=self.api)
-        self.accent_guard = patch("native_widget_material._CtypesBlurAPI",
-                                  side_effect=AssertionError("DWM details must never load WCA"))
+        self.accent_guard = patch("raster_blur_material._CtypesThinAcrylicAPI", return_value=self.accent)
         self.native_guard.start()
         self.policy_guard.start()
         self.api_guard.start()
@@ -258,8 +263,8 @@ class DetailHostIntegrationTests(unittest.TestCase):
             self.assertEqual(host.format().alphaBufferSize(), 0)
             self.assertEqual(quick.property("nativeHosted"), True)
             report = self.case.host.state.materialReports["details"]
-            self.assertEqual(report["material"], "desktop-acrylic")
-            self.assertEqual(panel["material_bridge"].bridge.status()["backend"], "desktop-acrylic")
+            self.assertEqual(report["material"], "system-blur")
+            self.assertEqual(panel["material_bridge"].bridge.status()["backend"], "system-blur")
             self.assertEqual(report["preparation"], "before-show")
             self.assertTrue(self.case.host.state.detailCoatingTranslucent)
             self.assertTrue(host.flags() & Qt.WindowDoesNotAcceptFocus)
@@ -279,14 +284,14 @@ class DetailHostIntegrationTests(unittest.TestCase):
         self.assertIsNotNone(panel, self.manager._errors)
         state = self.case.host.state
         self.assertTrue(state.detailCoatingTranslucent)
-        self.assertEqual(self.api.events, [("set", panel["binding"].hwnd, 3),
+        self.assertEqual(self.api.events, [("set", panel["binding"].hwnd, 1),
                                           ("extend", panel["binding"].hwnd, (-1, -1, -1, -1)),
                                           ("get", panel["binding"].hwnd)])
         before = list(self.api.events)
         QTest.qWait(600)  # Real offscreen first-frame and finite settle callbacks.
         self.assertEqual(self.api.events, before)
         self.assertTrue(state.detailCoatingTranslucent)
-        self.assertEqual(state.materialReports["details"]["material"], "desktop-acrylic")
+        self.assertEqual(state.materialReports["details"]["material"], "system-blur")
 
     def _assert_first_click_recovers_retained_panel(self, state):
         point = self.case.point()

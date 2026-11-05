@@ -10,6 +10,17 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 ## 安装与使用
 
+0.26.0-preview.12 保留所选检测频率，每轮用原生批量查询更新网卡清单、连接状态和
+上下行计数。接口变动、断线、计数器回退会重新建立速率基线，不将断测补成零。
+关闭图表时，桌面组件和编辑预览不再传递无用的历史采样；当前读数继续刷新，重新
+开启图表会立即读取最新历史，编辑窗口缩放时仍保留原有预览冻结行为。
+
+0.26.0-preview.11 的软件排行改为 Windows 批量进程快照。CPU、内存、GPU 和专用显存
+分别显示占用前五的软件，同名进程合并，CPU 百分比按整机容量计算。仅在详情打开时
+约每秒采集，关闭即停止；首次 CPU 读数通过短间隔建立基线，GPU 则保留完整速率窗口。
+排行不写入历史、设置或导出。无法识别名称与权限不足分别说明，不填造占用。
+顶部栏详情在后台提前加载，首次打开无需重复编译；既有图标、动效及配置保持不变。
+
 1. 解压发布包，保留 DesktopStats.exe 与 _internal 在同一目录。双击运行，或用 Install.cmd 安装。升级前先应用或撤销待保存设置；旧版本如不能安全自动退出，请从托盘退出后重试。安装先准备新目录，再换入并保留原版备份；准备、替换或注册失败会尝试回滚并明确记录未完成的步骤，配置文件保持独立。
 2. 左侧保留 **桌面组件 / 顶部栏 / 历史记录 / 偏好** 四个主要入口。在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
 3. 点击 **卡片 / 横条 / 竖条** 一键选择布局。**＋添加指标** 支持连续选择，点击“添加所选”才一次加入；取消或 Esc 不更改组件。每组件最多六项，同一模板可重复添加。
@@ -231,7 +242,29 @@ Sampling request intervals accept 0.01–5 seconds in Sensors, with up to two de
 
 Reference ideas: [Apple widget gallery and editing](https://support.apple.com/guide/mac-help/add-and-customize-widgets-mchl52be5da5/mac), [Stats modules and configuration](https://github.com/exelban/stats), [Microsoft Desktop Acrylic](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwm_systembackdrop_type). This is original Windows software, not an Apple product.
 
-Stats also includes richer macOS-specific information such as Bluetooth device batteries, advanced Wi-Fi information, top-process popups and timezone clocks. These are not claimed as supported here. Windows AMD/Intel GPU coverage, battery design-capacity/health, OEM power sensors and shell-extension compatibility need further provider work and hardware verification.
+Stats also includes richer macOS-specific information such as Bluetooth device batteries, advanced Wi-Fi information and timezone clocks. These are not claimed as supported here. Windows AMD/Intel GPU sensor coverage, battery design-capacity/health, OEM power sensors and shell-extension compatibility need further provider work and hardware verification.
+
+### Software using this hardware
+
+CPU, RAM, GPU and dedicated-VRAM details show up to five software names, sorted
+by actual usage after merging processes with the same case-insensitive name.
+CPU percentages use the whole machine's logical-processor capacity. RAM shows
+working-set bytes, including shared pages. GPU rankings select the busiest
+engine after grouping software on the identified Windows adapter; percentages
+from different engines are not added. Dedicated VRAM includes cross-process
+shared allocations, so summing the software rows does not give device totals.
+These definitions follow [psutil](https://psutil.readthedocs.io/stable/#psutil.Process.memory_info)
+and [Microsoft's GPU accounting](https://devblogs.microsoft.com/directx/gpus-in-the-task-manager/).
+
+The separate process worker samples at most once every two seconds while a
+hardware detail is open. Hidden/closed details release demand and native GPU
+queries. Names are transient and excluded from history, settings and diagnostic
+exports; command lines, accounts and executable paths are not requested. Access
+restrictions produce a partial-coverage notice. GPU mapping uses DXGI LUIDs and
+physical locations, with explicit errors for ambiguous or unavailable sources.
+Temperature/power pages can show associated CPU/GPU activity, never an invented
+per-software temperature or watts value. Per-process network tracing is not
+enabled, and general process I/O is not mislabelled as selected-disk traffic.
 
 ## Data and migration
 

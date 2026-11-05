@@ -13,7 +13,7 @@ import threading
 from PySide6.QtCore import QEvent, Qt, QTimer
 from PySide6.QtGui import QRegion
 
-from settings_acrylic_material import SettingsAcrylicMaterial
+from raster_blur_material import ThinRasterAcrylicMaterial
 from settings_backdrop_host import SettingsBackdropHost
 
 
@@ -179,11 +179,15 @@ class TopBarBackdropHost(SettingsBackdropHost):
 
 
 class DetailAcrylicBackend:
-    """WUJI-style DWM Acrylic on the owned black Raster presentation host."""
+    """Activation-independent blur on the owned black Raster presentation host.
 
-    def __init__(self, host, *, validate, api=None):
+    The retained class name is compatible with existing injected presenters.
+    The transparent foreground/coatings remain the WUJI-style reading planes.
+    """
+
+    def __init__(self, host, *, validate, api=None, accent_api=None):
         self.host, self.validate = host, validate
-        self.backend = SettingsAcrylicMaterial(api=api)
+        self.backend = ThinRasterAcrylicMaterial(dwm_api=api, accent_api=accent_api)
         self._identity = None
 
     def _guard(self, handle, serial):

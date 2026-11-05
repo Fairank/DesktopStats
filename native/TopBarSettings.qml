@@ -26,6 +26,8 @@ ColumnLayout {
     readonly property bool unapplied: JSON.stringify(config) !== JSON.stringify(stats.saved.top_bar)
     readonly property var liveStatus: stats.topBarStatus || ({})
     readonly property var appearance: config.appearance || ({follow_global:true,skin:"glass",glass_transparency:50})
+    readonly property string appearanceSkin: (appearance.follow_global ? stats.draft.skin : appearance.skin) === "minimal" ? "glass" : (appearance.follow_global ? stats.draft.skin : appearance.skin)
+    readonly property real appearanceTransparency: appearance.follow_global ? stats.draft.glass_transparency : appearance.glass_transparency
     readonly property string selectedDesign:appearance.design || "classic"
     readonly property bool compactDesigns:width<660
     readonly property var designOptions:[
@@ -93,7 +95,7 @@ ColumnLayout {
     onSensorChoicesChanged:refreshChoices()
     function selectItem(identifier) { selectedItem = identifier; Qt.callLater(revealCurrentInspector) }
     function revealCurrentInspector() {
-        if (!sideInspector && selected) root.revealInspector(selectedInspector)
+        if (selected) root.revealInspector(selectedInspector)
     }
     function stateLabel() {
         const state = liveStatus.state || "disabled"
@@ -306,27 +308,26 @@ ColumnLayout {
     }
     Text { parent: barOptions; Layout.fillWidth: true; visible: root.config.monitor_mode === "selected" && !root.config.screens.length; text: ui.t("选择至少一个显示器后应用。"); textFormat: Text.PlainText; color: ui.muted; font.family: ui.fontFamily; font.pixelSize: 11; wrapMode: Text.WordWrap }
     ColumnLayout {
-        parent: barOptions
         objectName:"topBarAppearanceSettings";Layout.fillWidth:true;spacing:10
         RowLayout {
             Layout.fillWidth:true;spacing:10
             Text {Layout.fillWidth:true;text:ui.t("顶栏外观");color:ui.ink;font.family:ui.fontFamily;font.pixelSize:13;font.weight:Font.DemiBold}
-            Text {text:ui.t("跟随全局");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11}
-            Toggle {objectName:"topBarFollowGlobal";checked:root.appearance.follow_global;Accessible.name:ui.t("跟随全局");onToggled:stats.changeTopBarAppearance("follow_global",checked)}
+            Check {objectName:"topBarFollowGlobal";text:ui.t("跟随全局");checked:root.appearance.follow_global;onToggled:stats.changeTopBarAppearance("follow_global",checked)}
         }
         GridLayout {
-            Layout.fillWidth:true;visible:root.appearance.follow_global===false
+            Layout.fillWidth:true
             columns:width>=500?2:1;uniformCellWidths:true;columnSpacing:18;rowSpacing:10
             FormField {Layout.fillWidth:true;label:ui.t("材质")
-                Choice {objectName:"topBarSkinChoice";Layout.fillWidth:true;implicitHeight:34;model:[{id:"glass",label:ui.t("清透玻璃")},{id:"frost",label:ui.t("柔雾玻璃")},{id:"tint",label:ui.t("柔彩玻璃")},{id:"card",label:ui.t("经典卡片")},{id:"graphite",label:ui.t("石墨黑")}];value:root.appearance.skin;onPicked:selected=>stats.changeTopBarAppearance("skin",selected)}
+                Choice {objectName:"topBarSkinChoice";Layout.fillWidth:true;implicitHeight:34;model:[{id:"glass",label:ui.t("清透玻璃")},{id:"frost",label:ui.t("柔雾玻璃")},{id:"tint",label:ui.t("柔彩玻璃")},{id:"card",label:ui.t("经典卡片")},{id:"graphite",label:ui.t("石墨黑")}];value:root.appearanceSkin;onPicked:selected=>stats.changeTopBarAppearance("skin",selected)}
             }
-            FormField {Layout.fillWidth:true;label:ui.t("透明度");enabled:["glass","frost","tint"].includes(root.appearance.skin)
+            FormField {Layout.fillWidth:true;label:ui.t("透明度");visible:["glass","frost","tint"].includes(root.appearanceSkin)
                 RowLayout {Layout.fillWidth:true;spacing:8
-                    ValueSlider {objectName:"topBarTransparency";Layout.fillWidth:true;from:0;to:100;value:root.appearance.glass_transparency;Accessible.name:ui.t("透明度");onMoved:stats.changeTopBarAppearance("glass_transparency",value)}
-                    Text {text:Math.round(root.appearance.glass_transparency)+"%";color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11}
+                    ValueSlider {objectName:"topBarTransparency";Layout.fillWidth:true;from:0;to:100;stepSize:0;value:root.appearanceTransparency;Accessible.name:ui.t("透明度");onMoved:stats.changeTopBarAppearance("glass_transparency",value)}
+                    Text {objectName:"topBarTransparencyValue";text:Math.round(root.appearanceTransparency)+"%";color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11}
                 }
             }
         }
+        Text {Layout.fillWidth:true;text:ui.t("拖动即可预览，应用后保存。")+(root.appearance.follow_global?" "+ui.t("单独调整时自动取消跟随全局。"):"");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
     }
     GridLayout {
         parent: metricsListColumn

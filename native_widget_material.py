@@ -1,7 +1,8 @@
 """Own-window compatibility blur; never changes flags, geometry or activation.
 
-Only WCA_ACCENT_POLICY state 3 (no extra tint) and state 0 are used. This is an
-undocumented Windows interface, distinct from the settings window's DWM path.
+The default path uses WCA_ACCENT_POLICY state 3 (no extra tint) and state 0.
+Explicit thin-material presenters opt into state 4 with minimal native tint.
+This is an undocumented Windows compatibility interface.
 API facts: github.com/zhiyiYo/PyQt-Frameless-Window, windows/window_effect.py.
 No Qt, product imports or DLL loading at import/construction. The host supplies
 policy and must call clear() before destroying/replacing an HWND. GUI operations
@@ -44,10 +45,28 @@ class _CtypesBlurAPI:
         if type(enabled) is not bool:
             raise ValueError("Blur request requires bool")
         accent = _AccentPolicy(3 if enabled else 0, 0, 0, 0)
+        return self._set_policy(hwnd, accent)
+
+    def _set_policy(self, hwnd, accent):
         data = _CompositionData(19, c.cast(c.pointer(accent), c.c_void_p), c.sizeof(accent))
         c.set_last_error(0)
         result = self.dll.SetWindowCompositionAttribute(HWND(hwnd), c.byref(data))
         return int(result), c.get_last_error()
+
+
+class _CtypesThinAcrylicAPI(_CtypesBlurAPI):
+    """Thin native Acrylic; no shadow, animation or focus mutation.
+
+    A minimum alpha of 1 avoids the compatibility path's zero-alpha special
+    case. ABGR/flags follow window-vibrancy c93f682, windows.rs:227-254; this
+    requests a material and does not verify its composed appearance.
+    """
+
+    def set_blur(self, hwnd, enabled):
+        if type(enabled) is not bool:
+            raise ValueError("Blur request requires bool")
+        accent = _AccentPolicy(4 if enabled else 0, 0, 0x01FFFFFF if enabled else 0, 0)
+        return self._set_policy(hwnd, accent)
 
 
 class _Rejected(Exception):
@@ -96,8 +115,11 @@ class WidgetBlurBackend:
     """api may inject is_window, owner->(tid,pid), set_blur->(BOOL,LastError).
 
     Failed removal stays pending and close() may be retried. API success reports
-    only a configured request, never proof of visible blur. No state 4 is used.
+    only a configured request, never proof of visible blur. Default requests
+    remain state 3; only the explicit menu-bar subclass requests state 4.
     """
+
+    _enabled_state = 3
 
     def __init__(self, api=None, *, api_factory=None):
         self._api = api
@@ -122,7 +144,8 @@ class WidgetBlurBackend:
             raise _Rejected("window-not-gui-thread")
 
     def _request(self, hwnd, enabled):
-        result = dict(ok=False, accent_state=3 if enabled else 0, bool_result=None, last_error=None)
+        result = dict(ok=False, accent_state=self._enabled_state if enabled else 0,
+                      bool_result=None, last_error=None)
         try:
             self._guard(hwnd)
         except _Rejected as error:
@@ -241,3 +264,50 @@ class WidgetBlurBackend:
             blur_configured=False,
             blur_may_remain=bool(self._pending),
         )
+
+
+class MenuBarAcrylicBackend(WidgetBlurBackend):
+    """Opt-in low-tint carrier; existing widget/Raster factories stay unchanged.
+
+    Continuous opacity belongs to the foreground coating. Native tint is fixed
+    at 1/255, so dragging a slider never starts another native effect request.
+    """
+
+    _enabled_state = 4
+
+    def __init__(self, api=None, *, api_factory=None):
+        super().__init__(api, api_factory=api_factory or _CtypesThinAcrylicAPI)
+        self._failed_cleanup = set()
+
+    @staticmethod
+    def _describe(report, enabled):
+        report["mechanism"] = "undocumented-accent-acrylic"
+        report["requested_accent_state"] = 4 if enabled is True else 0
+        report["requested_tint_alpha"] = 1 if enabled is True else 0
+        report["requested_tint_abgr"] = 0x01FFFFFF if enabled is True else 0
+        report["compositing_verified"] = False
+        return report
+
+    def apply(self, hwnd, enabled=True, policy=None):
+        if (enabled is True and not self._closed and _policy(policy)["state"] == "allowed"
+                and type(hwnd) is int and hwnd in self._failed_cleanup):
+            return self._describe(dict(_report(hwnd, policy), material="solid", rejected=True,
+                status="cleanup-failed", blur_may_remain=True,
+                fallback_reason="previous-acrylic-cleanup-failed"), enabled)
+        report = super().apply(hwnd, enabled, policy)
+        # Retain the lifecycle's system-blur success contract. API success is
+        # not a DWM38/readback result, and failure must not leave an alpha pane.
+        translucent = report.get("ok") is True and report.get("blur_configured") is True
+        report["coating_translucent"] = translucent
+        if not translucent:
+            report["material"] = "solid"
+        return self._describe(report, enabled)
+
+    def clear(self, hwnd):
+        report = super().clear(hwnd)
+        if type(hwnd) is int:
+            if report.get("cleanup_complete"):
+                self._failed_cleanup.discard(hwnd)
+            elif report.get("blur_may_remain"):
+                self._failed_cleanup.add(hwnd)
+        return self._describe(report, False)

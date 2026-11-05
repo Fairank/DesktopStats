@@ -4,8 +4,26 @@ from collections.abc import Mapping
 from copy import deepcopy
 from typing import Any
 
+from top_bar_config import top_bar_style
+
 _GLOBAL_FIELDS = ("skin", "theme", "opacity", "glass_transparency", "glass_curvature")
 _WIDGET_FIELDS = ("skin", "glass_transparency", "glass_curvature")
+
+
+def project_top_bar_appearance(
+    saved: Mapping[str, Any], draft: Mapping[str, Any], active: bool
+) -> dict[str, Any]:
+    """Project coatings only; never preview targets, items, height or enablement."""
+    if not active:
+        return top_bar_style(saved)
+    candidate = {field: deepcopy(draft.get(field, saved.get(field))) for field in _GLOBAL_FIELDS}
+    candidate["language"] = saved.get("language", "en")
+    candidate["top_bar"] = {
+        "appearance": deepcopy(draft.get("top_bar", {}).get(
+            "appearance", saved.get("top_bar", {}).get("appearance", {})
+        ))
+    }
+    return top_bar_style(candidate)
 
 
 def project_appearance(

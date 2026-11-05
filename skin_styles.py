@@ -50,7 +50,8 @@ def _main_window_alpha(transparency, anchor):
     return round(anchor * (100 - value) / 50)
 
 
-def palette(skin, dark=False, opacity=94, accent="#2884ff", frosted=True, *, transparency=None, curvature=None):
+def palette(skin, dark=False, opacity=94, accent="#2884ff", frosted=True, *, transparency=None,
+            curvature=None, menu_bar=False):
     """ARGB coatings, not proof that the compositor has blurred a window.
 
     ``frosted`` selects a translucent coating or the readable solid fallback.
@@ -111,6 +112,14 @@ def palette(skin, dark=False, opacity=94, accent="#2884ff", frosted=True, *, tra
         if frosted:
             value = GLASS_DEFAULTS["glass_transparency"] if transparency is None else transparency
             top_alpha = alpha = _main_window_alpha(value, 214 if dark else 163)
+    if menu_bar and frosted and skin in GLASS_SKINS:
+        # A thin band uses WUJI's navigation coating, not its reading-panel fill.
+        # Continuous endpoints: 0% is opaque; 100% exposes native blur, not a
+        # transparent text layer or whole-window opacity that fades the icons.
+        anchor = {"glass": 184 if dark else 82, "frost": 150 if dark else 128,
+                  "tint": 96 if dark else 86}[skin]
+        value = GLASS_DEFAULTS["glass_transparency"] if transparency is None else transparency
+        top_alpha = alpha = _main_window_alpha(value, anchor)
     return {
         "top": argb(top_alpha, top_rgb),
         "bottom": argb(alpha, rgb),

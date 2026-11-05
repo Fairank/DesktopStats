@@ -10,6 +10,7 @@ Window {
     required property var barState
     property bool nativeHosted: false
     property bool nativeRounded: false
+    property bool hostMinimized: false
     readonly property var detail: barState.detail || ({})
     readonly property bool overflowMode: detail.overflow === true
     readonly property var groupRows:detail.grouped===true?(detail.group_rows || []).slice(0,4):[]
@@ -804,6 +805,17 @@ Window {
                                 }
                             }
                         }
+                    }
+                    ProcessUsageCard {
+                        Layout.fillWidth: true
+                        provider: typeof stats !== "undefined" ? stats : null
+                        metric: root.detail.metric || ""
+                        hardwareName: root.detail.hardware_name || root.cpuContext.hardware_name || ""
+                        active: root.visible && !root.hostMinimized
+                            && root.visibility !== Window.Minimized && !root.overflowMode
+                        ink: root.foreground; muted: root.secondary
+                        fontFamily: root.barState.fontFamily
+                        motionEnabled: root.barState.motionEnabled === true
                     }
                     ColumnLayout {
                         objectName: "topBarCpuContext"

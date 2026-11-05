@@ -3,7 +3,6 @@
 import base64
 import copy
 import os
-import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -24,7 +23,7 @@ from PySide6.QtCore import (
     Signal,
     Slot,
 )
-from PySide6.QtGui import QFontDatabase, QImage, QPainter, QWheelEvent
+from PySide6.QtGui import QFontDatabase, QImage, QPainter
 from PySide6.QtQml import QQmlComponent, QQmlEngine, qmlRegisterType
 from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtSvg import QSvgRenderer
@@ -253,6 +252,21 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         self.state.changed.emit()
         QTest.qWait(20)
 
+    def wheel_scroll_once(self, flick, pointer_target=None):
+        self.wait_scroll_layout(flick)
+        before = flick.property("contentY")
+        target = flick if pointer_target is None else pointer_target
+        point = target.mapToScene(target.boundingRect().center()).toPoint()
+        QTest.mouseMove(self.window, point)
+        # Use one coherent Qt test-event clock, including for popup input.
+        # Never retry the wheel or assign contentY to make this assertion pass.
+        QTest.wheelEvent(self.window, point, QPoint(0, -360))
+        for _ in range(60):
+            if flick.property("contentY") > before:
+                break
+            QTest.qWait(10)
+        self.assertGreater(flick.property("contentY"), before)
+
     def proof(self, name):
         directory = os.environ.get("DESKTOP_STATS_QA_PROOF")
         if directory:
@@ -375,12 +389,7 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         scroll = self.find("topBarDetailScroll")
         self.wait_scroll_layout(scroll)
         self.assertGreater(scroll.property("contentHeight"), scroll.height())
-        point = scroll.mapToScene(scroll.boundingRect().center())
-        wheel = QWheelEvent(point, self.window.mapToGlobal(point.toPoint()), QPoint(0, 0), QPoint(0, -360),
-                            Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False)
-        wheel.setTimestamp(round(time.monotonic() * 1000))
-        self.app.sendEvent(self.window, wheel)
-        QTest.qWait(40)
+        self.wheel_scroll_once(scroll)
         self.assertGreater(scroll.property("contentY"), 0)
         QMetaObject.invokeMethod(scroll, "cancelFlick")
         scroll.setProperty("contentY", scroll.property("contentHeight") - scroll.height())
@@ -585,12 +594,7 @@ Window { id:scene; width:700;height:760;visible:false;color:stats.theme==="dark"
         scroll = self.find("skinPickerOptionsScroll")
         flick = scroll.property("contentItem")
         self.wait_scroll_layout(flick)
-        before = flick.property("contentY")
-        point = scroll.mapToScene(scroll.boundingRect().center())
-        event = QWheelEvent(point, point, QPoint(0, 0), QPoint(0, -360), Qt.NoButton, Qt.NoModifier, Qt.ScrollUpdate, False)
-        self.app.sendEvent(self.window, event)
-        QTest.qWait(40)
-        self.assertGreater(flick.property("contentY"), before)
+        self.wheel_scroll_once(flick, scroll)
         QTest.keyClick(self.window, Qt.Key_Escape)
         QTest.qWait(20)
         self.assertFalse(popup.property("opened"))

@@ -328,5 +328,86 @@ class WidgetBlurTests(unittest.TestCase):
         self.assertEqual(self.api.calls, [(HANDLE, True)])
 
 
+class MenuBarAcrylicTests(unittest.TestCase):
+    def setUp(self):
+        self.guard = self.enterContext(patch.object(c, "WinDLL", side_effect=AssertionError("No real DLL")))
+        self.api = FakeAPI()
+        self.backend = material.MenuBarAcrylicBackend(self.api)
+
+    def test_payload_uses_minimal_nonzero_alpha_with_full_width_handle_and_zeroed_clear(self):
+        dll = FakeDLL()
+        api = material._CtypesThinAcrylicAPI(Mock(return_value=dll))
+        self.assertEqual(api.set_blur(HANDLE, True), (1, 87))
+        self.assertEqual(api.set_blur(HANDLE, False), (1, 87))
+        self.assertEqual(dll.calls, [(HANDLE, 19, 16, 4, 0, 0x01FFFFFF, 0, 0),
+                                     (HANDLE, 19, 16, 0, 0, 0, 0, 0)])
+        with self.assertRaises(ValueError):
+            api.set_blur(HANDLE, 4)
+        self.guard.assert_not_called()
+
+    def test_special_factory_is_lazy_and_success_keeps_lifecycle_contract_not_dwm_claim(self):
+        with patch.object(material, "_CtypesThinAcrylicAPI", return_value=self.api) as factory:
+            backend = material.MenuBarAcrylicBackend()
+            factory.assert_not_called()
+            self.assertFalse(backend.apply(0, policy="allowed")["ok"])
+            factory.assert_not_called()
+            report = backend.apply(HANDLE, policy="allowed")
+            factory.assert_called_once_with()
+        self.assertEqual(report["material"], "system-blur")
+        self.assertEqual(report["accent_state"], 4)
+        self.assertEqual(report["requested_tint_alpha"], 1)
+        self.assertTrue(report["coating_translucent"])
+        self.assertFalse(report["compositing_verified"])
+        self.assertNotIn("backdrop_type", report)
+
+    def test_repeated_apply_keeps_same_api_without_flags_geometry_or_activation_api(self):
+        for _ in range(20):
+            self.assertTrue(self.backend.apply(HANDLE, policy="allowed")["ok"])
+        self.assertTrue(self.backend.close()["complete"])
+        self.assertEqual(self.api.calls, [(HANDLE, True)] * 20 + [(HANDLE, False)])
+
+    def test_disabled_policy_clears_acrylic_and_never_relabels_zero_as_active_four(self):
+        self.backend.apply(HANDLE, policy="allowed")
+        result = self.backend.apply(HANDLE, policy={"state": "disabled"})
+        self.assertFalse(result["coating_translucent"])
+        self.assertFalse(result["blur_configured"])
+        self.assertEqual(result["material"], "solid")
+        self.assertEqual(result["accent_state"], 0)
+        clear = self.backend.clear(HANDLE)
+        self.assertEqual(clear["requested_accent_state"], 0)
+        self.assertEqual(clear["requested_tint_abgr"], 0)
+        self.assertEqual(self.api.calls, [(HANDLE, True), (HANDLE, False)])
+
+    def test_native_failure_uses_solid_fallback_and_does_not_silently_try_old_mode(self):
+        self.api.responses = [(0, 87), (1, 0)]
+        report = self.backend.apply(HANDLE, policy="allowed")
+        self.assertFalse(report["ok"])
+        self.assertFalse(report["coating_translucent"])
+        self.assertFalse(report["blur_configured"])
+        self.assertEqual(report["material"], "solid")
+        self.assertEqual(report["cleanup"]["accent_state"], 0)
+        self.assertEqual(report["cleanup"]["requested_tint_abgr"], 0)
+        self.assertEqual(self.api.calls, [(HANDLE, True), (HANDLE, False)])
+
+    def test_failed_removal_blocks_new_enable_until_original_cleanup_completes(self):
+        self.api.responses = [(0, 87), (0, 5)]
+        report = self.backend.apply(HANDLE, policy="allowed")
+        self.assertTrue(report["blur_may_remain"])
+        calls = list(self.api.calls)
+        retry = self.backend.apply(HANDLE, policy="allowed")
+        self.assertEqual(retry["fallback_reason"], "previous-acrylic-cleanup-failed")
+        self.assertEqual(self.api.calls, calls)
+        self.assertTrue(self.backend.clear(HANDLE)["cleanup_complete"])
+        self.assertTrue(self.backend.apply(HANDLE, policy="allowed")["ok"])
+
+    def test_lost_owner_during_cleanup_remains_pending_without_touching_replacement(self):
+        self.backend.apply(HANDLE, policy="allowed")
+        self.api.pid += 1
+        result = self.backend.close()
+        self.assertFalse(result["complete"])
+        self.assertEqual(self.api.calls, [(HANDLE, True)])
+        self.assertTrue(self.backend.apply(HANDLE, policy="allowed")["blur_may_remain"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

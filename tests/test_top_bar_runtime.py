@@ -393,6 +393,87 @@ class TopBarRuntimeTests(unittest.TestCase):
         self.assertEqual(self.controller.status["state"], "unavailable")
         self.assertFalse(other.hosts)
 
+    def test_transparency_preview_repaints_all_existing_bands_without_models_or_placement(self):
+        value = config(mode="all")
+        self.manager.apply(value)
+        hosts = dict(self.manager.hosts)
+        before = copy.deepcopy(self.manager._config)
+        events = list(self.adapter.events)
+        for host in hosts.values():
+            host.material_bridge = Mock()
+        style = dict(self.manager._style, glass_transparency=83.125)
+        with patch.object(self.manager, "_layout", side_effect=AssertionError("No metric layout")), \
+                patch.object(self.manager, "_position_panel_safely", side_effect=AssertionError("No move")):
+            self.manager.preview_appearance(style)
+        self.assertEqual(self.manager._config, before)
+        self.assertEqual(self.adapter.events, events)
+        self.assertEqual(self.manager.hosts, hosts)
+        for host in hosts.values():
+            self.assertEqual(host.state.config["glass_transparency"], 83.125)
+            host.material_bridge.request.assert_not_called()
+            host.material_bridge = None  # Return the injected adapter to its non-native contract.
+        self.manager.apply(value)  # Display/apply refresh retains an active preview.
+        self.assertEqual(self.manager.hosts, hosts)
+        self.assertEqual(self.manager._style["glass_transparency"], 83.125)
+        self.manager.preview_appearance(dict(style, glass_transparency=60), active=False)
+        self.assertIsNone(self.manager._preview_style)
+        self.assertTrue(all(host.state.config["glass_transparency"] == 60 for host in hosts.values()))
+
+    def test_appearance_change_only_reconfigures_material_for_skin_and_not_each_slider_step(self):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        host.material_bridge = Mock()
+        original = dict(self.manager._style)
+        for level in range(101):
+            self.manager.preview_appearance(dict(original, glass_transparency=level))
+        host.material_bridge.request.assert_not_called()
+        self.manager.preview_appearance(dict(original, skin="frost"))
+        host.material_bridge.request.assert_called_once_with("preference_changed")
+        self.manager.preview_appearance(dict(original, skin="frost"))
+        self.assertEqual(host.material_bridge.request.call_count, 1)
+
+    def test_closing_preview_during_appbar_refresh_replays_saved_appearance_after_apply(self):
+        value = config(mode="all")
+        self.manager.apply(value)
+        saved = dict(self.manager._style)
+        self.manager.preview_appearance(dict(saved, glass_transparency=80))
+        original = self.manager._sync_host
+        once = []
+
+        def sync(host, **kwargs):
+            if not once:
+                once.append(True)
+                self.manager.preview_appearance(saved, active=False)
+            return original(host, **kwargs)
+
+        with patch.object(self.manager, "_sync_host", side_effect=sync):
+            self.manager.apply(value)
+        self.assertIsNone(self.manager._preview_style)
+        self.assertIsNone(self.manager._pending_appearance)
+        self.assertEqual(self.manager._style, saved)
+        self.assertTrue(all(host.state.config == saved for host in self.manager.hosts.values()))
+
+    def test_latest_slider_edit_during_appbar_refresh_is_not_lost_or_partially_applied(self):
+        value = config(mode="all")
+        self.manager.apply(value)
+        final = dict(self.manager._style, glass_transparency=91.125)
+        original = self.manager._sync_host
+        once = []
+
+        def sync(host, **kwargs):
+            if not once:
+                once.append(True)
+                self.manager.preview_appearance(dict(final, glass_transparency=71))
+                self.manager.preview_appearance(final)
+            return original(host, **kwargs)
+
+        with patch.object(self.manager, "_sync_host", side_effect=sync):
+            self.manager.apply(value)
+        self.assertIsNone(self.manager._pending_appearance)
+        self.assertEqual(self.manager._preview_style, final)
+        self.assertEqual(self.manager._style, final)
+        self.assertTrue(all(host.state.config == final for host in self.manager.hosts.values()))
+
     def test_primary_all_selected_and_missing_screens_preserve_intent(self):
         value = config()
         original = copy.deepcopy(value)
@@ -1357,8 +1438,10 @@ class TopBarRuntimeTests(unittest.TestCase):
             blur_configured=enabled and policy["state"] == "allowed")
         backend.clear.return_value = dict(ok=True, cleanup_complete=True)
         with patch("settings_material_bridge.SettingsMaterialBridge", Bridge), \
-                patch("native_widget_material.WidgetBlurBackend", return_value=backend):
+                patch("native_widget_material.MenuBarAcrylicBackend", return_value=backend) as acrylic, \
+                patch("native_widget_material.WidgetBlurBackend", side_effect=AssertionError("Bar must opt in explicitly")):
             material = self.manager._material_bridge(self.windows[0], state)
+            acrylic.assert_called_once_with()
             bridge = material.bridge
             self.assertTrue(bridge.started)
             self.assertEqual(bridge.callbacks["backend"], "system-blur")
@@ -1825,6 +1908,16 @@ class QmlTopBarTests(unittest.TestCase):
         self.host = self.manager.hosts.get("DISPLAY1")
         self.assertIsNotNone(self.host, self.controller.status)
         QTest.qWait(25)
+        # These interaction tests start from the running, warmed-up bar. The
+        # separate compilation tests exercise requests arriving before Ready.
+        for _ in range(200):
+            component = self.manager._components.get("TopBarDetails.qml")
+            if component is not None:
+                self.assertTrue(component.isReady(), component.errorString())
+                break
+            QTest.qWait(10)
+        else:
+            self.fail("The asynchronous detail component did not finish loading")
 
     def tearDown(self):
         self.manager.close()
@@ -1863,15 +1956,25 @@ class QmlTopBarTests(unittest.TestCase):
             QTest.qWait(10)
         self.assertIsNotNone(self.manager._panel)
 
+    def wait_until_panel_ready(self):
+        # A first request may share startup's asynchronous QML compilation.
+        # The fake compiler tests cover cancellation and exact request identity.
+        for _ in range(200):
+            if self.manager._panel is not None:
+                return
+            QTest.qWait(10)
+        self.fail(str((self.manager._detail_attempt, self.manager._errors)))
+
     def test_real_hover_stays_stable_under_repeated_readings_and_does_not_activate(self):
         metric = self.metric()
+        QTest.mouseMove(self.host.window, QPoint(-10, -10))
         QTest.mouseMove(self.host.window, self.point())
         for index in range(5):
             self.controller.rows[0]["value"] = f"{70 + index}%"
             self.manager.update_rows()
             QTest.qWait(85)
             self.assertIs(self.metric(), metric, "Live readings rebuilt a hover delegate")
-        self.assertIsNotNone(self.manager._panel)
+        self.wait_until_panel_ready()
         self.assertFalse(self.manager._panel["pinned"])
         self.assertEqual(self.host.state.detail["value"], "74%")
         self.assertEqual(self.adapter.shows[-1], ("details", False))
@@ -1908,7 +2011,7 @@ class QmlTopBarTests(unittest.TestCase):
             Qt.KeyboardModifier.NoModifier,
             self.point(),
         )
-        QTest.qWait(15)
+        self.wait_until_panel_ready()
         self.assertTrue(self.manager._panel["pinned"])
         window = self.manager._panel["window"]
         self.assertFalse(window.flags() & Qt.WindowType.WindowDoesNotAcceptFocus)
@@ -1939,6 +2042,7 @@ class QmlTopBarTests(unittest.TestCase):
 
     def test_actual_hover_recovers_a_hidden_pinned_detail_without_an_extra_click(self):
         QTest.mouseClick(self.host.window, Qt.LeftButton, Qt.NoModifier, self.point())
+        self.wait_until_panel_ready()
         old = self.manager._panel
         self.assertIsNotNone(old)
         self.assertTrue(old["pinned"])
@@ -1965,6 +2069,7 @@ class QmlTopBarTests(unittest.TestCase):
 
     def _assert_actual_reentrant_switch_keeps_the_same_visible_record(self, stage):
         QTest.mouseClick(self.host.window, Qt.LeftButton, Qt.NoModifier, self.point())
+        self.wait_until_panel_ready()
         QTest.qWait(20)  # Settle the first open before injecting another operation.
         panel = self.manager._panel
         self.assertIsNotNone(panel)

@@ -29,14 +29,14 @@ HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePrev
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 OptionTabs.qml Preview.qml SamplingControl.qml SensorBrowser.qml SettingRow.qml
 Settings.qml SettingsGroup.qml SkinPicker.qml Theme.qml Toggle.qml TopBar.qml
-TopBarDetails.qml TopBarItemInspector.qml TopBarMetricContent.qml TopBarGroupContent.qml TopBarChrome.qml
+TopBarDetails.qml TopBarItemInspector.qml TopBarMetricContent.qml TopBarGroupContent.qml TopBarChrome.qml ProcessUsageCard.qml
 TopBarPreviewStrip.qml TopBarSettings.qml ValueSlider.qml WidgetEditor.qml
 WidgetInspector.qml WidgetPreview.qml WindowChrome.qml
 """.split()
 _LUCIDE = """
 activity arrow-down-to-line arrow-down-up arrow-up-from-line audio-lines battery
 check chevron-down chevron-right chevron-up clock copy cpu fan gauge gpu
-hard-drive-download hard-drive-upload hard-drive layout-grid memory-stick plus
+hard-drive-download hard-drive-upload hard-drive layout-grid memory-stick panel-top plus
 redo search sliders-horizontal thermometer trash undo x zap
 """.split()
 _QT_LICENSES = {
