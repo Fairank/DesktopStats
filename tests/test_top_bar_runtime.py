@@ -2126,5 +2126,182 @@ class QmlTopBarTests(unittest.TestCase):
             self.assertEqual(listing.property("contentY"), scroll)
 
 
+class ForegroundGuardFixture:
+    def __init__(self, changed, hidden=()):
+        self.changed, self.hidden = changed, set(hidden)
+        self.started = self.closed = False
+        self.reads = self.invalidations = 0
+        self.failure = None
+        self.fail_close = False
+
+    def start(self):
+        self.started = True
+
+    def blocked(self, monitors):
+        self.reads += 1
+        return frozenset(self.hidden & monitors.keys())
+
+    def invalidate(self):
+        self.invalidations += 1
+
+    def close(self):
+        self.closed = True
+        return not self.fail_close
+
+
+class ForegroundFullscreenVisibilityTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.qt = QApplication.instance() or QApplication([])
+
+    def setUp(self):
+        TopBarRuntimeTests.setUp(self)
+        self.guards = []
+        self.initial_hidden = set()
+
+        def factory(changed):
+            guard = ForegroundGuardFixture(changed, self.initial_hidden)
+            self.guards.append(guard)
+            return guard
+
+        self.manager._fullscreen_guard_factory = factory
+
+    def drain(self):
+        self.qt.processEvents()
+        self.qt.processEvents()
+
+    def test_startup_fullscreen_never_shows_that_bar_and_other_monitor_stays_visible(self):
+        self.initial_hidden = {"DISPLAY1"}
+        self.manager.apply(config(mode="all"))
+        self.assertTrue(self.guards[0].started)
+        self.assertFalse(self.manager.hosts["DISPLAY1"].window.visible)
+        self.assertTrue(self.manager.hosts["DISPLAY2"].window.visible)
+        self.assertTrue(all(host.session.active for host in self.manager.hosts.values()))
+        self.assertNotIn(("DISPLAY1", False), self.adapter.shows)
+        self.assertTrue(self.controller.status["hosts"][0]["fullscreen_hidden"])
+        before = list(self.adapter.events)
+        self.manager.update_rows()
+        self.assertEqual(before, self.adapter.events)
+
+    def test_event_burst_is_queued_once_and_stale_shell_fullscreen_does_not_veto_restore(self):
+        self.manager.apply(config())
+        guard = self.guards[0]
+        initial = guard.reads
+        guard.hidden = {"DISPLAY1"}
+        for _ in range(20):
+            guard.changed()
+        self.assertTrue(self.manager.hosts["DISPLAY1"].window.visible)
+        self.drain()
+        self.assertEqual(guard.reads, initial + 1)
+        self.assertFalse(self.manager.hosts["DISPLAY1"].window.visible)
+        host = self.manager.hosts["DISPLAY1"]
+        host.session._fullscreen = True  # An older Shell enter may remain.
+        guard.hidden.clear()
+        guard.changed()
+        self.drain()
+        self.assertTrue(host.window.visible)
+        self.assertTrue(host.session.active)
+        self.assertEqual(len([event for event in self.adapter.events if event[0] == "register"]), 1)
+
+    def test_geometry_unchanged_relayout_and_shell_refresh_cannot_reveal_hidden_bar(self):
+        self.initial_hidden = {"DISPLAY1"}
+        self.manager.apply(config())
+        host, guard = self.manager.hosts["DISPLAY1"], self.guards[0]
+        self.manager._sync_host(host)
+        self.assertFalse(host.window.visible)
+        self.a.physical = PixelRect(0, 0, 2560, 1440)
+        self.a.dpi = 144
+        self.manager._sync_host(host)
+        self.assertFalse(host.window.visible)
+        self.manager._sync_host(host, shell_recreated=True, shell_epoch=1)
+        self.assertFalse(host.window.visible)
+        self.assertNotIn(("DISPLAY1", False), self.adapter.shows)
+        self.manager.native_message(host.binding.hwnd, self.adapter.callback_message,
+                                    ABN_FULLSCREENAPP, 0)
+        self.assertEqual(guard.invalidations, 1)
+        self.drain()
+        self.assertFalse(host.window.visible)
+
+    def test_guard_closes_pinned_hover_and_pending_details_and_blocks_reopen(self):
+        for pinned in (False, True):
+            with self.subTest(pinned=pinned):
+                self.manager.apply(config())
+                guard = self.guards[-1]
+                host = self.manager.hosts["DISPLAY1"]
+                self.manager._show_panel(host, "b_0", pinned)
+                panel = self.manager._panel
+                self.assertIsNotNone(panel)
+                guard.hidden = {"DISPLAY1"}
+                guard.changed()
+                self.drain()
+                self.assertIsNone(self.manager._panel)
+                self.assertFalse(panel["window"].visible)
+                self.assertFalse(self.manager._hover_timer.isActive())
+                serial = self.manager._detail_serial
+                self.manager._show_panel(host, "b_0", True)
+                self.assertIsNone(self.manager._panel)
+                self.assertGreater(self.manager._detail_serial, serial)
+                self.assertEqual(self.manager._detail_attempt["reason"], "fullscreen")
+                self.manager.pause()
+                self.manager.resume()
+
+    def test_dirty_guard_blocks_detail_before_its_visibility_timer_is_processed(self):
+        self.manager.apply(config())
+        guard = self.guards[0]
+        host = self.manager.hosts["DISPLAY1"]
+        guard.hidden = {"DISPLAY1"}
+        guard.changed()
+        self.manager._show_panel(host, "b_0", True)
+        self.assertIsNone(self.manager._panel)
+        self.assertEqual(self.manager._detail_attempt["reason"], "fullscreen")
+
+    def test_hidden_host_replacement_hotplug_and_late_callbacks_do_not_revive_windows(self):
+        self.initial_hidden = {"DISPLAY1"}
+        self.manager.apply(config(mode="all"))
+        guard, old = self.guards[0], self.manager.hosts["DISPLAY1"]
+        self.a = Screen("DISPLAY1", PixelRect(0, 0, 2560, 1440), dpi=144)
+        self.app._screens = [self.a, self.b]
+        self.manager.apply(config(mode="all"))
+        self.assertTrue(old.window.deleted)
+        self.assertFalse(self.manager.hosts["DISPLAY1"].window.visible)
+        guard.changed()
+        self.manager.close()
+        guard.changed()
+        self.drain()
+        self.assertTrue(guard.closed)
+        self.assertFalse(self.manager._foreground_timer.isActive())
+        self.assertFalse(self.manager.hosts)
+        self.assertTrue(all(window.deleted for window in self.windows))
+
+    def test_no_demand_does_not_create_listener_and_unhook_retry_does_not_block_hiding(self):
+        self.manager.apply(config(False))
+        self.assertEqual(self.guards, [])
+        self.manager.apply(config(mode="selected", screens=["disconnected"]))
+        self.assertEqual(self.guards, [])
+        self.manager.apply(config())
+        guard, window = self.guards[0], self.manager.hosts["DISPLAY1"].window
+        guard.fail_close = True
+        self.manager.close()
+        self.assertFalse(window.visible)
+        self.assertTrue(window.deleted)
+        self.assertIs(self.manager._fullscreen_guard, guard)
+        guard.fail_close = False
+        self.manager.close()
+        self.assertIsNone(self.manager._fullscreen_guard)
+
+    def test_native_guard_failure_is_conservative_and_does_not_escape_qt_callback(self):
+        self.manager.apply(config())
+        guard = self.guards[0]
+        with patch.object(guard, "blocked", side_effect=OSError("Synthetic query failure")):
+            guard.changed()
+            self.drain()
+        self.assertFalse(self.manager.hosts["DISPLAY1"].window.visible)
+        self.assertEqual(self.controller.status["fullscreen_avoidance"]["error"], "OSError")
+
+    def test_tooltip_visibility_explicitly_depends_on_own_window_visibility(self):
+        qml = (Path(__file__).resolve().parents[1] / "native/TopBar.qml").read_text(encoding="utf-8")
+        self.assertIn("visible: root.visible && metricMouse.containsMouse", qml)
+
+
 if __name__ == "__main__":
     unittest.main()

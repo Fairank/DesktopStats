@@ -239,19 +239,19 @@ Item {
         const first=Qt.darker(colors[index],1),second=Qt.darker(colors[Math.min(colors.length-1,index+1)],1),mix=position-index
         return Qt.rgba(first.r+(second.r-first.r)*mix,first.g+(second.g-first.g)*mix,first.b+(second.b-first.b)*mix,1)
     }
-    function converge(current,target,elapsed) {
+    function converge(current,target,smoothing) {
         if(!(target>0))return 0
-        const next=current+(target-current)*(1-Math.exp(-elapsed/200))
+        const next=current+(target-current)*smoothing
         return Math.abs(next-target)<.001?target:next
     }
     function resetFeedback() {
         phase=0;loadPhase=0;thermalArcPhase=0;energyPhase=0;inboundPhase=0;outboundPhase=0;spinPhase=0
-        displayedLoad=animationRunning && compositeActive?(loadTarget || 0):0
-        displayedThermal=animationRunning && compositeActive?(thermalTarget || 0):0
-        displayedEnergy=animationRunning && compositeActive?(energyTarget || 0):0
-        displayedInbound=animationRunning && compositeActive?(inboundTarget || 0):0
-        displayedOutbound=animationRunning && compositeActive?(outboundTarget || 0):0
-        displayedSpin=animationRunning && compositeActive?(spinTarget || 0):0
+        displayedLoad=animationRunning && compositeActive && supportsLoad?(loadTarget || 0):0
+        displayedThermal=animationRunning && compositeActive && supportsThermal?(thermalTarget || 0):0
+        displayedEnergy=animationRunning && compositeActive && supportsEnergy?(energyTarget || 0):0
+        displayedInbound=animationRunning && compositeActive && supportsInbound?(inboundTarget || 0):0
+        displayedOutbound=animationRunning && compositeActive && supportsOutbound?(outboundTarget || 0):0
+        displayedSpin=animationRunning && compositeActive && name==="fan"?(spinTarget || 0):0
         displayedLevel=animationRunning?(compositeActive?targetActivity:level):0
     }
 
@@ -260,22 +260,22 @@ Item {
         if (!Number.isFinite(now)) return
         if (!animationRunning) {previousTick = now;resetFeedback();return}
         const elapsed = Math.max(0, Math.min(136, now - previousTick))
+        const smoothing = 1-Math.exp(-elapsed/200)
         previousTick = now
-        if (thermometerEnabled) displayedTemperature=converge(displayedTemperature,thermometerTarget,elapsed)
+        if (thermometerEnabled) displayedTemperature=converge(displayedTemperature,thermometerTarget,smoothing)
         if(compositeActive && name === "fan") {
             // A rotor needs one smoothed channel and one transform per frame;
             // unrelated thermal/electrical phases belong to slower listeners.
-            displayedSpin=converge(displayedSpin,spinTarget,elapsed)
+            displayedSpin=converge(displayedSpin,spinTarget,smoothing)
             displayedLevel=spinChannelActive?displayedSpin:0
             spinPhase=spinChannelActive?(spinPhase+Math.min(.1,elapsed*fanRotationsPerSecond/1000))%1:0
             return
         } else if(compositeActive) {
-            displayedLoad=converge(displayedLoad,loadTarget,elapsed)
-            displayedThermal=converge(displayedThermal,thermalTarget,elapsed)
-            displayedEnergy=converge(displayedEnergy,energyTarget,elapsed)
-            displayedInbound=converge(displayedInbound,inboundTarget,elapsed)
-            displayedOutbound=converge(displayedOutbound,outboundTarget,elapsed)
-            displayedSpin=converge(displayedSpin,spinTarget,elapsed)
+            displayedLoad=supportsLoad?converge(displayedLoad,loadTarget,smoothing):0
+            displayedThermal=supportsThermal?converge(displayedThermal,thermalTarget,smoothing):0
+            displayedEnergy=supportsEnergy?converge(displayedEnergy,energyTarget,smoothing):0
+            displayedInbound=supportsInbound?converge(displayedInbound,inboundTarget,smoothing):0
+            displayedOutbound=supportsOutbound?converge(displayedOutbound,outboundTarget,smoothing):0
             displayedLevel=Math.max(loadActive?displayedLoad:0,thermalActive?displayedThermal:0,energyActive?displayedEnergy:0,
                 inboundActive?displayedInbound:0,outboundActive?displayedOutbound:0,spinChannelActive?displayedSpin:0)
             loadPhase=loadActive?(loadPhase+elapsed*speed*(.55+1.2*displayedLoad)/2200)%1:0
@@ -283,7 +283,7 @@ Item {
             energyPhase=energyActive?(energyPhase+elapsed*speed*(.82+.36*displayedEnergy)/2400)%1:0
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(.82+.36*displayedInbound)/2400)%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(.82+.36*displayedOutbound)/2400)%1:0
-        } else displayedLevel=converge(displayedLevel,level,elapsed)
+        } else displayedLevel=converge(displayedLevel,level,smoothing)
         // Four identical blades repeat every quarter-turn; bound a delayed
         // rotor step below half that pitch so it cannot appear to reverse.
         phase = (phase + (spinActive?Math.min(.1,elapsed/cycleDuration):elapsed/cycleDuration)) % 1
@@ -315,8 +315,35 @@ Item {
     onInboundTargetChanged: {if(!(inboundTarget>0)){displayedInbound=0;inboundPhase=0}}
     onOutboundTargetChanged: {if(!(outboundTarget>0)){displayedOutbound=0;outboundPhase=0}}
     onSpinTargetChanged: {if(!(spinTarget>0)){displayedSpin=0;spinPhase=0}}
+    // A glyph change discards only channels it no longer paints. Newly added
+    // channels start from their current target; channels shared by both glyphs
+    // keep their filtered value and phase instead of restarting the icon.
+    onSupportsLoadChanged: {
+        displayedLoad=animationRunning && compositeActive && supportsLoad?(loadTarget || 0):0
+        if(!supportsLoad)loadPhase=0
+    }
+    onSupportsThermalChanged: {
+        displayedThermal=animationRunning && compositeActive && supportsThermal?(thermalTarget || 0):0
+        if(!supportsThermal)thermalArcPhase=0
+    }
+    onSupportsEnergyChanged: {
+        displayedEnergy=animationRunning && compositeActive && supportsEnergy?(energyTarget || 0):0
+        if(!supportsEnergy)energyPhase=0
+    }
+    onSupportsInboundChanged: {
+        displayedInbound=animationRunning && compositeActive && supportsInbound?(inboundTarget || 0):0
+        if(!supportsInbound)inboundPhase=0
+    }
+    onSupportsOutboundChanged: {
+        displayedOutbound=animationRunning && compositeActive && supportsOutbound?(outboundTarget || 0):0
+        if(!supportsOutbound)outboundPhase=0
+    }
     onClockHostChanged: syncClock()
-    onNameChanged: syncClock()
+    onNameChanged: {
+        displayedSpin=animationRunning && compositeActive && name==="fan"?(spinTarget || 0):0
+        if(name!=="fan")spinPhase=0
+        syncClock()
+    }
     Component.onCompleted: syncClock()
     Component.onDestruction: EffectClock.unsubscribe(clockSubscription)
     Icon {

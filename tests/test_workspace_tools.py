@@ -4,6 +4,7 @@ import copy
 import json
 import os
 import tempfile
+import threading
 import unittest
 from contextlib import ExitStack
 from pathlib import Path
@@ -158,6 +159,114 @@ class WorkspaceToolsTests(unittest.TestCase):
         self.assertTrue(self.ui.undoDraft())
         self.assertFalse(self.ui._draft["history_enabled"])
         self.assertFalse(self.ui.historyRecording)
+
+    def test_production_backend_uses_five_second_batches_and_is_created_once(self):
+        self.assertIs(self.ui._store(), self.backend)
+        self.assertIs(self.ui._store(), self.backend)
+        self.store_factory.assert_called_once_with(self.root / "sensor-history.sqlite3", flush_interval=5)
+
+    def test_pause_does_not_create_an_unused_history_backend(self):
+        self.assertTrue(self.ui.setHistoryRecording(False))
+        self.store_factory.assert_not_called()
+        self.backend.flush_on_pause.assert_not_called()
+        self.assertIsNone(self.ui._history_backend)
+
+    def test_pause_flushes_existing_backend_only_after_successful_preference_commit(self):
+        self.ui._store()
+        observed = []
+
+        def paused():
+            observed.append((self.ui.historyRecording, self.save.call_count))
+            return True
+
+        self.backend.flush_on_pause.side_effect = paused
+        self.assertTrue(self.ui.setHistoryRecording(False))
+        self.assertEqual(observed, [(False, 1)])
+        self.backend.flush_on_pause.assert_called_once_with()
+        self.backend.close.assert_not_called()
+        self.ui._record_history(dict(time=100, cpu_usage=20))
+        self.backend.record.assert_not_called()
+
+    def test_failed_pause_setting_save_never_flushes_the_existing_backend(self):
+        self.ui._store()
+        self.save.side_effect = OSError("Synthetic preference unavailable")
+        self.assertFalse(self.ui.setHistoryRecording(False))
+        self.assertTrue(self.ui.historyRecording)
+        self.backend.flush_on_pause.assert_not_called()
+
+    def test_pause_storage_failure_does_not_roll_back_saved_recording_preference(self):
+        self.ui._store()
+        self.backend.status = dict(state="unavailable", detail="Local history storage is unavailable",
+                                   error="OSError", api="sqlite3.history.write", errorcode=28)
+        self.backend.flush_on_pause.return_value = False
+        self.assertTrue(self.ui.setHistoryRecording(False))
+        self.assertFalse(self.ui.historyRecording)
+        self.save.assert_called_once()
+        self.assertFalse(self.save.call_args.args[0]["history_enabled"])
+        self.assertEqual(self.ui.historyStatus["state"], "unavailable")
+        self.assertEqual(self.ui.historyStatus["errorcode"], 28)
+        self.backend.close.assert_not_called()
+
+    def test_unexpected_pause_flush_exception_keeps_the_successful_pause(self):
+        self.ui._store()
+        self.backend.flush_on_pause.side_effect = RuntimeError("Synthetic backend error")
+        with patch.object(tools.logging, "exception") as logged:
+            self.assertTrue(self.ui.setHistoryRecording(False))
+        self.assertFalse(self.ui.historyRecording)
+        self.save.assert_called_once()
+        logged.assert_called_once()
+
+    def test_pause_waits_for_inflight_record_then_flushes_and_rejects_later_records(self):
+        self.ui._store()
+        entered, release, saved = threading.Event(), threading.Event(), threading.Event()
+        order, record_lock_checks = [], []
+
+        def record(_sample):
+            order.append("record_started")
+            entered.set()
+            if not release.wait(3):
+                raise AssertionError("Synthetic record was not released")
+            order.append("record_finished")
+
+        def allow_record_to_finish_after_pause_is_saved():
+            try:
+                if not saved.wait(3):
+                    return
+                # The preference is committed before the UI waits for the
+                # in-flight worker's backend lock. Only inspect Python state.
+                for _ in range(200):
+                    if not self.ui._saved["history_enabled"]:
+                        break
+                    release.wait(.01)
+                lock = self.ui._history_backend_lock
+                acquired = lock.acquire(blocking=False)
+                record_lock_checks.append(acquired)
+                if acquired:
+                    lock.release()
+            finally:
+                release.set()
+
+        self.backend.record.side_effect = record
+        self.backend.flush_on_pause.side_effect = lambda: order.append("pause_flushed") or True
+        self.save.side_effect = lambda _value: saved.set()
+        worker = threading.Thread(target=self.ui._record_history, args=(dict(time=100, cpu_usage=20),))
+        releaser = threading.Thread(target=allow_record_to_finish_after_pause_is_saved)
+        worker.start()
+        try:
+            self.assertTrue(entered.wait(3))
+            releaser.start()
+            self.assertTrue(self.ui.setHistoryRecording(False))
+        finally:
+            release.set()
+            worker.join(3)
+            if releaser.ident is not None:
+                releaser.join(3)
+        self.assertFalse(worker.is_alive())
+        self.assertFalse(releaser.is_alive())
+        self.assertEqual(record_lock_checks, [False], "The in-flight record owns the pause boundary lock")
+        self.assertEqual(order, ["record_started", "record_finished", "pause_flushed"])
+        self.ui._record_history(dict(time=101, cpu_usage=30))
+        self.backend.record.assert_called_once_with(dict(time=100, cpu_usage=20))
 
     def test_failed_history_setting_save_preserves_saved_draft_and_history_stacks(self):
         self.ui._draft["language"] = "en"

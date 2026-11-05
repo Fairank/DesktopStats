@@ -42,6 +42,24 @@ class HistoryStoreTests(unittest.TestCase):
     def query(self, metric="cpu_usage", *, end=None, **options):
         return self.store.query(metric, end=self.wall + 1 if end is None else end, **options)
 
+    def seed_legacy_index(self, observations=None):
+        if observations is None:
+            observations = ((1, BASE - 4, BASE - 4, 0), (60, BASE - 60, BASE - 4, 0),
+                            (1, BASE - 2, BASE - 2, None), (60, BASE - 60, BASE - 2, None))
+        rows = []
+        for resolution, second, timestamp, value in observations:
+            bucket = history._Bucket()
+            bucket.add(value, timestamp)
+            rows.append((resolution, second, "cpu_usage", "", "", history.METRICS["cpu_usage"]["unit"])
+                        + bucket.values())
+        with closing(sqlite3.connect(self.path)) as database:
+            database.execute("PRAGMA journal_mode=WAL")
+            with database:
+                database.execute(history._CREATE)
+                database.execute("CREATE INDEX sensor_history_expiry ON sensor_history(resolution,second)")
+                database.executemany(history._UPSERT, rows)
+            return database.execute("SELECT * FROM sensor_history ORDER BY resolution,second").fetchall()
+
     def test_lazy_creation_and_empty_history_has_real_time_gaps(self):
         self.assertFalse(self.path.exists())
         result = self.query(points=600)
@@ -50,6 +68,161 @@ class HistoryStoreTests(unittest.TestCase):
         self.assertTrue(all(point["gap"] and point["mean"] is None for point in result["points"]))
         self.assertEqual(result["summary"]["count"], 0)
         self.assertFalse(self.path.exists(), "An empty query must not create a database")
+
+    def test_new_database_omits_expiry_index_without_changing_wal_or_durability(self):
+        self.store.record(self.sample(0, cpu_usage=0))
+        self.assertEqual(self.store._connection.execute("PRAGMA synchronous").fetchone()[0], 2)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("PRAGMA journal_mode").fetchone()[0], "wal")
+            self.assertEqual(database.execute("PRAGMA synchronous").fetchone()[0], 2)
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE type='index' "
+                                              "AND name='sensor_history_expiry'").fetchall(), [])
+        self.assertEqual(self.query()["summary"]["mean"], 0)
+
+    def test_legacy_expiry_index_migrates_with_first_write_without_losing_existing_rows(self):
+        old_rows = self.seed_legacy_index()
+        before = self.query()["summary"]
+        self.assertEqual((before["count"], before["missing_count"], before["mean"]), (1, 1, 0))
+        self.store.record(self.sample(6, cpu_usage=40))
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [])
+            self.assertEqual(database.execute("SELECT * FROM sensor_history WHERE second<? "
+                                              "ORDER BY resolution,second", (BASE,)).fetchall(), old_rows)
+        result = self.query()["summary"]
+        self.assertEqual((result["count"], result["missing_count"], result["mean"], result["minimum"], result["peak"]),
+                         (2, 1, 20, 0, 40))
+        self.store.close()
+        reopened = self.make_store()
+        self.assertEqual(reopened.query("cpu_usage", end=self.wall + 1)["summary"], result)
+
+    def test_expiry_index_drop_rolls_back_with_failed_insert_and_retries_without_recounting(self):
+        old_rows = self.seed_legacy_index()
+        with closing(sqlite3.connect(self.path)) as database:
+            database.execute("CREATE TRIGGER synthetic_insert_failure BEFORE INSERT ON sensor_history "
+                             "BEGIN SELECT RAISE(ABORT,'synthetic insert failure'); END")
+            database.commit()
+        self.assertTrue(self.store.record(self.sample(6, cpu_usage=40)))
+        self.assertEqual(self.store.status["state"], "unavailable")
+        self.assertFalse(self.store._schema_ready)
+        pending = self.store.status["pending_buckets"]
+        self.assertGreater(pending, 0)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [("sensor_history_expiry",)])
+            self.assertEqual(database.execute("SELECT * FROM sensor_history ORDER BY resolution,second").fetchall(), old_rows)
+            database.execute("DROP TRIGGER synthetic_insert_failure")
+            database.commit()
+        self.now = 10
+        self.assertFalse(self.store.flush())
+        self.assertEqual(self.store.status["pending_buckets"], pending)
+        self.now = 11
+        self.assertTrue(self.store.flush())
+        self.assertTrue(self.store._schema_ready)
+        self.assertEqual(self.store.status["write_transactions"], 1)
+        self.assertEqual(self.store.status["pending_buckets"], 0)
+        self.assertEqual(self.query()["summary"]["count"], 2)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [])
+
+    def test_denied_expiry_index_migration_keeps_pending_and_original_schema_until_retry(self):
+        old_rows = self.seed_legacy_index()
+        connection = self.store._connect()
+        connection.set_authorizer(lambda action, *args:
+                                  sqlite3.SQLITE_DENY if action == sqlite3.SQLITE_DROP_INDEX else sqlite3.SQLITE_OK)
+        self.store.record(self.sample(6, cpu_usage=40))
+        self.assertEqual(self.store.status["api"], "sqlite3.history.write")
+        self.assertEqual(self.store.status["errorcode"], sqlite3.SQLITE_AUTH)
+        self.assertEqual(self.store.status["write_transactions"], 0)
+        self.assertFalse(self.store._schema_ready)
+        self.assertGreater(self.store.status["pending_buckets"], 0)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT * FROM sensor_history ORDER BY resolution,second").fetchall(), old_rows)
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [("sensor_history_expiry",)])
+        connection.set_authorizer(None)
+        self.now = 11
+        self.assertTrue(self.store.flush())
+        self.assertEqual(self.store.status["state"], "ready")
+        self.assertEqual(self.query()["summary"]["count"], 2)
+
+    def test_retention_boundaries_are_unchanged_after_legacy_index_removal(self):
+        second_cutoff = BASE - history.SECOND_RETENTION
+        minute_cutoff = (BASE - history.RETENTION) // 60 * 60
+        observations = [(1, second_cutoff + delta, second_cutoff + delta, delta + 2)
+                        for delta in (-1, 0, 1)]
+        observations += [(60, minute_cutoff + delta, minute_cutoff + delta, delta + 61)
+                         for delta in (-60, 0, 60)]
+        self.seed_legacy_index(observations)
+        self.store.record(self.sample(0, cpu_usage=99))
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT second FROM sensor_history WHERE resolution=1 ORDER BY second")
+                             .fetchall(), [(second_cutoff,), (second_cutoff + 1,), (BASE,)])
+            self.assertEqual(database.execute("SELECT second FROM sensor_history WHERE resolution=60 ORDER BY second")
+                             .fetchall(), [(minute_cutoff,), (minute_cutoff + 60,), (BASE,)])
+
+    def test_clear_does_not_recreate_expiry_index_after_normal_migration_or_later_samples(self):
+        self.store = self.make_store(flush_interval=5)
+        self.store.record(self.sample(0, cpu_usage=10))
+        self.store.record(self.sample(2, cpu_usage=20))
+        self.assertTrue(self.store.clear())
+        self.assertEqual(self.query()["summary"]["count"], 0)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [])
+        self.store.record(self.sample(4, cpu_usage=40))
+        self.store.record(self.sample(7, cpu_usage=70))
+        self.assertEqual(self.query()["summary"]["count"], 2)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [])
+
+    def test_legacy_clear_as_first_write_removes_index_and_read_only_query_does_not(self):
+        self.seed_legacy_index()
+        self.assertEqual(self.query()["summary"]["count"], 1)
+        self.assertFalse(self.store._schema_ready)
+        self.assertIsNone(self.store._connection, "Read-only queries must not open the schema writer")
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [("sensor_history_expiry",)])
+        self.assertTrue(self.store.clear())
+        self.assertTrue(self.store._schema_ready)
+        self.assertEqual(self.query()["summary"]["count"], 0)
+        self.store.record(self.sample(2, cpu_usage=20))
+        self.assertEqual(self.query()["summary"]["mean"], 20)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [])
+
+    def test_failed_legacy_clear_rolls_back_index_drop_and_preserves_rows_and_pending_until_retry(self):
+        old_rows = self.seed_legacy_index()
+        with patch.object(self.store, "_connect", side_effect=OSError(28, "synthetic blocked write")):
+            self.store.record(self.sample(0, cpu_usage=10))
+        pending = self.store.status["pending_buckets"]
+        self.assertGreater(pending, 0)
+        with closing(sqlite3.connect(self.path)) as database:
+            database.execute("CREATE TRIGGER synthetic_clear_failure BEFORE DELETE ON sensor_history "
+                             "BEGIN SELECT RAISE(ABORT,'synthetic clear failure'); END")
+            database.commit()
+        self.assertFalse(self.store.clear())
+        self.assertFalse(self.store._schema_ready)
+        self.assertEqual(self.store.status["api"], "sqlite3.history.clear")
+        self.assertEqual(self.store.status["pending_buckets"], pending)
+        self.assertEqual(self.query()["summary"]["count"], 2)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT * FROM sensor_history ORDER BY resolution,second").fetchall(), old_rows)
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [("sensor_history_expiry",)])
+            database.execute("DROP TRIGGER synthetic_clear_failure")
+            database.commit()
+        self.assertTrue(self.store.clear())
+        self.assertEqual(self.store.status["state"], "ready")
+        self.assertEqual(self.store.status["pending_buckets"], 0)
+        self.assertEqual(self.query()["summary"]["count"], 0)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute("SELECT name FROM sqlite_master WHERE name='sensor_history_expiry'")
+                             .fetchall(), [])
 
     def test_one_hundred_hz_records_use_at_most_one_normal_transaction_per_second(self):
         for index in range(250):
@@ -62,6 +235,79 @@ class HistoryStoreTests(unittest.TestCase):
         for _ in range(20):
             self.assertFalse(self.store.flush())
         self.assertEqual(self.store.status["write_transactions"], 3)
+
+    def test_flush_interval_requires_finite_plain_numeric_seconds_within_bounds(self):
+        for interval in (True, False, None, "5", 0, .5, 60.01, math.nan, math.inf, -math.inf):
+            with self.subTest(interval=interval), self.assertRaises(ValueError):
+                self.make_store(flush_interval=interval)
+        for interval in (1, 1.5, 5, 60):
+            with self.subTest(interval=interval):
+                store = self.make_store(flush_interval=interval)
+                self.assertEqual(store._flush_interval, float(interval))
+
+    def test_five_second_batches_keep_pending_queries_live_between_two_second_samples(self):
+        store = self.make_store(flush_interval=5)
+        for second, value in ((0, 10), (2, 20), (4, 30)):
+            store.record(self.sample(second, cpu_usage=value))
+        self.assertEqual(store.status["write_transactions"], 1)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute(
+                "SELECT sum(count) FROM sensor_history WHERE resolution=1").fetchone()[0], 1)
+        for period in ("10m", "24h"):
+            result = store.query("cpu_usage", period=period, end=self.wall + 1)["summary"]
+            self.assertEqual((result["count"], result["mean"], result["minimum"], result["peak"]),
+                             (3, 20, 10, 30))
+            self.assertEqual(result["latest"], 30)
+        store.record(self.sample(6, cpu_usage=40))
+        self.assertEqual(store.status["write_transactions"], 2)
+        self.assertEqual(store.status["pending_buckets"], 0)
+        with closing(sqlite3.connect(self.path)) as database:
+            self.assertEqual(database.execute(
+                "SELECT sum(count) FROM sensor_history WHERE resolution=1").fetchone()[0], 4)
+
+    def test_pause_and_close_finish_five_second_tails_without_closing_on_pause(self):
+        store = self.make_store(flush_interval=5)
+        store.record(self.sample(0, cpu_usage=1))
+        store.record(self.sample(2, cpu_usage=3))
+        self.assertEqual(store.status["write_transactions"], 1)
+        self.assertTrue(store.flush_on_pause())
+        self.assertFalse(store.status["closed"])
+        self.assertEqual(store.status["pending_buckets"], 0)
+        self.assertEqual(store.status["write_transactions"], 2)
+        self.assertFalse(store.flush_on_pause(), "An empty repeated pause cannot create a transaction")
+        self.assertTrue(store.record(self.sample(3, cpu_usage=5)))
+        self.assertEqual(store.status["write_transactions"], 2)
+        store.close()
+        self.assertEqual(store.status["write_transactions"], 3)
+        self.assertFalse(store.flush_on_pause())
+        reopened = self.make_store(flush_interval=5)
+        result = reopened.query("cpu_usage", end=self.wall + 1)["summary"]
+        self.assertEqual((result["count"], result["mean"]), (3, 3))
+
+    def test_clear_resets_normal_gate_to_the_configured_interval(self):
+        store = self.make_store(flush_interval=5)
+        store.record(self.sample(0, cpu_usage=1))
+        store.record(self.sample(2, cpu_usage=2))
+        self.assertTrue(store.clear())
+        self.assertEqual(store.status["write_transactions"], 2)
+        for second in (3, 6):
+            store.record(self.sample(second, cpu_usage=second))
+        self.assertEqual(store.status["write_transactions"], 2)
+        self.assertEqual(store.query("cpu_usage", end=self.wall + 1)["summary"]["count"], 2)
+        store.record(self.sample(7, cpu_usage=7))
+        self.assertEqual(store.status["write_transactions"], 3)
+        self.assertEqual(store.status["pending_buckets"], 0)
+
+    def test_five_second_batches_do_not_recount_cached_source_observations(self):
+        store = self.make_store(flush_interval=5)
+        for second in (0, 2, 4):
+            store.record(self.sample(second, cpu_temp=50,
+                                     metric_timestamps={"cpu_temp": BASE}))
+        self.assertEqual(store.query("cpu_temp", end=self.wall + 1)["summary"]["count"], 1)
+        store.record(self.sample(6, cpu_temp=51, metric_timestamps={"cpu_temp": BASE + 6}))
+        self.assertEqual(store.status["write_transactions"], 2)
+        result = store.query("cpu_temp", end=self.wall + 1)["summary"]
+        self.assertEqual((result["count"], result["mean"]), (2, 50.5))
 
     def test_minute_rollups_preserve_weighted_mean_extrema_and_actual_zero(self):
         for index in range(100):
@@ -312,6 +558,14 @@ class HistoryStoreTests(unittest.TestCase):
         self.assertEqual(self.query()["summary"]["count"], 0)
 
     def test_concurrent_query_snapshot_does_not_block_writer_or_double_count_pending_tail(self):
+        self._assert_concurrent_query_snapshot(1)
+
+    def test_five_second_concurrent_query_keeps_one_snapshot_when_pending_is_flushed(self):
+        self._assert_concurrent_query_snapshot(5)
+
+    def _assert_concurrent_query_snapshot(self, interval):
+        if interval != 1:
+            self.store = self.make_store(flush_interval=interval)
         self.store.record(self.sample(0, cpu_usage=1))
         self.store.record(self.sample(.1, cpu_usage=3))
         self.query()  # Open the independent read connection before instrumenting it.
@@ -352,7 +606,7 @@ class HistoryStoreTests(unittest.TestCase):
         thread.start()
         try:
             self.assertTrue(reading.wait(3))
-            self.now = 1
+            self.now = interval
             self.assertTrue(self.store.flush(), "A slow history reader must not hold the worker lock")
         finally:
             release.set()

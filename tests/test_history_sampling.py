@@ -155,6 +155,36 @@ class HistorySamplingTests(unittest.TestCase):
         self.assertEqual(reading["metric_sources"]["cpu_power"], "HWiNFO VSB")
         self.assertEqual(reading["metric_timestamps"]["cpu_power"], BASE - .5)
 
+    def test_asus_cpu_bridge_samples_are_deduplicated_and_fallback_keeps_its_time(self):
+        from cpu_temperature import AsusCpuTemperature
+        from test_cpu_temperature import snapshot
+
+        memory = SimpleNamespace(read=lambda: snapshot(stamp=BASE), close=lambda: None)
+        bridge = AsusCpuTemperature(api=memory, app_pid=123, enabled=True,
+                                    clock=lambda: self.now, wall_clock=lambda: self.wall)
+        self.stack.callback(bridge.close)
+        self.sampler.cpu_thermal = bridge
+        self.config["widgets"]["cpu"]["content"] = ["cpu_temp"]
+        history = HistoryStore(Path(self.folder) / "temperature.sqlite3", metrics=("cpu_temp",), scopes=(),
+                               clock=lambda: self.now, wall_clock=lambda: self.wall)
+        self.stack.callback(history.close)
+        for now in (0, .01, .1, 1):
+            reading = self.sample(now)
+            history.record(reading)
+            self.assertEqual(reading["cpu_temp"], 48.5)
+            self.assertEqual(reading["metric_timestamps"]["cpu_temp"], BASE)
+            self.assertEqual(reading["metric_sources"]["cpu_temp"], "ASUS COM · CPU")
+        self.assertEqual(history.query("cpu_temp", end=BASE+2)["summary"]["count"], 1)
+        memory.read = lambda: snapshot(stamp=0, state=2, raw=0, result=-2147024891)
+        self.extra["cpu_temp"] = 51
+        self.extra.sample_times["cpu_temp"] = BASE + 1.5
+        reading = self.sample(2)
+        self.assertEqual(reading["cpu_temp"], 51)
+        self.assertEqual(reading["metric_sources"]["cpu_temp"], "HWiNFO VSB")
+        self.assertEqual(reading["metric_timestamps"]["cpu_temp"], BASE+1.5)
+        self.native.assert_not_called()
+        self.process.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

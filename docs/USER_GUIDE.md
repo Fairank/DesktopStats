@@ -20,6 +20,10 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 8. 指标清单保留完整名称和实时值，可点选、排序或移除；数据来源与单位、位置等较少使用的选项按需展开。调整皮肤、透明度或圆角时，现有桌面组件即时预览；点击固定底部的 **应用到桌面** 或 Ctrl+S 才保存。关闭整个设置窗口会恢复已保存外观，未保存草稿仍可重新打开继续修改。布局、设备、采样等其它设置在应用后生效。
 9. 在 **桌面组件 → 桌面默认设置** 调整组件的全局材质、大小、布局和磁吸；**偏好** 首屏设置语言、深浅外观、登录启动及检测间隔，**传感器与来源** 查看真实通道和来源。托盘“退出”完全关闭软件。
 
+全屏游戏或应用位于前台时，顶部栏会在被覆盖的屏幕上自动隐藏，关联的详情浮窗和提示也会关闭；切回该屏幕的普通桌面窗口后恢复。启动时即检查已运行的全屏窗口。避让期间保留采样与本地历史，隐藏栏的动效停止，不增加周期性的窗口检查。
+
+设置隐藏或最小化时，实时预览和额外传感器检查暂停，常规采样继续按已保存的间隔运行。最小化保留未确认分组、筛选与滚动位置；恢复窗口立即显示最近的读数。
+
 ### 顶部栏组合读数
 
 选中 CPU 或 GPU 指标后，打开 **组合指标**。可一键加入使用率、温度与功耗，也可从同一硬件的读数中选择最多四项。主指标保留在首位，其余项可调整顺序或移除；清除附加项即可回到原来的单项显示。每组沿用同一个显卡选择、单位和显示样式，拖动、溢出收纳与悬停都以整组为单位。缺测项显示“—”，不会从另一块显卡借数。混合温度、功率的组合使用数字、图标或趋势等样式，不将不同单位当成同一个百分比仪表。
@@ -52,7 +56,7 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 目前记录 CPU、内存、电池、已支持的功率与风扇指标，以及明确设备标识的显卡和网卡通道。扩展采集器和磁盘通道暂未纳入持久历史。设备断开后仍保留已经选择的历史，不自动混入另一设备。数据库位于独立用户数据目录的 `sensor-history.sqlite3`，不上传；磁盘上的设备标识采用哈希，不写设备名称或地址。
 
-折线连接实际区间均值，不使用平滑曲线；每段细线保留真实最低值到峰值，悬停可查看具体时间、均值及范围。刷新时保持固定时间分组，避免旧样本仅因时间窗移动就重新混成不同均值；首尾分组仍裁剪到查询范围。空白代表缺测，零仍是有效读数。数据按来源时间戳去重，缓存重复读取不算新样本。一秒桶保留一小时，分钟汇总保留七天；正常写盘最多每秒一个批次。页面最多约每两秒查询一次，不随每个快速采样事件反复绘制。存储失败会保留错误和有界内存缓冲，实时采样继续运行；退出时尝试保存剩余记录。
+折线连接实际区间均值，不使用平滑曲线；每段细线保留真实最低值到峰值，悬停可查看具体时间、均值及范围。刷新时保持固定时间分组，避免旧样本仅因时间窗移动就重新混成不同均值；首尾分组仍裁剪到查询范围。空白代表缺测，零仍是有效读数。数据按来源时间戳去重，缓存重复读取不算新样本。一秒桶保留一小时，分钟汇总保留七天；普通写盘采用五秒批次门槛（两秒采样时约六秒一次），查询会合并未提交尾部；暂停记录或正常退出时尝试保存尾部。意外终止可能丢失最近尚未提交的一批数据。页面最多约每两秒查询一次，不随每个快速采样事件反复绘制。存储失败会保留错误和有界内存缓冲，实时采样继续运行；退出时尝试保存剩余记录。
 
 组件列表旁的 **场景** 提供日常办公、性能观察和电池续航方案。先点击卡片看真实组件的当前读数预览，再选择 **使用方案**；预览本身不保存。场景只替换桌面组件与顶部栏设置，保留语言、采样、登录启动等通用偏好。内置方案沿用当前屏幕和材质；自存方案恢复保存时的组件与栏设置。尚有布局草稿时会在面板内提示确认。**保存布局** 可保留最多八个自定义方案，名称最多二十个字，场景文件共用 8 MiB 的 UTF-8 大小上限；自定义卡片可通过垃圾桶移除，需要行内再次确认。**上次布局** 恢复场景切换前的已保存布局，不是恢复未保存输入。方案保存在独立的 `scenes.json`，不随公开源码导出。
 
@@ -91,6 +95,87 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 Per-user installation: %LOCALAPPDATA%\Programs\DesktopStats. No drivers or administrator rights are installed. Desktop and Start menu shortcuts are included. Start at login is optional and off by default. Uninstall via Windows Settings or Uninstall.cmd; preferences are retained for a reinstall.
 
 ## Available readings
+
+### Runtime resource behavior
+
+The native GUI delivers readings directly in memory. Periodic legacy
+`state.txt`/`latest.json` exports are disabled for this path; old files can remain
+on disk with their old timestamps. `--headless` and standalone sampler operation
+retain those exports. Use the existing current-user IPC `--status` or
+`--diagnose JSON` for a fresh on-demand report.
+
+Disk throughput does not request volume-capacity queries. Capacity metrics and
+explicit source inspection still request them. Inactive/hidden/minimized history
+pages do not project device options or query the store; selection metadata is
+restored on reopening. Decorative icon cadence, assets and visible interpolation
+remain in use, with unused channel calculations skipped.
+
+The native history backend uses a five-second normal write gate. With the default
+two-second sampling interval, commits normally occur about six seconds apart.
+Every accepted observation is still aggregated, and queries merge the pending
+memory tail with the database. Explicit recording pause and normal shutdown
+attempt to save pending data. Unexpected process termination can lose the most
+recent uncommitted batch; a paused or failing writer does not establish a strict
+five-second durability guarantee. The pending buffer and existing retention
+limits remain bounded. This batching does not change sensor polling frequency.
+
+### ASUS CPU temperature bridge
+
+The optional local adaptation can read the already-running ASUS COM service's
+exact `CPU` sensor (`0x06030012`, decimal `100859922`) on the verified ASUS desktop.
+The source is labelled **ASUS COM · CPU**. It does not claim a package or core
+temperature. The tenths-Celsius convention is corroborated by the original
+[client implementation and protocol notes](https://github.com/fjorge9-arch/gmk104-aura/blob/6809c252a14abf656874d443d5b10979a196d2f9/python/gmk104aura/cpu_temp.py);
+this is client evidence, not an ASUS specification. Only the documented sensor
+ID plus exact name is accepted; arbitrary motherboard/ACPI temperatures are not
+substituted. The app does not copy that client's monitoring-start or refresh code.
+
+An ordinary process cannot activate this machine's ASUS COM interface. Therefore
+an explicitly authorized **separate elevated bridge** reads the cache; the main
+Desktop Stats app stays unelevated. The bridge checks the existing `asComSvc`
+service is running and locates the unique fixed CPU sensor once. Every two
+seconds it obtains a fresh `Sensors` collection, reads that fixed index, verifies
+the exact ID/name and reads `current`, then releases the snapshot. Retaining only
+an old sensor view produced unchanged readings in the machine comparison while
+reacquired views changed. The vendor's internal cache policy is undocumented;
+this implementation uses the observed updating path rather than assuming that
+a successful getter alone proves freshness. It never calls setters,
+monitoring startup, refresh, fan controls, or service start/stop. There are no new
+drivers, services, scheduled tasks or startup entries.
+
+The bridge publishes a 64-byte seqlock snapshot in current-session shared memory.
+The current user receives read access only; the mapping includes the user SID
+and owning app PID. The bridge verifies the installed executable path, same user
+and process creation time, then exits when that app process exits. No polling
+files, HTTP port or arbitrary command interface is used. Launching a second
+bridge for the same app is refused. Reopening the app requires a fresh explicit
+bridge launch; neither the application nor the bridge requests elevation itself.
+
+To enable it for one running application session, run this PowerShell code and
+approve Windows' UAC prompt:
+
+~~~powershell
+$statsExe = Join-Path $env:LOCALAPPDATA 'Programs\DesktopStats\DesktopStats.exe'
+$statsInstances = @(Get-Process DesktopStats -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -eq $statsExe })
+if ($statsInstances.Count -ne 1) { throw 'Start exactly one installed Desktop Stats instance first.' }
+$statsBridge = Join-Path (Split-Path $statsExe) '_internal\cpu-temperature\AsusCpuTemperatureBridge.exe'
+Start-Process -FilePath $statsBridge -WindowStyle Hidden -Verb RunAs `
+    -ArgumentList @('--app-pid', [string]$statsInstances[0].Id)
+~~~
+
+Successful getter time is an observation of the ASUS service cache, not a promise
+about the hardware's internal sampling rate. The ordinary sampler reads shared
+memory at most once per two seconds; faster UI requests reuse the same observation
+timestamp. Invalid, future, failed or over-eight-second-old snapshots produce a
+missing value. A persistent COM failure clears the snapshot immediately and waits
+60 seconds before reconnecting. The existing ASUS ACPI and HWiNFO fallbacks remain
+available. Source diagnostics expose the fixed API name and actual error code.
+
+For a source rebuild, run
+`python tools/build_cpu_temperature_bridge.py --self-test` before `tools/build.py`.
+The self-test uses synthetic anonymous memory only, without COM, hardware or
+elevation. The pinned original collector's enabled hardware groups are unchanged.
 
 The gallery offers editable templates, fixed readings and device-specific channels discovered by the bundled sensor engine. These are choices in the picker, not permanently visible settings.
 

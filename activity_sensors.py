@@ -6,6 +6,8 @@ import time
 
 import psutil
 
+from network_snapshot import NetworkSnapshot
+
 
 class _QueryFailure(RuntimeError):
     """Carry API facts without exception messages, filenames or adapter details."""
@@ -66,22 +68,55 @@ class Rates:
 
 
 class Activity:
-    def __init__(self):
+    def __init__(self, *, network_reader=None):
+        self.network_reader = NetworkSnapshot() if network_reader is None else network_reader
+        self._network_identities = {}
+        self._network_mode = None
         self.network_rates = Rates()
         self.disk_rates = Rates()
         self.volumes = []
         self.next_volumes = 0
 
     def network(self, now):
-        counters = _query(
-            "psutil.net_io_counters", psutil.net_io_counters, pernic=True, nowrap=False
-        )
-        statuses = _query("psutil.net_if_stats", psutil.net_if_stats)
-        amounts = {
-            name: (item.bytes_recv, item.bytes_sent)
-            for name, item in counters.items()
-            if name in statuses and statuses[name].isup and "loopback" not in name.lower()
-        }
+        try:
+            snapshot = self.network_reader.read()
+        except (OSError, RuntimeError, psutil.Error) as error:
+            raise _QueryFailure(getattr(error, "api", "Windows network snapshot"), error) from None
+        if snapshot is None:
+            mode, identities = "psutil", {}
+            counters = _query(
+                "psutil.net_io_counters", psutil.net_io_counters, pernic=True, nowrap=False
+            )
+            statuses = _query("psutil.net_if_stats", psutil.net_if_stats)
+            amounts = {
+                name: (item.bytes_recv, item.bytes_sent)
+                for name, item in counters.items()
+                if name in statuses and statuses[name].isup and "loopback" not in name.lower()
+            }
+        else:
+            mode = "native"
+            try:
+                amounts, identities = {}, {}
+                for name, item in snapshot.items():
+                    if (not isinstance(name, str) or type(item.isup) is not bool
+                            or any(type(value) is not int or not 0 <= value < 2**64
+                                   for value in (item.bytes_recv, item.bytes_sent))):
+                        raise ValueError("Invalid network reading")
+                    if item.isup and "loopback" not in name.lower():
+                        amounts[name] = (item.bytes_recv, item.bytes_sent)
+                        identity = getattr(item, "identity", None)
+                        if identity is not None:
+                            identities[name] = identity
+            except (AttributeError, TypeError, ValueError, OverflowError):
+                error = OSError(13, "Invalid network snapshot")
+                error.winerror = 13
+                raise _QueryFailure("Windows network snapshot", error) from None
+        if self._network_mode is not None and self._network_mode != mode:
+            self.network_rates.clear()
+        for name, identity in identities.items():
+            if name in self._network_identities and identity != self._network_identities[name]:
+                self.network_rates.previous.pop(name, None)
+        self._network_mode, self._network_identities = mode, identities
         rates = self.network_rates.sample(amounts, now)
         devices = {}
         for name, item in amounts.items():
@@ -191,9 +226,17 @@ class Activity:
                     result["networks" if source == "network" else "disks"] = {}
                     if source == "network":
                         result["network_active"] = None
+                        self._network_identities, self._network_mode = {}, None
             else:
                 rates.clear()
-        if "disk" in needed or inspecting:
+                if source == "network":
+                    self._network_identities, self._network_mode = {}, None
+                    status[source] = dict(state="not_requested", requested=False)
+                    result.update(networks={}, network_active=None)
+        # Throughput counters and volume capacity are independent demands.
+        # The caller supplies "volumes" only for actual capacity metrics;
+        # disk read/write widgets must not query every mounted drive's space.
+        if "volumes" in needed or inspecting:
             try:
                 current = self.storage(now)
                 status.update(current.pop("provider_status"))
@@ -201,4 +244,9 @@ class Activity:
             except _QueryFailure as error:
                 status["volumes"] = dict(state="query_failed", requested=True, error=error.facts)
                 result["volumes"] = {}
+        else:
+            status["volumes"] = dict(state="not_requested", requested=False)
+            # Keep only the bounded mount-point discovery cache internally.
+            # No previous capacity values or errors belong to this new sample.
+            result["volumes"] = {}
         return result

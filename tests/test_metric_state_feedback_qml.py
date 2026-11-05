@@ -252,7 +252,9 @@ Window {id:scene;width:96;height:64;visible:false;color:dark?"#20242b":"white";
             self.advance(100)
         for channel in ("load", "thermal", "energy", "inbound", "outbound", "spin"):
             value = state[channel] if state.get("available") is True else None
-            expected = value if type(value) in (int, float) and 0 <= value <= 1 else 0
+            supported = (self.icon.property("name") == "fan" if channel == "spin"
+                         else self.icon.property("supports" + channel.capitalize()))
+            expected = value if supported and type(value) in (int, float) and 0 <= value <= 1 else 0
             self.assertAlmostEqual(self.icon.property("displayed" + channel.capitalize()), expected, delta=.002)
 
     def hardware_frame(self, phase=.075):
@@ -1080,6 +1082,144 @@ Window { id:scene;width:360;height:100;visible:false;color:"white";
         self.assertGreaterEqual(self.changed_pixels(first, stages[1][1]), 2)
         self.assertGreaterEqual(self.changed_pixels(stages[1][1], last), 1)
         self.assertGreaterEqual(self.changed_pixels(first, last), 2)
+
+    def test_composite_channels_follow_each_glyph_and_do_not_preheat_unused_state(self):
+        cases = (
+            ("cpu", "processor", {"load", "thermal", "energy"}),
+            ("gpu", "processor", {"load", "thermal", "energy"}),
+            ("memory", "memory", {"load"}), ("vram", "memory", {"load"}),
+            ("temperature", "processor", {"thermal"}),
+            ("power", "processor", {"energy"}), ("voltage", "processor", {"energy"}),
+            ("network", "network", {"inbound", "outbound"}),
+            ("download", "network", {"inbound"}), ("upload", "network", {"outbound"}),
+            ("disk_read", "disk", {"inbound"}), ("disk_write", "disk", {"outbound"}),
+            ("disk", "storage", {"load", "thermal", "inbound", "outbound"}),
+            ("battery", "battery", {"load", "inbound", "outbound"}),
+            ("time", "battery", {"load", "inbound", "outbound"}),
+            ("frequency", "processor", {"load"}), ("grid", "volume", {"load"}),
+            ("custom", "volume", {"load"}), ("fan", "fan", {"spin"}),
+        )
+        channels = ("load", "thermal", "energy", "inbound", "outbound", "spin")
+        for glyph, profile, expected_channels in cases:
+            with self.subTest(glyph=glyph):
+                self.configure(glyph=glyph, choice="auto", hardware=self.state(
+                    profile, **dict.fromkeys(channels, .6)))
+                self.evaluate("resetFeedback()")
+                for _ in range(3):
+                    self.advance(34)
+                    for channel in channels:
+                        self.assertEqual(self.icon.property("displayed" + channel.capitalize()),
+                                         .6 if channel in expected_channels else 0, channel)
+
+    def test_shared_smoothing_is_exactly_equivalent_to_the_previous_active_state_and_phases(self):
+        # Independent reference of the former elapsed-based recurrence. It
+        # deliberately computes exp separately for each old channel, including
+        # channels which could never paint. Only painted state is compared;
+        # discarded, previously invisible state is covered by the mask test.
+        reference = '''JSON.stringify((function() {
+            const e=Math.max(0,Math.min(136,34));
+            function oldStep(c,t) {
+                if(!(t>0))return 0;
+                const n=c+(t-c)*(1-Math.exp(-e/200));
+                return Math.abs(n-t)<.001?t:n;
+            }
+            const keys=["Load","Thermal","Energy","Inbound","Outbound","Spin"], out={};
+            const before=[displayedLoad,displayedThermal,displayedEnergy,displayedInbound,displayedOutbound,displayedSpin];
+            const targets=[loadTarget,thermalTarget,energyTarget,inboundTarget,outboundTarget,spinTarget];
+            const supported=[supportsLoad,supportsThermal,supportsEnergy,supportsInbound,supportsOutbound,name==="fan"];
+            keys.forEach((k,i)=>out["displayed"+k]=oldStep(before[i],targets[i]));
+            out.displayedTemperature=thermometerEnabled?oldStep(displayedTemperature,thermometerTarget):displayedTemperature;
+            if(name==="fan") {
+                out.displayedLevel=spinChannelActive?out.displayedSpin:0;
+                const activity=Math.max(0,Math.min(1,out.displayedSpin));
+                const rps=speed*(.08+1.52*(1-Math.exp(-3*activity))/(1-Math.exp(-3)));
+                out.spinPhase=spinChannelActive?(spinPhase+Math.min(.1,e*rps/1000))%1:0;
+                out.phase=phase;
+            } else {
+                out.displayedLevel=Math.max(loadActive?out.displayedLoad:0,thermalActive?out.displayedThermal:0,
+                    energyActive?out.displayedEnergy:0,inboundActive?out.displayedInbound:0,outboundActive?out.displayedOutbound:0);
+                out.loadPhase=loadActive?(loadPhase+e*speed*(.55+1.2*out.displayedLoad)/2200)%1:0;
+                const heat=Math.max(0,Math.min(1,(out.displayedThermal-.28)/.55));
+                const hot=!thermometerGlyph && supportsThermal && thermalTarget!==null && heat>0;
+                out.thermalArcPhase=hot?(thermalArcPhase+e*speed/(2400/(.82+.36*heat)))%1:0;
+                out.energyPhase=energyActive?(energyPhase+e*speed*(.82+.36*out.displayedEnergy)/2400)%1:0;
+                out.inboundPhase=inboundActive?(inboundPhase+e*speed*(.82+.36*out.displayedInbound)/2400)%1:0;
+                out.outboundPhase=outboundActive?(outboundPhase+e*speed*(.82+.36*out.displayedOutbound)/2400)%1:0;
+                out.phase=(phase+e/(2400/(speed*(.82+.36*out.displayedLevel))))%1;
+            }
+            keys.forEach((k,i)=>{if(!supported[i])delete out["displayed"+k]});
+            return out;
+        })())'''
+        for glyph, profile in (("cpu", "processor"), ("memory", "memory"),
+                               ("temperature", "processor"), ("power", "processor"),
+                               ("network", "network"), ("download", "network"),
+                               ("battery", "battery"), ("time", "battery"), ("fan", "fan")):
+            with self.subTest(glyph=glyph):
+                channels = ("load", "thermal", "energy", "inbound", "outbound", "spin")
+                self.configure(glyph=glyph, choice="auto", hardware=self.state(profile, **dict.fromkeys(channels, .2)))
+                for target in (.73, .45, .91, .0015, .6):
+                    self.configure(hardware=self.state(profile, **dict.fromkeys(channels, target)))
+                    for _ in range(4):
+                        expected = json.loads(self.evaluate(reference))
+                        self.advance(34)
+                        for key, value in expected.items():
+                            self.assertEqual(self.icon.property(key), value, (glyph, target, key))
+
+    def test_glyph_changes_preserve_shared_channels_and_only_initialize_new_supported_channels(self):
+        self.configure(glyph="cpu", choice="auto", hardware=self.state("processor",
+            load=.3, thermal=.7, energy=.5, inbound=.6, outbound=.4, spin=.8))
+        self.configure(hardware=self.state("processor", load=.8, thermal=.9, energy=.7,
+            inbound=.6, outbound=.4, spin=.8))
+        self.advance(34)
+        shared = {key: self.icon.property(key) for key in
+                  ("displayedLoad", "displayedThermal", "displayedEnergy", "loadPhase", "thermalArcPhase", "energyPhase", "phase")}
+        self.window.setProperty("glyph", "gpu")
+        self.stop_clock()
+        for key, value in shared.items():
+            self.assertEqual(self.icon.property(key), value, key)
+        self.window.setProperty("glyph", "network")
+        self.stop_clock()
+        for channel in ("Load", "Thermal", "Energy", "Spin"):
+            self.assertEqual(self.icon.property("displayed" + channel), 0)
+        self.assertEqual(self.icon.property("displayedInbound"), .6)
+        self.assertEqual(self.icon.property("displayedOutbound"), .4)
+        self.advance(34)
+        inbound = (self.icon.property("displayedInbound"), self.icon.property("inboundPhase"))
+        self.window.setProperty("glyph", "download")
+        self.stop_clock()
+        self.assertEqual((self.icon.property("displayedInbound"), self.icon.property("inboundPhase")), inbound)
+        self.assertEqual(self.icon.property("displayedOutbound"), 0)
+        self.assertEqual(self.icon.property("outboundPhase"), 0)
+        self.window.setProperty("glyph", "fan")
+        self.stop_clock()
+        self.assertEqual(self.icon.property("displayedSpin"), .8)
+        self.assertEqual(self.icon.property("displayedInbound"), 0)
+        self.advance(34)
+        self.assertGreater(self.icon.property("spinPhase"), 0)
+
+    def test_composite_zero_and_missing_channels_clear_without_losing_other_activity_then_recover(self):
+        self.configure(glyph="cpu", choice="auto", hardware=self.state("processor", load=.4, thermal=.8, energy=.6))
+        self.advance(34)
+        self.configure(hardware=self.state("processor", load=0, thermal=.8, energy=.6))
+        self.assertTrue(self.icon.property("animationRunning"))
+        self.assertEqual(self.icon.property("displayedLoad"), 0)
+        self.assertEqual(self.icon.property("loadPhase"), 0)
+        self.advance(34)
+        self.assertGreater(self.icon.property("thermalArcPhase"), 0)
+        self.assertGreater(self.icon.property("energyPhase"), 0)
+        self.configure(hardware=self.state("processor"))
+        self.assertFalse(self.icon.property("animationRunning"))
+        for key in ("displayedLoad", "displayedThermal", "displayedEnergy", "phase", "loadPhase", "thermalArcPhase", "energyPhase"):
+            self.assertEqual(self.icon.property(key), 0, key)
+        self.configure(hardware=self.state("processor", load=None, thermal=.7, energy=.3))
+        self.assertTrue(self.icon.property("animationRunning"))
+        self.advance(34)
+        self.assertEqual(self.icon.property("displayedLoad"), 0)
+        self.assertEqual(self.icon.property("displayedThermal"), .7)
+        self.assertGreater(self.icon.property("displayedEnergy"), 0)
+        for _ in range(40):
+            self.advance(34)
+        self.assertEqual(self.icon.property("displayedEnergy"), .3)
 
     def test_zero_missing_off_and_reduced_motion_return_to_actual_static_icon_then_restore(self):
         for field, value, restored in (("reading", 0, .6), ("reading", None, .6),

@@ -98,6 +98,31 @@ class HistoryRecoveryTests(unittest.TestCase):
         self.assertEqual(pending["status"]["api"], "sqlite3.history.write")
         self.assertEqual(pending["status"]["state"], "unavailable")
 
+    def test_failed_five_second_pause_flush_retains_pending_and_source_deduplication(self):
+        store = self.make_store(flush_interval=5)
+        store.record(dict(time=self.wall, cpu_temp=50, metric_timestamps={"cpu_temp": self.wall}))
+        self.now = 2
+        self.wall = BASE + 2
+        store.record(dict(time=self.wall, cpu_temp=51, metric_timestamps={"cpu_temp": self.wall}))
+        pending = store.status["pending_buckets"]
+        with patch.object(store, "_connect", side_effect=OSError(28, "synthetic full disk")):
+            self.assertFalse(store.flush_on_pause())
+        self.assertEqual(store.status["pending_buckets"], pending)
+        self.assertEqual(store.status["api"], "sqlite3.history.write")
+        self.assertEqual(store.status["errorcode"], 28)
+        self.assertFalse(store.status["closed"])
+        self.now = 3
+        self.wall = BASE + 3
+        store.record(dict(time=self.wall, cpu_temp=51, metric_timestamps={"cpu_temp": BASE + 2}))
+        result = store.query("cpu_temp", end=self.wall + 1)
+        self.assertTrue(result["read_ok"])
+        self.assertEqual((result["summary"]["count"], result["summary"]["mean"]), (2, 50.5))
+        self.assertEqual(result["status"]["api"], "sqlite3.history.write")
+        self.assertTrue(store.flush_on_pause(), "Explicit pause retry is exempt from the normal/error gate")
+        self.assertEqual(store.status["pending_buckets"], 0)
+        self.assertEqual(store.status["state"], "ready")
+        self.assertEqual(store.query("cpu_temp", end=self.wall + 1)["summary"]["count"], 2)
+
     def test_successful_read_recovers_a_transient_read_error_without_a_new_write(self):
         self.store.record(dict(time=self.wall, cpu_usage=20))
         self.store.query("cpu_usage", end=self.wall + 1)

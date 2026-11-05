@@ -6,6 +6,8 @@ ColumnLayout {
     id: root
     objectName: "topBarSettings"
     property bool active: false
+    // Pausing readings must not run the editor's cancel/close handlers.
+    property bool readingsActive:active
     property Item headerHost: null
     property Item scrollHost: null
     property real viewportY: 0
@@ -14,12 +16,12 @@ ColumnLayout {
     property bool barOptionsOpen: false
     property bool placementOpen: false
     readonly property var config: stats.draft.top_bar
-    readonly property var rows: { const revision = stats.sensorRevision; const draft = stats.draft; return active ? stats.topBarDraftRows() : [] }
+    property var rows:[]
     readonly property var selected: config.items.find(item => item.id === selectedItem)
     readonly property var selectedRow: rows.find(item => item.id === selectedItem) || ({})
     readonly property bool groupPopupOpen:selectedInspector.groupPopupOpen
     readonly property bool pendingGroupEdits:selectedInspector.pendingGroupEdits
-    readonly property var sensorChoices:{if(!root.active || !picker.opened)return [];const revision=stats.sensorRevision;return stats.sensorRows}
+    property var sensorChoices:[]
     readonly property bool sideInspector: width >= 740
     readonly property bool unapplied: JSON.stringify(config) !== JSON.stringify(stats.saved.top_bar)
     readonly property var liveStatus: stats.topBarStatus || ({})
@@ -52,15 +54,20 @@ ColumnLayout {
     Theme { id: ui }
 
     function rowFor(identifier) { return rows.find(row => row.id === identifier) || ({}) }
+    function refreshRows(){if(!active){rows=[];return}if(readingsActive)rows=stats.topBarDraftRows()}
+    function refreshSensorChoices(){if(!active || !picker || !picker.opened){sensorChoices=[];return}if(readingsActive)sensorChoices=stats.sensorRows}
+    onReadingsActiveChanged:{refreshRows();refreshSensorChoices();if(readingsActive)Qt.callLater(root.refreshDesignExamples)}
+    Component.onCompleted:refreshRows()
+    Connections {target:stats;enabled:root.readingsActive && root.active;function onSensorsChanged(){root.refreshRows();root.refreshSensorChoices()}function onDraftChanged(){root.refreshRows();root.refreshSensorChoices()}}
     function refreshDesignExamples(){
-        if(!active){designExampleRows=[];return}
+        if(!active || !readingsActive)return
         const examples=rows.slice(0,2).map(row=>{
             const leaf=row.grouped && (row.group_rows || []).length?row.group_rows[0]:row
             return Object.assign({},leaf,{grouped:false,group_rows:[],style:"icon_value",placement:"right"})
         })
         if(JSON.stringify(examples)!==JSON.stringify(designExampleRows))designExampleRows=examples
     }
-    Timer {objectName:"topBarDesignSamplesTimer";interval:2000;running:root.active;repeat:true;triggeredOnStart:true;onTriggered:root.refreshDesignExamples()}
+    Timer {objectName:"topBarDesignSamplesTimer";interval:2000;running:root.active && root.readingsActive;repeat:true;triggeredOnStart:true;onTriggered:root.refreshDesignExamples()}
     function chooseMetric(identifier) {
         if(identifier && stats.addTopBarMetric(identifier)){
             const items=stats.draft.top_bar.items
@@ -139,7 +146,7 @@ ColumnLayout {
         if (!config.items.some(item => item.id === selectedItem)) selectedItem = config.items.length ? config.items[0].id : ""
         Qt.callLater(root.refreshDesignExamples)
     }
-    onActiveChanged: {if (!active) {cancelDrag();selectedInspector.cancelGroupEditing();designExampleRows=[]}else Qt.callLater(root.refreshDesignExamples)}
+    onActiveChanged: {refreshRows();refreshSensorChoices();if (!active) {cancelDrag();selectedInspector.cancelGroupEditing();designExampleRows=[]}else Qt.callLater(root.refreshDesignExamples)}
     Keys.onShortcutOverride: function(event) { if (dragging && event.key === Qt.Key_Escape) event.accepted = true }
     Keys.onEscapePressed: function(event) { if (dragging || draggedId) { cancelDrag(); event.accepted = true } }
     Timer {
@@ -450,7 +457,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignTop
             implicitHeight: selectedInspector.implicitHeight
             visible: !!root.selected
-            TopBarItemInspector { id: selectedInspector; objectName: "topBarSelectedInspector"; design:root.selectedDesign; width: parent.width; y: root.sideInspector ? Math.max(0, Math.min(Math.max(0, metricsBody.height - height), root.viewportY + root.stickyHeaderInset + 8 - metricsBody.y)) : 0; item: root.selected || null; row: root.selectedRow; index: root.config.items.findIndex(item => item.id === root.selectedItem); count: root.config.items.length; narrow: !root.sideInspector; onRevealRequested:target=>root.revealInspector(target) }
+            TopBarItemInspector { id: selectedInspector; objectName: "topBarSelectedInspector"; readingsActive:root.active && root.readingsActive; design:root.selectedDesign; width: parent.width; y: root.sideInspector ? Math.max(0, Math.min(Math.max(0, metricsBody.height - height), root.viewportY + root.stickyHeaderInset + 8 - metricsBody.y)) : 0; item: root.selected || null; row: root.selectedRow; index: root.config.items.findIndex(item => item.id === root.selectedItem); count: root.config.items.length; narrow: !root.sideInspector; onRevealRequested:target=>root.revealInspector(target) }
         }
     }
     Text { Layout.fillWidth: true; text: ui.t("悬停查看详情，拖动调整顺序。更多指标收在 +N 中。"); textFormat: Text.PlainText; color: ui.muted; font.family: ui.fontFamily; font.pixelSize: 11; wrapMode: Text.WordWrap }
@@ -501,9 +508,9 @@ ColumnLayout {
             }
             ActionButton {Layout.alignment:Qt.AlignRight;text:ui.t("取消");quiet:true;onClicked:picker.close()}
         }
-        onOpened:{query.text="";root.refreshChoices();query.forceActiveFocus();stats.inspect()}
-        onClosed:addMetricButton.forceActiveFocus()
-        Timer {interval:3000;running:picker.opened;repeat:true;onTriggered:stats.inspect()}
+        onOpened:{query.text="";root.refreshSensorChoices();root.refreshChoices();query.forceActiveFocus();if(root.readingsActive)stats.inspect()}
+        onClosed:{root.refreshSensorChoices();addMetricButton.forceActiveFocus()}
+        Timer {objectName:"topBarPickerInspectTimer";interval:3000;running:picker.opened && root.readingsActive;repeat:true;onTriggered:stats.inspect()}
     }
 }
 

@@ -11,6 +11,7 @@ Popup {
     property string category: "all"
     property string query: ""
     property bool onlyAvailable: false
+    property bool readingsActive:true
     property Item backdropSource: null
     signal chosen(string key)
     parent: Overlay.overlay
@@ -30,7 +31,24 @@ Popup {
     property var pendingMetrics: []
     property string selectionNotice:""
     readonly property int existingCount: {const draft=stats.draft;return mode==="metric" ? stats.widgetContentIds(targetKey).length : 0}
-    property var liveRows: {if(!opened || mode!=="metric")return [];const revision=stats.sensorRevision;const draft=stats.draft;return stats.metricRowsFor(targetKey)}
+    // Freeze values without closing the popup or resetting a pending selection.
+    property var liveRows:[]
+    property var previewReadings:({})
+    function refreshReadings(){
+        if(!opened){liveRows=[];previewReadings=({});return}
+        if(!readingsActive)return
+        liveRows=mode==="metric"?stats.metricRowsFor(targetKey):[]
+        previewReadings=mode==="widget"?stats.readings:({})
+    }
+    onReadingsActiveChanged:refreshReadings()
+    onModeChanged:refreshReadings()
+    onTargetKeyChanged:refreshReadings()
+    Connections {
+        target:stats;enabled:root.opened && root.readingsActive
+        function onSensorsChanged(){if(root.mode==="metric")root.refreshReadings()}
+        function onDraftChanged(){root.refreshReadings()}
+        function onDataChanged(){if(root.mode==="widget")root.refreshReadings()}
+    }
     readonly property var liveById: {const result={};for(const row of liveRows)result[row.id]=row;return result}
     signal dismissed()
     function focusIsInResults() {
@@ -110,9 +128,9 @@ Popup {
         else if(y+item.height>view.contentY+view.height)view.contentY=y+item.height-view.height
     }
     function showWidgets() { mode="widget"; targetKey=""; query=""; category="all"; open() }
-    function showReadings(key) { mode="metric"; targetKey=key; query=""; category="all"; open(); stats.inspect() }
-    onOpened: {activating=false;pendingMetrics=[];selectionNotice="";refreshEntries(true);pendingFocusIndex=-1;search.forceActiveFocus();stats.inspect()}
-    onClosed: {pendingFocusIndex=-1;pendingMetrics=[];query="";dismissed()}
+    function showReadings(key) { mode="metric"; targetKey=key; query=""; category="all"; open(); if(readingsActive)stats.inspect() }
+    onOpened: {activating=false;pendingMetrics=[];selectionNotice="";refreshReadings();refreshEntries(true);pendingFocusIndex=-1;search.forceActiveFocus();if(readingsActive)stats.inspect()}
+    onClosed: {refreshReadings();pendingFocusIndex=-1;pendingMetrics=[];query="";dismissed()}
     background: FrostedBackdrop {
         objectName: "galleryFrostedBackdrop"
         sourceItem: root.backdropSource
@@ -126,7 +144,7 @@ Popup {
         }
     }
     Overlay.modal: Rectangle { color: "#40071327" }
-    Timer { interval: 3000; repeat: true; running: root.opened; onTriggered: stats.inspect() }
+    Timer { objectName:"galleryInspectTimer";interval: 3000; repeat: true; running: root.opened && root.readingsActive; onTriggered: stats.inspect() }
     contentItem: ColumnLayout {
         spacing: 18
         RowLayout {
@@ -225,7 +243,7 @@ Popup {
                                 HardwareCard {
                                     visible:root.mode==="widget" && entry.modelData.id!=="status_bar"; x:4; y:12; width:78; height:78
                                     moduleKey:"gallery"; config:{const draft=stats.draft;return root.mode==="widget"?stats.templatePreview(entry.modelData.id):draft}
-                                    readings:root.opened?stats.readings:({}); history:[]; frosted:stats.coatingAllowed; surface:true
+                                    readings:root.previewReadings; history:[]; frosted:stats.coatingAllowed; surface:true
                                 }
                                 Item {
                                     visible:root.mode==="widget" && entry.modelData.id==="status_bar"

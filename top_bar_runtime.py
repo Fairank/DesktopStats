@@ -627,6 +627,7 @@ class Host:
     geometry_key: object = None
     geometry: object = None
     material_bridge: object = None
+    foreground_hidden: bool = False
 
 
 class NativeBarEvents(QAbstractNativeEventFilter):
@@ -649,7 +650,8 @@ class NativeBarEvents(QAbstractNativeEventFilter):
 class TopBarManager(QObject):
     """One reserved host per selected screen, one optional shared details window."""
 
-    def __init__(self, runtime, *, adapter=None, window_factory=None):
+    def __init__(self, runtime, *, adapter=None, window_factory=None,
+                 fullscreen_guard_factory=None):
         super().__init__(runtime if isinstance(runtime, QObject) else None)
         self.runtime, self.app, self.controller = runtime, runtime.app, runtime.controller
         self.adapter = adapter if adapter is not None else WindowsTopBarAdapter()
@@ -670,7 +672,16 @@ class TopBarManager(QObject):
         self._shell_identity, self._shell_identity_observed = None, False
         self._shell_notice_serial = 0
         self._dispatching_fullscreen = False
+        self._fullscreen_guard_factory = fullscreen_guard_factory
+        self._fullscreen_guard = None
+        self._fullscreen_guard_error = None
+        self._foreground_hidden_screens = frozenset()
+        self._foreground_timer = QTimer(self)
+        self._foreground_timer.setSingleShot(True)
+        self._foreground_timer.setInterval(0)
+        self._foreground_timer.timeout.connect(self._foreground_visibility_changed)
         self._filter, self._filter_installed, self._menu = NativeBarEvents(self), False, None
+        self._menu_host_id = None
         self._refresh_timer = QTimer(self)
         self._refresh_timer.setSingleShot(True)
         self._refresh_timer.setInterval(50)
@@ -841,6 +852,7 @@ class TopBarManager(QObject):
             hosts.append(dict(
                 screen_id=screen_id,
                 visible=bool(visible() if callable(visible) else getattr(host.window, "visible", False)),
+                fullscreen_hidden=bool(host.foreground_hidden),
                 width=host.window.width(), height=host.window.height(),
                 visible_metric_count=len(host.state._rows), overflow_count=len(host.overflow_ids),
                 material=dict(host.state._material_reports.get("bar", {})),
@@ -860,6 +872,11 @@ class TopBarManager(QObject):
             paused=self.paused,
             native_blur_verified=False,
             hosts=hosts,
+            fullscreen_avoidance=dict(
+                active=self._fullscreen_guard is not None,
+                hidden_screens=sorted(self._foreground_hidden_screens),
+                error=self._fullscreen_guard_error or getattr(self._fullscreen_guard, "failure", None),
+            ),
         )
         self.controller.set_top_bar_status(report)
 
@@ -928,6 +945,10 @@ class TopBarManager(QObject):
                 self._status("unavailable", "顶部状态栏仅可在 Windows 桌面模式使用。")
                 return
             targets, missing = self._targets(bar)
+            if targets:
+                self._ensure_fullscreen_guard()
+            else:
+                self._stop_fullscreen_guard()
             self._coating = self.adapter.coating_allowed()
             self._style = top_bar_style(config)
             names = {identifier for identifier, screen in targets}
@@ -976,6 +997,8 @@ class TopBarManager(QObject):
             if self.hosts and not self._filter_installed and not self._injected:
                 self.app.installNativeEventFilter(self._filter)
                 self._filter_installed = True
+            if not self.hosts:
+                self._stop_fullscreen_guard()
             state = "ready" if self.hosts else "missing_screen"
             if self._errors:
                 state = "partial" if self.hosts else "failed"
@@ -1192,6 +1215,123 @@ class TopBarManager(QObject):
         except Exception:
             return None  # Unknown identity cannot invalidate a fullscreen guard.
 
+    def _ensure_fullscreen_guard(self):
+        if self._fullscreen_guard is not None:
+            if getattr(self._fullscreen_guard, "closed", False):
+                self._stop_fullscreen_guard()
+                if self._fullscreen_guard is not None:
+                    raise AppBarError("Fullscreen listener cleanup is incomplete")
+            else:
+                return
+        if self._fullscreen_guard_factory is None and not self._native_windows():
+            return
+        factory = self._fullscreen_guard_factory
+        if factory is None:
+            from fullscreen_guard import FullscreenGuard
+
+            factory = FullscreenGuard
+        guard = factory(self._queue_foreground_visibility)
+        self._fullscreen_guard = guard
+        guard.start()
+
+    def _queue_foreground_visibility(self):
+        # OUTOFCONTEXT WinEvents arrive on this GUI thread. Never manipulate
+        # an HWND from the native callback; one queued turn merges event bursts.
+        if (not self.closed and not self.paused and self._fullscreen_guard is not None
+                and not self._foreground_timer.isActive()):
+            self._foreground_timer.start()
+
+    def _invalidate_foreground_visibility(self):
+        guard = self._fullscreen_guard
+        if guard is not None:
+            guard.invalidate()
+            self._queue_foreground_visibility()
+
+    def _read_foreground_visibility(self):
+        guard = self._fullscreen_guard
+        if guard is None:
+            self._foreground_hidden_screens = frozenset()
+            return
+        monitors = {
+            name: host.binding.monitor for name, host in self.hosts.items()
+            if not host.closing and host.binding is not None
+        }
+        try:
+            self._foreground_hidden_screens = guard.blocked(monitors)
+            self._fullscreen_guard_error = None
+        except Exception as error:
+            # A failed fact read must never reveal a bar over an unknown game.
+            self._fullscreen_guard_error = type(error).__name__
+            self._foreground_hidden_screens = frozenset(monitors)
+
+    def _apply_host_visibility(self, host, *, query=True, force=False):
+        if self._fullscreen_guard is None:
+            if force:
+                self.adapter.show(host.binding, activate=False)
+            return
+        binding = host.binding
+
+        def current():
+            return (not self.closed and not self.paused and not host.closing
+                    and self.hosts.get(host.state._host_id) is host
+                    and host.binding is binding)
+
+        if not current():
+            return
+        if query:
+            self._read_foreground_visibility()
+        if not current():
+            return
+        hidden = host.state._host_id in self._foreground_hidden_screens
+        changed = hidden != host.foreground_hidden
+        host.foreground_hidden = hidden
+        if hidden:
+            if changed:
+                # An earlier explicit pin must yield as well. Incrementing
+                # the detail serial invalidates any in-flight publication.
+                if (self._pending_hover and self._pending_hover[0] == host.state._host_id
+                        or self._detail_request_host == host.state._host_id
+                        or self._panel and self._panel["host"] is host):
+                    self.close_panel()
+                if self._menu_host_id == host.state._host_id:
+                    self._close_menu()
+            if changed or force:
+                self.adapter.hide(binding)  # Both QWindow and native visibility.
+        elif changed or force:
+            self.adapter.show(binding, activate=False)
+
+    def _foreground_visibility_changed(self):
+        if self.closed or self.paused or self._fullscreen_guard is None:
+            return
+        self._read_foreground_visibility()
+        for name, host in tuple(self.hosts.items()):
+            try:
+                self._apply_host_visibility(host, query=False)
+            except Exception as error:
+                self._errors.append(name + ": " + str(error))
+                if self.hosts.get(name) is host:
+                    self._drop(name)
+        if not self.hosts:
+            self._stop_fullscreen_guard()
+        state, reason, missing = self._reported_status
+        self._status("partial" if self._errors and self.hosts else
+                     "failed" if self._errors else state, reason, missing)
+
+    def _stop_fullscreen_guard(self):
+        self._foreground_timer.stop()
+        guard = self._fullscreen_guard
+        if guard is not None:
+            try:
+                complete = guard.close()
+            except Exception as error:
+                self._errors.append("fullscreen guard cleanup: " + str(error))
+            else:
+                if complete is False:
+                    self._errors.append("fullscreen guard cleanup is incomplete")
+                else:
+                    self._fullscreen_guard = None
+        self._foreground_hidden_screens = frozenset()
+
     def _sync_host(self, host, *, shell_recreated=False, invalidate_fullscreen=False,
                    fullscreen=None, shell_epoch=None):
         binding = host.binding
@@ -1241,6 +1381,8 @@ class TopBarManager(QObject):
                 and height == host.applied_height
             ):
                 self._layout(host)
+                if getattr(self, "_fullscreen_guard", None) is not None:
+                    self._apply_host_visibility(host)
                 return
             result = host.session.relayout(binding.monitor, dpi=binding.dpi, height_dip=height)
         if not current():
@@ -1266,7 +1408,10 @@ class TopBarManager(QObject):
                 raise AppBarError("Could not update AppBar fullscreen order")
         if not current():
             return
-        self.adapter.show(binding, activate=False)
+        if getattr(self, "_fullscreen_guard", None) is not None:
+            self._apply_host_visibility(host, force=True)
+        else:
+            self.adapter.show(binding, activate=False)
 
     @staticmethod
     def _cached(cache, key, create, maximum):
@@ -1627,6 +1772,12 @@ class TopBarManager(QObject):
             return "host_replaced"
         if host.binding is None:
             return "binding_missing"
+        if getattr(self, "_fullscreen_guard", None) is not None:
+            self._read_foreground_visibility()
+            if host.state._host_id in self._foreground_hidden_screens:
+                return "fullscreen"
+        if getattr(host, "foreground_hidden", False):
+            return "fullscreen"
         return None
 
     def _details_allowed(self, host):
@@ -1923,6 +2074,12 @@ class TopBarManager(QObject):
 
     def menu(self, host_id):
         host = self.hosts.get(host_id)
+        if getattr(self, "_fullscreen_guard", None) is not None:
+            self._read_foreground_visibility()
+            if host_id in self._foreground_hidden_screens:
+                return
+        if host is not None and getattr(host, "foreground_hidden", False):
+            return
         if self.closed or host is None:
             return
         self.close_panel()
@@ -1933,6 +2090,7 @@ class TopBarManager(QObject):
             return
         config = self._config or self.controller._saved
         self._menu = QMenu(theme=config.get("theme", "light"), language=config.get("language", "zh-CN"))
+        self._menu_host_id = host_id
         tr = self.hosts[host_id].state.tr
         settings = self._menu.addAction(tr("顶部状态栏设置"), self.open_settings)
         set_action_icon(settings, "sliders-horizontal")
@@ -1946,6 +2104,7 @@ class TopBarManager(QObject):
 
     def _close_menu(self):
         menu, self._menu = self._menu, None
+        self._menu_host_id = None
         if menu is not None:
             menu.close()
             menu.deleteLater()
@@ -1995,12 +2154,16 @@ class TopBarManager(QObject):
                 flags["fullscreen_notice"] = self._shell_notice_serial
                 if bool(lparam) and previous is not True:
                     self._fullscreen_enter(host)
+                if getattr(self, "_fullscreen_guard", None) is not None:
+                    self._invalidate_foreground_visibility()
         elif message == WM_ACTIVATE:
             flags["activation"] = bool(wparam & 0xFFFF)
         elif message == WM_WINDOWPOSCHANGED:
             flags["window_position"] = True
         elif message in (WM_DPICHANGED, WM_DISPLAYCHANGE):
             flags["position"] = True
+            if getattr(self, "_fullscreen_guard", None) is not None:
+                self._invalidate_foreground_visibility()
         elif message == WM_NCDESTROY:
             flags["destroyed"] = True
         else:
@@ -2133,6 +2296,7 @@ class TopBarManager(QObject):
         self._dispose(host)
 
     def _close_hosts(self):
+        self._stop_fullscreen_guard()
         self._close_menu()
         self.close_panel()
         self._rows_timer.stop()
@@ -2165,7 +2329,7 @@ class TopBarManager(QObject):
             delete()
 
     def close(self):
-        if self._closing or self.closed and not self.retired:
+        if self._closing or (self.closed and not self.retired and self._fullscreen_guard is None):
             return
         # Native hide/clear can synchronously dispatch Qt callbacks. Close the
         # admission gate first, while retained leases stay valid for cleanup.
@@ -2178,8 +2342,8 @@ class TopBarManager(QObject):
                 self.app.removeNativeEventFilter(self._filter)
                 self._filter_installed = False
             self._status(
-                "failed" if self.retired else "disabled",
-                "顶部状态栏清理未完成。" if self.retired else "",
+                "failed" if self.retired or self._fullscreen_guard is not None else "disabled",
+                "顶部状态栏清理未完成。" if self.retired or self._fullscreen_guard is not None else "",
             )
         finally:
             self._closing = False

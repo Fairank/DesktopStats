@@ -455,7 +455,8 @@ class ExternalIntegrationTests(unittest.TestCase):
                                 battery=Mock(read=Mock(return_value={})),
                                 storage=Mock(read=Mock(return_value={"storages": {}, "storage_status": {"state": "idle"}})),
                                 activity=Mock(read=Mock(return_value={})),
-                                cpu_power=Mock(), cooling=SimpleNamespace(sample_times={}))
+                                cpu_power=Mock(), cooling=SimpleNamespace(sample_times={}),
+                                cpu_thermal=Mock(read=Mock(return_value={}), status=Mock(return_value={})))
         sampler.external = Mock()
         sampler.external.read.side_effect = lambda *args: dict(external_sensors=rows,
             external_revision=(1, True), external_status={"state": "ready"})

@@ -94,6 +94,7 @@ def _valid_status(status):
 
 
 def close_existing():
+    """Return the last clean pre-quit status only after confirmed termination."""
     from native_ipc import send
 
     status = send({"command": "status"}, timeout=1200)
@@ -129,7 +130,7 @@ def close_existing():
             time.sleep(0.25)
             if (send({"command": "status"}, timeout=150) is None
                     and _server_absent() and process.exited()):
-                return
+                return dict(current)
         raise RuntimeError("软件仍在运行，安装尚未开始；请手动退出后重试。")
     finally:
         process.close()
@@ -414,7 +415,7 @@ def install():
     # Validate an existing explicit selection before closing the old app or
     # copying files. A corrupt pointer must never silently revert to defaults.
     resolve_profile_paths(frozen=True, executable=DIRECTORY / "DesktopStats.exe")
-    close_existing()
+    launch_status = close_existing()
     DIRECTORY.parent.mkdir(parents=True, exist_ok=True)
     stage, backup = _sibling("stage"), _sibling("backup")
     stage.mkdir()
@@ -450,7 +451,9 @@ def install():
         )
         # Copying the bundle can take time. A user may have reopened the old
         # app meanwhile; confirm clean termination before snapshot or swap.
-        close_existing()
+        reopened_status = close_existing()
+        if _valid_status(reopened_status):
+            launch_status = reopened_status
         folders = tuple(dict.fromkeys((shell_folder(0x10), shell_folder(2))))
         snapshot = _snapshot_registration(folders)
         # These are same-parent, verified transaction paths. No tree is deleted.
@@ -493,8 +496,12 @@ def install():
     # The backup remains recoverable. Starting the committed build is separate
     # from the transaction: launch failure must not claim installation rollback.
     target = DIRECTORY / "DesktopStats.exe"
+    command = [str(target)]
+    if (_valid_status(launch_status) and launch_status["dirty"] is False
+            and launch_status.get("settings_visible") is False):
+        command.append("--background")
     try:
-        subprocess.Popen([str(target)], creationflags=0x08000000)
+        subprocess.Popen(command, creationflags=0x08000000)
     except Exception as error:
         raise RuntimeError(
             "Installation committed, but launch failed; backup=" + str(backup)

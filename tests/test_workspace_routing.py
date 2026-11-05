@@ -60,7 +60,7 @@ class WorkspaceRoutingTests(unittest.TestCase):
         self.patches.close()
         self.directory.cleanup()
 
-    def collect(self, count=25, *, fail_history=False):
+    def collect(self, count=25, *, fail_history=False, diagnostic_exports=False):
         self.ui._saved["refresh"] = .01
         sequence, events = 0, []
         case = self
@@ -106,7 +106,7 @@ class WorkspaceRoutingTests(unittest.TestCase):
                          side_effect=lambda: stop_threads.append(threading.get_ident()) or timer_stop()),
             patch.object(tools.logging, "exception") as errors,
         ):
-            self.ui.start()
+            self.ui.start(diagnostic_exports=diagnostic_exports)
             self.ui.thread.join(3)
             self.assertFalse(self.ui.thread.is_alive(), "Synthetic sampling must terminate")
             self.app.processEvents()
@@ -114,7 +114,7 @@ class WorkspaceRoutingTests(unittest.TestCase):
                                stop_threads=stop_threads, close_threads=close_threads)
 
     def test_history_write_failure_does_not_drop_live_emit_or_optional_diagnostic_export(self):
-        result = self.collect(fail_history=True)
+        result = self.collect(fail_history=True, diagnostic_exports=True)
         self.assertEqual(result.events, [(kind, index) for index in range(25) for kind in ("emit", "history")])
         self.assertEqual(result.sampler.write.call_count, 25)
         self.assertEqual(self.ui.readings["sequence"], 24)
@@ -122,6 +122,7 @@ class WorkspaceRoutingTests(unittest.TestCase):
 
     def test_worker_finally_closes_history_backend_without_stopping_any_qt_timer(self):
         result = self.collect(count=3)
+        result.sampler.write.assert_not_called()
         result.sampler.close.assert_called_once_with()
         self.assertEqual(len(result.close_threads), 1)
         self.assertNotEqual(result.close_threads[0], threading.get_ident())

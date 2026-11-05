@@ -1,10 +1,11 @@
 """Local, bounded sensor history; no hardware, UI or preference access.
 
 ``record`` accepts the sampler's canonical values, never formatted display units.
-Call it on the sampling worker: at most one SQLite transaction per monotonic
-second is attempted, regardless of the sampling rate. A short in-memory tail is
+Call it on the sampling worker: normal SQLite transactions follow the configured
+monotonic interval, regardless of the sampling rate. A short in-memory tail is
 included in queries. Seconds are retained for one hour and minute rollups for
-seven days; rollups retain raw observation counts, sums and extrema.
+seven days; rollups retain raw observation counts, sums and extrema. Explicit
+pause and shutdown finish the current batch without waiting for the normal gate.
 """
 
 import hashlib
@@ -111,12 +112,14 @@ class HistoryStore:
     """
 
     def __init__(self, path, *, metrics=DEFAULT_METRICS, scopes=DEFAULT_SCOPES,
-                 clock=time.monotonic, wall_clock=time.time, max_pending=8192):
+                 clock=time.monotonic, wall_clock=time.time, max_pending=8192, flush_interval=1):
         self.path = Path(path)
         if str(self.path).startswith(("\\\\", "//")):
             raise ValueError("History must use a local file")
         if not 32 <= max_pending <= 65536:
             raise ValueError("Invalid history buffer size")
+        if not numeric(flush_interval) or not 1 <= flush_interval <= 60:
+            raise ValueError("Invalid history flush interval")
         self.metrics = tuple(dict.fromkeys(metrics))
         self.scopes = tuple(dict.fromkeys(scopes))
         if any(key not in METRICS or METRICS[key].get("scope") or key.startswith("external_")
@@ -125,6 +128,7 @@ class HistoryStore:
         self._scoped = {scope: tuple(key for key, meta in METRICS.items()
                                     if meta.get("scope") == scope) for scope in self.scopes}
         self._clock, self._wall = clock, wall_clock
+        self._flush_interval = float(flush_interval)
         self._lock = threading.RLock()
         self._pending = OrderedDict()
         self._source_times = OrderedDict()
@@ -305,7 +309,7 @@ class HistoryStore:
             now = self._clock()
             if self._closed or not self._pending or (not _final and now < self._next_write):
                 return False
-            self._next_write = now + 1
+            self._next_write = now + self._flush_interval
             wall = self._wall()
             for key in list(self._pending):
                 retention = SECOND_RETENTION if key[0] == 1 else RETENTION
@@ -319,8 +323,10 @@ class HistoryStore:
                     connection.execute("BEGIN IMMEDIATE")
                     if not self._schema_ready:
                         connection.execute(_CREATE)
-                        connection.execute("CREATE INDEX IF NOT EXISTS sensor_history_expiry "
-                                           "ON sensor_history(resolution,second)")
+                        # Hourly expiry can use the primary key's resolution
+                        # prefix. Remove the write-heavy legacy index in this
+                        # same transaction; a failed batch rolls back migration.
+                        connection.execute("DROP INDEX IF EXISTS sensor_history_expiry")
                     connection.executemany(_UPSERT, [key + bucket.values()
                                                     for key, bucket in self._pending.items()])
                     if now - self._last_cleanup >= 3600:
@@ -337,6 +343,15 @@ class HistoryStore:
             except (OSError, sqlite3.Error) as error:
                 self._failure(error, "sqlite3.history.write")
                 return False
+
+    def flush_on_pause(self):
+        """Finish the active batch after recording is explicitly paused.
+
+        Like shutdown, this user-requested boundary bypasses the normal write
+        gate. A storage failure retains the pending batch and its normal error
+        status; pausing does not close the backend or discard its observations.
+        """
+        return self.flush(_final=True)
 
     def query(self, metric, period="10m", *, scope="", device_id="", unit=None,
               end=None, points=240):
@@ -445,7 +460,8 @@ class HistoryStore:
 
         User-requested deletion is exempt from normal write cadence. A failed
         transaction leaves both persisted history and the pending tail intact.
-        It never changes sampling selection, preferences or database schema.
+        It never changes sampling selection or preferences. Legacy index
+        cleanup commits or rolls back with this same explicit transaction.
         """
         with self._query_lock, self._lock:
             if self._closed:
@@ -455,15 +471,14 @@ class HistoryStore:
                 with connection:
                     connection.execute("BEGIN IMMEDIATE")
                     connection.execute(_CREATE)
-                    connection.execute("CREATE INDEX IF NOT EXISTS sensor_history_expiry "
-                                       "ON sensor_history(resolution,second)")
+                    connection.execute("DROP INDEX IF EXISTS sensor_history_expiry")
                     connection.execute("DELETE FROM sensor_history")
                 self._pending.clear()
                 self._source_times.clear()
                 self._source_clock = None
                 self._schema_ready = True
                 self._last_cleanup = self._clock()
-                self._next_write = self._clock() + 1
+                self._next_write = self._clock() + self._flush_interval
                 self._status["write_transactions"] += 1
                 # This committed transaction proves the writer is usable,
                 # while leaving independent reader failures visible.
@@ -477,8 +492,8 @@ class HistoryStore:
     def close(self):
         """Finish one explicit final batch, then reject records and queries.
 
-        Shutdown is the sole exception to the normal one-transaction/second gate,
-        so a successful shutdown does not discard the final partial second.
+        Explicit pause and shutdown are batch boundaries exempt from the normal
+        transaction interval, so a successful shutdown preserves the final tail.
         """
         with self._query_lock, self._lock:
             if not self._closed:

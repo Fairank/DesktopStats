@@ -202,8 +202,17 @@ def variable(key):
 
 def required_sources(config):
     needed = set()
+
+    def include(metric):
+        meta = METRICS[metric]
+        needed.add(meta["source"])
+        if meta.get("scope") == "volumes":
+            needed.add("volumes")
+
     if config.get("top_bar", {}).get("enabled"):
-        needed.update(METRICS[item["metric"]]["source"] for item in config["top_bar"]["items"])
+        for item in config["top_bar"]["items"]:
+            for metric in item.get("prefs", {}).get("metrics") or [item["metric"]]:
+                include(metric)
     if not config.get("visible", True):
         return needed
     for key in config.get("widget_order", config["widgets"]):
@@ -211,8 +220,11 @@ def required_sources(config):
         if not prefs["enabled"]:
             continue
         if prefs.get("content"):
-            needed.update(METRICS[item]["source"] for item in prefs["content"])
+            for metric in prefs["content"]:
+                include(metric)
         else:
             kind = prefs.get("kind", key)
             needed.add("gpu" if kind == "vram" else "battery" if kind == "power" else kind)
+            if kind == "disk" and prefs.get("primary") == "percent":
+                needed.add("volumes")
     return needed

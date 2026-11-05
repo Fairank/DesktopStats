@@ -62,7 +62,7 @@ class WorkspaceTools(QObject):
     def _store(self):
         with self._history_backend_lock:
             if self._history_backend is None:
-                self._history_backend = HistoryStore(BASE / "sensor-history.sqlite3")
+                self._history_backend = HistoryStore(BASE / "sensor-history.sqlite3", flush_interval=5)
             return self._history_backend
 
     historyRecording = Property(bool, lambda self: self._saved.get("history_enabled", True),
@@ -83,10 +83,14 @@ class WorkspaceTools(QObject):
                                notify=diagnosticCheckChanged)
 
     def _record_history(self, sample):
-        if not self._saved.get("history_enabled", True):
-            return
         try:
-            self._store().record(sample)
+            # Serialize the enabled check with an explicit pause's final batch.
+            # A worker already inside this lock finishes before the pause flush;
+            # a later worker sees the saved paused state and cannot leave a tail.
+            with self._history_backend_lock:
+                if not self._saved.get("history_enabled", True):
+                    return
+                self._store().record(sample)
         except Exception:
             # Optional history can never discard a healthy live sample.
             now = time.monotonic()
@@ -215,6 +219,15 @@ class WorkspaceTools(QObject):
                 snapshot["history_enabled"] = enabled
         self._last_edit_key = None
         self._last_edit_time = 0
+        if not enabled:
+            try:
+                with self._history_backend_lock:
+                    if self._history_backend is not None:
+                        self._history_backend.flush_on_pause()
+            except Exception:
+                # The preference commit succeeded. An optional storage failure
+                # must not resume recording or discard its pending observations.
+                logging.exception("Optional sensor history pause flush failed")
         self.savedChanged.emit()
         self.draftChanged.emit()
         self.historyRecordingChanged.emit()

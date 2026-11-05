@@ -210,7 +210,7 @@ Window {
                 onCanceled:root.cancelDrag()
             }
             PlainTip {
-                visible: metricMouse.containsMouse && metricContent.labelTruncated && !root.dragHeld && !root.barState.detail.id && !root.barState.operationMessage
+                visible: root.visible && metricMouse.containsMouse && metricContent.labelTruncated && !root.dragHeld && !root.barState.detail.id && !root.barState.operationMessage
                 text: ((metric.modelData.grouped?metric.modelData.group_label:metric.modelData.label) || "") + "  " + ((metric.modelData.grouped?metric.modelData.group_value:metric.modelData.value) || "—")
             }
         }
