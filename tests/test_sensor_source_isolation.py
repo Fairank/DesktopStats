@@ -122,6 +122,7 @@ class SensorSourceIsolationTests(unittest.TestCase):
         self.thread = self.stack.enter_context(
             patch("threading.Thread.start", side_effect=AssertionError("No worker"))
         )
+        self.stack.enter_context(patch.object(sensors._NvidiaCleanup, "start", sensors._NvidiaCleanup._run))
         self.stack.enter_context(patch("time.monotonic", side_effect=lambda: self.now))
         replacements = dict(
             cpu_name=lambda: "Synthetic CPU",
@@ -416,9 +417,11 @@ class SensorSourceIsolationTests(unittest.TestCase):
                 setattr(self.sampler, field, source)
                 with patch("sensors.logging.exception"):
                     self.assertFalse(self.sampler.close())
-                self.assertIs(getattr(self.sampler, field), source)
+                self.assertIs(getattr(self.sampler, "_nvml_cleanup" if field == "nvidia" else field), source)
                 self.assertEqual(source.close.call_count, 1)
                 self.assertEqual(self.sampler.sample(), {})
+                if field == "nvidia":
+                    self.now += sensors.NVML_RETRY_SECONDS
                 self.assertTrue(self.sampler.close())
                 self.assertIsNone(getattr(self.sampler, field))
                 self.assertEqual(source.close.call_count, 2)
@@ -513,7 +516,7 @@ class SensorSourceIsolationTests(unittest.TestCase):
         self.assertIsNone(self.sampler._nvml_cleanup)
         self.assertEqual(self.gpu_loader.call_count, 2)
 
-    def test_explicit_close_retries_pending_cleanup_without_waiting_or_reopening(self):
+    def test_explicit_close_retries_pending_cleanup_at_backoff_without_reopening(self):
         self.nvml.handle_errors = {0: 4, 1: 15}
         self.nvml.shutdown_status = 9
         self.enable_gpu()
@@ -522,13 +525,14 @@ class SensorSourceIsolationTests(unittest.TestCase):
             source = self.sampler._nvml_cleanup
             self.assertFalse(self.sampler.close())
         self.assertIs(self.sampler._nvml_cleanup, source)
-        self.assertEqual(self.nvml.shutdowns, 2)
+        self.assertEqual(self.nvml.shutdowns, 1)
         self.assertEqual(self.sampler.sample(), {})
         self.nvml.shutdown_status = 0
+        self.now += sensors.NVML_RETRY_SECONDS
         self.assertTrue(self.sampler.close())
         self.assertIsNone(self.sampler._nvml_cleanup)
         self.assertFalse(source._initialized)
-        self.assertEqual(self.nvml.shutdowns, 3)
+        self.assertEqual(self.nvml.shutdowns, 2)
         self.assertEqual(self.gpu_loader.call_count, 1)
 
     def test_cleanup_false_is_pending_and_cannot_be_replaced_by_new_factory(self):
@@ -559,6 +563,7 @@ class SensorSourceIsolationTests(unittest.TestCase):
         self.assertEqual(self.sampler.nvml_status["reason"], "initialization_error")
         self.assertEqual(self.gpu_loader.call_count, 1)
         self.nvml.shutdown_status = 0
+        self.now += sensors.NVML_RETRY_SECONDS
         self.assertTrue(self.sampler.close())
         self.assertEqual(self.nvml.shutdowns, 2)
 

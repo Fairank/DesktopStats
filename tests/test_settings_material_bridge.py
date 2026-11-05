@@ -142,6 +142,49 @@ class SettingsMaterialBridgeTests(unittest.TestCase):
         self.due()
         self.compose.assert_called_once()
 
+    def system_blur(self):
+        self.bridge.close()
+        self.compose.return_value = dict(material="system-blur", status="configured-unverified",
+                                         blur_configured=True, bool_result=1, ok=True)
+        self.bridge = SettingsMaterialBridge(self.window, compose_once=self.compose,
+                                             policy_reader=self.policy, publish=self.publish,
+                                             backend="system-blur", clock=self.clock)
+        self.bridge.start()
+
+    def test_secure_desktop_recovery_burst_coalesces_with_no_continuous_refresh(self):
+        self.system_blur()
+        self.show()
+        self.bridge.compose_now("initial")
+        self.assertEqual(self.compose.call_count, 1)
+        for _ in range(20):
+            self.bridge.request("composition_changed")
+        self.due(.14)
+        self.assertEqual(self.compose.call_count, 1)
+        self.due(.01)
+        self.assertEqual(self.compose.call_count, 2)
+        self.assertIn("composition_changed", self.bridge.status()["last_request"]["reasons"])
+        self.due(10)
+        self.assertEqual(self.compose.call_count, 2)
+        self.assertFalse(self.bridge.status()["timer_active"])
+
+    def test_secure_desktop_recovery_hidden_or_closed_never_applies_and_restore_is_fresh(self):
+        self.system_blur()
+        self.show()
+        self.bridge.compose_now("initial")
+        self.window.hide()
+        self.app.processEvents()
+        self.assertFalse(self.bridge.request("composition_changed"))
+        self.due(10)
+        self.assertEqual(self.compose.call_count, 1)
+        self.show()
+        self.bridge.request("composition_changed")
+        self.due()
+        self.assertEqual(self.compose.call_count, 2)
+        self.bridge.close()
+        self.assertFalse(self.bridge.request("composition_changed"))
+        self.due(10)
+        self.assertEqual(self.compose.call_count, 2)
+
     def test_minimize_suspends_and_restore_reschedules(self):
         self.show()
         self.window.setWindowState(Qt.WindowMinimized)

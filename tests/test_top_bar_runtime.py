@@ -2326,6 +2326,124 @@ class ForegroundFullscreenVisibilityTests(unittest.TestCase):
         self.manager.update_rows()
         self.assertEqual(before, self.adapter.events)
 
+    def test_material_recovery_only_after_actual_hidden_to_visible_transition(self):
+        self.manager.apply(config())
+        host, guard = self.manager.hosts["DISPLAY1"], self.guards[0]
+        requests = []
+        host.material_bridge = SimpleNamespace(request=requests.append, close=lambda: None)
+        for _ in range(5):
+            self.manager._apply_host_visibility(host, force=True)
+            self.manager.update_rows()
+        self.assertEqual(requests, [])
+        guard.hidden.add("DISPLAY1")
+        guard.changed()
+        self.drain()
+        self.assertFalse(host.window.visible)
+        self.assertEqual(requests, [])
+        guard.hidden.clear()
+        for _ in range(20):
+            guard.changed()
+        self.drain()
+        self.assertTrue(host.window.visible)
+        self.assertEqual(requests, ["composition_changed"])
+        for _ in range(10):
+            self.manager._apply_host_visibility(host, force=True)
+            self.manager.update_rows()
+        self.assertEqual(requests, ["composition_changed"])
+
+    def test_show_reentry_close_drop_rebind_or_material_replace_never_requests_stale_bridge(self):
+        for mutation in ("close", "drop", "rebind", "material", "hide"):
+            with self.subTest(mutation=mutation):
+                self.manager.close()
+                self.setUp()
+                self.manager.apply(config())
+                host = self.manager.hosts["DISPLAY1"]
+                requests, replacement = [], []
+                host.material_bridge = SimpleNamespace(request=requests.append, close=lambda: None)
+                host.foreground_hidden = True
+                self.manager._foreground_hidden_screens = frozenset()
+
+                def show(binding, *, activate=False):
+                    binding.window.visible = True
+                    if mutation == "close": self.manager.close()
+                    elif mutation == "drop": self.manager._drop("DISPLAY1")
+                    elif mutation == "rebind": host.binding = SimpleNamespace()
+                    elif mutation == "hide": host.foreground_hidden = True
+                    else:
+                        host.material_bridge = SimpleNamespace(request=replacement.append, close=lambda: None)
+
+                original = host.binding
+                with patch.object(self.adapter, "show", side_effect=show):
+                    self.manager._apply_host_visibility(host, query=False)
+                if mutation == "rebind": host.binding = original
+                self.assertEqual(requests, [])
+                self.assertEqual(replacement, [])
+
+    def test_explicit_recovery_requests_only_current_hosts_and_existing_panel(self):
+        self.manager.apply(config(mode="all"))
+        first, second = self.manager.hosts.values()
+        requests = []
+        for host in (first, second):
+            name = host.state._host_id
+            host.material_bridge = SimpleNamespace(request=lambda reason, name=name: requests.append((name, reason)),
+                                                   close=lambda: None)
+        self.manager.refresh_materials()
+        self.assertIsNone(self.manager._panel)
+        self.assertEqual(requests, [("DISPLAY1", "composition_changed"), ("DISPLAY2", "composition_changed")])
+        self.manager._show_panel(first, "b_0", True)
+        panel = self.manager._panel
+        panel["material_bridge"] = SimpleNamespace(request=lambda reason: requests.append(("panel", reason)),
+                                                    close=lambda: None)
+        requests.clear()
+        second.closing = True
+        self.manager.refresh_materials()
+        self.assertEqual(requests, [("DISPLAY1", "composition_changed"), ("panel", "composition_changed")])
+        second.closing = False
+        self.manager.close()
+        requests.clear()
+        self.manager.refresh_materials()
+        self.assertEqual(requests, [])
+
+    def test_recovery_reentry_replaces_panel_without_requesting_old_or_new_panel(self):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        self.manager._show_panel(host, "b_0", True)
+        old = self.manager._panel
+        requests = []
+        old["material_bridge"] = SimpleNamespace(request=lambda reason: requests.append("old"), close=lambda: None)
+        replacement = dict(old, material_bridge=SimpleNamespace(request=lambda reason: requests.append("new")))
+        host.material_bridge = SimpleNamespace(request=lambda reason: setattr(self.manager, "_panel", replacement),
+                                               close=lambda: None)
+        self.manager.refresh_materials()
+        self.assertEqual(requests, [])
+        self.manager._panel = old
+
+    def test_recovery_reentry_shutdown_does_not_request_later_host_or_panel(self):
+        self.manager.apply(config(mode="all"))
+        first, second = self.manager.hosts.values()
+        requests = []
+        first.material_bridge = SimpleNamespace(request=lambda reason: self.manager.close(), close=lambda: None)
+        second.material_bridge = SimpleNamespace(request=requests.append, close=lambda: None)
+        self.manager.refresh_materials()
+        self.assertEqual(requests, [])
+
+    def test_recovery_does_not_adopt_in_place_panel_surface_or_bridge_replacement(self):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        self.manager._show_panel(host, "b_0", True)
+        panel = self.manager._panel
+        requests = []
+        panel["material_bridge"] = SimpleNamespace(request=requests.append, close=lambda: None)
+        for key in ("window", "binding", "material_bridge"):
+            with self.subTest(key=key):
+                previous = panel[key]
+                replacement = SimpleNamespace(request=requests.append)
+                host.material_bridge = SimpleNamespace(
+                    request=lambda reason: panel.update({key: replacement}), close=lambda: None)
+                self.manager.refresh_materials()
+                self.assertEqual(requests, [])
+                panel[key] = previous
+
     def test_event_burst_is_queued_once_and_stale_shell_fullscreen_does_not_veto_restore(self):
         self.manager.apply(config())
         guard = self.guards[0]

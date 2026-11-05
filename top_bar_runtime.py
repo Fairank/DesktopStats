@@ -1368,7 +1368,31 @@ class TopBarManager(QObject):
             if changed or force:
                 self.adapter.hide(binding)  # Both QWindow and native visibility.
         elif changed or force:
+            material = host.material_bridge
             self.adapter.show(binding, activate=False)
+            if (changed and current() and not host.foreground_hidden
+                    and host.material_bridge is material and material is not None):
+                material.request("composition_changed")
+
+    def refresh_materials(self, reason="composition_changed"):
+        """Recover only current owned surfaces through their existing gates."""
+        panel = self._panel
+        panel_identity = tuple(panel.get(key) for key in ("host", "window", "binding", "material_bridge")) if panel else None
+        for host in tuple(self.hosts.values()):
+            if self.closed or self.paused or self._closing:
+                return
+            material, binding = host.material_bridge, host.binding
+            if (not host.closing and binding is not None and material is not None
+                    and self.hosts.get(host.state._host_id) is host):
+                material.request(reason)
+        if self.closed or self.paused or self._closing or panel is None or self._panel is not panel:
+            return
+        host, window, binding, material = panel_identity
+        if (not host.closing and self.hosts.get(host.state._host_id) is host
+                and binding is not None and material is not None
+                and panel.get("host") is host and panel.get("window") is window
+                and panel.get("binding") is binding and panel.get("material_bridge") is material):
+            material.request(reason)
 
     def _foreground_visibility_changed(self):
         if self.closed or self.paused or self._fullscreen_guard is None:

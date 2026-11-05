@@ -2,7 +2,7 @@
 
 Native Windows top-bar monitoring and optional desktop widgets, with real
 hardware readings and local history. Development candidate
-**0.27.0-preview.1** organizes settings around one live top-bar
+**0.27.0-preview.2** organizes settings around one live top-bar
 preview, separate content/appearance tasks and contextual desktop controls.
 Desktop widgets, top bar and preferences save independently. Original application
 source is licensed under [PolyForm Noncommercial 1.0.0](../LICENSING.md).
@@ -13,6 +13,15 @@ materials. Transparency, high contrast, remote sessions and display drivers can
 change their appearance. A failed or unsupported material request keeps a
 readable fallback. Offscreen screenshots and successful API requests alone do
 not verify desktop blur. The original Niangao artwork and Lucide symbols remain.
+
+Preview.2 targets material lost after administrator authorization or a hidden
+top bar returning from fullscreen avoidance. These return events request the
+existing background material again, without permanent polling. Saved layout,
+temperature authorization and sampling settings remain independent; visible
+blur still needs verification on the target Windows system.
+It also isolates blocked NVIDIA cleanup after missing GPU readings so other
+requested sensors can continue updating. Only one cleanup may remain pending;
+the app does not repeatedly close/reinitialize that source or add normal polling.
 
 ## 安装与使用
 

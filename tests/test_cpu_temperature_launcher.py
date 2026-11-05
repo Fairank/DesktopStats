@@ -497,6 +497,135 @@ class RuntimeSignalTests(unittest.TestCase):
         self.assertEqual(self.runtime.cpu_temperature_launcher.status()["state"], "closed")
         self.assertIn(("close",), api.calls)
 
+    def consent_fixture(self, outcome=None):
+        api = FakeApi()
+        if outcome is not None:
+            api.result = outcome
+        local = Path(tempfile.gettempdir()) / "synthetic-recovery-startup"
+        self.runtime.cpu_temperature_launcher = startup.CpuTemperatureLauncher(
+            platform="win32", frozen=True, executable=local / "Programs/DesktopStats/DesktopStats.exe",
+            environ={"LOCALAPPDATA": str(local)}, app_pid=731, api_factory=lambda: api,
+            wall_clock=lambda: WALL,
+        )
+        self.enterContext(patch.object(self.runtime_module, "foreground_fullscreen", return_value=False))
+        self.runtime.controller._data = dict(time=WALL)
+        events = dict(bar=[], settings=[], widget=[])
+        self.runtime.top_bar.refresh_materials = events["bar"].append
+        self.runtime.settings_material = SimpleNamespace(request=events["settings"].append, close=lambda: None)
+        self.runtime.widgets["probe"] = SimpleNamespace(hide=lambda: None)
+        self.runtime.widget_materials["probe"] = SimpleNamespace(request=events["widget"].append, close=lambda: None)
+        return api, events
+
+    def test_consent_success_cancel_and_failure_queue_one_recovery_on_next_turn(self):
+        for outcome in (dict(launched=True, error=0), dict(launched=False, error=1223),
+                        dict(launched=False, error=5)):
+            with self.subTest(outcome=outcome):
+                _api, events = self.consent_fixture(outcome)
+                self.runtime.controller.dataChanged.emit()
+                self.assertEqual(events, dict(bar=[], settings=[], widget=[]))
+                self.app.processEvents()
+                self.assertEqual(events, {key: ["composition_changed"] for key in events})
+                for _ in range(10):
+                    self.runtime.controller.dataChanged.emit()
+                self.app.processEvents()
+                self.assertEqual(events, {key: ["composition_changed"] for key in events})
+
+    def test_healthy_deferred_and_source_sessions_never_queue_recovery(self):
+        _api, events = self.consent_fixture()
+        self.runtime.controller._data["cpu_temp"] = 47.0
+        self.runtime.controller.dataChanged.emit()
+        self.runtime.controller._data["cpu_temp"] = None
+        with patch.object(self.runtime_module, "foreground_fullscreen", return_value=True):
+            self.runtime.controller.dataChanged.emit()
+        with patch.object(self.runtime_module, "foreground_fullscreen", return_value=None):
+            self.runtime.controller.dataChanged.emit()
+        self.runtime.cpu_temperature_launcher = startup.CpuTemperatureLauncher()
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.assertEqual(events, dict(bar=[], settings=[], widget=[]))
+
+    def test_shutdown_before_queued_recovery_drops_every_request(self):
+        _api, events = self.consent_fixture()
+        self.runtime.controller.dataChanged.emit()
+        self.runtime.shutdown()
+        self.app.processEvents()
+        self.assertEqual(events, dict(bar=[], settings=[], widget=[]))
+
+    def test_replaced_manager_or_launcher_before_next_turn_drops_old_recovery(self):
+        for owner in ("top_bar", "cpu_temperature_launcher"):
+            with self.subTest(owner=owner):
+                _api, events = self.consent_fixture()
+                original = getattr(self.runtime, owner)
+                self.runtime.controller.dataChanged.emit()
+                setattr(self.runtime, owner, SimpleNamespace())
+                self.app.processEvents()
+                setattr(self.runtime, owner, original)
+                self.assertEqual(events, dict(bar=[], settings=[], widget=[]))
+
+    def test_shutdown_or_manager_replacement_inside_consent_does_not_queue(self):
+        api, events = self.consent_fixture()
+        original_bar = self.runtime.top_bar
+
+        def launch(_helper, _pid):
+            self.runtime.top_bar = SimpleNamespace()
+            return dict(launched=True, error=0)
+
+        api.launch = launch
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.runtime.top_bar = original_bar
+        self.assertEqual(events, dict(bar=[], settings=[], widget=[]))
+        api, events = self.consent_fixture()
+
+        def shutdown(_helper, _pid):
+            self.runtime.shutdown()
+            return dict(launched=False, error=1223)
+
+        api.launch = shutdown
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.assertEqual(events, dict(bar=[], settings=[], widget=[]))
+
+    def test_nested_sample_during_consent_still_queues_only_once(self):
+        api, events = self.consent_fixture()
+
+        def nested(_helper, _pid):
+            self.runtime.controller.dataChanged.emit()
+            return dict(launched=True, error=0)
+
+        api.launch = nested
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.assertEqual(events, {key: ["composition_changed"] for key in events})
+
+    def test_bar_refresh_reentrant_shutdown_skips_remaining_materials(self):
+        _api, events = self.consent_fixture()
+
+        def close(reason):
+            events["bar"].append(reason)
+            self.runtime.shutdown()
+
+        self.runtime.top_bar.refresh_materials = close
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.assertEqual(events, dict(bar=["composition_changed"], settings=[], widget=[]))
+
+    def test_replaced_settings_and_widget_during_bar_refresh_skip_stale_bridges(self):
+        _api, events = self.consent_fixture()
+        fresh = []
+
+        def replace(reason):
+            events["bar"].append(reason)
+            self.runtime.settings_material = SimpleNamespace(request=fresh.append, close=lambda: None)
+            self.runtime.widgets["probe"] = SimpleNamespace(hide=lambda: None)
+            self.runtime.widget_materials["probe"] = SimpleNamespace(request=fresh.append, close=lambda: None)
+
+        self.runtime.top_bar.refresh_materials = replace
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.assertEqual(events, dict(bar=["composition_changed"], settings=[], widget=[]))
+        self.assertEqual(fresh, [])
+
 
 if __name__ == "__main__":
     unittest.main()
