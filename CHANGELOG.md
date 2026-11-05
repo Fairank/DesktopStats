@@ -1,5 +1,12 @@
 # Changes
 
+## 0.26.1-preview.7
+
+- Reuse the last successful bounded capacities for adapter and legacy interface
+  queries, avoiding repeated size-only calls during normal network sampling.
+  Resize and retry when the interface inventory grows; retain existing bounds,
+  identity checks, fallback behavior and sampling frequency.
+
 ## 0.26.1-preview.6
 
 - Suspend optional inspection and live preview projection while settings are

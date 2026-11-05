@@ -28,6 +28,7 @@ class FakeLibrary:
         self.gaa_calls, self.table_calls, self.legacy_calls, self.frees = 0, 0, 0, []
         self.gaa_resize, self.legacy_resize = 0, 0
         self.flags = []
+        self.gaa_sizes, self.legacy_sizes = [], []
         self.owned = []
         self.GetAdaptersAddresses = Function(self.gaa)
         self.GetIfTable2 = Function(self.table)
@@ -46,6 +47,7 @@ class FakeLibrary:
     def gaa(self, family, flags, reserved, buffer, size):
         self.gaa_calls += 1
         self.flags.append(flags)
+        self.gaa_sizes.append(0 if buffer is None else len(buffer))
         if not self.members:
             return 232
         phase = "gaa_probe" if buffer is None else "gaa_data"
@@ -57,6 +59,12 @@ class FakeLibrary:
         if self.gaa_resize:
             self.gaa_resize -= 1
             self.size(size, len(buffer) * 2)
+            return 111
+        required = len(self.members) * c.sizeof(net.AdapterPrefix) + sum(
+            len(text.encode("utf-16-le", errors="surrogatepass")) + 2
+            for _index, name, description, _luid in self.members for text in (name, description))
+        if required > len(buffer):
+            self.size(size, required)
             return 111
         start, end = c.addressof(buffer), c.addressof(buffer) + len(buffer)
         position = len(self.members) * c.sizeof(net.AdapterPrefix)
@@ -116,6 +124,7 @@ class FakeLibrary:
 
     def legacy(self, buffer, size, ordered):
         self.legacy_calls += 1
+        self.legacy_sizes.append(0 if buffer is None else len(buffer))
         phase = "legacy_probe" if buffer is None else "legacy_data"
         if phase in self.errors:
             return self.errors[phase]
@@ -127,6 +136,9 @@ class FakeLibrary:
         if self.legacy_resize:
             self.legacy_resize -= 1
             self.size(size, len(buffer) + c.sizeof(net.LegacyRow))
+            return 122
+        if required > len(buffer):
+            self.size(size, required)
             return 122
         net.U32.from_buffer(buffer).value = len(members)
         for at, (index, _name, description, _luid) in enumerate(members):
@@ -261,6 +273,85 @@ class SnapshotAbiTests(unittest.TestCase):
         fake.members = []
         self.assertEqual(reader(fake).read(), {})
         self.assertEqual(fake.table_calls, 0)
+
+    def test_successful_size_hints_skip_only_probes_and_read_fresh_topology_counters_and_state(self):
+        fake = FakeLibrary()
+        snapshot = reader(fake)
+        first = snapshot.read()
+        fake.values[3] = (2**40 + 1234, 2**41 + 5678)
+        fake.admin[3] = 2
+        second = snapshot.read()
+        self.assertEqual(fake.gaa_sizes.count(0), 1)
+        self.assertEqual(fake.legacy_sizes.count(0), 1)
+        self.assertEqual((fake.gaa_calls, fake.legacy_calls, fake.table_calls), (3, 3, 2))
+        self.assertEqual(second["Adapter A"].bytes_recv, first["Adapter A"].bytes_recv + 1234)
+        self.assertFalse(second["Adapter A"].isup)
+
+        fake.members.append((5, "New adapter", "New description", 5005))
+        fake.values[5] = (10, 20)
+        third = snapshot.read()
+        self.assertEqual(list(third), ["Adapter A", "适配器 B", "New adapter"])
+        self.assertEqual((fake.gaa_calls, fake.legacy_calls, fake.table_calls), (5, 5, 3))
+        self.assertGreater(fake.gaa_sizes[-1], fake.gaa_sizes[-2])
+        self.assertGreater(fake.legacy_sizes[-1], fake.legacy_sizes[-2])
+        self.assertEqual(fake.gaa_sizes.count(0), 1)
+        self.assertEqual(fake.legacy_sizes.count(0), 1)
+
+        fake.members = []
+        self.assertEqual(snapshot.read(), {})
+        self.assertEqual(fake.table_calls, 3)
+        fake.members = [(5, "Renamed adapter", "New description", 5005)]
+        self.assertEqual(list(snapshot.read()), ["Renamed adapter"])
+        self.assertEqual(fake.table_calls, 4)
+        self.assertEqual(len(fake.frees), 4)
+
+    def test_cached_size_queries_keep_error_and_bounded_resize_contracts(self):
+        for phase, code, api in (("gaa_data", 5, "GetAdaptersAddresses"),
+                                 ("legacy_data", 87, "GetIfTable")):
+            with self.subTest(phase=phase):
+                fake = FakeLibrary()
+                snapshot = reader(fake)
+                snapshot.read()
+                fake.errors[phase] = code
+                with self.assertRaises(net.SnapshotError) as error:
+                    snapshot.read()
+                self.assertEqual((error.exception.api, error.exception.winerror), (api, code))
+                fake.errors.clear()
+                self.assertEqual(len(snapshot.read()), 2)
+                self.assertEqual(fake.gaa_sizes.count(0), 1)
+                self.assertEqual(fake.legacy_sizes.count(0), 1)
+        for attr, code in (("gaa_resize", 111), ("legacy_resize", 122)):
+            with self.subTest(attr=attr):
+                fake = FakeLibrary()
+                snapshot = reader(fake)
+                snapshot.read()
+                setattr(fake, attr, 10)
+                with self.assertRaises(net.SnapshotError) as error:
+                    snapshot.read()
+                self.assertEqual(error.exception.winerror, code)
+                self.assertLessEqual(fake.gaa_calls, 5)
+                self.assertLessEqual(fake.legacy_calls, 5)
+
+    def test_cached_capacity_does_not_allow_invalid_growth_sizes_or_poison_recovery(self):
+        for method, code, position, api_name in (("gaa", 111, 4, "GetAdaptersAddresses"),
+                                                ("legacy", 122, 1, "GetIfTable")):
+            for invalid_size in (0, 1, net.MAX_BUFFER + 1):
+                with self.subTest(method=method, invalid_size=invalid_size):
+                    fake = FakeLibrary()
+                    api = net.NativeNetworkApi(library=fake)
+                    api.read()
+                    original = getattr(api, method)
+
+                    def invalid_growth(*args):
+                        FakeLibrary.size(args[position], invalid_size)
+                        return code
+
+                    setattr(api, method, Function(invalid_growth))
+                    with self.assertRaises(net.SnapshotError) as error:
+                        api.read()
+                    self.assertEqual((error.exception.api, error.exception.winerror), (api_name, 13))
+                    setattr(api, method, original)
+                    self.assertEqual(len(api.read()), 2)
 
     def test_identity_ambiguity_falls_back_before_unnecessary_queries_and_retries_after_60s(self):
         for mode in ("description", "alias", "non_ascii", "alias_mismatch", "legacy_description_duplicate"):

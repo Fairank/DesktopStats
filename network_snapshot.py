@@ -126,19 +126,25 @@ class NativeNetworkApi:
         self.table2.argtypes, self.table2.restype = [c.POINTER(c.c_void_p)], U32
         self.free.argtypes, self.free.restype = [c.c_void_p], None
         self.legacy.argtypes, self.legacy.restype = [c.c_void_p, c.POINTER(U32), c.c_int], U32
+        # A successful size is only an allocation hint. Each sample still reads
+        # fresh native data, and topology growth follows the bounded resize path.
+        self._adapter_size, self._legacy_size = 0, 0
 
     def adapters(self):
-        api, size = "GetAdaptersAddresses", U32()
-        code = self.gaa(0, GAA_FLAGS, None, None, c.byref(size))
-        if code == 232:  # ERROR_NO_DATA: no IP adapters in this enumeration.
-            return []
-        if code != 111:
-            raise SnapshotError(api, code or INVALID_DATA)
+        api, size = "GetAdaptersAddresses", U32(self._adapter_size)
+        if not size.value:
+            code = self.gaa(0, GAA_FLAGS, None, None, c.byref(size))
+            if code == 232:  # ERROR_NO_DATA: no IP adapters in this enumeration.
+                return []
+            if code != 111:
+                raise SnapshotError(api, code or INVALID_DATA)
         for _attempt in range(3):
             if not c.sizeof(AdapterPrefix) <= size.value <= MAX_BUFFER:
                 _bad(api)
             buffer = c.create_string_buffer(size.value)
             code = self.gaa(0, GAA_FLAGS, None, buffer, c.byref(size))
+            if code == 232:
+                return []
             if code == 111:
                 continue
             if code:
@@ -173,6 +179,7 @@ class NativeNetworkApi:
                 _bad(api)
             rows.append((row.index, text(row.friendly_name), text(row.description), int(row.luid)))
             pointer = row.next
+        self._adapter_size = size.value
         return rows
 
     def counters(self):
@@ -202,10 +209,11 @@ class NativeNetworkApi:
                 self.free(pointer)
 
     def states(self):
-        api, size = "GetIfTable", U32()
-        code = self.legacy(None, c.byref(size), 0)
-        if code != 122:
-            raise SnapshotError(api, code or INVALID_DATA)
+        api, size = "GetIfTable", U32(self._legacy_size)
+        if not size.value:
+            code = self.legacy(None, c.byref(size), 0)
+            if code != 122:
+                raise SnapshotError(api, code or INVALID_DATA)
         for _attempt in range(3):
             if not LegacyTable.rows.offset <= size.value <= MAX_BUFFER:
                 _bad(api)
@@ -230,6 +238,7 @@ class NativeNetworkApi:
                 _bad(api)
             description = bytes(row.description[:row.description_length]).rstrip(b"\0")
             rows[row.index] = (description, row.oper in (4, 5) and row.admin == 1)
+        self._legacy_size = size.value
         return rows
 
     def read(self):
