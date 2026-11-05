@@ -46,6 +46,7 @@ class MaterialSurface(QQuickPaintedItem):
         self._config = {}
         self._frosted = True
         self._radius = -1.0
+        self._menu_bar = False
         self.setAntialiasing(True)
         self.setOpaquePainting(False)
 
@@ -70,6 +71,14 @@ class MaterialSurface(QQuickPaintedItem):
 
     cornerRadius = Property(float, lambda self: self._radius, set_radius, notify=changed)
 
+    def set_menu_bar(self, value):
+        if self._menu_bar != value:
+            self._menu_bar = value
+            self.changed.emit()
+            self.update()
+
+    menuBar = Property(bool, lambda self: self._menu_bar, set_menu_bar, notify=changed)
+
     def paint(self, painter):
         if self.width() <= 0 or self.height() <= 0:
             return
@@ -79,6 +88,7 @@ class MaterialSurface(QQuickPaintedItem):
             self._config.get("theme") == "dark",
             self._config.get("opacity", 94),
             frosted=self._frosted,
+            menu_bar=self._menu_bar,
             **glass_options(self._config),
         )
         paint_surface(painter, self.width(), self.height(), colors, None if self._radius < 0 else self._radius)

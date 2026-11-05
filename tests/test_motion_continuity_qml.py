@@ -274,6 +274,10 @@ Window {id:scene;width:1400;height:100;visible:false;color:"white";property var 
 
     def test_details_header_keeps_its_phase_while_live_detail_rows_change(self):
         self.manager.click("DISPLAY1", "b_cpu")
+        deadline = time.monotonic() + 2
+        while self.manager._panel is None and time.monotonic() < deadline:
+            QTest.qWait(10)
+        self.assertIsNotNone(self.manager._panel, "The asynchronous detail never became ready")
         panel = self.manager._panel["window"]
         QTest.qWait(40)
         rows = self.snapshot(panel)

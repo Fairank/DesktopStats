@@ -805,6 +805,16 @@ Window {
                             }
                         }
                     }
+                    ProcessUsageCard {
+                        Layout.fillWidth: true
+                        provider: typeof stats !== "undefined" ? stats : null
+                        metric: root.detail.metric || ""
+                        hardwareName: root.detail.hardware_name || root.cpuContext.hardware_name || ""
+                        active: root.visible && root.visibility !== Window.Minimized && !root.overflowMode
+                        ink: root.foreground; muted: root.secondary
+                        fontFamily: root.barState.fontFamily
+                        motionEnabled: root.barState.motionEnabled === true
+                    }
                     ColumnLayout {
                         objectName: "topBarCpuContext"
                         visible: root.hasCpuContext

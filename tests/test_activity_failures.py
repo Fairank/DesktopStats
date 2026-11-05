@@ -27,6 +27,8 @@ class ActivityFailureTests(unittest.TestCase):
     def setUp(self):
         self.stack = ExitStack()
         self.addCleanup(self.stack.close)
+        # This suite exercises the portable psutil error contract explicitly.
+        self.stack.enter_context(patch("activity_sensors._native_network", return_value=None))
         self.native = self.stack.enter_context(
             patch("ctypes.WinDLL", side_effect=AssertionError("No native API"))
         )

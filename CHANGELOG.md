@@ -1,5 +1,118 @@
 # Changes
 
+## 0.26.0-preview.12
+
+- Read Windows network counters and operating state through a joined native
+  snapshot. Refresh IP-adapter membership and friendly names each poll; join by
+  LUID so filter interfaces cannot enter automatic selection and IPv6-only
+  adapters remain identifiable. Keep the chosen polling interval, units and
+  reset-safe rate calculation. Native failures report their API and safe facts.
+- Skip the 40-sample Python/QML history transfer for desktop cards and editor
+  previews when their chart is explicitly disabled. Keep current readings live;
+  enabling a chart immediately obtains fresh history. Saved desktop settings,
+  draft preview settings and resizing freezes keep their existing boundaries.
+- Retain the original icons, animation cadence, materials and user settings.
+
+## 0.26.0-preview.11
+
+- Replace per-PID Windows software-usage queries with one bounded native process
+  snapshot. Keep fresh creation-time identities, whole-machine CPU accounting,
+  working-set semantics and selected-adapter GPU attribution.
+- Refresh visible software rankings about once per second without adding query
+  time to every interval. Establish the initial CPU rate in a short follow-up;
+  give GPU counters their full initial rate window. No idle polling, stale
+  generation delivery or catch-up query bursts.
+- Precompile top-bar details asynchronously after bars are ready. First-open
+  requests share the pending component and remain cancelable; native windows
+  and glass retain their existing preparation/cleanup lifecycle.
+- Preserve native snapshot API/status failures and distinguish unidentified
+  process names from permission failures. Keep original icons and animations.
+
+## 0.26.0-preview.10
+
+- Add descending top-five software rankings to top-bar and desktop-widget
+  hardware details. Merge names across processes before ranking. CPU uses a
+  whole-machine percentage, RAM uses working-set bytes, and GPU/VRAM readings
+  are bound to the selected Windows adapter. Shared memory is explicitly noted.
+- Query process activity only while a detail card is visible, on one separate
+  worker at a two-second interval. Keep rankings out of preferences, sensor
+  diagnostics, history and exports. Closing/replacing cards invalidates late
+  replies; PID reuse, counter resets and stale samples do not invent activity.
+- Resolve duplicated Windows GPU names through verified physical adapter
+  locations, excluding explicitly unlocated name aliases only when a matching
+  physical device is known. Ambiguous physical devices remain unavailable.
+- Show protected-process coverage and precise native API/error codes. Network,
+  disk and non-attributable hardware explain their current limitations rather
+  than displaying fabricated per-software percentages or watts.
+- Keep original icons, effects, sampling preferences, glass and bar placement.
+
+## 0.26.0-preview.9
+
+- Give RAM/VRAM a proportional light band and ten cool-to-amber colour anchors;
+  keep occupied extent independent of effect strength and avoid electrical arcs
+  or invented temperature on memory icons.
+- Replace network/disk arrow discharges with retained directional data packets.
+  Download/read use blue; upload/write use purple. Each real direction controls
+  its own density and cadence, with a perceptual small-transfer response that
+  never changes the formatted throughput. Disk activity lights use the matching
+  direction colour while the neutral drive/arrow geometry stays fixed.
+- Give the thermometer ten yellow-to-red anchors and a clearer, softly pulsing
+  bulb halo; preserve smooth true column height and clip warmth to its own icon.
+- Light the original power-bolt interior in blue between the existing irregular
+  current bursts. Keep fixed palette textures and increase packet cadence with
+  the real power channel, retaining the user's independent strength/speed.
+- Keep CPU/GPU feedback, the fan, battery, original glyphs and assets, shared
+  clock, data collection, settings, material behavior and layouts intact.
+
+## 0.26.0-preview.8
+
+- Give the top-bar navigation its own official Lucide panel-top symbol, keeping
+  preferences distinct and the original Niangao, CPU and GPU geometry intact.
+- In optional hardware feedback, CPU/GPU utilisation above50% and real thermal
+  activity warm the hardware body and a tightly clipped surrounding aura. Ten
+  warm colour anchors blend continuously; no extra temperature reading is inferred.
+- Above50% utilisation, smoothly increase existing irregular yellow/blue packet
+  cadence:2x at60%,3x at80%,4x at100%. Higher load also selects denser existing
+  atlas stages. Missing heat/power still suppresses its respective discharge.
+- Retain the same shared animation clock, image/shader assets, sampling cadence,
+  fan and thermometer behavior, saved settings and layouts. Keep aura geometry
+  retained across active sensor updates and stop all feedback for reduced motion.
+
+## 0.26.0-preview.7
+
+- Give the native settings caption explicit light/dark fill and text colors so
+  its title and standard minimize, maximize and close controls remain readable
+  with the extended glass frame. Apply after the guarded client paint, preserve
+  the original mode once per surface, and release custom colors to Windows
+  defaults during cleanup. Keep native window actions and close-to-tray behavior.
+- Use an explicit low-tint Acrylic compatibility carrier for the bar, settings
+  and details. Keep the continuous foreground transparency control independent
+  from icon/text opacity. Ordinary widget and default Raster blur remain on their
+  existing carrier; dragging the slider adds no native request or timer.
+- Replay a theme changed inside native setup once; if it changes again, clear
+  safely and use the existing bounded recovery with the latest theme. Do not
+  cache that transient fallback. Continue caption restoration after ordinary
+  cleanup read errors, while never crossing ownership or surface generations.
+- Preserve original icons, animation assets and cadence, profiles, sampling,
+  history and layouts. Own-window native-caption renders and isolated behavior
+  checks do not certify the active desktop compositor's glass appearance.
+
+## 0.26.0-preview.6
+
+- Keep bar material and continuous 0–100% transparency controls visible without
+  opening secondary settings. Editing an inherited slider makes only the bar
+  independent. Apply saves the bar branch; global/widget drafts remain separate.
+- Use a lighter bar-only coating, shared by the real band and its previews.
+  Paint only existing bands/details during preview, with no metric-model update,
+  AppBar placement, extra timer or per-step native blur reconfiguration. Restore
+  saved appearance on hide; replay the latest preview after reentrant refresh.
+- Use the existing activation-independent Raster compatibility blur for settings
+  and details, keeping the transparent foreground and WUJI-style reading planes.
+  Prepare before first Show, retain generation/ownership and cleanup guards, and
+  use a readable solid fallback when the native request fails. Native API success
+  and offscreen tests do not certify the desktop compositor's appearance.
+- Retain original icons, animations, shader assets, profile, collection and history.
+
 ## 0.26.0-preview.5
 
 - Composite the existing four arc-atlas cells in one RHI shader quad, preserving

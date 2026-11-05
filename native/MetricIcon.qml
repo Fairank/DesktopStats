@@ -88,6 +88,19 @@ Item {
     readonly property real thermalArcStrength:Math.max(0,Math.min(1,(heatPresentation-.28)/.55))
     readonly property real thermalArcDuration:2400/(.82+.36*thermalArcStrength)
     readonly property bool processorGlyph:["cpu","gpu"].includes(name)
+    // A local decorative stress response: temperature and utilisation remain
+    // independent real channels. Missing temperature never invents a hot reading.
+    readonly property real processorLoadPressure:processorGlyph && compositeActive && loadActive?displayedLoad:0
+    readonly property real processorWarmth:animationRunning && processorGlyph
+        ?Math.max(thermalContext?thermalArcStrength:0,Math.max(0,(processorLoadPressure-.5)*2)):0
+    readonly property var processorWarmColors:darkSurface
+        ?["#ffd565","#ffca50","#ffbb41","#ffaa36","#ff9532","#ff7c35","#ff623c","#ff4d46","#ff3b50","#ff2c59"]
+        :["#f3b330","#f5a62a","#f79726","#fa8525","#fc7028","#fb5b2d","#f74834","#ee383c","#e42b43","#d91e49"]
+    readonly property color processorWarmColor:paletteColor(processorWarmColors,processorWarmth)
+    // Continuous ten-band response:1x through50%,2x at60%,3x at80%,4x at100%.
+    // This changes the rate of decorative packets, never the measured power.
+    readonly property real processorDischargeRate:processorLoadPressure<=.5?1
+        :processorLoadPressure<=.6?1+10*(processorLoadPressure-.5):2+5*(processorLoadPressure-.6)
     readonly property bool thermalContext:animationRunning && !thermometerGlyph && name!=="fan"
         && (compositeActive?supportsThermal && thermalTarget!==null:resolvedEffect==="heat")
     readonly property bool thermalArcActive:thermalContext && thermalArcStrength>0
@@ -144,6 +157,8 @@ Item {
     readonly property real fanRotationsPerSecond:speed*(.08+1.52*(1-Math.exp(-3*fanActivity))/(1-Math.exp(-3)))
     readonly property real fanTrailStrength:Math.max(0,Math.min(1,(fanActivity-.2)/.6))
     readonly property real cycleDuration: resolvedEffect === "spin" ? 1000/fanRotationsPerSecond
+        : resolvedEffect === "flow" && arrowFlow ? 1000/(speed*streamCadence(displayedLevel))
+        : resolvedEffect === "flow" && name === "power" ? 1400/(speed*streamCadence(displayedLevel))
         : 2400/(speed*(.82+.36*displayedLevel))
     readonly property real wave: 0.5 - 0.5 * Math.cos(phase * Math.PI * 2)
     readonly property bool darkSurface: ink.r * .2126 + ink.g * .7152 + ink.b * .0722 > .55
@@ -166,6 +181,11 @@ Item {
     readonly property var loadColors: darkSurface
         ? ["#43baff","#4baeff","#599fff","#6992ff","#7985ff","#8879ff","#996fff","#aa66ff","#bb60f9","#ca59ed"]
         : ["#008ddd","#087edc","#206cdb","#365bd9","#4c4bd5","#623dd0","#762dc9","#891dc0","#9b13b4","#ab0aa5"]
+    // Occupancy is still an exact linear fill. Only its decorative ink changes
+    // from cool light to amber as the available capacity approaches saturation.
+    readonly property var memoryColors: darkSurface
+        ? ["#58d5f4","#64ccfc","#72c1ff","#86b5ff","#9aa8ff","#b39bf1","#c9a0cc","#e6bc77","#ffd15c","#ffb83d"]
+        : ["#008ab2","#078cc2","#248cd0","#4389da","#6482da","#877bcb","#ab85a0","#c59859","#d9a12b","#e39515"]
     readonly property var thermalColors: darkSurface
         ? ["#55baff","#42d5e1","#b6dc51","#ffe257","#ffc139","#ffa12e","#ff7b30","#ff573c","#ff374c","#ff235c"]
         : ["#177bd6","#008eac","#7c9800","#bd9b00","#db8800","#ec7000","#f0520b","#eb351b","#dc1d2d","#c90d42"]
@@ -185,12 +205,12 @@ Item {
         ? ["#ffe577","#ffdd62","#ffd44f","#ffca40","#ffc036","#ffb72f","#ffad2c","#ffa22d","#ff972f","#ff8c34"]
         : ["#b78b00","#c18400","#ca7c00","#d37500","#db6c00","#e36200","#e95803","#ed4c0a","#ef3f15","#ef321f"]
     readonly property var manualColors: resolvedEffect==="heat"?thermalColors:resolvedEffect==="spin"?spinColors
-        :energyFlow?energyColors:resolvedEffect==="flow"?(outgoing?outboundColors:inboundColors):loadColors
+        :energyFlow?energyColors:resolvedEffect==="flow"?(outgoing?outboundColors:inboundColors):memoryGlyph?memoryColors:loadColors
     readonly property color loadColor: paletteColor(loadColors,displayedLoad)
     readonly property color thermalColor: paletteColor(thermalColors,displayedThermal)
     readonly property var thermometerColors: darkSurface
-        ? ["#f5d470", "#ffc14b", "#ff9b38", "#ff703c", "#ff4855"]
-        : ["#ad7909", "#ca8008", "#dd650e", "#df431f", "#ca2340"]
+        ? ["#f5d470","#f9cc59","#ffc247","#ffb33a","#ffa032","#ff8c31","#ff7537","#ff5f40","#ff4b4b","#ff3c58"]
+        : ["#ad7909","#bc7c08","#cb7d08","#d97709","#e36b0d","#e65b14","#e64820","#e1352b","#d62639","#c91b45"]
     readonly property color thermometerColor: paletteColor(thermometerColors, displayedTemperature)
     readonly property color energyColor: paletteColor(energyColors,displayedEnergy)
     readonly property color inboundColor: paletteColor(inboundColors,displayedInbound)
@@ -203,6 +223,8 @@ Item {
         return match ? "M0 0 " + match[1] : ""
     }).join(" ")
     readonly property bool corePulse: ["cpu", "gpu", "memory", "vram", "battery", "disk"].includes(name) || !pulsePaths.trim()
+    readonly property bool memoryGlyph:["memory","vram"].includes(name)
+    readonly property bool transportGlyph:["network","download","upload","disk","disk_read","disk_write"].includes(name)
     readonly property bool arrowFlow: ["network", "download", "upload", "disk_read", "disk_write"].includes(name)
     readonly property bool outgoing: name === "upload" || name === "disk_read"
         || (name === "network" && metric === "net_upload")
@@ -233,6 +255,9 @@ Item {
         return typeof value==="number" && Number.isFinite(value) && value>=0 && value<=1?value:null
     }
     function channelOpacity(value) {return intensityGain*(.85+.15*value)}
+    // A perceptual throughput scale, independent of the displayed units. It
+    // gives small real transfers readable packets without inflating the value.
+    function streamCadence(value) {return .4+1.6*Math.sqrt(Math.max(0,Math.min(1,value)))}
     function smooth01(value) {const t=Math.max(0,Math.min(1,value));return t*t*(3-2*t)}
     function paletteColor(colors,value) {
         const position=Math.max(0,Math.min(1,value))*(colors.length-1),index=Math.floor(position)
@@ -279,10 +304,10 @@ Item {
             displayedLevel=Math.max(loadActive?displayedLoad:0,thermalActive?displayedThermal:0,energyActive?displayedEnergy:0,
                 inboundActive?displayedInbound:0,outboundActive?displayedOutbound:0,spinChannelActive?displayedSpin:0)
             loadPhase=loadActive?(loadPhase+elapsed*speed*(.55+1.2*displayedLoad)/2200)%1:0
-            thermalArcPhase=thermalArcActive?(thermalArcPhase+elapsed*speed/thermalArcDuration)%1:0
-            energyPhase=energyActive?(energyPhase+elapsed*speed*(.82+.36*displayedEnergy)/2400)%1:0
-            inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(.82+.36*displayedInbound)/2400)%1:0
-            outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(.82+.36*displayedOutbound)/2400)%1:0
+            thermalArcPhase=thermalArcActive?(thermalArcPhase+elapsed*speed*processorDischargeRate/thermalArcDuration)%1:0
+            energyPhase=energyActive?(energyPhase+elapsed*speed*(name==="power"?streamCadence(displayedEnergy)/1400:processorDischargeRate*(.82+.36*displayedEnergy)/2400))%1:0
+            inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedInbound)/1000:(.82+.36*displayedInbound)/2400))%1:0
+            outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedOutbound)/1000:(.82+.36*displayedOutbound)/2400))%1:0
         } else displayedLevel=converge(displayedLevel,level,elapsed)
         // Four identical blades repeat every quarter-turn; bound a delayed
         // rotor step below half that pitch so it cannot appear to reverse.
@@ -319,6 +344,53 @@ Item {
     onNameChanged: syncClock()
     Component.onCompleted: syncClock()
     Component.onDestruction: EffectClock.unsubscribe(clockSubscription)
+    Loader {
+        objectName:"metricIconPowerCore";anchors.fill:parent;z:-1
+        active:root.name==="power" && root.electricEnabled
+        sourceComponent:AccentPart {
+            fragment:root.glyphParts.join("");filled:true;strokeWidth:0
+            colors:root.energyColors;amount:root.electricActivity
+            opacity:root.intensityGain*(.35+.4*Math.sqrt(Math.max(0,root.electricActivity)))
+        }
+    }
+    Loader {
+        objectName:"metricIconProcessorWarmth"
+        // Retain the small geometry while a processor is active, so crossing
+        // the heat threshold adds no delegates or textures during a sample.
+        anchors.fill:parent;z:-1;active:root.processorGlyph && root.animationRunning
+        sourceComponent:Item {
+            visible:root.processorWarmth>0
+            Item {
+                width:18;height:18;anchors.centerIn:parent
+                scale:Math.min(root.width,root.height)/18
+                Item {
+                    x:-2.5;y:-root.paintBleed.top;width:23;height:18+root.paintBleed.top+root.paintBleed.bottom;clip:true
+                    Item {
+                        x:2.5;y:root.paintBleed.top;width:18;height:18
+                        Rectangle {
+                            id:processorBody;objectName:"metricIconProcessorBodyWarmth"
+                            x:root.name==="gpu"?1.5:3;y:root.name==="gpu"?3.75:3
+                            width:root.name==="gpu"?15:12;height:root.name==="gpu"?9:12
+                            radius:1.6;antialiasing:true;color:root.processorWarmColor
+                            opacity:root.channelOpacity(root.processorWarmth)*root.processorWarmth*.22
+                        }
+                        Repeater {
+                            model:3
+                            Rectangle {
+                                required property int index
+                                objectName:"metricIconProcessorHalo_"+index
+                                readonly property real spread:4.8-index*1.6
+                                width:processorBody.width+spread*2;height:processorBody.height+spread*2
+                                x:processorBody.x-spread;y:processorBody.y-spread;radius:processorBody.radius+spread
+                                antialiasing:true;color:root.processorWarmColor
+                                opacity:root.channelOpacity(root.processorWarmth)*root.processorWarmth*(.14-.025*index)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     Icon {
         objectName: "metricIconGlyph"
         anchors.fill: parent; name: root.name; ink: root.ink
@@ -364,15 +436,77 @@ Item {
         }
     }
 
+    // Retained data packets: the neutral upstream arrow stays fixed. Each
+    // real direction owns its colour, position and smoothed activity. No SVG
+    // regeneration, extra textures, per-packet timer or model reset per sample.
+    component TransportStream: Item {
+        id:stream
+        property real amount:0
+        property real phaseValue:0
+        property bool incoming:true
+        readonly property real signal:Math.sqrt(Math.max(0,Math.min(1,amount)))
+        readonly property bool disk:["disk","disk_read","disk_write"].includes(root.name)
+        readonly property var blueColors:root.darkSurface
+            ?["#48d7f5","#46d1f9","#45cbfc","#46c5ff","#48bfff","#4bb9ff","#4fb3ff","#53adff","#58a7ff","#5ea1ff"]
+            :["#0086af","#0089bb","#008bc8","#008bd5","#048be0","#0b88e9","#1384f0","#1b7ef5","#2377f8","#2a70fa"]
+        readonly property var purpleColors:root.darkSurface
+            ?["#afa0ff","#b19eff","#b39bff","#b598ff","#b795ff","#ba92ff","#bd8fff","#c08cff","#c389ff","#c786ff"]
+            :["#7142c8","#7641d0","#7c3fd7","#823ddd","#893be2","#9038e6","#9735e9","#9e32e9","#a62fe8","#ae2ce6"]
+        readonly property color packetInk:root.paletteColor(incoming?blueColors:purpleColors,signal)
+        readonly property real alpha:root.channelOpacity(amount)*Math.min(1,signal*24)
+        readonly property real shaftX:root.name==="network"?(incoming?5.25:12.75):9
+        readonly property real shaftTop:disk?1.5:root.name==="network"?3:2.25
+        readonly property real shaftBottom:disk?7.5:root.name==="network"?15:12.75
+        readonly property int direction:disk?(incoming?-1:1):(incoming?1:-1)
+        readonly property real density:1+3*signal
+        width:18;height:18
+        Item {
+            id:lane;x:stream.shaftX-1.2;y:stream.shaftTop;width:2.4;height:stream.shaftBottom-stream.shaftTop;clip:true
+            Repeater {
+                model:4
+                Rectangle {
+                    required property int index
+                    objectName:"metricIconDataPacket_"+index
+                    readonly property real t:((stream.phaseValue+index/4)%1+1)%1
+                    readonly property real progress:stream.direction>0?t:1-t
+                    width:lane.width;height:1.8+1.4*stream.signal;radius:width/2;antialiasing:true
+                    y:progress*(lane.height+height)-height
+                    opacity:stream.alpha*Math.max(0,Math.min(1,stream.density-index))
+                    gradient:Gradient {
+                        GradientStop {position:0;color:Qt.rgba(stream.packetInk.r,stream.packetInk.g,stream.packetInk.b,0)}
+                        GradientStop {position:.3;color:stream.packetInk}
+                        GradientStop {position:.62;color:Qt.lighter(stream.packetInk,1.35)}
+                        GradientStop {position:1;color:Qt.rgba(stream.packetInk.r,stream.packetInk.g,stream.packetInk.b,0)}
+                    }
+                }
+            }
+        }
+        Rectangle {
+            objectName:"metricIconDiskActivityGlow"
+            visible:stream.disk
+            width:3;height:3;radius:1.5;x:(stream.incoming?4.5:7.5)-width/2
+            y:(root.name==="disk"?12:13.5)-height/2
+            color:stream.packetInk;opacity:stream.alpha*.2;antialiasing:true
+        }
+        Rectangle {
+            objectName:"metricIconDiskActivityLight"
+            visible:stream.disk
+            width:1.55;height:1.55;radius:width/2;x:(stream.incoming?4.5:7.5)-width/2
+            y:(root.name==="disk"?12:13.5)-height/2
+            color:stream.packetInk;opacity:stream.alpha;antialiasing:true
+        }
+    }
+
     // The whole window shares one clock. RHI combines the same four weighted
     // cells in one quad; software/error paths retain the original image blend.
     component DischargeAtlas: Item {
         id:atlas
         property real amount:0
+        property real densityAmount:amount
         property real phaseValue:0
         property bool warm:false
         property real layerOpacity:1
-        readonly property real stagePosition:Math.max(0,Math.min(9,amount*10-1))
+        readonly property real stagePosition:Math.max(0,Math.min(9,densityAmount*10-1))
         readonly property int lowerStage:Math.floor(stagePosition)
         readonly property real stageBlend:stagePosition-lowerStage
         readonly property real framePosition:((phaseValue%1+1)%1)*48
@@ -450,6 +584,7 @@ Item {
                         DischargeAtlas {
                             objectName:"metricIconWarmDischarge"
                             warm:true;amount:root.thermalArcStrength;phaseValue:root.heatPhase
+                            densityAmount:root.processorGlyph?Math.max(amount,root.processorLoadPressure):amount
                         }
                     }
                 }
@@ -459,24 +594,16 @@ Item {
                     sourceComponent:DischargeAtlas {
                         objectName:"metricIconBlueDischarge"
                         amount:root.electricActivity;phaseValue:root.electricPhase
+                        densityAmount:root.processorGlyph?Math.max(amount,root.processorLoadPressure):amount
                     }
                 }
                 Loader {
                     objectName:"metricIconFlow"
                     anchors.fill:parent;active:root.flowActive && root.arrowFlow
-                    sourceComponent:Item {
-                        width:18;height:18
-                        Item {
-                            x:root.name==="network" && root.outgoing?9:0
-                            width:root.name==="network"?9:18
-                            height:["disk_read","disk_write"].includes(root.name)?10:root.name==="network"?18:14
-                            clip:true
-                            DischargeAtlas {
-                                objectName:"metricIconFlowArrow_0"
-                                x:root.name==="network"?(root.outgoing?-5.25:-3.75):0
-                                amount:root.displayedLevel;phaseValue:root.phase
-                            }
-                        }
+                    sourceComponent:TransportStream {
+                        objectName:"metricIconFlowArrow_0"
+                        incoming:root.name==="disk_read" || (root.name!=="disk_write" && !root.outgoing)
+                        amount:root.displayedLevel;phaseValue:root.phase
                     }
                 }
                 Loader {
@@ -491,15 +618,24 @@ Item {
                                 required property int index
                                 readonly property bool inbound:index===0
                                 active:inbound?root.inboundActive:root.outboundActive
-                                x:root.name==="network" && !inbound?9:0
-                                width:root.name==="network"?9:18
-                                height:["disk_read","disk_write"].includes(root.name)?10:18
-                                clip:root.name==="network" || ["disk_read","disk_write"].includes(root.name)
-                                sourceComponent:DischargeAtlas {
-                                    objectName:"metricIconTransportArc_"+packet.index
-                                    x:root.name==="network"?(packet.inbound?-3.75:-5.25):0
-                                    amount:packet.inbound?root.displayedInbound:root.displayedOutbound
-                                    phaseValue:packet.inbound?root.inboundPhase:(root.outboundPhase+.23)%1
+                                width:18;height:18
+                                sourceComponent:root.transportGlyph?streamPart:legacyPart
+                                Component {
+                                    id:streamPart
+                                    TransportStream {
+                                        objectName:"metricIconTransportArc_"+packet.index
+                                        incoming:packet.inbound
+                                        amount:packet.inbound?root.displayedInbound:root.displayedOutbound
+                                        phaseValue:packet.inbound?root.inboundPhase:(root.outboundPhase+.23)%1
+                                    }
+                                }
+                                Component {
+                                    id:legacyPart
+                                    DischargeAtlas {
+                                        objectName:"metricIconTransportArc_"+packet.index
+                                        amount:packet.inbound?root.displayedInbound:root.displayedOutbound
+                                        phaseValue:packet.inbound?root.inboundPhase:(root.outboundPhase+.23)%1
+                                    }
                                 }
                             }
                         }
@@ -547,7 +683,7 @@ Item {
         Item {
             id:heatLayer;objectName:"metricIconHeat"
             readonly property int paintCount:0
-            anchors.fill:parent;visible:root.thermometerEnabled
+            anchors.fill:parent;visible:root.thermometerEnabled;clip:true
             readonly property real activity:root.displayedTemperature
             readonly property real alpha:Math.min(1,root.channelOpacity(activity)*1.08)
             // Local, soft warmth belongs to temperature. No atlas, travelling
@@ -558,9 +694,9 @@ Item {
                 Rectangle {
                     required property int index
                     objectName:"metricIconTemperatureHalo_"+index
-                    width:6.6-index*1.25;height:width;x:9-width/2;y:13.5-height/2
+                    width:8.8-index*1.9;height:width;x:9-width/2;y:13.5-height/2
                     radius:width/2;antialiasing:true;color:root.thermometerColor
-                    opacity:heatLayer.haloAlpha*(.045+.03*index)
+                    opacity:heatLayer.haloAlpha*(.1+.045*index)
                 }
             }
             Rectangle {
@@ -587,19 +723,26 @@ Item {
             x:root.name==="gpu"?3:horizontal?2.5:6.8
             y:root.name==="gpu"?10:root.name==="disk"?10.5:horizontal?6:11.2-height
             radius:.35;antialiasing:true;clip:true
-            color:root.compositeActive?root.loadColor:root.accentColor
+            color:root.memoryGlyph?root.paletteColor(root.memoryColors,activity):root.compositeActive?root.loadColor:root.accentColor
             opacity:root.channelOpacity(activity)*(["cpu","gpu"].includes(root.name)?.5:.88+.12*localWave)
             Rectangle {
                 objectName:"metricIconLoadHighlight"
                 readonly property real progress:root.compositeActive?root.loadPhase:root.phase
                 x:pulseCore.horizontal?progress*(pulseCore.width+3)-2:0
                 y:pulseCore.horizontal?0:(1-progress)*(pulseCore.height+3)-1
-                width:pulseCore.horizontal?.8:pulseCore.width;height:pulseCore.horizontal?pulseCore.height:.65
+                width:pulseCore.horizontal?(root.memoryGlyph?2.7:.8):pulseCore.width;height:pulseCore.horizontal?pulseCore.height:.65
                 color:root.darkSurface?"#e9e5ff":"#d9e9ff";opacity:.8
+                gradient:root.memoryGlyph?memorySweep:null
+                Gradient {
+                    id:memorySweep;orientation:Gradient.Horizontal
+                    GradientStop {position:0;color:"transparent"}
+                    GradientStop {position:.55;color:root.darkSurface?"#f5faff":"#e7f6ff"}
+                    GradientStop {position:1;color:"transparent"}
+                }
             }
             Loader {
                 objectName:"metricIconCapacityActivity"
-                active:pulseCore.visible && pulseCore.horizontal
+                active:pulseCore.visible && pulseCore.horizontal && !root.memoryGlyph
                 sourceComponent:DischargeAtlas {
                     x:-pulseCore.x;y:-pulseCore.y;amount:pulseCore.activity
                     phaseValue:root.compositeActive?root.loadPhase:root.phase

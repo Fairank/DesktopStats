@@ -37,6 +37,27 @@ class TopBarActionUiTests(unittest.TestCase):
     preset = groups.GroupQmlTests.preset
     choose = groups.GroupQmlTests.choose
 
+    def test_sidebar_top_bar_and_preferences_have_distinct_nonoverlapping_icons(self):
+        # A user must be able to distinguish navigation destinations by symbol.
+        # Inspect the real content items, including after selection moves.
+        before = copy.deepcopy(self.ui._draft)
+        icons = []
+        for name in ("nav_0", "nav_3", "nav_4", "nav_1"):
+            nav = self.item(name)
+            content = nav.property("contentItem")
+            glyphs = [item for item in content.childItems()
+                      if item.metaObject().indexOfProperty("name") >= 0]
+            self.assertEqual(len(glyphs), 1, name)
+            icons.append(glyphs[0].property("name"))
+            self.assertGreaterEqual(glyphs[0].x(), 0)
+            self.assertLessEqual(glyphs[0].x()+glyphs[0].width(), content.width())
+        self.assertEqual(len(set(icons)), 4)
+        self.click("nav_1")
+        self.assertEqual(self.window.property("page"), 1)
+        self.click("nav_3")
+        self.assertEqual(self.window.property("page"), 3)
+        self.assertEqual(self.ui._draft, before)
+
     def test_confirm_commits_once_and_apply_keeps_other_scope_pending(self):
         self.ui.change("refresh", 0.5)
         before = copy.deepcopy(self.ui._draft)

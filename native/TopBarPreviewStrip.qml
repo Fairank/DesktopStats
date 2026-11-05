@@ -160,9 +160,11 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: root.barHeight
         MaterialSurface {
+            objectName: root.sampleOnly ? root.objectName+"MaterialSurface" : "topBarPreviewMaterialSurface"
             anchors.fill: parent
             config: root.appearanceConfig
             frosted: stats.coatingAllowed
+            menuBar: true
             cornerRadius: 0
         }
         TopBarChrome {objectName:root.sampleOnly?root.objectName+"BandChrome":"topBarPreviewBandChrome";anchors.fill:parent;role:"band";design:root.barDesign;ink:root.barInk;accent:root.barAccent}

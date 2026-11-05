@@ -464,6 +464,12 @@ class SettingsMaterialBridge(QObject):
                 or snapshot["policy"] != policy):
             return None
         report = snapshot["report"]
+        if report.get("fallback_reason") == "caption-theme-changed-during-request":
+            # A theme changed twice inside synchronous native callbacks. Its
+            # safe fallback is transient: use the existing finite recovery to
+            # configure the latest target, rather than cache an obsolete theme.
+            self._hidden_snapshot = None
+            return None
         if policy.get("state") != "allowed" and (
                 report.get("blur_may_remain") is True or report.get("cleanup_complete") is False
                 or report.get("status") == "cleanup-failed"):

@@ -293,5 +293,240 @@ class PerformanceContractTests(unittest.TestCase):
         self.assertEqual(self.ui.saved, self.initial)
 
 
+class WidgetHistoryQmlTests(unittest.TestCase):
+    """Exercise real QML history consumers with a counted real controller getter."""
+
+    @classmethod
+    def setUpClass(cls):
+        import os
+        from pathlib import Path
+
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        os.environ.setdefault("QT_QUICK_BACKEND", "software")
+        from PySide6.QtGui import QFontDatabase
+        from PySide6.QtQml import qmlRegisterType
+        from PySide6.QtWidgets import QApplication
+
+        from native_card import HardwareCard
+        from native_surface import MaterialSurface
+
+        cls.app = QApplication.instance() or QApplication([])
+        if cls.app.platformName() != "offscreen":
+            raise RuntimeError("Widget history tests require offscreen QPA")
+        directory = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts"
+        for name in ("SegUIVar.ttf", "segoeui.ttf", "seguisb.ttf", "msyh.ttc", "msyhbd.ttc"):
+            if (directory / name).is_file():
+                QFontDatabase.addApplicationFont(str(directory / name))
+        qmlRegisterType(HardwareCard, "DesktopStats", 1, 0, "HardwareCard")
+        qmlRegisterType(MaterialSurface, "DesktopStats", 1, 0, "MaterialSurface")
+
+    def setUp(self):
+        from PySide6.QtCore import Property
+        from PySide6.QtQml import QQmlEngine
+
+        class CountedController(controls.Controller):
+            history_reads = 0
+
+            def get_history(self):
+                self.history_reads += 1
+                return list(self._history)
+
+            history = Property("QVariantList", get_history, notify=controls.Controller.dataChanged)
+
+        self.enterContext(patch("ctypes.WinDLL", side_effect=AssertionError("No native API")))
+        self.enterContext(patch("subprocess.Popen", side_effect=AssertionError("No process")))
+        self.write = self.enterContext(patch.object(controls, "save"))
+        self.enterContext(patch.object(controls, "set_autostart"))
+        initial = copy.deepcopy(DEFAULT)
+        initial["widgets"]["cpu"]["chart"] = False
+        initial["widgets"]["gpu"]["chart"] = False
+        with patch.object(controls, "load", return_value=initial):
+            self.ui = CountedController()
+        self.ui.receive(dict(time=time.time(), cpu_usage=20, cpu_temp=60, gpu_temp=55))
+        self.ui.history_reads = 0
+        self.engine = QQmlEngine()
+        self.engine.rootContext().setContextProperty("stats", self.ui)
+        self.warnings = []
+        self.engine.warnings.connect(
+            lambda values: self.warnings.extend(value.toString() for value in values)
+        )
+        self.window = self.component = None
+
+    def tearDown(self):
+        from PySide6.QtCore import QCoreApplication, QEvent
+
+        self.ui.close()
+        if self.window is not None:
+            self.assertFalse(self.window.isVisible())
+            self.window.destroy()
+            self.window.deleteLater()
+        if self.component is not None:
+            self.component.deleteLater()
+        self.engine.deleteLater()
+        QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+        self.app.processEvents()
+        self.assertEqual(self.warnings, [])
+
+    def load(self, canvas=False):
+        from PySide6.QtCore import QUrl
+        from PySide6.QtQml import QQmlComponent
+
+        from stats_config import ASSETS
+
+        self.component = QQmlComponent(self.engine)
+        if canvas:
+            self.component.setData(b'''import QtQuick
+import "." as Product
+Window {visible:false;width:900;height:500
+ Product.ContentCanvas {objectName:"historyCanvas";anchors.fill:parent;widgetKey:"cpu";active:true}
+}''', QUrl.fromLocalFile(str(ASSETS / "native/WidgetHistoryFixture.qml")))
+            self.window = self.component.create()
+        else:
+            self.component.loadUrl(QUrl.fromLocalFile(str(ASSETS / "native/DesktopWidget.qml")))
+            spec = dict(id="history-fixture", width=336, height=168, cells=[
+                dict(key="cpu", x=0, y=0, width=168, height=168),
+                dict(key="gpu", x=168, y=0, width=168, height=168),
+            ])
+            self.window = self.component.createWithInitialProperties(dict(spec=spec))
+        self.assertIsNotNone(self.window, self.component.errorString())
+        self.app.processEvents()
+        self.assertFalse(self.window.isVisible())
+
+    def items(self):
+        pending = [self.window.contentItem()]
+        while pending:
+            item = pending.pop()
+            yield item
+            pending.extend(item.childItems())
+
+    def card(self, key="cpu"):
+        from native_card import HardwareCard
+
+        return next(item for item in self.items()
+                    if isinstance(item, HardwareCard) and item.property("moduleKey") == key)
+
+    def canvas(self):
+        return next(item for item in self.items() if item.objectName() == "historyCanvas")
+
+    def sample(self, value):
+        self.ui._reading_notify_at = float("-inf")
+        self.ui.receive(dict(time=time.time(), cpu_usage=value, cpu_temp=60, gpu_temp=55))
+        self.app.processEvents()
+
+    def test_desktop_chart_off_skips_history_getter_but_keeps_fresh_readings(self):
+        self.load()
+        self.assertEqual(self.ui.history_reads, 0)
+        for value in range(10):
+            self.sample(value)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("readings")["cpu_usage"], 9)
+        self.assertEqual(self.card().property("history"), [])
+        self.assertEqual(self.card("gpu").property("history"), [])
+
+    def test_desktop_uses_saved_chart_flag_and_restores_latest_history_on_commit(self):
+        self.load()
+        self.ui.changeWidget("cpu", "chart", True)
+        self.sample(31)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history"), [])
+        self.assertTrue(self.ui.applyDesktop())
+        self.app.processEvents()
+        self.assertGreater(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history")[-1]["cpu_usage"], 31)
+        self.assertEqual(self.card("gpu").property("history"), [])
+        self.ui.changeWidget("cpu", "chart", False)
+        self.assertTrue(self.ui.applyDesktop())
+        self.app.processEvents()
+        self.assertEqual(self.card().property("history"), [])
+        self.ui.history_reads = 0
+        self.sample(47)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("readings")["cpu_usage"], 47)
+
+    def test_desktop_appearance_config_gates_each_card_without_modifying_saved_flags(self):
+        self.load()
+        preview = copy.deepcopy(self.ui.saved)
+        preview["widgets"]["gpu"]["chart"] = True
+        self.window.setProperty("appearanceConfig", preview)
+        self.app.processEvents()
+        self.assertEqual(self.card().property("history"), [])
+        self.assertEqual(self.card("gpu").property("history")[-1]["cpu_usage"], 20)
+        self.assertFalse(self.ui.saved["widgets"]["gpu"]["chart"])
+        self.window.setProperty("appearanceConfig", None)
+        self.app.processEvents()
+        self.ui.history_reads = 0
+        self.sample(63)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card("gpu").property("history"), [])
+
+    def test_desktop_legacy_missing_or_nonboolean_chart_flag_keeps_history_enabled(self):
+        self.load()
+        for flag in (None, 0, "false", "missing"):
+            with self.subTest(flag=flag):
+                preview = copy.deepcopy(self.ui.saved)
+                if flag == "missing":
+                    preview["widgets"]["cpu"].pop("chart")
+                else:
+                    preview["widgets"]["cpu"]["chart"] = flag
+                self.ui.history_reads = 0
+                self.window.setProperty("appearanceConfig", preview)
+                self.app.processEvents()
+                self.assertGreater(self.ui.history_reads, 0)
+                self.assertEqual(self.card().property("history")[-1]["cpu_usage"], 20)
+
+    def test_canvas_chart_toggle_refreshes_history_without_waiting_for_another_sample(self):
+        self.load(canvas=True)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.ui.changeWidget("cpu", "chart", True)
+        self.app.processEvents()
+        self.assertGreater(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history")[-1]["cpu_usage"], 20)
+        self.assertFalse(self.ui.saved["widgets"]["cpu"]["chart"])
+        self.ui.changeWidget("cpu", "chart", False)
+        self.app.processEvents()
+        self.assertEqual(self.card().property("history"), [])
+        self.ui.history_reads = 0
+        self.sample(77)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.canvas().property("previewReadings")["cpu_usage"], 77)
+
+    def test_canvas_inactive_and_resizing_keep_history_frozen_then_resume_fresh(self):
+        self.load(canvas=True)
+        canvas = self.canvas()
+        canvas.setProperty("resizing", True)
+        self.ui.changeWidget("cpu", "chart", True)
+        self.sample(40)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history"), [])
+        canvas.setProperty("resizing", False)
+        self.app.processEvents()
+        self.assertGreater(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history")[-1]["cpu_usage"], 40)
+        frozen = self.card().property("history")
+        canvas.setProperty("active", False)
+        self.ui.history_reads = 0
+        self.sample(81)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history"), frozen)
+        canvas.setProperty("active", True)
+        self.app.processEvents()
+        self.assertEqual(self.card().property("history")[-1]["cpu_usage"], 81)
+
+    def test_canvas_module_switch_uses_its_own_draft_chart_flag_and_current_history(self):
+        self.ui.changeWidget("gpu", "chart", True)
+        self.load(canvas=True)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.canvas().setProperty("widgetKey", "gpu")
+        self.app.processEvents()
+        self.assertGreater(self.ui.history_reads, 0)
+        self.assertEqual(self.card("gpu").property("history")[-1]["cpu_usage"], 20)
+        self.canvas().setProperty("widgetKey", "cpu")
+        self.app.processEvents()
+        self.ui.history_reads = 0
+        self.sample(92)
+        self.assertEqual(self.ui.history_reads, 0)
+        self.assertEqual(self.card().property("history"), [])
+
+
 if __name__ == "__main__":
     unittest.main()

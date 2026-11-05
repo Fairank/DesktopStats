@@ -97,9 +97,11 @@ Window {
     }
 
     MaterialSurface {
+        objectName: "topBarMaterialSurface"
         anchors.fill: parent
         config: root.barState.config
         frosted: root.barState.coatingTranslucent
+        menuBar: true
         cornerRadius: 0
     }
     TopBarChrome {objectName:"topBarBandChrome";anchors.fill:parent;design:root.barDesign;role:"band";ink:root.foreground;accent:root.barAccent}

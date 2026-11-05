@@ -2,6 +2,7 @@
 
 import ctypes
 import os
+import sys
 import time
 
 import psutil
@@ -11,6 +12,14 @@ class _QueryFailure(RuntimeError):
     """Carry API facts without exception messages, filenames or adapter details."""
 
     def __init__(self, api, error):
+        native_api = getattr(error, "api", None)
+        native = isinstance(native_api, str) and native_api in {
+            "GetIfTable2",
+            "GetAdaptersAddresses",
+            "FreeMibTable",
+        }
+        if native:
+            api = native_api
         super().__init__(api)
         kind = next(
             (
@@ -26,6 +35,14 @@ class _QueryFailure(RuntimeError):
             ),
             "QueryError",
         )
+        native_reason = getattr(error, "reason", None)
+        if (
+            native
+            and isinstance(native_reason, str)
+            and native_reason
+            in {"InterfaceInventoryChanged", "InvalidNativeSnapshot", "UnsupportedNativeABI"}
+        ):
+            kind = native_reason
         self.facts = dict(api=api, reason=kind)
         for field in ("errno", "winerror"):
             value = getattr(error, field, None)
@@ -38,6 +55,14 @@ def _query(api, callback, *args, **kwargs):
         return callback(*args, **kwargs)
     except (OSError, RuntimeError, psutil.Error) as error:
         raise _QueryFailure(api, error) from None
+
+
+def _native_network():
+    if sys.platform == "win32":
+        from network_snapshot import NativeNetworkSnapshot
+
+        return NativeNetworkSnapshot()
+    return None
 
 
 class Rates:
@@ -71,17 +96,30 @@ class Activity:
         self.disk_rates = Rates()
         self.volumes = []
         self.next_volumes = 0
+        self._network_source = None
+        self._network_initialized = False
 
     def network(self, now):
-        counters = _query(
-            "psutil.net_io_counters", psutil.net_io_counters, pernic=True, nowrap=False
-        )
-        statuses = _query("psutil.net_if_stats", psutil.net_if_stats)
-        amounts = {
-            name: (item.bytes_recv, item.bytes_sent)
-            for name, item in counters.items()
-            if name in statuses and statuses[name].isup and "loopback" not in name.lower()
-        }
+        if not self._network_initialized:
+            self._network_source = _query("GetIfTable2", _native_network)
+            self._network_initialized = True
+        if self._network_source is not None:
+            rows = _query("GetIfTable2", self._network_source.read)
+            amounts = {
+                name: (item["bytes_recv"], item["bytes_sent"])
+                for name, item in rows.items()
+                if item["isup"] and "loopback" not in name.lower()
+            }
+        else:
+            counters = _query(
+                "psutil.net_io_counters", psutil.net_io_counters, pernic=True, nowrap=False
+            )
+            statuses = _query("psutil.net_if_stats", psutil.net_if_stats)
+            amounts = {
+                name: (item.bytes_recv, item.bytes_sent)
+                for name, item in counters.items()
+                if name in statuses and statuses[name].isup and "loopback" not in name.lower()
+            }
         rates = self.network_rates.sample(amounts, now)
         devices = {}
         for name, item in amounts.items():

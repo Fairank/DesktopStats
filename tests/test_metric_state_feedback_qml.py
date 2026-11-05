@@ -768,6 +768,199 @@ Window { id:scene;width:360;height:100;visible:false;color:"white";
         energy_only = self.pixels(self.hardware_frame())
         self.assertNotEqual(warm_only, energy_only)
 
+    def test_processor_high_load_and_heat_warm_the_body_and_its_nearby_perimeter(self):
+        # Regressions: colouring only the tiny core, or requiring both sensors
+        # before either real high-load or real hot hardware gets a local aura.
+        for dark in (False, True):
+            for glyph, quantity in (("cpu", "cpu_usage"), ("gpu", "gpu_usage")):
+                self.configure(glyph=glyph, quantity=quantity, dark=dark, strength=.5)
+                for state in (self.state("processor", load=.95),
+                              self.state("processor", load=0, thermal=.92)):
+                    self.settle_state(state, reading=0, valid=True)
+                    self.hardware_frame(.455)
+                    halo = self.routed_frame(self.window, self.icon, padding=3)
+                    dpr = self.window.devicePixelRatio()
+                    # These pixels are outside the18px icon. A second skeleton
+                    # or the small existing central fill cannot satisfy this.
+                    warm = 0
+                    for y in range(halo.height()):
+                        for x in range(halo.width()):
+                            if 3*dpr <= x < 21*dpr and 3*dpr <= y < 21*dpr:
+                                continue
+                            color = halo.pixelColor(x, y)
+                            if color.red() - color.green() >= 8 and color.red() - color.blue() >= 12:
+                                warm += 1
+                    self.assertGreaterEqual(warm, 6, (glyph, dark, state))
+                    skeleton = self.named_visual(self.window, "metricIconGlyph")
+                    self.assertEqual((skeleton.x(), skeleton.y(), skeleton.width(), skeleton.height()),
+                                     (0, 0, 18, 18))
+                    self.assertEqual(skeleton.opacity(), 1)
+
+    def test_processor_current_bursts_grow_above_half_load_without_resetting_or_new_textures(self):
+        # Regressions: all CPU/GPU loads animate the same current cadence,
+        # resetting the phase on a fresh sample, or changing non-processor flow.
+        for glyph, quantity in (("cpu", "cpu_usage"), ("gpu", "gpu_usage")):
+            self.configure(glyph=glyph, quantity=quantity)
+            rates = []
+            for load, atlas_stage in ((.5, 5), (.6, 5), (.8, 7), (1, 9)):
+                self.settle_state(self.state("processor", load=load, thermal=.8, energy=.6))
+                self.assertAlmostEqual(self.named_visual(self.window, "metricIconBlueDischarge")
+                                       .property("stagePosition"), atlas_stage, delta=.02)
+                self.icon.setProperty("thermalArcPhase", .1)
+                self.icon.setProperty("energyPhase", .2)
+                self.advance(20)
+                rates.append((self.icon.property("thermalArcPhase")-.1,
+                              self.icon.property("energyPhase")-.2))
+            for index, ratio in ((1, 2), (2, 3), (3, 4)):
+                for channel in range(2):
+                    self.assertAlmostEqual(rates[index][channel]/rates[0][channel], ratio, delta=.03)
+            sources = [item.property("source") for item in self.visual_items(self.window)
+                       if item.objectName().startswith("metricDischargeCell_")]
+            before = self.icon.property("energyPhase")
+            self.configure(hardware=self.state("processor", load=.51, thermal=.8, energy=.6))
+            self.assertEqual(self.icon.property("energyPhase"), before)
+            self.advance(20)
+            self.assertGreater(self.icon.property("displayedLoad"), .51)
+            self.assertEqual([item.property("source") for item in self.visual_items(self.window)
+                              if item.objectName().startswith("metricDischargeCell_")], sources)
+
+    def test_processor_aura_has_ten_distinct_temperature_responses_and_stops_with_motion(self):
+        self.configure(glyph="cpu", quantity="cpu_usage", strength=.5)
+        frames = []
+        for step in range(10):
+            self.settle_state(self.state("processor", thermal=.32+.055*step))
+            frames.append(self.pixels(self.hardware_frame(.455)))
+        self.assertEqual(len(set(frames)), 10)
+        self.configure(motionAllowed=False)
+        self.assertEqual(self.pixels(self.frame()), self.pixels(self.frame(control=True)))
+
+    def test_ram_and_vram_keep_proportional_fill_and_turn_amber_near_full(self):
+        # Regressions: purple at saturation or decorative intensity changing
+        # the occupied fraction rather than just its light.
+        for glyph, quantity in (("memory", "ram_percent"), ("vram", "vram_percent")):
+            for dark in (False, True):
+                self.configure(glyph=glyph, quantity=quantity, dark=dark)
+                self.settle_state(self.state("memory", load=.3))
+                core = self.named_visual(self.window, "metricIconPulseCore")
+                cool = core.property("color")
+                self.assertGreater(cool.blue(), cool.red())
+                self.settle_state(self.state("memory", load=.95))
+                hot = core.property("color")
+                self.assertGreater(hot.red(), hot.blue()+70)
+                self.assertGreater(hot.green(), hot.blue()+35)
+                self.assertAlmostEqual(core.width(), 12.35, delta=.03)
+                first = self.hardware_frame(.15)
+                second = self.hardware_frame(.45)
+                self.assertGreater(self.changed_pixels(first, second), 1)
+                self.configure(strength=.2)
+                self.assertAlmostEqual(core.width(), 12.35, delta=.03)
+
+    def test_duplex_network_has_blue_download_and_purple_upload_in_separate_columns(self):
+        self.configure(glyph="network", quantity="net_download", strength=.5)
+        self.settle_state(self.state("network", inbound=.3, outbound=.3))
+        blue, purple = 0, 0
+        for phase in (.1, .25, .4, .55, .7, .85):
+            image = self.hardware_frame(phase)
+            for y in range(image.height()):
+                for x in range(image.width()):
+                    c = image.pixelColor(x, y)
+                    if x < image.width()/2 and c.blue()-c.red()>35:
+                        blue += 1
+                    if x >= image.width()/2 and c.red()-c.green()>30 and c.blue()-c.green()>35:
+                        purple += 1
+        self.assertGreaterEqual(blue, 10)
+        self.assertGreaterEqual(purple, 10)
+        self.settle_state(self.state("network", inbound=.3, outbound=0))
+        before, after = self.hardware_frame(.1), self.hardware_frame(.4)
+        self.assertEqual(self.pixels(before.copy(10, 0, 8, 18)),
+                         self.pixels(after.copy(10, 0, 8, 18)))
+        self.assertNotEqual(self.pixels(before.copy(0, 0, 8, 18)),
+                            self.pixels(after.copy(0, 0, 8, 18)))
+
+    def test_transport_packets_follow_direction_and_positive_updates_retain_phase_and_nodes(self):
+        self.configure(glyph="network", quantity="net_download")
+        self.settle_state(self.state("network", inbound=.2, outbound=.4))
+        streams = [self.named_visual(self.window, "metricIconTransportArc_"+str(i)) for i in range(2)]
+        packets = []
+        for stream in streams:
+            packet = next((item for item in self.visual_items(self.window)
+                           if item.objectName()=="metricIconDataPacket_0"
+                           and item.parentItem().parentItem() is stream), None)
+            self.assertIsNotNone(packet, "Each direction needs a retained travelling packet")
+            packets.append(packet)
+        self.hardware_frame(.1)
+        before = [item.mapToScene(QPointF()).y() for item in packets]
+        self.hardware_frame(.2)
+        after = [item.mapToScene(QPointF()).y() for item in packets]
+        self.assertGreater(after[0], before[0])
+        self.assertLess(after[1], before[1])
+        nodes = list(self.visual_items(self.window))
+        images = [(item, item.property("source")) for item in nodes if item.inherits("QQuickImage")]
+        phases = [self.icon.property(name) for name in ("inboundPhase", "outboundPhase")]
+        self.configure(hardware=self.state("network", inbound=.8, outbound=.9))
+        self.assertEqual([self.icon.property(name) for name in ("inboundPhase", "outboundPhase")], phases)
+        self.advance(50)
+        self.assertGreater(self.icon.property("displayedInbound"), .2)
+        self.assertLess(self.icon.property("displayedInbound"), .8)
+        self.assertEqual(list(self.visual_items(self.window)), nodes)
+        self.assertEqual([(item, item.property("source")) for item,_ in images], images)
+
+    def test_duplex_colors_remain_blue_and_purple_at_all_rates_in_both_themes(self):
+        # Blue must stay distinct from purple even at maximum throughput.
+        for dark in (False, True):
+            self.configure(glyph="network", quantity="net_download", dark=dark)
+            for amount in (.1, .5, .95):
+                self.settle_state(self.state("network", inbound=amount, outbound=amount))
+                down = self.named_visual(self.window, "metricIconTransportArc_0").property("packetInk")
+                up = self.named_visual(self.window, "metricIconTransportArc_1").property("packetInk")
+                self.assertGreater(down.blue(), down.red()+80)
+                self.assertGreater(down.green(), down.red()+20)
+                self.assertGreater(up.blue(), up.green()+50)
+                self.assertGreater(up.red(), up.green()+25)
+                self.assertGreater(up.blue(), up.red()+15)
+
+    def test_disk_read_write_indicators_use_their_own_real_direction_and_color(self):
+        for glyph, channel, x, blue in (("disk_read", "inbound", 4.5, True),
+                                        ("disk_write", "outbound", 7.5, False)):
+            self.configure(glyph=glyph, quantity="disk_read" if blue else "disk_write")
+            self.settle_state(self.state("disk", **{channel:.6}))
+            frame = self.hardware_frame(.25)
+            colors = [frame.pixelColor(px, py) for py in (12, 13, 14)
+                      for px in range(round(x)-1, round(x)+2)]
+            if blue:
+                self.assertTrue(any(c.blue()-c.red()>35 for c in colors))
+            else:
+                self.assertTrue(any(c.blue()-c.green()>35 and c.red()-c.green()>25 for c in colors))
+            self.settle_state(self.state("disk", **{channel:0}))
+            self.assertEqual(self.pixels(self.frame()), self.pixels(self.frame(control=True)))
+
+    def test_thermometer_warmth_is_readable_around_bulb_and_column_stays_a_true_gauge(self):
+        self.configure(glyph="temperature", quantity="cpu_temp", choice="heat", strength=.5)
+        self.settle(.8)
+        image = self.hardware_frame(.455)
+        warm = sum(1 for y in range(9, 18) for x in range(4, 15)
+                   if not (7<=x<=10 and 11<=y<=15)
+                   and (lambda c:c.red()-c.green()>8 and c.red()-c.blue()>20)(image.pixelColor(x, y)))
+        self.assertGreaterEqual(warm, 12)
+        column = self.named_visual(self.window, "metricIconTemperatureColumn")
+        self.assertAlmostEqual(column.height(), 8, delta=.02)
+        self.configure(reading=.4)
+        self.advance(50)
+        self.assertGreater(column.height(), 4)
+        self.assertLess(column.height(), 8)
+
+    def test_power_keeps_a_blue_bolt_core_between_irregular_real_power_discharges(self):
+        self.configure(glyph="power", quantity="cpu_power", strength=.5)
+        self.settle_state(self.state("processor", energy=.1), reading=.1)
+        image = self.hardware_frame(.22)
+        blue = sum(1 for y in range(2, 16) for x in range(3, 15)
+                   if (lambda c:c.blue()-c.red()>35)(image.pixelColor(x, y)))
+        self.assertGreaterEqual(blue, 6)
+        self.assertTrue(self.icon.property("electricEnabled"))
+        self.assertFalse(self.icon.property("thermalActive"))
+        self.settle_state(self.state("processor"), reading=.9, valid=True)
+        self.assertEqual(self.pixels(self.frame()), self.pixels(self.frame(control=True)))
+
     def test_explicit_unavailable_or_zero_channels_never_fall_back_to_a_positive_primary(self):
         self.configure(glyph="cpu", quantity="cpu_usage")
         cases = (self.state("processor"),

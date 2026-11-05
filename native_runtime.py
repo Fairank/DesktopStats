@@ -13,7 +13,7 @@ from PySide6.QtNetwork import QLocalServer
 from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent, qmlRegisterType
 from PySide6.QtWidgets import QSystemTrayIcon
 
-from appearance_preview import project_appearance
+from appearance_preview import project_appearance, project_top_bar_appearance
 from desktop_placement import desktop_plan
 from localization import best_language, translate
 from magnet_layout import contained, separated, settle
@@ -43,8 +43,8 @@ from native_platform import (
 )
 from native_surface import MaterialSurface
 from native_widget_material import WidgetBlurBackend
+from raster_blur_material import ThinRasterAcrylicMaterial
 from responsive_layout import ResponsiveLayoutError, is_responsive
-from settings_acrylic_material import SettingsAcrylicMaterial
 from settings_backdrop_host import SettingsBackdropHost
 from settings_blur_material import SettingsBlurMaterial
 from settings_material_bridge import SettingsMaterialBridge
@@ -110,12 +110,13 @@ class Runtime(QObject):
         self.settings.setPersistentSceneGraph(True)
         self.settings_host = (SettingsBackdropHost(self.settings)
                               if not headless and application.platformName() == "windows" else None)
-        self.settings_blur = (SettingsAcrylicMaterial() if self.settings_host is not None
+        self.settings_blur = (ThinRasterAcrylicMaterial(paint_background=self.settings_host.paint_background)
+                              if self.settings_host is not None
                               else SettingsBlurMaterial()
                               if not headless and application.platformName() == "windows" else None)
         self.settings_material = None if headless else SettingsMaterialBridge(
             Runtime._settings_window(self), self,
-            backend="desktop-acrylic" if self.settings_host is not None else "system-blur",
+            backend="system-blur",
             frame_source=self.settings if self.settings_host is not None else None,
             allow_hidden_prepare=self.settings_host is not None,
             wait_for_first_frame=True, activation_requests=self.settings_host is not None,
@@ -250,6 +251,12 @@ class Runtime(QObject):
             window.setProperty("composition", report)
         self._appearance_states = states
         self.controller.set_window_materials(self.composition)
+        bar = getattr(self, "top_bar", None)
+        if bar is not None:
+            active = self.settings.isVisible()
+            bar.preview_appearance(project_top_bar_appearance(
+                self.controller._saved, self.controller._draft, active
+            ), active=active)
 
     def first_reading(self):
         if CONFIG.exists():
@@ -598,16 +605,34 @@ class Runtime(QObject):
         serial = context["surface_serial"]
         epoch = context.get("render_epoch")
         preparation = context.get("preparation_token") if context.get("preparing_hidden") else None
-        report = (self.settings_blur.apply(handle, policy, surface_id=serial,
-                                          valid=lambda: self._settings_surface_current(
-                                              handle, serial, frame_epoch=epoch, preparation_token=preparation))
-                  if self.settings_blur is not None
-                  else dict(material="solid", status="fallback", fallback_reason="native-platform-unavailable",
-                            coating_allowed=False, coating_translucent=False, blur_configured=False,
-                            compositing_verified=False))
         host = getattr(self, "settings_host", None)
+        # A native callback may synchronously change the selected theme. Replay
+        # only the latest target once in this transaction, then use the existing
+        # finite recovery budget if it changes again; never add a polling timer.
+        for attempt in range(2):
+            caption = {"caption_theme": self.controller.theme} if host is not None else {}
+            report = (self.settings_blur.apply(handle, policy, surface_id=serial, **caption,
+                valid=lambda: self._settings_surface_current(
+                    handle, serial, frame_epoch=epoch, preparation_token=preparation))
+                if self.settings_blur is not None
+                else dict(material="solid", status="fallback", fallback_reason="native-platform-unavailable",
+                    coating_allowed=False, coating_translucent=False, blur_configured=False,
+                    compositing_verified=False))
+            if (not report.get("ok") or not report.get("caption_configured")
+                    or caption["caption_theme"] == self.controller.theme):
+                break
+            if attempt == 1:
+                cleanup = self.settings_blur.clear(handle, surface_id=serial,
+                    valid=lambda: self._settings_surface_current(handle, serial, releasing=True))
+                report.update(material="solid", status="fallback", ok=False,
+                    coating_allowed=False, coating_translucent=False, blur_configured=False,
+                    caption_configured=False, caption_visual_verified=False,
+                    blur_may_remain=cleanup.get("blur_may_remain", True),
+                    cleanup_complete=cleanup.get("cleanup_complete", False),
+                    fallback_reason="caption-theme-changed-during-request", cleanup=cleanup)
         if host is not None:
-            if report.get("ok") and report.get("coating_translucent") and not host.paint_background():
+            if (report.get("ok") and report.get("coating_translucent")
+                    and not report.get("background_paint_completed") and not host.paint_background()):
                 cleanup = self.settings_blur.clear(handle, surface_id=serial,
                     valid=lambda: self._settings_surface_current(handle, serial, releasing=True))
                 report.update(material="solid", status="fallback", ok=False,

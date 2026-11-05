@@ -45,6 +45,37 @@ class MaterialStyleTests(unittest.TestCase):
     def setUpClass(cls):
         cls.app = QApplication.instance() or QApplication([])
 
+    def test_bar_coating_is_continuous_and_lighter_without_changing_widget_palette(self):
+        for dark in (False, True):
+            for skin in GLASS_SKINS:
+                alphas = [QColor(palette(skin, dark, frosted=True, transparency=value,
+                    menu_bar=True)["top"]).alpha() for value in range(101)]
+                self.assertEqual(alphas[0], 255)
+                self.assertEqual(alphas[-1], 0)
+                self.assertTrue(all(a > b for a, b in zip(alphas, alphas[1:])))
+                self.assertLess(alphas[50], QColor(palette(skin, dark, frosted=True,
+                    transparency=50)["top"]).alpha())
+                for value in (0, 37.125, 50, 82.5, 100):
+                    self.assertEqual(QColor(palette(skin, dark, frosted=False, transparency=value,
+                        menu_bar=True)["top"]).alpha(), 255)
+
+    def test_actual_band_painter_consumes_slider_and_keeps_separate_widget_fill(self):
+        surface = MaterialSurface()
+        surface.setWidth(180)
+        surface.setHeight(32)
+        surface.set_menu_bar(True)
+        surface.set_radius(0)
+        for level in (0, 16.125, 50, 83.25, 100):
+            surface.set_config(dict(skin="glass", glass_transparency=level))
+            image = QImage(180, 32, QImage.Format_ARGB32_Premultiplied)
+            image.fill(Qt.transparent)
+            painter = QPainter(image)
+            surface.paint(painter)
+            painter.end()
+            self.assertEqual(image.pixelColor(90, 16).alpha(), QColor(palette("glass",
+                transparency=level, menu_bar=True)["top"]).alpha())
+
+
     def test_material_surface_consumes_continuous_config_in_its_actual_paint(self):
         for skin in GLASS_SKINS:
             for frosted in (False, True):

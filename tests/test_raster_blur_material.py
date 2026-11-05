@@ -6,7 +6,7 @@ import threading
 import unittest
 from unittest.mock import Mock, patch
 
-from raster_blur_material import RasterBlurMaterial
+from raster_blur_material import RasterBlurMaterial, ThinRasterAcrylicMaterial
 
 
 class FakeDwm:
@@ -401,6 +401,174 @@ class RasterBlurTests(unittest.TestCase):
                 result = self.apply()
                 self.assertFalse(result["ok"] or result["coating_translucent"])
                 self.assertTrue(result["cleanup"]["cleanup_complete"])
+
+
+class CaptionDwm(FakeDwm):
+    def get_caption_dark_mode(self, handle):
+        return self.request(("caption_get", handle), (0, 0))
+
+    def set_caption_dark_mode(self, handle, value):
+        return self.request(("caption_dark", handle, value), 0)
+
+    def set_caption_color(self, handle, value):
+        return self.request(("caption_fill", handle, value), 0)
+
+    def set_caption_text_color(self, handle, value):
+        return self.request(("caption_text", handle, value), 0)
+
+
+class NativeCaptionTests(unittest.TestCase):
+    def setUp(self):
+        self.events = []
+        self.dwm, self.accent = CaptionDwm(self.events), FakeAccent(self.events)
+        self.current = True
+        self.paint = Mock(side_effect=lambda: self.events.append(("paint",)) or True)
+        self.material = ThinRasterAcrylicMaterial(self.dwm, self.accent, paint_background=self.paint)
+        self.loader = patch("ctypes.WinDLL", side_effect=AssertionError("No native API"))
+        self.loader.start()
+        self.addCleanup(self.loader.stop)
+
+    def apply(self, theme="light", policy=None):
+        return self.material.apply(123, policy or {"state": "allowed"}, surface_id=1,
+                                   valid=lambda: self.current, caption_theme=theme)
+
+    def clear(self):
+        return self.material.clear(123, surface_id=1, valid=lambda: self.current)
+
+    def test_caption_after_background_and_native_controls_remain_native(self):
+        report = self.apply()
+        self.assertTrue(report["ok"] and report["caption_configured"])
+        self.assertFalse(report["caption_visual_verified"] or report["compositing_verified"])
+        self.assertEqual(report["accent_state"], 4)
+        self.assertEqual(self.events, [
+            ("dwm", 123, 1), ("frame", 123, (-1, -1, -1, -1)),
+            ("readback", 123), ("accent", 123, True), ("paint",), ("caption_get", 123),
+            ("caption_dark", 123, 0), ("caption_fill", 123, 0x00FBF8F6),
+            ("caption_text", 123, 0x002B241F)])
+
+    def test_zero_original_mode_is_retained_across_theme_changes_and_released_to_defaults(self):
+        self.assertTrue(self.apply("dark")["ok"])
+        self.assertTrue(self.apply("light")["ok"])
+        self.assertEqual(self.events.count(("caption_get", 123)), 1)
+        self.assertIn(("caption_fill", 123, 0x002E2723), self.events)
+        self.assertTrue(self.clear()["cleanup_complete"])
+        self.assertEqual(self.events[-3:], [("caption_text", 123, 0xFFFFFFFF),
+            ("caption_fill", 123, 0xFFFFFFFF), ("caption_dark", 123, 0)])
+        self.assertIsNone(self.material.identity)
+
+    def test_read_failure_is_not_a_mutation_and_never_overwrites_unknown_original(self):
+        mutations = []
+        self.dwm.after = lambda row: mutations.append(self.material._mutations) if row[0] == "caption_get" else None
+        self.dwm.fail[("caption_get",)] = (-1, 0)
+        report = self.apply()
+        self.assertFalse(report["ok"] or report["coating_translucent"])
+        self.assertEqual(mutations, [3])  # backdrop, frame, WCA; both getters are read-only.
+        self.assertFalse(any(row[0] in ("caption_dark", "caption_fill", "caption_text") for row in self.events))
+        self.assertTrue(report["cleanup"]["cleanup_complete"])
+
+    def test_each_partial_caption_failure_rolls_back_attempted_fields(self):
+        for name, value in (("caption_dark", 1), ("caption_fill", 0x002E2723),
+                            ("caption_text", 0x00F8F6F5)):
+            with self.subTest(name=name):
+                self.setUp()
+                self.dwm.fail[(name, value)] = -1
+                report = self.apply("dark")
+                self.assertFalse(report["ok"] or report["coating_translucent"])
+                self.assertTrue(report["cleanup"]["cleanup_complete"])
+                expected = 0 if name == "caption_dark" else 0xFFFFFFFF
+                self.assertIn((name, 123, expected), self.events)
+                if name == "caption_dark":
+                    self.assertFalse(any(row[0] == "caption_fill" for row in self.events))
+                self.assertIsNone(self.material.identity)
+
+    def test_failed_caption_restore_retains_identity_and_can_retry(self):
+        self.assertTrue(self.apply()["ok"])
+        self.dwm.fail[("caption_fill", 0xFFFFFFFF)] = -1
+        report = self.clear()
+        self.assertFalse(report["cleanup_complete"])
+        self.assertTrue(self.material.cleanup_failed and report["blur_may_remain"])
+        self.assertEqual(self.material.identity, (1, 123))
+        count = len(self.events)
+        self.assertFalse(self.apply()["ok"])
+        self.assertEqual(len(self.events), count)
+        self.dwm.fail.clear()
+        self.assertTrue(self.material.close()["complete"])
+        self.assertEqual(self.events[-1], ("caption_fill", 123, 0xFFFFFFFF))
+
+    def test_policy_disabled_restores_caption_instead_of_applying_another_theme(self):
+        self.apply("dark")
+        self.events.clear()
+        report = self.apply("light", policy={"state": "disabled", "reason": "high-contrast"})
+        self.assertTrue(report["cleanup_complete"])
+        self.assertFalse(report["coating_translucent"])
+        self.assertEqual(self.events[-3:], [("caption_text", 123, 0xFFFFFFFF),
+            ("caption_fill", 123, 0xFFFFFFFF), ("caption_dark", 123, 0)])
+
+    def test_cleanup_read_exception_still_restores_every_caption_field(self):
+        self.apply("dark")
+        self.events.clear()
+        self.dwm.fail[("readback",)] = OSError("readback unavailable")
+        report = self.clear()
+        self.assertFalse(report["cleanup_complete"])
+        self.assertEqual(self.events[-3:], [("caption_text", 123, 0xFFFFFFFF),
+            ("caption_fill", 123, 0xFFFFFFFF), ("caption_dark", 123, 0)])
+        self.assertEqual(self.material.identity, (1, 123))
+        self.dwm.fail.clear()
+        self.assertTrue(self.clear()["cleanup_complete"])
+
+    def test_generation_loss_at_each_caption_call_aborts_without_foreign_cleanup(self):
+        for name in ("caption_get", "caption_dark", "caption_fill", "caption_text"):
+            with self.subTest(name=name):
+                self.setUp()
+                def lose(row):
+                    if row[0] == name:
+                        self.current = False
+                self.dwm.after = lose
+                report = self.apply()
+                self.assertFalse(report["ok"])
+                self.assertEqual(self.events[-1][0], name)
+                self.assertEqual(self.material.identity, (1, 123))
+                self.assertFalse(self.material.close()["complete"])
+                self.assertEqual(self.events[-1][0], name)
+
+    def test_close_during_caption_write_cannot_publish_success(self):
+        nested = []
+        def close(row):
+            if row[0] == "caption_fill" and row[2] != 0xFFFFFFFF:
+                nested.append(self.material.close())
+        self.dwm.after = close
+        report = self.apply()
+        self.assertFalse(report["ok"])
+        self.assertFalse(nested[0]["complete"])
+        self.assertTrue(report["cleanup"]["cleanup_complete"])
+        self.assertTrue(self.material.close()["complete"])
+
+    def test_invalid_theme_rejected_before_any_native_request(self):
+        for theme in (True, 0, "system", {}, ["light"]):
+            with self.subTest(theme=theme):
+                self.assertFalse(self.apply(theme)["ok"])
+        self.assertEqual(self.events, [])
+
+
+class ThinRasterFactoryTests(unittest.TestCase):
+    def test_explicit_thin_class_is_lazy_and_never_loads_the_default_widget_factory(self):
+        events = []
+        dwm, accent = FakeDwm(events), FakeAccent(events)
+        with (patch("raster_blur_material._CtypesThinAcrylicAPI", return_value=accent) as thin,
+              patch("raster_blur_material._CtypesBlurAPI", side_effect=AssertionError("Legacy path")) as legacy):
+            material = ThinRasterAcrylicMaterial(dwm)
+            thin.assert_not_called()
+            self.assertTrue(material.close()["complete"])
+            thin.assert_not_called()
+            material = ThinRasterAcrylicMaterial(dwm)
+            report = material.apply(123, {"state": "allowed"}, surface_id=1, valid=lambda: True)
+            self.assertTrue(report["ok"])
+            self.assertEqual(report["accent_state"], 4)
+            self.assertFalse(report["compositing_verified"])
+            thin.assert_called_once_with()
+            legacy.assert_not_called()
+            self.assertTrue(material.close()["complete"])
+            self.assertEqual(events[-4:], RasterBlurTests.clear_sequence())
 
 
 if __name__ == "__main__":

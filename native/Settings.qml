@@ -79,7 +79,7 @@ Window {
             }
             Column {anchors.fill:parent;spacing:5
               Repeater {
-                model:[{id:0,label:"桌面组件",icon:"grid"},{id:3,label:"顶部栏",icon:"sliders"},{id:4,label:"历史记录",icon:"time"},{id:1,label:"偏好",icon:"sliders"}]
+                model:[{id:0,label:"桌面组件",icon:"grid"},{id:3,label:"顶部栏",icon:"topbar"},{id:4,label:"历史记录",icon:"time"},{id:1,label:"偏好",icon:"sliders"}]
                 ItemDelegate {
                     id:nav;required property var modelData;required property int index;objectName:"nav_"+modelData.id
                     width:root.railWidth-24;height:40;leftPadding:12;rightPadding:10;focusPolicy:Qt.StrongFocus;onClicked:root.page=modelData.id
