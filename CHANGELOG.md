@@ -1,5 +1,21 @@
 # Changes
 
+## 0.27.0-preview.2
+
+- Restore top-bar background material after returning from administrator
+  authorization and when the hidden bar becomes visible again after fullscreen
+  avoidance. A successful earlier request does not imply the compositor retained
+  the effect across a secure-desktop transition.
+- Reapply the existing material in response to those events without adding a
+  permanent polling loop or changing sensor/animation cadence.
+- Isolate a stalled NVIDIA cleanup call after unavailable GPU readings from the
+  sampling worker. Allow only one pending background cleanup, without repeated
+  close/reinitialization or normal-path polling; CPU, temperature, network and
+  disk sampling can continue while the unavailable GPU source is handled.
+- Preserve saved layouts, bar-only mode, fullscreen avoidance and the optional
+  read-only ASUS temperature session bridge. New binary/on-device acceptance is
+  checked separately from source regressions and offscreen package self-checks.
+
 ## 0.27.0-preview.1
 
 - Organize top-bar editing around one live preview and separate Content & layout

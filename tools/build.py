@@ -172,6 +172,7 @@ SOURCES = (
     "tests/test_external_sensor.py",
     "tests/test_external_engine.py",
     "tests/test_provider_recovery.py",
+    "tests/test_nvml_cleanup_isolation.py",
     "tests/test_storage_sensor.py",
     "tests/test_storage_audit.py",
     "tests/test_stale_readings.py",

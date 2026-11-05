@@ -289,8 +289,44 @@ class Runtime(QObject):
             return
         launcher = getattr(self, "cpu_temperature_launcher", None)
         if launcher is not None:
-            launcher.update(self.controller._saved, self.controller._data,
-                            fullscreen=lambda: foreground_fullscreen(getattr(self, "top_bar", None)))
+            attempted = launcher.status().get("attempted") is True
+            bar = getattr(self, "top_bar", None)
+            result = launcher.update(
+                self.controller._saved, self.controller._data,
+                fullscreen=lambda: foreground_fullscreen(getattr(self, "top_bar", None)),
+            )
+            if (not attempted and result.get("attempted") is True and not self.shutting_down
+                    and getattr(self, "cpu_temperature_launcher", None) is launcher
+                    and getattr(self, "top_bar", None) is bar):
+                # Returning from consent can invalidate accepted compositor
+                # state. Queue once, then reuse the bridges' existing debounce
+                # and current-surface/visibility gates; never apply native blur
+                # in the sensor callback or start another polling loop.
+                QTimer.singleShot(0, lambda: Runtime._refresh_after_temperature_consent(self, launcher, bar))
+
+    def _refresh_after_temperature_consent(self, launcher, bar):
+        def current():
+            return (not self.shutting_down
+                    and getattr(self, "cpu_temperature_launcher", None) is launcher
+                    and getattr(self, "top_bar", None) is bar)
+
+        if not current():
+            return
+        settings = getattr(self, "settings_material", None)
+        widgets = tuple((key, self.widgets.get(key), material)
+                        for key, material in getattr(self, "widget_materials", {}).items())
+        if bar is not None:
+            bar.refresh_materials("composition_changed")
+        if not current():
+            return
+        if settings is not None and getattr(self, "settings_material", None) is settings:
+            settings.request("composition_changed")
+        for key, window, material in widgets:
+            if not current():
+                return
+            if (window is not None and self.widgets.get(key) is window
+                    and self.widget_materials.get(key) is material):
+                material.request("composition_changed")
 
     def update_menu(self):
         if not self.tray:

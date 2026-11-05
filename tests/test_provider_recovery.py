@@ -37,6 +37,9 @@ class RecoveryTests(unittest.TestCase):
         for target in ("sensors.c.WinDLL", "sensors.c.CDLL", "sensors.winreg.OpenKey",
                        "subprocess.Popen", "threading.Thread.start"):
             self.stack.enter_context(patch(target, side_effect=fail_io))
+        # Run completed fake cleanup deterministically; separate blocking-task
+        # regressions exercise the actual daemon worker.
+        self.stack.enter_context(patch.object(sensors._NvidiaCleanup, "start", sensors._NvidiaCleanup._run))
         self.now = 100.0
         self.stack.enter_context(patch("sensors.time.monotonic", side_effect=lambda: self.now))
         self.stack.enter_context(patch("sensors.time.time", side_effect=lambda: self.now + 1000))
