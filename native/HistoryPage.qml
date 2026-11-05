@@ -16,7 +16,7 @@ Item {
     property var selectedMetadata:({})
     property bool clearArmed:false
     property bool componentReady:false
-    readonly property var options:controller?controller.historyMetricChoices:[]
+    readonly property var options:controller && uiActive?controller.historyMetricChoices:[]
     readonly property var status:controller && uiActive?controller.historyStatus:({})
     readonly property bool recording:controller && controller.historyRecording===true
     readonly property var choices:options.map(row=>({id:row.id,label:row.label+(row.device_label?" · "+row.device_label:"")}))

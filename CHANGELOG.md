@@ -1,5 +1,58 @@
 # Changes
 
+## 0.26.1-preview.6
+
+- Suspend optional inspection and live preview projection while settings are
+  hidden or minimized. Keep the editing state and list positions alive, and
+  refresh from the latest sample on return without waiting for another sample.
+- Keep fullscreen avoidance active for a game's same-process or directly owned
+  popup while the tracked game window remains visible and fullscreen. Normal
+  desktop restoration and stale-window validation remain unchanged.
+- Record two low-frequency session events with time, process ID and version:
+  successful startup and return from the application event loop. Retain bounded
+  warning logs without periodic diagnostic writes.
+
+## 0.26.1-preview.5
+
+- Hide the top bar for foreground fullscreen applications, including a game
+  already running when Desktop Stats starts. Reconcile visibility through
+  native window events and retain AppBar registration and desktop settings.
+- Preserve a running installation's hidden-settings state when upgrading;
+  first installation keeps the normal settings launch behavior.
+
+## 0.26.1-preview.4
+
+- Combine requested network reads into one bounded IP-adapter enumeration and
+  native counter/status snapshots, retaining FriendlyName membership, 64-bit
+  counters and legacy link-state rules. Ambiguous identity uses the existing
+  psutil path; failed or replaced interfaces cannot reuse a rate baseline.
+- Remove the redundant history-expiry index in the first successful write
+  transaction, preserving existing rows, query results, retention, five-second
+  batching and WAL durability. Hourly expiry uses the primary-key resolution
+  prefix without maintaining a second index on each observation.
+
+## 0.26.1-preview.3
+
+- Refresh the ASUS per-connection sensor snapshot through the read-only
+  `Sensors` getter on each two-second read. Reuse the discovered CPU index,
+  validate the exact sensor ID/name, and release each snapshot after reading.
+  Do not issue monitoring-start, Refresh or hardware-control methods.
+- Add synthetic changing-snapshot and identity/failure tests to the bridge's
+  nonprivileged self-test. Retain all preview.2 resource reductions.
+
+## 0.26.1-preview.2
+
+- Avoid projecting history/device options while the history page is inactive,
+  hidden or minimized; restore the selected device metadata when it opens.
+- Request volume capacity only when selected metrics need it. Disk throughput
+  keeps its existing sampling and baseline behavior.
+- Compute one smoothing coefficient per icon tick and advance only supported
+  channels, retaining active phases, cadence, palettes and texture resources.
+- Native GUI sampling no longer writes legacy diagnostic files periodically.
+  Headless operation retains those exports; IPC diagnostics remain on demand.
+- Batch native history writes with a five-second gate, while queries merge the
+  bounded in-memory tail. Explicit pause and shutdown attempt to save that tail.
+
 ## 0.26.0-preview.5
 
 - Composite the existing four arc-atlas cells in one RHI shader quad, preserving
@@ -271,3 +324,14 @@
 
 This is a development preview. An offscreen layout check is not proof of Windows
 composition quality or universal hardware compatibility.
+# 0.26.1-preview.1 — optional ASUS CPU temperature
+
+- Adds an explicitly authorized, read-only ASUS CPU cache bridge for the fixed
+  `CPU / 0x06030012` sensor. It reuses an already-running ASUS COM service and
+  never starts monitoring, changes fan controls, or installs a driver/service.
+- One retained sensor getter runs every two seconds. The ordinary app reads a
+  64-byte shared snapshot, rejects failed/future/stale observations, and preserves
+  source times for history deduplication. The bridge exits with its bound app.
+- Adds protocol, source failure, freshness, sampling-limit and history/fallback
+  regressions; existing native layout and per-section settings remain in use.
+

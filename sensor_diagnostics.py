@@ -128,6 +128,8 @@ def unavailable_reason(data, metric, prefs=None):
     # A failed enumeration cannot prove that the saved device was disconnected.
     if activity_error:
         return "Windows 活动查询失败，将自动重试。" + error_text(activity_error)
+    if scope == "volumes" and activity.get("requested") is False:
+        return "当前未请求卷容量采样；添加或应用容量指标后读取。"
     if (
         target
         and target not in ("0", "auto", "all", "system")
@@ -178,6 +180,9 @@ def unavailable_reason(data, metric, prefs=None):
             " " + str(detail)[:300] if detail else "尚无具体错误，不能判断为权限不足。"
         )
     if metric == "cpu_temp" or meta["source"] == "cooling":
+        thermal = provider.get("cpu_thermal", {}) if metric == "cpu_temp" else {}
+        if thermal.get("requested") and thermal.get("state") not in (None, "idle"):
+            return thermal.get("detail", "ASUS CPU 来源本轮未提供有效读数。") + error_text(thermal.get("error"))
         if metric == "system_fan_rpm":
             return "内置 ASUS 读取只接入 CPU/GPU 两路机身风扇；第三风扇需从已发现的扩展传感器绑定。"
         endpoint = {
@@ -315,6 +320,7 @@ def source_rows(data):
                     "nvml": "NVIDIA NVML",
                     "battery": "Windows 电池接口",
                     "hwinfo": "HWiNFO VSB",
+                    "cpu_thermal": "ASUS CPU 温度",
                     "network": "Windows 网络计数器",
                     "disk": "Windows 磁盘计数器",
                     "volumes": "Windows 卷容量",

@@ -8,6 +8,8 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 
+from product_version import VERSION
+
 
 def main():
     parser = argparse.ArgumentParser(description="Desktop Stats native Windows widgets")
@@ -36,7 +38,11 @@ def main():
     handler = RotatingFileHandler(
         BASE / "app.log", maxBytes=512000, backupCount=2, encoding="utf-8"
     )
-    logging.basicConfig(handlers=[handler], level=logging.WARNING)
+    logging.basicConfig(
+        handlers=[handler], level=logging.WARNING,
+        format="%(asctime)s %(levelname)s [pid=%(process)d] %(name)s: %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S%z",
+    )
     os.environ["QT_QUICK_CONTROLS_STYLE"] = "Basic"
     # Python-painted cards share the GUI thread. Retain D3D composition without
     # a render-thread/GIL lock inversion when Windows exposes a new window.
@@ -91,6 +97,8 @@ def main():
     if not server.start():
         send({"command": "show"})
         return
+    lifecycle = logging.getLogger("DesktopStats.lifecycle")
+    lifecycle.setLevel(logging.INFO)
     runtime = pid_file = None
     try:
         from legacy_migration import migrate
@@ -100,7 +108,10 @@ def main():
         server.runtime = runtime
         pid_file = BASE / "app.pid"
         pid_file.write_text(str(os.getpid()), encoding="ascii")
-        application.exec()
+        lifecycle.info("started version=%s background=%s headless=%s",
+                       VERSION, args.background, args.headless)
+        exit_code = application.exec()
+        lifecycle.info("event loop ended version=%s exit_code=%s", VERSION, exit_code)
     finally:
         try:
             if runtime is not None and not runtime.shutting_down:

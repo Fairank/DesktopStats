@@ -180,7 +180,7 @@ class Runtime(QObject):
         self.stale_timer.setInterval(5000)
         self.stale_timer.timeout.connect(self.clear_stale)
         self.stale_timer.start()
-        self.controller.start()
+        self.controller.start(diagnostic_exports=self.headless)
 
     def qml_warnings(self, warnings):
         for warning in warnings:

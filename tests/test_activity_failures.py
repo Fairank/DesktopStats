@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QApplication
 
 import native_controller as controls
 import sensors
+from activity_sensors import Activity
 from stats_config import DEFAULT, validate
 
 
@@ -324,6 +325,106 @@ class ActivityFailureTests(unittest.TestCase):
         self.assertIn("psutil.net_io_counters", self.row("net_download")["reason"])
         self.assertNotIn("Win32", self.row("net_download")["reason"])
         self.assert_private_text_absent(data)
+
+
+class ActivityDemandTests(unittest.TestCase):
+    """Explicit volume demand never borrows the disk-throughput demand."""
+
+    def setUp(self):
+        self.stack = ExitStack()
+        self.addCleanup(self.stack.close)
+        self.now = 10.0
+        self.disk_bytes = 0
+        self.volume_error = None
+        self.activity = Activity()
+        self.activity.volumes = ["C:\\", "D:\\"]
+        self.activity.next_volumes = float("inf")
+        self.stack.enter_context(patch.dict(os.environ, {"SystemDrive": "C:"}))
+        self.stack.enter_context(patch("activity_sensors.time.monotonic", side_effect=lambda: self.now))
+        self.disk = self.stack.enter_context(patch(
+            "activity_sensors.psutil.disk_io_counters", side_effect=lambda **_: {
+                "Synthetic disk": SimpleNamespace(read_bytes=self.disk_bytes, write_bytes=self.disk_bytes)
+            }))
+        self.partitions = self.stack.enter_context(patch(
+            "activity_sensors.psutil.disk_partitions",
+            return_value=[SimpleNamespace(mountpoint="C:\\"), SimpleNamespace(mountpoint="D:\\")]))
+        self.usage = self.stack.enter_context(patch(
+            "activity_sensors.psutil.disk_usage", side_effect=self.volume_usage))
+        self.network = self.stack.enter_context(patch(
+            "activity_sensors.psutil.net_io_counters", return_value={}))
+        self.network_status = self.stack.enter_context(patch(
+            "activity_sensors.psutil.net_if_stats", return_value={}))
+
+    def volume_usage(self, path):
+        if self.volume_error:
+            raise self.volume_error
+        return SimpleNamespace(percent=25 if path == "C:\\" else 50,
+                               used=2**30, free=3 * 2**30, total=4 * 2**30)
+
+    def test_disk_io_only_never_queries_volume_capacity_and_keeps_rate_baselines(self):
+        # Expired topology discovery must also remain dormant without demand.
+        self.activity.next_volumes = 0
+        first = self.activity.read({"disk"})
+        self.assertEqual(first["provider_status"]["disk"]["state"], "warming_up")
+        self.now += 2
+        self.disk_bytes += 2_000_000
+        reading = self.activity.read({"disk"})
+        self.assertEqual(reading["provider_status"]["disk"]["state"], "ready")
+        self.assertEqual(reading["disk_read"], 1)
+        self.assertEqual(reading["disk_write"], 1)
+        self.assertEqual(self.disk.call_count, 2)
+        self.partitions.assert_not_called()
+        self.usage.assert_not_called()
+        self.assertEqual(reading["volumes"], {})
+        self.assertNotIn("disk_percent", reading)
+        self.assertEqual(reading["provider_status"]["volumes"],
+                         dict(state="not_requested", requested=False))
+
+    def test_volume_only_demand_reads_capacity_without_disk_io_queries(self):
+        reading = self.activity.read({"volumes"})
+        self.disk.assert_not_called()
+        self.partitions.assert_not_called()  # Existing 30-second topology cache.
+        self.assertEqual(self.usage.call_count, 2)
+        self.assertEqual(reading["disk_percent"], 25)
+        self.assertEqual(reading["volumes"]["D:\\"]["disk_percent"], 50)
+        self.assertEqual(reading["provider_status"]["volumes"],
+                         dict(state="ready", requested=True))
+
+    def test_inspection_queries_all_sources_without_visible_widget_demand(self):
+        self.activity.next_volumes = 0
+        drive_type = Mock(return_value=3)
+        with patch("activity_sensors.ctypes.windll",
+                   SimpleNamespace(kernel32=SimpleNamespace(GetDriveTypeW=drive_type))):
+            reading = self.activity.read(set(), inspecting=True)
+        self.disk.assert_called_once()
+        self.network.assert_called_once()
+        self.network_status.assert_called_once()
+        self.partitions.assert_called_once()
+        self.assertEqual(self.usage.call_count, 2)
+        self.assertEqual(reading["provider_status"]["volumes"]["state"], "ready")
+
+    def test_capacity_stop_and_failure_never_reuse_previous_values_or_errors(self):
+        previous = self.activity.read({"disk", "volumes"})
+        self.assertEqual(previous["disk_percent"], 25)
+        stopped = self.activity.read({"disk"})
+        self.assertNotIn("disk_percent", stopped)
+        self.assertEqual(stopped["volumes"], {})
+        self.assertEqual(self.usage.call_count, 2)
+        self.volume_error = ActivityFailureTests.failure(21)
+        failed = self.activity.read({"volumes"})
+        self.assertNotIn("disk_percent", failed)
+        self.assertNotIn("disk_percent", failed["volumes"]["C:\\"])
+        error = failed["provider_status"]["volumes"]["device_errors"]["C:\\"]
+        self.assertEqual(error["api"], "psutil.disk_usage")
+        self.assertEqual(error["winerror"], 21)
+        stopped_again = self.activity.read({"disk"})
+        self.assertEqual(stopped_again["provider_status"]["volumes"],
+                         dict(state="not_requested", requested=False))
+        self.assertEqual(stopped_again["volumes"], {})
+        self.volume_error = None
+        recovered = self.activity.read({"volumes"})
+        self.assertEqual(recovered["disk_percent"], 25)
+        self.assertNotIn("device_errors", recovered["provider_status"]["volumes"])
 
 
 if __name__ == "__main__":

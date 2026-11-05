@@ -85,6 +85,7 @@ class HistoryController(QObject):
         self.requests = []
         self.actions = []
         self.status_reads = 0
+        self.options_reads = 0
         self.response = synthetic_history()
         self.options = [
             dict(id="cpu:local", label="CPU 使用率", unit="%", device_id="local", scope="cpu", device_label="本机处理器", icon="cpu", available=True),
@@ -98,7 +99,10 @@ class HistoryController(QObject):
     texts = Property("QVariantMap", lambda self: {}, notify=changed)
     material = Property("QVariantMap", lambda self: {}, constant=True)
     motionEnabled = Property(bool, lambda self: False, constant=True)
-    historyMetricChoices = Property("QVariantList", lambda self: self.options, notify=historyOptionsChanged)
+    @Property("QVariantList", notify=historyOptionsChanged)
+    def historyMetricChoices(self):
+        self.options_reads += 1
+        return self.options
     @Property("QVariantMap", notify=historyChanged)
     def historyStatus(self):
         self.status_reads += 1
@@ -268,13 +272,16 @@ Window {id:scene;width:%d;height:%d;visible:false;color:stats.theme==="dark"?"#2
         def check_quiet():
             QTest.qWait(20)
             before = self.controller.status_reads
+            options_before = self.controller.options_reads
             self.controller.requests.clear()
             for _ in range(40):
                 self.controller.historyChanged.emit()
+                self.controller.historyOptionsChanged.emit()
             QTest.qWait(35)
             self.assertFalse(page.property("uiActive"))
             self.assertFalse(timer.property("running"))
             self.assertEqual(self.controller.status_reads, before)
+            self.assertEqual(self.controller.options_reads, options_before)
             self.assertEqual(self.controller.requests, [])
             self.assertEqual(self.controller.actions, [])
 
@@ -297,6 +304,30 @@ Window {id:scene;width:%d;height:%d;visible:false;color:stats.theme==="dark"?"#2
         self.assertTrue(page.property("uiActive"))
         self.assertTrue(timer.property("running"))
         self.assertEqual(self.controller.requests[-1], ("cpu:local", "1h"))
+
+    def test_hidden_options_defer_updates_and_restore_selected_device_metadata(self):
+        page = self.load()
+        page.choose("gpu:1")
+        before = dict(page.property("selectedMetadata").toVariant()
+                      if hasattr(page.property("selectedMetadata"), "toVariant")
+                      else page.property("selectedMetadata"))
+        self.window.hide()
+        QTest.qWait(20)
+        reads = self.controller.options_reads
+        self.controller.options[2].update(label="Updated GPU metric", device_label="Renamed device", available=False)
+        for _ in range(20):
+            self.controller.historyOptionsChanged.emit()
+        QTest.qWait(20)
+        self.assertEqual(self.controller.options_reads, reads)
+        self.assertEqual(page.property("selectedId"), "gpu:1")
+        self.window.show()
+        QTest.qWait(35)
+        metadata = page.property("selectedMetadata")
+        metadata = metadata.toVariant() if hasattr(metadata, "toVariant") else metadata
+        self.assertEqual(metadata["device_label"], "Renamed device")
+        self.assertFalse(metadata["available"])
+        self.assertEqual(page.property("selectedId"), "gpu:1")
+        self.assertNotEqual(metadata["device_label"], before["device_label"])
 
     def test_range_toggle_and_recording_use_only_their_explicit_actions(self):
         self.load()

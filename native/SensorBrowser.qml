@@ -4,11 +4,13 @@ import QtQuick.Layouts
 ColumnLayout {
     id:root
     property bool active:true
+    property bool readingsActive:active
     property string query:""
     property string category:"all"
-    property var rows:{const revision=stats.sensorRevision;return active?stats.sensorRows:[]}
+    // Retain the list/viewport while only live readings are paused.
+    property var rows:[]
     property var entries:[]
-    property var externalInfo:active?stats.externalStatus:({})
+    property var externalInfo:({})
     property bool restoringFocus:false
     property int modelGeneration:0
     readonly property var byId: {
@@ -18,6 +20,10 @@ ColumnLayout {
     }
     spacing:10
     Theme { id:ui }
+    function refreshRows(){if(!active){rows=[];externalInfo=({});return}if(readingsActive){rows=stats.sensorRows;externalInfo=stats.externalStatus}}
+    onActiveChanged:refreshRows()
+    onReadingsActiveChanged:refreshRows()
+    Connections {target:stats;enabled:root.active && root.readingsActive;function onSensorsChanged(){root.refreshRows()}}
     function filterRows(preserveViewport) {
         const q=query.trim().toLowerCase()
         const next=rows.filter(row=>(category==="all" || row.category===category) && (!q || [row.search,row.label,row.hardware_name,row.source,row.unit].filter(Boolean).join(" ").toLowerCase().includes(q)))
@@ -47,7 +53,7 @@ ColumnLayout {
     onQueryChanged:filterRows()
     onCategoryChanged:filterRows()
     onRowsChanged:filterRows(true)
-    Component.onCompleted:filterRows()
+    Component.onCompleted:{refreshRows();filterRows()}
     RowLayout {
         Layout.fillWidth:true; spacing:12
         ColumnLayout {

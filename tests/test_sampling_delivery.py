@@ -43,7 +43,7 @@ class SamplingDeliveryTests(unittest.TestCase):
         self.sequence += 1
         return value
 
-    def run_sampling(self, count, export):
+    def run_sampling(self, count, export=None, *, diagnostic_exports=False):
         case = self
 
         class Stop:
@@ -72,7 +72,10 @@ class SamplingDeliveryTests(unittest.TestCase):
             patch.object(controls.logging, "info") as recovery,
             patch.object(controls, "save", side_effect=AssertionError("No settings persistence")),
         ):
-            self.ui.start()
+            if diagnostic_exports:
+                self.ui.start(diagnostic_exports=True)
+            else:
+                self.ui.start()
             self.ui.thread.join(timeout=3)
             self.assertFalse(self.ui.thread.is_alive(), "Synthetic sampling must finish")
             self.app.processEvents()
@@ -83,7 +86,7 @@ class SamplingDeliveryTests(unittest.TestCase):
         def denied(_reading):
             raise PermissionError("Synthetic diagnostic file locked")
 
-        errors, _ = self.run_sampling(200, denied)
+        errors, _ = self.run_sampling(200, denied, diagnostic_exports=True)
         self.assertEqual(self.delivered, list(range(200)))
         self.assertEqual([row["sequence"] for row in self.ui._history], list(range(160, 200)))
         self.assertEqual(self.ui.readings["sequence"], 199)
@@ -98,7 +101,7 @@ class SamplingDeliveryTests(unittest.TestCase):
                 raise OSError("Synthetic disk temporarily unavailable")
             written.append(reading["sequence"])
 
-        errors, recovery = self.run_sampling(180, locked_then_ready)
+        errors, recovery = self.run_sampling(180, locked_then_ready, diagnostic_exports=True)
         self.assertEqual(self.delivered, list(range(180)))
         self.assertTrue(written, "Export must retry after the file becomes writable")
         self.assertGreaterEqual(written[0], 50)
@@ -109,7 +112,8 @@ class SamplingDeliveryTests(unittest.TestCase):
 
     def test_healthy_exports_keep_every_successful_sample_in_order(self):
         written = []
-        errors, recovery = self.run_sampling(25, lambda reading: written.append(reading["sequence"]))
+        errors, recovery = self.run_sampling(25, lambda reading: written.append(reading["sequence"]),
+                                             diagnostic_exports=True)
         self.assertEqual(self.delivered, list(range(25)))
         self.assertEqual(written, list(range(25)))
         self.assertEqual([row["sequence"] for row in self.ui._history], list(range(25)))
@@ -124,7 +128,7 @@ class SamplingDeliveryTests(unittest.TestCase):
                 raise PermissionError("Synthetic intermittent export lock")
             written.append(reading["sequence"])
 
-        errors, recovery = self.run_sampling(300, intermittent)
+        errors, recovery = self.run_sampling(300, intermittent, diagnostic_exports=True)
         self.assertEqual(self.delivered, list(range(300)))
         self.assertEqual(errors.call_count, 2)
         self.assertEqual(recovery.call_count, 2)
@@ -140,11 +144,23 @@ class SamplingDeliveryTests(unittest.TestCase):
 
         self.sampler.sample.side_effect = sometimes_unavailable
         written = []
-        errors, recovery = self.run_sampling(3, lambda reading: written.append(reading["sequence"]))
+        errors, recovery = self.run_sampling(3, lambda reading: written.append(reading["sequence"]),
+                                             diagnostic_exports=True)
         self.assertEqual(self.delivered, [0, 2])
         self.assertEqual(written, [0, 2])
         self.assertEqual([row["sequence"] for row in self.ui._history], [0, 2])
         errors.assert_called_once_with("Sensor sampling failed")
+        recovery.assert_not_called()
+
+    def test_native_default_skips_exports_without_dropping_emit_or_history(self):
+        with patch.object(self.ui, "_record_history") as record:
+            errors, recovery = self.run_sampling(25)
+        self.sampler.write.assert_not_called()
+        self.assertEqual(self.delivered, list(range(25)))
+        self.assertEqual([call.args[0]["sequence"] for call in record.call_args_list], list(range(25)))
+        self.assertEqual([row["sequence"] for row in self.ui._history], list(range(25)))
+        self.assertEqual(self.ui.readings["sequence"], 24)
+        errors.assert_not_called()
         recovery.assert_not_called()
 
 

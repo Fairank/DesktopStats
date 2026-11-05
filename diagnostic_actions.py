@@ -31,11 +31,13 @@ APIS = {
     "winreg.OpenKey", "winreg.QueryInfoKey", "winreg.EnumValue",
     "CallNtPowerInformation(SystemBatteryState)", "LoadLibraryW(PowrProf.dll)",
     "psutil.net_io_counters", "psutil.net_if_stats", "psutil.disk_io_counters",
+    "GetAdaptersAddresses", "GetIfTable2", "GetIfTable", "Windows network snapshot",
     "psutil.disk_partitions", "psutil.disk_usage",
     "nvmlInit_v2", "nvmlShutdown", "nvmlDeviceGetCount_v2", "nvmlDeviceGetHandleByIndex_v2",
     "nvmlDeviceGetName", "nvmlDeviceGetTemperature", "nvmlDeviceGetUtilizationRates",
     "nvmlDeviceGetPowerUsage", "nvmlDeviceGetMemoryInfo", "nvmlDeviceGetClockInfo",
     "nvmlDeviceGetFanSpeed", "nvmlErrorString",
+    "ASUS CPU shared memory",
 }
 MAX_FAILURES = 64
 _ASUS_METRICS = {"0x00120094": "cpu_temp", "0x00110013": "cpu_fan_rpm", "0x00110014": "gpu_fan_rpm"}
@@ -160,7 +162,7 @@ def safe_report(data, version):
         return result
 
     sources = {str(key): source_facts(key, value) for key, value in data.get("provider_status", {}).items()
-               if key in {"nvml", "asus", "hwinfo", "network", "disk", "volumes", "battery"}}
+               if key in {"nvml", "asus", "hwinfo", "network", "disk", "volumes", "battery", "cpu_thermal"}}
     for field in ("external_status", "storage_status", "battery_status", "sample_status"):
         if isinstance(data.get(field), dict):
             sources[field] = source_facts(field, data[field])

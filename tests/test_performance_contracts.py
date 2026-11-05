@@ -293,5 +293,32 @@ class PerformanceContractTests(unittest.TestCase):
         self.assertEqual(self.ui.saved, self.initial)
 
 
+class VolumeDemandTests(unittest.TestCase):
+    def test_io_only_bar_does_not_request_volume_capacity(self):
+        from metrics import required_sources
+        config = dict(visible=False, widgets={}, top_bar=dict(enabled=True, items=[
+            dict(metric="disk_read", prefs=dict(style="duplex_inline"))]))
+        self.assertEqual(required_sources(config), {"disk"})
+        config["top_bar"]["items"][0]["metric"] = "disk_percent"
+        self.assertEqual(required_sources(config), {"disk", "volumes"})
+
+    def test_visible_capacity_widgets_and_legacy_percent_still_request_volumes(self):
+        from metrics import required_sources
+        widget = dict(enabled=True, kind="disk", content=None, primary="percent")
+        config = dict(widgets={"disk": widget}, widget_order=["disk"])
+        self.assertIn("volumes", required_sources(config))
+        widget.update(primary="read", content=["disk_free_gb"])
+        self.assertIn("volumes", required_sources(config))
+        widget["enabled"] = False
+        self.assertEqual(required_sources(config), set())
+
+    def test_unrequested_volume_is_not_reported_as_a_disconnected_drive(self):
+        from sensor_diagnostics import unavailable_reason
+        reason = unavailable_reason(dict(volumes={}, provider_status=dict(
+            volumes=dict(state="not_requested", requested=False))), "disk_percent", {"volume_target": "X:/"})
+        self.assertIn("未请求", reason)
+        self.assertNotIn("未连接", reason)
+
+
 if __name__ == "__main__":
     unittest.main()

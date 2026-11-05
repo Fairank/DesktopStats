@@ -11,7 +11,7 @@ import os
 import threading
 from ctypes import wintypes as w
 
-from PySide6.QtCore import QAbstractNativeEventFilter, QEvent, Qt, QThread, Signal
+from PySide6.QtCore import QAbstractNativeEventFilter, QEvent, Qt, QThread, Signal, Slot
 from PySide6.QtGui import QGuiApplication, QPlatformSurfaceEvent, QSurface, QSurfaceFormat, QWindow
 
 
@@ -123,12 +123,14 @@ class SettingsBackdropHost(QWindow):
         self.resize(client.size())
         self.widthChanged.connect(self._sync_client_size)
         self.heightChanged.connect(self._sync_client_size)
+        self.windowStateChanged.connect(self._sync_client_activity)
         try:
             client.setProperty("nativeHosted", True)
             client.setParent(self)
             client.setPosition(0, 0)
             client.resize(self.size())
             client.visibleChanged.connect(self._client_visibility)
+            self._sync_client_activity()
             if self._native:
                 app.installNativeEventFilter(self._paint_filter)
                 self._filter_installed = True
@@ -172,6 +174,13 @@ class SettingsBackdropHost(QWindow):
         if (self._client is not None and not self._disposed and self.width() > 0 and self.height() > 0
                 and not self.windowState() & Qt.WindowMinimized):
             self._client.resize(self.size())
+
+    @Slot()
+    def _sync_client_activity(self):
+        # A parented Quick window remains Windowed when its native host is
+        # minimized. Pause computation without hiding/cancelling its editors.
+        if not self._disposed and self._client is not None:
+            self._client.setProperty("hostMinimized", bool(self.windowState() & Qt.WindowMinimized))
 
     def event(self, event):
         kind = event.type()
@@ -239,7 +248,8 @@ class SettingsBackdropHost(QWindow):
         if client is not None:
             for action in (
                 lambda: client.visibleChanged.disconnect(self._client_visibility),
-                client.hide, client.destroy, lambda: client.setParent(None),
+                client.hide, lambda: client.setProperty("hostMinimized", False),
+                client.destroy, lambda: client.setParent(None),
             ):
                 try:
                     action()

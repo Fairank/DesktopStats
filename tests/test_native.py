@@ -165,7 +165,7 @@ class NativeEditTests(unittest.TestCase):
             self.assertLogs(level="ERROR") as errors,
         ):
             try:
-                controller.start()
+                controller.start(diagnostic_exports=True)
                 controller.thread.join(timeout=2)
             finally:
                 stop.set()

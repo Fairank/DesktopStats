@@ -7,6 +7,7 @@ Item {
     property var row:({})
     property int index:-1
     property int count:0
+    property bool readingsActive:visible
     property bool narrow:false
     property string design:"classic"
     property bool galleryOpen:false
@@ -48,8 +49,9 @@ Item {
     readonly property real labelColumnWidth:width>=320?92:76
     signal revealRequested(var target)
     readonly property var stylePreviewRow: {
-        const revision=stats.sensorRevision, draft=stats.draft, current=root.row
-        if(!root.visible || !root.item)return current
+        const current=root.row
+        if(!root.readingsActive || !root.visible || !root.item)return current
+        const revision=stats.sensorRevision, draft=stats.draft
         return typeof stats.topBarStylePreviewRow === "function"
             ? stats.topBarStylePreviewRow(root.item.id) : current
     }

@@ -19,6 +19,7 @@ from activity_sensors import Activity
 from battery_sensor import Battery, power_state
 from cooling_sensor import FAN_ENDPOINTS, MAX_RPM, PRESENCE_BIT, AsusFans
 from cooling_sensor import SOURCE as COOLING_SOURCE
+from cpu_temperature import AsusCpuTemperature, is_requested as cpu_temperature_requested
 from energy_sensor import CpuPackagePower
 from external_engine import ExternalEngine
 from metrics import METRICS, metric_value, required_sources, variable
@@ -601,6 +602,7 @@ class Sampler:
         self.storage = StorageHealth(BASE)
         self.battery = Battery()
         self.cpu_power = CpuPackagePower()
+        self.cpu_thermal = AsusCpuTemperature()
         self.activity = Activity()
         self.external = ExternalEngine()
         self.nvml_retry = 0
@@ -819,6 +821,11 @@ class Sampler:
         else:
             self._cpu_per_core_primed = False
         data.update(asus_readings)
+        thermal_requested = inspecting or cpu_temperature_requested(config)
+        thermal = self.cpu_thermal.read(
+            requested=thermal_requested and data.get("cpu_temp") is None
+        )
+        data.update(thermal)
         needs_gpu = "gpu" in needed or inspecting
         self._retry_nvidia_cleanup()
         if (needs_gpu and self.nvidia is None and getattr(self, "_nvml_cleanup", None) is None
@@ -861,6 +868,7 @@ class Sampler:
         data["provider_status"] = dict(
             asus=self._provider_status("asus", "cpu" in needed or "cooling" in needed or inspecting),
             nvml=self._provider_status("nvml", needs_gpu),
+            cpu_thermal=self.cpu_thermal.status(thermal_requested),
         )
         extra = hwinfo_registry(getattr(self, "_hwinfo_cache", None))
         diagnostics = getattr(extra, "diagnostics", None)
@@ -872,6 +880,9 @@ class Sampler:
         }
         if data["cpu_per_core_timestamp"] is not None:
             data["metric_timestamps"]["cpu_per_core"] = data["cpu_per_core_timestamp"]
+        if thermal.get("cpu_temp") is not None:
+            data["metric_sources"]["cpu_temp"] = thermal["cpu_temp_source"]
+            data["metric_timestamps"]["cpu_temp"] = self.cpu_thermal.sample_time
         if (power_timestamp is not None and "cpu_power" not in asus_readings
                 and data.get("cpu_power_source") == power_source):
             data["metric_timestamps"]["cpu_power"] = power_timestamp
@@ -959,7 +970,7 @@ class Sampler:
         self._closed = True
         getattr(self, "_hwinfo_cache", {}).clear()
         complete = True
-        for name in ("storage", "external", "cooling", "asus", "nvidia", "_nvml_cleanup", "cpu_power"):
+        for name in ("storage", "external", "cooling", "asus", "nvidia", "_nvml_cleanup", "cpu_power", "cpu_thermal"):
             source = getattr(self, name, None)
             if source is not None:
                 try:

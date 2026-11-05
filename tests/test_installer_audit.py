@@ -122,7 +122,7 @@ class CloseExistingAuditTests(unittest.TestCase):
 
     def test_absent_instance_requires_an_independent_absent_server_probe(self):
         self.send.return_value = None
-        installer.close_existing()
+        self.assertIsNone(installer.close_existing())
         self.send.assert_called_once_with({"command": "status"}, timeout=1200)
         self.absent.assert_called_once_with()
         self.send.reset_mock()
@@ -190,6 +190,19 @@ class CloseExistingAuditTests(unittest.TestCase):
             [item.args[0]["command"] for item in self.send.call_args_list],
             ["status", "status", "quit_if_clean", "status", "status"],
         )
+        self.absent.assert_called_once_with()
+        self.process.close.assert_called_once_with()
+
+    def test_returns_latest_clean_visibility_only_after_process_and_pipe_disappear(self):
+        first = dict(self.status(), settings_visible=True)
+        latest = dict(self.status(), settings_visible=False)
+        self.send.side_effect = [first, latest,
+                                 dict(ok=True, quitting=True, dirty=False, pid=7007), None]
+        self.process.exited.side_effect = [False, False, True]
+        result = installer.close_existing()
+        self.assertEqual(result, latest)
+        self.assertIsNot(result, latest)
+        self.assertEqual(self.process.exited.call_count, 3)
         self.absent.assert_called_once_with()
         self.process.close.assert_called_once_with()
 
@@ -483,6 +496,56 @@ class InstallerTransactionAuditTests(unittest.TestCase):
         installer.close_existing.assert_not_called()
         self.assertFalse(self.target.exists())
         self.spawn.assert_not_called()
+
+    def test_first_install_without_a_running_instance_opens_settings_normally(self):
+        self.bundle()
+        installer.close_existing.return_value = None
+        installer.install()
+        self.spawn.assert_called_once_with(
+            [str(self.target / "DesktopStats.exe")], creationflags=0x08000000
+        )
+        self.assertEqual(installer.close_existing.call_count, 2)
+
+    def test_only_an_explicit_false_visibility_keeps_upgrade_in_background(self):
+        self.bundle()
+        self.old_install()
+        base = dict(ok=True, native=True, dirty=False, pid=7007)
+        cases = [
+            (dict(base, settings_visible=False), True),
+            (dict(base, settings_visible=True), False),
+            (dict(base), False),
+            (dict(base, settings_visible=None), False),
+            (dict(base, settings_visible=0), False),
+            (dict(base, settings_visible="false"), False),
+        ]
+        for status, background in cases:
+            with self.subTest(visibility=status.get("settings_visible", "missing")):
+                self.spawn.reset_mock()
+                installer.close_existing.side_effect = [status, None]
+                installer.install()
+                command = [str(self.target / "DesktopStats.exe")]
+                if background:
+                    command.append("--background")
+                self.spawn.assert_called_once_with(command, creationflags=0x08000000)
+
+    def test_restarted_instances_latest_visibility_controls_upgrade_launch(self):
+        self.bundle()
+        self.old_install()
+        base = dict(ok=True, native=True, dirty=False, pid=7007)
+        cases = [
+            (dict(base, settings_visible=False), dict(base, pid=7008, settings_visible=True), False),
+            (dict(base, settings_visible=True), dict(base, pid=7008, settings_visible=False), True),
+            (dict(base, settings_visible=False), dict(base, pid=7008), False),
+        ]
+        for original, restarted, background in cases:
+            with self.subTest(original=original, restarted=restarted):
+                self.spawn.reset_mock()
+                installer.close_existing.side_effect = [original, restarted]
+                installer.install()
+                command = [str(self.target / "DesktopStats.exe")]
+                if background:
+                    command.append("--background")
+                self.spawn.assert_called_once_with(command, creationflags=0x08000000)
 
     def test_source_inside_the_installation_refuses_self_overwrite(self):
         self.bundle(self.target)
@@ -974,7 +1037,8 @@ class ApplicationLifecycleAuditTests(unittest.TestCase):
 
         start = next(
             index for index, node in enumerate(constructor.body)
-            if isinstance(node, ast.Expr) and ast.unparse(node.value) == "self.controller.start()"
+            if (isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)
+                and ast.unparse(node.value.func) == "self.controller.start")
         )
         floor = next(
             index for index, node in enumerate(constructor.body)

@@ -33,4 +33,5 @@ qa-private/
 .vscode/
 *.dmp
 collector/runtime/
+collector/cpu-temperature-runtime/
 third_party/librehardwaremonitor/0.9.6/*.dll

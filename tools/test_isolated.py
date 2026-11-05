@@ -24,6 +24,9 @@ def worker(pattern):
         os.environ.update(
             DESKTOP_STATS_DATA=str(profile), QT_QPA_PLATFORM="offscreen",
             QT_QUICK_BACKEND="software", QSG_RENDER_LOOP="basic", TEMP=private, TMP=private,
+            DESKTOP_STATS_CPU_BRIDGE_DISABLED="1",
+            DESKTOP_STATS_NETWORK_SNAPSHOT_DISABLED="1",
+            DESKTOP_STATS_FULLSCREEN_GUARD_DISABLED="1",
         )
         font_directory = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "Fonts"
         if font_directory.is_dir():

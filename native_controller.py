@@ -2631,7 +2631,7 @@ class Controller(WorkspaceTools):
         notify=sensorsChanged,
     )
 
-    def start(self):
+    def start(self, *, diagnostic_exports=False):
         def collect():
             sampler = None
             export_retry_at = float("-inf")
@@ -2647,9 +2647,10 @@ class Controller(WorkspaceTools):
                     except Exception:
                         logging.exception("Sensor sampling failed")
                     else:
-                        # Diagnostic files are optional. A locked/full profile
-                        # must not discard healthy readings or their history.
-                        if time.monotonic() >= export_retry_at:
+                        # Native windows receive signals and history records
+                        # directly. Legacy/headless diagnostic files are opt-in;
+                        # their failures never discard healthy samples/history.
+                        if diagnostic_exports and time.monotonic() >= export_retry_at:
                             try:
                                 sampler.write(data)
                             except Exception:

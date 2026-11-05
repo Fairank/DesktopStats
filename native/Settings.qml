@@ -6,6 +6,8 @@ Window {
     id: root
     readonly property var draftConfig:stats.draft
     objectName: "settingsWindow"
+    property bool hostMinimized:false
+    readonly property bool uiActive:visible && !hostMinimized && visibility!==Window.Minimized
     property int page: 0
     property string selectedKey: root.draftConfig.widget_order[0] || ""
     property bool nativeHosted:false
@@ -55,7 +57,7 @@ Window {
     Shortcut {sequence:"Ctrl+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(false)}
     Shortcut {sequence:"Ctrl+Shift+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(true)}
     Shortcut {sequence:"Escape";enabled:!gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:{if(root.page===4 && historyPage.cancelInspection())return;if(!widgetEditorLoader.item || !widgetEditorLoader.item.cancelEditing())root.hide()}}
-    Timer {interval:3000;running:root.visible && (root.page===2 || stats.dirty);repeat:true;triggeredOnStart:true;onTriggered:stats.inspect()}
+    Timer {objectName:"settingsInspectTimer";interval:3000;running:root.uiActive && (root.page===2 || stats.dirty);repeat:true;triggeredOnStart:true;onTriggered:stats.inspect()}
     Item {
         id:settingsBody;objectName:"settingsBackdropSource";y:root.clientY;width:root.width;height:root.clientHeight
         Rectangle {anchors.fill:parent;visible:!ui.translucentBackdrop;color:ui.fallback}
@@ -120,7 +122,7 @@ Window {
         Item {x:root.railWidth;width:parent.width-x;height:parent.height-72-root.replacementBannerHeight;clip:true
         Item {
             id:workspace;width:root.layoutWidth-root.railWidth;height:root.layoutHeight-root.clientY-72-root.replacementBannerHeight
-            Loader {id:widgetEditorLoader;anchors.fill:parent;active:!!root.draftConfig.widgets[root.selectedKey];visible:root.page===0;sourceComponent:WidgetEditor {selectedKey:root.selectedKey;active:root.visible && root.page===0;resizing:root.resizeInProgress;onRequestApply:root.applySettings();onRequestReadings:key=>gallery.showReadings(key);onSelectKey:key=>root.selectWidget(key)}}
+            Loader {id:widgetEditorLoader;anchors.fill:parent;active:!!root.draftConfig.widgets[root.selectedKey];visible:root.page===0;sourceComponent:WidgetEditor {selectedKey:root.selectedKey;active:root.uiActive && root.page===0;resizing:root.resizeInProgress;onRequestApply:root.applySettings();onRequestReadings:key=>gallery.showReadings(key);onSelectKey:key=>root.selectWidget(key)}}
             Column {visible:root.page===0 && !widgetEditorLoader.active;anchors.centerIn:parent;spacing:20;Text {text:ui.t("你的桌面，从一个小组件开始。");font.family:ui.fontFamily;font.pixelSize:18;color:ui.ink}ActionButton {anchors.horizontalCenter:parent.horizontalCenter;text:"＋ "+ui.t("添加第一个小组件");accent:true;onClicked:root.showGallery()}}
             ScrollView {id:appearanceScroll;objectName:"editorScroll";anchors.fill:parent;anchors.margins:28;visible:root.page===1;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
                 Column {objectName:"appearanceContentColumn";width:Math.min(620,appearanceScroll.availableWidth-8);x:(appearanceScroll.availableWidth-width)/2;spacing:25
@@ -140,7 +142,7 @@ Window {
             }
             Item {id:topBarHeaderHost;objectName:"topBarHeaderHost";x:28+(parent.width-56-width)/2;y:28;width:Math.min(1000,parent.width-64);height:topBarEditor.headerHeight;visible:root.page===3;z:30}
             ScrollView {id:topBarScroll;objectName:"topBarSettingsScroll";anchors.fill:parent;anchors.margins:28;anchors.topMargin:28+topBarHeaderHost.height+16;visible:root.page===3;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
-                TopBarSettings {id:topBarEditor;width:Math.min(1000,topBarScroll.availableWidth-8);x:(topBarScroll.availableWidth-width)/2;active:root.visible && root.page===3;viewportY:topBarScroll.contentItem?topBarScroll.contentItem.contentY:0;scrollHost:topBarScroll.contentItem;headerHost:topBarHeaderHost
+                TopBarSettings {id:topBarEditor;width:Math.min(1000,topBarScroll.availableWidth-8);x:(topBarScroll.availableWidth-width)/2;active:root.visible && root.page===3;readingsActive:root.uiActive && root.page===3;viewportY:topBarScroll.contentItem?topBarScroll.contentItem.contentY:0;scrollHost:topBarScroll.contentItem;headerHost:topBarHeaderHost
                     onRevealInspector:item=>{const flick=topBarScroll.contentItem;if(item && flick){const top=item.mapToItem(topBarEditor,0,0).y;const bottom=top+item.height;let target=flick.contentY;if(item.height>flick.height-16 || top<target+8)target=top-8;else if(bottom>target+flick.height-8)target=bottom-flick.height+8;flick.contentY=Math.max(0,Math.min(Math.max(0,flick.contentHeight-flick.height),target))}}
                 }
             }
@@ -151,7 +153,7 @@ Window {
                     ColumnLayout {Layout.fillWidth:true;spacing:6;ActionButton {objectName:"sensorBackButton";text:"‹ "+ui.t("偏好");quiet:true;implicitHeight:28;leftPadding:0;onClicked:root.page=1}Text {text:ui.t("传感器");font.family:ui.fontFamily;font.pixelSize:25;font.weight:Font.DemiBold;color:ui.ink}Text {Layout.fillWidth:true;text:ui.t("查看真实读数与数据来源。");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}}
                 }
                 Text {Layout.fillWidth:true;text:ui.t("硬件传感器的实际更新速度可能更慢。");font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:ui.muted;wrapMode:Text.WordWrap}
-                SensorBrowser {objectName:"sensorBrowser";active:root.visible && root.page===2;Layout.fillWidth:true;Layout.fillHeight:true}
+                SensorBrowser {objectName:"sensorBrowser";active:root.visible && root.page===2;readingsActive:root.uiActive && root.page===2;Layout.fillWidth:true;Layout.fillHeight:true}
             }
             HistoryPage {id:historyPage;anchors.fill:parent;visible:root.page===4;active:root.visible && root.page===4}
         }}
@@ -167,7 +169,7 @@ Window {
         }
     }
     WindowChrome {anchors.fill:parent;visible:!root.nativeHosted;enabled:visible;targetWindow:root;titleText:"Desktop Stats"}
-    Gallery {id:gallery;backdropSource:settingsBody;onDismissed:root.restoreGalleryFocus();onChosen:key=>root.selectWidget(key)}
+    Gallery {id:gallery;backdropSource:settingsBody;readingsActive:root.uiActive;onDismissed:root.restoreGalleryFocus();onChosen:key=>root.selectWidget(key)}
     Popup {
         id:scenePopup;objectName:"scenePopup";parent:Overlay.overlay
         property string selectedId:""
@@ -187,7 +189,7 @@ Window {
                 IconButton {symbol:"close";label:ui.t("关闭");onClicked:scenePopup.close()}
             }
             ColumnLayout {Layout.fillWidth:true;visible:!!scenePopup.selectedId;spacing:6
-                ScenePreview {objectName:"selectedSceneLivePreview";Layout.fillWidth:true;Layout.preferredHeight:150;proposal:scenePopup.proposal;readings:scenePopup.opened?stats.readings:({})}
+                ScenePreview {objectName:"selectedSceneLivePreview";Layout.fillWidth:true;Layout.preferredHeight:150;proposal:scenePopup.proposal;readings:scenePopup.opened && root.uiActive?stats.readings:({})}
                 Text {Layout.fillWidth:true;text:ui.t("当前读数预览 · 尚未应用");font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted}
             }
             ScrollView {id:sceneScroll;objectName:"scenePickerScroll";Layout.fillWidth:true;Layout.fillHeight:true;contentWidth:availableWidth;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff

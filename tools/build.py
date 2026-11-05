@@ -19,6 +19,8 @@ SOURCES = (
     "appearance_preview.py",
     "app.py",
     "activity_sensors.py",
+    "network_snapshot.py",
+    "fullscreen_guard.py",
     "appbar_platform.py",
     "shell_identity.py",
     "battery_sensor.py",
@@ -27,6 +29,7 @@ SOURCES = (
     "compact_labels.py",
     "configuration_scopes.py",
     "cooling_sensor.py",
+    "cpu_temperature.py",
     "desktop_placement.py",
     "energy_sensor.py",
     "diagnostic_actions.py",
@@ -119,6 +122,10 @@ SOURCES = (
     "tests/test_product.py",
     "tests/test_extensions.py",
     "tests/test_energy_sensor.py",
+    "tests/test_cpu_temperature.py",
+    "tests/test_network_snapshot.py",
+    "tests/test_fullscreen_guard.py",
+    "tests/test_settings_activity_qml.py",
     "tests/test_power_integration.py",
     "tests/test_runtime_preview.py",
     "tests/test_appearance_preview.py",
@@ -214,6 +221,8 @@ SOURCES = (
     "tests/test_runtime_status.py",
     "tests/test_collector_contract.py",
     "collector/Program.cs",
+    "collector/AsusCpuTemperatureBridge.cs",
+    "tools/build_cpu_temperature_bridge.py",
     "collector/README.md",
     "collector/build.ps1",
     "collector/DesktopStats.Collector.exe.config",
@@ -267,6 +276,16 @@ def main():
     if archive.exists():
         raise FileExistsError("Versioned release archives are immutable; choose a new candidate version")
     collector = collector_files()
+    from tools.build_cpu_temperature_bridge import digest, existing_runtime
+
+    bridge_directory = ROOT / "collector/cpu-temperature-runtime"
+    bridge = existing_runtime(bridge_directory)
+    if (not bridge or bridge.get("sensor_id") != 100859922
+            or bridge.get("protocol_bytes") != 64 or bridge.get("protocol_schema") != 1
+            or bridge.get("sources") != [dict(name="AsusCpuTemperatureBridge.cs",
+                                             sha256=digest(ROOT / "collector/AsusCpuTemperatureBridge.cs"))]
+            or bridge.get("builder", {}).get("sha256") != digest(ROOT / "tools/build_cpu_temperature_bridge.py")):
+        raise ValueError("Rebuild the CPU temperature bridge before packaging")
     for target in (ROOT / "dist/native/DesktopStats", ROOT / "build/native"):
         if (
             not target.resolve().is_relative_to(ROOT.resolve())
@@ -297,6 +316,7 @@ def main():
     command += ["--add-data", str(ROOT / "locales.txt") + ";."]
     for file in collector:
         command += ["--add-data", str(file) + ";collector"]
+    command += ["--add-data", str(bridge_directory / "AsusCpuTemperatureBridge.exe") + ";cpu-temperature"]
     for module in (
         "tkinter",
         "PyQt5",
