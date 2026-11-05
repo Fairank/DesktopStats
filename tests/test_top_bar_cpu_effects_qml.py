@@ -1,6 +1,7 @@
 """Actual CPU detail/icon QML, owned offscreen windows and synthetic readings only."""
 
 import copy
+import math
 import os
 import time
 import unittest
@@ -13,7 +14,7 @@ os.environ.setdefault("QT_QUICK_BACKEND", "software")
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPoint, QPointF, Qt, QUrl
 from PySide6.QtGui import QWheelEvent
 from PySide6.QtQml import QQmlComponent, QQmlEngine
-from PySide6.QtTest import QTest
+from PySide6.QtTest import QSignalSpy, QTest
 
 from tests import test_top_bar_module_qml as module_fixture
 
@@ -76,7 +77,7 @@ class CpuEffectsQmlTests(unittest.TestCase):
         self.native.assert_not_called()
         self.process.assert_not_called()
 
-    def load(self, kind="details"):
+    def load(self, kind="details", *, expand_cpu=True):
         self.component = QQmlComponent(self.engine)
         if kind == "details":
             self.component.loadUrl(QUrl.fromLocalFile(str(ROOT / "native/TopBarDetails.qml")))
@@ -105,6 +106,14 @@ Window { id:scene; width:336; height:96; visible:false; color:stats.theme==="dar
         self.assertIsNotNone(self.window, [error.toString() for error in self.component.errors()])
         self.window.show()
         QTest.qWait(35)
+        if kind == "details" and expand_cpu:
+            self.window.setProperty("showCpuDetails", True)
+            QTest.qWait(20)
+            host = self.find("topBarCpuCoreViewport")
+            scroll = self.find("topBarDetailScroll")
+            if host.isVisible():
+                scroll.setProperty("contentY", max(0, host.property("contentTop") - 4))
+                QTest.qWait(25)
 
     def items(self):
         result, pending = [], [self.window.contentItem()]
@@ -138,6 +147,37 @@ Window { id:scene; width:336; height:96; visible:false; color:stats.theme==="dar
         self.assertEqual(self.find("topBarCpuCoreGrid").property("count"), 8)
         self.assertIn("8", self.find("topBarCpuTopology").property("text"))
         self.assertEqual(self.find("topBarCpuRelatedValue_cpu_fan_rpm").property("text"), "—")
+
+    def test_secondary_processor_grid_starts_collapsed_and_creates_no_delegates(self):
+        self.state.details["cpu_context"] = cpu_context(128)
+        self.load(expand_cpu=False)
+        self.assertFalse(self.window.property("showCpuDetails"))
+        self.assertFalse(self.find("topBarCpuDetailsBody").isVisible())
+        cells = self.find("topBarCpuCellModel")
+        self.assertEqual(cells.property("count"), 0)
+        self.state.details["cpu_context"]["logical_rows"][0].update(numeric_value=75,value="75 %")
+        self.publish()
+        self.assertEqual(cells.property("count"), 0)
+        self.assertEqual(self.find("topBarCpuCoreGrid").property("count"), 0)
+        self.assertFalse(any(item.objectName().startswith("topBarCpuLogical_") for item in self.items()))
+        self.window.setProperty("showCpuDetails", True)
+        QTest.qWait(25)
+        host = self.find("topBarCpuCoreViewport")
+        self.find("topBarDetailScroll").setProperty("contentY", host.property("contentTop"))
+        QTest.qWait(25)
+        self.assertEqual(self.find("topBarCpuCoreGrid").property("count"), 128)
+        self.assertEqual(self.find("topBarCpuLogicalValue_0").property("text"), "75%")
+        self.window.setProperty("showCpuDetails", False)
+        changes = QSignalSpy(cells.dataChanged)
+        self.state.details["cpu_context"]["logical_rows"][0].update(numeric_value=40,value="40 %")
+        self.publish()
+        self.assertEqual(cells.property("count"), 128)
+        self.assertEqual(changes.count(), 0)
+        self.window.setProperty("showCpuDetails", True)
+        QTest.qWait(20)
+        self.find("topBarDetailScroll").setProperty("contentY", host.property("contentTop"))
+        QTest.qWait(20)
+        self.assertEqual(self.find("topBarCpuLogicalValue_0").property("text"), "40%")
 
     def test_fake_psutil_through_actual_sampler_controller_and_qml_preserves_real_channels(self):
         from tests.test_cpu_details import CpuDetailsTests
@@ -180,19 +220,23 @@ Window { id:scene; width:336; height:96; visible:false; color:stats.theme==="dar
         self.load()
         grid = self.find("topBarCpuCoreGrid")
         self.assertEqual(grid.property("count"), 1024)
-        self.assertLessEqual(grid.height(), 208)
+        scroll = self.find("topBarDetailScroll")
+        host = self.find("topBarCpuCoreViewport")
+        self.assertLessEqual(grid.height(), scroll.height())
+        self.assertFalse(grid.property("interactive"))
         self.assertLessEqual(self.window.height(), 640)
         instantiated = [item for item in self.items() if item.objectName().startswith("topBarCpuLogical_")]
-        self.assertLessEqual(len(instantiated), 80)
+        maximum_visible = (math.ceil(scroll.height() / grid.property("cellHeight")) + 2) * self.window.property("coreColumns")
+        self.assertLessEqual(len(instantiated), maximum_visible)
         self.assertIn("1024 / 2048", self.find("topBarCpuContextTruncated").property("text"))
-        grid.setProperty("contentY", grid.property("contentHeight") - grid.height())
+        scroll.setProperty("contentY", host.property("contentTop") + host.implicitHeight() - scroll.height())
         QTest.qWait(30)
         last = self.find("topBarCpuLogicalValue_1023")
-        position = grid.property("contentY")
+        position = scroll.property("contentY")
         self.state.details["cpu_context"]["logical_rows"][1023].update(numeric_value=75, value="75 %")
         self.publish()
         self.assertIs(self.find("topBarCpuLogicalValue_1023"), last)
-        self.assertAlmostEqual(grid.property("contentY"), position, delta=1)
+        self.assertAlmostEqual(scroll.property("contentY"), position, delta=1)
         self.assertEqual(last.property("text"), "75%")
 
     def test_baseline_and_stale_context_never_show_synthetic_zero(self):

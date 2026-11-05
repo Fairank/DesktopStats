@@ -1,39 +1,44 @@
 # Desktop Stats for Windows
 
-Small, configurable **native Windows desktop widgets**, with configurable materials and real hardware readings. Original application source under PolyForm Noncommercial 1.0.0; see ../LICENSING.md for scope and exceptions. Development candidate **0.25.0-preview.2** adds colored, smoothly state-driven local icon feedback while retaining detail inspection, device-scoped histories and saved-layout checks across fresh processes. Local history, previewable workspace scenes and guided source diagnostics remain available. The skin chooser retains complete miniature desktop scenes; menu-bar details are organized by hardware module. Network transfer, disk I/O and battery-side input/output offer paired inline or stacked readouts. Detail charts show real amplitude scales, peaks and available sample timing; paired channels share their scale. Quantity-specific vector icons distinguish fans, temperature, power, frequency and transfer direction. Desktop widgets, menu bar and preferences save independently; existing styles and precision layout remain available. The vector icon preserves the approved Niangao face. This is a preview, not a stable public release; successful native requests are not visual proof of blur.
+Native Windows top-bar monitoring and optional desktop widgets, with real
+hardware readings and local history. Development candidate
+**0.27.0-preview.1** organizes settings around one live top-bar
+preview, separate content/appearance tasks and contextual desktop controls.
+Desktop widgets, top bar and preferences save independently. Original application
+source is licensed under [PolyForm Noncommercial 1.0.0](../LICENSING.md).
 
-Windows settings and menu-bar details share an alpha-zero native raster host and transparent Qt Quick foreground. They now use the WUJI Workbench material sequence: DWM transient-window backdrop (type 3), full client-frame extension, verified type readback, black native background and transparent foreground. No accent-blur fallback is substituted for these two hosts. Their foreground remains Qt Quick rather than WUJI's WebView2. Windows 11 detail corners request the system's smooth rounded clipping; unsupported or failed requests retain the rounded-mask fallback. UI symbols use one pinned Lucide set, while the original Niangao brand artwork remains unchanged. Failed native setup or background painting selects a readable solid fallback.
-
-No browser, WebView, web server, Rainmeter, Python installation or cloud account is required by the packaged app. Qt Quick renders native windows with DPI-scaled typography and vectors.
-
-Menu-bar detail windows prepare their retained native material while hidden, then publish the matching foreground coating before showing. First-frame and hover activation adopt this setup without a delayed material switch. A failed initial request stays readable for that opening; explicit policy/compositor recovery keeps finite retries. Fullscreen mode blocks late hover or click events from reopening a detail panel. Closing hides a panel before attempting native cleanup, including cleanup failures.
+The packaged app needs no browser, Rainmeter, Python installation or cloud login.
+Qt Quick provides the interface; Windows supplies supported native background
+materials. Transparency, high contrast, remote sessions and display drivers can
+change their appearance. A failed or unsupported material request keeps a
+readable fallback. Offscreen screenshots and successful API requests alone do
+not verify desktop blur. The original Niangao artwork and Lucide symbols remain.
 
 ## 安装与使用
 
-0.26.0-preview.12 保留所选检测频率，每轮用原生批量查询更新网卡清单、连接状态和
-上下行计数。接口变动、断线、计数器回退会重新建立速率基线，不将断测补成零。
-关闭图表时，桌面组件和编辑预览不再传递无用的历史采样；当前读数继续刷新，重新
-开启图表会立即读取最新历史，编辑窗口缩放时仍保留原有预览冻结行为。
-
-0.26.0-preview.11 的软件排行改为 Windows 批量进程快照。CPU、内存、GPU 和专用显存
-分别显示占用前五的软件，同名进程合并，CPU 百分比按整机容量计算。仅在详情打开时
-约每秒采集，关闭即停止；首次 CPU 读数通过短间隔建立基线，GPU 则保留完整速率窗口。
-排行不写入历史、设置或导出。无法识别名称与权限不足分别说明，不填造占用。
-顶部栏详情在后台提前加载，首次打开无需重复编译；既有图标、动效及配置保持不变。
-
 1. 解压发布包，保留 DesktopStats.exe 与 _internal 在同一目录。双击运行，或用 Install.cmd 安装。升级前先应用或撤销待保存设置；旧版本如不能安全自动退出，请从托盘退出后重试。安装先准备新目录，再换入并保留原版备份；准备、替换或注册失败会尝试回滚并明确记录未完成的步骤，配置文件保持独立。
-2. 左侧保留 **桌面组件 / 顶部栏 / 历史记录 / 偏好** 四个主要入口。在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
+2. 左侧保留 **桌面组件 / 顶部栏 / 历史记录 / 偏好** 四个主要入口。侧栏的组件列表、**＋** 和场景操作只在桌面编辑页显示；在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
 3. 点击 **卡片 / 横条 / 竖条** 一键选择布局。**＋添加指标** 支持连续选择，点击“添加所选”才一次加入；取消或 Esc 不更改组件。每组件最多六项，同一模板可重复添加。
 4. 默认使用自适应排列，拖动指标调整顺序。需要手工编辑时展开 **精细排版**；开启 **自由摆放** 后，拖动有边缘/中心吸附和参考线，按住 Alt 临时关闭吸附。拖到另一项中央可交换位置，拖动选中项的小角可调整其区域。
 5. 按住 Ctrl 点击多选，再使用 **对齐与均分**。重叠或空间不足的操作不会部分提交；新增指标会保留手动摆放的旧位置，没有空位时向下扩展。移除指标不重铺剩余项。
 6. 在组件页直接修改精确宽高，或在 **精细排版** 画布拖动右下角调整真实宽高，内部自动布局随尺寸重排。**适合 / 100% / Ctrl＋滚轮** 只调整编辑显示比例；普通滚轮滚动内容。移动主窗口边缘时暂缓昂贵预览重绘，停下后恢复到最终尺寸，编辑输入和草稿保留。
-7. 使用画布底部 **撤销 / 重做** 或 Ctrl+Z / Ctrl+Shift+Z 回退草稿操作。连续标题输入或滑条调整合并为一步；拖动只在松手提交，Esc 可取消当前拖动。**应用到桌面 / 应用顶部栏 / 应用偏好** 只保存当前区域；**恢复** 也只撤销当前区域。其他区域的草稿和撤销记录保留。导入或恢复默认会明确进入“将替换全部设置”预览，点击 **应用全部设置** 才整体保存；取消可回到之前的草稿。
+7. 使用画布底部 **撤销 / 重做** 或 Ctrl+Z / Ctrl+Shift+Z 回退草稿操作。连续标题输入或滑条调整合并为一步；拖动只在松手提交，Esc 可取消当前拖动。**应用到桌面 / 应用顶部栏 / 应用偏好** 只保存当前区域；**放弃更改** 也只撤销当前区域。页底显示 **已保存** 或 **有未应用的更改**，没有更改时不会突出应用按钮。其他区域的草稿和撤销记录保留。导入或恢复默认会明确进入“将替换全部设置”预览，点击 **应用全部设置** 才整体保存；取消可回到之前的草稿。
 8. 指标清单保留完整名称和实时值，可点选、排序或移除；数据来源与单位、位置等较少使用的选项按需展开。调整皮肤、透明度或圆角时，现有桌面组件即时预览；点击固定底部的 **应用到桌面** 或 Ctrl+S 才保存。关闭整个设置窗口会恢复已保存外观，未保存草稿仍可重新打开继续修改。布局、设备、采样等其它设置在应用后生效。
 9. 在 **桌面组件 → 桌面默认设置** 调整组件的全局材质、大小、布局和磁吸；**偏好** 首屏设置语言、深浅外观、登录启动及检测间隔，**传感器与来源** 查看真实通道和来源。托盘“退出”完全关闭软件。
 
 全屏游戏或应用位于前台时，顶部栏会在被覆盖的屏幕上自动隐藏，关联的详情浮窗和提示也会关闭；切回该屏幕的普通桌面窗口后恢复。启动时即检查已运行的全屏窗口。避让期间保留采样与本地历史，隐藏栏的动效停止，不增加周期性的窗口检查。
 
-设置隐藏或最小化时，实时预览和额外传感器检查暂停，常规采样继续按已保存的间隔运行。最小化保留未确认分组、筛选与滚动位置；恢复窗口立即显示最近的读数。
+设置隐藏或最小化时，预览动效、实时预览投影、历史页查询和额外传感器检查暂停，常规采样继续按已保存的间隔运行。最小化保留未确认分组、筛选与滚动位置；恢复窗口立即显示最近的读数。只改标题、间距等外观内容不会触发额外硬件检查。
+
+### 顶部栏设置
+
+仅启用顶部栏、关闭全部桌面组件的已保存配置，首次打开设置会直接进入 **顶部栏**；
+从历史或组件入口打开时仍进入指定页面。正常切页保留本次会话的位置。
+
+顶部栏页共用一个实时预览。**内容与排列** 显示完整指标列表，可拖动排序、选择左右
+位置，并通过每项右侧按钮调整或删除；**外观** 集中选择整体设计、材质与透明度。
+切换任务不保存草稿；未确认的组合编辑需先确认，否则按取消处理。
+**显示顶部栏** 开关立即生效，布局更改须点击 **应用顶部栏** 保存。
 
 ### 顶部栏组合读数
 
@@ -43,7 +48,7 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 ### CPU 详情与可选动效
 
-悬停 CPU 组或 CPU 指标可查看逐 **逻辑处理器使用率**，编号从 CPU 0 开始。逻辑处理器可能包括同时多线程，不能当作独立物理核心；物理核心数另列。较多通道可在网格内滚动，最多展示 1024 项并明确显示截断数量。温度、频率、封装功率与 CPU 风扇按实际来源关联，不编造每核心温度或功耗。首轮采样或故障恢复时先建立基线，过期或失败读数显示原因，不以 0 代替。逐逻辑读数仅实时展示，不增加硬件轮询或持久历史。
+悬停 CPU 组或 CPU 指标可打开详情，先查看当前值、趋势与软件排行；点击 **逻辑处理器** 展开每核网格，编号从 CPU 0 开始。逻辑处理器可能包括同时多线程，不能当作独立物理核心；物理核心数另列。展开后随详情页滚动查看较多通道，最多展示 1024 项并明确显示截断数量。温度、频率、封装功率与 CPU 风扇按实际来源关联，不编造每核心温度或功耗。首轮采样或故障恢复时先建立基线，过期或失败读数显示原因，不以 0 代替。逐逻辑读数仅实时展示，不增加硬件轮询或持久历史。
 
 顶部栏指标设置中的 **图标动效** 默认关闭，可选择硬件联动、热感、流动、旋转或呼吸（按指标提供适用选项）。硬件联动按各硬件的真实通道分别呈现，组合成员及网络上下行也各自判断。动效仅为视觉反馈，不代表告警或额外传感器；缺测、零活动、窗口隐藏和系统减少动画时停止，切换温度或网速单位不会改变其强度。原有静态图标与显示样式保留。
 
@@ -53,11 +58,11 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 ### 顶部栏整体设计
 
-预览下方直接选择 **经典菜单栏 / 分组胶囊 / 精密仪表**。经典保留紧凑菜单栏轮廓；胶囊用轻底板区分每组；仪表以细分隔和量程刻线组织信息。三套设计共用当前真实指标和原有十种显示方式，不重置单位、设备或排序，也不关闭“跟随全局”材质。旧设置默认沿用经典设计，切换后点 **应用顶部栏** 保存，未应用的改动可撤销。
+在 **外观** 中选择 **经典菜单栏 / 分组胶囊 / 精密仪表**，上方同一个实时预览随选择更新。经典保留紧凑菜单栏轮廓；胶囊用轻底板区分每组；仪表以细分隔和量程刻线组织信息。三套设计共用当前真实指标和原有十种显示方式，不重置单位、设备或排序，也不关闭“跟随全局”材质。旧设置默认沿用经典设计，切换后点 **应用顶部栏** 保存，未应用的改动可撤销。
 
 实时顶部栏拖动时会显示与原项同宽的随行预览及落位线，读数更新不会移动原来的命中区域。松手到栏外，或按住左键时点击右键，可取消本次拖动；实时栏不抢走下方应用的键盘焦点。设置页中的拖动仍可按 Esc 取消。
 
-详情先展示当前读数和最近趋势，再展示逻辑处理器负载与相关数据。组合采用主项加双列排布；小屏可继续滚动查看来源和缺测原因。图表可用鼠标或方向键逐点查看实际样本，空缺不补成零。自动网卡及系统卷的历史按当前设备身份投影，设备尚未出现的时段保留缺口；“所有物理磁盘”仍表示总吞吐。
+详情先展示当前读数、最近趋势和按需软件排行；逻辑处理器负载可展开，相关数据与来源继续向下查看。组合采用主项加双列排布；小屏可继续滚动查看来源和缺测原因。图表可用鼠标或方向键逐点查看实际样本，空缺不补成零。自动网卡及系统卷的历史按当前设备身份投影，设备尚未出现的时段保留缺口；“所有物理磁盘”仍表示总吞吐。
 
 动效保留可辨认的硬件结构与固定轴心。CPU/GPU 的过载热感使用黄、橙、红色电弧，功耗使用独立的蓝白色电弧；独立温度计使用随实际温度变化的温柱和局部黄红热晕，不显示任何电流。接收与发送分别使用青蓝及紫色，风扇为青绿，负载内核为蓝紫。颜色、活动范围和节奏根据当前原始读数平滑变化，再受所选强度与速度调节；数字仍直接显示真实读数，不被动画插值。电弧是装饰性的状态表现，不代表测到了物理放电，不是校准转速或温度告警。旧配置仍默认静止；停用动画、缺测、零活动或隐藏时停止。
 
@@ -75,7 +80,7 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 在侧栏 **顶部栏** 设置系统屏幕边缘栏：可选择主屏、所有屏幕或指定屏幕，高度 28/32/40 个逻辑像素，最多 64 项指标。顶部固定开关直接启停；预览明确标出未启用状态。先选“紧凑数字 / 均衡 / 迷你图表”模板，再点单项编辑。检查器保留一个实际比例预览，点击 **显示方式** 在原页展开完整样式预览，选中即收起；位置、精度、单位和设备可直接调整，来源按需展开，错误原因直接显示。原有八种显示方式保留：标签、纯数值、图标、趋势、柱状、圆环、迷你图表、上下两行。网络速度、磁盘读写和电池侧充放电另外支持 **双向读数 / 单行双向**；两方向共用同一个所选设备和单位，缺读数显示“—”，真实零值保留。已知 0–100% 量程才推荐柱状和圆环，NVMe 已用寿命不冒充占用率。拖动列表或预览可放到左侧、右侧并排序，实时顶部栏也可直接拖排；存在未应用的顶部栏修改时，需先应用后再拖实时栏。趋势复用最近最多 40 次已有读数，不额外采集；无效读数留断点。此页应用只保存顶部栏，保留其他组件的草稿和撤销记录。
 
-**顶栏外观** 可跟随全局，或独立选择材质和 0–100% 连续底色透明度；改变底色不反复调用原生材质。详情与设置页按 WUJI 工作台的 DWM 磨砂流程准备，普通顶部横栏保留其现有 Windows 模糊路径。原生请求成功后才允许透明涂层，失败保留可读实色；API 成功仍不等于已确认系统模糊。Windows 透明效果关闭或高对比度启用时也恢复可读实色。
+**顶栏外观** 可跟随全局，或独立选择材质和 0–100% 连续底色透明度。跟随全局时直接拖动透明度，会自动改为当前栏的独立设置；实时预览后点击 **应用顶部栏** 保存。底色透明度与 Windows 背景模糊分别处理：透明底板不代表模糊已生效。系统不支持、关闭透明效果或启用高对比度时使用可读回退。
 
 它通过 Windows AppBar 为普通应用预留空间；全屏时让位，关闭后注销预留。停留约 350 毫秒显示来源和相关读数，点击可固定详情；放不下的完整指标统一收入 **+N**，不截单位、不缩字体。此模式默认关闭，不迁移已有桌面条。原来的 **＋ → 顶部状态条** 与“横条”仍是普通桌面组件，不预留系统工作区域。真实 Shell、多屏和第三方窗口兼容性仍需要候选版实机验收。
 
@@ -103,7 +108,7 @@ Menu-bar detail windows prepare their retained native material while hidden, the
 
 设置界面使用组件侧栏、紧凑编辑区和尺寸预览，浅色采用中性灰白，深色采用石墨色。切换主栏目时，共享的玻璃选中底板用 200 毫秒平滑移动；Windows 关闭动画时直接到位。正文与控件字号、文字对比度和间距统一调整；预设布局收进选择器，样式与设备选项分组显示。窄窗口保留滚动编辑与实际大小预览入口。
 
-Per-user installation: %LOCALAPPDATA%\Programs\DesktopStats. No drivers or administrator rights are installed. Desktop and Start menu shortcuts are included. Start at login is optional and off by default. Uninstall via Windows Settings or Uninstall.cmd; preferences are retained for a reinstall.
+Per-user installation: %LOCALAPPDATA%\Programs\DesktopStats. The ordinary app runs without administrator rights and installs no drivers. The optional ASUS temperature bridge requires a separately authorized administrator session. Desktop and Start menu shortcuts are included. Start at login is optional and off by default. Bridge recovery is a separate opt-in preference that still requires authorization after the app starts. Uninstall via Windows Settings or Uninstall.cmd; preferences are retained for a reinstall.
 
 ## Available readings
 
@@ -141,6 +146,9 @@ this is client evidence, not an ASUS specification. Only the documented sensor
 ID plus exact name is accepted; arbitrary motherboard/ACPI temperatures are not
 substituted. The app does not copy that client's monitoring-start or refresh code.
 
+This is a machine-specific adaptation, not a universal CPU temperature
+provider. A PC without the verified ASUS service/sensor remains unsupported.
+
 An ordinary process cannot activate this machine's ASUS COM interface. Therefore
 an explicitly authorized **separate elevated bridge** reads the cache; the main
 Desktop Stats app stays unelevated. The bridge checks the existing `asComSvc`
@@ -159,10 +167,18 @@ The current user receives read access only; the mapping includes the user SID
 and owning app PID. The bridge verifies the installed executable path, same user
 and process creation time, then exits when that app process exits. No polling
 files, HTTP port or arbitrary command interface is used. Launching a second
-bridge for the same app is refused. Reopening the app requires a fresh explicit
-bridge launch; neither the application nor the bridge requests elevation itself.
+bridge for the same app is refused. The bridge has no startup entry and cannot
+approve its own elevation.
 
-To enable it for one running application session, run this PowerShell code and
+In **Preferences**, **Restore CPU temperature at startup** is disabled by default.
+Enable it only on a supported machine with the existing ASUS service. Each app
+session then offers one Windows administrator authorization prompt; fullscreen
+games/apps defer it until returning to the desktop. Canceling suppresses further
+prompts for that session. Accepting starts the read-only bridge for that app
+process; it still exits with the app. This option does not install a general CPU
+temperature driver or start a missing ASUS service.
+
+Alternatively, to enable it for one running application session, run this PowerShell code and
 approve Windows' UAC prompt:
 
 ~~~powershell
@@ -229,8 +245,8 @@ Sampling request intervals accept 0.01–5 seconds in Sensors, with up to two de
 
 ## Glass, layout and languages
 
-- Settings request Desktop Acrylic on their separate native background host after the transparent Quick child submits a current frame. Host and child lifetimes are guarded independently. Windows may adapt Acrylic when inactive, as in WUJI. First-show, activation and restore appearance remain visual acceptance gates. Desktop/screen capture is not used to fake glass.
-- Windows transparency/high contrast, Remote Desktop and drivers may affect the material. When Acrylic is unavailable, glass skins use a legible solid fallback; minimal digits keep their transparent background.
+- Windows provides the native background material behind the Qt Quick interface. Appearance depends on system support and policy; first show, activation and restoration need on-device verification. Desktop/screen capture is not used to simulate glass.
+- Windows transparency/high contrast, Remote Desktop and drivers may affect the material. Unsupported or failed requests retain a legible fallback; minimal digits keep their transparent background.
 - Light/dark modes; six shared skins with global or per-widget choices; optional titles and global or per-widget sizing.
 - Independent width/height and five internal layout modes; responsive strips flow actual-sized readings instead of stretching a fixed square canvas. Manual positions are normalized and validated against overlap and bounds.
 - Desktop widgets default to above wallpaper and below ordinary windows. Each standalone strip/widget can optionally remain on top and target a specific monitor. The settings host has accessible minimize, maximize and close controls, native drag/resize requests and close-to-tray behavior; native snapping and mixed-DPI resize still require Windows acceptance.
@@ -256,9 +272,14 @@ shared allocations, so summing the software rows does not give device totals.
 These definitions follow [psutil](https://psutil.readthedocs.io/stable/#psutil.Process.memory_info)
 and [Microsoft's GPU accounting](https://devblogs.microsoft.com/directx/gpus-in-the-task-manager/).
 
-The separate process worker samples at most once every two seconds while a
-hardware detail is open. Hidden/closed details release demand and native GPU
-queries. Names are transient and excluded from history, settings and diagnostic
+The separate process worker normally updates about once per second while
+software activity is needed. In top-bar details the ranking area must also be
+in view; scrolling it away, closing/hiding the detail or minimizing its native
+host releases demand. Desktop-widget details retain their visible-card demand.
+CPU needs an initial rate baseline; unavailable or warming-up readings explain
+their state. Source notes and technical details are under Sources and limitations.
+
+Names are transient and excluded from history, settings and diagnostic
 exports; command lines, accounts and executable paths are not requested. Access
 restrictions produce a partial-coverage notice. GPU mapping uses DXGI LUIDs and
 physical locations, with explicit errors for ambiguous or unavailable sources.
@@ -300,7 +321,10 @@ $env:DESKTOP_STATS_DATA = Join-Path $PWD '.qa-profile'
 
 The customization verifier forces offscreen rendering, isolated private settings, synthetic local mouse events, stubbed hardware/composition, and no tray. It does not move the OS mouse, touch the system clipboard, activate windows, or change the installed app. The legacy native/upgrade/scroll tools refuse to open windows unless explicitly passed `--allow-visible-desktop`; run them only while the user is idle. Offscreen captures exclude Windows' composited backdrop and cannot verify actual desktop blur. Physical sensor verification covers Windows 11 x64 at 175% DPI on Ryzen 7940HS / RTX 4060 Laptop; it does not establish universal hardware support.
 
-The main settings and detail raster hosts use the guarded WUJI-style DWM type-3/full-frame/readback path. Existing layered desktop widgets and the top strip keep their separate compatibility backend. The app keeps explicit fallback diagnostics and respects high contrast and system transparency settings. No further native visual test is claimed for this candidate; the user requested implementation directly from the working WUJI source.
+Native background materials are prepared separately from the Qt Quick
+foreground. Keep fallback diagnostics and respect high contrast and system
+transparency settings. Verify the packaged app on Windows after material changes;
+offscreen captures and API success do not establish the visible backdrop result.
 
 The settings window coalesces native surface, visibility, theme and composition events before restoring its material. A transient failure has at most two delayed retries; hidden/minimized windows pause recovery. Native request metadata and the exact transparency policy cause are available through the read-only `--status` command, without screenshots. Explicit high contrast or transparency-off settings keep the readable fallback. Recovery does not spoof focus or override system accessibility settings.
 

@@ -1,7 +1,8 @@
 """Read the fixed ASUS CPU channel from an explicitly launched local bridge.
 
-The ordinary app never activates privileged COM, requests elevation or starts a
-helper. It reads 64 bytes of shared memory, at most once per two seconds. The
+This reader never activates privileged COM or starts a helper. The separate,
+opt-in startup coordinator can request consent once per installed app session.
+The reader reads 64 bytes of shared memory, at most once per two seconds. The
 bridge retains one service connection and a verified CPU index, obtains a new
 sensor view on each read, and stops with its bound application process.
 This is the ASUS CPU channel, not a claim about a package/core temperature.
@@ -159,7 +160,7 @@ class AsusCpuTemperature:
     def status(self, requested):
         detail = {
             "idle": "仅按需读取已获授权的 CPU 温度桥接。",
-            "missing": "CPU 温度桥接尚未运行；程序不会自动请求管理员权限。",
+            "missing": "ASUS CPU 温度桥接尚未运行；可在偏好中开启启动恢复。",
             "ready": "每两秒读取 ASUS CPU 缓存；时间为成功 getter 的观察时间。",
             "stale": "CPU 温度快照已过期或时钟改变，已清除读数。",
             "unavailable": "ASUS CPU 温度接口本轮未提供有效读数。",

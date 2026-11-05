@@ -9,16 +9,9 @@ Rectangle {
     radius: tone === "window" || tone === "rail" ? 0 : tone === "field" ? ui.controlRadius : 10
     border.color: focused ? ui.accent : tone === "field" ? ui.controlBorder : ui.line
     border.width: tone === "window" || tone === "rail" ? 0 : 1
-    gradient: Gradient {
-        GradientStop {
-            position: 0
-            color: root.tone === "window" ? ui.windowTop : root.tone === "rail" ? ui.railTop : root.tone === "field" ? ui.fieldTop : root.tone === "popup" ? ui.popupTop : root.tone === "card" ? ui.cardTop : ui.panelTop
-        }
-        GradientStop {
-            position: 1
-            color: root.tone === "window" ? ui.windowBottom : root.tone === "rail" ? ui.railBottom : root.tone === "field" ? ui.fieldBottom : root.tone === "popup" ? ui.popupBottom : root.tone === "card" ? ui.cardBottom : ui.panelBottom
-        }
-    }
+    color: tone === "window" ? ui.windowTop : tone === "rail" ? ui.railTop
+        : tone === "field" ? ui.fieldTop : tone === "popup" ? ui.popupTop
+        : tone === "card" ? ui.cardTop : ui.panelTop
     Rectangle {
         anchors.fill: parent; radius: root.radius
         color: root.highlighted ? ui.hover : "transparent"

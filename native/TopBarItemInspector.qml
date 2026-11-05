@@ -171,7 +171,7 @@ Item {
             x: Math.max(0,(sampleViewport.availableWidth-implicitWidth)/2)
             y: Math.max(0,(sampleViewport.availableHeight-implicitHeight)/2)
             row: Object.assign({},root.stylePreviewRow,{style:sampleViewport.sampleStyle})
-            motionEnabled:stats.motionEnabled
+            motionEnabled:root.readingsActive && stats.motionEnabled
             design:root.design
             ink: ui.ink; muted: ui.muted; fontFamily: ui.fontFamily
             width: implicitWidth; height: implicitHeight

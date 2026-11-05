@@ -555,5 +555,111 @@ Window {visible:false;width:900;height:500
         self.assertEqual(self.card().property("history"), [])
 
 
+class PreviewInspectionDemandTests(unittest.TestCase):
+    """Only readings missing from the saved runtime warm discovery for previews."""
+
+    def setUp(self):
+        self.configuration("cpu_usage", "cpu_temp")
+        for name in ("save", "set_autostart"):
+            guard = patch.object(controls, name, side_effect=AssertionError("No persistence"))
+            guard.start()
+            self.addCleanup(guard.stop)
+        guard = patch.object(controls.sensors, "Sampler", side_effect=AssertionError("No hardware"))
+        guard.start()
+        self.addCleanup(guard.stop)
+
+    def configuration(self, *metrics):
+        config = copy.deepcopy(DEFAULT)
+        config["visible"] = False
+        for prefs in config["widgets"].values():
+            prefs["enabled"] = False
+        config["top_bar"].update(enabled=bool(metrics), items=[
+            dict(id=f"b_test_{index}", metric=metric, prefs={})
+            for index, metric in enumerate(metrics)
+        ])
+        with patch.object(controls, "load", return_value=validate(config)):
+            self.ui = controls.Controller()
+
+    @staticmethod
+    def binding(identifier):
+        return dict(provider=PROVIDER, sensor_id=identifier, sensor_type="Temperature",
+                    name="Synthetic temperature", hardware_name="Synthetic board")
+
+    def test_cosmetic_edits_and_preferences_need_no_extra_hardware(self):
+        self.ui.changeWidget("cpu", "title", "Pending title")
+        self.ui.change("theme", "dark")
+        self.ui.changeTopBar("spacing", 12)
+        before = copy.deepcopy((self.ui.saved, self.ui.draft, self.ui._undo_drafts))
+        for scope, key in (("desktop", "cpu"), ("topbar", ""), ("preferences", "cpu"),
+                           ("history", "gpu"), ("unknown", ""), ("desktop", "missing")):
+            self.assertFalse(self.ui.previewNeedsInspection(scope, key), (scope, key))
+        self.assertEqual((self.ui.saved, self.ui.draft, self.ui._undo_drafts), before)
+
+    def test_disabled_selected_preview_adds_only_its_own_demand(self):
+        self.assertTrue(self.ui.previewNeedsInspection("desktop", "gpu"))
+        self.assertFalse(self.ui.saved["widgets"]["gpu"]["enabled"])
+        self.assertFalse(self.ui.draft["widgets"]["gpu"]["enabled"])
+        self.assertFalse(self.ui.saved["visible"])
+        self.ui.changeWidget("gpu", "title", "Offscreen edit")
+        self.ui.changeWidget("power", "content", ["storage_temp"])
+        self.assertFalse(self.ui.previewNeedsInspection("desktop", "cpu"))
+        self.assertFalse(self.ui.previewNeedsInspection("topbar", ""))
+
+    def test_cpu_temperature_is_explicit_even_when_cpu_family_is_already_active(self):
+        self.configuration("cpu_usage")
+        self.assertTrue(self.ui.previewNeedsInspection("desktop", "cpu"))
+        self.ui._draft["widgets"]["cpu"].update(primary="frequency", secondary="usage")
+        self.assertFalse(self.ui.previewNeedsInspection("desktop", "cpu"))
+        self.ui._draft["top_bar"]["items"].append(
+            dict(id="b_extra_temperature", metric="cpu_temp", prefs={}))
+        self.assertTrue(self.ui.previewNeedsInspection("topbar", ""))
+
+    def test_disabled_bar_still_previews_its_items_without_becoming_enabled(self):
+        self.configuration("cpu_usage")
+        self.ui._draft["top_bar"].update(enabled=False, items=[
+            dict(id="b_gpu_preview", metric="gpu_usage", prefs={})])
+        self.assertTrue(self.ui.previewNeedsInspection("topbar", ""))
+        self.assertFalse(self.ui.draft["top_bar"]["enabled"])
+        self.ui._draft["widgets"]["cpu"].update(primary="usage", secondary="frequency")
+        self.assertFalse(self.ui.previewNeedsInspection("desktop", "cpu"))
+
+    def test_capacity_preview_adds_volumes_without_changing_throughput_demand(self):
+        self.configuration("disk_read")
+        self.ui._draft["widgets"]["cpu"]["content"] = ["disk_read"]
+        self.assertFalse(self.ui.previewNeedsInspection("desktop", "cpu"))
+        self.ui._draft["widgets"]["cpu"]["content"] = ["disk_free_gb"]
+        self.assertTrue(self.ui.previewNeedsInspection("desktop", "cpu"))
+
+    def test_new_external_binding_keeps_fresh_catalog_discovery(self):
+        self.configuration("cpu_usage")
+        old = self.binding("/synthetic/old")
+        self.ui._saved["top_bar"]["items"][0]["metric"] = "external_1"
+        self.ui._saved["top_bar"]["items"][0]["prefs"]["sensor_bindings"] = {"external_1": old}
+        prefs = self.ui._draft["widgets"]["cpu"]
+        prefs.update(content=["external_1"], sensor_bindings={"external_1": dict(old)})
+        self.assertFalse(self.ui.previewNeedsInspection("desktop", "cpu"))
+        prefs["sensor_bindings"]["external_1"] = self.binding("/synthetic/new")
+        before = copy.deepcopy((self.ui.saved, self.ui.draft))
+        self.assertTrue(self.ui.previewNeedsInspection("desktop", "cpu"))
+        self.assertEqual((self.ui.saved, self.ui.draft), before)
+        self.assertEqual(self.ui._data, {})
+
+    def test_dormant_saved_binding_does_not_count_as_active_runtime_demand(self):
+        self.configuration("cpu_usage")
+        active = self.binding("/synthetic/active")
+        dormant = self.binding("/synthetic/dormant")
+        item = self.ui._saved["top_bar"]["items"][0]
+        item.update(metric="external_1", prefs={"sensor_bindings": {"external_1": active}})
+        self.ui._saved["widgets"]["cpu"].update(content=["external_1"],
+            sensor_bindings={"external_1": dormant}, enabled=False)
+        self.ui._draft["widgets"]["cpu"] = copy.deepcopy(self.ui._saved["widgets"]["cpu"])
+        self.assertTrue(self.ui.previewNeedsInspection("desktop", "cpu"))
+        self.assertFalse(self.ui.saved["widgets"]["cpu"]["enabled"])
+        self.ui._saved["widgets"]["cpu"]["enabled"] = True
+        self.assertTrue(self.ui.previewNeedsInspection("desktop", "cpu"))  # Desktop still hidden.
+        self.ui._saved["visible"] = True
+        self.assertFalse(self.ui.previewNeedsInspection("desktop", "cpu"))
+
+
 if __name__ == "__main__":
     unittest.main()

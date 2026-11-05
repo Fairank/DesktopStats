@@ -274,9 +274,10 @@ class NativeHistorySettingsRoutingTests(unittest.TestCase):
         self.settings.showNormal.assert_not_called()
         self.runtime.controller.inspect.assert_not_called()
 
-    def test_inspect_callback_shutdown_prevents_all_window_presentation(self):
-        self.runtime.controller.inspect.side_effect = lambda: setattr(self.runtime, "shutting_down", True)
-        Runtime.show_settings(self.runtime, "__history__:h_synthetic")
+    def test_page_selection_callback_shutdown_prevents_all_window_presentation(self):
+        self.settings.setProperty.side_effect = lambda *_: setattr(self.runtime, "shutting_down", True)
+        Runtime.show_settings(self.runtime, "__history__")
+        self.settings.setProperty.assert_called_once_with("page", 4)
         self.settings.showNormal.assert_not_called()
         self.runtime.compose.assert_not_called()
         self.settings.raise_.assert_not_called()
@@ -295,30 +296,36 @@ class NativeHistorySettingsRoutingTests(unittest.TestCase):
         self.settings.raise_.assert_not_called()
         self.settings.requestActivate.assert_not_called()
 
-    def test_inspect_show_compose_callbacks_cannot_present_a_replaced_host_generation(self):
-        for stage in ("inspect", "show", "compose"):
+    def test_selection_show_compose_callbacks_cannot_present_a_replaced_host_generation(self):
+        for stage in ("select", "show", "compose"):
             with self.subTest(stage=stage):
                 runtime, settings = self.make_runtime()
-                callback = {"inspect": runtime.controller.inspect,
+                callback = {"select": settings.selectHistory,
                             "show": settings.showNormal, "compose": runtime.compose}[stage]
                 callback.side_effect = lambda *_: setattr(runtime, "settings_host", Mock())
                 Runtime.show_settings(runtime, "__history__:h_synthetic")
                 settings.raise_.assert_not_called()
                 settings.requestActivate.assert_not_called()
-                if stage == "inspect":
+                callback.assert_called_once()
+                if stage == "select":
                     settings.showNormal.assert_not_called()
-                if stage in ("inspect", "show"):
+                if stage in ("select", "show"):
                     runtime.compose.assert_not_called()
 
-    def test_inspect_show_compose_callbacks_cannot_present_replaced_settings_content(self):
-        for stage in ("inspect", "show", "compose"):
+    def test_selection_show_compose_callbacks_cannot_present_replaced_settings_content(self):
+        for stage in ("select", "show", "compose"):
             with self.subTest(stage=stage):
                 runtime, settings = self.make_runtime()
                 replacement = Mock()
-                callback = {"inspect": runtime.controller.inspect,
+                callback = {"select": settings.selectHistory,
                             "show": settings.showNormal, "compose": runtime.compose}[stage]
                 callback.side_effect = lambda *_: setattr(runtime, "settings", replacement)
                 Runtime.show_settings(runtime, "__history__:h_synthetic")
+                callback.assert_called_once()
+                if stage == "select":
+                    settings.showNormal.assert_not_called()
+                if stage in ("select", "show"):
+                    runtime.compose.assert_not_called()
                 settings.raise_.assert_not_called()
                 settings.requestActivate.assert_not_called()
                 replacement.showNormal.assert_not_called()

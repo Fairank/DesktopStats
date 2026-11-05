@@ -24,8 +24,7 @@ Button {
         opacity: control.enabled ? 1 : .45
         GlassSurface {
             anchors.fill: parent; tone: "field"; radius: ui.controlRadius
-            visible: !control.accent && !control.checked
-            opacity: control.quiet && !control.hovered && !control.down ? .72 : 1
+            visible: !control.accent && !control.checked && !control.quiet
             highlighted: control.hovered || control.down
         }
         Rectangle {

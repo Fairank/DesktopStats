@@ -393,6 +393,28 @@ class TopBarRuntimeTests(unittest.TestCase):
         self.assertEqual(self.controller.status["state"], "unavailable")
         self.assertFalse(other.hosts)
 
+    def test_detail_client_limits_fit_below_bar_on_negative_high_dpi_work_area(self):
+        self.a.physical = PixelRect(-500, -300, 100, 140)
+        self.a.dpi = 192
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        self.assertEqual(host.state.panelMaximumWidth, 292)
+        self.assertEqual(host.state.panelMaximumHeight, 158)
+        notifications = []
+        host.state.changed.connect(lambda: notifications.append(
+            (host.state.panelMaximumWidth, host.state.panelMaximumHeight)))
+        host.binding.work = PixelRect(-500, -268, 1500, 1600)
+        self.manager._layout(host)
+        self.assertEqual(notifications[-1], (368, 680))
+
+    def test_detail_limits_remain_positive_when_work_area_leaves_no_room_below_bar(self):
+        self.manager.apply(config())
+        host = self.manager.hosts["DISPLAY1"]
+        host.binding.work = PixelRect(-100, -30, -70, 2)
+        self.manager._layout(host)
+        self.assertEqual(host.state.panelMaximumWidth, 14)
+        self.assertEqual(host.state.panelMaximumHeight, 1)
+
     def test_transparency_preview_repaints_all_existing_bands_without_models_or_placement(self):
         value = config(mode="all")
         self.manager.apply(value)
@@ -1687,6 +1709,22 @@ class AdapterBoundaryTests(unittest.TestCase):
             self.adapter.release(binding)
         self.assertEqual(self.properties, {})
         self.assertEqual(self.released, [binding.token])
+
+    def test_detail_placement_uses_dpi_clamped_client_and_stays_below_its_anchor(self):
+        calls = []
+        self.adapter._functions["position"] = lambda *args: calls.append(args) or 1
+        work = PixelRect(-960, -200, -320, 400)
+        anchor = PixelRect(-600, -200, -500, -136)
+        self.window.width = lambda: 312
+        self.window.height = lambda: 258
+        binding = self.adapter.prepare(self.window, self.screen)
+        self.adapter.place_panel(binding, anchor, work, 192)
+        _hwnd, _order, left, top, width, height, flags = calls[-1]
+        self.assertGreaterEqual(left, work.left + 8)
+        self.assertLessEqual(left + width, work.right - 8)
+        self.assertGreaterEqual(top, anchor.bottom + 12)
+        self.assertLessEqual(top + height, work.bottom - 8)
+        self.assertEqual(flags, 0x0010)
 
     def test_screen_identity_uses_qt_handle_and_native_device_not_friendly_name(self):
         with (

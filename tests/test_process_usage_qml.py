@@ -210,6 +210,88 @@ metric:"cpu_usage"; hardwareName:"Synthetic CPU" }
         self.assertTrue(self.monitors[-1].targets)
         self.assertNotEqual(self.card.property("lease"), previous)
 
+    def test_process_section_outside_viewport_releases_lease_without_collapsing_geometry(self):
+        from tests.test_top_bar_cpu_effects_qml import cpu_context
+
+        self.load(top_bar=True)
+        self.state.details["cpu_context"] = cpu_context(128)
+        self.state.changed.emit()
+        self.window.setProperty("showCpuDetails", True)
+        self.window.show()
+        self.publish()
+        slot, scroll = self.find("topBarProcessViewport"), self.find("topBarDetailScroll")
+        previous = self.card.property("lease")
+        height = slot.height()
+        scroll.setProperty("contentY", slot.y() + height + 12)
+        QTest.qWait(25)
+        self.assertEqual(self.card.property("lease"), "")
+        self.assertEqual(self.monitors[-1].targets, {})
+        self.assertAlmostEqual(slot.height(), height, delta=1)
+        generation = self.monitors[-1].generation
+        QTest.qWait(40)
+        self.assertEqual(self.monitors[-1].generation, generation)
+        scroll.setProperty("contentY", slot.y())
+        QTest.qWait(20)
+        current = self.card.property("lease")
+        self.assertTrue(current)
+        self.assertNotEqual(current, previous)
+        self.assertEqual(self.card.property("displayedCount"), 0)
+        self.assertEqual(self.ui.processUsage(current)["state"], "warming_up")
+
+    def test_empty_unrequested_section_keeps_a_reachable_request_region(self):
+        self.load(top_bar=True)
+        self.window.setHeight(200)
+        self.window.show()
+        QTest.qWait(25)
+        slot, scroll = self.find("topBarProcessViewport"), self.find("topBarDetailScroll")
+        self.assertGreater(slot.height(), 0)
+        self.assertEqual(self.card.property("lease"), "")
+        self.assertFalse(any(m.targets for m in self.monitors))
+        scroll.setProperty("contentY", min(slot.y(), scroll.property("contentHeight")-scroll.height()))
+        QTest.qWait(20)
+        self.assertTrue(self.card.property("lease"))
+        self.publish()
+        self.assertEqual(self.card.property("displayedCount"), 5)
+
+    def test_unattributable_network_is_one_limitation_without_a_process_query(self):
+        self.load(top_bar=True)
+        self.state.details.update(metric="net_download", family="network", hardware_name="Synthetic NIC")
+        self.state.changed.emit()
+        self.window.show()
+        QTest.qWait(25)
+        self.assertEqual(self.monitors, [])
+        self.assertTrue(self.card.property("unsupported"))
+        self.assertEqual(self.card.property("displayedCount"), 0)
+        context = self.ui.processUsage(self.card.property("lease"))
+        self.assertEqual(context["reason_code"], "not_attributable")
+        self.assertEqual(context["coverage"], "")
+        self.assertIn("网络事件跟踪", self.find("processUsageReason").property("text"))
+
+    def test_quick_detail_scene_tracks_runtime_work_area_caps_without_native_clipping(self):
+        from top_bar_runtime import BarViewState
+
+        self.load(top_bar=True)
+        manager = QObject()
+        manager.controller = self.ui
+        manager.enter_panel = lambda: None
+        manager.leave = lambda: None
+        state = BarViewState(manager, "synthetic-small-work-area")
+        state._config = copy.deepcopy(self.ui._saved)
+        state._detail = copy.deepcopy(self.state.details)
+        state._panel_width, state._panel_maximum = 232, 160
+        self.window.setProperty("barState", state)
+        self.window.show()
+        QTest.qWait(25)
+        self.assertEqual(self.window.width(), 232)
+        self.assertEqual(self.window.height(), 160)
+        state._panel_width, state._panel_maximum = 368, 680
+        state.changed.emit()
+        QTest.qWait(25)
+        self.assertEqual(self.window.width(), 368)
+        self.assertLessEqual(self.window.height(), 680)
+        self.window.hide()
+        self.window.setProperty("barState", self.state)
+
     def test_foreground_game_guard_closes_actual_qml_detail_and_releases_software_demand(self):
         from tests import test_top_bar_runtime as bar_fixture
 

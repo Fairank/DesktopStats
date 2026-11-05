@@ -258,5 +258,72 @@ class ConfigurationScopeTests(unittest.TestCase):
         self.assertEqual(draft["widget"]["skin"], "glass")
 
 
+class UnchangedApplyTests(unittest.TestCase):
+    def setUp(self):
+        with patch.object(controls, "load", return_value=copy.deepcopy(DEFAULT)):
+            self.ui = controls.Controller()
+        self.applied = []
+        self.ui.applyRequested.connect(lambda rearrange: self.applied.append(rearrange))
+        self.ui.topBarApplyRequested.connect(lambda: self.applied.append("topbar"))
+
+    def test_unchanged_apply_does_not_save_revalidate_layout_or_reapply_windows(self):
+        with (
+            patch.object(controls, "save") as save,
+            patch.object(controls, "set_autostart") as autostart,
+            patch.object(self.ui, "layout_error", side_effect=AssertionError("No layout work")),
+        ):
+            self.assertTrue(self.ui._commit())
+            self.assertTrue(self.ui.applyDesktop())
+            self.assertTrue(self.ui.applyPreferences())
+            self.assertTrue(self.ui.applyTopBar())
+        save.assert_not_called()
+        autostart.assert_not_called()
+        self.assertEqual(self.applied, [])
+
+    def test_scoped_noop_keeps_other_pending_drafts_and_undo(self):
+        for method, pending in (("applyDesktop", "preferences"),
+                                ("applyPreferences", "desktop"), ("applyTopBar", "desktop")):
+            with self.subTest(method=method):
+                self.setUp()
+                if pending == "preferences":
+                    self.ui.change("refresh", .75)
+                else:
+                    self.ui.changeWidget("cpu", "title", "Keep this draft")
+                before = copy.deepcopy((self.ui.saved, self.ui.draft, self.ui._undo_drafts,
+                                        self.ui._redo_drafts))
+                with patch.object(controls, "save") as save:
+                    self.assertTrue(getattr(self.ui, method)())
+                save.assert_not_called()
+                self.assertEqual((self.ui.saved, self.ui.draft, self.ui._undo_drafts,
+                                  self.ui._redo_drafts), before)
+                self.assertEqual(self.applied, [])
+
+    def test_explicit_rearrangement_still_runs_for_equal_configuration(self):
+        with patch.object(controls, "save") as save, patch.object(self.ui, "layout_error", return_value=""):
+            self.assertTrue(self.ui.rearrangeDesktop())
+        save.assert_called_once_with(self.ui.saved)
+        self.assertEqual(self.applied, [True])
+
+    def test_equal_global_replacement_still_finishes_the_explicit_preview(self):
+        self.ui.changeWidget("cpu", "title", "Unapplied draft")
+        self.assertTrue(self.ui._stage_replacement(copy.deepcopy(self.ui.saved)))
+        self.assertTrue(self.ui.replacementPending)
+        self.assertFalse(self.ui.dirty)
+        with patch.object(controls, "save") as save, patch.object(self.ui, "layout_error", return_value=""):
+            self.assertTrue(self.ui.applyReplacement())
+        save.assert_called_once()
+        self.assertFalse(self.ui.replacementPending)
+        self.assertEqual(self.applied, [False])
+
+    def test_explicit_live_toggle_still_synchronizes_a_different_pending_toggle(self):
+        self.ui.changeTopBar("enabled", True)
+        self.assertFalse(self.ui.saved["top_bar"]["enabled"])
+        with patch.object(controls, "save") as save:
+            self.assertTrue(self.ui.setTopBarEnabled(False))
+        save.assert_called_once()
+        self.assertFalse(self.ui.draft["top_bar"]["enabled"])
+        self.assertEqual(self.applied, ["topbar"])
+
+
 if __name__ == "__main__":
     unittest.main()

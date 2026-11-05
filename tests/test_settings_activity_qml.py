@@ -11,7 +11,7 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("QT_QUICK_BACKEND", "software")
 
-from PySide6.QtCore import QObject, Property, QCoreApplication, QEvent, QUrl, Slot
+from PySide6.QtCore import QObject, Property, QCoreApplication, QEvent, Qt, QUrl, Slot
 from PySide6.QtGui import QFontDatabase
 from PySide6.QtQml import (
     QJSValue, QQmlComponent, QQmlEngine, QQmlExpression, qmlContext, qmlRegisterType,
@@ -59,6 +59,11 @@ class CountedController(controls.Controller):
     @Slot()
     def inspect(self):
         self.calls["inspect"] += 1
+
+    @Slot(str, str, result=bool)
+    def previewNeedsInspection(self, scope, key):
+        self.calls["previewDemand"] += 1
+        return super().previewNeedsInspection(scope, key)
 
     def sensor_rows(self, prefs=None, *, discovered=True):
         self.calls["sensor_rows"] += 1
@@ -217,6 +222,65 @@ class SettingsActivityTests(unittest.TestCase):
         QCoreApplication.processEvents()
         self.find("widgetWorkspaceScroll").property("contentItem").setProperty("contentY", 35)
 
+    def test_only_current_preview_hardware_changes_start_inspection(self):
+        self.prepare_editor()
+        self.assertFalse(self.window.property("previewInspectionNeeded"))
+        self.assertFalse(self.find("settingsInspectTimer").property("running"))
+        self.ui.calls.clear()
+        self.deliver(80)
+        self.assertEqual(self.ui.calls["previewDemand"], 0)
+        self.assertEqual(self.ui.calls["inspect"], 0)
+        self.ui.changeWidget("cpu", "content", ["storage_temp"])
+        QCoreApplication.processEvents()
+        self.assertTrue(self.window.property("previewInspectionNeeded"))
+        self.assertTrue(self.find("settingsInspectTimer").property("running"))
+        QTest.qWait(20)
+        self.assertGreater(self.ui.calls["inspect"], 0)
+        self.page(1)
+        self.assertFalse(self.window.property("previewInspectionNeeded"))
+        self.assertFalse(self.find("settingsInspectTimer").property("running"))
+
+    def test_inspection_demand_refreshes_on_editor_events_not_sensor_delivery(self):
+        self.page(3)
+        self.ui.calls.clear()
+        for spacing in (14, 15, 16):
+            self.ui.changeTopBar("spacing", spacing)
+        QCoreApplication.processEvents()
+        self.assertEqual(self.ui.calls["previewDemand"], 1)
+        self.assertEqual(self.ui.calls["inspect"], 0)
+        self.ui.calls.clear()
+        for usage in (40, 60, 80):
+            self.deliver(usage)
+        self.assertEqual(self.ui.calls["previewDemand"], 0)
+        self.assertEqual(self.ui.calls["inspect"], 0)
+
+    def test_appearance_task_pauses_hidden_item_projection_then_restores_latest(self):
+        self.page(3)
+        editor = self.find("topBarSettings")
+        inspector = self.find("topBarSelectedInspector")
+        selected = editor.property("selectedItem")
+        identity = getCppPointer(inspector)[0]
+        before = value(inspector, "stylePreviewRow")
+        draft = copy.deepcopy(self.ui._draft)
+        editor.setProperty("editingTask", "appearance")
+        QCoreApplication.processEvents()
+        self.assertFalse(inspector.property("readingsActive"))
+        self.ui.calls.clear()
+        self.deliver(80)
+        self.assertEqual(self.ui.calls["style"], 0)
+        self.assertEqual(self.ui.calls["history"], 0)
+        self.assertEqual(before["numeric_value"], 20)
+        # The shared bar preview still supplies its cheap current row; only
+        # the hidden inspector's extra style/history projection is paused.
+        self.assertEqual(value(inspector, "stylePreviewRow")["numeric_value"], 80)
+        editor.setProperty("editingTask", "content")
+        QCoreApplication.processEvents()
+        self.assertTrue(inspector.property("readingsActive"))
+        self.assertEqual(value(inspector, "stylePreviewRow")["numeric_value"], 80)
+        self.assertEqual(editor.property("selectedItem"), selected)
+        self.assertEqual(getCppPointer(inspector)[0], identity)
+        self.assertEqual(self.ui._draft, draft)
+
     def test_hidden_editor_skips_all_live_projection_and_restores_latest_with_inputs(self):
         self.prepare_editor()
         before = self.editor_state()
@@ -266,7 +330,7 @@ class SettingsActivityTests(unittest.TestCase):
         self.assertTrue(inspector.property("pendingGroupEdits"))
         self.assertEqual(value(inspector, "groupBaseline"), baseline)
         self.assertEqual(value(inspector, "groupDraftMetrics"), ["cpu_usage", "cpu_temp"])
-        self.assertFalse(self.find("topBarDesignSamplesTimer").property("running"))
+        self.assertIsNone(self.window.findChild(QObject,"topBarDesignSamplesTimer"))
         self.resume()
         self.assertTrue(inspector.property("groupPopupOpen"))
         self.assertEqual(value(inspector, "stylePreviewRow")["numeric_value"], 80)
@@ -414,6 +478,69 @@ Window {
         self.host.show()
         QCoreApplication.processEvents()
 
+    def test_host_chrome_controls_own_the_raster_window_and_keep_unsaved_draft(self):
+        self.prepare_editor()
+        draft = copy.deepcopy(self.ui._draft)
+        undo = copy.deepcopy(self.ui._undo_drafts)
+        self.window.hide()
+        QCoreApplication.processEvents()
+        self.host = SettingsBackdropHost(self.window, native=False)
+        self.assertFalse(self.host.isVisible())
+        self.assertTrue(self.host.status()["custom_chrome"])
+        for flag in (Qt.FramelessWindowHint, Qt.WindowMinimizeButtonHint,
+                     Qt.WindowMaximizeButtonHint, Qt.WindowCloseButtonHint):
+            self.assertTrue(self.host.flags() & flag)
+        self.assertIs(self.window.parent(), self.host)
+        self.assertIs(value(self.window, "frameWindow"), self.host)
+        chrome = self.find("settingsWindowChrome")
+        self.assertIs(value(chrome, "targetWindow"), self.host)
+        self.assertEqual(self.window.property("titlebarHeight"), 34)
+        self.assertEqual(self.window.property("clientY"), 34)
+        self.host.show()
+        QCoreApplication.processEvents()
+        self.assertTrue(chrome.property("visible"))
+
+        def click(name):
+            # Repeater delegates have visual parents, not QObject ownership.
+            pending = [chrome]
+            while pending:
+                item = pending.pop()
+                if item.objectName() == "window_" + name:
+                    item.clicked.emit()
+                    QCoreApplication.processEvents()
+                    return
+                pending.extend(item.childItems())
+            self.fail("Missing chrome action: " + name)
+
+        click("maximize")
+        self.assertEqual(self.host.visibility().name, "Maximized")
+        self.assertTrue(chrome.property("maximized"))
+        self.assertEqual(self.window.visibility().name, "Windowed")
+        click("maximize")
+        self.assertEqual(self.host.visibility().name, "Windowed")
+        self.assertFalse(chrome.property("maximized"))
+
+        click("minimize")
+        self.assertEqual(self.host.visibility().name, "Minimized")
+        self.assertTrue(self.window.property("hostMinimized"))
+        self.assertFalse(self.window.property("uiActive"))
+        self.assertTrue(self.window.isVisible())
+        self.assertEqual(self.find("widgetWidthInput").property("text"), "unfinished")
+        self.host.showNormal()
+        QCoreApplication.processEvents()
+
+        click("close")
+        self.assertFalse(self.host.isVisible())
+        self.assertFalse(self.window.isVisible())
+        self.assertEqual(self.ui._draft, draft)
+        self.assertEqual(self.ui._undo_drafts, undo)
+        self.assertEqual(self.find("widgetWidthInput").property("text"), "unfinished")
+        self.assertTrue(self.window.property("pendingInput"))
+        self.host.showNormal()
+        QCoreApplication.processEvents()
+        self.assertTrue(self.window.property("uiActive"))
+        self.assertEqual(self.ui._draft, draft)
+
     def minimize_host(self):
         self.host.showMinimized()
         QCoreApplication.processEvents()
@@ -425,6 +552,8 @@ Window {
 
     def test_host_minimized_editor_stops_dirty_inspection_without_losing_input(self):
         self.prepare_editor()
+        self.ui.changeWidget("cpu","content",["storage_temp"])
+        QCoreApplication.processEvents()
         self.attach_host()
         before = self.editor_state()
         self.assertTrue(self.find("settingsInspectTimer").property("running"))
@@ -436,6 +565,38 @@ Window {
         QCoreApplication.processEvents()
         self.assertEqual(self.editor_state(),before)
         self.assertEqual(value(self.find("contentLayoutEditor"),"previewReadings")["cpu_usage"],80)
+
+    def test_host_minimized_history_stops_queries_and_retains_selection(self):
+        from tests.test_history_qml import HistoryController
+        fixture = HistoryController()
+        history = self.find("historyPage")
+        history.setProperty("controller", fixture)
+        try:
+            self.attach_host()
+            self.page(4)
+            history.setProperty("period", "1h")
+            QCoreApplication.processEvents()
+            timer = self.find("historyRefreshTimer")
+            self.assertTrue(timer.property("running"))
+            self.assertGreater(len(fixture.requests), 0)
+            selection = (history.property("selectedId"), history.property("period"))
+            self.minimize_host()
+            self.assertFalse(history.property("active"))
+            self.assertFalse(timer.property("running"))
+            requests = len(fixture.requests)
+            metadata = (fixture.options_reads, fixture.status_reads)
+            fixture.historyChanged.emit()
+            QTest.qWait(30)
+            self.assertEqual(len(fixture.requests), requests)
+            self.assertEqual((fixture.options_reads, fixture.status_reads), metadata)
+            self.host.showNormal()
+            QCoreApplication.processEvents()
+            self.assertTrue(timer.property("running"))
+            self.assertGreater(len(fixture.requests), requests)
+            self.assertEqual((history.property("selectedId"), history.property("period")), selection)
+        finally:
+            self.page(0)
+            history.setProperty("controller", self.ui)
 
     def test_host_minimized_sensor_browser_stops_inspection_and_retains_viewport(self):
         self.attach_host()
@@ -487,6 +648,39 @@ Window {
         self.assertFalse(inspector.property("groupPopupOpen"))
         self.assertEqual(self.ui._draft["top_bar"]["items"][0]["prefs"]["metrics"],["cpu_usage","cpu_temp"])
 
+    def test_host_minimized_topbar_previews_release_clock_without_canceling_group_edit(self):
+        self.ui.changeTopBarItem("b_cpu_usage", "style", "icon_value")
+        self.ui.changeTopBarItem("b_cpu_usage", "icon_effect", "auto")
+        self.attach_host()
+        self.page(3)
+        editor = self.find("topBarSettings")
+        inspector = self.find("topBarSelectedInspector")
+        self.evaluate(inspector, 'openGroup();groupDraftMetrics=["cpu_usage","cpu_temp"]')
+        def subscribers():
+            return sum(clock.property("subscriberCount")
+                       for clock in self.window.findChildren(QObject, "metricEffectClock"))
+        QTest.qWait(30)
+        self.assertGreater(subscribers(), 0)
+        draft = copy.deepcopy(self.ui._draft)
+        selection = editor.property("selectedItem")
+        baseline = value(inspector, "groupBaseline")
+        self.minimize_host()
+        QTest.qWait(30)
+        self.assertTrue(editor.property("active"))
+        self.assertFalse(editor.property("readingsActive"))
+        self.assertEqual(subscribers(), 0)
+        self.assertTrue(inspector.property("groupPopupOpen"))
+        self.assertTrue(inspector.property("pendingGroupEdits"))
+        self.assertEqual(value(inspector, "groupBaseline"), baseline)
+        self.assertEqual(self.ui._draft, draft)
+        self.host.showNormal()
+        QTest.qWait(30)
+        self.assertGreater(subscribers(), 0)
+        self.assertTrue(inspector.property("groupPopupOpen"))
+        self.assertEqual(value(inspector, "groupDraftMetrics"), ["cpu_usage", "cpu_temp"])
+        self.assertEqual(editor.property("selectedItem"), selection)
+        self.assertEqual(self.ui._draft, draft)
+
     def test_disposed_minimized_host_resets_computation_state_for_parentless_fallback(self):
         self.attach_host()
         self.host.showMinimized()
@@ -494,6 +688,8 @@ Window {
         self.assertTrue(self.window.property("hostMinimized"))
         self.host.dispose()
         self.assertIsNone(self.window.parent())
+        self.assertIsNone(value(self.window, "frameWindow"))
+        self.assertIs(value(self.find("settingsWindowChrome"), "targetWindow"), self.window)
         self.assertFalse(self.window.isVisible())
         self.assertIs(self.window.property("hostMinimized"),False)
         # State signals after disposal must not address the detached client.

@@ -1,5 +1,6 @@
 """Fake DWM and offscreen-only detail presentation; no native windows or sensors."""
 import ctypes
+import math
 import os
 import threading
 import unittest
@@ -341,7 +342,7 @@ class DetailHostIntegrationTests(unittest.TestCase):
 
     def test_dynamic_content_size_and_close_do_not_leave_an_empty_host(self):
         # Leave genuine height headroom for this first assertion. The complete
-        # trend/summary layout can already reach the 480-DIP work-area cap, in
+        # trend/summary layout can already reach the work-area cap, in
         # which case expanding metadata must scroll rather than grow the HWND.
         self.case.controller.rows[0].update(history=[], related=[])
         self.manager.update_rows()
@@ -364,9 +365,9 @@ class DetailHostIntegrationTests(unittest.TestCase):
         self.assertGreater(host.height(), previous_height)
         self.assertEqual(host.size(), quick.size())
         self.assertLessEqual(host.height(), maximum)
+        metadata_height = host.height()
 
-        # Once content exceeds the cap, retain the same bounded native host and
-        # make the additional real delegates and diagnostics reachable inside it.
+        # Extra content grows naturally; a large work area need not be filled.
         self.case.controller.rows[0]["related"] = [
             dict(label=f"Synthetic channel {index}", value=f"{index} W", available=True)
             for index in range(8)
@@ -374,6 +375,23 @@ class DetailHostIntegrationTests(unittest.TestCase):
         self.manager.update_rows()
         scroll = self.case.visual(quick, "topBarDetailScroll")
         self.assertIsNotNone(scroll)
+        for _ in range(25):
+            if host.size() == quick.size() and host.height() > metadata_height:
+                break
+            QTest.qWait(10)
+        self.assertEqual(host.size(), quick.size())
+        self.assertGreater(host.height(), metadata_height)
+        self.assertLessEqual(host.height(), maximum)
+
+        # A smaller physical work area must constrain the actual Quick client
+        # and Raster host together, leaving every real row reachable by scroll.
+        bar = self.case.host
+        work, scale = bar.binding.work, bar.binding.dpi / 96
+        top = max(work.top + 8, bar.rect.bottom + math.ceil(6 * scale))
+        bar.binding.work = type(work)(work.left, work.top, work.right,
+                                      top + 8 + round(min(480, maximum) * scale))
+        self.manager._layout(bar)
+        maximum = bar.state.panelMaximumHeight
         for _ in range(25):
             if (host.size() == quick.size() and host.height() == maximum
                     and scroll.property("contentHeight") > scroll.height()):

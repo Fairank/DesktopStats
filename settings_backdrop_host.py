@@ -84,7 +84,7 @@ class _PaintEvents(QAbstractNativeEventFilter):
 
 
 class SettingsBackdropHost(QWindow):
-    """Native caption, geometry and visibility; QML retains state and focus.
+    """Raster geometry and visibility; QML owns the caption, state and focus.
 
     Construct before showing the Quick client. Construction never creates a
     native handle or shows a window. dispose() runs after the material bridge
@@ -108,13 +108,16 @@ class SettingsBackdropHost(QWindow):
         self._syncing = False
         self._filter_installed = False
         self._client = client
+        self._custom_chrome = client.metaObject().indexOfProperty("frameWindow") >= 0
         self._paint_filter = _PaintEvents(self)
         self.setObjectName("settingsNativeBackdropHost")
         self.setSurfaceType(QSurface.RasterSurface)
         format_ = QSurfaceFormat()
         format_.setAlphaBufferSize(0)
         self.setFormat(format_)
-        self.setFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
+        # The native caption paints an opaque client on the raster acrylic
+        # path. Keep the existing QML chrome and give it this actual owner.
+        self.setFlags(Qt.Window | Qt.FramelessWindowHint
                       | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
                       | Qt.WindowCloseButtonHint)
         self.setTitle(client.title())
@@ -125,6 +128,8 @@ class SettingsBackdropHost(QWindow):
         self.heightChanged.connect(self._sync_client_size)
         self.windowStateChanged.connect(self._sync_client_activity)
         try:
+            if self._custom_chrome:
+                client.setProperty("frameWindow", self)
             client.setProperty("nativeHosted", True)
             client.setParent(self)
             client.setPosition(0, 0)
@@ -231,6 +236,7 @@ class SettingsBackdropHost(QWindow):
         return dict(kind="native-raster-host", surface_alive=bool(self._handle),
                     surface_serial=self._serial, alpha_bits=self.format().alphaBufferSize(),
                     paint_count=self._paint_count, paint_error=self._paint_error,
+                    custom_chrome=self._custom_chrome,
                     visual_verified=False, disposed=self._disposed)
 
     def dispose(self):
@@ -249,6 +255,7 @@ class SettingsBackdropHost(QWindow):
             for action in (
                 lambda: client.visibleChanged.disconnect(self._client_visibility),
                 client.hide, lambda: client.setProperty("hostMinimized", False),
+                lambda: client.setProperty("frameWindow", None) if self._custom_chrome else None,
                 client.destroy, lambda: client.setParent(None),
             ):
                 try:

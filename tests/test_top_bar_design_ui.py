@@ -17,6 +17,7 @@ os.environ.setdefault("QT_QUICK_BACKEND", "software")
 
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, QPoint, QPointF, Qt
 from PySide6.QtTest import QTest
+from shiboken6 import getCppPointer
 
 from tests import test_top_bar_groups_qml as fixture
 from tests import test_top_bar_runtime as bars
@@ -43,36 +44,38 @@ class TopBarDesignUiTests(unittest.TestCase):
             fixture.GroupQmlTests.tearDown(self)
 
     def sample_rows(self):
-        return fixture.variant(self.item("topBarSettings").property("designExampleRows"))
+        return fixture.variant(self.item("topBarSettings").property("rows"))
 
-    def test_three_real_bar_samples_are_visible_without_opening_more_options(self):
+    def show_appearance(self):
+        self.click("nav_3")
+        self.click("topBarAppearanceTab")
+
+    def test_content_is_primary_and_appearance_has_static_choices_with_one_live_preview(self):
         self.resize(1280, 900)
         self.click("nav_3")
-        self.assertFalse(self.item("topBarSettings").property("barOptionsOpen"))
+        editor = self.item("topBarSettings")
+        self.assertEqual(editor.property("editingTask"), "content")
+        self.assertFalse(self.item("topBarDesignSelector").isVisible())
+        self.assertFalse(self.item("topBarAppearanceSettings").isVisible())
+        preview = getCppPointer(self.item("topBarMainPreview"))[0]
+        self.assertFalse(self.item("topBarMainPreview").property("showHelp"))
+        self.assertIsNone(self.window.findChild(QObject, "topBarDesignSamplesTimer"))
+        self.show_appearance()
         for design in ("classic", "capsule", "instrument"):
             tile = self.item("topBarDesign_" + design)
-            sample = self.item("topBarDesignSample_" + design)
             self.assertTrue(tile.isVisible())
-            self.assertTrue(sample.property("sampleOnly"))
-            self.assertFalse(sample.property("interactivePreview"))
-            self.assertEqual(sample.property("barDesign"), design)
-            self.assertGreater(sample.height(), 27)
-            self.assertGreaterEqual(sample.property("shown"), 1)
-            self.assertEqual(sample.property("hiddenCount"), 0)
-            self.assertGreater(len(self.sample_rows()), 0)
+            self.assertIsNone(self.window.findChild(QObject, "topBarDesignSample_" + design))
             point = tile.mapToScene(QPointF())
             self.assertGreaterEqual(point.y(), 0)
             self.assertLessEqual(point.y() + tile.height(), self.window.height() - 72)
+        self.click("topBarContentTab")
+        self.assertEqual(getCppPointer(self.item("topBarMainPreview"))[0], preview)
 
-    def test_clicking_the_real_sample_changes_only_design_and_can_undo(self):
+    def test_clicking_a_static_choice_updates_shared_preview_only_and_can_undo(self):
         self.ui.change("refresh", 0.5)
-        before = copy.deepcopy(self.ui._draft)
-        saved = copy.deepcopy(self.ui._saved)
-        self.click("nav_3")
-        tile = self.item("topBarDesign_capsule")
-        point = tile.mapToScene(QPointF(tile.width() / 2, 20)).toPoint()
-        QTest.mouseClick(self.window, Qt.LeftButton, Qt.NoModifier, point)
-        QTest.qWait(40)
+        before, saved = copy.deepcopy(self.ui._draft), copy.deepcopy(self.ui._saved)
+        self.show_appearance()
+        self.click("topBarDesign_capsule")
         expected = copy.deepcopy(before)
         expected["top_bar"]["appearance"]["design"] = "capsule"
         self.assertEqual(self.ui._draft, expected)
@@ -86,7 +89,7 @@ class TopBarDesignUiTests(unittest.TestCase):
 
     def test_keyboard_choice_and_scoped_apply_preserve_other_pending_preferences(self):
         self.ui.change("refresh", 0.5)
-        self.click("nav_3")
+        self.show_appearance()
         self.item("topBarDesign_instrument").forceActiveFocus()
         QTest.keyClick(self.window, Qt.Key_Space)
         QTest.qWait(35)
@@ -97,69 +100,85 @@ class TopBarDesignUiTests(unittest.TestCase):
         self.assertNotEqual(self.ui._saved["refresh"], 0.5)
         self.assertEqual(self.save.call_count, 1)
 
-    def test_narrow_samples_and_selection_do_not_clip_or_shrink_the_type(self):
+    def test_narrow_choices_keep_readable_labels_and_shared_preview_updates_all_designs(self):
         self.resize(740, 700)
-        self.click("nav_3")
-        tiles = [
-            self.item("topBarDesign_" + design) for design in ("classic", "capsule", "instrument")
-        ]
-        for tile in tiles:
+        self.show_appearance()
+        for design in ("classic", "capsule", "instrument"):
+            tile = self.item("topBarDesign_" + design)
             point = tile.mapToScene(QPointF())
             self.assertGreaterEqual(point.x(), 184)
             self.assertLessEqual(point.x() + tile.width(), self.window.width())
             self.assertGreater(tile.width(), 125)
-        for design in ("classic", "capsule", "instrument"):
-            sample = self.item("topBarDesignSample_" + design)
-            self.assertGreaterEqual(sample.property("shown"), 1)
-            self.assertEqual(sample.property("hiddenCount"), 0)
-            tile = self.item("topBarDesign_" + design)
             self.assertEqual(tile.height(), 56)
-            sample_top = sample.mapToItem(tile, QPointF()).y()
-            self.assertGreaterEqual(sample_top, 8)
-            self.assertLessEqual(sample_top + sample.height(), tile.height() - 8)
         for design in ("capsule", "instrument", "classic"):
             self.click("topBarDesign_" + design)
             self.assertEqual(self.ui._draft["top_bar"]["appearance"]["design"], design)
             self.assertTrue(self.item("topBarDesign_" + design).property("chosen"))
+            self.assertEqual(self.item("topBarMainPreview").property("barDesign"), design)
 
-    def test_unavailable_sample_keeps_a_missing_reading_instead_of_synthetic_zero(self):
+    def test_unavailable_shared_preview_keeps_missing_reading_instead_of_synthetic_zero(self):
         self.ui._data = {}
         self.ui.sensorsChanged.emit()
-        self.click("nav_3")
-        for row in self.sample_rows():
-            self.assertEqual(row["value"], "—")
-            self.assertFalse(row["available"])
+        self.show_appearance()
+        row = next(row for row in self.sample_rows() if row["metric"] == "cpu_usage")
+        self.assertEqual(row["value"], "—")
+        self.assertFalse(row["available"])
         self.click("topBarDesign_capsule")
         self.assertEqual(self.item("topBarMainPreview").property("barDesign"), "capsule")
         self.assertFalse(self.ui._saved["top_bar"]["enabled"])
 
-    def test_hidden_samples_stop_and_active_samples_do_not_rebuild_on_each_reading(self):
-        self.click("nav_3")
+    def test_static_choices_have_no_polling_keep_focus_and_hidden_editor_stops_projection(self):
+        self.show_appearance()
         editor = self.item("topBarSettings")
-        before = copy.deepcopy(self.sample_rows())
-        timer = self.window.findChild(QObject, "topBarDesignSamplesTimer")
-        self.assertTrue(timer.property("running"))
+        tile = self.item("topBarDesign_capsule")
+        tile.forceActiveFocus()
+        identity = getCppPointer(tile)[0]
+        self.assertIsNone(self.window.findChild(QObject, "topBarDesignSamplesTimer"))
         for index in range(12):
-            self.ui.receive(
-                dict(self.ui._data, time=time.time(), cpu_usage=60 + index, external_revision=index)
-            )
+            self.ui.receive(dict(self.ui._data, time=time.time(), cpu_usage=60+index,
+                                 external_revision=index))
         QTest.qWait(50)
-        self.assertEqual(fixture.variant(editor.property("rows"))[0]["value"], "71 %")
-        self.assertEqual(self.sample_rows(), before)
-        timer.setProperty("interval", 40)
-        deadline = time.monotonic() + 1
-        while self.sample_rows()[0]["value"] == before[0]["value"] and time.monotonic() < deadline:
-            QTest.qWait(15)
-        self.assertNotEqual(self.sample_rows()[0]["value"], before[0]["value"])
-        timer.setProperty("interval", 2000)
+        self.assertEqual(self.sample_rows()[0]["value"], "71 %")
+        self.assertEqual(getCppPointer(self.item("topBarDesign_capsule"))[0], identity)
+        self.assertTrue(tile.hasActiveFocus())
         self.click("nav_1")
-        self.assertFalse(timer.property("running"))
         self.assertEqual(self.sample_rows(), [])
         with patch.object(self.ui, "_top_bar_rows", wraps=self.ui._top_bar_rows) as readings:
             self.ui.sensorsChanged.emit()
             QTest.qWait(40)
             self.assertEqual(readings.call_count, 0)
         self.assertFalse(editor.property("active"))
+
+    def test_four_group_metrics_are_visible_before_scrolling_and_adjustment_is_one_click(self):
+        config = copy.deepcopy(self.ui._draft)
+        config["top_bar"]["items"] = [
+            dict(id="b_cpu_usage",metric="cpu_usage",prefs=dict(style="icon_value",metrics=["cpu_usage","cpu_temp","cpu_power"],sensor_bindings={})),
+            dict(id="b_gpu_usage",metric="gpu_usage",prefs=dict(style="icon_value",metrics=["gpu_usage","gpu_temp","gpu_power"],sensor_bindings={})),
+            dict(id="b_net_download",metric="net_download",prefs=dict(style="duplex_inline",sensor_bindings={})),
+            dict(id="b_disk_read",metric="disk_read",prefs=dict(style="duplex_inline",sensor_bindings={})),
+        ]
+        self.ui.edit(config)
+        self.click("nav_3")
+        for size in ((960,700),(1280,850)):
+            self.resize(*size)
+            scroll=self.item("topBarSettingsScroll")
+            scroll.property("contentItem").setProperty("contentY",0)
+            self.app.processEvents()
+            heading=self.item("topBarMetricsHeading")
+            self.assertTrue(heading.property("singleLine"),self.evaluate(heading,
+                'JSON.stringify({width:width,parentWidth:parent.width,outerWidth:metricsBody.width,editor:root.width,fill:Layout.fillWidth,title:metricsHeadingTitle.implicitWidth,count:metricsHeadingCount.implicitWidth,labelGap:metricsHeadingLabel.spacing,placement:placementToggle.implicitWidth,add:addMetricButton.implicitWidth,gap:columnSpacing})'))
+            for item in config["top_bar"]["items"]:
+                row=self.item("topBarItem_"+item["id"])
+                point=row.mapToItem(scroll,QPointF())
+                self.assertGreaterEqual(point.y(),0)
+                self.assertLessEqual(point.y()+row.height(),scroll.height()+.5,(size,item["id"],point.y(),row.height(),scroll.height()))
+        self.resize(960,700)
+        self.click("topBarItemAdjust_b_gpu_usage")
+        QTest.qWait(50)
+        chooser=self.item("topBarStyleChooser")
+        point=chooser.mapToScene(QPointF())
+        self.assertGreaterEqual(point.y(),0)
+        self.assertLess(point.y()+chooser.height(),self.window.height()-72)
 
     def make_bar(self, design="classic", height=32, width=1280):
         settings = copy.deepcopy(self.ui._saved)

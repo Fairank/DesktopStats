@@ -22,7 +22,7 @@ Window {
         row.metric !== root.detail.metric
         && !root.groupRows.some(member => member.metric === row.metric)
         && !root.pairedRows.some(member => member.metric === row.metric))
-    readonly property int coreColumns: cpuCells.count > 32 ? 8 : 4
+    readonly property int coreColumns: (cpuContext.logical_rows || []).length > 32 && width >= 320 ? 8 : 4
     readonly property var relatedRows: (detail.related || []).filter(row => {
         if (!row.metric) return true
         if (root.pairedRows.some(pair => pair.metric === row.metric)) return false
@@ -52,6 +52,7 @@ Window {
     readonly property bool dark: foreground.r > 0.5
     property bool showMissing: false
     property bool showMetadata: false
+    property bool showCpuDetails: false
     property int chartCursorIndex: -1
     property real chartCursorTime: NaN
     property string chartCursorIdentity: ""
@@ -65,10 +66,11 @@ Window {
         return {label:hasPair?pairLabel(row):row.label || detail.label || "", color:pairColor(index),
             value:readable?sampleNumber(sample,row):"—", reason:readable?"":row.reason || tr("无法读取")}
     })
-    onCpuContextChanged: syncCpuRows()
-    Component.onCompleted: syncCpuRows()
+    onCpuContextChanged: if(showCpuDetails)syncCpuRows()
+    onShowCpuDetailsChanged: if(showCpuDetails)syncCpuRows()
+    Component.onCompleted: if(showCpuDetails)syncCpuRows()
 
-    ListModel { id: cpuCells }
+    ListModel { id: cpuCells; objectName:"topBarCpuCellModel" }
 
     function syncCpuRows() {
         if (!cpuCells) return
@@ -104,7 +106,7 @@ Window {
 
     visible: false
     color: "transparent"
-    width: 336
+    width: Math.min(368, Number.isFinite(barState.panelMaximumWidth) ? barState.panelMaximumWidth : 368)
     height: Math.min(barState.panelMaximumHeight, panelContent.implicitHeight + 32)
     // The manager decides focus flags before retaining this window's HWND.
     flags: nativeHosted ? Qt.Widget : Qt.Tool | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
@@ -117,6 +119,7 @@ Window {
         if (root.detail.id !== root.previousId) {
             root.showMissing = false
             root.showMetadata = false
+            root.showCpuDetails = false
             root.previousId = root.detail.id || ""
             metricScroll.contentY = 0
         }
@@ -289,9 +292,9 @@ Window {
         padding: 6; focusPolicy: Qt.TabFocus; hoverEnabled: true
         contentItem: Icon { name: tool.glyph; ink: root.foreground }
         background: Rectangle {
-            radius: 7; color: root.tint(tool.down ? 0.12 : tool.hovered ? 0.075 : 0.025)
+            radius: 7; color: root.tint(tool.down ? 0.12 : tool.hovered ? 0.075 : 0)
             border.width: 1
-            border.color: tool.visualFocus ? root.pairColor(0) : root.tint(0.12)
+            border.color: tool.visualFocus ? root.pairColor(0) : "transparent"
         }
     }
 
@@ -435,7 +438,7 @@ Window {
                 ColumnLayout {
                     id: metricContent
                     width: Math.max(0, metricScroll.width-(metricScroll.interactive?6:0))
-                    spacing: 16
+                    spacing: 14
                     Item {
                         visible: !root.hasPair && !root.hasGroup
                         Layout.fillWidth: true; Layout.preferredHeight: 44
@@ -465,7 +468,7 @@ Window {
                     GridLayout {
                         objectName:"topBarDetailGroupValues"
                         visible:root.hasGroup
-                        Layout.fillWidth:true;columns:2;uniformCellWidths:true;columnSpacing:16;rowSpacing:12
+                        Layout.fillWidth:true;columns:2;uniformCellWidths:true;columnSpacing:16;rowSpacing:10
                         Repeater {
                             model:root.groupRows
                             ColumnLayout {
@@ -476,7 +479,7 @@ Window {
                                     Icon {name:selectedMember.modelData.icon || "sensors";ink:root.secondary;Layout.preferredWidth:14;Layout.preferredHeight:14}
                                     Text {Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.label || "";textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:11;elide:Text.ElideRight}
                                 }
-                                Text {objectName:"topBarGroupDetail_"+selectedMember.modelData.metric;Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.value || "—";textFormat:Text.PlainText;color:selectedMember.modelData.available?root.foreground:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:root.groupRows.length===3 && selectedMember.index===0?30:23;font.weight:Font.Medium;font.features:{"tnum":1};elide:Text.ElideRight}
+                                Text {objectName:"topBarGroupDetail_"+selectedMember.modelData.metric;Layout.fillWidth:true;Layout.minimumWidth:0;text:selectedMember.modelData.value || "—";textFormat:Text.PlainText;color:selectedMember.modelData.available?root.foreground:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:root.groupRows.length===3 && selectedMember.index===0?30:21;font.weight:Font.Medium;font.features:{"tnum":1};elide:Text.ElideRight}
                                 HoverHandler {id:selectedMemberHover}
                                 PlainTip {visible:selectedMemberHover.hovered;text:root.readingTip(selectedMember.modelData)}
                             }
@@ -602,7 +605,7 @@ Window {
                         Item {
                             id: chartArea
                             objectName: "topBarDetailChartArea"
-                            Layout.fillWidth: true; Layout.preferredHeight: root.hasTrend ? 122 : 48
+                            Layout.fillWidth: true; Layout.preferredHeight: root.hasTrend ? 110 : 48
                             activeFocusOnTab: true
                             Accessible.role: Accessible.Chart
                             Accessible.name: root.tr("历史趋势")
@@ -623,7 +626,7 @@ Window {
                                 objectName: "topBarDetailTrend"
                                 visible: root.hasTrend
                                 width: root.chartScale.valid ? parent.width-52 : parent.width
-                                height: 100
+                                height: 88
                                 antialiasing: true
                                 onVisibleChanged: requestPaint()
                                 onWidthChanged: requestPaint()
@@ -778,27 +781,24 @@ Window {
                                 color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10
                             }
                         }
-                        GridLayout {
+                        RowLayout {
                             objectName:"topBarHistorySummary"
-                            visible:root.hasTrend
-                            Layout.fillWidth:true;columns:2;uniformCellWidths:true;columnSpacing:20;rowSpacing:4
+                            visible:root.hasTrend; Layout.fillWidth:true; spacing:16
                             Repeater {
                                 model:root.hasPair?root.pairedRows:[root.detail,root.detail]
-                                ColumnLayout {
+                                RowLayout {
                                     required property var modelData
                                     required property int index
-                                    Layout.fillWidth:true;Layout.minimumWidth:0;spacing:3
+                                    Layout.fillWidth:true; Layout.minimumWidth:0; spacing:6
                                     Text {
-                                        Layout.fillWidth:true;Layout.minimumWidth:0
                                         text:root.hasPair?root.pairLabel(parent.modelData)+" · "+root.tr("峰值"):root.tr(parent.index===0?"峰值":"平均值")
-                                        textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:10;elide:Text.ElideRight
+                                        textFormat:Text.PlainText;color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:11
                                     }
                                     Text {
-                                        id: summaryValue
-                                        objectName:"topBarHistorySummaryValue_"+parent.index
+                                        id:summaryValue;objectName:"topBarHistorySummaryValue_"+parent.index
                                         Layout.fillWidth:true;Layout.minimumWidth:0
                                         text:root.summaryNumber(parent.modelData,root.hasPair || parent.index===0?"peak":"mean")
-                                        textFormat:Text.PlainText;color:root.foreground;font.family:root.barState.fontFamily;font.pixelSize:13;font.weight:Font.Medium;elide:Text.ElideRight
+                                        textFormat:Text.PlainText;color:root.foreground;font.family:root.barState.fontFamily;font.pixelSize:12;font.weight:Font.Medium;elide:Text.ElideRight
                                         HoverHandler {id:summaryHover}
                                         PlainTip {visible:summaryHover.hovered;text:summaryValue.text}
                                     }
@@ -806,97 +806,46 @@ Window {
                             }
                         }
                     }
-                    ProcessUsageCard {
-                        Layout.fillWidth: true
-                        provider: typeof stats !== "undefined" ? stats : null
-                        metric: root.detail.metric || ""
-                        hardwareName: root.detail.hardware_name || root.cpuContext.hardware_name || ""
-                        active: root.visible && !root.hostMinimized
-                            && root.visibility !== Window.Minimized && !root.overflowMode
-                        ink: root.foreground; muted: root.secondary
-                        fontFamily: root.barState.fontFamily
-                        motionEnabled: root.barState.motionEnabled === true
+                    Item {
+                        id:softwareSlot
+                        objectName:"topBarProcessViewport"
+                        Layout.fillWidth:true; visible:softwareCard.providerAvailable
+                        // The request geometry survives an empty or released lease.
+                        // Live row height is retained while outside the viewport,
+                        // preventing collapse/re-entry loops at a scroll boundary.
+                        property real retainedHeight:96
+                        readonly property bool inViewport:y+height>metricScroll.contentY+1
+                            && y<metricScroll.contentY+metricScroll.height-1
+                        implicitHeight:Math.max(1,retainedHeight,softwareCard.visible?softwareCard.implicitHeight:0)
+                        ProcessUsageCard {
+                            id:softwareCard; width:parent.width
+                            provider:typeof stats!=="undefined"?stats:null
+                            metric:root.detail.metric || ""
+                            hardwareName:root.detail.hardware_name || root.cpuContext.hardware_name || ""
+                            active:root.visible && !root.hostMinimized && root.visibility!==Window.Minimized
+                                && !root.overflowMode && softwareSlot.inViewport
+                            ink:root.foreground;muted:root.secondary;fontFamily:root.barState.fontFamily
+                            motionEnabled:root.barState.motionEnabled===true
+                            onImplicitHeightChanged:if(active && context.state && context.state!=="warming_up")softwareSlot.retainedHeight=implicitHeight
+                            onMetricChanged:softwareSlot.retainedHeight=96
+                            onHardwareNameChanged:softwareSlot.retainedHeight=96
+                        }
                     }
                     ColumnLayout {
-                        objectName: "topBarCpuContext"
-                        visible: root.hasCpuContext
-                        Layout.fillWidth: true; spacing: 9
-                        RowLayout {
-                            Layout.fillWidth: true; spacing: 8
-                            Text {
-                                text: root.tr("逻辑处理器"); textFormat: Text.PlainText
-                                color: root.foreground; font.family: root.barState.fontFamily
-                                font.pixelSize: 11; font.weight: Font.Medium
+                        id:cpuPanel;objectName:"topBarCpuContext"
+                        visible:root.hasCpuContext; Layout.fillWidth:true; spacing:8
+                        Button {
+                            id:cpuToggle;objectName:"topBarCpuDetailsToggle"
+                            Layout.fillWidth:true;implicitHeight:34;padding:0;checkable:true
+                            checked:root.showCpuDetails;onClicked:root.showCpuDetails=checked
+                            Accessible.name:root.tr("逻辑处理器")+" · "+root.cpuCounts()
+                            contentItem:RowLayout {
+                                spacing:8
+                                Text {text:root.tr("逻辑处理器");color:root.foreground;font.family:root.barState.fontFamily;font.pixelSize:12;font.weight:Font.Medium}
+                                Text {objectName:"topBarCpuTopology";Layout.fillWidth:true;Layout.minimumWidth:0;text:root.cpuCounts();color:root.secondary;font.family:root.barState.fontFamily;font.pixelSize:11;elide:Text.ElideRight;horizontalAlignment:Text.AlignRight}
+                                Icon {name:"chevron";ink:root.secondary;rotation:root.showCpuDetails?270:90;Layout.preferredWidth:12;Layout.preferredHeight:12}
                             }
-                            Item { Layout.fillWidth: true }
-                            Text {
-                                text: root.tr("使用率") + " · %"; textFormat: Text.PlainText
-                                color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
-                            }
-                        }
-                        Text {
-                            objectName: "topBarCpuTopology"
-                            visible: !!text; Layout.fillWidth: true; Layout.minimumWidth: 0
-                            text: root.cpuCounts(); textFormat: Text.PlainText
-                            color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
-                            wrapMode: Text.Wrap
-                        }
-                        GridView {
-                            id: coreGrid
-                            objectName: "topBarCpuCoreGrid"
-                            visible: cpuCells.count > 0
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: Math.min(Math.floor(208/cellHeight)*cellHeight, Math.ceil(cpuCells.count / root.coreColumns) * cellHeight)
-                            Layout.minimumHeight: 0; Layout.maximumHeight: 208
-                            model: cpuCells; clip: true; reuseItems: true; cacheBuffer: 0
-                            cellWidth: Math.max(1, (width - 5) / root.coreColumns)
-                            cellHeight: root.coreColumns === 8 ? 34 : 44
-                            interactive: contentHeight > height; boundsBehavior: Flickable.StopAtBounds
-                            ScrollBar.vertical: QuietScrollBar { }
-                            delegate: Rectangle {
-                                id: coreTile
-                                required property int logicalIndex
-                                required property string logicalLabel
-                                required property string usageText
-                                required property bool readingAvailable
-                                required property real usageFraction
-                                required property string readingReason
-                                required property string readingSource
-                                objectName: "topBarCpuLogical_" + logicalIndex
-                                width: Math.max(0, coreGrid.cellWidth - 4); height: coreGrid.cellHeight - 4
-                                radius: 4
-                                color: readingAvailable ? Qt.rgba(0.22, 0.48, 0.82, 0.065 + 0.28 * usageFraction)
-                                    : root.tint(0.035)
-                                border.width: 0.6; border.color: root.tint(0.065)
-                                Accessible.role: Accessible.StaticText
-                                Accessible.name: logicalLabel + " " + usageText
-                                Accessible.description: readingReason || readingSource
-                                Text {
-                                    objectName: "topBarCpuLogicalLabel_" + coreTile.logicalIndex
-                                    x: 4; y: 3; width: parent.width - 8
-                                    text: root.coreColumns === 8 ? (coreTile.logicalIndex >= 0 ? String(coreTile.logicalIndex) : "—")
-                                        : coreTile.logicalLabel
-                                    textFormat: Text.PlainText; color: root.secondary
-                                    font.family: root.barState.fontFamily; font.pixelSize: root.coreColumns === 8 ? 8 : 9
-                                    elide: Text.ElideRight
-                                }
-                                Text {
-                                    objectName: "topBarCpuLogicalValue_" + coreTile.logicalIndex
-                                    x: 4; anchors.bottom: parent.bottom; anchors.bottomMargin: 3
-                                    width: parent.width - 8
-                                    text: root.coreColumns === 8 ? coreTile.usageText.replace(/\s+%$/, "%") : coreTile.usageText
-                                    textFormat: Text.PlainText
-                                    color: coreTile.readingAvailable ? root.foreground : root.secondary
-                                    font.family: root.barState.fontFamily; font.pixelSize: root.coreColumns === 8 ? 9 : 12
-                                    font.weight: Font.Medium; font.features: { "tnum": 1 }; elide: Text.ElideRight
-                                }
-                                HoverHandler { id: coreHover }
-                                PlainTip {
-                                    visible: coreHover.hovered
-                                    text: [coreTile.logicalLabel, coreTile.usageText, coreTile.readingSource,
-                                           coreTile.readingReason].filter(value => !!value).join("\n")
-                                }
-                            }
+                            background:Rectangle {radius:5;color:root.tint(cpuToggle.hovered?.04:0);border.color:cpuToggle.visualFocus?root.pairColor(0):"transparent"}
                         }
                         Text {
                             objectName: "topBarCpuContextReason"
@@ -905,42 +854,113 @@ Window {
                             color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
                             wrapMode: Text.Wrap
                         }
-                        Text {
-                            objectName: "topBarCpuContextTruncated"
-                            visible: root.cpuContext.truncated === true; Layout.fillWidth: true
-                            text: root.tr("显示 %1 / %2 个逻辑处理器")
+                        ColumnLayout {
+                            id:cpuDetailBody
+                            objectName:"topBarCpuDetailsBody"
+                            visible:root.showCpuDetails
+                            Layout.fillWidth: true; spacing: 9
+                            Item {
+                                id:coreViewport;objectName:"topBarCpuCoreViewport"
+                                Layout.fillWidth:true; visible:cpuCells.count>0
+                                implicitHeight:Math.ceil(cpuCells.count/root.coreColumns)*(root.coreColumns===8?34:44)
+                                readonly property real contentTop:cpuPanel.y+cpuDetailBody.y+y
+                                readonly property real visibleOffset:Math.max(0,Math.min(implicitHeight,metricScroll.contentY-contentTop))
+                                readonly property real visibleHeight:Math.max(0,Math.min(implicitHeight-visibleOffset,
+                                metricScroll.height-Math.max(0,contentTop-metricScroll.contentY)))
+                                GridView {
+                                    id: coreGrid
+                                    objectName: "topBarCpuCoreGrid"
+                                    x:0; y:coreViewport.visibleOffset; width:parent.width
+                                    height:coreViewport.visibleHeight
+                                    visible:root.showCpuDetails && height>0
+                                    contentY:coreViewport.visibleOffset
+                                    model:visible?cpuCells:null; clip:true; reuseItems:true; cacheBuffer:0
+                                    cellWidth: Math.max(1, (width - 5) / root.coreColumns)
+                                    cellHeight: root.coreColumns === 8 ? 34 : 44
+                                    interactive:false; boundsBehavior:Flickable.StopAtBounds
+                                    delegate: Rectangle {
+                                        id: coreTile
+                                        required property int logicalIndex
+                                        required property string logicalLabel
+                                        required property string usageText
+                                        required property bool readingAvailable
+                                        required property real usageFraction
+                                        required property string readingReason
+                                        required property string readingSource
+                                        objectName: "topBarCpuLogical_" + logicalIndex
+                                        width: Math.max(0, coreGrid.cellWidth - 4); height: coreGrid.cellHeight - 4
+                                        radius: 4
+                                        color: readingAvailable ? Qt.rgba(0.22, 0.48, 0.82, 0.065 + 0.28 * usageFraction)
+                                        : root.tint(0.035)
+                                        border.width: 0.6; border.color: root.tint(0.065)
+                                        Accessible.role: Accessible.StaticText
+                                        Accessible.name: logicalLabel + " " + usageText
+                                        Accessible.description: readingReason || readingSource
+                                        Text {
+                                            objectName: "topBarCpuLogicalLabel_" + coreTile.logicalIndex
+                                            x: 4; y: 3; width: parent.width - 8
+                                            text: root.coreColumns === 8 ? (coreTile.logicalIndex >= 0 ? String(coreTile.logicalIndex) : "—")
+                                            : coreTile.logicalLabel
+                                            textFormat: Text.PlainText; color: root.secondary
+                                            font.family: root.barState.fontFamily; font.pixelSize: root.coreColumns === 8 ? 8 : 9
+                                            elide: Text.ElideRight
+                                        }
+                                        Text {
+                                            objectName: "topBarCpuLogicalValue_" + coreTile.logicalIndex
+                                            x: 4; anchors.bottom: parent.bottom; anchors.bottomMargin: 3
+                                            width: parent.width - 8
+                                            text: root.coreColumns === 8 ? coreTile.usageText.replace(/\s+%$/, "%") : coreTile.usageText
+                                            textFormat: Text.PlainText
+                                            color: coreTile.readingAvailable ? root.foreground : root.secondary
+                                            font.family: root.barState.fontFamily; font.pixelSize: root.coreColumns === 8 ? 9 : 12
+                                            font.weight: Font.Medium; font.features: { "tnum": 1 }; elide: Text.ElideRight
+                                        }
+                                        HoverHandler { id: coreHover }
+                                        PlainTip {
+                                            visible: coreHover.hovered
+                                            text: [coreTile.logicalLabel, coreTile.usageText, coreTile.readingSource,
+                                            coreTile.readingReason].filter(value => !!value).join("\n")
+                                        }
+                                    }
+                                }
+                            }
+                            Text {
+                                objectName: "topBarCpuContextTruncated"
+                                visible: root.cpuContext.truncated === true; Layout.fillWidth: true
+                                text: root.tr("显示 %1 / %2 个逻辑处理器")
                                 .replace("%1", String(cpuCells.count)).replace("%2", String(root.cpuContext.logical_processors || "—"))
-                            textFormat: Text.PlainText; color: root.secondary
-                            font.family: root.barState.fontFamily; font.pixelSize: 10; wrapMode: Text.Wrap
-                        }
-                        GridLayout {
-                            objectName: "topBarCpuRelatedGrid"
-                            visible: root.cpuRelatedRows.length > 0
-                            Layout.fillWidth: true; columns: 2; uniformCellWidths: true
-                            columnSpacing: 10; rowSpacing: 10
-                            Repeater {
-                                model: root.cpuRelatedRows
-                                ColumnLayout {
-                                    id: cpuRelated
-                                    required property var modelData
-                                    Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 3
-                                    Text {
-                                        Layout.fillWidth: true; Layout.minimumWidth: 0
-                                        text: cpuRelated.modelData.label || ""; textFormat: Text.PlainText
-                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
-                                        elide: Text.ElideRight
+                                textFormat: Text.PlainText; color: root.secondary
+                                font.family: root.barState.fontFamily; font.pixelSize: 10; wrapMode: Text.Wrap
+                            }
+                            GridLayout {
+                                objectName: "topBarCpuRelatedGrid"
+                                visible: root.cpuRelatedRows.length > 0
+                                Layout.fillWidth: true; columns: 2; uniformCellWidths: true
+                                columnSpacing: 10; rowSpacing: 10
+                                Repeater {
+                                    model: root.cpuRelatedRows
+                                    ColumnLayout {
+                                        id: cpuRelated
+                                        required property var modelData
+                                        Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 3
+                                        Text {
+                                            Layout.fillWidth: true; Layout.minimumWidth: 0
+                                            text: cpuRelated.modelData.label || ""; textFormat: Text.PlainText
+                                            color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 10
+                                            elide: Text.ElideRight
+                                        }
+                                        Text {
+                                            objectName: "topBarCpuRelatedValue_" + cpuRelated.modelData.metric
+                                            Layout.fillWidth: true; Layout.minimumWidth: 0
+                                            text: cpuRelated.modelData.available === true ? (cpuRelated.modelData.value || "—") : "—"
+                                            textFormat: Text.PlainText
+                                            color: cpuRelated.modelData.available === true ? root.foreground : root.secondary
+                                            font.family: root.barState.fontFamily; font.pixelSize: 13
+                                            font.weight: Font.Medium; font.features: { "tnum": 1 }; elide: Text.ElideRight
+                                        }
+                                        HoverHandler { id: cpuRelatedHover }
+                                        PlainTip { visible: cpuRelatedHover.hovered; text: root.readingTip(cpuRelated.modelData) }
                                     }
-                                    Text {
-                                        objectName: "topBarCpuRelatedValue_" + cpuRelated.modelData.metric
-                                        Layout.fillWidth: true; Layout.minimumWidth: 0
-                                        text: cpuRelated.modelData.available === true ? (cpuRelated.modelData.value || "—") : "—"
-                                        textFormat: Text.PlainText
-                                        color: cpuRelated.modelData.available === true ? root.foreground : root.secondary
-                                        font.family: root.barState.fontFamily; font.pixelSize: 13
-                                        font.weight: Font.Medium; font.features: { "tnum": 1 }; elide: Text.ElideRight
-                                    }
-                                    HoverHandler { id: cpuRelatedHover }
-                                    PlainTip { visible: cpuRelatedHover.hovered; text: root.readingTip(cpuRelated.modelData) }
                                 }
                             }
                         }

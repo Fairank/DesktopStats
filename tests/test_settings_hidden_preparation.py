@@ -687,6 +687,7 @@ class RuntimeHiddenPreparationTests(unittest.TestCase):
         self.assertEqual(observed, [(True, 1, True)])
         self.assertTrue(host.isVisible())
         self.runtime.compose.assert_called_once()
+        self.runtime.controller.inspect.assert_not_called()
 
     def test_paint_failure_clears_native_before_publishing_solid(self):
         self.create()
