@@ -44,6 +44,8 @@ class MeasuringPainter:
         self.runs = []
         self.labels = []
         self.paths = []
+        self.rounded_rects = []
+        self.ellipses = []
         self.overflows = []
 
     def __getattr__(self, name):
@@ -83,6 +85,14 @@ class MeasuringPainter:
     def drawPath(self, path):
         self.paths.append(dict(brush=self.painter.brush().style(), bounds=path.boundingRect()))
         return self.painter.drawPath(path)
+
+    def drawRoundedRect(self, rect, *args):
+        self.rounded_rects.append(QRectF(rect))
+        return self.painter.drawRoundedRect(rect, *args)
+
+    def drawEllipse(self, *args):
+        self.ellipses.append(args)
+        return self.painter.drawEllipse(*args)
 
 
 def render_card(
@@ -383,6 +393,44 @@ class CardLayoutTests(unittest.TestCase):
         _, result = render_card(count=1)
         self.assertEqual(len(result.paths), 1)
         self.assertEqual(result.paths[0]["brush"], Qt.BrushStyle.NoBrush)
+
+    def test_capacity_track_preserves_the_real_fraction_inside_its_reserved_space(self):
+        for height in (4, 25):
+            for value in (0, 25, 62.5, 100):
+                image = QImage(160, 160, QImage.Format_ARGB32_Premultiplied)
+                painter = QPainter(image)
+                measured = MeasuringPainter(painter)
+                helper = _CardPainter(measured, DEFAULT,
+                    {"ink": "#222222", "muted": "#666666"}, "#2288ff", 1)
+                box = Box(14, 115, 132, height)
+                helper.bar(box, value, 100)
+                painter.end()
+                track, filled = measured.rounded_rects
+                self.assertTrue(QRectF(box.x, box.y, box.width, box.height).contains(track))
+                self.assertLessEqual(track.height(), 6)
+                self.assertEqual(track.center().y(), box.y + height / 2)
+                self.assertEqual(filled.width(), value / 100 * track.width())
+                self.assertEqual((filled.x(), filled.y(), filled.height()),
+                                 (track.x(), track.y(), track.height()))
+
+    def test_trend_marker_requires_a_current_readable_sample_and_stays_inside_plot(self):
+        for values, fresh, count in (((10, 20), True, 1), ((10, 20, None), True, 0),
+                                     ((10, 20), False, 0), ((None, 20), True, 0)):
+            image = QImage(160, 160, QImage.Format_ARGB32_Premultiplied)
+            painter = QPainter(image)
+            measured = MeasuringPainter(painter)
+            helper = _CardPainter(measured, DEFAULT,
+                {"ink": "#222222", "muted": "#666666"}, "#2288ff", 1)
+            box = Box(14, 115, 132, 25)
+            helper.trend(box, [{"cpu_usage": value} for value in values], "cpu_usage", {}, fresh)
+            painter.end()
+            self.assertEqual(len(measured.ellipses), count)
+            if count:
+                center, radius_x, radius_y = measured.ellipses[0]
+                self.assertGreaterEqual(center.x() - radius_x, box.x)
+                self.assertLessEqual(center.x() + radius_x, box.right)
+                self.assertGreaterEqual(center.y() - radius_y, box.y)
+                self.assertLessEqual(center.y() + radius_y, box.bottom)
 
     def test_negative_and_extreme_trends_stay_finite_and_inside_plot(self):
         for values in ((-90, -20, None, -60), (-1.7e308, 1.7e308, None, -1e308), (0, 0, None, 0)):

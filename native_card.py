@@ -274,7 +274,7 @@ class HardwareCard(QQuickPaintedItem):
                     TEMPLATES.get(prefs.get("template"), {}).get("label", meta["label"]),
                     config["language"],
                 )
-                draw.label(title, layout.title, 11, draw.ink, QFont.Weight.DemiBold)
+                draw.heading(title, layout.title)
             for separator in layout.separators:
                 color = QColor(draw.muted)
                 color.setAlpha(46)
@@ -426,16 +426,10 @@ class HardwareCard(QQuickPaintedItem):
                 title = prefs.get("title") or tr(
                     TEMPLATES.get(prefs.get("template"), {}).get("label", meta["label"])
                 )
-                painter.setPen(Qt.PenStyle.NoPen)
-                painter.setBrush(draw.accent)
-                painter.drawEllipse(QRectF(14, 18, 3.5, 3.5))
                 badge = style == "cores" and len(content) >= 4
-                draw.label(
+                draw.heading(
                     title,
-                    Box(24, 10, width - (76 if badge else 38), 21),
-                    11,
-                    draw.ink,
-                    QFont.Weight.DemiBold,
+                    Box(14, 10, width - (66 if badge else 28), 21),
                 )
                 if badge:
                     draw.label(
@@ -586,18 +580,36 @@ class _CardPainter:
         )
         self.label(selected, box, size, elide=True, align=align)
 
+    def heading(self, value, box):
+        """A quiet hardware accent and a readable title, within the same slot."""
+        painter = self.painter
+        painter.save()
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self.accent)
+        marker_height = min(10, box.height)
+        marker = QRectF(box.x, box.y + (box.height - marker_height) / 2, 3, marker_height)
+        painter.drawRoundedRect(marker, 1.5, 1.5)
+        painter.restore()
+        self.label(value, Box(box.x + 10, box.y, max(0, box.width - 10), box.height),
+                   12, self.ink, QFont.Weight.DemiBold)
+
+    @staticmethod
+    def stack_gap(height):
+        return 5 if height >= 64 else 2
+
     def responsive_stack(self, labels, value, unit, box, size, align=Qt.AlignmentFlag.AlignLeft):
         label_size = 10 if box.height <= 60 else 11
         label_height = QFontMetricsF(self.font(label_size)).height()
-        available = max(12, box.height - label_height - 2)
+        gap = self.stack_gap(box.height)
+        available = max(12, box.height - label_height - gap)
         measured = self.measure(value, unit, box.width, available, size)
-        total = label_height + 2 + measured["height"]
+        total = label_height + gap + measured["height"]
         y = box.y + max(0, (box.height - total) / 2)
         self.responsive_label(labels, Box(box.x, y, box.width, label_height), label_size, align)
         self.readout(
             value,
             unit,
-            Box(box.x, y + label_height + 2, box.width, measured["height"]),
+            Box(box.x, y + label_height + gap, box.width, measured["height"]),
             size,
             align=align,
             measured=measured,
@@ -711,7 +723,7 @@ class _CardPainter:
         if reading.mode == "row":
             width = max(1, width - self.label_width(labels) - 8) if labels else width * 0.80
         else:
-            height -= QFontMetricsF(self.font(max(10, self.label_min))).height() + 2
+            height -= QFontMetricsF(self.font(max(10, self.label_min))).height() + self.stack_gap(height)
             if labels and self.label_width(labels) > width + 0.01:
                 return True
         measured = self.measure(value, unit, width, max(1, height), reading.size)
@@ -719,16 +731,17 @@ class _CardPainter:
 
     def stack(self, label, value, unit, box, size):
         label_height = QFontMetricsF(self.font(max(10, self.label_min))).height()
-        available = max(1, box.height - label_height - 2)
+        gap = self.stack_gap(box.height)
+        available = max(1, box.height - label_height - gap)
         reading = self.measure(value, unit, box.width, available, size)
         number_height = min(available, reading["height"])
-        total = label_height + 2 + number_height
+        total = label_height + gap + number_height
         y = box.y + max(0, (box.height - total) / 2)
         self.metric_label(label, Box(box.x, y, box.width, label_height), 10)
         self.readout(
             value,
             unit,
-            Box(box.x, y + label_height + 2, box.width, number_height),
+            Box(box.x, y + label_height + gap, box.width, number_height),
             size,
             measured=reading,
         )
@@ -818,13 +831,15 @@ class _CardPainter:
 
     def bar(self, box, current, maximum):
         painter = self.painter
+        height = min(6, box.height)
+        track = Box(box.x, box.y + (box.height - height) / 2, box.width, height)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QColor(130, 145, 164, 32))
-        painter.drawRoundedRect(self.rect(box), box.height / 2, box.height / 2)
+        painter.drawRoundedRect(self.rect(track), height / 2, height / 2)
         if numeric(current):
             painter.setBrush(self.accent)
-            filled = Box(box.x, box.y, box.width * min(1, max(0, current / maximum)), box.height)
-            painter.drawRoundedRect(self.rect(filled), box.height / 2, box.height / 2)
+            filled = Box(track.x, track.y, track.width * min(1, max(0, current / maximum)), height)
+            painter.drawRoundedRect(self.rect(filled), height / 2, height / 2)
 
     def trend(self, box, history, metric, prefs, fresh):
         painter = self.painter
@@ -850,7 +865,8 @@ class _CardPainter:
             if not numeric(value):
                 connected = False
                 continue
-            x = box.x + index / max(1, len(points) - 1) * box.width
+            inset = min(2, box.width / 2)
+            x = box.x + inset + index / max(1, len(points) - 1) * (box.width - 2 * inset)
             y = (
                 box.bottom
                 - 2
@@ -874,6 +890,12 @@ class _CardPainter:
             )
         )
         painter.drawPath(path)
+        if points and numeric(points[-1][1]):
+            # Mark only the current sample, never the end of an older segment.
+            current = path.currentPosition()
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(self.accent)
+            painter.drawEllipse(current, 1.8, 1.8)
         painter.restore()
 
     def cores(self, box, values):
