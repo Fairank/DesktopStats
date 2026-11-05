@@ -1,5 +1,15 @@
 # Changes
 
+## 0.26.1-preview.9
+
+- Refine optional desktop widgets with clearer hardware headings and static
+  accents, more label/value spacing in roomy layouts, slim centered capacity
+  tracks and a bounded marker for the current valid history sample.
+- Preserve compact layouts, click geometry, true capacity fractions, missing
+  and stale data rules. Add no animation clock, polling or material effect.
+- Retain preview.8's integration of preview.12 animations/software rankings,
+  fullscreen avoidance, read-only ASUS temperature and background work gates.
+
 ## 0.26.1-preview.8
 
 - Integrate the separately published 0.26.0-preview.12 development line with

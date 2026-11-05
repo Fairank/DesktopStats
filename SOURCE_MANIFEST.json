@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.26.1-preview.8",
-  "archive_root": "DesktopStats-0.26.1-preview.8-source/",
+  "version": "0.26.1-preview.9",
+  "archive_root": "DesktopStats-0.26.1-preview.9-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 29471,
-      "sha256": "e827cf6b4439a9663922bca586e1ebd4e5ebdccefe2fdf7b450720bcafae6e6c"
+      "bytes": 30022,
+      "sha256": "be59507c06b34a0fe08fbb9a04d33aa2c49384f4ae79906fe9e3f0d3e3ec1767"
     },
     {
       "path": "Install.cmd",
@@ -39,8 +39,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 17069,
-      "sha256": "5139569925f62b67217c0769c1b58e5206eeae0e3d84339f1beba9036a4590f6"
+      "bytes": 17398,
+      "sha256": "4672084bdb89411c0de36a7a590d947754fdfd4fa97e031cc94c39be92b73b05"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1254,8 +1254,8 @@
     },
     {
       "path": "native_card.py",
-      "bytes": 36955,
-      "sha256": "16d51dc587a369ea4360cec6c2d2cfd21494ceadba35937ff890af441ed6e092"
+      "bytes": 37951,
+      "sha256": "c4939c20a94abc23ea86f4397a3685d08e572c0b275c372e47f8f1c15a5c030d"
     },
     {
       "path": "native_controller.py",
@@ -1330,7 +1330,7 @@
     {
       "path": "product_version.py",
       "bytes": 30,
-      "sha256": "c7e17a02bbc64d4aba6810f61b7dabdd6268699bc8f891828ac0ac2a03ad6ce0"
+      "sha256": "332e98d76289f0d4f0b3340b3530397e66d3108f8b1fa91e916486a8362f1a48"
     },
     {
       "path": "profile_paths.py",
@@ -1459,8 +1459,8 @@
     },
     {
       "path": "tests/test_card_layout.py",
-      "bytes": 19970,
-      "sha256": "cdc098b2537278b73beb870bab1b0c91ba04c1822455847587b78df6b293bcbb"
+      "bytes": 22528,
+      "sha256": "f08eadf3e581560a69c61c90413c555ca201d173b45ab066ef323af07e51bcb4"
     },
     {
       "path": "tests/test_collector_build.py",
