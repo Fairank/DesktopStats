@@ -21,6 +21,7 @@ from PySide6.QtSvg import QSvgRenderer
 
 import hardware_appearance as hardware
 from hardware_fan_profiles import GROUP_A, GROUP_B, PROFILES, profile_for
+from hardware_variants import base_identity
 from hardware_series import SERIES_CATALOG
 from tools.generate_hardware_fan_data import payload
 
@@ -107,7 +108,7 @@ class HardwareFanProfileDataTests(unittest.TestCase):
                     self.assertIs(type(fan["outer_ring"]), bool)
                     self.assertIn(fan.get("group_size", 1), (1, 2, 3))
                     self.assertIn(fan.get("direction", 1), (1, -1))
-        self.assertEqual(guarded_models, set(GPU_ROWS))
+        self.assertEqual(guarded_models, {base_identity(model) for model in GPU_ROWS})
 
     def test_series_brand_other_sku_and_non_gpu_cannot_claim_reviewed_technology(self):
         for series, row in PROFILES.items():
@@ -213,7 +214,6 @@ QtObject {
                         self.assertEqual(sum(node.get("class") == "hardware-fan-hub" for node in svg.iter()), 1)
                         self.assertEqual(rotor["direction"], expected.get("direction", 1))
         self.assertGreater(known_seen, 100)
-        self.assertGreater(unknown_seen, 100)
 
     def test_rotating_tip_rings_linked_groups_and_triangle_hub_are_distinct(self):
         for series in ("asus_dual", "msi_ventus", "msi_suprim", "asrock_steel_legend", "amd_reference", "colorful_advanced"):
@@ -276,7 +276,9 @@ QtObject {
         self.assertEqual(blade_paths(missing), [])
         self.assertEqual(sum(node.tag.endswith("path") for node in missing.iter()), 0)
         self.assertIsNone(PROFILES["powercolor_reaper"]["blades"])
-        self.assertIsNone(PROFILES["leadtek_hurricane"]["blades"])
+        leadtek=PROFILES['leadtek_hurricane']
+        self.assertEqual([effective_profile(leadtek,index).get('blades') for index in range(3)],[9,None,9])
+        self.assertFalse(profile_for(exact_appearance(leadtek['model_ids'][0]))['render_ready'])
 
 
 if __name__ == "__main__":

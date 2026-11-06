@@ -456,11 +456,14 @@ class Controller(WorkspaceTools):
             "placement",
             "style",
             "icon_effect",
+            "hardware_model",
         ):
             return
         value = copy.deepcopy(self._draft)
         item = next((item for item in value["top_bar"]["items"] if item["id"] == identifier), None)
         if item is not None:
+            if field=="gpu_target" and selected!=(item['prefs'].get('gpu_target') or '0'):
+                item['prefs'].pop('hardware_model',None)
             item["prefs"][field] = selected
             self.edit(value)
 
@@ -795,6 +798,14 @@ class Controller(WorkspaceTools):
     @Slot(result="QVariantList")
     def topBarRows(self):
         return self._top_bar_rows(self._saved)
+
+    @Slot(str,result="QVariantList")
+    def hardwareAppearanceChoices(self,identifier):
+        from hardware_appearance import appearance_choices
+        item=next((row for row in self._draft['top_bar']['items'] if row['id']==identifier),None)
+        if item is None or (not item['metric'].startswith('ram_') and METRICS.get(item['metric'],{}).get('scope')!='gpus'):
+            return []
+        return [dict(id='',label=self.tr('自动匹配'))]+appearance_choices(self._data,item['metric'],item['prefs'])
 
     @Slot(result="QVariantList")
     def topBarDraftRows(self):

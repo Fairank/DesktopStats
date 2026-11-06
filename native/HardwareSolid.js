@@ -1,6 +1,7 @@
 .pragma library
 .import "HardwareSeriesShapes.js" as Series
 .import "HardwareFanDesigns.js" as FanDesigns
+.import "HardwareBoardDesigns.js" as Board
 
 // Original static object illustrations. The caller supplies normalized,
 // allowlisted state and owns SVG wrapping, stable keys, texture caching and
@@ -84,8 +85,8 @@ function baseGeometry(state) {
 }
 
 function front(state, g, colors) {
-    return Series.known(state) ? Series.face(state, g, colors)
-        : shell(g, family(state), colors) + trim(state, g, colors)
+    return Board.variantFace(state,g,colors) || (Series.known(state) ? Series.face(state, g, colors)
+        : shell(g, family(state), colors) + trim(state, g, colors))
 }
 
 function underlay(state, g, colors) {
@@ -149,11 +150,7 @@ function integrated(colors) {
 function gpu(state, colors) {
     if (state.style === "gpu_integrated") return integrated(colors)
     const g=geometry(state), x=g.x, y=g.y, end=x+g.w, bottom=y+g.h
-    let result = r(x-.75,y-.4,.9,g.h+1.25,.25,colors.rim)
-        + r(x-.9,y-.45,1.85,.65,.18,colors.rim)
-        + r(x+.5,bottom-.25,g.w-1,.9,.25,colors.caseShade)
-        + r(x+g.w*.27,bottom+.55,g.w*.18,.7,.1,colors.gold)
-        + underlay(state,g,colors) + front(state,g,colors)
+    let result = Board.base(state,g,colors) + underlay(state,g,colors) + front(state,g,colors)
     const cy=y+g.h*.51
     if (state.style === "gpu_blower" && state.fan_count === 1) {
         result += turbine(g.centers.length?g.centers[0]:end-4.5,cy,Math.min(3.55,g.h*.37),colors)
@@ -168,12 +165,12 @@ function gpu(state, colors) {
             +"M"+(x+8.2)+" "+(y+2.5)+"L"+(x+7.1)+" "+(y+6.6),"none",.65,colors.caseShade,1.0)
         result += p("M"+(end-6)+" "+(y+2.8)+"H"+(end-2.1)+"V"+(y+6.2)+"H"+(end-5.2)+"Z",colors.caseShade,.52)
     }
-    return result
+    return result+Board.finish(state,g,colors)
 }
 
 function body(state, rotorCollector) {
     const normalized=state || ({})
-    const colors=palette(normalized)
+    const colors=normalized.kind==="gpu"?Board.colors(normalized,palette(normalized)):palette(normalized)
     colors.fanDesignSeries=normalized.series_id
     colors.fanDesignIndex=0
     // Optional call-local collection; ordinary static output is unchanged.

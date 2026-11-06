@@ -4,6 +4,7 @@
 .import "HardwareSoft.js" as Soft
 .import "HardwareSeriesShapes.js" as SeriesCatalog
 .import "HardwareMemoryShapes.js" as Memory
+.import "HardwareBoardDesigns.js" as Board
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
@@ -66,9 +67,20 @@ function key(appearance, ink) {
     const motif = requestedMotif === series ? series : ""
     if (!motif) series = ""
     const defaults = {intel: "#2479b5", amd: "#c65b56", nvidia: "#729b42", unknown: "#77818f"}
-    return [kind, vendor, board, style, count, shroud,
+    const parts = [kind, vendor, board, style, count, shroud,
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
-        choice(input.icon_set, ["outline", "solid", "miniature", "soft"], "outline")].join("|")
+        choice(input.icon_set, ["outline", "solid", "miniature", "soft"], "outline")]
+    // Original Outline keys and art stay byte-stable. Exact exterior details
+    // require an independently guarded model identity, including on old cards.
+    const model=parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):""
+    if(model)parts.push(model)
+    return parts.join("|")
+}
+
+function inputFromParts(parts) {
+    return {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
+        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10],
+        id:parts[11]||"",confidence:parts.length===12?"model":""}
 }
 
 function path(d, ink, width, opacity) {
@@ -210,16 +222,15 @@ function gpu(style, count, shroud, board, ink, accent, motif) {
 
 function source(geometryKey) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
-    if (parts.length !== 11) return source(key({}, "#69788c"))
+    if (parts.length !== 11 && parts.length !== 12) return source(key({}, "#69788c"))
     // Validate public input again; no untrusted text is inserted into XML.
-    const canonical = key({kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10]}, parts[7])
+    const canonical = key(inputFromParts(parts), parts[7])
     if (canonical !== geometryKey) return source(canonical)
     const ink = parts[7], accent = parts[6]
     const outlineBody = parts[10] === "outline" && parts[0] !== "memory" ? (parts[0] === "cpu" ? cpu(parts[3], ink, accent)
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10]}
+        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
     const body = parts[0] === "memory" ? Memory.body(state) : parts[10] === "solid" ? Solid.body(state)
         : parts[10] === "miniature" ? Miniature.body(state)
         : parts[10] === "soft" ? Soft.body(state)
@@ -231,11 +242,10 @@ function source(geometryKey) {
 
 function layers(geometryKey) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
-    if (parts.length !== 11) return {baseSource:source(key({}, "#69788c")),rotors:[]}
+    if (parts.length !== 11 && parts.length !== 12) return {baseSource:source(key({}, "#69788c")),rotors:[]}
     // This public API accepts only the same canonical, allowlisted fields as
     // source(). No SVG or caller-supplied descriptor body is parsed or trusted.
-    const canonical = key({kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10]}, parts[7])
+    const canonical = key(inputFromParts(parts), parts[7])
     if (canonical !== geometryKey) return layers(canonical)
     const count = Number(parts[4])
     if (parts[0] !== "gpu" || ["solid","miniature","soft"].indexOf(parts[10]) < 0
@@ -244,7 +254,7 @@ function layers(geometryKey) {
         return {baseSource:source(canonical),rotors:[]}
 
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:count,shroud:parts[5],accent:parts[6],ink:parts[7],series_id:parts[9],icon_set:parts[10]}
+        fan_count:count,shroud:parts[5],accent:parts[6],ink:parts[7],series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
     // One normal style body pass supplies fixed casing/discs and final fan
     // coordinates. The collector is local, including all per-style offsets and
     // each fan's reviewed radius/type. No complete-card regeneration per frame.

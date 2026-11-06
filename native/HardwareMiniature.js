@@ -1,5 +1,6 @@
 .pragma library
 .import "HardwareSolid.js" as Solid
+.import "HardwareBoardDesigns.js" as Board
 
 // Original tiny physical objects: a thin upper edge, a right-side thickness and
 // one fixed polygon shadow. Fan faces remain circles; no SVG filters, skewed
@@ -92,15 +93,12 @@ function gpu(state, colors) {
     g.h-=.3
     if(g.fan_y)g.fan_y=g.fan_y.map(function(value){return value+.75-.3*.51})
     const x=g.x,y=g.y,e=x+g.w,b=y+g.h
-    let result=shadow(g)
-        +Solid.r(x-.7,y-.2,.85,g.h+1.0,.2,colors.rim)
-        +Solid.r(x-.85,y-.3,1.55,.55,.15,colors.rim)
-        +Solid.p("M"+(x+.7)+" "+y+"L"+(x+2.35)+" "+(y-1.8)+"H"+(e+1.65)+"L"+e+" "+y+"Z",colors.caseTop)
-        +Solid.p("M"+(e-.2)+" "+(y+.3)+"L"+(e+1.65)+" "+(y-1.8)+"V"+(b-1.8)+"L"+(e-.2)+" "+(b+.1)+"Z",colors.side)
-        +Solid.r(x+.6,b-.05,g.w-.35,.7,.15,colors.side)
-        +Solid.r(x+g.w*.27,b+.55,g.w*.18,.65,.1,colors.gold)
+    const depth=Board.depth(state,g)
+    let result=shadow(g)+Board.base(state,g,colors)
+        +Solid.p("M"+(x+.7)+" "+y+"L"+(x+.7+depth)+" "+(y-depth)+"H"+(e+depth)+"L"+e+" "+y+"Z",colors.caseTop)
+        +Solid.p("M"+(e-.2)+" "+(y+.3)+"L"+(e+depth)+" "+(y-depth)+"V"+(b-depth)+"L"+(e-.2)+" "+(b+.1)+"Z",colors.side)
         +Solid.underlay(state,g,colors)+Solid.front(state,g,colors)
-    result+=Solid.p("M"+(x+2.35)+" "+(y-1.5)+"H"+(e+1.0),"none",.65,colors.edge,.35)
+    result+=Solid.p("M"+(x+.7+depth)+" "+(y-depth+.22)+"H"+(e+depth-.5),"none",.65,colors.edge,.25)
     const cy=y+g.h*.51
     if(state.style==="gpu_blower"&&state.fan_count===1) {
         result+=Solid.turbine(g.centers.length?g.centers[0]:e-4.5,cy,Math.min(3.5,g.h*.37),colors)
@@ -117,12 +115,12 @@ function gpu(state, colors) {
             +"M"+(x+6.1)+" "+(y+3.0)+"L"+(x+5.2)+" "+(y+6.3)
             +"M"+(x+8.2)+" "+(y+3.0)+"L"+(x+7.3)+" "+(y+6.3),"none",.72,colors.caseTop,.8)
     }
-    return result
+    return result+Board.finish(state,g,colors)
 }
 
 function body(state, rotorCollector) {
     const normalized=state || ({})
-    const colors=palette(normalized)
+    const colors=normalized.kind==="gpu"?Board.colors(normalized,palette(normalized)):palette(normalized)
     colors.fanDesignSeries=normalized.series_id
     colors.fanDesignIndex=0
     if(Array.isArray(rotorCollector))colors.rotorCollector=rotorCollector

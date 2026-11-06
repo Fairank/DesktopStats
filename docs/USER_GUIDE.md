@@ -65,6 +65,18 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 
 开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。通用风扇符号与功率流动属于装饰反馈。开发版的实物显卡叶轮单独跟随当前 RPM，以固定 120 倍慢放，速度偏好不改变其比例；详见下文显卡风扇说明。
 
+### 硬件图标与型号（开发版）
+
+在 **顶部栏 → 外观 → 硬件图标** 选择 **经典通用、结构线稿、精简实物、微型实物、柔和双色**。五种版本继续保留，旧设置默认使用经典通用（Classic）；切换后按现有 **应用顶部栏** 流程保存。实物风格按已核型号绘制盖板、风扇、外露 PCB 边缘、分段金手指、挡板和散热鳍片边缘；有官方依据时使用该型号的真实外观颜色。尺寸和轮毂比例仍是便于小图标阅读的简化，未核实的 PCB 内部元件、走线和长度不补造。
+
+基础图库包括 103 个显卡代表型号、16 个内存代表型号，以及原有 CPU 示例。经过核实且图示已就绪的完整版本型号会另行加入匹配；同系列的 OC、非 OC、白色、特殊供电和修订版分别记录，不通过删除型号后缀自动合并。有证据证明外观相同的版本才共用图示；结构不同的版本需要单独实现。例如 MSI RTX 5090 SUPRIM SOC/OC 使用独立金属盖板和 STORMFORCE 七叶前扇，不套用 RTX 4090 的外壳；ROG Astral RTX 5090 标准版/OC 版在逐项核对官方图库和外部规格后，共用已核 Astral RTX 5080 OC 的可见散热外观。共用外观不会把另一型号的芯片、显存或读数带过来。
+
+未识别出具体非公型号时，可在该指标的 **外观型号** 中手动选择，详情会标明 **手动外观**。显卡候选只来自当前所选设备已缓存的 GPU 芯片身份，Ti、SUPER、XT 等不同芯片变体不会混为一个候选；设备缺失或身份不明确时，不借用另一块显卡来提供候选或读数。内存也可手动选择图示。手动选择仅改变图示，不改变所选设备、指标、传感器来源和数值，也不证明电脑实际安装了所选零售型号。选回 **自动匹配** 可恢复现有识别规则；切换所选显卡时，也会只清除该项手动外观并恢复自动匹配，保留其余显示设置。打开或切换外观选项复用缓存身份，不增加硬件查询。
+
+展开硬件说明后，**查看接口** 与 **查看供电** 按已有资料提供实体插口的类型和数量示意。视频口的排列、供电插座的安装位置和挡板开孔未核实时会明确说明；示意图不代表已确认的实物顺序。已确认无需外接供电的型号会单独标明；未知供电不当作没有供电。主机接口区分 PCIe/AGP，电气通道数不会被画成未经确认的短金手指。内存接口按已确认的代际、DIMM/SO-DIMM 和物理引脚规格说明；三种实物风格的 DDR4 DIMM、DDR5 DIMM、DDR4 SO-DIMM 缺口按官方正视 PCB 尺寸图的中心、宽度和深度比例绘制，其他未核规格仍保留简化示意。图中的触点细线不是逐针工程图，经典通用与结构线稿保持原样。
+
+待核型号和不同但尚未实现的版本仍保留在版本清单，不会悄悄套用代表型号的盖板或叶轮。基础图库、就绪版本及风扇细节的当前状态见 [硬件覆盖报告](HARDWARE_COVERAGE.json)；它记录已核范围，不表示已完成市面上每个品牌、系列和版本。
+
 ### 顶部栏整体设计
 
 在 **外观** 中选择 **经典菜单栏 / 分组胶囊 / 精密仪表**，上方同一个实时预览随选择更新。经典保留紧凑菜单栏轮廓；胶囊用轻底板区分每组；仪表以细分隔和量程刻线组织信息。三套设计共用当前真实指标和原有十种显示方式，不重置单位、设备或排序，也不关闭“跟随全局”材质。旧设置默认沿用经典设计，切换后点 **应用顶部栏** 保存，未应用的改动可撤销。
@@ -144,20 +156,52 @@ recent uncommitted batch; a paused or failing writer does not establish a strict
 five-second durability guarantee. The pending buffer and existing retention
 limits remain bounded. This batching does not change sensor polling frequency.
 
-### Graphics-card fan appearance and RPM (development)
+### Hardware appearances, model selection and fan RPM (development)
 
-The reviewed GPU catalog includes a fan profile for each of its 103 exact board
-representatives. Blade counts are confirmed for 48 of them; unconfirmed blades
-use neutral rotors. Rings, linked blade groups, triangular hubs and opposite
-rotation are applied only where model-specific references support them. A bare
-GPU chip name does not establish a retail cooler. Illustration proportions are
-visual estimates, not measured factory dimensions.
+The source-linked base catalog contains 103 GPU and 16 RAM representatives,
+alongside the existing CPU examples. Ready exact versions extend that catalog
+only after their visible exterior is reviewed and either confirmed to share art
+or given an independent structural recipe. OC/non-OC, white, rear-power and
+revision suffixes are not discarded. MSI RTX 5090 SUPRIM SOC/OC has its own
+metal-panel cover and STORMFORCE seven-blade front rotors; reviewed ROG Astral
+RTX 5090 standard/OC exteriors share the reviewed Astral RTX 5080 OC art only
+after checking official images and external specifications. The
+[coverage report](HARDWARE_COVERAGE.json)
+records the current reviewed and pending inventory; it is not a claim of full
+market coverage.
 
-Unreviewed active fan faces are explicitly labelled pending and remain static.
-They are not completed brand-specific fan designs. Reviewed faces use curved,
-separated vanes and a recessed cap; the confirmed PURE white fan keeps its light
-rotor instead of inheriting the common dark fan palette. The offline gallery
-enables fan motion only for the 48 reviewed faces.
+All five selectable icon versions remain available: Classic, Outline, Solid,
+Miniature and Soft. Existing settings retain Classic. Reviewed model colors,
+exposed PCB edges, separated contacts, bracket and heatsink edges refine the
+hardware drawings. Internal PCB layouts, unverified notches and bare-board
+lengths are not invented. Electrical PCIe lanes do not establish mechanical
+connector length. Port and power views show documented connector types and
+counts, with unverified order and position explicitly labelled; they are not
+physical installation diagrams.
+
+Modern DDR4 DIMM, DDR5 DIMM and DDR4 SO-DIMM keys use the nominal center,
+width and depth ratios from published front-view PCB mechanical drawings.
+Other unreviewed classes retain schematic keys; contact dividers do not depict
+every physical pin. Classic and Outline remain unchanged.
+
+An optional Appearance model choice is labelled Manual appearance. GPU choices
+use only the selected device's cached chip identity; chip variants and missing
+secondary GPUs cannot borrow another device's cooler or readings. RAM art can
+also be selected manually. Only the illustration changes: metrics, device
+targets, sensor sources and values stay the same. Selecting Automatic matching
+restores the existing resolver, and opening or changing these choices adds no
+hardware query. Manual art does not establish the installed retail model.
+Changing the GPU target clears only that item's manual artwork choice and
+restores automatic matching, preserving its other display preferences.
+
+Blade counts, rings, linked blade groups, hubs and relative counter-rotation
+are applied only where exact-model references support them. A bare GPU chip
+name does not establish a retail cooler. Illustration proportions are visual
+estimates, not measured factory dimensions. Source-confirmed light and dark
+rotors retain their own colors; fixed shroud rings do not rotate with the fan.
+Unreviewed active fan faces are labelled pending and remain neutral and static.
+The offline gallery enables motion only for reviewed fan faces; its current
+review totals are recorded in the coverage report.
 
 Solid, Miniature and Soft Auto effects use fresh same-card current RPM, displayed
 unchanged and animated at a fixed 120x slow-motion scale. Higher RPM rotates

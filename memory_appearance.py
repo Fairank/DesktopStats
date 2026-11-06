@@ -9,6 +9,8 @@ No hardware, registry, profile, filesystem, driver, network or thread is read.
 
 import re
 from functools import lru_cache
+from hardware_board_details import for_appearance as board_details_for
+from hardware_variants import extend_memory_catalog
 
 BRANDS = {
     "corsair": ("CORSAIR", "#ae975b"),
@@ -107,6 +109,7 @@ CATALOG = (
     _model("adata-ax4u32008g16a-st60", "adata_spectrix_d60g", "XPG SPECTRIX D60G AX4U32008G16A-ST60", "AX4U32008G16A-ST60"),
 )
 
+CATALOG = extend_memory_catalog(CATALOG)
 _SERIES_BY_ID = {row["id"]: row for row in SERIES_CATALOG}
 _BRAND_ALIASES = {
     "corsair": ("corsair", "海盗船", "美商海盗船"),
@@ -205,9 +208,13 @@ def appearance_for_memory(name="", model="", manufacturer=""):
     """
     identity, brand, label, form, presentation, series, series_label, features, url, confidence = _resolve(
         _bounded(name), _bounded(model), _bounded(manufacturer))
-    return dict(id=identity, kind="memory", vendor="unknown", brand=brand, board_vendor=brand,
+    result = dict(id=identity, kind="memory", vendor="unknown", brand=brand, board_vendor=brand,
                 label=label, style=form if form in ("dimm", "sodimm") else "memory_neutral",
                 form_factor=form, presentation=presentation, shroud=presentation,
                 series_id=series, series_label=series_label, features=list(features), source_url=url,
                 confidence=confidence, accent=BRANDS[brand][1], fan_count=None,
                 visible_fan_count=None, legacy=False)
+    details = board_details_for(result)
+    if details:
+        result['board_details'] = details
+    return result

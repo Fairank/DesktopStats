@@ -10,12 +10,12 @@ function profile(series,index,kind) {
     Object.keys(row).forEach(function(key){if(key!=="fans")result[key]=row[key]})
     if(row.fans && row.fans[index]) Object.keys(row.fans[index]).forEach(function(key){result[key]=row.fans[index][key]})
     result.blades=Number.isInteger(result.blades)&&result.blades>=2&&result.blades<=64?result.blades:null
-    result.hub_ratio=typeof result.hub_ratio==="number"&&Number.isFinite(result.hub_ratio)?Math.max(.1,Math.min(.55,result.hub_ratio)):.28
-    result.shape=["swept","wide","paired","claw","radial","neutral"].indexOf(result.shape)>=0?result.shape:"neutral"
+    result.hub_ratio=typeof result.hub_ratio==="number"&&Number.isFinite(result.hub_ratio)?Math.max(.1,Math.min(.70,result.hub_ratio)):.28
+    result.shape=["swept","wide","paired","claw","radial","straight","neutral"].indexOf(result.shape)>=0?result.shape:"neutral"
     result.group_size=[1,2,3].indexOf(result.group_size)>=0?result.group_size:1
     result.direction=result.direction===-1?-1:1
     result.hub_shape=result.hub_shape==="triangle"?"triangle":"circle"
-    result.tone=result.tone==="light"?"light":"dark"
+    result.tone=["light","red"].indexOf(result.tone)>=0?result.tone:"dark"
     result.paintKey=String(series).replace(/[^a-z0-9_]/g,"")+"_"+index
     result.kind=kind
     return result
@@ -29,7 +29,8 @@ function point(angle,radius) {
 function contour(p) {
     // Sweep is independent of blade pitch: dense 11/13-blade rotors must
     // retain curved vanes instead of collapsing into almost radial spokes.
-    return p.shape==="wide"?{sweep:34,lead:.35,trail:.34,root:.23}
+    return p.shape==="straight"?{sweep:4,lead:.32,trail:.32,root:.25}
+        :p.shape==="wide"?{sweep:34,lead:.35,trail:.34,root:.23}
         :p.shape==="paired"?{sweep:34,lead:.31,trail:.30,root:.18}
         :p.shape==="claw"?{sweep:36,lead:.33,trail:.31,root:.20}
         :{sweep:34,lead:.28,trail:.28,root:.20}
@@ -49,7 +50,9 @@ function blade(p) {
 function fanPalette(p) {
     // Object colours belong to the rotor, not the CPU/board highlight palette.
     // Keep a dark recess and an independent cap; white retail fans opt in.
-    return p.tone==="light"
+    return p.tone==="red"
+        ? {rim:"#686c72",disk:"#302d33",blade:"#b9555d",hub:"#582f38",edge:"#c78186",ridge:"#d48d92",shade:"#743842",light:"#d37b80"}
+        :p.tone==="light"
         ? {rim:"#a6b6be",disk:"#637684",blade:"#d3dde2",hub:"#bdcbd3",edge:"#eef3f6",ridge:"#a4b6c2",shade:"#acbfca",light:"#eef3f6"}
         : {rim:"#738795",disk:"#253440",blade:"#586c7b",hub:"#344450",edge:"#8297a5",ridge:"#91a3af",shade:"#3c4f5e",light:"#738b9c"}
 }
@@ -61,6 +64,7 @@ function tipArc(start,end,color) {
 
 function rotor(p,c) {
     c=fanPalette(p)
+    if(p.hub_tone==="silver"){c.hub="#bdc9d0";c.edge="#e1e8ed"}
     var out="",count=p.blades
     if(count!==null && p.shape!=="neutral") {
         // A small static SVG paint gives the curved plastic a raised face.
@@ -88,13 +92,14 @@ function rotor(p,c) {
     } else {
         // Known rotor presence with unreviewed blades: broad shaded disc,
         // no arbitrary repeated spokes that could be mistaken for a count.
-        out+='<circle r="2.25" fill="'+c.disk+'"/><circle r="1.95" fill="none" stroke="'+c.blade+'" stroke-opacity=".25" stroke-width=".32"/>'
+        out+='<circle r="2.25" fill="'+c.blade+'" fill-opacity=".24"/><circle r="1.95" fill="none" stroke="'+c.blade+'" stroke-opacity=".3" stroke-width=".32"/>'
         if(p.outer_ring===true)out+='<circle r="2.62" fill="none" stroke="'+c.blade+'" stroke-width=".22"/>'
     }
     if(p.direction===-1)out='<g transform="scale(-1 1)">'+out+'</g>'
     var hub=p.hub_ratio*3
     if(p.hub_shape==="triangle")out+='<path class="hardware-fan-hub" d="M'+point(0,hub*1.15)+'L'+point(120,hub*1.15)+'L'+point(240,hub*1.15)+'Z" fill="'+c.hub+'"/>'
     else out+='<circle class="hardware-fan-hub" r="'+hub+'" fill="'+c.hub+'" stroke="'+c.edge+'" stroke-width=".06"/>'
+    if(p.hub_tone==="silver")out+='<circle r="'+(hub*.78)+'" fill="none" stroke="#8c9eaa" stroke-width=".065"/>'
     return out
 }
 
@@ -102,6 +107,7 @@ function fan(cx,cy,radius,c,kind) {
     var index=c.fanDesignIndex || 0
     c.fanDesignIndex=index+1
     var p=profile(c.fanDesignSeries,index,kind)
+    if(c.fanOverrides)Object.keys(c.fanOverrides).forEach(function(key){p[key]=c.fanOverrides[key]})
     var colors=fanPalette(p)
     var moving=rotor(p,c)
     var base='<g class="'+(kind==="blower"?'hardware-blower':'hardware-fan')+'" transform="translate('+cx+' '+cy+') scale('+(radius/3)+')">'

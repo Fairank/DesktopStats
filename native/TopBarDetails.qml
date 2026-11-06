@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import DesktopStats 1.0
+import "HardwareBoardDesigns.js" as BoardDesigns
 
 Window {
     id: root
@@ -52,6 +53,11 @@ Window {
     readonly property bool dark: foreground.r > 0.5
     property bool showMissing: false
     property bool showMetadata: false
+    property string hardwareStructureView: ""
+    readonly property var boardFacts: (detail.hardware_appearance || ({})).board_details || ({})
+    readonly property string hardwareDrawingKey: BoardDesigns.modelKey(detail.hardware_appearance || ({}))
+    onHardwareDrawingKeyChanged: hardwareStructureView=""
+    onShowMetadataChanged: if(!showMetadata)hardwareStructureView=""
     property bool showCpuDetails: false
     property int chartCursorIndex: -1
     property real chartCursorTime: NaN
@@ -1126,7 +1132,7 @@ Window {
                                         text: {
                                             const appearance = appearanceSummary.appearance
                                             const confidence = appearance.confidence
-                                            const parts = [root.tr(appearance.icon_set === "classic" ? "经典通用"
+                                            const parts = [root.tr(appearance.selection_source==="manual"?"手动外观":appearance.icon_set === "classic" ? "经典通用"
                                                 : confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
                                             if (["model", "brand"].includes(confidence) && typeof appearance.label === "string" && appearance.label.trim())
                                                 parts.push(appearance.label.trim())
@@ -1192,6 +1198,70 @@ Window {
                                         text: appearanceSummary.appearance.icon_set !== "classic"
                                             && appearanceSummary.appearance.features && typeof appearanceSummary.appearance.features.filter === "function"
                                             ? appearanceSummary.appearance.features.filter(value => typeof value === "string" && value.trim()).slice(0, 2).join("\n") : ""
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailBoardSockets"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: [root.boardFacts.ports_text,root.boardFacts.power_text].filter(value=>!!value).map(value=>root.tr(value)).join("\n")
+                                        textFormat: Text.PlainText
+                                        color: root.foreground; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailBoardStructure"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: {
+                                            const facts=root.boardFacts,parts=[]
+                                            if(facts.host_text)parts.push(root.tr(facts.host_text))
+                                            if(Number.isFinite(facts.slot_width))parts.push(facts.slot_width+" "+root.tr("槽"))
+                                            if(facts.kind==="memory") {
+                                                if(facts.generation)parts.push(String(facts.generation).toUpperCase())
+                                                if(Number.isInteger(facts.pins))parts.push(facts.pins+" pin")
+                                            }
+                                            return parts.join(" · ")
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    RowLayout {
+                                        Layout.fillWidth: true; spacing: 6
+                                        visible: root.boardFacts.kind==="gpu" && !!root.hardwareDrawingKey
+                                        Repeater {
+                                            model: [{id:"ports",label:root.tr("查看接口"),ready:root.boardFacts.ports && root.boardFacts.ports.length>0},
+                                                {id:"power",label:root.tr("查看供电"),ready:root.boardFacts.power_connectors && root.boardFacts.power_connectors.length>0}]
+                                            delegate: Button {
+                                                id: structureButton
+                                                required property var modelData
+                                                objectName: "topBarHardwareStructure_"+modelData.id
+                                                text: modelData.label; enabled: !!modelData.ready
+                                                onClicked: root.hardwareStructureView=root.hardwareStructureView===modelData.id?"":modelData.id
+                                                padding: 6
+                                                contentItem: Text { text: structureButton.text; color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11 }
+                                                background: Rectangle { radius: 6; color: root.tint(structureButton.hovered?0.08:0.03); border.width: 1; border.color: root.hardwareStructureView===structureButton.modelData.id?root.pairColor(0):root.tint(0.1) }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Loader {
+                                objectName: "topBarHardwareStructureLoader"
+                                Layout.fillWidth: true
+                                active: root.showMetadata && root.visible && !root.hostMinimized
+                                    && root.visibility!==Window.Minimized && !!root.hardwareDrawingKey && !!root.hardwareStructureView
+                                visible: active
+                                sourceComponent: ColumnLayout {
+                                    spacing: 4
+                                    Image {
+                                        objectName: "topBarHardwareStructureImage"
+                                        Layout.fillWidth: true; Layout.preferredHeight: 90
+                                        source: BoardDesigns.technicalSource(root.hardwareDrawingKey,root.hardwareStructureView)
+                                        sourceSize.width: 320; sourceSize.height: 140
+                                        fillMode: Image.PreserveAspectFit; cache: true; smooth: true; mipmap: false
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.tr(root.hardwareStructureView==="ports"?"接口数量示意，排列未核实":root.boardFacts.alternative_power?"供电插座示意，连接位置二选一":"供电插座示意")
                                         textFormat: Text.PlainText
                                         color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
                                     }

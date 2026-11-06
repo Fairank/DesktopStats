@@ -50,11 +50,16 @@ class MemoryIdentityTests(unittest.TestCase):
                     self.assertIsNone(value["visible_fan_count"])
 
     def test_part_boundaries_do_not_strip_capacity_kit_color_or_revision_suffixes(self):
+        exact={alias.casefold():row['id'] for row in memory.CATALOG for alias in row['aliases']}
         for row in memory.CATALOG:
             part = row["aliases"][0]
             for value in (part[:-1], "X" + part, part + "X", part + "-WHITE", part + "/1", part + ".1", part + "_EXTRA"):
                 with self.subTest(part=part, invalid=value):
-                    self.assertNotEqual(memory.appearance_for_memory(model=value)["confidence"], "model")
+                    result=memory.appearance_for_memory(model=value)
+                    if value.casefold() in exact:
+                        self.assertEqual((result['confidence'],result['id']),('model',exact[value.casefold()]))
+                    else:
+                        self.assertNotEqual(result["confidence"], "model")
         # SMBIOS can expose the individual module, while a retail page names
         # the two-module kit. Neither is obtained by removing a kit suffix.
         for value in ("CMK8GX4M1B3200C16", "F4-4000C16-16GTZRA"):
@@ -319,7 +324,7 @@ Window {
                 pointer = getCppPointer(glyph)[0]
                 key = control.property("geometryKey")
                 fields = key.split("|")
-                self.assertEqual((fields[0], fields[2], fields[3], fields[4], fields[5], fields[-1]),
+                self.assertEqual((fields[0], fields[2], fields[3], fields[4], fields[5], fields[10]),
                                  ("memory", "corsair", "dimm", "-1", "rgb", style))
                 self.assertEqual(fields[8], "corsair_dominator_platinum")
                 source = self.svg(control)

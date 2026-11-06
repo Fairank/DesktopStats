@@ -5,6 +5,8 @@ meaning, live temperature, load colours or the existing motion clock. CPU, GPU
 and RAM appearances also reach the expanded hardware details. These are
 stylised illustrations, not product photos, official logos or manufacturing drawings.
 Small brand accents are UI colours, not a claim about a card's physical colour.
+Source-confirmed model colours are applied separately to modern shrouds, rotors
+and exposed PCB edges.
 
 ## Selectable icon versions
 
@@ -34,13 +36,15 @@ The source-export tools include a synthetic offscreen comparison renderer,
 
 - CPU manufacturer and GPU chip vendor are different from the manufacturer of a
   complete graphics card. A motherboard's ASUS identity says nothing about a GPU.
-- The GPU catalog contains 103 dedicated designs and 103 reviewed GPU models
-  across 24 GPU brand identities. The memory catalog adds 16 designs and 16
-  complete reviewed part numbers across 6 memory brands. Together with 3 CPU
-  examples, that is 122 model records and 119 GPU/memory designs, with 30 brand
-  identities across the GPU and memory catalogs and official reference URLs.
-  This is a bounded catalog, not coverage of every current or historical SKU.
-  The CPU examples do not establish coverage of all processor families.
+- The base catalog contains 103 GPU representatives across 24 GPU brand
+  identities, 16 RAM representatives across 6 memory brands, and 3 CPU examples.
+  Source-confirmed ready exact versions extend that base: shared exteriors need
+  their own complete reviewed aliases, while different structures need an
+  implemented independent recipe. The current generated runtime catalog has
+  146 entries: 122 GPU, 21 RAM and 3 CPU. The generated
+  [coverage report](docs/HARDWARE_COVERAGE.json) records supported and pending
+  versions and current field-review totals. This is a bounded catalog, not
+  coverage of every current or historical SKU or processor family.
 - Each GPU series has a dedicated static casing profile in Solid, Miniature and
   Soft. Expanded details provide up to two short feature descriptions and an
   on-demand larger illustration. These summarize the cited representative's
@@ -62,6 +66,12 @@ The source-export tools include a synthetic offscreen comparison renderer,
 - A GPU revision, white edition, BTF version or nearby model must have its own
   reviewed alias. A GPU chip name, sensor row count and fan speed of zero cannot
   prove the number of physical fans.
+- OC/non-OC versions share art only where exact official sources support the
+  same visible exterior. Shared artwork does not transfer chip specifications,
+  sensor readings or internal PCB claims. MSI RTX 5090 SUPRIM SOC/OC uses an
+  independent cover recipe and seven-blade STORMFORCE front rotors; reviewed
+  Astral RTX 5090 standard/OC artwork shares the verified Astral exterior only
+  after checking official images and external specifications.
 - Bare chip names do not prove a reference board. Founders Edition, AMD Reference
   / Made by AMD and Intel Limited Edition require their explicit reviewed
   identities; an ordinary NVML name is not silently treated as one of them.
@@ -72,6 +82,26 @@ The source-export tools include a synthetic offscreen comparison renderer,
 - The details metadata distinguishes model, series, brand and generic appearance.
   It separates the physical total from fans visible on the illustrated front.
   Neither field is derived from the number of circles drawn by the UI.
+
+An optional per-item **Appearance model** choice changes only the illustration
+and is labelled **Manual appearance**. GPU candidates use the selected device's
+cached desktop chip identity, including Ti/SUPER/XT distinctions. Known laptop,
+mobile and integrated identities cannot offer or apply a desktop cooler, even
+when their name contains a familiar desktop model number. A missing secondary
+GPU cannot use another GPU's candidates. RAM art can also be selected manually.
+The choice does not change metric values, device targets or sensor sources and
+does not establish the installed retail model. **Automatic matching** restores
+the existing resolver; changing the GPU target clears only that item's manual
+art choice. Candidate projection adds no hardware query.
+
+Modern drawings include exposed PCB edges, separated gold contacts, brackets
+and narrow heatsink edges. Expanded details build **View ports** and **View power
+connectors** technical illustrations only on demand. Their shapes indicate
+documented connector types and counts; order, placement and exact bracket
+cutouts remain unverified unless separately documented. Unknown power is not
+treated as confirmed absence. Electrical PCIe lane count does not imply a
+shortened mechanical connector, and full-card dimensions do not establish bare
+PCB length or internal component placement.
 
 ### Total and front-visible fans
 
@@ -88,23 +118,31 @@ Optional auxiliary fans do not prove what a user installed. Unknown is not zero,
 and unknown layouts do not borrow a fan count from the family name or a nearby
 model. The classic generic glyph does not depict a physical fan layout.
 
-### Decorative fan motion
+### Fan appearance and same-card RPM
 
-The 100 reviewed GPU models with confirmed visible impellers can supply separate
-fan layers in Solid, Miniature and Soft. Axial fans, radial blowers and mixed
-layouts retain their own positions and sizes, including opposed-face and
-auxiliary-fan layouts. Unknown layouts and passive cards have no rotating layer.
+Only reviewed visible rotor faces can supply separate fan layers in Solid,
+Miniature and Soft. The current export has 98 motion-ready GPU entries; the
+[coverage report](docs/HARDWARE_COVERAGE.json) and generated gallery provide the
+current reviewed/pending inventory. A confirmed fan position alone does not
+establish blade count or make its face motion-ready. Axial fans, radial blowers
+and mixed layouts retain their reviewed positions and sizes. Unknown faces,
+unknown layouts and passive cards do not gain rotating placeholder layers.
 Classic and Outline keep their existing static hardware drawings.
 
-Rotation is a decorative response to the existing icon effect and available
-activity channels. It does not report measured RPM or establish whether a real
-fan is currently spinning. CPU and memory load/thermal/electrical feedback keeps
-its existing channel semantics.
+At runtime the Auto effect requires fresh current RPM from the same selected
+card. Rotation uses a fixed 120x slow-motion scale, proportional to that RPM;
+the numeric reading stays unchanged. Load, temperature, fan percentage,
+intended speed and effect-speed preferences do not supply or rescale this RPM.
+Zero, missing, failed or stale RPM stops the rotor. Manual Pulse does not
+animate the physical fan assembly. Driver channel IDs do not establish
+left/center/right positions: a labelled same-card channel mean drives the
+illustrated fans together, without claiming independent physical fan speeds.
+CPU and memory load/thermal/electrical feedback keeps its existing semantics.
 
 ### Memory identity and limits
 
-The 16 reviewed memory part numbers cover CORSAIR, G.SKILL, Kingston, Crucial,
-TEAMGROUP and ADATA/XPG representatives. A complete reviewed part number can
+The 16 base memory part numbers and ready exact versions cover CORSAIR, G.SKILL,
+Kingston, Crucial, TEAMGROUP and ADATA/XPG representatives. A complete reviewed part number can
 select its model; a confirmed manufacturer and unambiguous series phrase can
 select a series illustration. Kit part numbers and individual module part
 numbers remain distinct. No suffix is removed to turn an unreviewed module into
@@ -118,6 +156,24 @@ rather than selecting the first module as the machine's appearance. A missing
 official product image also leaves that representative's unverified enclosure
 neutral. RAM's existing usage/capacity readings and effects retain their meaning.
 
+Modern exact-model memory illustrations use nominal key dimensions only for
+three confirmed DDR/form classes. Ratios are relative to the bare PCB, with
+contacts downward in the source's dimensioned reference view:
+
+| Mechanical class | Notch centre / PCB length | Notch width / PCB length | Notch depth / PCB height | Official mechanical source |
+| --- | --- | --- | --- | --- |
+| DDR4 DIMM | 72.25 / 133.35 | 1.50 / 133.35 | 3.85 / 31.25 | [KVR32N22S8/16, p.2](https://www.kingston.com/datasheets/KVR32N22S8_16.pdf) |
+| DDR5 DIMM | 68.10 / 133.35 | 1.50 / 133.35 | 3.85 / 31.25 | [KF564C32RSK2-32, p.2](https://www.kingston.com/datasheets/KF564C32RSK2-32.pdf) |
+| DDR4 SO-DIMM | 38.30 / 69.60 | 1.00 / 69.60 | 4.00 / 30.00 | [KVR32S22S8/16, p.2](https://www.kingston.com/datasheets/KVR32S22S8_16.pdf) |
+
+These are printed nominal dimensions, not pixel measurements or a universal
+tolerance promise across SKUs. The opposite face mirrors the centre ratio as
+`1 - ratio`; a label or heatspreader design alone does not establish that face.
+The PCB body extends behind the gold contacts, and both share the key cutout.
+Heatspreader length and height are not used as PCB dimensions. Contact strokes
+remain schematic rather than one stroke per physical pin. Unknown classes keep
+their limits explicit, and Outline retains its earlier geometry.
+
 ## Offline review gallery
 
 Generate a self-contained HTML comparison using the project's Python environment:
@@ -127,8 +183,8 @@ python tools/export_hardware_gallery.py --output qa-private/hardware-gallery.htm
 ```
 
 Use `--overwrite` when deliberately replacing an existing export. The current
-gallery includes all 122 reviewed model entries and 1,220 complete static SVG
-variants: (103 GPU + 16 memory + 3 CPU representatives)
+gallery includes 146 runtime-supported entries and 1,460 complete static SVG
+variants: (122 GPU + 21 RAM + 3 CPU entries, including ready exact versions)
 × 5 icon versions × 2 themes. It supports hardware type, brand, GPU chip vendor,
 generation and product-line filters, model/series search, style and background
 selection and an 18px top-bar comparison. Open any illustration for a larger
@@ -136,13 +192,17 @@ view, then browse the filtered items with Previous/Next or the left/right arrow
 keys; Home/End reaches the first/last item.
 
 The gallery opens with static illustrations. Its optional motion preview uses
-the prebuilt base and fan layers of the 100 eligible GPU models, with CSS
+the prebuilt base and fan layers of the reviewed motion-ready entries, with CSS
 rotating only the small fan images. It runs only for visible illustrations while
 the page is active and the system does not request reduced motion. Leaving the
 viewport, hiding/suspending the page or requesting reduced motion stops it.
 Classic, Outline, CPU, memory, unknown layouts and passive cards remain static
 in this gallery preview. This offline preview is illustrative, without live
-hardware readings or measured fan speeds.
+hardware readings or measured fan speeds. Its RPM control is explicitly
+simulated; it does not replace the app's same-card current-RPM requirement.
+Port and power diagrams are created when requested and retain their schematic
+type/count and unverified-order/position labels. Regenerated totals should be
+read from the gallery and [coverage report](docs/HARDWARE_COVERAGE.json).
 
 The exporter uses the actual QML drawing code without starting the installed
 application, sampler, native desktop windows or hardware discovery. The generated
@@ -181,14 +241,20 @@ and [DMTF SMBIOS 3.9.0, section 7.18](https://www.dmtf.org/sites/default/files/s
 `process_gpu.dxgi_adapters` retains four PCI identity integers that GetDesc1 already
 returned; this does not start Top 5, add an API call or resolve a retail SKU by itself.
 No new NVML query is introduced into the sampling path.
+Same-card NVIDIA RPM uses the existing demand-gated, read-only NvAPI provider,
+capped at one query per second per requested card with five-second transient
+failure backoff and cached PCI/capability matching. It reports driver current
+RPM, without claiming independent physical validation; a compatible same-card
+provider is required for other vendors. Choosing artwork does not start a new
+scan, service, control call, polling thread or animation timer.
 The series shape modules only generate static geometry when the existing
 appearance key changes. They do not discover devices, infer fans, animate, add
 an animation clock or poll hardware.
 
 The shape identity and geometry key remain independent of dynamic
 `hardware_state` and rotation phase. `HardwareGlyph` defaults to one complete
-static SVG image. For a visible GPU in a modern style, a confirmed fan layout
-and an active Auto/Pulse effect can replace it with one fixed base plus one
+static SVG image. For a visible GPU in a modern style, a reviewed fan face,
+an active Auto effect and fresh same-card RPM can replace it with one fixed base plus one
 small retained texture per visible fan. Only each fan's local transform rotates;
 the casing and discs stay fixed. Equal identity samples and phase updates do not
 rebuild the key, SVG sources or fan-layer geometry. Only the selected icon version

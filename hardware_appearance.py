@@ -19,6 +19,8 @@ from hardware_model_extensions import CATALOG_EXTENSIONS, MODEL_SERIES
 from hardware_series import SERIES_CATALOG
 from hardware_catalog_metadata import fields as catalog_fields, generation as catalog_generation
 from hardware_fan_profiles import profile_for as fan_profile_for
+from hardware_board_details import for_appearance as board_details_for
+from hardware_variants import READY as READY_VERSIONS, extend_gpu_catalog
 from memory_appearance import appearance_for_memory
 
 # These are restrained interface accents, not claims about a product's paint.
@@ -109,10 +111,12 @@ _SEED_CATALOG = (
 )
 _EXTRA_CATALOGS = (group_a_catalog, group_b_catalog, group_c_catalog, core_catalog,
                    nvidia_legacy_catalog, radeon_arc_catalog)
-CATALOG = (_SEED_CATALOG + CATALOG_EXTENSIONS
+CATALOG = extend_gpu_catalog(_SEED_CATALOG + CATALOG_EXTENSIONS
            + tuple(row for package in _EXTRA_CATALOGS for row in package.CATALOG))
 _VISIBLE_FANS = {key: count for package in _EXTRA_CATALOGS
                  for key, count in getattr(package, "VISIBLE_FANS", {}).items()}
+_VISIBLE_FANS.update({key:_VISIBLE_FANS[row['base_model_id']] for key,row in READY_VERSIONS.items()
+                      if row['kind']=='gpu' and row['base_model_id'] in _VISIBLE_FANS})
 
 _FIELDS = ("id", "kind", "vendor", "board_vendor", "label", "style", "fan_count",
            "shroud", "source_url", "confidence", "accent", "series_id", "series_label", "features")
@@ -168,18 +172,30 @@ _MODEL_SERIES = {
     **MODEL_SERIES,
     **{key: series for package in _EXTRA_CATALOGS for key, series in package.MODEL_SERIES.items()},
 }
+_MODEL_SERIES.update({key:row['series_id'] for key,row in READY_VERSIONS.items() if row['kind']=='gpu'})
 _MODEL_CHIP_NAMES = {key: value for package in _EXTRA_CATALOGS
                      for key, value in getattr(package, "MODEL_CHIPS", {}).items()}
 _MODEL_CHIPS = {row[0]: _gpu_chips(_text(_MODEL_CHIP_NAMES.get(row[0], row[4])))
                 for row in CATALOG if row[1] == "gpu"}
+_GPU_BY_ID = {row[0]:row for row in CATALOG if row[1]=='gpu'}
 _SERIES_METADATA = {row["id"]: row for row in SERIES_CATALOG}
 _SERIES_FILTERS = {row["id"]: catalog_fields(row) for row in SERIES_CATALOG}
 _MODEL_FILTERS = {row[0]: catalog_fields(_SERIES_METADATA.get(_MODEL_SERIES.get(row[0])), row[4])
                   for row in CATALOG if row[1] == "gpu"}
 _SERIES_REP_ERAS = {_MODEL_SERIES[row[0]]: _MODEL_FILTERS[row[0]]["era"]
-                    for row in CATALOG if row[1] == "gpu" and row[0] in _MODEL_SERIES}
+                    for row in CATALOG if row[1] == "gpu" and row[0] in _MODEL_SERIES and row[0] not in READY_VERSIONS}
 _CPU_FEATURES = {"lga_rect": ("长方形金属顶盖",), "am5": ("八处边缘缺口", "中央金属顶盖")}
 _MOBILE = re.compile(r"\b(?:laptop|mobile|notebook|max q)\b|\b\d{4,5}(?:hx|hs|hk|h|u|m)\b")
+
+
+def _selectable_gpu_chips(device):
+    """A desktop cooler choice cannot replace known mobile/integrated art."""
+    name = _text(device.get("gpu_name") or device.get("label"))
+    model = _text(device.get("board_model"))
+    if (_MOBILE.search(name + " " + model)
+            or re.search(r"\b(?:uhd|iris|integrated)\b", name)):
+        return set()
+    return _gpu_chips(name)
 
 
 def _series(board, text, *, exact_id=""):
@@ -295,6 +311,9 @@ def appearance_for(kind, name, *, model="", board_vendor=""):
     fan_profile = fan_profile_for(result)
     if fan_profile:
         result["fan_profile"] = fan_profile
+    board_details = board_details_for(result)
+    if board_details:
+        result["board_details"] = board_details
     return result
 
 
@@ -346,6 +365,14 @@ def metric_appearance(data, metric, prefs, *, scope=None, target=None, external=
     if metric.startswith("cpu_"):
         return appearance_for("cpu", data.get("cpu_name"))
     if metric.startswith("ram_") and scope != "gpus":
+        chosen=prefs.get('hardware_model')
+        if chosen:
+            from memory_appearance import CATALOG as memory_models
+            model=next((row for row in memory_models if row['id']==chosen),None)
+            if model:
+                value=appearance_for_memory(model=model['aliases'][0])
+                value['selection_source']='manual'
+                return value
         return memory_appearance(data)
     if scope != "gpus":
         return {}
@@ -355,5 +382,26 @@ def metric_appearance(data, metric, prefs, *, scope=None, target=None, external=
         data if selected == "0" else {})
     if not isinstance(device, dict):
         device = {}
+    chosen=_GPU_BY_ID.get(prefs.get('hardware_model'))
+    if chosen:
+        chips=_selectable_gpu_chips(device)
+        if len(chips)==1 and chips==_MODEL_CHIPS[chosen[0]]:
+            value=appearance_for('gpu',chosen[-1][0])
+            value['selection_source']='manual'
+            return value
     return appearance_for("gpu", device.get("gpu_name") or device.get("label"),
                           model=device.get("board_model"), board_vendor=device.get("board_vendor"))
+
+
+def appearance_choices(data, metric, prefs):
+    """Use cached identity only; a manual cooler never selects another GPU chip."""
+    if metric.startswith('ram_'):
+        from memory_appearance import CATALOG as models
+        return [dict(id=row['id'],label=row['label']) for row in models]
+    selected=prefs.get('gpu_target') or '0'
+    table=data.get('gpus')
+    device=table.get(selected,{}) if isinstance(table,dict) else data if selected=='0' else {}
+    if not isinstance(device,dict):return []
+    chips=_selectable_gpu_chips(device)
+    if len(chips)!=1:return []
+    return [dict(id=row[0],label=row[4]) for row in _GPU_BY_ID.values() if _MODEL_CHIPS[row[0]]==chips]

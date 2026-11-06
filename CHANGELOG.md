@@ -2,11 +2,13 @@
 
 ## Unreleased — hardware appearances
 
-- Expand the source-linked GPU catalog to 103 models and dedicated designs
-  across 24 GPU brands. Add 16 memory designs and 16 complete reviewed part
-  numbers across 6 memory brands. With the 3 CPU examples, the catalogs contain
-  122 model records, 119 GPU/memory designs and 30 GPU/memory brand identities;
-  coverage remains limited to reviewed representatives.
+- Retain 103 source-linked base GPU representatives across 24 brands, 16 base
+  RAM designs across 6 brands, and the 3 CPU examples. Extend matching with
+  complete, reviewed version SKUs marked ready: either source-confirmed shared
+  exteriors or explicitly implemented structural recipes. The version inventory
+  also retains pending entries; it does not establish coverage of every product
+  on the market. See [the hardware coverage report](docs/HARDWARE_COVERAGE.json)
+  for the generated model, version and fan-review inventory.
 - Add 16 NVIDIA historical designs from GTX/GT 10 through GTX 900/700/600/500/
   400/200 to GeForce 8800 GTS and FX 5200, plus 20 Radeon/Arc representatives.
   Keep era-specific enclosures tied to exact SKUs instead of reusing a current
@@ -14,21 +16,39 @@
   entry/mainstream/flagship labels describe the board line within its era,
   rather than GPU performance rankings.
 - Give Solid, Miniature and Soft distinct major panels, shoulders, end caps and
-  illustration proportions for each series. Preserve the earlier Outline
-  drawings and original Classic glyphs as selectable versions.
+  illustration proportions for each series. Apply reviewed model colors to
+  shrouds, metal panels and rotors instead of treating brand accents as paint.
+  Add exposed PCB edges, separated gold-contact segments, bracket outlines and
+  narrow heatsink edges without inventing an internal board layout. Electrical
+  PCIe lane counts do not imply a mechanically shortened connector.
+- Add on-demand video-port and power-connector technical views with reviewed
+  connector types and quantities. These are schematics, not claims about the
+  physical port order, socket placement or exact cutouts. Preserve unknown
+  interfaces and distinguish verified absence of auxiliary power; documented
+  alternative power positions do not become simultaneous extra sockets.
+- Share OC/non-OC artwork only for individually reviewed complete SKUs. Verify
+  the ROG Astral RTX 5090 standard/OC visible enclosure against the reviewed
+  Astral RTX 5080 OC, including official product imagery and external dimensions.
+  Give MSI RTX 5090 SUPRIM SOC/OC an independent metal-panel recipe with
+  STORMFORCE seven-blade front fans instead of inheriting the RTX 4090 cover.
+  Shared artwork never transfers chip identity, memory, power ratings or sensor
+  readings between cards. Unimplemented or uncertain versions stay pending.
 - Distinguish radial blower housings, the Acer BiFrost's left small
   blower/right axial arrangement and fanless fins for confirmed passive cards.
-- Add exact-SKU fan profiles to all 103 GPU records. Confirm blade counts on
-  48 representatives (including TUF's 11/13/11 arrangement); retain neutral
-  rotors for unconfirmed counts. Distinguish source-backed rings, linked blade
-  groups, triangular hubs and relative counter-rotation. Illustration dimensions
-  remain visual approximations rather than engineering measurements.
+- Add exact-SKU fan profiles to the base GPU representatives and apply reviewed
+  version overrides separately. Confirm blades, rotor contours, hubs, rings,
+  linked blade groups and relative counter-rotation only from model-specific
+  evidence; retain neutral, static faces for unconfirmed blade details.
+  Illustration proportions remain visual approximations rather than engineering
+  measurements. Current review totals are recorded in the coverage report.
 - Correct the modern fan faces: use visibly swept vanes with open curved gaps,
   a recessed dark cavity and an independent cap, rather than bright radial
-  discs. Distinguish wide, linked and claw-textured contours; align linked tip
-  arcs with the leaf ends. Preserve the reviewed PURE's white rotor. Label the
-  53 unreviewed active fan faces as pending and keep them static; the gallery
-  offers fan motion on the 48 reviewed representatives, not empty placeholders.
+  discs. Distinguish wide, swept, straight, linked and claw-textured contours;
+  align confirmed linked tip arcs with the blade ends and keep fixed shroud
+  rings separate from the rotor. Preserve source-confirmed light and dark fans,
+  including the distinct SPARKLE A750/B580 TITAN rotors. Label unreviewed active
+  fan faces as pending and keep them static; gallery motion requires a reviewed
+  face rather than an empty placeholder.
 - Animate confirmed visible fans in Solid, Miniature and Soft only when Auto
   receives fresh same-card RPM. Keep a fixed base
   and small retained fan textures; phase changes update local transforms without
@@ -56,8 +76,18 @@
   individual module part numbers do not inherit a kit's design by suffix guesses.
   Physical diffuser covers do not claim current lighting or add RGB animation.
 - Keep all five hardware-icon versions in top-bar Appearance settings.
-  Existing preferences default to Classic, preserving original glyphs. Switching
+  Preserve the original Classic glyphs and earlier Outline drawings alongside
+  Solid, Miniature and Soft. Existing preferences default to Classic. Switching
   versions updates the shared preview and follows the existing scoped Apply flow.
+- Add an optional per-item appearance model selection. GPU candidates use the
+  currently selected device's cached chip identity, retaining Ti/SUPER/XT and
+  other chip distinctions. An explicit choice is labelled Manual appearance;
+  clearing it restores automatic matching. RAM artwork can also be selected
+  manually. These choices change the illustration only: selected devices,
+  metrics, readings and data sources stay intact, with no new discovery query.
+  Changing a GPU target clears only that item's manual artwork choice and
+  restores automatic matching, preserving its other display preferences.
+  A missing secondary GPU never borrows the default GPU or legacy flat identity.
 - Distinguish physical fan totals from front-visible fans: opposed MSI EXPERT
   and rear/side auxiliary layouts retain their true totals. Keep the GALAX SG+
   total unknown when auxiliary installation is optional, and keep BIOSTAR's
@@ -70,12 +100,14 @@
   shroud motifs and feature summaries in expanded details, with an on-demand
   64px illustration. Unknown fan layouts remain neutral rather than guessed.
 - Add an offline, searchable comparison gallery exported from the real QML
-  drawing code: all 122 reviewed model entries, including 3 CPUs, with 1,220
-  complete static SVG variants across five versions and two themes. Retain 18px
+  drawing code, including the base entries and ready exact versions, across all
+  five icon versions and two themes. Retain 18px
   top-bar comparisons and hardware/brand/vendor/generation/product-line filters.
   Add enlarged per-item browsing with Previous/Next and keyboard navigation.
   Keep the page static by default; optional CSS fan preview runs only in view,
-  while the page is active and reduced motion is disabled.
+  while the page is active and reduced motion is disabled. Interface schematics
+  retain their type/count and unverified-position labels. Neither gallery art nor
+  a full-card dimension is evidence of a reviewed internal PCB layout.
 - Reuse existing identity strings with a bounded offline match cache. Retain PCI
   fields already returned by DXGI without adding monitoring queries or polling.
   The series drawings are static vectors and add no sampling or animation clock;

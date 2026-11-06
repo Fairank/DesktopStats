@@ -80,6 +80,11 @@ Item {
     readonly property string displayTitle:(row.grouped===true || ["duplex","duplex_inline"].includes(selectedStyle)) && row.group_label
         ? row.group_label : row.label || ui.t("指标设置")
     readonly property bool hasDevice:["gpus","networks","disks","volumes","storages"].includes(scope)
+    readonly property var appearanceOptions: {
+        if(!root.item || !root.readingsActive || !(root.scope==="gpus" || root.item.metric.startsWith("ram_")))return []
+        const revision=stats.sensorRevision,draft=stats.draft
+        return typeof stats.hardwareAppearanceChoices==="function"?stats.hardwareAppearanceChoices(root.item.id):[]
+    }
     onItemChanged: {
         const identifier=item ? item.id : ""
         if(identifier!==previousItemId){if(focusReveal){focusReveal.stop();focusReveal.target=null}galleryOpen=false;sourceOpen=false;groupDialog.close();groupError="";previousItemId=identifier}
@@ -316,7 +321,10 @@ Item {
             Choice {objectName:"topBarPlacement";Layout.fillWidth:true;Layout.minimumWidth:128;model:[{id:"left",label:ui.t("左侧")},{id:"right",label:ui.t("右侧")}];value:root.item?root.item.prefs.placement || "right":"right";onPicked:selected=>stats.placeTopBarMetric(root.item.id,"",selected)}
             RowLabel {visible:root.hasDevice;text:ui.t("设备")}
             Choice {objectName:"topBarDevice";Layout.fillWidth:true;Layout.minimumWidth:128;visible:root.hasDevice;model:root.deviceOptions();value:root.item?root.item.prefs[root.deviceField] || root.deviceDefault:root.deviceDefault;onPicked:selected=>stats.changeTopBarItem(root.item.id,root.deviceField,selected)}
+            RowLabel {visible:root.appearanceOptions.length>1;text:ui.t("外观型号")}
+            Choice {objectName:"topBarHardwareModel";Layout.fillWidth:true;Layout.minimumWidth:128;visible:root.appearanceOptions.length>1;model:root.appearanceOptions;value:root.item?root.item.prefs.hardware_model || "":"";onPicked:selected=>stats.changeTopBarItem(root.item.id,"hardware_model",selected)}
         }
+        Text {Layout.fillWidth:true;visible:root.appearanceOptions.length>1;text:ui.t("未识别具体非公型号时可手动选择；只修改图示，读数仍来自所选设备。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
         Rectangle {Layout.fillWidth:true;implicitHeight:1;color:ui.line}
         Button {
             id:sourceToggle;objectName:"topBarInspectorSourceToggle";Layout.fillWidth:true;implicitHeight:30;padding:0

@@ -1,4 +1,19 @@
 // Source | Traditional Chinese | English | Japanese | Korean | German | French | Spanish
+自动匹配|自動比對|Automatic matching|自動照合|자동 매칭|Automatisch zuordnen|Correspondance automatique|Identificación automática
+外观型号|外觀型號|Appearance model|外観モデル|외관 모델|Darstellungsmodell|Modèle d’apparence|Modelo de apariencia
+手动外观|手動外觀|Manual appearance|手動の外観|수동 외관|Manuelle Darstellung|Apparence manuelle|Apariencia manual
+不支持的外观型号|不支援的外觀型號|Unsupported appearance model|未対応の外観モデル|지원하지 않는 외관 모델|Nicht unterstütztes Darstellungsmodell|Modèle d’apparence non pris en charge|Modelo de apariencia no compatible
+未识别具体非公型号时可手动选择；只修改图示，读数仍来自所选设备。|未辨識出確切的非公版型號時，可手動選擇外觀；僅修改圖示，讀數仍來自所選裝置。|If the specific custom card model is not recognized, choose its appearance manually. Only the illustration changes; readings still come from the selected device.|具体的なカスタム仕様のグラフィックスカードを識別できない場合は、外観を手動で選べます。図だけが変わり、測定値は引き続き選択中のデバイスから取得します。|정확한 비레퍼런스 그래픽 카드 모델을 식별하지 못하면 외관을 직접 선택할 수 있습니다. 그림만 바뀌며 측정값은 계속 선택한 장치에서 가져옵니다.|Wenn das genaue Custom-Modell nicht erkannt wird, können Sie die Darstellung manuell wählen. Nur die Abbildung ändert sich; die Messwerte stammen weiterhin vom ausgewählten Gerät.|Si le modèle exact de carte personnalisée n’est pas reconnu, choisissez son apparence manuellement. Seule l’illustration change ; les mesures proviennent toujours de l’appareil sélectionné.|Si no se reconoce el modelo exacto de la tarjeta personalizada, elige su apariencia manualmente. Solo cambia la ilustración; las lecturas siguen procediendo del dispositivo seleccionado.
+查看接口|查看連接埠|View ports|端子を表示|포트 보기|Anschlüsse anzeigen|Voir les ports|Ver puertos
+查看供电|查看供電接頭|View power connectors|電源コネクターを表示|전원 커넥터 보기|Stromanschlüsse anzeigen|Voir les connecteurs d’alimentation|Ver conectores de alimentación
+槽|槽|slots|スロット|슬롯|Slots|emplacements|ranuras
+视频接口待核实|視訊連接埠待確認|Video ports unverified|映像出力端子は未確認|영상 출력 포트 미확인|Videoanschlüsse unbestätigt|Ports vidéo non vérifiés|Puertos de vídeo sin verificar
+供电接口待核实|供電接頭待確認|Power connectors unverified|電源コネクターは未確認|전원 커넥터 미확인|Stromanschlüsse unbestätigt|Connecteurs d’alimentation non vérifiés|Conectores de alimentación sin verificar
+无需外接供电|無需外接供電|No external power required|補助電源不要|별도 전원 연결 불필요|Kein zusätzlicher Stromanschluss nötig|Aucune alimentation externe nécessaire|No requiere alimentación externa
+主机接口待核实|主機連接介面待確認|Host connection unverified|マザーボード接続端子は未確認|호스트 연결 단자 미확인|Mainboard-Anschluss unbestätigt|Connecteur vers la carte mère non vérifié|Conector a la placa base sin verificar
+接口数量示意，排列未核实|連接埠數量示意，排列未確認|Port count schematic; layout unverified|端子数の模式図。配置は未確認|포트 개수 개략도, 배치는 미확인|Schematische Anschlussanzahl; Anordnung unbestätigt|Schéma du nombre de ports ; disposition non vérifiée|Esquema del número de puertos; disposición sin verificar
+供电插座示意，连接位置二选一|供電插座示意，連接位置為兩個候選位置之一|Power connector schematic; one of two possible connection positions|電源コネクターの模式図。接続位置は2か所の候補のうち1か所|전원 소켓 개략도, 두 연결 위치 중 한 곳|Schema der Strombuchsen; eine von zwei Anschlusspositionen|Schéma des prises d’alimentation ; une position parmi deux possibles|Esquema de las tomas de alimentación; una de dos posiciones posibles
+供电插座示意|供電插座示意|Power connector schematic|電源コネクターの模式図|전원 소켓 개략도|Schema der Strombuchsen|Schéma des prises d’alimentation|Esquema de las tomas de alimentación
 硬件图标|硬體圖示|Hardware icons|ハードウェアアイコン|하드웨어 아이콘|Hardware-Symbole|Icônes du matériel|Iconos de hardware
 经典通用|經典通用|Classic|クラシック|클래식|Klassisch|Classique|Clásico
 结构线稿|結構線稿|Outline|線画|구조 선화|Konturen|Contours|Contornos

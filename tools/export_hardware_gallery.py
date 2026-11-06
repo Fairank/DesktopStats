@@ -39,7 +39,7 @@ dialog{color:inherit;background:var(--card);border:1px solid var(--line);border-
 <div class="toolbar"><select id="kind" aria-label="硬件类型"><option value="all">全部硬件</option><option value="cpu">处理器</option><option value="gpu">显卡</option><option value="memory">内存条</option></select><select id="brand" aria-label="品牌"><option value="all">全部品牌</option></select><select id="vendor" aria-label="芯片厂商"><option value="all">全部芯片厂商</option><option value="nvidia">NVIDIA</option><option value="amd">AMD</option><option value="intel">Intel</option></select><select id="era" aria-label="代际"><option value="all">全部代际</option></select><select id="tier" aria-label="产品线"><option value="all">全部产品线</option><option value="entry">入门非公</option><option value="mainstream">主流非公</option><option value="flagship">旗舰非公</option><option value="creator">创作系列</option><option value="reference">公版 / 参考设计</option><option value="processor">处理器封装</option></select><select id="style" aria-label="图标版本"><option value="solid">精简实物</option><option value="miniature">微型实物</option><option value="soft">柔和双色</option><option value="outline">结构线稿 · 旧版</option><option value="classic">经典通用</option></select><select id="theme" aria-label="背景"><option value="light">浅色背景</option><option value="dark">深色背景</option></select><input id="search" type="search" placeholder="搜索系列或代表型号" aria-label="搜索系列或代表型号"></div>
 <div class="preview-controls"><label><input id="motion" type="checkbox">动效预览</label><label for="simulated-rpm">模拟 RPM <select id="simulated-rpm" aria-label="模拟转速 RPM"><option value="0">0 · 停止</option><option value="600">600</option><option value="1200" selected>1200</option><option value="1800">1800</option><option value="2400">2400</option><option value="3000">3000</option></select></label><span>固定 120 倍慢放 · 非实时测量</span><span id="motion-status">默认静态；模拟转速只用于预览。</span></div>
 <p id="count" role="status"></p><main id="grid" class="grid"></main><p id="empty" hidden>没有匹配的作品。</p>
-<dialog id="focus-dialog" aria-labelledby="focus-title"><div class="focus-top"><p id="focus-position"></p><button id="focus-close" type="button">关闭</button></div><h2 id="focus-title"></h2><div id="focus-model"></div><div id="focus-art" class="focus-art"></div><div class="focus-details"><div id="focus-small" class="small"></div><div id="focus-facts" class="facts"></div></div><p id="focus-features" class="features"></p><p id="focus-profile" class="fan-profile" hidden></p><div class="source-links"><a id="focus-source" class="link" target="_blank" rel="noopener noreferrer">官方型号资料</a><a id="focus-fan-source" class="link" target="_blank" rel="noopener noreferrer" hidden>官方风扇资料</a></div><div class="focus-actions"><button id="focus-prev" type="button">← 上一项</button><span>键盘 ← / → 浏览<br>Home / End 首尾</span><button id="focus-next" type="button">下一项 →</button></div></dialog>
+<dialog id="focus-dialog" aria-labelledby="focus-title"><div class="focus-top"><p id="focus-position"></p><button id="focus-close" type="button">关闭</button></div><h2 id="focus-title"></h2><div id="focus-model"></div><div id="focus-art" class="focus-art"></div><div class="focus-details"><div id="focus-small" class="small"></div><div id="focus-facts" class="facts"></div></div><p id="focus-features" class="features"></p><p id="focus-profile" class="fan-profile" hidden></p><p id="focus-board" class="features" hidden></p><div id="focus-structure" hidden></div><div class="source-links"><a id="focus-source" class="link" target="_blank" rel="noopener noreferrer">官方型号资料</a><a id="focus-fan-source" class="link" target="_blank" rel="noopener noreferrer" hidden>官方风扇资料</a></div><div class="focus-actions"><button id="focus-prev" type="button">← 上一项</button><span>键盘 ← / → 浏览<br>Home / End 首尾</span><button id="focus-next" type="button">下一项 →</button></div></dialog>
 <footer>图形是依据代表产品特征绘制的简化插画，不是照片、厂商标志或精确尺寸图。未确认的风扇不会被猜成零或固定扇数；外置冷排和附加风扇另行说明。内存扩散罩不表示灯效已开启。产品线定位不代表芯片性能排名。叶片数量只在官方文字或图片足够明确时确认，未知部分不补猜；轮毂与叶片轮廓是插画估计。模拟 RPM 固定 120 倍慢放，保留已核相对转向，不代表真实读数。动效默认关闭，0 RPM 停止，只在当前视口、页面可见且系统未要求减少动态时播放；放大时暂停后方卡片。页面、静态图及叶轮均已内嵌，无需联网；官方资料链接仅在你点击后打开。</footer>
 <script>const DATA=__DATA__;
 const $=id=>document.getElementById(id),controls=Object.fromEntries(['kind','brand','vendor','era','tier','style','theme','search'].map(id=>[id,$(id)]));
@@ -75,7 +75,9 @@ function resetObservation(){if(observer)observer.disconnect();for(const stage of
 function actualSample(row){const small=document.createElement('div');small.className='small';const image=localImage(row.art[style.value][theme.value],'');image.width=18;image.height=18;small.append(image,text('span','18px 实际尺寸'));return small}
 function shownFeatures(row){return style.value==='classic'?'通用符号，不表达具体型号布局':row.features.join(' · ')}
 function focusIndex(){return filtered.findIndex(row=>row.id===focusedId)}
-function updateFocus(){const index=focusIndex();if(index<0){if(dialog.open)dialog.close();return}const row=filtered[index];clearStages(true);$('focus-title').textContent=row.label;$('focus-model').textContent=row.model;$('focus-position').textContent=(index+1)+' / '+filtered.length+' · '+row.brandLabel;$('focus-facts').textContent=row.fans;$('focus-features').textContent=shownFeatures(row);$('focus-profile').textContent=row.fanProfileText;$('focus-profile').hidden=!row.fanProfileText;$('focus-fan-source').hidden=!row.fanProfile?.source_url;if(row.fanProfile?.source_url)$('focus-fan-source').href=row.fanProfile.source_url;$('focus-source').href=row.source;$('focus-art').replaceChildren(setupStage(row,true));const sample=actualSample(row);$('focus-small').replaceChildren(...sample.childNodes);$('focus-prev').disabled=filtered.length<2;$('focus-next').disabled=filtered.length<2;resetObservation()}
+function boardText(row){const facts=row.boardDetails||{};return [facts.ports_text,facts.power_text,facts.host_text,facts.kind==='memory'?[facts.generation?.toUpperCase(),facts.pins?facts.pins+' pin':''].filter(Boolean).join(' · '):''].filter(Boolean).join(' · ')}
+function structurePanel(row){const host=$('focus-structure');host.replaceChildren();host.hidden=!Object.keys(row.structures||{}).length;if(host.hidden)return;const controls=document.createElement('div');controls.className='source-links';const body=document.createElement('div');for(const [kind,uri] of Object.entries(row.structures)){const button=text('button',kind==='ports'?'视频接口':'供电插座','view-button');button.type='button';button.addEventListener('click',()=>{const image=localImage(uri,row.model+' '+button.textContent,'eager');image.style.width='100%';image.style.maxWidth='420px';image.style.height='auto';body.replaceChildren(image,text('p','类型与数量示意；排列和位置未核实。','features'))});controls.append(button)}host.append(controls,body)}
+function updateFocus(){const index=focusIndex();if(index<0){if(dialog.open)dialog.close();return}const row=filtered[index];clearStages(true);$('focus-title').textContent=row.label;$('focus-model').textContent=row.model;$('focus-position').textContent=(index+1)+' / '+filtered.length+' · '+row.brandLabel;$('focus-facts').textContent=row.fans;$('focus-features').textContent=shownFeatures(row);$('focus-profile').textContent=row.fanProfileText;$('focus-profile').hidden=!row.fanProfileText;$('focus-board').textContent=boardText(row);$('focus-board').hidden=!$('focus-board').textContent;structurePanel(row);$('focus-fan-source').hidden=!row.fanProfile?.source_url;if(row.fanProfile?.source_url)$('focus-fan-source').href=row.fanProfile.source_url;$('focus-source').href=row.source;$('focus-art').replaceChildren(setupStage(row,true));const sample=actualSample(row);$('focus-small').replaceChildren(...sample.childNodes);$('focus-prev').disabled=filtered.length<2;$('focus-next').disabled=filtered.length<2;resetObservation()}
 function openFocus(row,button){focusedId=row.id;returnFocus=button;if(!dialog.open)dialog.showModal();updateFocus()}
 function browse(direction){if(!filtered.length)return;const index=focusIndex();focusedId=filtered[(index+direction+filtered.length)%filtered.length].id;updateFocus()}
 function buildCard(row){const card=document.createElement('article');card.className='card';card.dataset.id=row.id;card.append(text('div',row.brandLabel+' · '+({cpu:'处理器',gpu:'显卡',memory:'内存条'}[row.kind]),'brand'));const title=text('h2',row.label);if(row.legacy)title.append(text('span','历史型号','badge'));card.append(title,text('div',row.model,'model'));const art=document.createElement('button');art.type='button';art.className='art art-open';art.setAttribute('aria-label','放大查看 '+row.label);art.append(setupStage(row));art.addEventListener('click',()=>openFocus(row,art));card.append(art);const actual=document.createElement('div');actual.className='actual';actual.append(actualSample(row),text('div',row.fans,'facts'));card.append(actual,text('div',shownFeatures(row),'features'));if(row.fanProfileText)card.append(text('p',row.fanProfileText,'fan-profile'));const links=document.createElement('div');links.className='card-links';const link=text('a','官方型号资料','link');link.href=row.source;link.target='_blank';link.rel='noopener noreferrer';const view=text('button','放大查看 →','view-button');view.type='button';view.addEventListener('click',()=>openFocus(row,view));links.append(link);if(row.fanProfile?.source_url){const fanLink=text('a','风扇资料','link');fanLink.href=row.fanProfile.source_url;fanLink.target='_blank';fanLink.rel='noopener noreferrer';links.append(fanLink)}links.append(view);card.append(links);return card}
@@ -119,6 +121,7 @@ def export_gallery(output):
 
     from hardware_appearance import BRANDS, CATALOG, appearance_for
     from hardware_series import SERIES_CATALOG
+    from hardware_variants import READY, RECORDS
     from memory_appearance import BRANDS as MEMORY_BRANDS, CATALOG as MEMORY_MODELS
     from memory_appearance import SERIES_CATALOG as MEMORY_SERIES, appearance_for_memory
 
@@ -129,11 +132,13 @@ def export_gallery(output):
     component.setData(b'''import QtQml
 import "../native/HardwareShapes.js" as Shapes
 import "../native/IconData.js" as Icons
+import "../native/HardwareBoardDesigns.js" as Boards
 QtObject { function svgFor(value,ink) {
     if(value.icon_set === "classic") return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="'+ink+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+Icons.fragment(value.kind==='memory'?'memory':value.kind==='cpu'?'cpu':'gpu')+'</svg>'
     return decodeURIComponent(Shapes.source(Shapes.key(value,ink)).split(',')[1])
 }
 function layersFor(value,ink) { return JSON.stringify(Shapes.layers(Shapes.key(value,ink))) }
+function structureFor(value,view) { return Boards.technicalSource(Boards.modelKey(value),view) }
 }''', QUrl.fromLocalFile(str(ROOT / "tools/hardware-gallery.qml")))
     renderer = component.create()
     if renderer is None:
@@ -158,6 +163,15 @@ function layersFor(value,ink) { return JSON.stringify(Shapes.layers(Shapes.key(v
         value = appearance_for_memory(model=row["aliases"][0])
         representatives.setdefault(value["series_id"], value)
     entries.extend((series, representatives[series["id"]]) for series in (*SERIES_CATALOG, *MEMORY_SERIES))
+    series_by_id={row['id']:row for row in (*SERIES_CATALOG,*MEMORY_SERIES)}
+    for row in CATALOG:
+        if row[0] in READY:
+            value=appearance_for(row[1],row[-1][0])
+            entries.append((dict(series_by_id[value['series_id']],id='variant-'+row[0],label=value['label'],variant=True),value))
+    for row in MEMORY_MODELS:
+        if row['id'] in READY:
+            value=appearance_for_memory(model=row['aliases'][0])
+            entries.append((dict(series_by_id[value['series_id']],id='variant-'+row['id'],label=value['label'],variant=True),value))
     cards, counts, assets, asset_ids = [], {}, [], {}
     all_brands = dict(BRANDS, **MEMORY_BRANDS)
 
@@ -185,6 +199,11 @@ function layersFor(value,ink) { return JSON.stringify(Shapes.layers(Shapes.key(v
         elif total == 0:
             fans = "被动散热 · 无风扇"
         profile_text, profile_state = fan_profile_text(value)
+        facts=value.get('board_details') or {}
+        structures={}
+        if value['kind']=='gpu':
+            for view,field in (('ports','ports'),('power','power_connectors')):
+                if facts.get(field):structures[view]=evaluate('structureFor',value,view)
         art, motion = {}, {}
         for style in STYLES:
             art[style] = {}
@@ -219,6 +238,7 @@ function layersFor(value,ink) { return JSON.stringify(Shapes.layers(Shapes.key(v
                           model=value["label"], fans=fans, features=value["features"],
                           fanProfile=value.get("fan_profile") or {},
                           fanProfileText=profile_text, fanProfileState=profile_state,
+                          boardDetails=facts,structures=structures,variant=bool(series.get('variant')),
                           source=value["source_url"], legacy=bool(series.get("legacy")), art=art, motion=motion,
                           kind=value["kind"], vendor=value["vendor"] if value["kind"]!="memory" else "memory",
                           era="cpu" if value["kind"]=="cpu" else value.get("era", "memory"),
@@ -232,7 +252,7 @@ function layersFor(value,ink) { return JSON.stringify(Shapes.layers(Shapes.key(v
                       arc_a="Intel Arc A", arc_b="Intel Arc B", unspecified="代际未分组")
     era_labels.update({"rtx"+digit+"0": "GeForce RTX "+digit+"0 系列" for digit in "2345"})
     era_labels.update({"rx"+digit+"000": "Radeon RX "+digit+"000" for digit in "56789"})
-    data = dict(cards=cards, motionAssets=assets,
+    data = dict(cards=cards, motionAssets=assets, versionInventory=list(RECORDS.values()),
                 simulation=dict(rpmOptions=SIMULATED_RPMS, slowdown=FAN_SLOWDOWN, source="simulation"),
                 brands=[dict(id=brand, label=all_brands[brand][0], count=count)
                                     for brand, count in sorted(counts.items())],

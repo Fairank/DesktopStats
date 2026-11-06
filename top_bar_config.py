@@ -152,6 +152,11 @@ def validate_top_bar(value):
         if source.get('style') in ('duplex', 'duplex_inline') and not paired_channels(metric):
             raise ValueError('该指标没有可配对的双向读数')
         prefs = {}
+        if 'hardware_model' in source:
+            model=source['hardware_model']
+            if not isinstance(model,str) or model and not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,95}',model):
+                raise ValueError('不支持的外观型号')
+            prefs['hardware_model']=model
         for field, options in (
             ("precision", ("auto", "0", "1", "2")),
             ("temperature_unit", ("C", "F")),

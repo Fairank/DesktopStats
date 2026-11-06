@@ -1,6 +1,7 @@
 .pragma library
 .import "HardwareSeriesShapes.js" as Series
 .import "HardwareFanDesigns.js" as FanDesigns
+.import "HardwareBoardDesigns.js" as Board
 
 // Original soft, two-tone hardware miniatures on the 24-unit icon grid.
 // Series accents illustrate a design language, never an exact product or color.
@@ -203,14 +204,14 @@ function seriesGpu(state, p, count) {
     var g = Series.geometry(state, base)
     var colors = {caseBody:p.face,caseTop:p.hub,caseShade:p.shade,disk:p.well,
         rim:p.base,metal:p.face,ink:p.edge,accent:p.accent,edge:p.hub,gold:p.gold,pcb:p.base}
-    var result = rect(g.x+.2,g.y+.7,g.w-.4,g.h,.8,p.base,p.edge,.45)
-        + rect(g.x-1.05,g.y+.3,.85,g.h+.7,.25,p.base,p.edge,.4)
-        + rect(g.x+g.w*.27,g.y+g.h+.7,g.w*.18,.7,.12,p.gold)
+    colors=Board.colors(state,colors)
+    if(colors.fanOverrides)p.fanOverrides=colors.fanOverrides
+    var result = Board.base(state,g,colors)
         + rect(g.x+.65,g.y+g.h*.18,g.w-1.3,g.h*.66,.3,p.shade)
-        + Series.face(state,g,colors)
+        + (Board.variantFace(state,g,colors) || Series.face(state,g,colors))
     var cy = g.y+g.h*.51
     if (state.style === "gpu_blower" && count === 1)
-        return result + turbine(g.centers.length?g.centers[0]:g.x+g.w-4.5,cy,Math.min(3.4,g.h*.37),p)
+        return result + turbine(g.centers.length?g.centers[0]:g.x+g.w-4.5,cy,Math.min(3.4,g.h*.37),p)+Board.finish(state,g,colors)
     if (g.centers.length) {
         g.centers.forEach(function(x,index){result += (g.blowers && g.blowers.indexOf(index)>=0?turbine:fan)(x,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,p)})
     } else if (state.fan_count !== 0) {
@@ -218,7 +219,7 @@ function seriesGpu(state, p, count) {
         result += rect(g.x+g.w*.14,g.y+g.h*.26,g.w*.66,g.h*.48,.7,p.shade)
             + path("M"+(g.x+g.w*.22)+" "+(g.y+g.h*.42)+"H"+(g.x+g.w*.68),"none",p.base,.75)
     }
-    return result
+    return result+Board.finish(state,g,colors)
 }
 
 function body(state, rotorCollector) {

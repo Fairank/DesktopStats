@@ -1,8 +1,10 @@
 .pragma library
+.import "HardwareBoardDesigns.js" as Board
 
 // Original static memory-module miniatures; no logos, text, filters or clocks.
 // Case language is sourced in memory_appearance.py. IC blocks and edge contacts
-// are schematic, not a diagram of rank, chip count, pin count or DDR key position.
+// are schematic, not a diagram of rank, chip count or physical pin count.
+// Modern known DDR/form classes use sourced nominal front-view key ratios.
 // A diffuser is a physical cover, never a claim that LEDs are currently on.
 
 var brands = ["corsair", "gskill", "kingston", "crucial", "teamgroup", "adata", "unknown"]
@@ -61,20 +63,33 @@ function profile(state) {
 }
 
 function board(g,c) {
-    var x=g.x,e=x+g.w,key=x+g.w*.49
+    if(c.outline) {
+        // Preserve the previously selectable Outline verbatim; reviewed
+        // mechanical detail belongs to the modern object illustrations.
+        var ox=g.x,oe=ox+g.w,okey=ox+g.w*.49,otop=g.shortForm?8.2:9.0
+        var old="M"+(ox+.7)+" "+otop+"H"+(oe-.7)+"Q"+oe+" "+otop+" "+oe+" "+(otop+.7)
+            +"V11.2H"+(oe-.5)+"V12.2H"+oe+"V16.4H"+(okey+.65)+"V15.35H"+(okey-.65)
+            +"V16.4H"+ox+"V12.2H"+(ox+.5)+"V11.2H"+ox+"V"+(otop+.7)+"Q"+ox+" "+otop+" "+(ox+.7)+" "+otop+"Z"
+        return p(old,c.pcb,c)+r(ox+.45,16.4,okey-ox-1.1,1.15,.08,c.gold,c,.4)
+            +r(okey+.65,16.4,oe-okey-1.1,1.15,.08,c.gold,c,.4)
+    }
+    var x=g.x,e=x+g.w,key=x+g.w*(typeof c.notchRatio==="number"?c.notchRatio:.49)
     var top=g.shortForm?8.2:9.0
+    var bottom=c.outline?16.4:17.55
+    var keyHalf=!c.outline && typeof c.notchWidthRatio==="number"?g.w*c.notchWidthRatio/2:.65
+    var keyTop=!c.outline && typeof c.notchDepthRatio==="number"?bottom-(bottom-top)*c.notchDepthRatio:15.35
     // A visible lower notch continues through both PCB and the contact strip.
     var body="M"+(x+.7)+" "+top+"H"+(e-.7)+"Q"+e+" "+top+" "+e+" "+(top+.7)
-        +"V11.2H"+(e-.5)+"V12.2H"+e+"V16.4H"+(key+.65)+"V15.35H"+(key-.65)
-        +"V16.4H"+x+"V12.2H"+(x+.5)+"V11.2H"+x+"V"+(top+.7)+"Q"+x+" "+top+" "+(x+.7)+" "+top+"Z"
+        +"V11.2H"+(e-.5)+"V12.2H"+e+"V"+bottom+"H"+(key+keyHalf)+"V"+keyTop+"H"+(key-keyHalf)
+        +"V"+bottom+"H"+x+"V12.2H"+(x+.5)+"V11.2H"+x+"V"+(top+.7)+"Q"+x+" "+top+" "+(x+.7)+" "+top+"Z"
     var result=p(body,c.pcb,c)
-    result+=r(x+.45,16.4,key-x-1.1,1.15,.08,c.gold,c,.4)
-        +r(key+.65,16.4,e-key-1.1,1.15,.08,c.gold,c,.4)
+    result+=r(x+.45,16.4,key-x-.45-keyHalf,1.15,.04,c.gold,c,.4)
+        +r(key+keyHalf,16.4,e-key-.45-keyHalf,1.15,.04,c.gold,c,.4)
     if(!c.outline) {
-        // Sparse contact dividers stay legible without pretending to draw pins.
-        for(var index=1;index<4;index++) {
-            var at=x+g.w*index/4
-            if(Math.abs(at-key)>.9) result+=r(at,16.45,.18,1.05,0,c.pcb,c)
+        // Schematic finger density, not the physical 260/288 pin count.
+        for(var index=1;index<32;index++) {
+            var at=x+.45+(g.w-.9)*index/32
+            if(Math.abs(at-key)>keyHalf+.06) result+=r(at,16.45,.08,1.05,0,c.pcb,c)
         }
     }
     return result
@@ -178,7 +193,7 @@ function neutral(c) {
 
 function body(state) {
     if(!state || state.kind!=="memory") return ""
-    var c=palette(state)
+    var c=Board.memoryColors(state,palette(state))
     if(state.style!=="dimm" && state.style!=="sodimm") return neutral(c)
     var g=profile(state), result="",e=g.x+g.w
     if(state.icon_set==="miniature") {
