@@ -40,7 +40,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(default_top_bar()["hardware_icon_style"], "classic")
 
     def test_all_seven_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
-        self.assertEqual(HARDWARE_ICON_STYLES, ("cartoon", "notebook_smile", "notebook_color", "notebook_line", "classic", "outline", "solid", "miniature", "soft", "sketch"))
+        self.assertEqual(HARDWARE_ICON_STYLES, ("miniature", "cartoon", "notebook_color", "notebook_line", "classic", "outline", "solid", "soft", "sketch", "notebook_smile"))
         for style in HARDWARE_ICON_STYLES:
             with self.subTest(style=style):
                 config = copy.deepcopy(DEFAULT)

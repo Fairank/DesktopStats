@@ -29,7 +29,8 @@ from memory_appearance import appearance_for_memory
 from tests import test_top_bar_module_qml as fixture
 
 ROOT = Path(__file__).resolve().parents[1]
-STYLES = ("solid", "miniature", "soft", "cartoon", "sketch")
+STYLES = ("solid", "miniature", "soft", "cartoon", "sketch",
+          "notebook_line", "notebook_color", "notebook_smile")
 DUAL = "DUAL-RTX4060-O8G"
 
 
@@ -228,25 +229,50 @@ Window {
                 with self.subTest(style=style, model=model):
                     data = self.layer_data(appearance(model, style))
                     layers = data["layers"]
-                    self.assertEqual(len(layers["rotors"]), count)
-                    original = self.static_layout(decode_source(data["source"]))
+                    # Notebook openings are independently drawn true circles,
+                    # rather than circles inside the legacy rotor transform.
+                    # Compare every physical plane to the original drawing,
+                    # including the two unequal unreviewed BiFrost openings.
+                    if style.startswith("notebook_"):
+                        tree = ET.fromstring(decode_source(data["source"]))
+                        fixed = sorted(tuple(float(node.get(field)) for field in ("cx", "cy", "r"))
+                                       for node in tree.iter()
+                                       if node.get("class") == "hardware-notebook-fan-opening")
+                        control = self.static_layout(decode_source(self.layer_data(appearance(model, "solid"))["source"]))
+                        self.assertEqual(len(fixed), count)
+                        self.assertEqual(len(control), count)
+                        for opening, expected in zip(fixed, control):
+                            for actual, known in zip(opening, expected[:3]):
+                                self.assertAlmostEqual(actual, known, places=4)
+                        original = [(*opening, expected[3]) for opening, expected in zip(fixed, control)]
+                    else:
+                        original = self.static_layout(decode_source(data["source"]))
+                    unreviewed_notebook = style.startswith("notebook_") and model == "APBF-IA770-16G-OC"
+                    self.assertEqual(len(layers["rotors"]), 0 if unreviewed_notebook else count)
                     projected = sorted((rotor["cx"], rotor["cy"], rotor["radius"], rotor["kind"])
                                        for rotor in layers["rotors"])
-                    self.assertEqual(len(original), len(projected))
+                    self.assertEqual(len(original), count)
+                    if unreviewed_notebook:
+                        self.assertEqual(layers["baseSource"], data["source"])
+                    else:
+                        self.assertEqual(len(original), len(projected))
                     for before, after in zip(original, projected):
                         for left, right in zip(before[:3], after[:3]):
-                            self.assertAlmostEqual(left, right, places=6)
+                            self.assertAlmostEqual(left, right, places=4 if style.startswith("notebook_") else 6)
                         self.assertEqual(before[3], after[3])
                     base = ET.fromstring(decode_source(layers["baseSource"]))
-                    self.assertFalse(any(node.get("class") == "hardware-fan-hub" for node in base.iter()))
+                    hubs = sum(node.get("class") == "hardware-fan-hub" for node in base.iter())
+                    # Unknown notebook leaves stay in the fixed plane with
+                    # both real caps. Moving known caps belong to the sprites.
+                    self.assertEqual(hubs, count if unreviewed_notebook else 0)
                     for rotor in layers["rotors"]:
                         tree = ET.fromstring(decode_source(rotor["source"]))
                         self.assertEqual(tree.get("viewBox"), "-3 -3 6 6")
                         self.assertEqual(sum(node.get("class") == "hardware-fan-hub" for node in tree.iter()), 1)
                         self.assertTrue(math.isfinite(rotor["radius"]) and rotor["radius"] > 0)
                     if model == "APBF-IA770-16G-OC":
-                        self.assertEqual([rotor[3] for rotor in projected], ["blower", "axial"])
-                        self.assertLess(projected[0][2], projected[1][2])
+                        self.assertEqual([rotor[3] for rotor in original], ["blower", "axial"])
+                        self.assertLess(original[0][2], original[1][2])
                     if "EXPERT" in model:
                         self.assertGreater(projected[0][0], 13)
 
@@ -290,7 +316,9 @@ Window {
         self.window.setProperty("directMotion", True)
         glyph = self.find("directGlyph")
         for style in STYLES:
-            value = appearance("APBF-IA770-16G-OC", style)
+            # Unreviewed BiFrost leaves are intentionally static in notebook
+            # art; the confirmed Dual rotor tests texture retention there.
+            value = appearance(DUAL if style.startswith("notebook_") else "APBF-IA770-16G-OC", style)
             self.assign("appearance", value)
             rotors = self.rotors(glyph)
             self.assertEqual(len(rotors), 2)
@@ -433,6 +461,78 @@ Window {
                         expected = .2 + 100 * rpm / (60000 * 120)
                         self.assertAlmostEqual(icon.property("gpuFanPhase"), expected)
                         self.assertAlmostEqual(self.rotors(glyph)[0].property("rotation"), expected * 360)
+
+    def test_four_primary_versions_follow_real_rpm_and_share_the_existing_clock(self):
+        # The four requested choices: original, cute, colored pen and plain pen.
+        # Legacy artwork remains selectable and is covered by STYLES above.
+        primary = ("miniature", "cartoon", "notebook_color", "notebook_line")
+        icon = self.find("fanMetric")
+        for style in primary:
+            with self.subTest(style=style):
+                self.assign("appearance", appearance("ROG-ASTRAL-RTX5090-32G-GAMING", style))
+                self.assign("channels", processor_channels(rpm=1200))
+                self.stop_clock()
+                glyph = self.metric_glyph()
+                self.assertTrue(icon.property("gpuFanMotionActive"))
+                self.assertEqual(self.evaluate(self.window, "clockCount()"), 1)
+                self.assertEqual(self.evaluate(self.window, "subscribers()"), 1)
+                self.assertEqual(self.find("metricIconAnimation").property("interval"), 34)
+                self.assertFalse(self.find("metricEffectClock").property("frameDriven"))
+                source = glyph.property("svgSource")
+                source_changes = QSignalSpy(glyph.svgSourceChanged)
+                pointers = [getCppPointer(rotor)[0] for rotor in self.rotors(glyph)]
+                images = self.rotor_images(glyph)
+                textures = [image.property("source") for image in images]
+                self.assertEqual(len(pointers), 3)
+                directions = [row["direction"] for row in self.layer_data(appearance("ROG-ASTRAL-RTX5090-32G-GAMING", style))["layers"]["rotors"]]
+                self.assertEqual(directions, [1, -1, 1])
+                for rpm, load, thermal in ((1200, .1, .3), (2400, .95, None)):
+                    self.assign("channels", processor_channels(rpm=rpm, load=load, thermal=thermal))
+                    self.stop_clock()
+                    icon.setProperty("gpuFanPhase", .2)
+                    self.evaluate(icon, "advanceClock(previousTick + 100)")
+                    phase = .2 + 100 * rpm / (60000 * 120)
+                    self.assertAlmostEqual(icon.property("gpuFanPhase"), phase)
+                    for rotor, direction in zip(self.rotors(glyph), directions):
+                        self.assertAlmostEqual(rotor.property("rotation"), (phase * 360 * direction) % 360)
+                    self.assertEqual([getCppPointer(rotor)[0] for rotor in self.rotors(glyph)], pointers)
+                    self.assertEqual([image.property("source") for image in self.rotor_images(glyph)], textures)
+                    if thermal is None:
+                        self.assertIsNone(icon.property("thermalTarget"))
+                        self.assertEqual(icon.property("displayedThermal"), 0)
+                for channels in (processor_channels(rpm=0), processor_channels(timestamp=time.time() - 4),
+                                 processor_channels(semantics="percent"), processor_channels(rpm=None)):
+                    self.assign("channels", channels)
+                    self.stop_clock()
+                    icon.setProperty("gpuFanPhase", .31)
+                    self.assertFalse(icon.property("gpuFanMotionActive"))
+                    self.assertIsNone(self.motion_loader(glyph).property("item"))
+                    self.evaluate(icon, "advanceClock(previousTick + 100)")
+                    self.assertAlmostEqual(icon.property("gpuFanPhase"), .31)
+                    self.assertEqual(self.find("hardwareGlyphImage", glyph).property("source"), source)
+                self.assertEqual(source_changes.count(), 0)
+                self.assign("channels", processor_channels(rpm=1800))
+                self.stop_clock()
+                icon.setProperty("gpuFanPhase", .217)
+                self.window.hide()
+                self.app.processEvents()
+                self.assertEqual(self.evaluate(self.window, "clockCount()"), 0)
+                self.assertEqual(self.evaluate(self.window, "subscribers()"), 0)
+                self.assertFalse(icon.property("gpuFanMotionActive"))
+                self.evaluate(icon, "advanceClock(previousTick + 100)")
+                self.assertAlmostEqual(icon.property("gpuFanPhase"), .217)
+                self.window.show()
+                self.app.processEvents()
+                self.stop_clock()
+                self.assertTrue(icon.property("gpuFanMotionActive"))
+                self.assertEqual(glyph.property("svgSource"), source)
+                self.assertEqual(self.evaluate(self.window, "clockCount()"), 1)
+                self.assign("appearance", appearance("APBF-IA770-16G-OC", style))
+                self.stop_clock()
+                self.assertEqual(icon.property("gpuFanRpm"), 1800)
+                self.assertFalse(icon.property("gpuFanCanAnimate"))
+                self.assertFalse(icon.property("gpuFanMotionActive"))
+                self.assertIsNone(self.motion_loader(self.metric_glyph()).property("item"))
 
     def test_tuf_rdna2_counter_rotating_center_reaches_real_qml_transforms(self):
         icon = self.find("fanMetric")

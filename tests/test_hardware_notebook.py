@@ -20,6 +20,7 @@ from PySide6.QtTest import QSignalSpy, QTest
 from shiboken6 import getCppPointer
 
 from tests import test_hardware_cartoon as drawing_fixture
+from top_bar_config import HARDWARE_ICON_STYLES
 
 ROOT = Path(__file__).resolve().parents[1]
 STYLES = ("notebook_line", "notebook_color", "notebook_smile")
@@ -31,6 +32,22 @@ class HardwareNotebookTests(unittest.TestCase):
     evaluate = drawing_fixture.HardwareCartoonTests.evaluate
     drawing = drawing_fixture.HardwareCartoonTests.drawing
     visual_item = drawing_fixture.HardwareCartoonTests.visual_item
+
+    def test_original_is_the_pre_smiley_miniature_and_cute_remains_separate(self):
+        self.assertEqual(HARDWARE_ICON_STYLES[:4],
+                         ("miniature", "cartoon", "notebook_color", "notebook_line"))
+        for value in drawing_fixture.all_appearances():
+            with self.subTest(model=value["id"]):
+                svg = drawing_fixture.decode(self.drawing(dict(value, icon_set="miniature"))["source"])
+                self.assertTrue(QSvgRenderer(svg.encode()).isValid())
+                original = ET.fromstring(svg)
+                expressions = [node for node in original.iter()
+                               if any(word in node.get("class", "") for word in ("expression", "smile"))]
+                self.assertEqual(expressions, [])
+                if value["kind"] == "cpu":
+                    cute = ET.fromstring(drawing_fixture.decode(
+                        self.drawing(dict(value, icon_set="cartoon"))["source"]))
+                    self.assertTrue(self.nodes(cute, "hardware-cartoon-expression"))
 
     def setUp(self):
         self.native = self.enterContext(patch("ctypes.WinDLL", side_effect=AssertionError("No native I/O")))

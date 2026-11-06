@@ -1,5 +1,15 @@
 # Changes
 
+## 0.30.0-preview.2
+
+- Correct the four primary artwork choices: Original is the pre-smiley
+  Miniature treatment, Cute Smiley is the separate Cartoon treatment, followed
+  by Pencil Color and Pen Lines. Keep Smiley Doodle as an additional option.
+  No original drawing is repainted or given an expression.
+- Expand retained fan-motion regression coverage across every modern treatment,
+  including the four primary choices. Preserve measured-RPM timing, stopped
+  and stale readings, relative directions and visibility suspension.
+
 ## 0.30.0-preview.1
 
 - Add three optional notebook treatments: Loose Pen, Pencil Color and Smiley

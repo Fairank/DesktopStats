@@ -275,13 +275,14 @@ ColumnLayout {
             objectName: "topBarHardwareIconChoice"
             width: Math.min(220, Math.max(150, hardwareIconSetting.width * .36))
             implicitHeight: 34; Accessible.name: ui.t("硬件图标")
-            model: [{id:"cartoon",label:ui.t("1 · 原版")},
-                    {id:"notebook_smile",label:ui.t("2 · 可爱笑脸")},
+            model: [{id:"miniature",label:ui.t("1 · 原版")},
+                    {id:"cartoon",label:ui.t("2 · 可爱笑脸")},
                     {id:"notebook_color",label:ui.t("3 · 彩色手绘")},
                     {id:"notebook_line",label:ui.t("4 · 纯线条")},
                     {id:"classic",label:ui.t("经典通用")},{id:"outline",label:ui.t("结构线稿")},
-                    {id:"solid",label:ui.t("精简实物")},{id:"miniature",label:ui.t("微型实物")},
-                    {id:"soft",label:ui.t("柔和双色")},{id:"sketch",label:ui.t("手绘线稿")}]
+                    {id:"solid",label:ui.t("精简实物")},
+                    {id:"soft",label:ui.t("柔和双色")},{id:"sketch",label:ui.t("手绘线稿")},
+                    {id:"notebook_smile",label:ui.t("笑脸手绘")}]
             value: root.config.hardware_icon_style || "classic"
             onPicked: selected => stats.changeTopBar("hardware_icon_style", selected)
         }
