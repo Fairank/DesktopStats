@@ -64,14 +64,14 @@ from top_bar_profiles import (
     validate_group_metrics,
 )
 from widget_catalog import CATEGORIES, TEMPLATES, from_template
-from workspace_tools import WorkspaceTools
+from assembly_tools import AssemblyTools
 
 
 def choices(value):
     return [dict(id=key, label=label) for key, label in value.items()]
 
 
-class Controller(WorkspaceTools):
+class Controller(AssemblyTools):
     draftChanged = Signal()
     savedChanged = Signal()
     dataChanged = Signal()
@@ -148,6 +148,7 @@ class Controller(WorkspaceTools):
         self.draftChanged.connect(self._update_theme)
         self.savedChanged.connect(self.historyRecordingChanged.emit)
         self.devicesChanged.connect(self.historyOptionsChanged.emit)
+        self.initialize_assembly_signals()
 
     draft = Property("QVariantMap", lambda self: self._draft, notify=draftChanged)
     saved = Property("QVariantMap", lambda self: self._saved, notify=savedChanged)

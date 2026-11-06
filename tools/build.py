@@ -18,6 +18,13 @@ SOURCES = (
     ".gitignore",
     "appearance_preview.py",
     "app.py",
+    "assembly_config.py",
+    "assembly_geometry.py",
+    "assembly_profiles.py",
+    "assembly_spec.py",
+    "assembly_tools.py",
+    "assembly_viewer.py",
+    "assembly_window.py",
     "activity_sensors.py",
     "network_snapshot.py",
     "fullscreen_guard.py",
@@ -26,6 +33,8 @@ SOURCES = (
     "battery_sensor.py",
     "build_modular.py",
     "card_layout.py",
+    "chassis_catalog.py",
+    "chassis_identity.py",
     "compact_labels.py",
     "configuration_scopes.py",
     "cooling_sensor.py",
@@ -170,6 +179,14 @@ SOURCES = (
     "tests/test_customization.py",
     "tests/test_material_policy.py",
     "tests/test_card_layout.py",
+    "tests/test_widget_refinement.py",
+    "tests/test_assembly_geometry.py",
+    "tests/test_assembly_profiles.py",
+    "tests/test_assembly_tools.py",
+    "tests/test_assembly_window.py",
+    "tests/test_assembly_page.py",
+    "tests/test_chassis_catalog.py",
+    "tests/test_chassis_identity.py",
     "tests/test_responsive_layout.py",
     "tests/test_layout_customization.py",
     "tests/test_layout_audit.py",
@@ -386,6 +403,13 @@ def main():
         "PySide6.QtWebEngineCore",
         "PySide6.QtWebEngineWidgets",
         "PySide6.QtWebEngineQuick",
+        "PySide6.QtQuick3D",
+        "PySide6.Qt3DCore",
+        "PySide6.Qt3DRender",
+        "PySide6.Qt3DInput",
+        "PySide6.Qt3DLogic",
+        "PySide6.Qt3DExtras",
+        "PySide6.Qt3DAnimation",
         "PIL",
         "pystray",
         "lupa",
@@ -438,6 +462,7 @@ def main():
         "Original application: PolyForm Noncommercial 1.0.0; see LICENSE, NOTICE and LICENSING.md.\n"
         "Third-party and prior MIT rights remain intact. Qt / PySide / Shiboken: LGPL v3 option.\n"
         "Qt libraries are dynamically loaded from _internal and may be replaced with compatible modified versions.\n"
+        "Optional assembly view: QtOpenGL / QtOpenGLWidgets from Qt Base, using its LGPL v3 option; no Qt Quick 3D or Qt 3D runtime.\n"
         "Source/rebuild instructions are included in source/. Reverse engineering for debugging modifications to LGPL libraries is permitted.\n"
         "Unmodified upstream sources: https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/\n"
         "PySide/Shiboken source: https://github.com/pyside/pyside-setup/tree/v6.10.2\n"

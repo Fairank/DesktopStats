@@ -14,6 +14,10 @@
 切换插画风格不会改变许可。修改、重新配色或重新打包也须遵守许可证；
 分享本项目副本或许可允许的修改版时，须保留 LICENSE、NOTICE 及相关来源声明。
 
+原创三维机箱与硬件示意网格、部件外形转换及其渲染代码也属于上述非商业范围。
+这些模型由本项目代码生成，不包含厂商 CAD、下载网格或产品照片；目录中的官方
+链接只用于核对规格与外观事实，不授予厂商商标或素材使用权。
+
 这一范围仅涉及可受版权保护的原创表达。Lucide/Feather 通用符号及其衍生片段、
 既有年糕图标和第三方组件继续适用下文各自的许可，不能用本项目的非商业限制
 撤销它们已授予的权利。硬件品牌、产品名称及商标属于各自权利人；这些简化硬件
@@ -35,6 +39,9 @@ permitted purposes, not download protection or an OSI-approved open-source licen
 Original model-specific hardware illustrations, fan drawings and their original
 rendering code are included in this scope. Commercial use, commercial integration,
 sale and other use for commercial gain require separate written permission.
+This includes the original schematic assembly meshes and their generation and
+rendering code. They are project-authored illustrations, not manufacturer CAD
+files or a license to the referenced manufacturers' product assets.
 Third-party or previously licensed symbols and artwork retain their existing
 permissions; generic fragments derived from Lucide/Feather are not relicensed.
 Hardware product names and trademarks remain with their respective owners.
@@ -61,6 +68,10 @@ Hardware product names and trademarks remain with their respective owners.
   granted for those libraries are not restricted by the application's license.
   Rebuild instructions and upstream source locations are in the user guide and
   packaged `THIRD_PARTY_LICENSES.txt`.
+  The optional 3D assembly view uses Qt Base's QtOpenGL/QtOpenGLWidgets through
+  the existing PySide6-Essentials dependency, under the LGPL v3 option. It does
+  not add Qt Quick 3D, Qt 3D or PySide6-Addons. The application restrictions do
+  not limit the independent permissions granted for those Qt Base libraries.
 - **Earlier versions:** copies through 0.18.0-preview.2 were supplied under MIT.
   Their existing permissions are not revoked by deleting an archive, removing
   a release or changing the license of a later version. The original notice is

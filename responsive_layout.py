@@ -7,8 +7,9 @@ computes a legal effective rectangle before a native window is created/resized.
 
 from math import ceil, floor, isfinite
 
-from card_layout import Box, CardLayout, Reading
+from card_layout import Box, CardLayout, Reading, summary_plan
 from card_layout import plan as legacy_plan
+from widget_catalog import TEMPLATES
 
 CELL_WIDTH = 128
 ROW_HEIGHT = 30
@@ -20,6 +21,19 @@ TITLE_HEIGHT = 22
 
 class ResponsiveLayoutError(ValueError):
     """The requested content rectangle is incomplete or too small."""
+
+
+def default_summary(prefs, metrics):
+    """Only unchanged automatic three-reading templates receive the new layout.
+
+    A selected manual/grid/list mode or edited metric sequence keeps its own
+    geometry. This is a presentation choice, never a preference migration.
+    """
+    template = TEMPLATES.get(prefs.get("template"), {})
+    return (prefs.get("form") != "bar"
+            and prefs.get("layout_mode", "auto") == "auto"
+            and prefs.get("presentation", "auto") == "auto"
+            and len(metrics) == 3 and tuple(template.get("content", ())) == tuple(metrics))
 
 
 def is_responsive(prefs):
@@ -191,6 +205,7 @@ def responsive_plan(width, height, metrics, prefs):
             or not prefs.get("content")
             and style != "cores"
             and prefs.get("secondary", "none") != "none",
+            summary=default_summary(prefs, metrics),
         )
 
         def box(item):
@@ -221,6 +236,15 @@ def responsive_plan(width, height, metrics, prefs):
     title_height = TITLE_HEIGHT if _title(prefs) else 0
     body = Box(PAD_X, PAD_Y + title_height, width - 2 * PAD_X, height - 2 * PAD_Y - title_height)
     title = Box(PAD_X, PAD_Y, width - 2 * PAD_X, TITLE_HEIGHT - 2) if title_height else None
+    if default_summary(prefs, metrics) and height >= 148:
+        inset = 14 if width >= 170 else 10
+        body_top = 42 if title_height else 14
+        body = Box(inset, body_top, width - 2 * inset, height - body_top - 14)
+        title = Box(inset, 10, width - 2 * inset, 22) if title_height else None
+        layout = summary_plan(body, title=title)
+        return CardLayout(layout.body,
+                          tuple(Reading(r.index, r.box, r.mode, r.size, metrics[r.index])
+                                for r in layout.readings), title=title)
     mode = _mode(prefs)
     if mode == "manual":
         boxes = tuple(

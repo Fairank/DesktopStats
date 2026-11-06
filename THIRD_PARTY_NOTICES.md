@@ -54,6 +54,27 @@ software automatically inherits its software license. Runtime playback uses
 local PNG textures in Qt; neither Three.js nor a browser is an application
 runtime dependency. Pillow is used only by the optional artwork generator.
 
+## Optional 3D assembly view
+
+The assembly view uses `QOpenGLWidget`, QtOpenGL and QtOpenGLWidgets from
+**Qt Base 6.10.2**, through the existing **PySide6-Essentials 6.10.2** dependency.
+These Qt libraries use the LGPL v3 option and remain dynamically replaceable.
+Their complete notices and corresponding-source references are included with
+the existing Qt Base notices in `licenses/qt-6.10.2/` and the packaged
+`THIRD_PARTY_LICENSES.txt`. The application's noncommercial license does not
+restrict the permissions granted for these libraries.
+
+- Qt OpenGL module and licensing: https://doc.qt.io/qt-6.10/qtopengl-index.html
+- QOpenGLWidget API: https://doc.qt.io/qt-6.10/qopenglwidget.html
+- Corresponding Qt Base source: https://download.qt.io/official_releases/qt/6.10/6.10.2/submodules/
+- PySide/Shiboken source: https://github.com/pyside/pyside-setup/tree/v6.10.2
+
+This feature does not use Qt Quick 3D, Qt 3D, PySide6-Addons, a browser engine
+or downloaded model assets. The meshes, shaders and profile conversion code
+are original application contributions under the scope in `LICENSING.md`.
+Manufacturer URLs in `chassis_catalog.py` document product facts; no product
+photograph, manufacturer CAD model or trademark license is included.
+
 ## Other dependencies
 
 The original application uses PolyForm Noncommercial 1.0.0 from

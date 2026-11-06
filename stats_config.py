@@ -15,6 +15,7 @@ from profile_paths import resolve_profile_paths
 from skin_styles import SKINS
 from top_bar_config import default_top_bar, validate_top_bar
 from widget_catalog import GLASS_DEFAULTS, MODULES, TEMPLATES, from_template, widget_defaults
+from assembly_config import DEFAULT_ASSEMBLY, validate_assembly
 
 ASSETS = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 PROFILE_PATHS = resolve_profile_paths()
@@ -50,6 +51,7 @@ DEFAULT = dict(
     refresh=2,
     history_enabled=True,
     cpu_temperature_prompt_on_start=False,
+    assembly=dict(DEFAULT_ASSEMBLY),
     top_bar=default_top_bar(),
     magnet_enabled=False,
     magnet_gap=12,
@@ -91,6 +93,7 @@ def validate(value):
         raise ValueError("不支持的设置版本")
     legacy = version < 5
     out = copy.deepcopy(DEFAULT)
+    out["assembly"] = validate_assembly(value.get("assembly"))
     out["top_bar"] = validate_top_bar(value.get("top_bar", out["top_bar"]))
     if value.get("theme") == "glass":
         value["theme"] = "light"

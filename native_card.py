@@ -13,7 +13,7 @@ from compact_labels import label_options
 from localization import translate
 from metrics import display_value, metric_info, metric_value, numeric
 from native_surface import paint_surface
-from responsive_layout import ResponsiveLayoutError, is_responsive, responsive_plan
+from responsive_layout import ResponsiveLayoutError, default_summary, is_responsive, responsive_plan
 from skin_styles import effective_skin, glass_options, palette
 from stats_config import DEFAULT, MODULES
 from widget_catalog import TEMPLATES
@@ -176,6 +176,7 @@ class HardwareCard(QQuickPaintedItem):
             show_title=prefs.get("show_title", True),
             chart=bool(prefs["chart"] and style == "auto" and len(content) <= 2),
             footer=footer,
+            summary=default_summary(prefs, content),
         )
         layout = plan(self.width() / scale, len(content), **args)
         draw = _CardPainter(
@@ -389,6 +390,7 @@ class HardwareCard(QQuickPaintedItem):
             show_title,
             chart=bool(prefs["chart"] and style == "auto" and len(content) <= 2),
             footer=bool(footer),
+            summary=default_summary(prefs, content),
         )
         values = data.get("cpu_per_core", [])
         values = values if isinstance(values, (list, tuple)) else []
@@ -420,6 +422,7 @@ class HardwareCard(QQuickPaintedItem):
                     show_title,
                     chart=bool(prefs["chart"] and style == "auto" and len(content) <= 2),
                     footer=bool(footer),
+                    summary=default_summary(prefs, content),
                     compact=True,
                 )
             if show_title:

@@ -1,5 +1,28 @@
 # Changes
 
+## 0.32.0-preview.1
+
+- Remove the visible desktop-widget corner grip while preserving corner resize
+  behavior. Give unchanged automatic three-metric defaults a primary/supporting
+  hierarchy; retain customized ordering, manual layouts and existing templates.
+- Add an optional, rotatable OpenGL assembly window with exploded and component
+  views. Convert the existing 178-entry hardware catalog into original schematic
+  meshes, retaining reviewed shells, fan geometry, CPU lids and module profiles.
+  Do not invent unverified fan blades or installed cooling/power components.
+- Add a bounded, source-linked catalog of 24 case references across 14 brands
+  and five layout families. Manual selection is available. Read SMBIOS only on
+  demand and cache whitelisted identity fields; no serial numbers, UUIDs, WMI
+  worker, driver, background network lookup or extra hardware poll is added.
+  No verified retail-case firmware mappings are available in this first batch;
+  unidentified DIY cases remain reference models rather than motherboard guesses.
+- Keep the assembly static by default. Optional GPU fan motion uses existing
+  fresh RPM feedback and the shared animation clock, pauses outside the visible
+  view and releases graphics resources on close. Use Qt Base OpenGL components
+  from the existing Essentials dependency, without Qt Quick 3D or Qt 3D.
+- Preserve Original's expression-free art, other saved appearances, temperature
+  bridge behavior and third-party license rights. Extend the original-art
+  noncommercial notice to the generated assembly models and rendering code.
+
 ## 0.31.0-preview.1
 
 - Add optional Cream Sticker, Paper Cutout and Blue Ink Journal illustrations,

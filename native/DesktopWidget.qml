@@ -175,15 +175,7 @@ Window {
             if(!accepted) {root.width=root.spec.width;root.height=root.spec.height}
         }
         onCanceled: {root.resizing=false;root.width=root.spec.width;root.height=root.spec.height}
-        Canvas {
-            anchors.right:parent.right;anchors.bottom:parent.bottom;anchors.margins:7;width:12;height:12
-            opacity:resizeHandle.containsMouse || resizeHandle.pressed || moveArea.containsMouse ? .65 : .18
-            onPaint: {
-                let ctx=getContext("2d")
-                ctx.clearRect(0,0,width,height);ctx.strokeStyle=stats.saved.theme==="dark"?"#d9e4f2":"#65768b";ctx.lineWidth=1.2
-                ctx.beginPath();ctx.moveTo(3,10);ctx.lineTo(10,3);ctx.moveTo(7,10);ctx.lineTo(10,7);ctx.stroke()
-            }
-        }
+        // Keep the resize cursor and hit area without painting corner marks.
         Accessible.name:stats.tr("缩放小组件")
     }
 }

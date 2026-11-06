@@ -54,7 +54,7 @@ def _check(report, output):
         QUrl,
         qVersion,
     )
-    from PySide6.QtGui import QFontDatabase, QImage, QPainter
+    from PySide6.QtGui import QFontDatabase, QImage, QPainter, QWindow
     from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent, qmlRegisterType
     from PySide6.QtQuick import QQuickWindow
     from PySide6.QtWidgets import QApplication
@@ -102,7 +102,8 @@ def _check(report, output):
     bar_state._config = copy.deepcopy(DEFAULT)
     try:
         for filename in (
-            "Settings.qml", "DesktopWidget.qml", "Details.qml", "TopBar.qml", "TopBarDetails.qml"
+            "Settings.qml", "DesktopWidget.qml", "Details.qml", "TopBar.qml", "TopBarDetails.qml",
+            "AssemblyPage.qml", "AssemblyClock.qml",
         ):
             component = QQmlComponent(engine, QUrl.fromLocalFile(str(ASSETS / "native" / filename)))
             components.append(component)
@@ -119,7 +120,8 @@ def _check(report, output):
             window = component.createWithInitialProperties(initial)
             assert window is not None, f"Could not create bundled {filename}"
             objects.append(window)
-            assert not window.isVisible(), "Self-check must not show even an offscreen window"
+            if isinstance(window,QWindow):
+                assert not window.isVisible(), "Self-check must not show even an offscreen window"
             if filename == "DesktopWidget.qml":
                 scene = window.contentItem()
                 names = [child.objectName() for child in scene.childItems()]
@@ -148,6 +150,18 @@ def _check(report, output):
         with output.with_suffix(".png").open("xb") as file:
             file.write(bytes(buffer.data()))
         report["checks"].append("native-card-render")
+        # Exercise the optional geometry and profile adapter without a GL
+        # context, Windows inventory, sensor sampling or an assembly window.
+        from assembly_spec import build_spec
+        from assembly_profiles import bake_profiles
+        from assembly_geometry import build_scene
+        from PySide6 import QtOpenGL,QtOpenGLWidgets
+        assembly=build_spec(dict(cpu_name="Intel Core i7-13700KF",gpus={"0":dict(gpu_name="RTX 5090")}),
+                            copy.deepcopy(DEFAULT),dict(state="unavailable"),[])
+        scene=build_scene(bake_profiles(assembly,engine))
+        assert scene.meshes,"Missing optional assembly geometry"
+        report["assembly_meshes"]=len(scene.meshes)
+        report["checks"].append("assembly-geometry-no-graphics")
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

@@ -16,7 +16,7 @@ Window {
     readonly property int clientY:titlebarHeight
     readonly property real clientHeight:Math.max(0,height-clientY)
     readonly property int replacementBannerHeight:stats.replacementPending?40:0
-    readonly property string currentScope:page===3?"topbar":page===1 || page===2 || page===4?"preferences":"desktop"
+    readonly property string currentScope:page===3?"topbar":page===1 || page===2 || page===4 || page===5?"preferences":"desktop"
     readonly property int railWidth: layoutWidth<900?184:200
     readonly property int contentGutter: layoutWidth-railWidth<580?20:28
     property bool previewInspectionNeeded:false
@@ -54,7 +54,8 @@ Window {
     onUiActiveChanged:{if(!uiActive)previewInspectionNeeded=false;root.scheduleInspectionRefresh()}
     function refreshInspectionDemand(){
         inspectionRefreshQueued=false
-        previewInspectionNeeded=uiActive && page!==2 && typeof stats.previewNeedsInspection==="function"
+        if(typeof stats.setAssemblyActive==="function")stats.setAssemblyActive(uiActive && page===5)
+        previewInspectionNeeded=uiActive && page!==2 && page!==5 && typeof stats.previewNeedsInspection==="function"
             && stats.previewNeedsInspection(currentScope,selectedKey)
     }
     function scheduleInspectionRefresh(){
@@ -67,7 +68,7 @@ Window {
     function showGallery(){if(!atWidgetLimit)gallery.showWidgets()}
     function selectNext(){if(!root.draftConfig.widget_order.includes(selectedKey))selectedKey=root.draftConfig.widget_order[0] || ""}
     function restoreGalleryFocus(){
-        if(page!==0){const nav=navigationRepeater.itemAt(page===3?1:page===4?2:3);if(nav)nav.forceActiveFocus();return}
+        if(page!==0){const nav=navigationRepeater.itemAt(page===3?1:page===4?2:page===5?3:4);if(nav)nav.forceActiveFocus();return}
         const row=instanceRepeater.itemAt(root.draftConfig.widget_order.indexOf(selectedKey))
         if(row)row.forceActiveFocus();else addWidgetButton.forceActiveFocus()
     }
@@ -98,17 +99,17 @@ Window {
             Column {width:root.railWidth-76;spacing:4;Text {width:parent.width;text:"Desktop Stats";color:ui.ink;font.family:ui.fontFamily;font.pixelSize:13;font.weight:Font.DemiBold;elide:Text.ElideRight}Text {width:parent.width;text:"WINDOWS · "+stats.version;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:9;font.letterSpacing:.3;elide:Text.ElideRight}}
         }
         Item {
-            id:mainNavigation;x:12;y:94;width:root.railWidth-24;height:175
+            id:mainNavigation;x:12;y:94;width:root.railWidth-24;height:220
             Rectangle {objectName:"sidebarNavigationReadingSurface";anchors.fill:parent;radius:8;border.width:0;color:ui.railReading}
             Rectangle {
-                objectName:"sidebarSelectionSurface";width:parent.width;height:40;y:root.page===0?0:root.page===3?45:root.page===4?90:135
+                objectName:"sidebarSelectionSurface";width:parent.width;height:40;y:root.page===0?0:root.page===3?45:root.page===4?90:root.page===5?135:180
                 radius:7;color:ui.selection;border.color:ui.line
                 Behavior on y {NumberAnimation {duration:root.visible && stats.motionEnabled?200:0;easing.type:Easing.OutCubic}}
             }
             Column {anchors.fill:parent;spacing:5
               Repeater {
                 id:navigationRepeater
-                model:[{id:0,label:"桌面组件",icon:"grid"},{id:3,label:"顶部栏",icon:"topbar"},{id:4,label:"历史记录",icon:"time"},{id:1,label:"偏好",icon:"sliders"}]
+                model:[{id:0,label:"桌面组件",icon:"grid"},{id:3,label:"顶部栏",icon:"topbar"},{id:4,label:"历史记录",icon:"time"},{id:5,label:"整机视图",icon:"gpu"},{id:1,label:"偏好",icon:"sliders"}]
                 ItemDelegate {
                     id:nav;required property var modelData;required property int index;objectName:"nav_"+modelData.id
                     width:root.railWidth-24;height:40;leftPadding:12;rightPadding:10;focusPolicy:Qt.StrongFocus;onClicked:root.page=modelData.id
@@ -119,17 +120,17 @@ Window {
               }
             }
         }
-        Rectangle {objectName:"sidebarWidgetsReadingSurface";visible:root.page===0;x:12;y:283;width:root.railWidth-24;height:Math.min(Math.max(0,languageSelector.y-y-12),Math.max(44,added.y-y+Math.min(added.height,instanceColumn.implicitHeight)+6));radius:8;border.width:0;color:ui.railReading}
+        Rectangle {objectName:"sidebarWidgetsReadingSurface";visible:root.page===0;x:12;y:327;width:root.railWidth-24;height:Math.min(Math.max(0,languageSelector.y-y-12),Math.max(44,added.y-y+Math.min(added.height,instanceColumn.implicitHeight)+6));radius:8;border.width:0;color:ui.railReading}
         RowLayout {
             objectName:"sidebarWidgetCountContent"
             visible:root.page===0
-            x:22;y:291;width:root.railWidth-42;height:30
+            x:22;y:335;width:root.railWidth-42;height:30
             Text {Layout.fillWidth:true;text:stats.catalog.instances.length+" "+ui.t("个小组件");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:10;elide:Text.ElideRight}
             ActionButton {objectName:"openScenesButton";text:ui.t("场景");quiet:true;implicitWidth:42;implicitHeight:28;leftPadding:2;rightPadding:2;onClicked:scenePopup.open();ToolTip.visible:hovered;ToolTip.text:ui.t("场景方案")}
             ActionButton {id:addWidgetButton;objectName:"addWidgetButton";text:"＋";quiet:true;implicitWidth:28;implicitHeight:28;leftPadding:0;rightPadding:0;enabled:!root.atWidgetLimit;Accessible.name:ui.t("添加小组件");onClicked:root.showGallery();ToolTip.visible:hovered;ToolTip.text:root.atWidgetLimit?ui.t("最多添加 24 个小组件"):ui.t("添加小组件")}
         }
         ScrollView {
-            id:added;objectName:"widgetListScroll";visible:root.page===0;x:12;y:331;width:root.railWidth-24;height:Math.max(1,languageSelector.y-y-20)
+            id:added;objectName:"widgetListScroll";visible:root.page===0;x:12;y:375;width:root.railWidth-24;height:Math.max(1,languageSelector.y-y-20)
             contentWidth:availableWidth;contentHeight:instanceColumn.implicitHeight;clip:true;ScrollBar.horizontal.policy:ScrollBar.AlwaysOff
             Column {
                 id:instanceColumn;width:added.availableWidth;spacing:4
@@ -185,6 +186,7 @@ Window {
                 SensorBrowser {objectName:"sensorBrowser";active:root.visible && root.page===2;readingsActive:root.uiActive && root.page===2;Layout.fillWidth:true;Layout.fillHeight:true}
             }
             HistoryPage {id:historyPage;anchors.fill:parent;alignContentLeft:true;visible:root.page===4;active:root.uiActive && root.page===4}
+            Loader {objectName:"assemblyPageLoader";anchors.fill:parent;anchors.margins:root.contentGutter;active:root.page===5;sourceComponent:AssemblyPage {active:root.uiActive && root.page===5}}
         }}
         Rectangle {objectName:"replacementPreviewBanner";x:root.railWidth;y:parent.height-72-root.replacementBannerHeight;width:parent.width-x;height:root.replacementBannerHeight;visible:stats.replacementPending;color:ui.selection
             Text {anchors.fill:parent;anchors.leftMargin:28;anchors.rightMargin:28;text:ui.t("将替换全部设置");verticalAlignment:Text.AlignVCenter;font.family:ui.fontFamily;font.pixelSize:ui.captionSize;font.weight:Font.Medium;color:ui.ink}

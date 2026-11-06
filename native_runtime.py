@@ -85,6 +85,8 @@ class Runtime(QObject):
         self.position_timer.setInterval(450)
         self.position_timer.timeout.connect(self.save_positions)
         self.controller = Controller()
+        self._assembly_window = None
+        self.controller.assemblyViewRequested.connect(self.open_assembly_view)
         self.controller.set_motion_enabled(not headless and animations_enabled())
         self.frame_bridge = (
             None
@@ -1177,6 +1179,47 @@ class Runtime(QObject):
         self.details.show()
         self.details.requestActivate()
 
+    def open_assembly_view(self, specification):
+        """A user-requested native viewer, kept on the selected bar screen."""
+        if self.headless or self.shutting_down:
+            return
+        window = None
+        try:
+            configured = self.controller.saved.get("top_bar", {})
+            from assembly_config import target_screen
+            target = target_screen(self.app.screens(),configured,self.app.primaryScreen(),
+                lambda screen:self.top_bar.adapter.screen_identity(screen).native_id)
+            if target is None:
+                self.controller.set_status("所选屏幕不可用", error=True)
+                return
+            current = self._assembly_window
+            if current is not None:
+                current.synchronize(specification)
+                window = current
+            else:
+                from assembly_window import AssemblyWindow
+                window = AssemblyWindow(self.controller, self.engine, specification)
+            area = target.availableGeometry()
+            minimum_width = min(760, max(320, area.width()))
+            minimum_height = min(520, max(240, area.height()))
+            window.setMinimumSize(minimum_width, minimum_height)
+            width = min(1080, max(minimum_width, area.width() - 64))
+            height = min(800, max(minimum_height, area.height() - 64))
+            window.resize(width, height)
+            window.winId()
+            window.windowHandle().setScreen(target)
+            window.move(area.x() + max(0, (area.width() - width) // 2),
+                        area.y() + max(0, (area.height() - height) // 2))
+            if current is None:
+                self._assembly_window = window
+                window.closed.connect(lambda: setattr(self, "_assembly_window", None))
+            window.showNormal();window.raise_();window.activateWindow()
+        except Exception:
+            if window is not None:
+                window.close()
+            logging.exception("Assembly view could not open")
+            self.controller.set_status("无法打开三维视图", error=True)
+
     def diagnose(self, output):
         output = Path(output)
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -1223,6 +1266,7 @@ class Runtime(QObject):
                 errors.append((label, error))
 
         for owner_name, method in (
+            ("_assembly_window", "close"),
             ("cpu_temperature_launcher", "close"),
             ("settings_material", "close"), ("settings_blur", "close"),
             ("settings_host", "dispose"), ("top_bar", "close"),
