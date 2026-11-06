@@ -740,6 +740,7 @@ class Controller(WorkspaceTools):
                     effect_speed=effect_speed,
                     hardware_state=hardware_feedback(data, metric, prefs, stale=stale),
                     hardware_appearance=appearance,
+                    hardware_icon_style=config["top_bar"].get("hardware_icon_style", "classic"),
                     source=source,
                     reason=reason,
                     hardware_name=hardware_name,

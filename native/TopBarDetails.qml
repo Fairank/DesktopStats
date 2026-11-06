@@ -335,6 +335,7 @@ Window {
                 metric: root.detail.metric || ""
                 hardwareState: root.detail.hardware_state || ({})
                 hardwareAppearance: root.detail.hardware_appearance || ({})
+                iconStyle: root.detail.hardware_icon_style || "classic"
                 automaticEffect: root.detail.auto_effect || ""
                 effect: root.detail.icon_effect || "off"
                 level: root.detail.effect_level === undefined ? null : root.detail.effect_level
@@ -1180,7 +1181,7 @@ Window {
                                         objectName: "topBarDetailFanRpm"
                                         Layout.fillWidth: true
                                         visible: appearanceSummary.appearance.kind==="gpu"
-                                            && ["solid","miniature","soft"].includes(appearanceSummary.appearance.icon_set)
+                                            && ["solid","miniature","soft","cartoon"].includes(appearanceSummary.appearance.icon_set)
                                         text: {
                                             const rpm=detailMetricIcon.gpuFanRpm, sample=detailMetricIcon.gpuFanReading
                                             if (!Number.isFinite(rpm)) return root.tr("显卡风扇")+" · "+root.tr("转速未知")

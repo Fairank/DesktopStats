@@ -2,6 +2,7 @@
 .import "HardwareSolid.js" as Solid
 .import "HardwareMiniature.js" as Miniature
 .import "HardwareSoft.js" as Soft
+.import "HardwareCartoon.js" as Cartoon
 .import "HardwareSeriesShapes.js" as SeriesCatalog
 .import "HardwareMemoryShapes.js" as Memory
 .import "HardwareBoardDesigns.js" as Board
@@ -69,7 +70,7 @@ function key(appearance, ink) {
     const defaults = {intel: "#2479b5", amd: "#c65b56", nvidia: "#729b42", unknown: "#77818f"}
     const parts = [kind, vendor, board, style, count, shroud,
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
-        choice(input.icon_set, ["outline", "solid", "miniature", "soft"], "outline")]
+        choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon"], "outline")]
     // Original Outline keys and art stay byte-stable. Exact exterior details
     // require an independently guarded model identity, including on old cards.
     const model=parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):""
@@ -231,7 +232,8 @@ function source(geometryKey) {
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
-    const body = parts[0] === "memory" ? Memory.body(state) : parts[10] === "solid" ? Solid.body(state)
+    const body = parts[10] === "cartoon" ? Cartoon.body(state)
+        : parts[0] === "memory" ? Memory.body(state) : parts[10] === "solid" ? Solid.body(state)
         : parts[10] === "miniature" ? Miniature.body(state)
         : parts[10] === "soft" ? Soft.body(state)
         : outlineBody
@@ -248,7 +250,7 @@ function layers(geometryKey) {
     const canonical = key(inputFromParts(parts), parts[7])
     if (canonical !== geometryKey) return layers(canonical)
     const count = Number(parts[4])
-    if (parts[0] !== "gpu" || ["solid","miniature","soft"].indexOf(parts[10]) < 0
+    if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon"].indexOf(parts[10]) < 0
             || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
             || [1,2,3].indexOf(count) < 0)
         return {baseSource:source(canonical),rotors:[]}
@@ -259,7 +261,8 @@ function layers(geometryKey) {
     // coordinates. The collector is local, including all per-style offsets and
     // each fan's reviewed radius/type. No complete-card regeneration per frame.
     const collector = []
-    const body = parts[10] === "solid" ? Solid.body(state,collector)
+    const body = parts[10] === "cartoon" ? Cartoon.body(state,collector)
+        : parts[10] === "solid" ? Solid.body(state,collector)
         : parts[10] === "miniature" ? Miniature.body(state,collector)
         : Soft.body(state,collector)
     const baseSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
@@ -276,4 +279,13 @@ function layers(geometryKey) {
             source:"data:image/svg+xml;utf8," + encodeURIComponent(svg)}
     })
     return {baseSource:"data:image/svg+xml;utf8," + encodeURIComponent(baseSvg),rotors:rotors}
+}
+
+// Generic quantity/device symbols deliberately carry no retail identity.
+function genericSource(kind, ink, moving) {
+    const body = Cartoon.generic(kind, hex(ink,"#69788c"), moving === true)
+    if (!body) return ""
+    return "data:image/svg+xml;utf8," + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
+        + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>')
 }

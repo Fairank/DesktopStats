@@ -60,6 +60,7 @@ class MemoryIdentityTests(unittest.TestCase):
     def test_only_modern_topbar_with_ram_requests_one_shot_identity(self):
         bar = dict(enabled=True, hardware_icon_style="soft", items=[dict(metric="ram_percent", prefs={})])
         self.assertTrue(identity.requested(dict(top_bar=bar)))
+        self.assertTrue(identity.requested(dict(top_bar=dict(bar, hardware_icon_style="cartoon"))))
         for patch_value in (dict(enabled=False), dict(hardware_icon_style="classic"),
                             dict(items=[dict(metric="vram_percent", prefs={})]), dict(items=[])):
             self.assertFalse(identity.requested(dict(top_bar=dict(bar, **patch_value))))

@@ -124,6 +124,7 @@ ColumnLayout {
         model: root.measureSlots
         onItemAdded: fit.restart()
         delegate: TopBarGroupContent {
+            barHeight:root.barHeight
             design:root.barDesign
             motionEnabled:root.interactivePreview && stats.motionEnabled
             required property int index
@@ -199,6 +200,7 @@ ColumnLayout {
             }
             contentItem: Item {
                 TopBarGroupContent {
+                    barHeight:root.barHeight
                     design:root.barDesign
                     motionEnabled:root.interactivePreview && stats.motionEnabled
                     anchors.left: parent.left

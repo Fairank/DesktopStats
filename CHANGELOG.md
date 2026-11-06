@@ -1,5 +1,18 @@
 # Changes
 
+## 0.29.0-preview.2
+
+- Add optional Cute Cartoon artwork for all 178 current GPU, CPU and memory
+  entries, preserving each reviewed enclosure, fan profile and memory key.
+  Cartoon quantity and device symbols also cover storage, network, battery,
+  cooling and the other existing metric icons without asserting retail models.
+- Enlarge modern top-bar GPU drawings from an 18-pixel square to a 30-by-22
+  frame at the normal 32-pixel bar height. CPU/RAM icons use 22-pixel frames;
+  text spacing, hit regions, grouping and previews share the new width contract.
+  Keep Classic/Outline sizing and all five previous artwork choices.
+- Reuse retained SVGs, rotor textures and the shared effect clock. No extra
+  sampling cadence, hardware scan, frame timer or background service is added.
+
 ## 0.28.0-preview.2
 
 - Allow up to 60 seconds for a verified clean shutdown during installation.

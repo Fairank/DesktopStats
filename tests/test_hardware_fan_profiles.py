@@ -27,7 +27,7 @@ from tools.generate_hardware_fan_data import payload
 
 ROOT = Path(__file__).resolve().parents[1]
 GPU_ROWS = {row[0]: row for row in hardware.CATALOG if row[1] == "gpu"}
-STYLES = ("solid", "miniature", "soft")
+STYLES = ("solid", "miniature", "soft", "cartoon")
 
 
 def exact_appearance(model_id, style="solid"):
@@ -185,7 +185,7 @@ QtObject {
         for private_or_unused in ("source_url", "source_image_url", "representative", "model_ids", "notes"):
             self.assertNotIn('"' + private_or_unused + '"', encoded)
 
-    def test_all_three_styles_draw_exact_confirmed_blades_and_neutral_unknowns(self):
+    def test_all_modern_styles_draw_exact_confirmed_blades_and_neutral_unknowns(self):
         unknown_seen = known_seen = 0
         for style in STYLES:
             for series, row in PROFILES.items():
@@ -320,7 +320,14 @@ QtObject {
             shadow=self.layers(exact_appearance('msi-shadow-5080oc',style))['rotors'][0]
             caps=[next(node for node in ET.fromstring(decode(row['source'])).iter()
                        if node.get('class')=='hardware-fan-hub') for row in (silver,shadow)]
-            self.assertGreater(luminance(caps[0].get('fill'))-luminance(caps[1].get('fill')),100)
+            silver_luma,dark_luma=(luminance(cap.get('fill')) for cap in caps)
+            if style=='cartoon':
+                # Pastel paint intentionally lifts dark retail tones. Preserve
+                # recognisable light/dark cap finishes instead of requiring the
+                # physical treatments' metallic contrast from this illustration.
+                self.assertGreater(silver_luma,192)
+                self.assertLess(dark_luma,128)
+            self.assertGreater(silver_luma-dark_luma,75 if style=='cartoon' else 100)
 
     def test_taichi_rdna3_and_rdna4_do_not_share_center_fan_paint(self):
         def paints(svg):

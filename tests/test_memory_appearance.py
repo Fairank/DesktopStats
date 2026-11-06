@@ -309,12 +309,12 @@ Window {
         header, body = source.split(",", 1)
         return base64.b64decode(body).decode() if ";base64" in header else unquote(body)
 
-    def test_true_qvariant_map_dispatches_all_four_memory_themes_and_retains_static_source(self):
+    def test_true_qvariant_map_dispatches_all_memory_themes_and_retains_static_source(self):
         control = self.find("memoryControl")
         icon = self.find("memoryMetric")
         loader = self.find("metricHardwareGlyphLoader", icon)
         sources = set()
-        for style in ("outline", "solid", "miniature", "soft"):
+        for style in ("outline", "solid", "miniature", "soft", "cartoon"):
             with self.subTest(style=style):
                 value = dict(memory.appearance_for_memory(model="CMT32GX5M2B5600C36"), icon_set=style)
                 self.deliver(value)  # Python QVariantMap, including real None, not JSON construction.
@@ -346,7 +346,7 @@ Window {
                     self.assertEqual(self.svg(control), source)
                     self.assertEqual(getCppPointer(loader.property("item"))[0], pointer)
                 self.assertEqual(source_changes.count(), 0)
-        self.assertEqual(len(sources), 4)
+        self.assertEqual(len(sources), 5)
         self.assertFalse(self.window.grabWindow().isNull())
 
     def test_real_memory_maps_switch_short_neutral_and_classic_without_borrowing_gpu_geometry(self):

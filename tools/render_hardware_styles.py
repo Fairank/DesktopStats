@@ -15,14 +15,14 @@ ROOT = Path(__file__).resolve().parents[1]
 QML = '''import QtQuick
 import "../native" as Product
 Window {
-    id:scene; visible:false; width:1380; height:866
+    id:scene; visible:false; width:1612; height:866
     property bool dark:false
     property var cases:[]
     property var styles:[]
     readonly property color ink:dark?"#e8edf4":"#303a48"
     readonly property color muted:dark?"#a1aebf":"#68768a"
     color:dark?"#1c222b":"#eff2f6"
-    Text {x:28;y:22;text:"硬件图标 · 五种外观版本";font.family:"Microsoft YaHei UI"
+    Text {x:28;y:22;text:"硬件图标 · 六种外观版本";font.family:"Microsoft YaHei UI"
         font.pixelSize:23;font.weight:Font.DemiBold;color:scene.ink}
     Text {x:28;y:61;text:"放大外观 + 18px 顶部栏实际大小  /  静态矢量，无新增动画或采样"
         font.family:"Microsoft YaHei UI";font.pixelSize:12;color:scene.muted}
@@ -100,7 +100,8 @@ def render(output, scratch, *, dark=False):
     styles = [dict(id=key, label=label, note=note) for key, label, note in (
         ("classic", "经典通用", "原来图标"), ("outline", "结构线稿", "上一版 · 保留可选"),
         ("solid", "精简实物", "实体外壳 / 清晰风扇"), ("miniature", "微型实物", "薄顶边 / 立体厚度"),
-        ("soft", "柔和双色", "圆角色块 / 简单可爱"))]
+        ("soft", "柔和双色", "圆角色块 / 简单可爱"),
+        ("cartoon", "可爱卡通", "圆润描边 / 保留型号结构"))]
     samples = (
         ("Intel Core i7-13700KF\n长方形顶盖", "cpu", "Intel Core i7-13700KF", "42%"),
         ("ZOTAC SOLO\n单风扇 · 紧凑短卡", "gpu", "ZOTAC GAMING GeForce RTX 4060 8GB SOLO", "36%"),

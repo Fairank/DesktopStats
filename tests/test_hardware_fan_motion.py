@@ -29,7 +29,7 @@ from memory_appearance import appearance_for_memory
 from tests import test_top_bar_module_qml as fixture
 
 ROOT = Path(__file__).resolve().parents[1]
-STYLES = ("solid", "miniature", "soft")
+STYLES = ("solid", "miniature", "soft", "cartoon")
 DUAL = "DUAL-RTX4060-O8G"
 
 
@@ -337,7 +337,7 @@ Window {
                     data = self.layer_data(appearance(model, style))
                     self.assertEqual(raster(source=data["source"]), raster(layers=data["layers"]))
 
-    def test_rectangular_glyphs_letterbox_rotors_in_the_same_static_coordinate_system(self):
+    def test_rectangular_gpu_glyphs_fit_rotors_in_the_same_static_coordinate_system(self):
         glyph = self.find("directGlyph")
         self.window.setProperty("directMotion", True)
         self.assign("appearance", appearance("APBF-IA770-16G-OC"))
@@ -346,7 +346,7 @@ Window {
             glyph.setWidth(width)
             glyph.setHeight(height)
             self.app.processEvents()
-            unit = min(width, height) / 24
+            unit = (width if width > height else min(width, height)) / 24
             for rotor, expected in zip(self.rotors(glyph), data):
                 self.assertAlmostEqual(rotor.x() + rotor.width() / 2, (width - unit*24)/2 + expected["cx"]*unit)
                 self.assertAlmostEqual(rotor.y() + rotor.height() / 2, (height - unit*24)/2 + expected["cy"]*unit)

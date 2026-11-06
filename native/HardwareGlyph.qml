@@ -15,7 +15,10 @@ Item {
     readonly property string geometryKey: classic ? "" : Shapes.key(appearance, ink)
     readonly property url svgSource: classic ? "" : Shapes.source(geometryKey)
     readonly property bool fanShapeEligible: !classic && appearance && appearance.kind === "gpu"
-        && ["solid", "miniature", "soft"].includes(appearance.icon_set)
+        && ["solid", "miniature", "soft", "cartoon"].includes(appearance.icon_set)
+    readonly property bool wideGpu: appearance && appearance.kind === "gpu"
+        && ["solid", "miniature", "soft", "cartoon"].includes(appearance.icon_set)
+        && root.width > root.height
     readonly property var fanLayerData: fanMotionEnabled && fanShapeEligible
         ? Shapes.layers(geometryKey) : null
     readonly property bool windowVisible: root.Window.window !== null
@@ -28,7 +31,7 @@ Item {
     }
     readonly property bool fanMotionActive: !!(fanMotionEnabled && fanShapeEligible && exposed && windowVisible
         && Number.isFinite(fanRotation) && fanLayerData && fanLayerData.rotors.length > 0)
-    readonly property real artworkUnit: Math.min(root.width,root.height)/24
+    readonly property real artworkUnit: (wideGpu ? Math.max(root.width,root.height) : Math.min(root.width,root.height))/24
     readonly property real artworkLeft: (root.width-artworkUnit*24)/2
     readonly property real artworkTop: (root.height-artworkUnit*24)/2
     implicitWidth: 18
@@ -51,9 +54,9 @@ Item {
         visible: !root.classic
         source: root.fanMotionActive ? root.fanLayerData.baseSource : root.svgSource
         opacity: root.ink.a
-        sourceSize.width: Math.max(1, Math.ceil(root.width * Screen.devicePixelRatio))
-        sourceSize.height: Math.max(1, Math.ceil(root.height * Screen.devicePixelRatio))
-        fillMode: Image.PreserveAspectFit
+        sourceSize.width: Math.max(1, Math.ceil((root.wideGpu ? Math.max(root.width,root.height) : root.width) * Screen.devicePixelRatio))
+        sourceSize.height: Math.max(1, Math.ceil((root.wideGpu ? Math.max(root.width,root.height) : root.height) * Screen.devicePixelRatio))
+        fillMode: root.wideGpu ? Image.PreserveAspectCrop : Image.PreserveAspectFit
         asynchronous: false
         cache: true
         smooth: true

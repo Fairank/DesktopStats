@@ -36,8 +36,8 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(old, before)
         self.assertEqual(default_top_bar()["hardware_icon_style"], "classic")
 
-    def test_all_five_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
-        self.assertEqual(HARDWARE_ICON_STYLES, ("classic", "outline", "solid", "miniature", "soft"))
+    def test_all_six_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
+        self.assertEqual(HARDWARE_ICON_STYLES, ("classic", "outline", "solid", "miniature", "soft", "cartoon"))
         for style in HARDWARE_ICON_STYLES:
             with self.subTest(style=style):
                 config = copy.deepcopy(DEFAULT)
@@ -73,7 +73,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(rebased["widgets"]["cpu"]["title"], "Pending")
 
     def test_control_labels_and_note_are_available_in_all_eight_languages(self):
-        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色",
+        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通",
                 "切换外观版本，自动匹配规则和读数保持一致。")
         self.assertEqual(len(LANGUAGES), 8)
         for language in LANGUAGES.keys() - {"zh-CN"}:
@@ -133,7 +133,7 @@ class HardwareIconPreferenceUiTests(unittest.TestCase):
         self.resize(960, 700)
         choice = self.show_choice()
         self.assertEqual(choice.property("value"), "classic")
-        self.assertEqual(choice.property("count"), 5)
+        self.assertEqual(choice.property("count"), len(HARDWARE_ICON_STYLES))
         preview = getCppPointer(self.item("topBarMainPreview"))[0]
         before = copy.deepcopy(self.ui._draft)
         saved = copy.deepcopy(self.ui._saved)

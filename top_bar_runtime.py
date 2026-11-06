@@ -1535,7 +1535,7 @@ class TopBarManager(QObject):
         )
 
     def _content_width(self, row, family, dpi):
-        """Measure one unchanged single-reading renderer in logical pixels."""
+        """Match the shared reading renderer, including its hardware icon box."""
         style = row['style']
         short = row.get('bar_label') or row['label']
         size = 9 if style == 'graph' else 11 if style in ('stacked', 'duplex') else 12
@@ -1565,7 +1565,15 @@ class TopBarManager(QObject):
                  if channel.get('unit_text') else 0) for channel in row.get('paired_rows', [])[:2]]
             return (sum(widths) + 12 * max(0, len(widths)-1)
                     if style == 'duplex_inline' else max(widths, default=stable_value))
-        return {'value': 0, 'icon_value': 23, 'trend_value': 42,
+        appearance = row.get('hardware_appearance')
+        appearance = appearance if isinstance(appearance, dict) else {}
+        icon_width = 18
+        if (row.get('icon') in ('cpu', 'gpu', 'memory')
+                and appearance.get('kind') == row.get('icon')
+                and appearance.get('icon_set') in ('solid', 'miniature', 'soft', 'cartoon')):
+            icon_height = max(18, min(26, self._config.get('top_bar', {}).get('height', 32) - 10))
+            icon_width = round(icon_height * 15 / 11) if appearance['kind'] == 'gpu' else icon_height
+        return {'value': 0, 'icon_value': icon_width + 5, 'trend_value': 42,
                 'bar_value': 28, 'ring_value': 20}[style] + stable_value
 
     def _layout(self, host):

@@ -216,7 +216,7 @@ Window {
         rows = [(package, row) for package, row in reviewed_rows()
                 if row[5] == "gpu_blower" and package.MODEL_SERIES[row[0]] in historical_ids]
         self.assertGreaterEqual(len(rows), 4)
-        for style in ("solid", "miniature", "soft"):
+        for style in ("solid", "miniature", "soft", "cartoon"):
             for package, row in rows:
                 with self.subTest(model=row[0], style=style):
                     tree = self.svg_for(row, style)
@@ -240,7 +240,7 @@ Window {
 
     def test_passive_fins_and_active_fx_card_remain_distinct_in_each_modern_style(self):
         rows = {row[0]: row for row in nvidia.CATALOG}
-        for style in ("solid", "miniature", "soft"):
+        for style in ("solid", "miniature", "soft", "cartoon"):
             passive = self.svg_for(rows["gigabyte-gt1030-silent-lp-2g"], style)
             active = self.svg_for(rows["gigabyte-fx5200-n52128d"], style)
             self.assertFalse(any(node.get("class") in ("hardware-fan-hub", "hardware-blower") for node in passive.iter()))

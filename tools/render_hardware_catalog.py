@@ -322,7 +322,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "qa-private/hardware-catalog.png")
     parser.add_argument("--catalog", choices=("models", "series", "series_models", "brands", "memory"), default="models")
-    parser.add_argument("--icon-set", choices=("outline", "solid", "miniature", "soft"), default="outline")
+    parser.add_argument("--icon-set", choices=("outline", "solid", "miniature", "soft", "cartoon"), default="outline")
     parser.add_argument("--compact", action="store_true", help="Four-column cards with both themes and full model labels")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()

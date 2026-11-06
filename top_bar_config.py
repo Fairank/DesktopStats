@@ -11,7 +11,7 @@ from top_bar_layout import DISPLAY_STYLES
 from top_bar_profiles import ICON_EFFECTS, paired_channels, validate_group_metrics
 
 BAR_DESIGNS = ("classic", "capsule", "instrument")
-HARDWARE_ICON_STYLES = ("classic", "outline", "solid", "miniature", "soft")
+HARDWARE_ICON_STYLES = ("classic", "outline", "solid", "miniature", "soft", "cartoon")
 APPEARANCE_DEFAULTS = dict(
     follow_global=True, skin="glass", glass_transparency=50.0, design="classic"
 )

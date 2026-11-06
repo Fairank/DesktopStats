@@ -1,5 +1,12 @@
 # Hardware appearance catalog
 
+The 0.29.0 preview adds Cute Cartoon as a sixth optional drawing treatment for
+every current model and the generic metric symbols. Rounded contours and small
+expressions are illustration, while reviewed geometry, unknown fields and real
+fan-speed semantics remain intact. Modern top-bar GPU frames grow to 30×22 at
+the standard 32-pixel band height; CPU/RAM use 22×22. The frame and rotor mapping
+share the same scale. Classic and Outline retain their 18×18 presentation.
+
 The top bar can use small original hardware silhouettes without changing metric
 meaning, live temperature, load colours or the existing motion clock. CPU, GPU
 and RAM appearances also reach the expanded hardware details. These are

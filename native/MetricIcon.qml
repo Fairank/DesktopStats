@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Window
 import "IconData.js" as IconData
 import "MetricEffectClock.js" as EffectClock
+import "HardwareShapes.js" as HardwareShapes
 
 // Optional feedback. Fill follows normalized readings; motion is decorative, never an alarm.
 Item {
@@ -14,6 +15,9 @@ Item {
     property var level: null
     property var hardwareState: ({})
     property var hardwareAppearance: ({})
+    property string iconStyle: "classic"
+    readonly property string cartoonSymbol: iconStyle === "cartoon" && !hasHardwareAppearance
+        ? HardwareShapes.genericSource(name, ink, spinActive) : ""
     readonly property bool hasHardwareAppearance: (processorGlyph || name === "memory")
         && hardwareAppearance && hardwareAppearance.kind === name
         && hardwareAppearance.icon_set !== "classic"
@@ -178,7 +182,7 @@ Item {
     readonly property real gpuFanDisplaySlowdown: 120
     readonly property bool gpuFanCanAnimate: name==="gpu" && hasHardwareAppearance && compositeActive
         && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
-        && gpuVisibleFans>0 && ["solid","miniature","soft"].includes(hardwareAppearance.icon_set)
+        && gpuVisibleFans>0 && ["solid","miniature","soft","cartoon"].includes(hardwareAppearance.icon_set)
         && hardwareAppearance.fan_profile && hardwareAppearance.fan_profile.render_ready===true
         && resolvedEffect==="hardware"
     readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning
@@ -462,9 +466,20 @@ Item {
     Icon {
         objectName: "metricIconGlyph"
         anchors.fill: parent; name: root.name; ink: root.ink
-        visible: !root.hasHardwareAppearance
+        visible: !root.hasHardwareAppearance && !root.cartoonSymbol
         // The neutral carrier survives strength→0; active arrow/rotor layers blend in.
         opacity: root.spinActive ? Math.pow(1-root.rotorOpacity,6) : 1
+    }
+    Image {
+        objectName: "metricCartoonSymbol"
+        anchors.fill: parent
+        visible: !!root.cartoonSymbol
+        source: root.cartoonSymbol
+        sourceSize.width: Math.max(1,Math.ceil(root.width*Screen.devicePixelRatio))
+        sourceSize.height: Math.max(1,Math.ceil(root.height*Screen.devicePixelRatio))
+        fillMode: Image.PreserveAspectFit
+        opacity: root.ink.a
+        smooth: true; cache: true; asynchronous: false; mipmap: false
     }
     Loader {
         objectName: "metricHardwareGlyphLoader"

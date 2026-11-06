@@ -174,6 +174,7 @@ Window {
                 dragged:root.dragging && root.draggedId===metric.modelData.id
             }
             TopBarGroupContent {
+                barHeight:root.height
                 design:root.barDesign
                 motionEnabled:root.barState.motionEnabled
                 id: metricContent
@@ -295,6 +296,7 @@ Window {
             border.color:root.barAccent;border.width:1
         }
         TopBarGroupContent {
+            barHeight:root.height
             anchors.left:parent.left;anchors.leftMargin:6;anchors.verticalCenter:parent.verticalCenter
             width:implicitWidth;height:implicitHeight
             row:root.draggedRow;design:root.barDesign;ink:root.foreground;muted:root.secondary
