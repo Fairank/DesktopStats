@@ -201,7 +201,7 @@ function seriesGpu(state, p, count) {
         : count === 2 ? {x:2.8,y:6.05,w:19.5,h:10.3,centers:[8.05,17.05],radius:3.65}
         : count === 3 ? {x:2,y:7,w:20.5,h:8.6,centers:[5.8,12.25,18.7],radius:2.72}
         : {x:3,y:6.15,w:19.1,h:10.2,centers:[],radius:0}
-    var g = Series.geometry(state, base)
+    var g = Board.geometry(state,Series.geometry(state, base))
     var colors = {caseBody:p.face,caseTop:p.hub,caseShade:p.shade,disk:p.well,
         rim:p.base,metal:p.face,ink:p.edge,accent:p.accent,edge:p.hub,gold:p.gold,pcb:p.base}
     colors=Board.colors(state,colors)

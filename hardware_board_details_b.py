@@ -1181,10 +1181,13 @@ VERSION_FAMILIES = ({'series_id': 'asrock_taichi',
                 'aliases': ('ASRock AMD Radeon RX 7900 XTX Taichi White 24GB OC', 'RX7900XTX TCW 24GO'),
                 'label': 'ASRock AMD Radeon RX 7900 XTX Taichi White 24GB OC',
                 'visual_relation': 'different',
-                'source_urls': ('https://www.asrock.com/Graphics-Card/AMD/Radeon%20RX%207900%20XTX%20Taichi%20White%2024GB%20OC/index.asp',),
+                'source_urls': ('https://www.asrock.com/Graphics-Card/AMD/Radeon%20RX%207900%20XTX%20Taichi%20White%2024GB%20OC/index.asp',
+                                'https://www.asrockchina.com.cn/Graphics-Card/photo/Radeon%20RX%207900%20XTX%20Taichi%20White%2024GB%20OC(L2).png',
+                                'https://asrock.com/news/images/20230406-1.jpg'),
                 'overrides': {'shroud_tone': 'light'},
-                'notes': ('White TCW is a separate visual version; same documented 110/100/110 fan layout does '
-                          'not establish identical paint or rear details.',)},)},
+                'notes': ('Exact official White L2 front and announcement photo inspected. White faceted cover, '
+                          'light 11/13/11 leaf rotors with a translucent centre, and white caps have their own recipe. '
+                          'Official 110/100/110 diameter layout and reverse centre are retained; RGB is not live.',)},)},
  {'series_id': 'asrock_taichi_rdna4',
   'base_model_id': 'asrock-taichi-rx9070xt-16g-oc',
   'source_urls': ('https://www.asrock.com/Graphics-Card/AMD/Radeon%20RX%209070%20XT%20Taichi%20White%2016GB%20OC/index.asp',),
@@ -1192,10 +1195,14 @@ VERSION_FAMILIES = ({'series_id': 'asrock_taichi',
                 'aliases': ('ASRock AMD Radeon RX 9070 XT Taichi White 16GB OC', 'RX9070XT TCW 16GO'),
                 'label': 'ASRock AMD Radeon RX 9070 XT Taichi White 16GB OC',
                 'visual_relation': 'different',
-                'source_urls': ('https://www.asrock.com/Graphics-Card/AMD/Radeon%20RX%209070%20XT%20Taichi%20White%2016GB%20OC/index.asp',),
+                'source_urls': ('https://www.asrock.com/Graphics-Card/AMD/Radeon%20RX%209070%20XT%20Taichi%20White%2016GB%20OC/index.asp',
+                                'https://www.asrockchina.com.cn/Graphics-Card/photo/Radeon%20RX%209070%20XT%20Taichi%20White%2016GB%20OC(L2).png',
+                                'https://www.asrockchina.com.cn/Graphics-Card/photo/Radeon%20RX%209070%20XT%20Taichi%20White%2016GB%20OC(L3).png'),
                 'overrides': {'shroud_tone': 'light', 'lcd': True},
-                'notes': ('White RDNA4 version includes an LCD Information Center absent from the documented '
-                          'black TC feature list.',)},)},
+                'notes': ('Exact official L2/L3 white fronts inspected: separate faceted cover and light '
+                          '11/13/11 rotors. The side LCD is drawn as a closed unlit panel, never invented telemetry. '
+                          'Official 100/100/100 mm layout and reverse centre are retained. Regional exact-product '
+                          'dimension tables conflict (330/146/61 versus 330/140/67); dimensions stay unknown.',)},)},
  {'series_id': 'inno3d_twin_x2',
   'base_model_id': 'inno3d-twin-x2-4070',
   'source_urls': ('https://www.inno3d.com/product/inno3d-geforce-rtx-4070-twin-x2',),
@@ -1219,18 +1226,25 @@ VERSION_FAMILIES = ({'series_id': 'asrock_taichi',
                 'aliases': ('INNO3D GeForce RTX 4070 TWIN X2 OC WHITE',),
                 'label': 'INNO3D GeForce RTX 4070 TWIN X2 OC WHITE',
                 'visual_relation': 'different',
-                'source_urls': ('https://www.inno3d.com/product/inno3d-geforce-rtx-4070-twin-x2-oc-white',),
+                'source_urls': ('https://www.inno3d.com/product/inno3d-geforce-rtx-4070-twin-x2-oc-white',
+                                'https://www.inno3d.com/sites/default/files/2024-03/LP_4070_TWIN_X2_OC_WHITE_main_card.png'),
                 'overrides': {'shroud_tone': 'light'},
-                'notes': ('WHITE paint requires its own visual; do not silently replace it with the silver base '
-                          'model or the rear-power STEALTH version.',)},
+                'notes': ('Exact official WHITE main-card image inspected: plain white/silver two-panel cover, '
+                          'two eleven-leaf white rotors and light round caps; separate recipe from silver base. '
+                          'The ordinary top-power identity is not the rear-power STEALTH version.',)},
                {'model_id': 'inno3d-twin-x2-4070-oc-white-stealth',
                 'aliases': ('INNO3D GeForce RTX 4070 TWIN X2 OC WHITE STEALTH', 'N40702-126XX-183052V'),
                 'label': 'INNO3D GeForce RTX 4070 TWIN X2 OC WHITE STEALTH',
                 'visual_relation': 'different',
-                'source_urls': ('https://www.inno3d.com/news/inno3d-geforce-rtx-4070-twin-x2-oc-stealth-cable-management',),
+                'source_urls': ('https://www.inno3d.com/product/inno3d-geforce-rtx-4070-twin-x2-oc-white-stealth',
+                                'https://www.inno3d.com/news/inno3d-geforce-rtx-4070-twin-x2-oc-stealth-cable-management',
+                                'https://www.inno3d.com/sites/default/files/2024-03/4070_TWIN_X2_OC_WHITE_stealth_set.png',
+                                'https://www.inno3d.com/sites/default/files/2024-03/LP_4070_TWIN_X2_OC_stealth_WHITE_backplate.png'),
                 'overrides': {'shroud_tone': 'light', 'power_position': 'rear', 'backplate': True},
-                'notes': ('Manufacturer announcement places the 8-pin connection at the rear behind a partially '
-                          'removable backplate; this is a structural version difference.',)})},
+                'notes': ('Exact official STEALTH front and backplate images inspected: two white eleven-leaf '
+                          'rotors, plain two-panel front, and a right-side rear connector hatch within the '
+                          'triangular exhaust framework. Manufacturer places the 8-pin at the rear behind this '
+                          'partly removable cover; a separate lazy rear illustration preserves that difference.',)})},
  {'series_id': 'biostar_radeon',
   'base_model_id': 'biostar-radeon-rx7600-va7606rm81',
   'source_urls': ('https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334',),
@@ -1238,7 +1252,12 @@ VERSION_FAMILIES = ({'series_id': 'asrock_taichi',
                 'aliases': ('BIOSTAR Radeon RX 7600 OC VA76S6RM81', 'VA76S6RM81'),
                 'label': 'BIOSTAR Radeon RX 7600 OC VA76S6RM81',
                 'visual_relation': 'unknown',
-                'source_urls': ('https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334',),
-                'overrides': {},
-                'notes': ('OC has its own exact part number; equal 235/150/45 mm, HDMI+3DP and 8-pin specs alone '
-                          'do not prove its cover is the same.',)},)})
+                'source_urls': ('https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334',
+                                'https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=334'),
+                'overrides': {'shroud_tone': 'unknown'},
+                'notes': ('Exact OC part number has an explicit neutral schematic recipe. Cached official '
+                          'export confirms dual-fan footprint, 235/150/45 mm, HDMI+3DP and one 8-pin; '
+                          'normal original bitmap/export fetches return 403. Detailed cover, colour, '
+                          'rear structure, rotor leaf count and hub ratio remain unverified. This is '
+                          'supported exact identity with a labelled schematic, not photo-faithful completion '
+                          'or an alias to the non-OC cover.',)},)})

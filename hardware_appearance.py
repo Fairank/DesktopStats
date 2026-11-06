@@ -20,7 +20,7 @@ from hardware_series import SERIES_CATALOG
 from hardware_catalog_metadata import fields as catalog_fields, generation as catalog_generation
 from hardware_fan_profiles import profile_for as fan_profile_for
 from hardware_board_details import for_appearance as board_details_for
-from hardware_variants import READY as READY_VERSIONS, extend_gpu_catalog
+from hardware_variants import READY as READY_VERSIONS, extend_gpu_catalog, drawing_overrides
 from memory_appearance import appearance_for_memory
 
 # These are restrained interface accents, not claims about a product's paint.
@@ -115,8 +115,13 @@ CATALOG = extend_gpu_catalog(_SEED_CATALOG + CATALOG_EXTENSIONS
            + tuple(row for package in _EXTRA_CATALOGS for row in package.CATALOG))
 _VISIBLE_FANS = {key: count for package in _EXTRA_CATALOGS
                  for key, count in getattr(package, "VISIBLE_FANS", {}).items()}
-_VISIBLE_FANS.update({key:_VISIBLE_FANS[row['base_model_id']] for key,row in READY_VERSIONS.items()
-                      if row['kind']=='gpu' and row['base_model_id'] in _VISIBLE_FANS})
+for _identity,_version in READY_VERSIONS.items():
+    if _version['kind']!='gpu':continue
+    _art=drawing_overrides(_identity)
+    if 'visible_fan_count' in _art:
+        _VISIBLE_FANS[_identity]=_art['visible_fan_count']
+    elif _version['base_model_id'] in _VISIBLE_FANS and 'fan_count' not in _art:
+        _VISIBLE_FANS[_identity]=_VISIBLE_FANS[_version['base_model_id']]
 
 _FIELDS = ("id", "kind", "vendor", "board_vendor", "label", "style", "fan_count",
            "shroud", "source_url", "confidence", "accent", "series_id", "series_label", "features")

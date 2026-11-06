@@ -160,10 +160,13 @@ def _result(brand="unknown", *, model=None, series=None, form="unknown"):
     if series:
         form = series["form_factor"]
     presentation = series["presentation"] if series else "neutral"
+    if model:
+        form=model.get('form_factor',form)
+        presentation=model.get('presentation',presentation)
     return (model["id"] if model else "memory-" + (series["id"] if series else brand),
             brand, model["label"] if model else series["label"] if series else BRANDS[brand][0],
             form, presentation, series["id"] if series else "", series["label"] if series else "",
-            tuple(series["features"]) if series else (),
+            tuple(model.get('features',series['features'])) if model and series else tuple(series["features"]) if series else (),
             model["source_url"] if model else series["source_url"] if series else "",
             "model" if model else "series" if series else "brand" if brand != "unknown" else "generic")
 

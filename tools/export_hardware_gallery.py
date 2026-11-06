@@ -76,7 +76,7 @@ function actualSample(row){const small=document.createElement('div');small.class
 function shownFeatures(row){return style.value==='classic'?'通用符号，不表达具体型号布局':row.features.join(' · ')}
 function focusIndex(){return filtered.findIndex(row=>row.id===focusedId)}
 function boardText(row){const facts=row.boardDetails||{};return [facts.ports_text,facts.power_text,facts.host_text,facts.kind==='memory'?[facts.generation?.toUpperCase(),facts.pins?facts.pins+' pin':''].filter(Boolean).join(' · '):''].filter(Boolean).join(' · ')}
-function structurePanel(row){const host=$('focus-structure');host.replaceChildren();host.hidden=!Object.keys(row.structures||{}).length;if(host.hidden)return;const controls=document.createElement('div');controls.className='source-links';const body=document.createElement('div');for(const [kind,uri] of Object.entries(row.structures)){const button=text('button',kind==='ports'?'视频接口':'供电插座','view-button');button.type='button';button.addEventListener('click',()=>{const image=localImage(uri,row.model+' '+button.textContent,'eager');image.style.width='100%';image.style.maxWidth='420px';image.style.height='auto';body.replaceChildren(image,text('p','类型与数量示意；排列和位置未核实。','features'))});controls.append(button)}host.append(controls,body)}
+function structurePanel(row){const host=$('focus-structure');host.replaceChildren();host.hidden=!Object.keys(row.structures||{}).length;if(host.hidden)return;const controls=document.createElement('div');controls.className='source-links';const body=document.createElement('div');const labels={ports:'视频接口',power:'供电插座',backplate:'原厂背板',accessory:'附送配件背板'};for(const [kind,uri] of Object.entries(row.structures)){const button=text('button',labels[kind],'view-button');button.type='button';button.addEventListener('click',()=>{const image=localImage(uri,row.model+' '+button.textContent,'eager');image.style.width='100%';image.style.maxWidth='420px';image.style.height='auto';const note=kind==='accessory'?'附送背板外观，未确认实际安装。':kind==='backplate'?'原厂背板简化外观。':'类型与数量示意；排列和位置未核实。';body.replaceChildren(image,text('p',note,'features'))});controls.append(button)}host.append(controls,body)}
 function updateFocus(){const index=focusIndex();if(index<0){if(dialog.open)dialog.close();return}const row=filtered[index];clearStages(true);$('focus-title').textContent=row.label;$('focus-model').textContent=row.model;$('focus-position').textContent=(index+1)+' / '+filtered.length+' · '+row.brandLabel;$('focus-facts').textContent=row.fans;$('focus-features').textContent=shownFeatures(row);$('focus-profile').textContent=row.fanProfileText;$('focus-profile').hidden=!row.fanProfileText;$('focus-board').textContent=boardText(row);$('focus-board').hidden=!$('focus-board').textContent;structurePanel(row);$('focus-fan-source').hidden=!row.fanProfile?.source_url;if(row.fanProfile?.source_url)$('focus-fan-source').href=row.fanProfile.source_url;$('focus-source').href=row.source;$('focus-art').replaceChildren(setupStage(row,true));const sample=actualSample(row);$('focus-small').replaceChildren(...sample.childNodes);$('focus-prev').disabled=filtered.length<2;$('focus-next').disabled=filtered.length<2;resetObservation()}
 function openFocus(row,button){focusedId=row.id;returnFocus=button;if(!dialog.open)dialog.showModal();updateFocus()}
 function browse(direction){if(!filtered.length)return;const index=focusIndex();focusedId=filtered[(index+direction+filtered.length)%filtered.length].id;updateFocus()}
@@ -202,8 +202,10 @@ function structureFor(value,view) { return Boards.technicalSource(Boards.modelKe
         facts=value.get('board_details') or {}
         structures={}
         if value['kind']=='gpu':
-            for view,field in (('ports','ports'),('power','power_connectors')):
-                if facts.get(field):structures[view]=evaluate('structureFor',value,view)
+            for view,field in (('ports','ports'),('power','power_connectors'),
+                               ('backplate','backplate_recipe'),('accessory','accessory_backplate_recipe')):
+                if facts.get(field) or view=='power' and facts.get('extra_power_interface'):
+                    structures[view]=evaluate('structureFor',value,view)
         art, motion = {}, {}
         for style in STYLES:
             art[style] = {}

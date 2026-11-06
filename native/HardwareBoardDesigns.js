@@ -1,5 +1,8 @@
 .pragma library
 .import "HardwareBoardProfileData.js" as Data
+.import "HardwareVariantGroupA.js" as VariantA
+.import "HardwareVariantGroupB.js" as VariantB
+.import "HardwareVariantGroupC.js" as VariantC
 
 // Static exterior structures. Never expose an invented PCB circuit, native
 // socket order or hidden component count. Connector close-ups are count/type
@@ -30,16 +33,25 @@ function colors(state,input) {
         silver:["#a1afb9","#d5dfe5","#637682","#a6b8c3","#c6d2d9","#edf2f5"],
         blue:["#4e739b","#7da0c3","#2e4c6a","#8ea9bf","#a7bdce","#d8e6ee"],
         pink:["#d5b9cd","#eee0ec","#947e9b","#bea6bd","#d9cbd9","#f6eef4"],
-        mixed:["#aebcc5","#d4dee5","#435562","#93a7b4","#bbc9d3","#ebf1f5"]}
+        mixed:["#aebcc5","#d4dee5","#435562","#93a7b4","#bbc9d3","#ebf1f5"],
+        gold:["#bfaa72","#e4d4a2","#786946","#b7a271","#dac493","#f1e3bb"],
+        copper:["#aa7653","#d7a67f","#694936","#b68764","#c99b73","#ead1b6"],
+        red:["#a95658","#cf8583","#603c42","#a76d70","#bf8d8c","#e2bdb9"]}
     var palette=palettes[row.shroud_tone]
     if(palette){out.caseBody=palette[0];out.caseTop=palette[1];out.caseShade=palette[2];out.rim=palette[3];out.metal=palette[4];out.edge=palette[5];if(out.side)out.side=palette[2]}
-    out.pcb=row.pcb_tone==="blue"?"#386e98":row.pcb_tone==="green"?"#426b60":row.pcb_tone==="dark"?"#293944":"#344c4d";out.gold="#c7a65d"
+    out.pcb=row.pcb_tone==="blue"?"#386e98":row.pcb_tone==="green"?"#426b60":row.pcb_tone==="dark"?"#293944":row.pcb_tone==="light"?"#d6dedf":"#344c4d";out.gold="#c7a65d"
+    if(row.heatsink_tone==="copper")out.metal="#b9865d"
+    else if(row.heatsink_tone==="light")out.metal="#dce2e4"
     if(row.fan_profile)out.fanOverrides=row.fan_profile
     return out
 }
 
 function variantFace(state,g,c) {
     var row=profile(state)
+    if(row && row.recipe) {
+        var face=VariantA.face(row.recipe,g,c,state) || VariantB.face(row.recipe,g,c,state) || VariantC.face(row.recipe,g,c,state)
+        if(face)return face
+    }
     if(!row || row.recipe!=="suprim_blackwell")return ""
     // Reviewed 5090 front: broad brushed-metal triangles around three dark
     // octagonal bays. This is independent of the 4090 TORX cover drawing.
@@ -58,6 +70,32 @@ function variantFace(state,g,c) {
     }
     body+=path("M29 23L32 50L30 74M67 25L70 50L68 76","none","#8aaec9",.65)
     return '<g class="hardware-variant-face suprim_blackwell" transform="translate('+g.x+' '+g.y+') scale('+(g.w/100)+' '+(g.h/100)+')">'+body+'</g>'
+}
+
+function geometry(state,g) {
+    var row=profile(state)
+    if(!row || !row.recipe)return g
+    return VariantA.geometry(row.recipe,state,g) || VariantB.geometry(row.recipe,state,g)
+        || VariantC.geometry(row.recipe,state,g) || g
+}
+
+function memoryFace(state,g,c) {
+    var row=profile(state)
+    return row && row.recipe ? VariantB.face(row.recipe,g,c,state):""
+}
+
+function backplateSource(model,accessory) {
+    var row=typeof model==="string" && model.length<=96?Data.models[model]:null
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 4 24 16" width="320" height="140">'
+    if(!row || row.kind!=="gpu")return "data:image/svg+xml;utf8,"+encodeURIComponent(svg+'</svg>')
+    var recipe=accessory?row.accessory_backplate_recipe:row.backplate_recipe
+    if(!recipe)return "data:image/svg+xml;utf8,"+encodeURIComponent(svg+'</svg>')
+    var state={model_id:model,kind:row.kind,series_id:row.series_id},g={x:1.9,y:7.3,w:20.7,h:8.4,centers:[],radius:0}
+    var c=colors(state,{caseBody:"#687986",caseTop:"#bbc8d0",caseShade:"#344450",side:"#344450",rim:"#9eafb9",metal:"#becbd2",edge:"#dce5ea",pcb:"#344c4d",gold:"#c7a65d"})
+    var body=(typeof VariantA.back==="function"?VariantA.back(recipe,g,c,state):"")
+        || (typeof VariantB.back==="function"?VariantB.back(recipe,g,c,state):"")
+        || (typeof VariantC.back==="function"?VariantC.back(recipe,g,c,state):"")
+    return "data:image/svg+xml;utf8,"+encodeURIComponent(svg+body+'</svg>')
 }
 
 function memoryColors(state,input) {
@@ -150,6 +188,11 @@ function contact(type,x,y,scale) {
         for(var r=0;r<3;r++)for(var k=0;k<5;k++)shape+='<circle cx="'+(3+k*2.2)+'" cy="'+(2.4+r*2.3)+'" r=".52" fill="'+hole+'"/>'
     } else if(type==="tv_out") {
         shape='<circle cx="7.5" cy="5" r="5" fill="'+hole+'" stroke="'+edge+'" stroke-width=".8"/>'+rect(5.5,3.6,4,2.2,.6,tongue)
+    } else if(type==="gc_hpwr") {
+        // External high-power edge interface: schematic contact density only,
+        // no unverified internal circuit or claimed pin assignment.
+        shape=rect(-1,-1,20,12,1,hole,edge,.8)+rect(1,2,16,7,.4,tongue)
+        for(var finger=0;finger<8;finger++)shape+=rect(1.5+finger*1.9,2.5,1.05,6,.1,"#c7a65d")
     } else if(["4pin","6pin","8pin","12pin","16pin"].indexOf(type)>=0) {
         var cols=type==="4pin"?2:type==="6pin"?3:type==="8pin"?4:6
         var w=cols*3.2+2
@@ -161,10 +204,12 @@ function contact(type,x,y,scale) {
 }
 
 function technicalSource(model,view) {
+    if(view==="backplate"||view==="accessory")return backplateSource(model,view==="accessory")
     var row=typeof model==="string" && model.length<=96 ? Data.models[model]:null
     var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 70" width="320" height="140">'
     if(!row || row.kind!=="gpu" || ["ports","power"].indexOf(view)<0)return "data:image/svg+xml;utf8,"+encodeURIComponent(svg+'</svg>')
     var items=view==="power"?row.power_connectors:row.ports
+    if(view==="power" && row.extra_power_interface==="gc_hpwr")items=(items || []).concat([{type:"gc_hpwr",count:1}])
     if(!Array.isArray(items))return "data:image/svg+xml;utf8,"+encodeURIComponent(svg+'</svg>')
     var total=items.reduce(function(sum,item){return sum+item.count},0),index=0
     if(total>0) {

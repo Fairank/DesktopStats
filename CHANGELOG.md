@@ -1,14 +1,20 @@
 # Changes
 
-## Unreleased — hardware appearances
+## 0.28.0-preview.2
+
+- Allow up to 60 seconds for a verified clean shutdown during installation.
+  Explicit background installation keeps settings closed even after the previous
+  instance has exited; failures log and return an error without a blocking dialog.
 
 - Retain 103 source-linked base GPU representatives across 24 brands, 16 base
   RAM designs across 6 brands, and the 3 CPU examples. Extend matching with
-  complete, reviewed version SKUs marked ready: either source-confirmed shared
-  exteriors or explicitly implemented structural recipes. The version inventory
-  also retains pending entries; it does not establish coverage of every product
-  on the market. See [the hardware coverage report](docs/HARDWARE_COVERAGE.json)
-  for the generated model, version and fan-review inventory.
+  complete version SKUs: the 56 recorded versions are now supported, with zero
+  pending version registrations and 34 explicit artwork registrations, including
+  the two earlier SUPRIM 5090 entries and 32 newly implemented versions. The
+  runtime catalog contains 178 entries: 147 GPU, 28 RAM and 3 CPU. Support does
+  not imply every visual detail is confirmed or every retail SKU is covered.
+  See [the generated coverage report](docs/HARDWARE_COVERAGE.json) for exact
+  model guards, field-level unknowns, sources and the bounded version inventory.
 - Add 16 NVIDIA historical designs from GTX/GT 10 through GTX 900/700/600/500/
   400/200 to GeForce 8800 GTS and FX 5200, plus 20 Radeon/Arc representatives.
   Keep era-specific enclosures tied to exact SKUs instead of reusing a current
@@ -35,7 +41,19 @@
   Give MSI RTX 5090 SUPRIM SOC/OC an independent metal-panel recipe with
   STORMFORCE seven-blade front fans instead of inheriting the RTX 4090 cover.
   Shared artwork never transfers chip identity, memory, power ratings or sensor
-  readings between cards. Unimplemented or uncertain versions stay pending.
+  readings between cards. White, copper, rear-power and revision treatments
+  retain their own reviewed finishes and structures. The black and white Astral
+  front layouts preserve the source-confirmed reversed center fan.
+- Retain unconfirmed blade counts for ZOTAC Infinity 5080 10A, GIGABYTE GTX 460
+  Rev2/Rev3 and BIOSTAR RX 7600 OC; their fans remain static. BIOSTAR OC's
+  unverified cover is explicitly labelled as a technical schematic rather than
+  a verified retail enclosure. Version matching can be ready while individual
+  appearance fields remain unknown.
+- Add on-demand factory-backplate and separate removable-accessory views where
+  exact sources support them. Keep GC_HPWR and 16-pin power as alternative
+  routes only for the documented SAPPHIRE NITRO+ PhantomLink editions; never draw both as
+  simultaneous required sockets. RAM RGB diffuser covers remain static physical
+  parts, without claiming the current LED state.
 - Distinguish radial blower housings, the Acer BiFrost's left small
   blower/right axial arrangement and fanless fins for confirmed passive cards.
 - Add exact-SKU fan profiles to the base GPU representatives and apply reviewed
@@ -51,7 +69,8 @@
   rings separate from the rotor. Preserve source-confirmed light and dark fans,
   including the distinct SPARKLE A750/B580 TITAN rotors. Label unreviewed active
   fan faces as pending and keep them static; gallery motion requires a reviewed
-  face rather than an empty placeholder.
+  face rather than an empty placeholder. The completed export has 119
+  motion-ready GPU entries; other active faces retain their unknown status.
 - Give the modern leaves longer asymmetric curves and quieter dark-plastic
   shading. Encode the reviewed old MSI TORX seven-wide/seven-narrow pattern;
   preserve the distinct SUPRIM 4090 silver cap, B580 TITAN dark caps, TITAN Luna
@@ -109,7 +128,8 @@
   64px illustration. Unknown fan layouts remain neutral rather than guessed.
 - Add an offline, searchable comparison gallery exported from the real QML
   drawing code, including the base entries and ready exact versions, across all
-  five icon versions and two themes. Retain 18px
+  five icon versions and two themes: 178 entries and 1,780 static SVG variants.
+  Retain 18px
   top-bar comparisons and hardware/brand/vendor/generation/product-line filters.
   Add enlarged per-item browsing with Previous/Next and keyboard navigation.
   Keep the page static by default; optional CSS fan preview runs only in view,

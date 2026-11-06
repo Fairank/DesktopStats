@@ -853,3 +853,9 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 高低错层鳍片|高低錯層鰭片|Staggered-height fins|高さを変えたフィン|높이가 다른 핀|Höhenversetzte Kühlrippen|Ailettes de hauteurs décalées|Aletas de alturas escalonadas
 混合内存|混合記憶體|Mixed memory modules|異なるメモリの混在|혼합 메모리|Gemischte Speichermodule|Modules mémoire différents|Módulos de memoria distintos
 不同型号内存条|不同型號記憶體模組|Different memory-module models|異なる型番のメモリモジュール|서로 다른 모델의 메모리 모듈|Unterschiedliche Speichermodulmodelle|Modules mémoire de modèles différents|Módulos de memoria de distintos modelos
+查看背板|查看背板|View backplate|バックプレートを見る|백플레이트 보기|Rückplatte ansehen|Voir la plaque arrière|Ver placa trasera
+查看配件背板|查看配件背板|View accessory backplate|付属バックプレートを見る|부속 백플레이트 보기|Zubehör-Rückplatte ansehen|Voir la plaque arrière fournie|Ver placa trasera adicional
+原厂背板简化外观|原廠背板簡化外觀|Simplified factory backplate|工場出荷時バックプレートの簡略外観|기본 백플레이트의 간략한 외관|Vereinfachte Werksrückplatte|Aspect simplifié de la plaque arrière d’origine|Aspecto simplificado de la placa trasera original
+附送背板外观，未确认实际安装|附送背板外觀，未確認實際安裝|Included backplate; installation unconfirmed|付属バックプレートの外観、装着は未確認|부속 백플레이트 외관, 실제 장착 여부 미확인|Beiliegende Rückplatte; Einbau unbestätigt|Plaque arrière fournie ; installation non confirmée|Placa trasera incluida; instalación sin confirmar
+布局示意|佈局示意|Layout schematic|配置の概略|배치 개략도|Schematische Anordnung|Schéma de disposition|Esquema de disposición
+该型号外壳与叶片尚未核实，当前为布局示意|該型號外殼與葉片尚未核實，目前為佈局示意|This model’s cover and blades are unverified; a layout schematic is shown|このモデルの外装と羽根は未確認のため、配置の概略を表示しています|이 모델의 커버와 날개는 미확인 상태이며 배치 개략도를 표시합니다|Gehäuse und Blätter dieses Modells sind unbestätigt; gezeigt wird ein Schema|Le capot et les pales de ce modèle ne sont pas vérifiés ; un schéma est affiché|La carcasa y las aspas de este modelo no están verificadas; se muestra un esquema

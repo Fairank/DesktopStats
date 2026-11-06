@@ -206,7 +206,7 @@ class HardwareAppearanceTests(unittest.TestCase):
         self.assertNotIn("synthetic mutation", again["features"])
 
     def test_model_match_is_exact_for_gpu_revision_color_capacity_variants(self):
-        for name in ("DUAL-RTX4060-O8G-V2", "DUAL-RTX4060-O8G-WHITE",
+        for name in ("DUAL-RTX4060-O8G-V2", "DUAL-RTX4060-O8G-WHITE-UNREVIEWED",
                      "ASUS Dual GeForce RTX 4060 Ti OC Edition 8GB",
                      "TUF-RTX4070TIS-O16G-GAMING BTF", "ZT-D40600G-10L revised",
                      "SAPPHIRE PULSE RX 7600 XT", "SAPPHIRE PULSE RX 7600 laptop"):
@@ -218,6 +218,11 @@ class HardwareAppearanceTests(unittest.TestCase):
     def test_every_reviewed_gpu_alias_rejects_unreviewed_color_revision_and_laptop_suffixes(self):
         # Cover complete aliases/SKUs across the expanded catalog, rather than
         # just a seed model. A close name must not inherit either fan fact.
+        reviewed_white={
+            'DUAL RTX4060 O8G WHITE':'asus-dual-4060-oc-white',
+            'RX7800XT 16G-L/OC WHITE':'powercolor-hellhound-7800xt-white',
+            'INNO3D GeForce RTX 4070 TWIN X2 OC WHITE':'inno3d-twin-x2-4070-oc-white',
+        }
         for row in appearance.CATALOG:
             if row[1] != "gpu":
                 continue
@@ -225,6 +230,10 @@ class HardwareAppearanceTests(unittest.TestCase):
                 for suffix in (" WHITE", " revised", " Laptop GPU"):
                     with self.subTest(model=row[0], alias=alias, suffix=suffix):
                         result = appearance.appearance_for("gpu", alias + suffix)
+                        if alias+suffix in reviewed_white:
+                            self.assertEqual((result['confidence'],result['id']),('model',reviewed_white[alias+suffix]))
+                            self.assertNotEqual(result['id'],row[0])
+                            continue
                         self.assertNotEqual(result["confidence"], "model")
                         self.assertIsNone(result["fan_count"])
                         self.assertIsNone(result["visible_fan_count"])

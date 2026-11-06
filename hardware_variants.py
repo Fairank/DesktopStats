@@ -31,6 +31,12 @@ def base_identity(identity):
     return READY[identity]['base_model_id'] if identity in READY else identity
 
 
+def drawing_overrides(identity):
+    """Exact reviewed illustration fields; never live hardware specification data."""
+    version=READY.get(identity,{})
+    return dict(version.get('overrides',{}),**ART.get(identity,{}))
+
+
 def extend_gpu_catalog(rows):
     by_id={row[0]:row for row in rows}
     extra=[]
@@ -41,7 +47,10 @@ def extend_gpu_catalog(rows):
             raise ValueError('Version base is absent or version duplicates a catalog entry')
         source=next((url for url in version.get('source_urls',()) if url.startswith('https://')),None)
         if not source:raise ValueError('Shared exterior version needs a source')
-        extra.append((key,base[1],base[2],base[3],version['label'],*base[5:8],source,tuple(version['aliases'])))
+        art=drawing_overrides(key)
+        extra.append((key,base[1],base[2],base[3],version['label'],
+                      art.get('style',base[5]),art.get('fan_count',base[6]),
+                      art.get('shroud',base[7]),source,tuple(version['aliases'])))
     return tuple(rows)+tuple(extra)
 
 
@@ -53,6 +62,12 @@ def extend_memory_catalog(rows):
         base=by_id.get(version['base_model_id'])
         if base is None or key in by_id:raise ValueError('Invalid memory version base')
         row=dict(base,id=key,label=version['label'],aliases=tuple(version['aliases']))
+        art=drawing_overrides(key)
+        if art.get('form') in ('dimm','sodimm'):row['form_factor']=art['form']
+        if art.get('presentation') in ('neutral','bare','low','spreader','rgb'):
+            row['presentation']=art['presentation']
+        if isinstance(art.get('features'),(list,tuple)):
+            row['features']=tuple(text[:80] for text in art['features'][:2] if isinstance(text,str))
         if version.get('source_urls'):row['source_url']=version['source_urls'][0]
         extra.append(row)
     return tuple(rows)+tuple(extra)
@@ -64,11 +79,12 @@ def exterior_row(identity,source):
     if not version:return source
     if version['base_model_id'] not in source.get('model_ids',()):return {}
     result=copy.deepcopy(source)
-    result.update(version.get('overrides',{}))
+    result.update(copy.deepcopy(version.get('overrides',{})))
     art=ART.get(identity,{})
     if art:
-        result.update({key:value for key,value in art.items() if key!='fan_profile'})
-        result['fan_profile']=dict(result.get('fan_profile',{}),**art.get('fan_profile',{}))
+        result.update(copy.deepcopy({key:value for key,value in art.items() if key!='fan_profile'}))
+        result['fan_profile']=dict(copy.deepcopy(result.get('fan_profile',{})),
+                                   **copy.deepcopy(art.get('fan_profile',{})))
     result['model_ids']=(identity,)
     result['source_urls']=tuple(version.get('source_urls',()))
     return result

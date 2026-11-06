@@ -253,7 +253,7 @@ QtObject {
                 self.assertLess(outer[1] / pitch, .85, "Leaves close into a featureless full disc")
 
     def test_source_confirmed_reversal_and_mixed_blades_survive_projection(self):
-        for series in ("asus_tuf", "asrock_phantom", "asrock_taichi", "asrock_taichi_rdna4", "gigabyte_aorus"):
+        for series in ("asus_tuf", "asus_astral", "asrock_phantom", "asrock_taichi", "asrock_taichi_rdna4", "gigabyte_aorus"):
             row = PROFILES[series]
             result = self.layers(exact_appearance(row["model_ids"][0]))
             self.assertEqual([rotor["direction"] for rotor in result["rotors"]], [1, -1, 1])
@@ -334,6 +334,23 @@ QtObject {
             for rotors in (rdna3,rdna4):
                 self.assertEqual([len(blade_paths(ET.fromstring(decode(row['source'])))) for row in rotors],[11,13,11])
                 self.assertEqual([row['direction'] for row in rotors],[1,-1,1])
+
+    def test_exact_new_white_and_compact_variants_keep_per_fan_overrides(self):
+        cases={
+            'asrock-taichi-7900xtx-white-oc':([11,13,11],[1,-1,1]),
+            'asrock-taichi-rx9070xt-white-16g-oc':([11,13,11],[1,-1,1]),
+            'zotac-twin-4060ti-oc-white':([11,11],[1,1]),
+            'asus-astral-5080-oc-white':([7,7,7],[1,-1,1]),
+            'powercolor-fighter-7800xt-mini':([9,9],[1,1]),
+        }
+        for identity,(counts,directions) in cases.items():
+            for style in STYLES:
+                with self.subTest(model=identity,style=style):
+                    value=exact_appearance(identity,style)
+                    rotors=self.layers(value)['rotors']
+                    self.assertEqual([len(blade_paths(ET.fromstring(decode(row['source'])))) for row in rotors],counts)
+                    self.assertEqual([row['direction'] for row in rotors],directions)
+                    self.assertTrue(profile_for(value)['render_ready'])
 
 
 if __name__ == "__main__":

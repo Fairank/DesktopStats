@@ -73,7 +73,7 @@ function turbine(cx, cy, radius, colors) {
 }
 
 function geometry(state) {
-    return Series.geometry(state, baseGeometry(state))
+    return Board.geometry(state,Series.geometry(state, baseGeometry(state)))
 }
 
 function baseGeometry(state) {

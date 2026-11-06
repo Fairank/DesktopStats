@@ -9,6 +9,10 @@ function profile(series,index,kind) {
     var result={}
     Object.keys(row).forEach(function(key){if(key!=="fans")result[key]=row[key]})
     if(row.fans && row.fans[index]) Object.keys(row.fans[index]).forEach(function(key){result[key]=row.fans[index][key]})
+    return normalized(result,series,index,kind)
+}
+
+function normalized(result,series,index,kind) {
     result.blades=Number.isInteger(result.blades)&&result.blades>=2&&result.blades<=64?result.blades:null
     result.hub_ratio=typeof result.hub_ratio==="number"&&Number.isFinite(result.hub_ratio)?Math.max(.1,Math.min(.70,result.hub_ratio)):.28
     result.shape=["swept","wide","paired","claw","radial","straight","neutral"].indexOf(result.shape)>=0?result.shape:"neutral"
@@ -17,6 +21,7 @@ function profile(series,index,kind) {
     result.hub_shape=result.hub_shape==="triangle"?"triangle":"circle"
     result.tone=["light","red"].indexOf(result.tone)>=0?result.tone:"dark"
     result.blade_pattern=result.blade_pattern==="alternating" && result.blades!==null && result.blades%2===0?"alternating":"uniform"
+    result.hub_mark=result.hub_mark==="gold"?"gold":""
     result.paintKey=String(series).replace(/[^a-z0-9_]/g,"")+"_"+index
     result.kind=kind
     return result
@@ -116,6 +121,7 @@ function rotor(p,c) {
     if(p.hub_shape==="triangle")out+='<path class="hardware-fan-hub" d="M'+point(0,hub*1.15)+'L'+point(120,hub*1.15)+'L'+point(240,hub*1.15)+'Z" fill="'+c.hub+'"/>'
     else out+='<circle class="hardware-fan-hub" r="'+hub+'" fill="'+c.hub+'" stroke="'+c.edge+'" stroke-width=".06"/>'
     if(p.hub_tone==="silver")out+='<circle r="'+(hub*.78)+'" fill="none" stroke="#8c9eaa" stroke-width=".065"/>'
+    if(p.hub_mark==="gold")out+='<path class="hardware-fan-cap-mark" d="M-.22 0L0 -.23L.22 0L0 .23Z" fill="none" stroke="#bd9c53" stroke-width=".065"/>'
     return out
 }
 
@@ -123,7 +129,12 @@ function fan(cx,cy,radius,c,kind) {
     var index=c.fanDesignIndex || 0
     c.fanDesignIndex=index+1
     var p=profile(c.fanDesignSeries,index,kind)
-    if(c.fanOverrides)Object.keys(c.fanOverrides).forEach(function(key){p[key]=c.fanOverrides[key]})
+    if(c.fanOverrides) {
+        Object.keys(c.fanOverrides).forEach(function(key){if(key!=="fans")p[key]=c.fanOverrides[key]})
+        var single=c.fanOverrides.fans && c.fanOverrides.fans[index]
+        if(single)Object.keys(single).forEach(function(key){p[key]=single[key]})
+        p=normalized(p,c.fanDesignSeries,index,kind)
+    }
     var colors=fanPalette(p)
     var moving=rotor(p,c)
     var base='<g class="'+(kind==="blower"?'hardware-blower':'hardware-fan')+'" transform="translate('+cx+' '+cy+') scale('+(radius/3)+')">'

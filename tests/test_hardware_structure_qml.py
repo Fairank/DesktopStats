@@ -194,9 +194,9 @@ class HardwareStructureQmlTests(unittest.TestCase):
         self.assert_released()
         self.assertEqual(self.window.property("hardwareStructureView"), "")
         self.assertFalse(self.find("topBarHardwareStructure_power").property("enabled"))
+
         self.assertTrue(self.find("topBarHardwareStructure_ports").property("enabled"))
         self.assertIn("供电接口待核实", self.find("topBarDetailBoardSockets").property("text"))
-
         slot_power = self.publish("sapphire-pulse-rx6400-4g-lp")
         self.assertEqual(slot_power["board_details"]["power_connectors"], [])
         self.assert_released()
@@ -204,6 +204,24 @@ class HardwareStructureQmlTests(unittest.TestCase):
         self.assertIn("无需外接供电", self.find("topBarDetailBoardSockets").property("text"))
         _, image = self.open_structure("ports")
         self.assertEqual(socket_counts(image), Counter(hdmi=1, displayport=1))
+
+    def test_rear_accessory_views_are_distinct_and_wrap_in_narrow_details(self):
+        self.load('powercolor-red-devil-7800xt-bp')
+        self.window.setWidth(360)
+        loader,image=self.open_structure('backplate')
+        original=image.property('source')
+        accessory=self.find('topBarHardwareStructure_accessory')
+        self.assertTrue(accessory.property('enabled'))
+        self.assertTrue(QMetaObject.invokeMethod(accessory,'clicked'))
+        self.settle()
+        self.assertEqual(self.window.property('hardwareStructureView'),'accessory')
+        self.assertNotEqual(self.find('topBarHardwareStructureImage').property('source'),original)
+        self.assert_image_ready(self.find('topBarHardwareStructureImage'))
+        views=self.find('topBarHardwareStructureViews')
+        self.assertLessEqual(views.property('childrenRect').width(),views.width()+.1)
+        self.publish('asus-proart-5080-oc')
+        self.assertEqual(self.window.property('hardwareStructureView'),'')
+        self.assert_released()
 
 
 if __name__ == "__main__":

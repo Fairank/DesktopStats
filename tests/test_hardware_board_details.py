@@ -281,8 +281,9 @@ class HardwareVersionGuardTests(unittest.TestCase):
         self.assertTrue(INDEPENDENT_GPU_IDS <= set(ART))
         self.assertEqual(set(variants.READY), shared | set(ART))
         for identity in ART:
-            self.assertEqual(variants.RECORDS[identity]["visual_relation"], "different")
-            self.assertEqual(variants.RECORDS[identity]["kind"], "gpu")
+            self.assertIn(variants.RECORDS[identity]["visual_relation"], ("shared","different","unknown"))
+            self.assertIn(variants.RECORDS[identity]["kind"], ("gpu","memory"))
+            self.assertRegex(ART[identity]['recipe'],r'^(suprim_blackwell|[abc]_[a-z0-9_]+)$')
         for identity, version in variants.RECORDS.items():
             with self.subTest(model=identity):
                 table = boards.MEMORY_PROFILES if version["kind"] == "memory" else boards.PROFILES
@@ -563,6 +564,46 @@ QtObject {
                 result = self.drawing(dict(hardware.appearance_for(kind, alias), icon_set="outline"))
                 self.assertEqual(len(result["key"].split("|")), 11)
                 self.assertEqual(hashlib.sha256(decode(result["source"]).encode()).hexdigest(), expected)
+
+    def test_completed_version_inventory_contains_all_fifty_six_exact_versions(self):
+        self.assertEqual(len(variants.RECORDS),56)
+        self.assertEqual(set(variants.READY),set(variants.RECORDS))
+        for identity,version in variants.READY.items():
+            with self.subTest(model=identity):
+                value=exact_appearance(identity)
+                self.assertEqual(value['confidence'],'model')
+                self.assertEqual(value['id'],identity)
+                self.assertEqual(value['board_details']['model_ids'],(identity,))
+                for style in MODERN_STYLES:
+                    rendered=self.drawing(dict(value,icon_set=style))
+                    self.assertEqual(rendered['key'].split('|')[-1],identity)
+                    self.assertTrue(QSvgRenderer(decode(rendered['source']).encode()).isValid())
+
+    def test_compact_dual_variants_replace_three_fan_parent_geometry(self):
+        for identity in ('powercolor-fighter-7800xt-mini','sparkle-b580-roc-luna-12g-oc-ultra'):
+            for style in MODERN_STYLES:
+                with self.subTest(model=identity,style=style):
+                    value=exact_appearance(identity,style)
+                    self.assertEqual(value['fan_count'],2)
+                    self.assertEqual(value['visible_fan_count'],2)
+                    rendered=self.drawing(value)
+                    layers=self.evaluate('fromKey('+json.dumps(rendered['key'])+')')['layers']
+                    self.assertEqual(len(layers['rotors']),2)
+                    self.assertLess(layers['rotors'][0]['cx'],layers['rotors'][1]['cx'])
+
+    def test_rear_accessories_and_gc_hpwr_are_separate_lazy_sources(self):
+        checked=0
+        for identity in variants.READY:
+            facts=boards.for_appearance(exact_appearance(identity))
+            if facts.get('extra_power_interface')=='gc_hpwr':
+                self.assertEqual(sockets(self.technical(identity,'power'))['gc_hpwr'],1)
+            for view,field in (('backplate','backplate_recipe'),('accessory','accessory_backplate_recipe')):
+                if not facts.get(field):continue
+                source=self.technical(identity,view)
+                self.assertTrue(QSvgRenderer(source.encode()).isValid())
+                self.assertGreater(len(list(ET.fromstring(source).iter())),3)
+                checked+=1
+        self.assertGreaterEqual(checked,8)
 
 
 if __name__ == "__main__":

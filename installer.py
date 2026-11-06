@@ -126,11 +126,16 @@ def close_existing():
             or reply.get("pid") != status["pid"]
         ):
             raise RuntimeError("当前版本不能安全自动退出；请手动退出 Desktop Stats 后重试。")
-        for _ in range(20):
-            time.sleep(0.25)
+        # Qt and the collector can finish after the IPC server closes. Allow a
+        # bounded clean shutdown without killing a process or swapping early.
+        deadline = time.monotonic() + 60.0
+        for _ in range(120):
+            time.sleep(0.5)
             if (send({"command": "status"}, timeout=150) is None
                     and _server_absent() and process.exited()):
                 return dict(current)
+            if time.monotonic() >= deadline:
+                break
         raise RuntimeError("软件仍在运行，安装尚未开始；请手动退出后重试。")
     finally:
         process.close()
@@ -404,7 +409,7 @@ def _installed_autostart(target):
     return load()["autostart"]
 
 
-def install():
+def install(*, background=False):
     if not getattr(sys, "frozen", False):
         raise RuntimeError("Use the packaged DesktopStats.exe to install")
     source_root = Path(sys.executable).parent.resolve()
@@ -497,8 +502,8 @@ def install():
     # from the transaction: launch failure must not claim installation rollback.
     target = DIRECTORY / "DesktopStats.exe"
     command = [str(target)]
-    if (_valid_status(launch_status) and launch_status["dirty"] is False
-            and launch_status.get("settings_visible") is False):
+    if (background or (_valid_status(launch_status) and launch_status["dirty"] is False
+            and launch_status.get("settings_visible") is False)):
         command.append("--background")
     try:
         subprocess.Popen(command, creationflags=0x08000000)

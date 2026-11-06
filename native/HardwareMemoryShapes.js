@@ -103,6 +103,10 @@ function bare(g,c) {
 }
 
 function enclosure(state,g,c) {
+    if(!c.outline) {
+        var exact=Board.memoryFace(state,g,c)
+        if(exact)return exact
+    }
     var id=identity(state), presentation=state.shroud || state.presentation || "neutral"
     if(g.shortForm) {
         return presentation==="bare" ? bare(g,c)
@@ -195,7 +199,7 @@ function body(state) {
     if(!state || state.kind!=="memory") return ""
     var c=Board.memoryColors(state,palette(state))
     if(state.style!=="dimm" && state.style!=="sodimm") return neutral(c)
-    var g=profile(state), result="",e=g.x+g.w
+    var g=c.outline?profile(state):Board.geometry(state,profile(state)), result="",e=g.x+g.w
     if(state.icon_set==="miniature") {
         result='<path d="M'+(g.x+.4)+' 17.8H'+(e+.35)+'L'+(e+.6)+' 18.8H'+(g.x+1.4)+'Z" fill="#233b4d" opacity=".13"/>'
             +p("M"+e+" "+(g.top+.4)+"L"+(e+.65)+" "+(g.top+1)+"V16.5L"+e+" 17.1Z",c.side,c)

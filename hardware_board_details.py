@@ -4,6 +4,7 @@ No probing, driver access, network or polling. Unknowns are retained. A family
 name, ASIC identity or a different retail revision cannot borrow these sockets.
 """
 import copy
+import re
 
 import hardware_board_details_a as group_a
 import hardware_board_details_b as group_b
@@ -32,7 +33,7 @@ POWER_TYPES = {name: name for name in ('4pin', '6pin', '8pin', '12pin', '16pin')
 LABELS = dict(displayport='DP', mini_displayport='Mini DP', hdmi='HDMI', mini_hdmi='Mini HDMI',
               dvi='DVI', vga='VGA', usb_c='USB-C', tv_out='TV-Out',
               **{'4pin': '4 pin', '6pin': '6 pin', '8pin': '8 pin', '12pin': '12 pin', '16pin': '16 pin'})
-TONES = ('dark', 'light', 'silver', 'blue', 'pink', 'mixed', 'unknown')
+TONES = ('dark', 'light', 'silver', 'blue', 'pink', 'mixed', 'gold', 'copper', 'red', 'unknown')
 MEMORY_KEYS = {
     # Nominal front-view PCB mechanical drawings, page 2; no SKU-wide
     # tolerance claim. Each dimension is relative to the PCB, not a cover.
@@ -106,9 +107,15 @@ def normalise(series, row, *, kind='gpu'):
     if not result['model_ids']:
         raise ValueError('Exterior facts require exact model guards: ' + series)
     result['shroud_tone'] = row.get('shroud_tone', row.get('tone', 'unknown'))
-    result['pcb_tone'] = row.get('pcb_tone') if row.get('pcb_tone') in ('blue','green','dark') else 'unknown'
+    result['illustration_status']='schematic_unverified_exterior' if row.get('illustration_status')=='schematic_unverified_exterior' else 'simplified'
+    result['pcb_tone'] = row.get('pcb_tone') if row.get('pcb_tone') in ('blue','green','dark','light') else 'unknown'
     if result['shroud_tone'] not in TONES:
         result['shroud_tone'] = 'unknown'
+    for field in ('recipe','backplate_recipe','accessory_backplate_recipe'):
+        value=row.get(field)
+        result[field]=value if isinstance(value,str) and (value=='suprim_blackwell' or re.fullmatch(r'[abc]_[a-z0-9_]{1,72}',value)) else ''
+    if row.get('heatsink_tone') in ('silver','copper','light','dark'):
+        result['heatsink_tone']=row['heatsink_tone']
     if kind == 'memory':
         for field in ('form', 'generation', 'pins', 'heat_spreader', 'diffuser'):
             result[field] = row.get(field)
@@ -116,6 +123,7 @@ def normalise(series, row, *, kind='gpu'):
         result['notch_ratio']=standard[0] if standard else None
         result['notch_width_ratio']=standard[2] if standard else None
         result['notch_depth_ratio']=standard[3] if standard else None
+        result['memory_rgb_cover']=row.get('memory_rgb_cover') is True or result.get('diffuser') is True
         return result
     result.update(ports=groups(row.get('ports'), PORT_TYPES),
                   power_connectors=groups(row.get('power_connectors'), POWER_TYPES),
@@ -133,12 +141,15 @@ def normalise(series, row, *, kind='gpu'):
                                     lanes=host.get('lanes') if type(host.get('lanes')) is int and host['lanes'] in (1, 2, 4, 8, 16) else None)
     result['edge_key_count'] = row.get('edge_key_count') if type(row.get('edge_key_count')) is int and 0 <= row['edge_key_count'] <= 2 else None
     result['power_position'] = row.get('power_position') if row.get('power_position') in ('top', 'end', 'rear', 'hidden', 'alternative') else 'unknown'
-    result['recipe'] = row.get('recipe') if row.get('recipe') in ('suprim_blackwell',) else ''
     if isinstance(row.get('fan_profile'),dict):
-        allowed=('blades','shape','hub_ratio','hub_tone','group_size','outer_ring','tone')
+        allowed=('blades','shape','blade_pattern','hub_ratio','hub_tone','hub_mark','hub_shape','group_size','outer_ring','tone','direction')
         result['fan_profile']={key:row['fan_profile'][key] for key in allowed if key in row['fan_profile']}
+        if isinstance(row['fan_profile'].get('fans'),(list,tuple)):
+            result['fan_profile']['fans']=[{key:fan[key] for key in allowed if key in fan}
+                                           for fan in row['fan_profile']['fans'][:4] if isinstance(fan,dict)]
     layout = row.get('power_layout') or {}
     result['alternative_power'] = layout.get('mode') == 'alternative'
+    if row.get('extra_power_interface')=='gc_hpwr':result['extra_power_interface']='gc_hpwr'
     if row.get('auxiliary_button')=='hyper_boost':
         result['auxiliary_button']='hyper_boost'
     return result
@@ -164,6 +175,7 @@ def for_appearance(appearance):
     if kind == 'gpu':
         result['ports_text'] = label_groups(result['ports'], unknown='视频接口待核实')
         result['power_text'] = label_groups(result['power_connectors'], empty='无需外接供电', unknown='供电接口待核实')
+        if result.get('extra_power_interface')=='gc_hpwr':result['power_text']+=' · GC_HPWR'
         result['pcb_text'] = ('短 PCB · ' if result['pcb_length']=='short' else '')+'PCB 内部布局未核实'
         host = result['host_interface']
         result['host_text'] = ('PCIe' if host['bus'] == 'pcie' else 'AGP' if host['bus'] == 'agp' else '主机接口待核实')

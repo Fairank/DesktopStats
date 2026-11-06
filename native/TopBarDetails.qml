@@ -1132,7 +1132,7 @@ Window {
                                         text: {
                                             const appearance = appearanceSummary.appearance
                                             const confidence = appearance.confidence
-                                            const parts = [root.tr(appearance.selection_source==="manual"?"手动外观":appearance.icon_set === "classic" ? "经典通用"
+                                            const parts = [root.tr(appearance.selection_source==="manual"?"手动外观":(appearance.board_details || ({})).illustration_status==="schematic_unverified_exterior"?"布局示意":appearance.icon_set === "classic" ? "经典通用"
                                                 : confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
                                             if (["model", "brand"].includes(confidence) && typeof appearance.label === "string" && appearance.label.trim())
                                                 parts.push(appearance.label.trim())
@@ -1224,17 +1224,29 @@ Window {
                                         textFormat: Text.PlainText
                                         color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
                                     }
-                                    RowLayout {
+                                    Text {
+                                        Layout.fillWidth: true
+                                        visible: root.boardFacts.illustration_status==="schematic_unverified_exterior"
+                                        text: root.tr("该型号外壳与叶片尚未核实，当前为布局示意")
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Flow {
+                                        objectName: "topBarHardwareStructureViews"
                                         Layout.fillWidth: true; spacing: 6
+                                        Layout.preferredHeight: childrenRect.height
                                         visible: root.boardFacts.kind==="gpu" && !!root.hardwareDrawingKey
                                         Repeater {
                                             model: [{id:"ports",label:root.tr("查看接口"),ready:root.boardFacts.ports && root.boardFacts.ports.length>0},
-                                                {id:"power",label:root.tr("查看供电"),ready:root.boardFacts.power_connectors && root.boardFacts.power_connectors.length>0}]
+                                                {id:"power",label:root.tr("查看供电"),ready:root.boardFacts.extra_power_interface || root.boardFacts.power_connectors && root.boardFacts.power_connectors.length>0},
+                                                {id:"backplate",label:root.tr("查看背板"),ready:!!root.boardFacts.backplate_recipe},
+                                                {id:"accessory",label:root.tr("查看配件背板"),ready:!!root.boardFacts.accessory_backplate_recipe}]
                                             delegate: Button {
                                                 id: structureButton
                                                 required property var modelData
                                                 objectName: "topBarHardwareStructure_"+modelData.id
                                                 text: modelData.label; enabled: !!modelData.ready
+                                                visible: !!modelData.ready || ["ports","power"].includes(modelData.id)
                                                 onClicked: root.hardwareStructureView=root.hardwareStructureView===modelData.id?"":modelData.id
                                                 padding: 6
                                                 contentItem: Text { text: structureButton.text; color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11 }
@@ -1261,7 +1273,7 @@ Window {
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        text: root.tr(root.hardwareStructureView==="ports"?"接口数量示意，排列未核实":root.boardFacts.alternative_power?"供电插座示意，连接位置二选一":"供电插座示意")
+                                        text: root.tr(root.hardwareStructureView==="ports"?"接口数量示意，排列未核实":root.hardwareStructureView==="backplate"?"原厂背板简化外观":root.hardwareStructureView==="accessory"?"附送背板外观，未确认实际安装":root.boardFacts.alternative_power?"供电插座示意，连接位置二选一":"供电插座示意")
                                         textFormat: Text.PlainText
                                         color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
                                     }

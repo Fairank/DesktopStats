@@ -1,8 +1,8 @@
 # Desktop Stats for Windows
 
 Native Windows top-bar monitoring and optional desktop widgets, with real
-hardware readings and local history. Development candidate
-**0.27.0-preview.2** organizes settings around one live top-bar
+hardware readings and local history. Preview release
+**0.28.0-preview.2** organizes settings around one live top-bar
 preview, separate content/appearance tasks and contextual desktop controls.
 Desktop widgets, top bar and preferences save independently. Original application
 source is licensed under [PolyForm Noncommercial 1.0.0](../LICENSING.md).
@@ -14,8 +14,9 @@ change their appearance. A failed or unsupported material request keeps a
 readable fallback. Offscreen screenshots and successful API requests alone do
 not verify desktop blur. The original Niangao artwork and Lucide symbols remain.
 
-Preview.2 targets material lost after administrator authorization or a hidden
-top bar returning from fullscreen avoidance. These return events request the
+The material recovery introduced in 0.27.0-preview.2 targets loss after
+administrator authorization or a hidden top bar returning from fullscreen
+avoidance. These return events request the
 existing background material again, without permanent polling. Saved layout,
 temperature authorization and sampling settings remain independent; visible
 blur still needs verification on the target Windows system.
@@ -63,9 +64,9 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 
 硬件联动对 CPU/GPU 分别使用负载、温度和功耗，黄红热感与蓝色功耗电弧可同时出现。短电弧会在不同位置和方向出现、分叉、熄灭，十个视觉阶段逐步增加幅度、放电次数和重叠细丝，并在阶段之间平滑过渡；真实读数不分成十档。内存使用实际占用量，网络和磁盘分别使用两个方向，电池分别使用电量、充电和放电，风扇使用实际转速或设备报告的风扇百分比，NVMe 使用真实温度。只叠加有来源的通道；缺测不借另一块设备的值，不从内存占用推测温度，也不把 SSD 损耗作为当前负载。主使用率为零或缺失时，有真实温度或功耗的层仍可独立呈现。
 
-开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。通用风扇符号与功率流动属于装饰反馈。开发版的实物显卡叶轮单独跟随当前 RPM，以固定 120 倍慢放，速度偏好不改变其比例；详见下文显卡风扇说明。
+开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。通用风扇符号与功率流动属于装饰反馈。预览版的实物显卡叶轮单独跟随当前 RPM，以固定 120 倍慢放，速度偏好不改变其比例；详见下文显卡风扇说明。
 
-### 硬件图标与型号（开发版）
+### 硬件图标与型号（0.28.0 预览版）
 
 在 **顶部栏 → 外观 → 硬件图标** 选择 **经典通用、结构线稿、精简实物、微型实物、柔和双色**。五种版本继续保留，旧设置默认使用经典通用（Classic）；切换后按现有 **应用顶部栏** 流程保存。实物风格按已核型号绘制盖板、风扇、外露 PCB 边缘、分段金手指、挡板和散热鳍片边缘；有官方依据时使用该型号的真实外观颜色。尺寸和轮毂比例仍是便于小图标阅读的简化，未核实的 PCB 内部元件、走线和长度不补造。
 
@@ -75,7 +76,9 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 
 展开硬件说明后，**查看接口** 与 **查看供电** 按已有资料提供实体插口的类型和数量示意。视频口的排列、供电插座的安装位置和挡板开孔未核实时会明确说明；示意图不代表已确认的实物顺序。已确认无需外接供电的型号会单独标明；未知供电不当作没有供电。主机接口区分 PCIe/AGP，电气通道数不会被画成未经确认的短金手指。内存接口按已确认的代际、DIMM/SO-DIMM 和物理引脚规格说明；三种实物风格的 DDR4 DIMM、DDR5 DIMM、DDR4 SO-DIMM 缺口按官方正视 PCB 尺寸图的中心、宽度和深度比例绘制，其他未核规格仍保留简化示意。图中的触点细线不是逐针工程图，经典通用与结构线稿保持原样。
 
-待核型号和不同但尚未实现的版本仍保留在版本清单，不会悄悄套用代表型号的盖板或叶轮。基础图库、就绪版本及风扇细节的当前状态见 [硬件覆盖报告](HARDWARE_COVERAGE.json)；它记录已核范围，不表示已完成市面上每个品牌、系列和版本。
+本次运行图库共 178 项：147 个显卡、28 个内存和 3 个 CPU 示例。清单中的 56 个具体版本已全部支持，待实现版本为 0；其中 34 项有明确的专用绘图登记，包含原有两款 SUPRIM 5090 和本次新增的 32 个版本处理。就绪表示可以精确选择这个版本，不表示每个外观细节都已查明。ZOTAC Infinity 5080 10A、GIGABYTE GTX 460 Rev2/Rev3 和 BIOSTAR RX 7600 OC 的叶片数仍未知，保持静态；BIOSTAR OC 的盖板未核，界面明确显示为技术示意。基础图库、版本、来源及逐项未知字段见 [硬件覆盖报告](HARDWARE_COVERAGE.json)；它不表示已覆盖市面上每个品牌、系列和版本。
+
+有来源支持的原厂背板和可拆装饰背板可分别按需查看，装饰件图不表示电脑已安装该配件。GC_HPWR 与 16pin 仅在有依据的 SAPPHIRE NITRO+ PhantomLink 版本中按替代供电路线说明，不同时画成两个必接插口。内存 RGB 导光罩只画物理结构，不增加灯效动画，也不读取或推测当前灯光。三种实物风格继续采用浅薄侧面投影；新增外观、接口和背板只按需构建，不增加硬件轮询、动画计时器或采样频率。
 
 ### 顶部栏整体设计
 
@@ -167,8 +170,11 @@ metal-panel cover and STORMFORCE seven-blade front rotors; reviewed ROG Astral
 RTX 5090 standard/OC exteriors share the reviewed Astral RTX 5080 OC art only
 after checking official images and external specifications. The
 [coverage report](HARDWARE_COVERAGE.json)
-records the current reviewed and pending inventory; it is not a claim of full
-market coverage.
+records all 56 supported version registrations, with zero pending versions, and
+the unknown fields that remain. The 0.28.0-preview.2 runtime catalog has 178
+entries: 147 GPU, 28 RAM and 3 CPU. Its 34 explicit artwork registrations include
+the two earlier SUPRIM 5090 entries and 32 new treatments. This is a bounded
+inventory, not a claim of full market coverage or complete visual verification.
 
 All five selectable icon versions remain available: Classic, Outline, Solid,
 Miniature and Soft. Existing settings retain Classic. Reviewed model colors,
@@ -178,6 +184,12 @@ lengths are not invented. Electrical PCIe lanes do not establish mechanical
 connector length. Port and power views show documented connector types and
 counts, with unverified order and position explicitly labelled; they are not
 physical installation diagrams.
+
+Factory backplates and documented removable accessories have separate on-demand
+views. GC_HPWR and 16-pin are alternative routes only on the source-confirmed
+SAPPHIRE NITRO+ PhantomLink editions, never simultaneous required sockets. RAM RGB covers are
+static physical diffusers. Modern drawings retain shallow side projection, and
+these new exterior views add no hardware polls, timers or sampling cadence.
 
 Modern DDR4 DIMM, DDR5 DIMM and DDR4 SO-DIMM keys use the nominal center,
 width and depth ratios from published front-view PCB mechanical drawings.
@@ -200,8 +212,12 @@ name does not establish a retail cooler. Illustration proportions are visual
 estimates, not measured factory dimensions. Source-confirmed light and dark
 rotors retain their own colors; fixed shroud rings do not rotate with the fan.
 Unreviewed active fan faces are labelled pending and remain neutral and static.
-The offline gallery enables motion only for reviewed fan faces; its current
-review totals are recorded in the coverage report.
+The completed export has 119 motion-ready GPU entries. ZOTAC Infinity 5080 10A,
+GIGABYTE GTX 460 Rev2/Rev3 and BIOSTAR RX 7600 OC retain unknown blade counts.
+BIOSTAR OC's unverified cover is explicitly labelled as a technical schematic.
+The offline gallery enables motion only for reviewed fan faces; field-level
+limits remain recorded in the coverage report. Black and white Astral front
+fans preserve the source-confirmed reversed center fan.
 
 Solid, Miniature and Soft Auto effects use fresh same-card current RPM, displayed
 unchanged and animated at a fixed 120x slow-motion scale. Higher RPM rotates

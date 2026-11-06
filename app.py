@@ -66,7 +66,7 @@ def main():
     if args.install:
         from installer import install
 
-        install()
+        install(background=args.background)
         return
     if args.uninstall:
         from installer import close_existing, remove_registration
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         sys.exit(main() or 0)
     except Exception:
         logging.exception("Application failed")
-        if any(
+        if ("--install" in sys.argv and "--background" in sys.argv) or any(
             arg in ("--self-check", "--storage-read")
             or arg.startswith(("--self-check=", "--storage-read="))
             for arg in sys.argv

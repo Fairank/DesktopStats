@@ -31,6 +31,7 @@ HardwareGlyph.qml HardwareShapes.js
 HardwareSolid.js HardwareMiniature.js HardwareSoft.js
 HardwareFanDesigns.js HardwareFanProfileData.js
 HardwareBoardDesigns.js HardwareBoardProfileData.js
+HardwareVariantGroupA.js HardwareVariantGroupB.js HardwareVariantGroupC.js
 HardwareSeriesShapes.js
 HardwareSeriesGroupA.js HardwareSeriesGroupB.js HardwareSeriesGroupC.js HardwareSeriesCoreExpansion.js
 HardwareSeriesNvidiaLegacy.js HardwareSeriesRadeonArc.js HardwareMemoryShapes.js

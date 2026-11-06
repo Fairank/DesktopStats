@@ -84,6 +84,7 @@ def coverage(kind, series, row, appearance, fan_row, fan_sources, *, inherited_f
     if kind == "cpu":
         return result
     normal = boards.normalise(series, row, kind=kind)
+    result['illustration_status']=normal.get('illustration_status','simplified')
     result["pcb_length"] = fact(normal.get("pcb_length"))
     result["pcb_internal_layout"] = dict(status="unverified", value=None)
     if kind == "memory":

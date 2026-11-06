@@ -194,25 +194,22 @@ class HardwareModelProjectionTests(unittest.TestCase):
         self.assertEqual(appearance.metric_appearance(data, "cpu_temp", prefs),
                          appearance.metric_appearance(data, "cpu_temp", {}))
 
-    def test_unreviewed_versions_remain_inventory_not_silent_base_matches(self):
+    def test_completed_versions_do_not_silently_absorb_unreviewed_revisions(self):
         gpu_ids = {row[0] for row in appearance.CATALOG if row[1] == "gpu"}
         memory_ids = {row["id"] for row in memory.CATALOG}
-        # These have separate reviewed recipes, rather than inheriting another
-        # generation's cooler via the version inventory.
-        independently_reviewed = {"msi-suprim-5090-32g-soc", "msi-suprim-5090-32g-oc"}
-        pending = {key: row for key, row in variants.RECORDS.items()
-                   if row["visual_relation"] in ("different", "unknown")
-                   and key not in independently_reviewed}
-        self.assertTrue(pending)
-        for identity, row in pending.items():
+        self.assertEqual(set(variants.READY),set(variants.RECORDS))
+        for identity, row in variants.RECORDS.items():
             with self.subTest(identity=identity):
-                self.assertNotIn(identity, variants.READY)
-                self.assertNotIn(identity, gpu_ids if row["kind"] == "gpu" else memory_ids)
+                self.assertIn(identity,gpu_ids if row['kind']=='gpu' else memory_ids)
                 for alias in row["aliases"]:
                     result = (appearance.appearance_for("gpu", alias) if row["kind"] == "gpu"
                               else memory.appearance_for_memory(model=alias))
-                    self.assertNotEqual((result["id"], result["confidence"]),
-                                        (row["base_model_id"], "model"))
+                    self.assertEqual((result['id'],result['confidence']),(identity,'model'))
+                    unknown=alias+'-UNREVIEWED'
+                    result=(appearance.appearance_for('gpu',unknown) if row['kind']=='gpu'
+                            else memory.appearance_for_memory(model=unknown))
+                    self.assertNotEqual(result['confidence'],'model')
+                    self.assertNotIn('board_details',result)
 
 
 class HardwareModelPreferenceTests(unittest.TestCase):

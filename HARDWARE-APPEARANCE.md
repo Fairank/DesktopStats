@@ -47,10 +47,13 @@ The source-export tools include a synthetic offscreen comparison renderer,
   identities, 16 RAM representatives across 6 memory brands, and 3 CPU examples.
   Source-confirmed ready exact versions extend that base: shared exteriors need
   their own complete reviewed aliases, while different structures need an
-  implemented independent recipe. The current generated runtime catalog has
-  146 entries: 122 GPU, 21 RAM and 3 CPU. The generated
-  [coverage report](docs/HARDWARE_COVERAGE.json) records supported and pending
-  versions and current field-review totals. This is a bounded catalog, not
+  implemented independent treatment. In 0.28.0-preview.2, all 56 recorded
+  versions are supported, with zero pending version registrations and 34 explicit
+  artwork registrations, including the two earlier SUPRIM 5090 entries and 32
+  new treatments. The runtime catalog has 178 entries: 147 GPU, 28 RAM and 3 CPU.
+  The generated [coverage report](docs/HARDWARE_COVERAGE.json) records exact
+  aliases, supported versions and field-level known/unknown status. A ready
+  version registration does not certify every visible detail. This is a bounded catalog, not
   coverage of every current or historical SKU or processor family.
 - Each GPU series has a dedicated static casing profile in Solid, Miniature and
   Soft. Expanded details provide up to two short feature descriptions and an
@@ -110,6 +113,14 @@ treated as confirmed absence. Electrical PCIe lane count does not imply a
 shortened mechanical connector, and full-card dimensions do not establish bare
 PCB length or internal component placement.
 
+Factory backplates and documented removable covers have separate on-demand
+views; an accessory view does not assert the accessory is installed. Only the
+source-confirmed SAPPHIRE NITRO+ PhantomLink editions describe GC_HPWR and 16-pin as alternative
+power routes. A technical view never turns those alternatives into simultaneous
+required sockets. BIOSTAR RX 7600 OC's cover remains unverified and is explicitly
+labelled as a technical schematic, even though its exact SKU and documented
+interfaces can now be selected.
+
 ### Total and front-visible fans
 
 | Reviewed representative | Physical total | Front-visible |
@@ -128,13 +139,18 @@ model. The classic generic glyph does not depict a physical fan layout.
 ### Fan appearance and same-card RPM
 
 Only reviewed visible rotor faces can supply separate fan layers in Solid,
-Miniature and Soft. The current export has 98 motion-ready GPU entries; the
+Miniature and Soft. The 0.28.0-preview.2 export has 119 motion-ready GPU entries; the
 [coverage report](docs/HARDWARE_COVERAGE.json) and generated gallery provide the
 current reviewed/pending inventory. A confirmed fan position alone does not
 establish blade count or make its face motion-ready. Axial fans, radial blowers
 and mixed layouts retain their reviewed positions and sizes. Unknown faces,
 unknown layouts and passive cards do not gain rotating placeholder layers.
 Classic and Outline keep their existing static hardware drawings.
+ZOTAC Infinity 5080 10A, GIGABYTE GTX 460 Rev2/Rev3 and BIOSTAR RX 7600 OC
+retain unknown blade counts and static fan faces. Other per-model limitations
+are recorded separately in the coverage report. Black and white Astral front
+fans preserve the reviewed relative directions `[1,-1,1]`; this is not a claim
+about independently measured physical fan speeds.
 
 At runtime the Auto effect requires fresh current RPM from the same selected
 card. Rotation uses a fixed 120x slow-motion scale, proportional to that RPM;
@@ -190,8 +206,8 @@ python tools/export_hardware_gallery.py --output qa-private/hardware-gallery.htm
 ```
 
 Use `--overwrite` when deliberately replacing an existing export. The current
-gallery includes 146 runtime-supported entries and 1,460 complete static SVG
-variants: (122 GPU + 21 RAM + 3 CPU entries, including ready exact versions)
+gallery includes 178 runtime-supported entries and 1,780 complete static SVG
+variants: (147 GPU + 28 RAM + 3 CPU entries, including all 56 recorded versions)
 × 5 icon versions × 2 themes. It supports hardware type, brand, GPU chip vendor,
 generation and product-line filters, model/series search, style and background
 selection and an 18px top-bar comparison. Open any illustration for a larger

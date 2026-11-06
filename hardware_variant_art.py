@@ -3,6 +3,9 @@
 Each recipe needs reviewed exact-product imagery and its own changed structure.
 Keeping a version in the inventory alone never enables this registry.
 """
+from hardware_variant_art_a import ART as GROUP_A
+from hardware_variant_art_b import ART as GROUP_B
+from hardware_variant_art_c import ART as GROUP_C
 _SUPRIM_BLACKWELL = dict(recipe='suprim_blackwell', shroud_tone='silver', slot_width=None,
     host_interface=dict(bus='pcie',generation=5,lanes=16,connector_shape='pcie_standard'),
     fan_profile=dict(technology='stormforce', label='STORMFORCE 七叶风扇', blades=7,
@@ -10,3 +13,6 @@ _SUPRIM_BLACKWELL = dict(recipe='suprim_blackwell', shroud_tone='silver', slot_w
 
 ART = {'msi-suprim-5090-32g-soc': dict(_SUPRIM_BLACKWELL),
        'msi-suprim-5090-32g-oc': dict(_SUPRIM_BLACKWELL)}
+for _group in (GROUP_A,GROUP_B,GROUP_C):
+    if ART.keys() & _group.keys():raise ValueError('Duplicate implemented exact-version artwork')
+    ART.update(_group)
