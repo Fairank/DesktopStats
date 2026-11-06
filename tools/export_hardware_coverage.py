@@ -62,6 +62,10 @@ def fan_coverage(row, appearance, evidence, *, inherited_from=None):
         status = "known" if type(common) is int and common > 0 else "unknown"
     result = dict(status=status, physical_fans=fact(total), visible_front_fans=fact(front),
                   blades=common, front_blade_counts=counts,
+                  blade_pattern=fact(row.get('blade_pattern')),
+                  front_hub_tones=[fact(overrides[index].get('hub_tone', row.get('hub_tone'))
+                                       if index < len(overrides) else row.get('hub_tone'))
+                                   for index in range(front or 0)],
                   confirmed_front_indices=[index for index, ready in enumerate(known) if ready],
                   unknown_front_indices=[index for index, ready in enumerate(known) if not ready],
                   technology=row.get("technology", "unknown"),

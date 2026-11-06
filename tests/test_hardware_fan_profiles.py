@@ -280,6 +280,61 @@ QtObject {
         self.assertEqual([effective_profile(leadtek,index).get('blades') for index in range(3)],[9,None,9])
         self.assertFalse(profile_for(exact_appearance(leadtek['model_ids'][0]))['render_ready'])
 
+    def test_legacy_torx_keeps_seven_wide_and_seven_narrow_leaves(self):
+        for series in ('msi_gaming_pascal','msi_lightning_pascal','msi_gaming_maxwell'):
+            for style in STYLES:
+                with self.subTest(series=series,style=style):
+                    value=exact_appearance(PROFILES[series]['model_ids'][0],style)
+                    self.assertEqual(profile_for(value)['blade_pattern'],'alternating')
+                    for rotor in self.layers(value)['rotors']:
+                        blades=blade_paths(ET.fromstring(decode(rotor['source'])))
+                        paths={node.get('d') for node in blades}
+                        self.assertEqual(len(blades),14)
+                        self.assertEqual(len(paths),2)
+                        self.assertEqual(sorted(sum(node.get('d')==path for node in blades)
+                                                for path in paths),[7,7])
+                        first,second=(rendered_blade_sections(node)[1][1] for node in blades[:2])
+                        self.assertGreater(max(first,second)/min(first,second),1.3)
+        uniform=blade_paths(ET.fromstring(self.study('msi_suprim')['svg']))
+        self.assertEqual(len({node.get('d') for node in uniform}),1)
+
+    def test_b580_titan_and_luna_caps_keep_their_own_finish(self):
+        def luminance(color):
+            return sum(int(color[index:index+2],16)*weight
+                       for index,weight in ((1,.2126),(3,.7152),(5,.0722)))
+        for style in STYLES:
+            base=exact_appearance('sparkle-b580-titan-12g-oc',style)
+            luna=exact_appearance('sparkle-b580-titan-luna-12g-oc',style)
+            self.assertEqual(profile_for(base)['hub_tone'],'dark')
+            self.assertEqual(profile_for(luna)['hub_tone'],'light')
+            for dark,light in zip(self.layers(base)['rotors'],self.layers(luna)['rotors']):
+                dark_tree,light_tree=(ET.fromstring(decode(row['source'])) for row in (dark,light))
+                dark_hub=next(node for node in dark_tree.iter() if node.get('class')=='hardware-fan-hub')
+                light_hub=next(node for node in light_tree.iter() if node.get('class')=='hardware-fan-hub')
+                self.assertGreater(luminance(light_hub.get('fill'))-luminance(dark_hub.get('fill')),100)
+                self.assertEqual([node.get('d') for node in blade_paths(dark_tree)],
+                                 [node.get('d') for node in blade_paths(light_tree)])
+                self.assertEqual(len(blade_paths(dark_tree)),9)
+            # Two exact TORX 5.0 boards do not establish the same cap finish.
+            silver=self.layers(exact_appearance('msi-suprim-x-4090-24g',style))['rotors'][0]
+            shadow=self.layers(exact_appearance('msi-shadow-5080oc',style))['rotors'][0]
+            caps=[next(node for node in ET.fromstring(decode(row['source'])).iter()
+                       if node.get('class')=='hardware-fan-hub') for row in (silver,shadow)]
+            self.assertGreater(luminance(caps[0].get('fill'))-luminance(caps[1].get('fill')),100)
+
+    def test_taichi_rdna3_and_rdna4_do_not_share_center_fan_paint(self):
+        def paints(svg):
+            return [node.get('stop-color') for node in ET.fromstring(svg).iter()
+                    if node.tag.endswith('stop')]
+        for style in STYLES:
+            rdna3=self.layers(exact_appearance(PROFILES['asrock_taichi']['model_ids'][0],style))['rotors']
+            rdna4=self.layers(exact_appearance(PROFILES['asrock_taichi_rdna4']['model_ids'][0],style))['rotors']
+            self.assertEqual(paints(decode(rdna3[0]['source'])),paints(decode(rdna3[1]['source'])))
+            self.assertNotEqual(paints(decode(rdna4[0]['source'])),paints(decode(rdna4[1]['source'])))
+            for rotors in (rdna3,rdna4):
+                self.assertEqual([len(blade_paths(ET.fromstring(decode(row['source'])))) for row in rotors],[11,13,11])
+                self.assertEqual([row['direction'] for row in rotors],[1,-1,1])
+
 
 if __name__ == "__main__":
     unittest.main()

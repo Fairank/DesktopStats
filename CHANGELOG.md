@@ -21,6 +21,9 @@
   Add exposed PCB edges, separated gold-contact segments, bracket outlines and
   narrow heatsink edges without inventing an internal board layout. Electrical
   PCIe lane counts do not imply a mechanically shortened connector.
+- Reduce Miniature's exaggerated upper/side extrusion and heavy shadow. Keep
+  documented thickness differences through a shallow projection while leaving
+  the circular fan plane, fan placement and the other icon versions intact.
 - Add on-demand video-port and power-connector technical views with reviewed
   connector types and quantities. These are schematics, not claims about the
   physical port order, socket placement or exact cutouts. Preserve unknown
@@ -49,6 +52,11 @@
   including the distinct SPARKLE A750/B580 TITAN rotors. Label unreviewed active
   fan faces as pending and keep them static; gallery motion requires a reviewed
   face rather than an empty placeholder.
+- Give the modern leaves longer asymmetric curves and quieter dark-plastic
+  shading. Encode the reviewed old MSI TORX seven-wide/seven-narrow pattern;
+  preserve the distinct SUPRIM 4090 silver cap, B580 TITAN dark caps, TITAN Luna
+  light caps and RDNA3/RDNA4 Taichi center-fan paint. Exact shared versions can
+  override their reviewed fan finish without changing live telemetry.
 - Animate confirmed visible fans in Solid, Miniature and Soft only when Auto
   receives fresh same-card RPM. Keep a fixed base
   and small retained fan textures; phase changes update local transforms without

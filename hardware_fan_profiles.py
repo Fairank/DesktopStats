@@ -16,7 +16,7 @@ for package in (board_a,board_b,board_c):
         guard=update.get('model_ids') or getattr(package,'PROFILES',{}).get(identity,{}).get('model_ids')
         if original is None or tuple(guard or ())!=tuple(original.get('model_ids',())):
             raise ValueError('Fan update must refer to the same exact representative')
-        allowed=('blades','shape','hub_ratio','hub_tone','tone','outer_ring','group_size','hub_shape','fans',
+        allowed=('blades','shape','blade_pattern','hub_ratio','hub_tone','tone','outer_ring','group_size','hub_shape','fans',
                  'technology','label','source_url','notes','evidence','count_status')
         PROFILES[identity]=dict(original,**{key:update[key] for key in allowed if key in update})
 
@@ -28,6 +28,11 @@ def profile_for(appearance):
     value = PROFILES.get(appearance.get("series_id"), {})
     if value.get("model_ids") and base_identity(appearance.get("id")) not in value["model_ids"]:
         return {}
+    version=READY.get(appearance.get('id'))
+    if version:
+        # Sharing a cooler structure does not imply identical cap/rotor paint.
+        # Only the exact version's explicitly reviewed overrides apply here.
+        value=dict(value,**version.get('overrides',{}).get('fan_profile',{}))
     if appearance.get('id') in ART:
         value=dict(value,**ART[appearance['id']].get('fan_profile',{}))
     if appearance.get('id') in READY:
@@ -36,7 +41,8 @@ def profile_for(appearance):
     shapes=[fan.get('shape',value.get('shape')) for fan in value.get('fans',())] or [value.get('shape')]
     ready=all(type(count) is int and count>0 for count in counts) and all(shape!='neutral' for shape in shapes)
     return dict(label=value.get("label", ""), technology=value.get("technology", "unknown"),
-                blades=value.get("blades"), source_url=value.get("source_url", ""),
+                blades=value.get("blades"), blade_pattern=value.get('blade_pattern'),
+                hub_tone=value.get('hub_tone'), source_url=value.get("source_url", ""),
                 blade_counts=[fan.get('blades', value.get('blades'))
                               for fan in value.get('fans', ())],
                 render_ready=ready, artwork_status=('not_applicable' if appearance.get('fan_count')==0

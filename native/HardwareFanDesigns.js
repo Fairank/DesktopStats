@@ -16,6 +16,7 @@ function profile(series,index,kind) {
     result.direction=result.direction===-1?-1:1
     result.hub_shape=result.hub_shape==="triangle"?"triangle":"circle"
     result.tone=["light","red"].indexOf(result.tone)>=0?result.tone:"dark"
+    result.blade_pattern=result.blade_pattern==="alternating" && result.blades!==null && result.blades%2===0?"alternating":"uniform"
     result.paintKey=String(series).replace(/[^a-z0-9_]/g,"")+"_"+index
     result.kind=kind
     return result
@@ -29,22 +30,24 @@ function point(angle,radius) {
 function contour(p) {
     // Sweep is independent of blade pitch: dense 11/13-blade rotors must
     // retain curved vanes instead of collapsing into almost radial spokes.
-    return p.shape==="straight"?{sweep:4,lead:.32,trail:.32,root:.25}
-        :p.shape==="wide"?{sweep:34,lead:.35,trail:.34,root:.23}
-        :p.shape==="paired"?{sweep:34,lead:.31,trail:.30,root:.18}
-        :p.shape==="claw"?{sweep:36,lead:.33,trail:.31,root:.20}
-        :{sweep:34,lead:.28,trail:.28,root:.20}
+    if(p.blade_variant==="dispersion")return {sweep:44,lead:.46,trail:.33,root:.30}
+    if(p.blade_variant==="traditional")return {sweep:48,lead:.27,trail:.25,root:.20}
+    return p.shape==="straight"?{sweep:4,lead:.36,trail:.33,root:.32}
+        :p.shape==="wide"?{sweep:48,lead:.46,trail:.35,root:.28}
+        :p.shape==="paired"?{sweep:58,lead:.37,trail:.34,root:.23}
+        :p.shape==="claw"?{sweep:46,lead:.43,trail:.32,root:.27}
+        :{sweep:52,lead:.35,trail:.30,root:.24}
 }
 
 function blade(p) {
-    var pitch=360/p.blades,hub=Math.max(.45,p.hub_ratio*3*.90),g=contour(p),s=g.sweep
+    var pitch=360/p.blades,hub=Math.max(.45,p.hub_ratio*3*.88),g=contour(p),s=g.sweep
     if(p.kind==="blower" || p.shape==="radial")
         return "M"+point(-pitch*.19,Math.max(1.15,hub))+"L"+point(-pitch*.39,2.60)
             +"Q"+point(0,2.72)+" "+point(pitch*.30,2.54)+"L"+point(pitch*.17,Math.max(1.15,hub))+"Z"
     return "M"+point(-pitch*g.root,hub)
-        +"C"+point(-s*.25-pitch*.10,1.15)+" "+point(-s*.90-pitch*(g.lead+.07),1.85)+" "+point(-s-pitch*g.lead,2.52)
-        +"Q"+point(-s+pitch*.02,2.78)+" "+point(-s+pitch*g.trail,2.50)
-        +"C"+point(-s*.85+pitch*(g.trail+.04),1.85)+" "+point(-s*.20+pitch*.25,1.14)+" "+point(pitch*g.root,hub)+"Z"
+        +"C"+point(-s*.18-pitch*.18,1.32)+" "+point(-s*.85-pitch*(g.lead+.04),2.12)+" "+point(-s-pitch*g.lead,2.55)
+        +"Q"+point(-s-pitch*.05,2.73)+" "+point(-s+pitch*g.trail,2.54)
+        +"C"+point(-s*.60+pitch*(g.trail+.08),2.03)+" "+point(-s*.06+pitch*.29,1.23)+" "+point(pitch*g.root,hub)+"Z"
 }
 
 function fanPalette(p) {
@@ -54,7 +57,7 @@ function fanPalette(p) {
         ? {rim:"#686c72",disk:"#302d33",blade:"#b9555d",hub:"#582f38",edge:"#c78186",ridge:"#d48d92",shade:"#743842",light:"#d37b80"}
         :p.tone==="light"
         ? {rim:"#a6b6be",disk:"#637684",blade:"#d3dde2",hub:"#bdcbd3",edge:"#eef3f6",ridge:"#a4b6c2",shade:"#acbfca",light:"#eef3f6"}
-        : {rim:"#738795",disk:"#253440",blade:"#586c7b",hub:"#344450",edge:"#8297a5",ridge:"#91a3af",shade:"#3c4f5e",light:"#738b9c"}
+        : {rim:"#48535b",disk:"#1f262c",blade:"#45515a",hub:"#343d44",edge:"#63727d",ridge:"#809099",shade:"#2b343c",light:"#5b6974"}
 }
 
 function tipArc(start,end,color) {
@@ -65,6 +68,8 @@ function tipArc(start,end,color) {
 function rotor(p,c) {
     c=fanPalette(p)
     if(p.hub_tone==="silver"){c.hub="#bdc9d0";c.edge="#e1e8ed"}
+    else if(p.hub_tone==="dark"){c.hub="#343d44";c.edge="#63727d"}
+    else if(p.hub_tone==="light"){c.hub="#e1e6e8";c.edge="#f0f3f4"}
     var out="",count=p.blades
     if(count!==null && p.shape!=="neutral") {
         // A small static SVG paint gives the curved plastic a raised face.
@@ -72,8 +77,19 @@ function rotor(p,c) {
         var paint="fan-leaf-"+p.paintKey
         out+='<defs><linearGradient id="'+paint+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c.shade+'"/><stop offset=".38" stop-color="'+c.blade+'"/><stop offset=".62" stop-color="'+c.light+'"/><stop offset="1" stop-color="'+c.shade+'"/></linearGradient></defs>'
         var path=blade(p)
+        // TORX/TORX 2.0's confirmed 7+7 alternating leaves remain fourteen
+        // blades. The wider dispersion and narrow traditional leaves are two
+        // static contours, not extra spokes or additional moving layers.
+        var alternating=p.blade_pattern==="alternating" && count%2===0 && p.kind!=="blower"
+        var leaves=[]
+        if(alternating)for(var variant=0;variant<2;variant++) {
+            var variantProfile={}
+            Object.keys(p).forEach(function(key){variantProfile[key]=p[key]})
+            variantProfile.blade_variant=variant===0?"dispersion":"traditional"
+            leaves.push(blade(variantProfile))
+        }
         for(var i=0;i<count;i++) {
-            out+='<path class="hardware-fan-blade" d="'+path+'" transform="rotate('+(i*360/count)+')" fill="url(#'+paint+')"/>'
+            out+='<path class="hardware-fan-blade" d="'+(alternating?leaves[i%2]:path)+'" transform="rotate('+(i*360/count)+')" fill="url(#'+paint+')"/>'
             if(p.shape==="claw") {
                 // The documented surface ridges stay on the leaf, never
                 // become extra blades or a second full-size rotating plane.

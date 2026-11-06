@@ -1023,7 +1023,7 @@ FAN_UPDATES = {'asrock_steel_legend': {'model_ids': ('asrock-steel-legend-7800xt
                    'hub_ratio': 0.3,
                    'outer_ring': True,
                    'fans': ({'direction': 1, 'blades': 11},
-                            {'direction': -1, 'blades': 13, 'tone': 'light'},
+                            {'direction': -1, 'blades': 13, 'tone': 'dark'},
                             {'direction': 1, 'blades': 11}),
                    'source_url': 'https://www.asrock.com/Graphics-Card/photo/Radeon%20RX%207900%20XTX%20Taichi%2024GB%20OC%28L2%29.png',
                    'evidence': 'official_front_view',

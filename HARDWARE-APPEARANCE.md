@@ -27,6 +27,13 @@ symbol. The reviewed Acer BiFrost combines a small left blower and a right axial
 fan; reviewed passive cards have no fan. Memory designs distinguish exposed
 boards, low heatspreaders, taller enclosures and physical diffuser covers.
 These shapes do not introduce lighting effects or report the current LED state.
+Miniature uses a shallow top/side projection and a narrow static shadow, keeping
+documented card thickness differences without enlarging the top into a slab.
+The fan plane stays circular. Modern fan faces use long, asymmetric curved
+leaves; the reviewed older TORX models retain seven wide and seven narrow
+alternating leaves. Rotor and cap finishes are separate: for example, blue
+B580 TITAN has light leaves with dark caps, while its TITAN Luna version keeps
+light caps. RDNA3 and RDNA4 Taichi center-fan paint is also exact-model data.
 Choosing a version changes
 the draft and shared preview; the existing top-bar Apply action persists it.
 The source-export tools include a synthetic offscreen comparison renderer,

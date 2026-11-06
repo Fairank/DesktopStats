@@ -22,10 +22,11 @@ function palette(state) {
     return colors
 }
 
-function shadow(g) {
+function shadow(g, depth) {
     const x=g.x,y=g.y,b=y+g.h,e=x+g.w
-    return Solid.p("M"+(x+.3)+" "+(b+.15)+"L"+(e+.8)+" "+(b-.3)+"L"+(e+1.1)+" "+(b+.9)
-        +"L"+(x+1.3)+" "+(b+1.35)+"Z", "#182735", .15)
+    const dx=.20+depth*.35,dy=.22+depth*.20
+    return Solid.p("M"+(x+.25)+" "+(b+.16)+"L"+(e+dx)+" "+(b+.04)
+        +"L"+(e+dx+.18)+" "+(b+dy)+"L"+(x+.60)+" "+(b+dy+.16)+"Z", "#182735", .09)
 }
 
 function fan(cx, cy, radius, colors) {
@@ -94,11 +95,12 @@ function gpu(state, colors) {
     if(g.fan_y)g.fan_y=g.fan_y.map(function(value){return value+.75-.3*.51})
     const x=g.x,y=g.y,e=x+g.w,b=y+g.h
     const depth=Board.depth(state,g)
-    let result=shadow(g)+Board.base(state,g,colors)
-        +Solid.p("M"+(x+.7)+" "+y+"L"+(x+.7+depth)+" "+(y-depth)+"H"+(e+depth)+"L"+e+" "+y+"Z",colors.caseTop)
-        +Solid.p("M"+(e-.2)+" "+(y+.3)+"L"+(e+depth)+" "+(y-depth)+"V"+(b-depth)+"L"+(e-.2)+" "+(b+.1)+"Z",colors.side)
+    const rise=depth*.56
+    let result=shadow(g,depth)+Board.base(state,g,colors)
+        +Solid.p("M"+(x+.7)+" "+(y+.06)+"L"+(x+.7+depth)+" "+(y-rise)+"H"+(e+depth)+"L"+e+" "+(y+.06)+"Z",colors.caseTop)
+        +Solid.p("M"+(e-.08)+" "+(y+.16)+"L"+(e+depth)+" "+(y-rise)+"V"+(b-rise-.08)+"L"+(e-.08)+" "+(b-.03)+"Z",colors.side)
         +Solid.underlay(state,g,colors)+Solid.front(state,g,colors)
-    result+=Solid.p("M"+(x+.7+depth)+" "+(y-depth+.22)+"H"+(e+depth-.5),"none",.65,colors.edge,.25)
+    result+=Solid.p("M"+(x+.7+depth)+" "+(y-rise+.10)+"H"+(e+depth-.35),"none",.50,colors.edge,.12)
     const cy=y+g.h*.51
     if(state.style==="gpu_blower"&&state.fan_count===1) {
         result+=Solid.turbine(g.centers.length?g.centers[0]:e-4.5,cy,Math.min(3.5,g.h*.37),colors)

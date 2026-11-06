@@ -637,6 +637,7 @@ FAN_UPDATES = {
         'blades': 9,
         'shape': 'wide',
         'hub_ratio': 0.34,
+        'hub_tone': 'dark',
         'tone': 'light',
         'outer_ring': False,
         'evidence': 'official_front_view',
@@ -847,9 +848,12 @@ VERSION_FAMILIES = ({'kind': 'gpu',
                 'label': 'SPARKLE Intel Arc B580 TITAN Luna OC 12GB',
                 'visual_relation': 'shared',
                 'source_urls': ('https://www.sparkle.com.tw/files/20250116155909862.pdf',),
-                'overrides': {'shroud_tone': 'light', 'fan_tone': 'light'},
+                'overrides': {'shroud_tone': 'light', 'fan_tone': 'light',
+                              'fan_profile': {'hub_tone': 'light'}},
                 'notes': 'Official photo inspected: white version of the three-fan 315x117x44mm TITAN '
-                         '2.2-slot enclosure; same HDMI+3DP bracket and single 8pin socket. No PCB colour '
+                         '2.2-slot enclosure; its three white hub caps differ from the blue TITAN black '
+                         'caps and require an exact-version light hub override. Same HDMI+3DP bracket '
+                         'and single 8pin socket. No PCB colour '
                          'or internal geometry is inferred.'},
                {'model_id': 'sparkle-b580-roc-luna-12g-oc-ultra',
                 'aliases': ('SB580RW-12GOC', 'SPARKLE Intel Arc B580 ROC Luna OC Ultra 12GB'),

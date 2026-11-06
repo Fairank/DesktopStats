@@ -75,11 +75,13 @@ function memoryColors(state,input) {
 
 function depth(state,g) {
     var row=profile(state),size=row && row.dimensions_mm
-    var value=size && typeof size.thickness==="number" && typeof size.height==="number" && size.height>0
-        ? g.h*size.thickness/size.height*.45:1.45
-    // A shallow illustration projection follows documented card thickness;
-    // it never skews the circular fan plane or exceeds the 24-unit canvas.
-    return Math.max(.55,Math.min(2.05,23.72-g.x-g.w,value))
+    var known=size && typeof size.thickness==="number" && Number.isFinite(size.thickness) && size.thickness>0
+        && typeof size.height==="number" && Number.isFinite(size.height) && size.height>0
+    var value=known ? g.h*size.thickness/size.height*.21:.48
+    // Shallow perspective keeps the sourced thickness/height distinction without
+    // turning the upper edge into another full panel. This is artwork projection,
+    // not a slot or dimension measurement; the circular front plane is untouched.
+    return Math.max(0,Math.min(1.08,23.72-g.x-g.w,Math.max(.24,value)))
 }
 
 function base(state,g,c) {
