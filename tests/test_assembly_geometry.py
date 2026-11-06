@@ -207,9 +207,9 @@ class AssemblyGeometryTests(unittest.TestCase):
         renderer.draw.assert_called_once_with(1200,900,yaw=-80.,pitch=12.,zoom=.9,
             exploded=True,phase=35.,dark=True,focus='cpu')
 
-    def test_all_24_case_families_keep_source_dimensions_and_no_installed_fan_guess(self):
+    def test_all_64_cases_keep_source_dimensions_and_no_installed_fan_guess(self):
         from chassis_catalog import CASES
-        self.assertEqual(len(CASES),24)
+        self.assertEqual(len(CASES),64)
         for case in CASES:
             scene=build_scene({'case':case})
             self.assertEqual(scene.dimensions,tuple(case['dimensions_mm'][key] for key in ('width','height','depth')))
@@ -221,6 +221,25 @@ class AssemblyGeometryTests(unittest.TestCase):
         self.assertEqual(scene.metadata['memory_count'],16)
         self.assertEqual(scene.metadata['memory_rendered_count'],8)
         self.assertEqual(sum(m.name=='ram-pcb' for m in scene.meshes),8)
+
+    def test_open_frame_does_not_gain_enclosing_walls_or_top_vents(self):
+        scene=build_scene({'case':{'layout':'open_frame','panels':{'left':'open','front':'open'}}})
+        names={mesh.name for mesh in scene.meshes}
+        self.assertIn('open-frame-tray',names)
+        self.assertTrue(names.isdisjoint(('case-back','case-right','front-panel','left-panel','top-vent','psu-shroud')))
+
+    def test_glass_roof_and_pillarless_construction_keep_their_open_corner(self):
+        scene=build_scene({'case':{'panels':{'top':'glass'},'features':['pillarless_glass_corner']}})
+        self.assertEqual(sum(m.name=='case-upright' for m in scene.meshes),3)
+        self.assertTrue(any(m.name=='top-glass' and m.color[3]<1 for m in scene.meshes))
+        self.assertFalse(any(m.name=='top-vent' for m in scene.meshes))
+
+    def test_slim_case_and_upper_power_shroud_keep_physical_construction(self):
+        scene=build_scene({'case':{'dimensions_mm':{'width':84,'height':244,'depth':217},'layout':'compact'}})
+        self.assertEqual(scene.dimensions,(84,244,217))
+        top=build_scene({'case':{'features':['top_psu_shroud']}})
+        self.assertFalse(any(m.name=='psu-shroud' for m in top.meshes))
+        self.assertGreater(next(m.position[1] for m in top.meshes if m.name=='top-psu-shroud'),0)
 
 
 if __name__=='__main__':unittest.main()

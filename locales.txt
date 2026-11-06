@@ -917,3 +917,25 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 显卡风扇|顯示卡風扇|GPU fans|グラフィックカードのファン|그래픽 카드 팬|GPU-Lüfter|Ventilateurs du GPU|Ventiladores de la GPU
 风扇转速不可用，保持静止|風扇轉速無法取得，保持靜止|RPM unavailable; fans remain still|回転数を取得できないため停止表示|RPM을 사용할 수 없어 정지 상태 유지|Drehzahl nicht verfügbar; Lüfter bleiben stehen|Régime indisponible ; ventilateurs immobiles|RPM no disponibles; ventiladores inmóviles
 插画配色；每套型号目录和读数相同。|插畫配色；每套型號目錄和讀數相同。|Illustrative colors; every style shares the same models and readings.|イラスト配色。全スタイルで機種一覧と測定値は共通です。|일러스트 색상입니다. 모든 스타일은 동일한 모델과 측정값을 사용합니다.|Illustrative Farben; alle Stile verwenden dieselben Modelle und Messwerte.|Couleurs illustratives ; tous les styles partagent les mêmes modèles et mesures.|Colores ilustrativos; todos los estilos comparten modelos y lecturas.
+品牌筛选|品牌篩選|Filter by brand|ブランドで絞り込み|브랜드 필터|Nach Marke filtern|Filtrer par marque|Filtrar por marca
+全部品牌|全部品牌|All brands|すべてのブランド|모든 브랜드|Alle Marken|Toutes les marques|Todas las marcas
+机箱不支持独立显卡安装。|機殼不支援獨立顯示卡安裝。|This case does not support a discrete GPU.|このケースは独立したグラフィックカードの搭載に対応していません。|이 케이스는 외장 그래픽 카드 장착을 지원하지 않습니다.|Dieses Gehäuse unterstützt keine separate Grafikkarte.|Ce boîtier ne permet pas d'installer une carte graphique dédiée.|Esta caja no admite una tarjeta gráfica dedicada.
+机箱仅支持半高扩展卡。|機殼僅支援半高擴充卡。|This case only supports low-profile expansion cards.|このケースはロープロファイル拡張カードのみ対応です。|이 케이스는 로우 프로파일 확장 카드만 지원합니다.|Dieses Gehäuse unterstützt nur Low-Profile-Erweiterungskarten.|Ce boîtier accepte uniquement les cartes d'extension au format bas.|Esta caja solo admite tarjetas de expansión de perfil bajo.
+// PC appearance follows the existing hardware styles by default.
+整机外观|整機外觀|PC appearance|PCの外観|PC 외관|PC-Darstellung|Apparence du PC|Aspecto del PC
+跟随顶部栏|跟隨頂部欄|Follow top bar|トップバーに合わせる|상단 표시줄 따르기|Obere Leiste übernehmen|Suivre la barre supérieure|Seguir la barra superior
+默认跟随顶部栏，也可单独选择。|預設跟隨頂部欄，也可獨立選擇。|Follows the top bar by default, or choose a separate style.|既定ではトップバーに合わせます。個別にも選択できます。|기본적으로 상단 표시줄을 따르며 별도 스타일을 선택할 수도 있습니다.|Standardmäßig die obere Leiste übernehmen oder einen eigenen Stil wählen.|Suit la barre supérieure par défaut ; un style distinct peut être choisi.|Sigue la barra superior por defecto; también puedes elegir un estilo independiente.
+整机外观设置不正确|整機外觀設定不正確|Invalid PC appearance setting|PCの外観設定が無効です|PC 외관 설정이 잘못되었습니다|Ungültige PC-Darstellungseinstellung|Réglage d’apparence du PC invalide|Ajuste de aspecto del PC no válido
+机箱|機殼|Case|ケース|케이스|Gehäuse|Boîtier|Caja
+单击部件查看状态|點選元件查看狀態|Click a component to inspect it|部品をクリックして状態を確認|부품을 클릭하여 상태 확인|Komponente anklicken, um ihren Zustand zu sehen|Cliquez sur un composant pour voir son état|Haz clic en un componente para ver su estado
+实时状态|即時狀態|Live status|現在の状態|실시간 상태|Aktueller Zustand|État actuel|Estado actual
+选中部件|選取元件|Selected component|選択した部品|선택한 부품|Ausgewählte Komponente|Composant sélectionné|Componente seleccionado
+功率|功率|Power|電力|전력|Leistung|Puissance|Potencia
+主板规格|主機板規格|Board format|基板の規格|보드 규격|Mainboardformat|Format de carte mère|Formato de placa base
+宽 × 高 × 深|寬 × 高 × 深|Width × Height × Depth|幅 × 高さ × 奥行き|너비 × 높이 × 깊이|Breite × Höhe × Tiefe|Largeur × Hauteur × Profondeur|Ancho × Alto × Fondo
+参考尺寸|參考尺寸|Reference size|参考サイズ|참고 크기|Referenzgröße|Dimensions indicatives|Tamaño de referencia
+风扇转速为板卡汇总读数。|風扇轉速為板卡彙總讀數。|Fan RPM is the card's aggregate reading.|ファン回転数はカード全体の集約値です。|팬 RPM은 그래픽 카드의 집계 측정값입니다.|Die Lüfterdrehzahl ist ein zusammengefasster Kartenwert.|Le régime des ventilateurs est une mesure agrégée de la carte.|Las RPM son una lectura agregada de la tarjeta.
+内存读数为整机合计。|記憶體讀數為整機合計。|Memory readings cover the whole PC.|メモリの測定値はPC全体の合計です。|메모리 측정값은 PC 전체의 합계입니다.|Die Speicherwerte gelten für den gesamten PC.|Les mesures de mémoire concernent l’ensemble du PC.|Las lecturas de memoria corresponden al PC completo.
+未提供此部件的独立传感器读数。|未提供此元件的獨立感測器讀數。|No separate sensor reading was provided for this component.|この部品専用のセンサー値は取得できていません。|이 부품의 개별 센서 측정값은 제공되지 않았습니다.|Für diese Komponente liegt kein eigener Sensorwert vor.|Aucune mesure de capteur distincte n’est fournie pour ce composant.|No se proporcionó una lectura de sensor independiente para este componente.
+桌面 3D 检视|桌面 3D 檢視|Desktop 3D inspection|デスクトップ3D検査|데스크톱 3D 살펴보기|3D-Desktopansicht|Inspection 3D du bureau|Inspección 3D del escritorio
+此屏幕正在运行全屏应用，暂不打开三维检视。|此螢幕正在執行全螢幕應用程式，暫不開啟三維檢視。|This screen has a fullscreen app; 3D inspection will stay closed.|この画面では全画面アプリが動作中のため、3D検査を開きません。|이 화면에서 전체 화면 앱이 실행 중이므로 3D 살펴보기를 열지 않습니다.|Auf diesem Bildschirm läuft eine Vollbildanwendung; die 3D-Ansicht bleibt geschlossen.|Une application en plein écran est active sur cet écran ; l’inspection 3D reste fermée.|Hay una aplicación a pantalla completa en esta pantalla; la inspección 3D permanecerá cerrada.

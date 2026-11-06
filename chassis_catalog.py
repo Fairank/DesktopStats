@@ -13,7 +13,7 @@ from copy import deepcopy
 import re
 import unicodedata
 
-CATALOG_VERSION = 1
+CATALOG_VERSION = 2
 SOURCES_REVIEWED = "2026-11-07"
 _ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z", re.ASCII)
 _FORM_IDS = {"ATX": "atx", "Micro-ATX": "micro_atx", "Mini-ITX": "mini_itx",
@@ -205,6 +205,13 @@ _CASES = (
            _mount("bottom", 3, 120), _mount("bottom", 2, 140, 160), _mount("rear", 1, 120)),
           "官方现行网页 400 mm 与另一官方数据表 380 mm 不一致；未确认配置前不填单一限长。"),
 )
+from chassis_catalog_group_a import records as _group_a
+from chassis_catalog_group_b import records as _group_b
+from chassis_catalog_group_c import records as _group_c
+
+_CASES += _group_a(_case, _mount, _ATX, _EATX)
+_CASES += _group_b(_case, _mount, _ATX, _EATX)
+_CASES += _group_c(_case, _mount, _ATX, _EATX)
 _BY_ID = {row["id"]: row for row in _CASES}
 # A detached export is offered for catalog tooling. Runtime getters use the
 # private records, so an accidental caller mutation cannot corrupt later views.

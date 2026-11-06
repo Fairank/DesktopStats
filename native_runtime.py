@@ -285,6 +285,9 @@ class Runtime(QObject):
 
     def clear_stale(self):
         self.controller.expire_readings()
+        inspector=getattr(self,"_assembly_window",None)
+        if inspector is not None:
+            inspector.update_readings()
 
     def maybe_start_cpu_temperature(self):
         if self.shutting_down:
@@ -350,6 +353,10 @@ class Runtime(QObject):
         set_action_icon(action, "activity")
         action.setEnabled(self.controller._saved.get("top_bar", {}).get("enabled", False))
         action.triggered.connect(lambda: self.top_bar.focus_details())
+        action = menu.addAction(tr("桌面 3D 检视"))
+        action.setObjectName("openAssemblyDesktop")
+        set_action_icon(action, "gpu")
+        action.triggered.connect(self.controller.openAssemblyView)
         menu.addSeparator()
         for field, label in (("visible", "显示桌面组件"), ("locked", "锁定位置")):
             action = menu.addAction(tr(label))
@@ -1192,6 +1199,13 @@ class Runtime(QObject):
             if target is None:
                 self.controller.set_status("所选屏幕不可用", error=True)
                 return
+            identifier = self.top_bar.adapter.screen_identity(target).native_id
+            refresh = getattr(self.top_bar,"_read_foreground_visibility",None)
+            if callable(refresh):refresh()
+            if identifier in getattr(self.top_bar,"_foreground_hidden_screens",()):
+                self.controller.set_status("此屏幕正在运行全屏应用，暂不打开三维检视。",error=True)
+                return
+            activate = foreground_fullscreen() is False
             current = self._assembly_window
             if current is not None:
                 current.synchronize(specification)
@@ -1213,7 +1227,10 @@ class Runtime(QObject):
             if current is None:
                 self._assembly_window = window
                 window.closed.connect(lambda: setattr(self, "_assembly_window", None))
-            window.showNormal();window.raise_();window.activateWindow()
+            window.setAttribute(Qt.WA_ShowWithoutActivating,not activate)
+            window.showNormal()
+            if activate:
+                window.raise_();window.activateWindow()
         except Exception:
             if window is not None:
                 window.close()

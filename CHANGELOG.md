@@ -1,5 +1,23 @@
 # Changes
 
+## 0.33.0-preview.1
+
+- Expand the source-linked chassis catalog from 24 to 64 cases across 18 brands
+  and six layouts. Keep every saved model ID and the unverified-firmware fallback.
+- Add a local brand filter without changing the selected case or settings until
+  a model is chosen. Preserve static defaults and on-demand resource ownership.
+- Draw glass/solid roofs, pillarless corners, open-frame wings and standoffs,
+  carry handles/straps, mesh bands, wood frames, blank status screens and stands.
+  Preserve 84 mm slim-case dimensions and report no-GPU/low-profile restrictions;
+  never shrink or hide the selected GPU to manufacture a fit.
+- Keep original noncommercial model licensing and manufacturer source links.
+- Match the case and its components to all 13 hardware illustration styles,
+  following the bar by default or selected independently. Preserve dimensions
+  and rotor feedback; keep expressions exclusive to the two smile styles.
+- Add a direct desktop-inspector tray entry and click selection independent of
+  camera focus. Show selected-component status from existing, freshness-checked
+  readings without starting extra sensors; retain selected-screen game avoidance.
+
 ## 0.32.0-preview.1
 
 - Remove the visible desktop-widget corner grip while preserving corner resize

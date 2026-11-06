@@ -162,6 +162,16 @@ def _check(report, output):
         assert scene.meshes,"Missing optional assembly geometry"
         report["assembly_meshes"]=len(scene.meshes)
         report["checks"].append("assembly-geometry-no-graphics")
+        from chassis_catalog import coverage
+        from top_bar_config import HARDWARE_ICON_STYLES
+        report["assembly_cases"]=coverage()["cases"]
+        report["assembly_styles"]=len(HARDWARE_ICON_STYLES)
+        assert report["assembly_cases"]>=64 and report["assembly_styles"]==13
+        for style in HARDWARE_ICON_STYLES:
+            styled=copy.deepcopy(assembly);styled['visual_style']=style
+            result=build_scene(styled)
+            assert result.dimensions==scene.dimensions and result.metadata['visual_style']==style
+        report["checks"].append("assembly-style-catalog-no-graphics")
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

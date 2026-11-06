@@ -330,9 +330,11 @@ def build_scene(spec=None):
     is interpreted as an installed case fan.
     """
     spec=spec if isinstance(spec,dict) else {};case=spec.get('case') or {};dims=case.get('dimensions_mm') or {}
-    w=number(dims.get('width'),230,120,650);h=number(dims.get('height'),470,150,900);d=number(dims.get('depth'),460,150,900)
+    w=number(dims.get('width'),230,60,800);h=number(dims.get('height'),470,150,900);d=number(dims.get('depth'),460,150,900)
     meshes=[];steel=color(case.get('color'),'#4d5965');edge=color('#a9b8c4');dark=color('#25313e');green=color('#2f5960');gold=color('#d7b36d')
     features=case.get('features') or []
+    open_frame=case.get('layout')=='open_frame'
+    winged=open_frame and 'winged_open_frame' in features
     corner='curved_front_glass' if 'curved_front_glass' in features else 'angular_glass_corner' if 'angular_glass_corner' in features else ''
     cut=min(w*.23,d*.18) if corner else 0.
     def add(name,vertices,tone,position=(0,0,0),component='case',**kw):
@@ -343,7 +345,9 @@ def build_scene(spec=None):
     body_h=h-16;body_y=8;bottom=-h/2+16
     for x in (-(w-rail)/2,(w-rail)/2):
         for z in (-(d-rail)/2,(d-rail)/2):
-            if not(corner and x<0 and z>0):cube('case-upright',(rail,body_h,rail),(x,body_y,z))
+            if (not open_frame and not((corner or 'pillarless_glass_corner' in features)
+                    and x<0 and z>0)):
+                cube('case-upright',(rail,body_h,rail),(x,body_y,z))
     for y in (bottom+rail/2,h/2-rail/2):
         for z in (-(d-rail)/2,(d-rail)/2):cube('case-width-rail',(w-cut if corner and z>0 else w,rail,rail),(cut/2 if corner and z>0 else 0,y,z))
         for x in (-(w-rail)/2,(w-rail)/2):cube('case-depth-rail',(rail,rail,d-cut if corner and x<0 else d),(x,y,-cut/2 if corner and x<0 else 0))
@@ -351,9 +355,21 @@ def build_scene(spec=None):
         footprint=((-w/2,-d/2),(w/2,-d/2),(w/2,d/2),(-w/2+cut,d/2),(-w/2,d/2-cut))
         add('case-bottom',rotate_vertices(extrude(footprint,3),'down'),dark,(0,bottom+1.5,0))
     else:cube('case-bottom',(w,3,d),(0,bottom+1.5,0),dark)
-    cube('case-back',(w,body_h,2),(0,body_y,-d/2+1),dark)
-    cube('case-right',(2,body_h,d),(w/2-1,body_y,0),steel)
+    if not open_frame:
+        cube('case-back',(w,body_h,2),(0,body_y,-d/2+1),dark)
+        cube('case-right',(2,body_h,d),(w/2-1,body_y,0),steel)
+    else:
+        if winged:
+            cube('open-frame-tray',(w*.45,body_h*.86,3),(0,body_y,-d*.10),steel)
+            for side in (-1,1):
+                for index in range(9):
+                    cube('hinged-wing-grid',(w*.22,2,4),(side*w*.37,-h*.36+index*h*.72/8,-d*.07),edge)
+                for at in (-.10,.10):cube('hinged-wing-edge',(4,h*.76,6),(side*w*(.37+at),0,-d*.07),steel)
+        else:cube('open-frame-tray',(3,body_h*.86,d*.80),(w*.36,body_y,-d*.04),steel)
+        for z in (-d*.37,d*.37):
+            cube('open-frame-support',(w*.65,rail,rail),(0,-h*.35,z),edge)
     panels=case.get('panels') or {};front=panels.get('front','mesh');left=panels.get('left','glass')
+    if open_frame and not winged:front='open'
     glass=color('#9fc2d0',alpha=.13)
     if left in ('glass','angled_glass'):
         cube('left-glass',(2,body_h-rail*2,d-rail*2-cut),(-w/2+1,body_y,-cut/2),glass,'panel')
@@ -368,7 +384,7 @@ def build_scene(spec=None):
         for i in range(13):cube('front-slat',(max(3,w/26),body_h-rail*2,5),(-w*.43+i*w*.86/12,body_y,d/2-2.5),color('#b89a77') if front=='wood' else edge)
     elif front=='mesh':
         for i in range(22):cube('front-vent',(w-rail*2,1.5,2),(0,body_y-body_h*.44+i*body_h*.88/21,d/2-1),edge)
-    else:cube('front-panel',(w-rail*2,body_h-rail*2,2),(0,body_y,d/2-1),steel)
+    elif front not in ('open',None):cube('front-panel',(w-rail*2,body_h-rail*2,2),(0,body_y,d/2-1),steel)
     if corner=='angular_glass_corner':
         vertices=box(cut*math.sqrt(2),h-rail*2,2);out=[];a=math.sqrt(.5)
         for n in range(0,len(vertices),6):
@@ -402,6 +418,59 @@ def build_scene(spec=None):
     if 'front_wood_strip' in features:cube('front-wood-strip',(w*.08,h-rail*2,4),(-w*.32,0,d/2+2),color('#b89a77'))
     if 'external_exoskeleton' in features:
         for x in (-w*.46,w*.46):cube('external-frame-upright',(11,h,14),(x,0,d*.46),edge)
+    if 'carry_handle' in features:
+        for z in (-d*.13,d*.13):cube('carry-handle-post',(8,14,7),(0,h/2+3,z),edge)
+        cube('carry-handle-grip',(10,7,d*.26+7),(0,h/2+10,0),dark)
+    if 'fabric_carry_straps' in features:
+        for at in (-d*.24,d*.24):
+            for index in range(8):
+                x=-w*.40+index*w*.80/7
+                cube('fabric-carry-strap',(w*.115,3,19),(x,h/2+7+16*(1-(x/(w*.45))**2),at),dark)
+    if 'side_glass_standoffs' in features:
+        for y in (-h*.37,h*.37):
+            for z in (-d*.37,d*.37):cube('glass-standoff',(w*.78,7,7),(0,y,z),edge)
+    if 'front_wood_frame' in features:
+        wood=color('#b49776')
+        for x in (-w*.45,w*.45):cube('wood-front-rim',(10,body_h*.92,5),(x,body_y,d/2+1),wood)
+        for y in (-h*.44,h*.46):cube('wood-front-rim',(w*.91,9,5),(0,y,d/2+1),wood)
+    if 'front_wood_panel' in features:
+        cube('wood-front-upper',(w*.90,h*.36,3),(0,h*.22,d/2+1),color('#aa8964'))
+    if 'nas_split_chamber' in features:
+        cube('nas-chamber-divider',(w-12,3,d-12),(0,-h*.04,0),steel)
+        cube('nas-front-seam',(w*.94,2,4),(0,-h*.01,d/2+2),dark)
+    if 'front_wood_io_trim' in features:
+        cube('wood-io-trim',(w*.12,h*.28,4),(w*.37,h*.29,d/2+2),color('#b49776'))
+    if 'side_status_screen' in features:
+        cube('side-status-frame',(4,h*.08,d*.23),(-w/2-1,-h*.32,d*.13),edge,'panel')
+        cube('side-status-off',(2,h*.065,d*.21),(-w/2-3,-h*.32,d*.13),dark,'panel')
+    if 'translucent_base' in features:
+        cube('translucent-stand',(w*.94,12,d*.90),(0,-h/2+6,0),color('#b9b0d4',alpha=.30),'panel')
+    if 'front_screen' in features:
+        cube('front-screen-frame',(w*.77,h*.16,4),(0,h*.27,d/2+1),edge)
+        cube('front-screen-off',(w*.73,h*.14,2),(0,h*.27,d/2+3),dark)
+    if 'side_bottom_mesh_band' in features:
+        for index in range(9):cube('side-lower-mesh',(2,1.3,d*.86),(-w/2-.3,-h*.43+index*h*.018,0),edge,'panel')
+    if 'vertical_front_light_strips' in features:
+        for x in (-w*.43,w*.43):cube('front-light-strip',(2.5,body_h*.9,2),(x,body_y,d/2+1),color('#9dc9d4'))
+    if 'top_bottom_light_strips' in features:
+        for y in (-h*.46,h*.46):cube('horizontal-light-strip',(w*.86,2.5,2),(0,y,d/2+1),color('#9dc9d4'))
+    if 'front_square_grid' in features:
+        for index in range(12):cube('front-grid-column',(1.2,body_h*.9,2),(-w*.43+index*w*.86/11,body_y,d/2+.5),steel)
+    if 'front_triangle_grid' in features or 'triangular_front_mesh' in features:
+        for side in (-1,1):
+            for index in range(7):
+                vertices=box(w*.48,1.5,2);out=[];angle=side*math.pi/7;co,si=math.cos(angle),math.sin(angle)
+                for n in range(0,len(vertices),6):
+                    for offset in (0,3):
+                        x,y,z=vertices[n+offset:n+offset+3];out.extend((co*x-si*y,si*x+co*y,z))
+                add('front-triangle-line',tuple(out),edge,(side*w*.23,body_y-body_h*.35+index*body_h*.7/6,d/2+1))
+    if 'front_diagonal_rails' in features:
+        for side in (-1,1):
+            vertices=box(w*.43,7,6);out=[];angle=side*math.pi/8;co,si=math.cos(angle),math.sin(angle)
+            for n in range(0,len(vertices),6):
+                for offset in (0,3):
+                    x,y,z=vertices[n+offset:n+offset+3];out.extend((co*x-si*y,si*x+co*y,z))
+            add('front-diagonal-rail',tuple(out),edge,(side*w*.23,-h*.20,d/2+2))
     if 'octagonal_front' in features:
         for sign in (-1,1):
             vertices=box(w*.30,7,6);out=[];angle=sign*math.pi/6;co,si=math.cos(angle),math.sin(angle)
@@ -410,15 +479,22 @@ def build_scene(spec=None):
                     x,y,z=vertices[n+offset:n+offset+3];out.extend((co*x-si*y,si*x+co*y,z))
             for yy in (-h*.44,h*.44):add('octagonal-frame',tuple(out),edge,(sign*w*.30,yy,d/2+3))
     # Top vent rails suggest the panel construction, never invented mounted fans.
-    for i in range(12):cube('top-vent',(w*.78,1.6,2),(0,h/2-.8,-d*.4+i*d*.8/11),edge)
+    if not open_frame:
+        top=panels.get('top','mesh')
+        if top=='glass':cube('top-glass',(w-rail*2,2,d-rail*2),(0,h/2-1,0),glass,'panel')
+        elif top=='solid':cube('top-panel',(w-rail*2,2,d-rail*2),(0,h/2-1,0),steel)
+        else:
+            for i in range(12):cube('top-vent',(w*.78,1.6,2),(0,h/2-.8,-d*.4+i*d*.8/11),edge)
     for x in (-w*.34,w*.34):
         for z in (-d*.34,d*.34):cube('case-foot',(23,12,30),(x,-h/2+6,z),dark)
     layout=case.get('layout','tower');dual=layout=='dual_chamber'
-    board_x=w*(.10 if dual else .36)
+    board_x=0 if winged else -h*.12 if 'nas_split_chamber' in features else w*(.10 if dual else .36)
     if dual:cube('rear-chamber-divider',(2,h-12,d-12),(w*.19,0,0),steel)
     if dual:
         cube('rear-chamber-shroud',(w*.28,h*.23,d*.44),(w*.34,-h*.32,-d*.25),dark)
-    elif layout not in ('compact','horizontal'):
+    elif 'top_psu_shroud' in features:
+        cube('top-psu-shroud',(w-12,h*.15,d-12),(0,h*.405,0),dark)
+    elif layout not in ('compact','horizontal','open_frame'):
         cube('psu-shroud',(w-12,h*.17,d-12),(0,-h*.405,0),dark)
     board=spec.get('board') or {};board_dims=board.get('dimensions_mm') or {}
     board_h=number(board_dims.get('height'),305,70,370);board_d=number(board_dims.get('width'),244,70,370)
@@ -532,11 +608,11 @@ def build_scene(spec=None):
     # Case layout changes pose, never component dimensions. Known ATX/GPU sizes
     # can protrude from an incompatible compact case instead of shrinking.
     vertical_gpu='vertical_gpu_mount' in features
-    if layout in ('vertical','horizontal') or vertical_gpu:
+    if layout in ('vertical','horizontal') or vertical_gpu or winged:
         transformed=[]
         def pose(p):
             x,y,z=p
-            return (x,z,-y) if layout=='vertical' else (y,-x,z)
+            return (z,y,-x) if winged else (x,z,-y) if layout=='vertical' else (y,-x,z)
         for mesh in meshes:
             if mesh.component in ('board','cpu','memory','gpu'):
                 if vertical_gpu and layout not in ('vertical','horizontal'):
@@ -564,6 +640,15 @@ def build_scene(spec=None):
               gpu_mount='vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
               board_layout_schematic=True,connector_positions_schematic=True,
               dimensions_verified=case.get('dimensions_verified') is True,cad_or_fit_guarantee=False)
+    from assembly_style import apply_colors,expression_vertices,resolve_style,style_for
+    visual_style=resolve_style(spec.get('visual_style'))
+    visual_policy=style_for(visual_style)
+    meshes=apply_colors(meshes,visual_style)
+    if visual_policy['expressions'] and panels.get('front')!='open':
+        meshes=(*meshes,Mesh('style-case-expression',expression_vertices((w,h,d)),
+                            visual_policy['ink']))
+    meta['visual_style']=visual_style
+    meta['decorative_expression']=visual_policy['expressions'] and any(m.name=='style-case-expression' for m in meshes)
     return Scene(tuple(meshes),(w,h,d),meta)
 
 

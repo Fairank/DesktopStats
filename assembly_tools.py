@@ -4,6 +4,7 @@ import copy
 from PySide6.QtCore import Property, Signal, Slot
 
 from assembly_spec import build_spec, component_fingerprint, fan_state, summary
+from assembly_config import style_choices
 from workspace_tools import WorkspaceTools
 
 
@@ -64,9 +65,13 @@ class AssemblyTools(WorkspaceTools):
         from chassis_catalog import choices
         return [dict(id="", label=self.tr("自动识别 / 参考机箱")), *choices()]
 
+    @Property("QVariantList", notify=assemblyCasesChanged)
+    def assemblyStyles(self):
+        return style_choices(self.tr)
+
     @Slot(str, "QVariant")
     def changeAssembly(self, field, selected):
-        if field not in ("case_model", "exploded", "fan_animation"):
+        if field not in ("case_model", "exploded", "fan_animation", "appearance_style"):
             return
         value = copy.deepcopy(self._draft)
         value["assembly"][field] = selected

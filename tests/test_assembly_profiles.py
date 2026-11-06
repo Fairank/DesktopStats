@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication
 
 from assembly_profiles import ProfileReader,bake_profiles,bounds,path_polygon
 from assembly_spec import build_spec
+from assembly_config import HARDWARE_ICON_STYLES
 from hardware_appearance import appearance_for
 from stats_config import DEFAULT
 from tests.test_hardware_cartoon import all_appearances
@@ -88,6 +89,36 @@ class AssemblyProfileTests(unittest.TestCase):
         spec=build_spec(data,config,dict(state='unavailable'),[])
         self.assertEqual(spec['gpu']['appearance']['id'],'asus-astral-5090')
         self.assertEqual(spec['gpu']['selection_source'],'manual')
+
+    def test_every_visual_style_keeps_the_same_hardware_geometry_and_case_identity_in_the_adapter(self):
+        config=copy.deepcopy(DEFAULT)
+        config['assembly']['case_model']='hyte-y60'
+        config['top_bar']['items']=[dict(metric='gpu_usage',prefs=dict(hardware_model='asus-astral-5090'))]
+        data=dict(cpu_name='Intel Core i7-13700KF',gpus={'0':dict(gpu_name='RTX 5090')})
+        modules=[dict(manufacturer='G.Skill',part_number='F4-3200C16D-16GTZR',form_factor='dimm')]
+        reference=None
+        for style in HARDWARE_ICON_STYLES:
+            with self.subTest(style=style):
+                config['assembly']['appearance_style']=style
+                baked=bake_profiles(build_spec(data,config,dict(state='unavailable'),modules),self.engine)
+                self.assertEqual(baked['visual_style'],style)
+                self.assertEqual(baked['case']['id'],'hyte-y60')
+                self.assertEqual(baked['gpu']['physical_fan_count'],4)
+                self.assertEqual([f['direction'] for f in baked['gpu']['fans']],[1,-1,1])
+                geometry={key:baked[key] for key in ('case','gpu','cpu','memory','board')}
+                if reference is None:reference=geometry
+                else:self.assertEqual(geometry,reference)
+
+    def test_slim_and_half_height_cases_report_mount_limits_without_hiding_the_actual_gpu(self):
+        config=copy.deepcopy(DEFAULT)
+        config['top_bar']['items']=[dict(metric='gpu_usage',prefs=dict(hardware_model='asus-astral-5090'))]
+        data=dict(gpus={'0':dict(gpu_name='RTX 5090')})
+        for identity,reason in (('inwin-chopin-max','no_slots'),('jonsbo-n4-black','low_profile')):
+            config['assembly']['case_model']=identity
+            spec=build_spec(data,config,dict(state='unavailable'),[])
+            self.assertIn(dict(kind='gpu_mount',state='unsupported',reason=reason),spec['checks'])
+            self.assertTrue(spec['gpu']['present'])
+            self.assertEqual(spec['gpu']['length_mm'],357.6)
 
 
 if __name__=='__main__':unittest.main()

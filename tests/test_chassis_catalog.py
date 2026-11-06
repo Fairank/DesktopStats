@@ -11,8 +11,8 @@ import chassis_catalog as catalog
 class ChassisCatalogTests(unittest.TestCase):
     def test_coverage_is_explicit_and_identical_for_every_style(self):
         result = catalog.coverage()
-        self.assertEqual(result["cases"], 24)
-        self.assertEqual(result["brands"], 14)
+        self.assertEqual(result["cases"], 64)
+        self.assertEqual(result["brands"], 18)
         self.assertFalse(result["complete_market"])
         self.assertEqual(result["verified_firmware_identities"], 0)
         self.assertEqual(result["geometry_accuracy"], "schematic")
@@ -37,7 +37,9 @@ class ChassisCatalogTests(unittest.TestCase):
                  "www.fractal-design.com", "hyte.com", "www.asus.com", "rog.asus.com",
                  "www.coolermaster.com", "thermaltakeusa.com", "phanteks.com", "www.bequiet.com",
                  "www.jonsbo.com", "www.antec.com", "www.montechpc.com", "uk.msi.com",
-                 "download.msi.com", "storage-asset.msi.com"}
+                 "download.msi.com", "storage-asset.msi.com", "www.msi.com", "legacy.coolermaster.com",
+                 "thermaltake.com", "www.deepcool.com", "deepcool.com", "www.silverstonetek.com",
+                 "device.report", "resources.mini-box.com", "www.in-win.com", "www.gigabyte.com", "download.gigabyte.com"}
         forms = {"atx", "micro_atx", "mini_itx", "e_atx", "mini_dtx", "dtx", "ssi_eeb", "ssi_ceb"}
         for choice in catalog.choices():
             row = catalog.get_case(choice["id"])
@@ -45,7 +47,7 @@ class ChassisCatalogTests(unittest.TestCase):
                 json.dumps(row, ensure_ascii=False, allow_nan=False)
                 self.assertTrue(catalog.valid_case_id(row["id"]))
                 self.assertEqual(set(row["dimensions_mm"]), {"width", "height", "depth"})
-                self.assertTrue(all(100 < x < 800 for x in row["dimensions_mm"].values()))
+                self.assertTrue(all(50 < x < 800 for x in row["dimensions_mm"].values()))
                 self.assertTrue(set(row["form_factors"]) <= forms)
                 self.assertEqual(row["geometry_accuracy"], "schematic")
                 self.assertEqual(row["sources_reviewed"], "2026-11-07")
@@ -93,7 +95,7 @@ class ChassisCatalogTests(unittest.TestCase):
                                  ("cooler-master-haf-700-evo", "front_round_display")):
             self.assertIn(feature, catalog.get_case(case_id)["features"])
         self.assertEqual({catalog.get_case(row["id"])["layout"] for row in catalog.choices()},
-                         {"tower", "dual_chamber", "compact", "vertical", "horizontal"})
+                         {"tower", "dual_chamber", "compact", "vertical", "horizontal", "open_frame"})
 
     def test_unverified_retail_names_and_generic_brand_strings_never_auto_match(self):
         for enclosure in ({"manufacturer": "ASUS", "version": "TUF Gaming GT502"},

@@ -187,11 +187,68 @@ class AssemblyPageTests(unittest.TestCase):
             source = (ROOT/filename).read_text(encoding="utf-8")
             keys.update(re.findall(r'(?:ui\.t|controller\.tr|self\.controller\.tr)\("([^"]+)"\)', source))
         keys.update(("自动识别 / 参考机箱", "参考机箱（未识别）", "处理器未识别", "显卡未识别",
+                     "跟随顶部栏", "整机外观设置不正确",
+                     "机箱", "单击部件查看状态", "实时状态", "选中部件", "功率", "主板规格",
+                     "宽 × 高 × 深", "参考尺寸", "风扇转速为板卡汇总读数。", "内存读数为整机合计。",
+                     "未提供此部件的独立传感器读数。", "桌面 3D 检视", "此屏幕正在运行全屏应用，暂不打开三维检视。",
+                     "机箱仅支持半高扩展卡。", "机箱不支持独立显卡安装。",
                      "内存型号未识别", "主板布局示意", "整机视图设置格式不正确", "机箱型号设置不正确",
                      "整机视图开关设置不正确"))
         for language in set(LANGUAGES)-{"zh-CN"}:
             for key in keys:
                 self.assertTrue(MESSAGES[language].get(key), (language,key))
+
+    def test_brand_filter_changes_only_picker_and_keeps_the_current_model_label(self):
+        self.show_assembly()
+        self.controller.changeAssembly('case_model','hyte-y60')
+        before=copy.deepcopy(self.controller.draft)
+        brand=self.find('assemblyBrandChoice');choice=self.find('assemblyCaseChoice')
+        brand.picked.emit('ASUS');self.app.processEvents()
+        rows=choice.property('model')
+        self.assertGreater(len(rows),1)
+        self.assertTrue(all(not row['id'] or row['brand']=='ASUS' for row in rows))
+        self.assertEqual(choice.property('displayText'),'HYTE Y60')
+        self.assertEqual(self.controller.draft,before)
+        brand.picked.emit('');self.app.processEvents()
+        self.assertEqual(len(choice.property('model')),len(self.controller.assemblyCases))
+
+    def test_style_choice_has_follow_and_every_bar_style_without_changing_the_bar_or_case(self):
+        from top_bar_config import HARDWARE_ICON_STYLES
+        self.show_assembly()
+        self.controller.changeAssembly('case_model','hyte-y60')
+        before=copy.deepcopy(self.controller.draft)
+        choice=self.find('assemblyStyleChoice')
+        self.assertEqual([r['id'] for r in choice.property('model')],['follow',*HARDWARE_ICON_STYLES])
+        self.assertEqual(choice.property('value'),'follow')
+        page=self.find('assemblyPageLoader').property('item');scroll=page.property('contentItem')
+        scroll.setProperty('contentY',max(0,scroll.property('contentHeight')-scroll.height()))
+        QTest.qWait(30)
+        choice.forceActiveFocus();QTest.keyClick(self.window,Qt.Key_End);QTest.keyClick(self.window,Qt.Key_Return)
+        QTest.qWait(30)
+        self.assertEqual(self.controller.assemblySummary['visual_style'],HARDWARE_ICON_STYLES[-1])
+        self.assertEqual(self.controller.draft['assembly']['case_model'],'hyte-y60')
+        self.assertEqual(self.controller.draft['top_bar'],before['top_bar'])
+        self.assertEqual(self.controller.scopeDirty,dict(desktop=False,preferences=True,topbar=False))
+        self.controller.change('language','en');self.app.processEvents()
+        self.assertEqual(choice.property('model')[0]['label'],'Follow top bar')
+        self.assertEqual(choice.property('value'),HARDWARE_ICON_STYLES[-1])
+        proof=os.environ.get('DESKTOP_STATS_ASSEMBLY_PAGE_PROOF')
+        if proof:
+            self.window.resize(720,600)
+            for _ in range(60):
+                QTest.qWait(10)
+                if self.window.property('layoutWidth')==720:break
+            self.assertEqual(self.window.property('layoutWidth'),720)
+            for language in ('zh-CN','de','fr','ja'):
+                self.controller.change('language',language);QTest.qWait(50)
+                scroll.setProperty('contentY',max(0,scroll.property('contentHeight')-scroll.height()))
+                QTest.qWait(30)
+                top=choice.mapToScene(QPointF(0,0))
+                self.assertGreaterEqual(top.x(),self.window.property('railWidth'))
+                self.assertLessEqual(top.x()+choice.width(),720)
+                self.assertGreaterEqual(top.y(),34)
+                self.assertLessEqual(top.y()+choice.height(),self.window.height()-72)
+                self.assertTrue(self.window.grabWindow().save(str(Path(proof)/f'assembly-style-choice-{language}.png')))
 
 
 if __name__ == "__main__":

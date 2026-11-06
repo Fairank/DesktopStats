@@ -5,9 +5,11 @@ import time
 
 from PySide6.QtCore import Qt, Signal, Slot, QUrl
 from PySide6.QtQml import QQmlComponent
-from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QLabel,QPushButton,QCheckBox,QComboBox)
+from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QPushButton,QCheckBox,QComboBox,QSizePolicy)
 
 from assembly_profiles import bake_profiles
+from assembly_config import HARDWARE_ICON_STYLES,style_choices
+from assembly_inspection import COMPONENT_LABELS,snapshot as inspection_snapshot
 from stats_config import ASSETS
 from top_bar_feedback import GPU_FAN_MAX_AGE
 
@@ -31,6 +33,7 @@ class AssemblyWindow(QWidget):
             from assembly_viewer import AssemblyViewport
             viewport_factory=AssemblyViewport
         self._geometry_key=None;self._last_fan={};self._spec=None;self._renderer_error=False
+        self.selected_component='all';self.inspection_state=None;self._inspection_columns=0
         self.setAttribute(Qt.WA_DeleteOnClose,True)
         self.setWindowTitle(controller.tr("整机视图")+" · Desktop Stats")
         self.resize(1080,780);self.setMinimumSize(760,520)
@@ -40,22 +43,61 @@ class AssemblyWindow(QWidget):
             +";} QPushButton,QComboBox{padding:7px 12px;border:1px solid "
             +("#52606e" if dark else "#c8d2db")+";border-radius:6px;} QPushButton:hover{background:"
             +("#34404c" if dark else "#e2eaf0")+";}")
-        layout=QVBoxLayout(self);layout.setContentsMargins(18,16,18,14);layout.setSpacing(12)
+        layout=QVBoxLayout(self);layout.setContentsMargins(18,16,18,14);layout.setSpacing(8)
         header=QHBoxLayout();self.title=QLabel();self.title.setTextFormat(Qt.PlainText)
+        self.title.setWordWrap(True);self.title.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
         self.title.setStyleSheet("font-size:19px;font-weight:600;")
         header.addWidget(self.title,1)
         self.focus_choice=QComboBox();self.focus_choice.setAccessibleName(controller.tr("查看部件"))
-        for label,key in (("整机","all"),("显卡","gpu"),("处理器","cpu"),("内存","memory"),("主板","board")):
+        for label,key in (("整机","all"),("显卡","gpu"),("处理器","cpu"),("内存","memory"),("主板","board"),("机箱","case")):
             self.focus_choice.addItem(controller.tr(label),key)
         header.addWidget(self.focus_choice)
         reset=QPushButton(controller.tr("重置视角"));header.addWidget(reset)
         layout.addLayout(header)
-        self.hint=QLabel(controller.tr("拖动旋转 · 滚轮缩放")+" · "+controller.tr("风扇按实际转速的 1/120 展示"))
+        self.hint=QLabel(controller.tr("拖动旋转 · 滚轮缩放")+" · "+controller.tr("单击部件查看状态")
+                        +" · "+controller.tr("风扇按实际转速的 1/120 展示"))
         self.hint.setWordWrap(True);layout.addWidget(self.hint)
+        style_row=QHBoxLayout();style_row.addWidget(QLabel(controller.tr("整机外观")))
+        self.style_choice=QComboBox();self.style_choice.setAccessibleName(controller.tr("整机外观"))
+        for row in style_choices(controller.tr):self.style_choice.addItem(row['label'],row['id'])
+        style_row.addWidget(self.style_choice);style_row.addStretch(1);layout.addLayout(style_row)
+        scene_row=QHBoxLayout();scene_row.setSpacing(16)
         self.viewport=viewport_factory(self);self.viewport.set_dark(dark)
-        layout.addWidget(self.viewport,1)
+        self.viewport.setMinimumHeight(240)
+        scene_row.addWidget(self.viewport,1)
+        inspector=QWidget();inspector.setObjectName('assemblyInspector')
+        inspector.setFixedWidth(244)
+        inspector_layout=QVBoxLayout(inspector);inspector_layout.setContentsMargins(0,0,0,0);inspector_layout.setSpacing(5)
+        inspector_layout.setAlignment(Qt.AlignTop)
+        inspector_header=QHBoxLayout()
+        self.inspection_heading=QLabel(controller.tr("实时状态"));self.inspection_heading.setStyleSheet('font-weight:600;')
+        self.inspection_heading.setWordWrap(True)
+        inspector_header.addWidget(self.inspection_heading);inspector_header.addStretch(1)
+        self.component_choice=QComboBox();self.component_choice.setObjectName('assemblyComponentChoice')
+        self.component_choice.setMaximumWidth(130)
+        self.component_choice.setAccessibleName(controller.tr("选中部件"))
+        for key,label in COMPONENT_LABELS.items():self.component_choice.addItem(controller.tr(label),key)
+        inspector_header.addWidget(self.component_choice);inspector_layout.addLayout(inspector_header)
         self.components=QLabel();self.components.setWordWrap(True);self.components.setTextFormat(Qt.PlainText)
-        layout.addWidget(self.components)
+        self.components.setObjectName('assemblySelectedIdentity');inspector_layout.addWidget(self.components)
+        self._inspection_grid=QGridLayout();self._inspection_grid.setContentsMargins(0,0,0,0)
+        self._inspection_grid.setHorizontalSpacing(18);self._inspection_grid.setVerticalSpacing(3)
+        self.inspection_rows=[]
+        for index in range(6):
+            cell=QWidget();cell.setMinimumWidth(0)
+            cell_layout=QHBoxLayout(cell);cell_layout.setContentsMargins(0,0,0,0);cell_layout.setSpacing(8)
+            label=QLabel();label.setWordWrap(True);label.setTextFormat(Qt.PlainText)
+            label.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
+            value=QLabel('—');value.setTextFormat(Qt.PlainText);value.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            value.setWordWrap(False);value.setMaximumWidth(150)
+            value.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.Preferred)
+            value.setObjectName('assemblyReading'+str(index));value.setStyleSheet('font-weight:600;font-size:13px;')
+            cell_layout.addWidget(label,1);cell_layout.addWidget(value)
+            self.inspection_rows.append((cell,label,value))
+        inspector_layout.addLayout(self._inspection_grid)
+        self.inspection_note=QLabel();self.inspection_note.setTextFormat(Qt.PlainText);self.inspection_note.setWordWrap(True)
+        self.inspection_note.setStyleSheet('font-size:11px;');inspector_layout.addWidget(self.inspection_note)
+        scene_row.addWidget(inspector);layout.addLayout(scene_row,1)
         tools=QHBoxLayout()
         self.exploded=QCheckBox(controller.tr("展开组件"));tools.addWidget(self.exploded)
         self.animate=QCheckBox(controller.tr("风扇随转速转动"));tools.addWidget(self.animate)
@@ -64,6 +106,10 @@ class AssemblyWindow(QWidget):
         layout.addLayout(tools)
         self.exploded.toggled.connect(lambda value:controller.changeAssembly("exploded",value))
         self.animate.toggled.connect(lambda value:controller.changeAssembly("fan_animation",value))
+        self.style_choice.currentIndexChanged.connect(
+            lambda _:controller.changeAssembly("appearance_style",self.style_choice.currentData()))
+        self.component_choice.currentIndexChanged.connect(self._choose_component)
+        self.viewport.componentSelected.connect(self._component_selected)
         reset.clicked.connect(self.viewport.reset_camera)
         self.focus_choice.currentIndexChanged.connect(lambda _:self.viewport.focus_component(self.focus_choice.currentData()))
         self.viewport.rendererError.connect(self._render_failed)
@@ -88,22 +134,27 @@ class AssemblyWindow(QWidget):
         if self._closing:return
         self._spec=copy.deepcopy(spec)
         geometry={key:spec[key] for key in ('case','gpu','cpu','memory','board')}
+        resolved=spec.get('visual_style','miniature')
+        if resolved not in HARDWARE_ICON_STYLES:resolved='miniature'
+        geometry['visual_style']=resolved
         signature=json.dumps(geometry,sort_keys=True,ensure_ascii=True)
         if signature!=self._geometry_key:
             baked=bake_profiles(spec,self.engine)
+            baked['visual_style']=resolved
             self.viewport.set_scene(baked);self._geometry_key=signature
         options=spec['options']
+        self.style_choice.blockSignals(True)
+        self.style_choice.setCurrentIndex(self.style_choice.findData(options.get('appearance_style','follow')))
+        self.style_choice.blockSignals(False)
         for control,field in ((self.exploded,'exploded'),(self.animate,'fan_animation')):
             control.blockSignals(True);control.setChecked(options[field]);control.blockSignals(False)
         self.viewport.set_exploded(options['exploded'])
         self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled and not self._renderer_error)
         self.title.setText(self.controller.tr(spec['case']['label']))
-        self.components.setText(" · ".join((self.controller.tr(spec['cpu']['label']),self.controller.tr(spec['gpu']['label']),
-            self.controller.tr("内存")+" "+str(spec['memory']['count'])+" "+self.controller.tr("条"))))
         self.update_readings()
 
     def update_readings(self):
-        if self._closing:return
+        if self._closing or not self.isVisible() or self.isMinimized():return
         self._last_fan=self.controller.assembly_fan_state()
         self.viewport.set_fan_state(self._last_fan.get('rpm'),self._last_fan.get('available') is True,
                                     self._last_fan.get('timestamp'))
@@ -111,6 +162,44 @@ class AssemblyWindow(QWidget):
                      and not self._renderer_error)
         self.viewport.set_fan_animation_enabled(enabled)
         self._update_status()
+        self._update_inspection()
+
+    def _choose_component(self,_index):
+        self._component_selected(self.component_choice.currentData())
+        self.viewport.select_component(self.selected_component)
+
+    def _component_selected(self,name):
+        if self._closing:return
+        name=name if name in COMPONENT_LABELS else 'all'
+        changed=name!=self.selected_component
+        self.selected_component=name
+        self.component_choice.blockSignals(True)
+        self.component_choice.setCurrentIndex(self.component_choice.findData(name))
+        self.component_choice.blockSignals(False)
+        if changed or self.inspection_state is None:self._update_inspection()
+
+    def _update_inspection(self):
+        if self._closing or not self._spec or not self.isVisible() or self.isMinimized():return
+        state=inspection_snapshot(getattr(self.controller,'readings',{}),self._spec,
+                                  getattr(self.controller,'draft',{}),self.selected_component)
+        if state==self.inspection_state:return
+        self.inspection_state=state
+        self.components.setText(' · '.join(self.controller.tr(part) for part in state['identity_parts']))
+        columns=1
+        if columns!=self._inspection_columns:
+            self._inspection_columns=columns
+            for index,(cell,_label,_value) in enumerate(self.inspection_rows):
+                self._inspection_grid.addWidget(cell,index//columns,index%columns)
+            for index in range(3):self._inspection_grid.setColumnStretch(index,1 if index<columns else 0)
+        for index,(cell,label,value) in enumerate(self.inspection_rows):
+            active=index<len(state['rows']);cell.setVisible(active)
+            if not active:continue
+            row=state['rows'][index]
+            label.setText(self.controller.tr(row['label']));value.setText(row['value'])
+            tip=' · '.join(part for part in (self.controller.tr(row.get('reason','')),row.get('source','')) if part)
+            cell.setToolTip(tip)
+        self.inspection_note.setText(' · '.join(self.controller.tr(note) for note in state['notes']))
+        self.inspection_note.setVisible(bool(state['notes']))
 
     def _render_failed(self,_message):
         self._renderer_error=True
@@ -142,7 +231,7 @@ class AssemblyWindow(QWidget):
         timestamp=self._last_fan.get('timestamp')
         if (type(timestamp) not in (int,float) or not 0<=time.time()-timestamp<=GPU_FAN_MAX_AGE):
             self._last_fan=dict(available=False)
-            self.viewport.set_fan_state(None,False);self._update_status();return
+            self.viewport.set_fan_state(None,False);self._update_status();self._update_inspection();return
         self.viewport.advance_fans(elapsed)
 
     def showEvent(self,event):

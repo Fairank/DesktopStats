@@ -2,7 +2,7 @@
 
 Native Windows top-bar monitoring and optional desktop widgets, with real
 hardware readings and local history. Preview release
-**0.32.0-preview.1** adds an optional 3D assembly view and refines default desktop
+**0.33.0-preview.1** expands the optional 3D case catalog and refines default desktop
 widget layouts, alongside one live top-bar preview, separate content/appearance
 tasks and contextual desktop controls.
 Desktop widgets, top bar and preferences save independently. Original application
@@ -57,10 +57,20 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 按现有 **应用偏好** 流程保存；不会改动顶部栏或桌面布局草稿。窗口按顶部栏配置
 选择屏幕，不因为打开三维视图自动迁移顶部栏。
 
+也可从托盘菜单 **桌面 3D 检视** 直接打开。点击模型中的 CPU、显卡、内存或
+主板可选中部件并查看状态，拖动只旋转视角；部件选择与局部放大相互独立。
+状态使用当前缓存的传感器读数，未知或失效值保持缺测，不因为点击模型发起额外
+硬件查询。机箱与主板的身份、比例尺寸和安装限制不冒充未检测到的传感器状态。
+
 硬件模型复用现有 178 项目录（147 显卡、28 内存、3 CPU）的型号、盖板、风扇和
 内存缺口资料；内存按已识别的模块分别选择外形，不从第一条借用所有模块的身份。
-机箱是首批 24 款、14 个品牌、5 类结构的原创示意模型，完整品牌、尺寸、形态与
+机箱现有 64 款、18 个品牌、6 类结构的原创示意模型，可先按品牌筛选，完整品牌、尺寸、形态与
 官方来源保存在 `chassis_catalog.py`。**这不是所有市售机箱的完整目录。**
+
+机箱与内部组件默认 **跟随顶部栏硬件风格**，也可在整机视图独立选择原版、可爱、
+彩色手绘、纯线条及其余旧方案。风格选择只属于整机视图偏好，不会反向改动顶部栏。
+同一型号的尺寸、安装限制、面板结构和风扇保留；配色、光照、描边与手绘笔触随方案
+改变。无表情原版继续保留，笑脸只属于可爱笑脸和笑脸手绘。
 
 系统读取的机箱标识来自 Windows SMBIOS。读取仅在该页或三维窗口需要身份时
 进行并缓存，没有新增 WMI 工作进程、驱动、网络检索或周期轮询；返回数据不含

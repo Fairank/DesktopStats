@@ -2,7 +2,7 @@
 import copy
 import math
 
-from assembly_config import validate_assembly
+from assembly_config import STYLE_LABELS,validate_assembly,visual_style
 from hardware_appearance import metric_appearance, appearance_for
 from memory_appearance import appearance_for_memory
 from metrics import metric_info
@@ -44,7 +44,7 @@ def component_fingerprint(data, config, firmware, modules):
             str(prefs.get("hardware_model", "")),
             tuple((r.get("manufacturer", ""), r.get("part_number", ""), r.get("form_factor", ""))
                   for r in modules if isinstance(r, dict)),
-            repr(firmware), repr(config.get("assembly", {})))
+            repr(firmware), repr(config.get("assembly", {})),visual_style(config))
 
 
 def build_spec(data, config, firmware, modules, *, identify_case=None):
@@ -65,6 +65,7 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     device = device if isinstance(device, dict) else {}
     dimensions = appearance.get("board_details", {}).get("dimensions_mm") or {}
     gpu = dict(appearance=appearance, present=bool(text(device.get("gpu_name") or device.get("label"))),
+               target=target,
                label=(appearance.get("label") if appearance.get("confidence")=="model"
                       or appearance.get("selection_source")=="manual"
                       else text(device.get("gpu_name") or device.get("label"))) or "显卡未识别",
@@ -94,6 +95,12 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
             and board_maker in ("asus", "asustek computer inc.", "asustek computer inc")):
         board.update(form_factor="atx", dimensions_mm=dict(height=305, width=244), source=BOARD_SOURCE)
     checks = []
+    if (known_case and 'no_expansion_slots' in case.get('features',())
+            and gpu['present'] and appearance.get('style')!='gpu_integrated'):
+        checks.append(dict(kind='gpu_mount',state='unsupported',reason='no_slots'))
+    elif (known_case and 'low_profile_only' in case.get('features',()) and gpu['present']
+            and gpu['width_mm'] and gpu['width_mm']>80):
+        checks.append(dict(kind='gpu_mount',state='unsupported',reason='low_profile'))
     max_length = number(case.get("max_gpu_length_mm"))
     if max_length and gpu["length_mm"]:
         checks.append(dict(kind="gpu_length", state="within_limit" if gpu["length_mm"] <= max_length else "exceeds_limit",
@@ -104,7 +111,7 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     if known_case and board["form_factor"] != "unknown" and forms:
         checks.append(dict(kind="board_form", state="within_limit" if board["form_factor"] in forms else "exceeds_limit"))
     return dict(case=case, case_identity=identity, gpu=gpu, cpu=cpu, memory=memory, board=board,
-                options=options, checks=checks, schematic=True,
+                options=options, checks=checks, schematic=True,visual_style=visual_style(config),
                 limitations=["比例与安装位置为三维示意，不能代替实物安装检查。",
                              "散热器、电源和机箱风扇的实际型号尚未识别。"])
 
@@ -120,5 +127,7 @@ def summary(spec):
                 cpu_label=spec["cpu"]["label"], gpu_label=spec["gpu"]["label"],
                 gpu_source=spec["gpu"]["selection_source"], memory_label=spec["memory"]["label"],
                 memory_count=spec["memory"]["count"], board_label=spec["board"]["label"],
+                visual_style=spec.get("visual_style","miniature"),
+                visual_style_label=STYLE_LABELS.get(spec.get("visual_style","miniature"),STYLE_LABELS["miniature"]),
                 checks=spec["checks"], limitations=spec["limitations"],
                 case_sources=case.get("sources", []))
