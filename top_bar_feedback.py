@@ -1,8 +1,37 @@
 """Read-only, device-scoped channels for optional hardware icon feedback."""
 
+import time
+
 from metrics import display_value, metric_info, numeric
 
 CHANNELS = ('load', 'thermal', 'energy', 'inbound', 'outbound', 'spin')
+GPU_FAN_MAX_AGE = 3.0
+
+
+def gpu_fan_feedback(data, prefs, *, stale=False):
+    """Accept selected-card tachometer/current RPM, never targets, chassis or %."""
+    target = prefs.get('gpu_target') or '0'
+    devices = data.get('gpus')
+    row = devices.get(target, {}) if isinstance(devices, dict) else {}
+    if not isinstance(row, dict):
+        row = {}
+    statuses = row.get('channel_status')
+    status = statuses.get('gpu_fan_rpm', {}) if isinstance(statuses, dict) else {}
+    status_valid = isinstance(status, dict)
+    rpm, timestamp = row.get('gpu_fan_rpm'), row.get('gpu_fan_rpm_timestamp')
+    source = row.get('gpu_fan_rpm_source')
+    semantics, scope = row.get('gpu_fan_rpm_semantics'), row.get('gpu_fan_rpm_scope')
+    available = (not stale and numeric(rpm) and 0 <= rpm <= 100000
+                 and numeric(timestamp) and 0 <= time.time()-timestamp <= GPU_FAN_MAX_AGE
+                 and isinstance(source, str) and bool(source.strip())
+                 and semantics in ('measured', 'driver_current_rpm') and scope == 'card'
+                 and status_valid and (not status or status.get('state') == 'available'))
+    return dict(available=bool(available), rpm=rpm if available else None,
+                timestamp=timestamp if available else None,
+                source=source[:160] if isinstance(source, str) else '',
+                semantics=semantics if available else 'unknown', scope='card',
+                aggregate=status.get('aggregate', '') if status_valid else '',
+                display_slowdown=120)
 
 
 def hardware_feedback(data, metric, prefs, *, stale=False):
@@ -67,6 +96,7 @@ def hardware_feedback(data, metric, prefs, *, stale=False):
         state.update(load=activity('gpu_usage'),
                      thermal=activity('gpu_temp', cold_is_zero=True),
                      energy=activity('gpu_power'))
+        state['fan_speed'] = gpu_fan_feedback(data, prefs, stale=stale)
     elif metric.startswith('net_'):
         profile = 'network'
         state.update(inbound=activity('net_download'), outbound=activity('net_upload'))
@@ -92,5 +122,6 @@ def hardware_feedback(data, metric, prefs, *, stale=False):
         return {}
     if stale:
         state = dict.fromkeys(CHANNELS)
-    state.update(profile=profile, available=any(value is not None for value in state.values()))
+    state.update(profile=profile, available=any(state.get(key) is not None for key in CHANNELS)
+                 or bool(state.get('fan_speed', {}).get('available')))
     return state

@@ -63,7 +63,7 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 
 硬件联动对 CPU/GPU 分别使用负载、温度和功耗，黄红热感与蓝色功耗电弧可同时出现。短电弧会在不同位置和方向出现、分叉、熄灭，十个视觉阶段逐步增加幅度、放电次数和重叠细丝，并在阶段之间平滑过渡；真实读数不分成十档。内存使用实际占用量，网络和磁盘分别使用两个方向，电池分别使用电量、充电和放电，风扇使用实际转速或设备报告的风扇百分比，NVMe 使用真实温度。只叠加有来源的通道；缺测不借另一块设备的值，不从内存占用推测温度，也不把 SSD 损耗作为当前负载。主使用率为零或缺失时，有真实温度或功耗的层仍可独立呈现。
 
-开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。风扇旋转和功率流动是装饰反馈，不是经过标定的转速或电流动画。
+开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。通用风扇符号与功率流动属于装饰反馈。开发版的实物显卡叶轮单独跟随当前 RPM，以固定 120 倍慢放，速度偏好不改变其比例；详见下文显卡风扇说明。
 
 ### 顶部栏整体设计
 
@@ -143,6 +143,38 @@ attempt to save pending data. Unexpected process termination can lose the most
 recent uncommitted batch; a paused or failing writer does not establish a strict
 five-second durability guarantee. The pending buffer and existing retention
 limits remain bounded. This batching does not change sensor polling frequency.
+
+### Graphics-card fan appearance and RPM (development)
+
+The reviewed GPU catalog includes a fan profile for each of its 103 exact board
+representatives. Blade counts are confirmed for 48 of them; unconfirmed blades
+use neutral rotors. Rings, linked blade groups, triangular hubs and opposite
+rotation are applied only where model-specific references support them. A bare
+GPU chip name does not establish a retail cooler. Illustration proportions are
+visual estimates, not measured factory dimensions.
+
+Solid, Miniature and Soft Auto effects use fresh same-card current RPM, displayed
+unchanged and animated at a fixed 120x slow-motion scale. Higher RPM rotates
+faster in the same proportion. Zero stops; missing, failed or stale readings
+remain unknown and stop. Load, temperature, percentage and intended fan speed
+do not substitute for current RPM. Classic, Outline and manual Pulse keep their
+static hardware illustrations. The offline gallery's RPM control is explicitly
+simulated and never reads the computer.
+
+The NVIDIA provider uses a bounded read-only NvAPI query, at most once per
+second per requested card, with cached capability/PCI matching and five-second
+transient-failure backoff. The private CurrentRpm interface follows
+[LibreHardwareMonitor v0.9.6](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/v0.9.6/LibreHardwareMonitorLib/Interop/NvApi.cs);
+it is labelled driver current RPM, without claiming independent physical
+validation. Where unavailable, the provider tries the public single-channel
+[tachometer](https://docs.nvidia.com/nvapi/group__gpucooler.html). Driver cooler
+channel IDs do not establish left/center/right physical positions: a labelled
+card channel mean drives the illustrated fans together. This does not claim
+independent per-fan speed. AMD/Intel RPM remains unknown without a compatible
+same-card provider. No fan controls, new driver, service, administrator prompt,
+polling thread or animation timer is added. Existing sampling and hidden-window
+animation pause behavior remain; an enabled Auto item still requests sampling
+while the bar is temporarily hidden by fullscreen avoidance.
 
 ### ASUS CPU temperature bridge
 

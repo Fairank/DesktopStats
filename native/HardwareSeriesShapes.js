@@ -88,6 +88,9 @@ function geometry(state, base) {
         radii=[radius*.88,radius*1.10,radius*.88]
     if (state.series_id === "galax_ex_gamer" && count === 3)
         radii=[radius*.94,radius*.94*102/92,radius*.94]
+    // Reviewed RX 7900 XTX Taichi: 110 / 100 / 110 mm front fans.
+    if (state.series_id === "asrock_taichi" && count === 3)
+        radii=[radius,radius*100/110,radius]
     if (state.series_id === "evga_ftw3" && count === 3) fanY[1]+=h*.08
     var blowers=[]
     if (state.series_id === "acer_bifrost_arc_a770" && count === 2) {

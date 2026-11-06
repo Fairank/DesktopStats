@@ -1,5 +1,6 @@
 .pragma library
 .import "HardwareSeriesShapes.js" as Series
+.import "HardwareFanDesigns.js" as FanDesigns
 
 // Original soft, two-tone hardware miniatures on the 24-unit icon grid.
 // Series accents illustrate a design language, never an exact product or color.
@@ -90,36 +91,11 @@ function cpu(style, p) {
 }
 
 function fan(cx, cy, radius, p) {
-    var result = '<g transform="translate(' + cx + ' ' + cy + ') scale(' + (radius / 3.1) + ')">'
-        + circle(0, 0, 3.1, p.well, p.base, .35)
-    var rotating = ""
-    // Five separated, filled blades: no nested rings, linked loops or gear teeth.
-    var blade = "M-.33-.49C-1.12-.81-1.86-1.91-1.22-2.39"
-        + "C-.52-2.95.54-2.50.64-1.86C.70-1.30.16-.86.32-.47Z"
-    for (var angle = 0; angle < 360; angle += 72) {
-        rotating += '<path d="' + blade + '" transform="rotate(' + angle + ')" fill="' + p.blade + '"/>'
-    }
-    rotating += circle(0, 0, .74, p.hub, null, null, "hardware-fan-hub")
-        + circle(0, 0, .22, p.base)
-    if (p.rotorCollector) {
-        p.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:"axial",basis:3.1,body:rotating})
-        return result + '</g>'
-    }
-    return result + rotating + '</g>'
+    return FanDesigns.fan(cx,cy,radius,p,"axial")
 }
 
 function turbine(cx, cy, radius, p) {
-    var result='<g class="hardware-blower" transform="translate('+cx+' '+cy+') scale('+(radius/3.1)+')">'
-        +circle(0,0,3.1,p.well,p.base,.35)
-    var rotating=""
-    for(var angle=0;angle<360;angle+=36)
-        rotating+='<path d="M.75-1.06L1.44-2.39L1.84-2.13L1.14-.75Z" transform="rotate('+angle+')" fill="'+p.blade+'"/>'
-    rotating+=circle(0,0,1.13,p.hub,null,null,"hardware-fan-hub")
-    if(p.rotorCollector) {
-        p.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:"blower",basis:3.1,body:rotating})
-        return result+'</g>'
-    }
-    return result+rotating+'</g>'
+    return FanDesigns.fan(cx,cy,radius,p,"blower")
 }
 
 function series(state) {
@@ -248,6 +224,8 @@ function seriesGpu(state, p, count) {
 function body(state, rotorCollector) {
     if (!state || (state.kind !== "cpu" && state.kind !== "gpu")) return ""
     var p = palette(state)
+    p.rim=p.base; p.disk=p.well
+    p.fanDesignSeries=state.series_id; p.fanDesignIndex=0
     if (Array.isArray(rotorCollector)) p.rotorCollector=rotorCollector
     return '<g stroke-linejoin="round" stroke-linecap="round">'
         + (state.kind === "cpu" ? cpu(state.style, p) : gpu(state, p)) + '</g>'

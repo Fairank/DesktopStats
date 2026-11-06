@@ -1155,6 +1155,36 @@ Window {
                                         color: root.foreground; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
                                     }
                                     Text {
+                                        objectName: "topBarDetailFanProfile"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: {
+                                            const profile=appearanceSummary.appearance.fan_profile
+                                            if (!profile || appearanceSummary.appearance.icon_set==="classic") return ""
+                                            const counts=profile.blade_counts && profile.blade_counts.length
+                                                ? profile.blade_counts : [profile.blades]
+                                            const known=counts.every(value=>Number.isInteger(value))
+                                            return (profile.label || "") + " · " + (known
+                                                ? counts.join(" / ")+" "+root.tr("叶片") : root.tr("叶片细节未确认"))
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailFanRpm"
+                                        Layout.fillWidth: true
+                                        visible: appearanceSummary.appearance.kind==="gpu"
+                                            && ["solid","miniature","soft"].includes(appearanceSummary.appearance.icon_set)
+                                        text: {
+                                            const rpm=detailMetricIcon.gpuFanRpm, sample=detailMetricIcon.gpuFanReading
+                                            if (!Number.isFinite(rpm)) return root.tr("显卡风扇")+" · "+root.tr("转速未知")
+                                            const origin=root.tr(sample.semantics==="driver_current_rpm"?"驱动当前转速":"测速转速")
+                                            const scope=sample.aggregate==="mean_valid_cooler_channels"?" · "+root.tr("通道均值"):""
+                                            return origin+scope+" · "+Math.round(rpm)+" RPM · "+root.tr(rpm===0?"已停转":"动画慢放 120×")
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
                                         objectName: "topBarDetailAppearanceFeatures"
                                         Layout.fillWidth: true; visible: !!text
                                         text: appearanceSummary.appearance.icon_set !== "classic"

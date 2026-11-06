@@ -18,6 +18,7 @@ import hardware_catalog_group_c as group_c_catalog
 from hardware_model_extensions import CATALOG_EXTENSIONS, MODEL_SERIES
 from hardware_series import SERIES_CATALOG
 from hardware_catalog_metadata import fields as catalog_fields, generation as catalog_generation
+from hardware_fan_profiles import profile_for as fan_profile_for
 from memory_appearance import appearance_for_memory
 
 # These are restrained interface accents, not claims about a product's paint.
@@ -291,6 +292,9 @@ def appearance_for(kind, name, *, model="", board_vendor=""):
     result["visible_fan_count"] = _VISIBLE_FANS.get(result["id"], result["fan_count"])
     result["legacy"] = bool(_SERIES_METADATA.get(result["series_id"], {}).get("legacy", False))
     result.update(_MODEL_FILTERS.get(result["id"]) or _SERIES_FILTERS.get(result["series_id"]) or {})
+    fan_profile = fan_profile_for(result)
+    if fan_profile:
+        result["fan_profile"] = fan_profile
     return result
 
 

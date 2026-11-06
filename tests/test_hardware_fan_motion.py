@@ -37,6 +37,14 @@ def appearance(model=DUAL, style="solid"):
     return dict(appearance_for("gpu", model), icon_set=style)
 
 
+def processor_channels(*, load=.4, thermal=.5, energy=.2, rpm=1440,
+                       semantics="measured", timestamp=None):
+    return dict(profile="processor", available=True, load=load, thermal=thermal, energy=energy,
+                fan_speed=dict(available=True, rpm=rpm, semantics=semantics, scope="card",
+                               source="Synthetic card RPM", timestamp=time.time() if timestamp is None else timestamp,
+                               display_slowdown=120))
+
+
 def decode_source(source):
     value = source.toString() if isinstance(source, QUrl) else source
     header, body = value.split(",", 1)
@@ -106,6 +114,7 @@ Window {
         self.window = self.component.create()
         self.assertIsNotNone(self.window, [error.toString() for error in self.component.errors()])
         self.assign("appearance", appearance())
+        self.assign("channels", processor_channels())
         self.window.show()
         QTest.qWait(25)
         self.stop_clock()
@@ -396,6 +405,82 @@ Window {
         self.assertEqual(clock.property("subscriberCount"), 2)
         self.assertFalse(clock.property("frameDriven"))
 
+    def test_measured_and_driver_rpm_use_fixed_120x_ratio_independent_of_load_and_speed(self):
+        icon = self.find("fanMetric")
+        glyph = self.metric_glyph()
+        for semantics in ("measured", "driver_current_rpm"):
+            for rpm in (1200, 2400):
+                for load, speed in ((0, .5), (.2, 1), (1, 2)):
+                    with self.subTest(semantics=semantics, rpm=rpm, load=load, speed=speed):
+                        self.assign("channels", processor_channels(load=load, rpm=rpm, semantics=semantics))
+                        icon.setProperty("speed", speed)
+                        self.stop_clock()
+                        icon.setProperty("gpuFanPhase", .2)
+                        self.assertEqual(icon.property("gpuFanDisplaySlowdown"), 120)
+                        self.assertEqual(icon.property("gpuFanRpm"), rpm)
+                        self.assertTrue(icon.property("gpuFanMotionActive"))
+                        self.evaluate(icon, "advanceClock(previousTick + 100)")
+                        expected = .2 + 100 * rpm / (60000 * 120)
+                        self.assertAlmostEqual(icon.property("gpuFanPhase"), expected)
+                        self.assertAlmostEqual(self.rotors(glyph)[0].property("rotation"), expected * 360)
+
+    def test_tuf_rdna2_counter_rotating_center_reaches_real_qml_transforms(self):
+        icon = self.find("fanMetric")
+        for style in STYLES:
+            with self.subTest(style=style):
+                value = appearance("TUF-RX6800XT-O16G-GAMING", style)
+                self.assertEqual(value["id"], "asus-tuf-rx6800xt-o16g")
+                self.assign("appearance", value)
+                self.assign("channels", processor_channels())
+                self.stop_clock()
+                glyph = self.metric_glyph()
+                self.assertTrue(icon.property("gpuFanMotionActive"))
+                self.assertEqual([row["direction"] for row in self.layer_data(value)["layers"]["rotors"]],
+                                 [1, -1, 1])
+                icon.setProperty("gpuFanPhase", .25)
+                self.app.processEvents()
+                self.assertAlmostEqual(glyph.property("fanRotation"), 90)
+                self.assertEqual([rotor.property("rotation") for rotor in self.rotors(glyph)],
+                                 [90, 270, 90])
+
+    def test_unknown_intended_percentage_stale_and_true_zero_keep_gpu_rotors_stationary(self):
+        icon = self.find("fanMetric")
+        glyph = self.metric_glyph()
+        cases = [processor_channels(rpm=0), processor_channels(rpm=None),
+                 processor_channels(semantics="intended"), processor_channels(semantics="percent"),
+                 processor_channels(semantics="unknown"), processor_channels(timestamp=time.time()-4),
+                 processor_channels(timestamp=time.time()+4)]
+        unavailable = processor_channels()
+        unavailable["fan_speed"]["available"] = False
+        cases.append(unavailable)
+        cases.append(dict(profile="processor", available=True, load=1, thermal=1, energy=1))
+        for channels in cases:
+            with self.subTest(sample=channels.get("fan_speed")):
+                self.assign("channels", channels)
+                self.stop_clock()
+                icon.setProperty("gpuFanPhase", .31)
+                self.assertFalse(icon.property("gpuFanMotionActive"))
+                self.assertIsNone(self.motion_loader(glyph).property("item"))
+                self.evaluate(icon, "advanceClock(previousTick + 100)")
+                self.assertAlmostEqual(icon.property("gpuFanPhase"), .31)
+                self.assertEqual(self.find("hardwareGlyphImage", glyph).property("source"), glyph.property("svgSource"))
+
+    def test_selected_card_projection_never_animates_from_other_gpu_or_flat_chassis_rpm(self):
+        from top_bar_feedback import hardware_feedback
+        row = dict(gpu_usage=40, gpu_fan_rpm=2400, gpu_fan_rpm_timestamp=time.time(),
+                   gpu_fan_rpm_source="Synthetic tachometer", gpu_fan_rpm_semantics="measured",
+                   gpu_fan_rpm_scope="card")
+        data = dict(gpu_fan_rpm=9000, gpu_fan_percent=100, gpus={"0": row, "1": dict(gpu_usage=40)})
+        icon, glyph = self.find("fanMetric"), self.metric_glyph()
+        self.assign("channels", hardware_feedback(data, "gpu_usage", dict(icon_effect="auto", gpu_target="1")))
+        self.stop_clock()
+        self.assertFalse(icon.property("gpuFanMotionActive"))
+        self.assertIsNone(self.motion_loader(glyph).property("item"))
+        self.assign("channels", hardware_feedback(data, "gpu_usage", dict(icon_effect="auto", gpu_target="0")))
+        self.stop_clock()
+        self.assertTrue(icon.property("gpuFanMotionActive"))
+        self.assertEqual(icon.property("gpuFanRpm"), 2400)
+
     def test_hidden_minimized_off_and_reduced_motion_release_rotors_and_keep_phase(self):
         icon = self.find("fanMetric")
         glyph = self.metric_glyph()
@@ -407,7 +492,7 @@ Window {
             (lambda: self.window.setProperty("motionAllowed", False), lambda: self.window.setProperty("motionAllowed", True)),
             (lambda: self.window.setProperty("effect", "off"), lambda: self.window.setProperty("effect", "auto")),
             (lambda: self.assign("channels", dict(profile="processor", available=False, load=None, thermal=None)),
-             lambda: self.assign("channels", dict(profile="processor", available=True, load=.4, thermal=.5, energy=.2))),
+             lambda: self.assign("channels", processor_channels())),
         )
         for pause, resume in pairs:
             icon.setProperty("gpuFanPhase", .217)
@@ -451,11 +536,11 @@ Window {
         self.assertFalse(clock.property("frameDriven"))
         self.assertEqual(clock.property("subscriberCount"), 1)
 
-    def test_manual_modes_only_pulse_joins_the_existing_gpu_fan_motion(self):
-        self.assign("channels", {})
+    def test_manual_modes_do_not_drive_gpu_rotors_even_with_valid_card_rpm(self):
+        self.assign("channels", processor_channels())
         icon = self.find("fanMetric")
         glyph = self.metric_glyph()
-        for effect, expected in (("pulse", True), ("heat", False), ("flow", False), ("spin", False), ("off", False)):
+        for effect, expected in (("pulse", False), ("heat", False), ("flow", False), ("spin", False), ("off", False)):
             self.window.setProperty("effect", effect)
             self.app.processEvents()
             self.stop_clock()
@@ -479,7 +564,7 @@ Window {
         source = glyph.property("svgSource")
         changed = QSignalSpy(glyph.svgSourceChanged)
         for load, thermal in ((.9, .2), (.1, .8), (.65, None), (.99, .3)):
-            self.assign("channels", dict(profile="processor", available=True, load=load, thermal=thermal, energy=.25))
+            self.assign("channels", processor_channels(load=load, thermal=thermal, energy=.25))
             self.stop_clock()
             self.evaluate(icon, "advanceClock(previousTick + 34)")
             if thermal is None:
@@ -506,7 +591,10 @@ Window {
         self.addCleanup(controller.close)
         controller._data = dict(time=time.time(), cpu_name="AMD Ryzen 9 9950X", cpu_usage=30, cpu_temp=62.5,
                                 gpus={"0": dict(gpu_name="NVIDIA GeForce RTX 4060", board_model=DUAL,
-                                                board_vendor="ASUS", gpu_usage=40, gpu_temp=100, gpu_power=160)})
+                                                board_vendor="ASUS", gpu_usage=40, gpu_temp=100, gpu_power=160,
+                                                gpu_fan_rpm=1440, gpu_fan_rpm_timestamp=time.time(),
+                                                gpu_fan_rpm_source="Synthetic tachometer",
+                                                gpu_fan_rpm_semantics="measured", gpu_fan_rpm_scope="card")})
         temperature, gpu = controller.topBarRows()
         self.assertEqual(temperature["numeric_value"], 62.5)
         self.assertAlmostEqual(temperature["hardware_state"]["thermal"], .5)
@@ -521,7 +609,7 @@ Window {
         self.assertFalse(thermometer.property("hasHardwareAppearance"))
         self.assertAlmostEqual(thermometer.property("thermometerTarget"), .5)
         for load in (.2, .9, .6):
-            self.assign("channels", dict(profile="processor", available=True, load=load, thermal=.95, energy=.7))
+            self.assign("channels", processor_channels(load=load, thermal=.95, energy=.7))
             self.evaluate(icon, "advanceClock(previousTick + 34)")
             self.assertAlmostEqual(thermometer.property("thermometerTarget"), .5)
         controller._data["cpu_temp"] = None
@@ -540,7 +628,7 @@ Window {
         state.details.update(family="gpu", metric="gpu_usage", icon="gpu", icon_effect="auto",
                              numeric_value=40, available=True, value="40 %", source="Synthetic provider",
                              hardware_name="Synthetic GPU", hardware_appearance=appearance(),
-                             hardware_state=dict(profile="processor", available=True, load=.4, thermal=.5, energy=.2))
+                             hardware_state=processor_channels())
         self.engine.rootContext().setContextProperty("stats", state)
         component = QQmlComponent(self.engine, QUrl.fromLocalFile(str(ROOT / "native/TopBarDetails.qml")))
         details = component.createWithInitialProperties(dict(barState=state))

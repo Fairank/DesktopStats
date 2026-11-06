@@ -28,22 +28,7 @@ function shadow(g) {
 }
 
 function fan(cx, cy, radius, colors) {
-    let result='<g class="hardware-fan" transform="translate('+cx+' '+cy+') scale('+radius/3+')">'
-        +'<circle r="3" fill="'+colors.side+'"/>'
-        +'<circle cy=".1" r="2.84" fill="'+colors.rim+'"/>'
-        +'<circle r="2.57" fill="'+colors.disk+'"/>'
-    let rotating=""
-    for(let angle=0;angle<360;angle+=60) {
-        rotating+=Solid.p("M-.27-.53C-1.01-.91-1.53-1.74-.95-2.19C-.43-2.60.24-2.45.73-2.09"
-            +"C.04-1.94.02-1.05.27-.53Z",colors.blade)
-            .replace("<path ",'<path transform="rotate('+angle+')" ')
-    }
-    rotating+='<circle class="hardware-fan-hub" r=".51" fill="'+colors.hub+'"/>'
-    if(colors.rotorCollector) {
-        colors.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:"axial",basis:3,body:rotating})
-        return result+'</g>'
-    }
-    return result+rotating+'</g>'
+    return Solid.fan(cx,cy,radius,colors)
 }
 
 function cpu(state, colors) {
@@ -138,6 +123,8 @@ function gpu(state, colors) {
 function body(state, rotorCollector) {
     const normalized=state || ({})
     const colors=palette(normalized)
+    colors.fanDesignSeries=normalized.series_id
+    colors.fanDesignIndex=0
     if(Array.isArray(rotorCollector))colors.rotorCollector=rotorCollector
     return normalized.kind==="gpu"?gpu(normalized,colors):cpu(normalized,colors)
 }

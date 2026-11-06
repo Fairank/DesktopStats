@@ -210,7 +210,8 @@ Window {
         self.assertTrue(QSvgRenderer(svg.encode()).isValid())
         return ET.fromstring(svg)
 
-    def test_all_reviewed_legacy_blowers_have_radial_impellers_in_each_modern_style(self):
+    def test_legacy_blowers_keep_position_and_only_confirmed_blade_counts(self):
+        from hardware_fan_profiles import PROFILES
         historical_ids = {row["id"] for package in PACKAGES for row in package.SERIES if row.get("legacy")}
         rows = [(package, row) for package, row in reviewed_rows()
                 if row[5] == "gpu_blower" and package.MODEL_SERIES[row[0]] in historical_ids]
@@ -229,7 +230,9 @@ Window {
                     self.assertEqual(sum(node.get("class") == "hardware-fan-hub" for node in tree.iter()), 1)
                     blades = [node for node in radial[0] if node.tag.endswith("path")
                               and "rotate(" in node.get("transform", "")]
-                    self.assertGreaterEqual(len(blades), 10, "A radial impeller must not reuse the few broad axial vanes")
+                    profile = PROFILES[package.MODEL_SERIES[row[0]]]
+                    self.assertEqual(len(blades), profile['blades'] or 0,
+                                     "Unconfirmed radial blades must remain a neutral rotor")
                     self.assertTrue(any(node.get("class", "").split() ==
                                         ["hardware-series-face", package.MODEL_SERIES[row[0]]]
                                         for node in tree.iter()))

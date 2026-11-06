@@ -41,6 +41,7 @@ Item {
     property real outboundPhase: 0
     property real spinPhase: 0
     property real gpuFanPhase: 0
+    property double gpuFanSampleTick: 0
     property double previousTick: 0
     property var clockSubscription: null
     property bool feedbackReady: false
@@ -80,7 +81,7 @@ Item {
         ? thermometerEnabled && (thermometerTarget > .28 || thermometerChanging) ? Math.max(.001, thermometerTarget) : 0
         : compositeActive ? Math.max(supportsLoad && loadTarget || 0,
         supportsThermal && (thermalTarget>.28?thermalTarget:0) || 0,supportsEnergy && energyTarget || 0,
-        supportsInbound && inboundTarget || 0,supportsOutbound && outboundTarget || 0,name==="fan" && spinTarget || 0)
+        supportsInbound && inboundTarget || 0,supportsOutbound && outboundTarget || 0,name==="fan" && spinTarget || 0,gpuFanCanAnimate?1:0)
         : levelValid ? resolvedEffect==="heat" && level<=.28?0:level : 0
     readonly property bool loadActive: animationRunning && compositeActive && supportsLoad && loadTarget > 0
     readonly property bool thermalActive: animationRunning && compositeActive && supportsThermal && thermalTarget > 0
@@ -162,9 +163,24 @@ Item {
         if (Number.isInteger(front) && front>0 && front<=3 && (total==null || Number.isInteger(total) && front<=total)) return front
         return Number.isInteger(total) && total>0 && total<=3 ? total : 0
     }
-    readonly property bool gpuFanMotionActive: name==="gpu" && hasHardwareAppearance && animationRunning
+    readonly property var gpuFanReading: compositeActive && hardwareState.fan_speed ? hardwareState.fan_speed : ({})
+    readonly property real gpuFanRpm: {
+        const wake=root.gpuFanSampleTick, sample=root.gpuFanReading
+        const now=Date.now()/1000
+        if (sample.available!==true || ["measured","driver_current_rpm"].indexOf(sample.semantics)<0 || sample.scope!=="card"
+            || typeof sample.rpm!=="number" || !Number.isFinite(sample.rpm) || sample.rpm<0 || sample.rpm>100000
+            || typeof sample.timestamp!=="number" || !Number.isFinite(sample.timestamp)
+            || now-sample.timestamp<-.01 || now-sample.timestamp>3) return NaN
+        return sample.rpm
+    }
+    // Fixed slow motion keeps blade direction readable on a low-cadence bar.
+    // Keep reported RPM unchanged; load, heat and effect-speed never set it.
+    readonly property real gpuFanDisplaySlowdown: 120
+    readonly property bool gpuFanCanAnimate: name==="gpu" && hasHardwareAppearance && compositeActive
+        && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
         && gpuVisibleFans>0 && ["solid","miniature","soft"].includes(hardwareAppearance.icon_set)
-        && ["hardware","pulse"].includes(resolvedEffect)
+        && resolvedEffect==="hardware"
+    readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning
     readonly property real activityStrength: 0.28 + 0.72 * displayedLevel
     readonly property real feedbackStrength: intensity * activityStrength
     readonly property real intensityGain: effectControlsValid?intensity*(1.8-.8*intensity):0
@@ -304,6 +320,7 @@ Item {
         if (!Number.isFinite(now)) return
         if (!animationRunning) {previousTick = now;resetFeedback();return}
         const elapsed = Math.max(0, Math.min(136, now - previousTick))
+        gpuFanSampleTick=now
         const smoothing = 1-Math.exp(-elapsed/200)
         previousTick = now
         if (thermometerEnabled) displayedTemperature=converge(displayedTemperature,thermometerTarget,smoothing)
@@ -328,10 +345,10 @@ Item {
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedInbound)/1000:(.82+.36*displayedInbound)/2400))%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedOutbound)/1000:(.82+.36*displayedOutbound)/2400))%1:0
         } else displayedLevel=converge(displayedLevel,level,smoothing)
-        // Decorative, never a measured RPM. Reuse the existing bounded clock;
-        // a delayed tick stays below half the finest radial-blade pitch.
+        // Follow the measured card tachometer with a fixed 120x slow-motion
+        // ratio. Never synthesize RPM from utilization, temperature or percent.
         if (gpuFanMotionActive)
-            gpuFanPhase=(gpuFanPhase+Math.min(1/48,elapsed*speed*(.30+.55*Math.max(0,Math.min(1,displayedLoad||displayedLevel)))/3000))%1
+            gpuFanPhase=(gpuFanPhase+elapsed*gpuFanRpm/(60000*gpuFanDisplaySlowdown))%1
         // Four identical blades repeat every quarter-turn; bound a delayed
         // rotor step below half that pitch so it cannot appear to reverse.
         phase = (phase + (spinActive?Math.min(.1,elapsed/cycleDuration):elapsed/cycleDuration)) % 1

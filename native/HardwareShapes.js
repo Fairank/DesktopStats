@@ -256,13 +256,13 @@ function layers(geometryKey) {
         + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>'
     const rotors = collector.map(function(rotor) {
         // Every small image has a local origin and identical six-unit box.
-        // Soft draws in a 3.1-unit basis, so normalize inside its static SVG,
-        // keeping radius in the same 24-unit card coordinates as cx and cy.
+        // Normalize legacy collector bases inside the static sprite.
         const scaled = rotor.basis === 3 ? rotor.body
             : '<g transform="scale(' + (3 / rotor.basis) + ')">' + rotor.body + '</g>'
         const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 -3 6 6" width="6" height="6">'
             + '<g stroke-linecap="round" stroke-linejoin="round">' + scaled + '</g></svg>'
         return {cx:rotor.cx,cy:rotor.cy,radius:rotor.radius,kind:rotor.kind,
+            direction:rotor.direction===-1?-1:1,
             source:"data:image/svg+xml;utf8," + encodeURIComponent(svg)}
     })
     return {baseSource:"data:image/svg+xml;utf8," + encodeURIComponent(baseSvg),rotors:rotors}

@@ -29,6 +29,7 @@ HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePrev
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 HardwareGlyph.qml HardwareShapes.js
 HardwareSolid.js HardwareMiniature.js HardwareSoft.js
+HardwareFanDesigns.js HardwareFanProfileData.js
 HardwareSeriesShapes.js
 HardwareSeriesGroupA.js HardwareSeriesGroupB.js HardwareSeriesGroupC.js HardwareSeriesCoreExpansion.js
 HardwareSeriesNvidiaLegacy.js HardwareSeriesRadeonArc.js HardwareMemoryShapes.js

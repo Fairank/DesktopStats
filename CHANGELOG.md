@@ -16,14 +16,29 @@
 - Give Solid, Miniature and Soft distinct major panels, shoulders, end caps and
   illustration proportions for each series. Preserve the earlier Outline
   drawings and original Classic glyphs as selectable versions.
-- Draw radial impellers for reviewed blowers, the Acer BiFrost's left small
+- Distinguish radial blower housings, the Acer BiFrost's left small
   blower/right axial arrangement and fanless fins for confirmed passive cards.
-- Animate the confirmed visible impellers of 100 reviewed GPU models in Solid,
-  Miniature and Soft with the existing Auto/Pulse feedback. Keep a fixed base
+- Add exact-SKU fan profiles to all 103 GPU records. Confirm blade counts on
+  48 representatives (including TUF's 11/13/11 arrangement); retain neutral
+  rotors for unconfirmed counts. Distinguish source-backed rings, linked blade
+  groups, triangular hubs and relative counter-rotation. Illustration dimensions
+  remain visual approximations rather than engineering measurements.
+- Animate confirmed visible fans in Solid, Miniature and Soft only when Auto
+  receives fresh same-card RPM. Keep a fixed base
   and small retained fan textures; phase changes update local transforms without
   rebuilding shapes or SVG sources. Reuse the existing shared 34 ms clock and
   metric subscription, without adding a timer or raising frame-driven cadence.
-  Rotation is decorative and does not report measured RPM or actual fan status.
+  Use fixed 120x slow motion proportional to RPM, independent of usage,
+  temperature and effect-speed preferences; zero, unknown and stale RPM stop.
+  Never infer current RPM from duty percentage or intended speed. Driver fan
+  channels have no verified physical-position mapping, so their card mean drives
+  all illustrated front fans and is labelled as a channel mean.
+- Add demand-only NVIDIA RPM using existing PCI identity and a read-only NvAPI
+  query capped at 1Hz per card, with 5s transient-failure backoff. Prefer the
+  private CurrentRpm ABI used by LibreHardwareMonitor v0.9.6, explicitly labelled
+  as driver current RPM; fall back to the public single-channel tachometer where
+  supported. No administrator prompt, driver, service or control call is added.
+  AMD/Intel RPM remains unknown unless a same-card provider supplies it.
 - Release rotating layers to the original static illustration when hidden,
   minimized, Off or motion-disabled. Keep Classic/Outline hardware art static
   and CPU/memory load, thermal and electrical channels unchanged. Share the

@@ -1,5 +1,6 @@
 .pragma library
 .import "HardwareSeriesShapes.js" as Series
+.import "HardwareFanDesigns.js" as FanDesigns
 
 // Original static object illustrations. The caller supplies normalized,
 // allowlisted state and owns SVG wrapping, stable keys, texture caching and
@@ -63,37 +64,11 @@ function cpu(state, colors) {
 }
 
 function fan(cx, cy, radius, colors) {
-    let result = '<g class="hardware-fan" transform="translate(' + cx + ' ' + cy + ') scale(' + radius / 3 + ')">'
-        + '<circle r="3" fill="' + colors.rim + '"/>'
-        + '<circle r="2.67" fill="' + colors.disk + '"/>'
-    let rotating = ""
-    // Six broad, curved vanes; a real hub, without tiny decorative gear teeth.
-    for (let angle = 0; angle < 360; angle += 60) {
-        rotating += p("M-.32-.55C-1.15-1.02-1.42-1.85-.70-2.35C-.17-2.63.56-2.40.86-2.02"
-            + "C.16-2.03-.02-1.02.22-.57Z", colors.blade)
-            .replace("<path ", '<path transform="rotate(' + angle + ')" ')
-    }
-    rotating += '<circle class="hardware-fan-hub" r=".51" fill="' + colors.hub + '"/>'
-    if (colors.rotorCollector) {
-        colors.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:"axial",basis:3,body:rotating})
-        return result + '</g>'
-    }
-    return result + rotating + '</g>'
+    return FanDesigns.fan(cx,cy,radius,colors,"axial")
 }
 
 function turbine(cx, cy, radius, colors) {
-    let result = '<g class="hardware-blower" transform="translate('+cx+' '+cy+') scale('+radius/3+')">'
-        + '<circle r="3" fill="'+colors.rim+'"/><circle r="2.68" fill="'+colors.disk+'"/>'
-    let rotating = ""
-    for (let angle=0;angle<360;angle+=30)
-        rotating += p("M.72-1.03L1.38-2.30L1.78-2.07L1.12-.72Z",colors.blade)
-            .replace("<path ",'<path transform="rotate('+angle+')" ')
-    rotating += '<circle class="hardware-fan-hub" r="1.1" fill="'+colors.hub+'"/>'
-    if (colors.rotorCollector) {
-        colors.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:"blower",basis:3,body:rotating})
-        return result + '</g>'
-    }
-    return result + rotating + '</g>'
+    return FanDesigns.fan(cx,cy,radius,colors,"blower")
 }
 
 function geometry(state) {
@@ -199,6 +174,8 @@ function gpu(state, colors) {
 function body(state, rotorCollector) {
     const normalized=state || ({})
     const colors=palette(normalized)
+    colors.fanDesignSeries=normalized.series_id
+    colors.fanDesignIndex=0
     // Optional call-local collection; ordinary static output is unchanged.
     if (Array.isArray(rotorCollector)) colors.rotorCollector=rotorCollector
     return normalized.kind === "gpu" ? gpu(normalized,colors) : cpu(normalized,colors)

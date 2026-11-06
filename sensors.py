@@ -23,18 +23,41 @@ from cooling_sensor import SOURCE as COOLING_SOURCE
 from cpu_temperature import AsusCpuTemperature, is_requested as cpu_temperature_requested
 from energy_sensor import CpuPackagePower
 from external_engine import ExternalEngine
+from gpu_fan_sensor import Tachometer as GpuTachometer
 from metrics import METRICS, metric_value, required_sources, variable
 from memory_identity import modules as memory_modules, requested as memory_identity_requested
 from stats_config import BASE, load
 from storage_sensor import StorageHealth
+from top_bar_layout import metric_icon
 
 INSPECT_UNTIL = 0
 EXTERNAL_RESCAN = 0
 ASUS_RETRY_SECONDS = 60.0
 NVML_RETRY_SECONDS = 5.0
+NVML_GPU_TARGETS = frozenset(map(str, range(16)))
+GPU_CARD_TACH_FIELDS = frozenset(("gpu_fan_rpm", "gpu_fan_rpm_source", "gpu_fan_rpm_semantics",
+                                "gpu_fan_rpm_scope", "gpu_fan_rpm_timestamp", "gpu_fans"))
 MAX_LOGICAL_PROCESSORS = 4096
 CPU_LOGICAL_API = "psutil.cpu_percent(percpu=True)"
 _NVML_CLEANUP_RETAINERS = set()
+
+
+def gpu_fan_rpm_targets(config):
+    """Only configured modern automatic GPU glyphs request current fan RPM."""
+    bar = config.get("top_bar", {})
+    if not bar.get("enabled") or bar.get("hardware_icon_style") not in ("solid", "miniature", "soft"):
+        return frozenset()
+    targets = set()
+    for item in bar.get("items", ()):
+        prefs = item.get("prefs", {})
+        if prefs.get("icon_effect") != "auto":
+            continue
+        metric = item.get("metric")
+        if METRICS.get(metric, {}).get("scope") == "gpus" and metric_icon(metric, prefs) == "gpu":
+            target = prefs.get("gpu_target") or "0"
+            if isinstance(target, str) and target in NVML_GPU_TARGETS:
+                targets.add(target)
+    return frozenset(targets)
 
 
 def logical_processor_values(values):
@@ -243,6 +266,13 @@ class Memory(c.Structure):
     _fields_ = [("total", c.c_ulonglong), ("free", c.c_ulonglong), ("used", c.c_ulonglong)]
 
 
+class NvidiaPciInfo(c.Structure):
+    # nvmlDeviceGetPciInfo_v3 / nvmlPciInfo_t, verified against NVIDIA nvml.h.
+    _fields_ = [("busIdLegacy", c.c_char * 16), ("domain", c.c_uint),
+                ("bus", c.c_uint), ("device", c.c_uint), ("pciDeviceId", c.c_uint),
+                ("pciSubSystemId", c.c_uint), ("busId", c.c_char * 32)]
+
+
 class Nvidia:
     def __init__(self, *, defer_cleanup=False):
         self.lib = c.CDLL(str(Path(os.environ["WINDIR"]) / "System32/nvml.dll"))
@@ -307,6 +337,7 @@ class Nvidia:
         self._device_retry_at[key] = time.monotonic() + NVML_RETRY_SECONDS
 
     def read(self):
+        self._prune_fan_cache()
         now = time.monotonic()
         for key, deadline in list(getattr(self, "_device_retry_at", {}).items()):
             if now >= deadline:
@@ -322,8 +353,77 @@ class Nvidia:
                 devices[key] = dict(label="NVIDIA GPU " + key, gpu_source="NVIDIA NVML", channel_status={})
             if status:
                 devices[key]["device_status"] = status
+        # The flat gpu_fan_rpm is the separate ASUS chassis GPU-side fan. A
+        # card tachometer must remain scoped to its explicitly selected GPU.
         first = devices.get("0", {})
+        if "gpu_fans" in first:
+            first = {key: value for key, value in first.items() if key not in GPU_CARD_TACH_FIELDS}
+            first["channel_status"] = {key: value for key, value in first["channel_status"].items()
+                                       if key != "gpu_fan_rpm"}
         return dict(first, gpus=devices)
+
+    @staticmethod
+    def _handle_token(handle):
+        return handle if type(handle) is int else getattr(handle, "value", None)
+
+    def request_fan_rpm(self, targets=()):
+        """Sampling-thread-only demand setter; no initialization or native call."""
+        self._fan_targets = frozenset(target for target in targets
+                                     if type(target) is str and target in NVML_GPU_TARGETS)
+        self._prune_fan_cache()
+
+    def _prune_fan_cache(self):
+        cache = getattr(self, "_fan_pci", {})
+        if not cache:
+            return
+        changed = False
+        for key, row in list(cache.items()):
+            if row["token"] != self._handle_token(self.handles.get(key)):
+                del cache[key]
+                changed = True
+        tachometer = getattr(self, "_fan_tachometer", None)
+        if changed and tachometer is not None:
+            tachometer.invalidate()
+
+    def _read_fan_rpm(self, handle, channels, result):
+        token = self._handle_token(handle)
+        key = next((key for key in getattr(self, "_fan_targets", ())
+                    if self._handle_token(self.handles.get(key)) == token), None)
+        if key is None or token is None:
+            return
+        cache = getattr(self, "_fan_pci", None)
+        if cache is None:
+            cache = self._fan_pci = {}
+        now = time.monotonic()
+        row = cache.get(key)
+        if row is None or row["token"] != token or now >= row["retry_at"]:
+            facts, pci = {}, NvidiaPciInfo()
+            valid = self._query(facts, "identity", "nvmlDeviceGetPciInfo_v3", (), "",
+                                handle, c.byref(pci))
+            status = facts["identity"]
+            identity = (pci.domain, pci.bus, pci.device) if valid else None
+            if valid and not (pci.domain == 0 and pci.bus <= 255 and pci.device <= 31):
+                identity = None
+                status.update(state="identity_unavailable", reason="unmatched_pci_domain_or_address")
+            permanent = valid or status["state"] == "entrypoint_missing" or status.get("status_code") == 3
+            row = cache[key] = dict(token=token, identity=identity, status=status,
+                                    retry_at=float("inf") if permanent else time.monotonic() + NVML_RETRY_SECONDS)
+        if row["identity"] is None:
+            status = dict(row["status"], unit="RPM", source="NVIDIA NvAPI tachometer",
+                          semantics="measured", scope="card")
+            reading = dict(rpm=None, status=status)
+        else:
+            tachometer = getattr(self, "_fan_tachometer", None)
+            if tachometer is None:
+                tachometer = self._fan_tachometer = GpuTachometer()
+            reading = tachometer.read(row["identity"])
+        status = reading["status"]
+        channels["gpu_fan_rpm"] = status
+        result.update(gpu_fans=reading.get("fans", []), gpu_fan_rpm_source=status["source"],
+                      gpu_fan_rpm_semantics=status["semantics"], gpu_fan_rpm_scope="card",
+                      gpu_fan_rpm_timestamp=status["timestamp"])
+        if reading["rpm"] is not None:
+            result["gpu_fan_rpm"] = reading["rpm"]
 
     def read_device(self, handle):
         channels = {}
@@ -361,6 +461,7 @@ class Nvidia:
             if self._query(channels, key, function, args, "%" if key == "gpu_fan_percent" else "MHz",
                            handle, *args, c.byref(value)):
                 result[key] = value.value
+        self._read_fan_rpm(handle, channels, result)
         return result
 
     def _status_text(self, code):
@@ -405,9 +506,17 @@ class Nvidia:
                       status_code=code, status_text=self._status_text(code))
         return code == 0
     def close(self):
+        self._fan_targets = frozenset()
+        getattr(self, "_fan_pci", {}).clear()
         if getattr(self, "_initialized", True):
             self._call("nvmlShutdown")
             self._initialized = False
+        tachometer = getattr(self, "_fan_tachometer", None)
+        if tachometer is not None:
+            # Sampler already closes retired NVML owners on its sole cleanup
+            # task. The initialized NvAPI/DLL shares that retained lifecycle.
+            tachometer.close()
+            self._fan_tachometer = None
 
 
 class RegistryReadings(dict):
@@ -907,7 +1016,8 @@ class Sampler:
             requested=thermal_requested and data.get("cpu_temp") is None
         )
         data.update(thermal)
-        needs_gpu = "gpu" in needed or inspecting
+        fan_targets = gpu_fan_rpm_targets(config)
+        needs_gpu = "gpu" in needed or inspecting or bool(fan_targets)
         self._retry_nvidia_cleanup()
         if (needs_gpu and self.nvidia is None and getattr(self, "_nvml_cleanup", None) is None
                 and time.monotonic() >= self.nvml_retry):
@@ -940,6 +1050,9 @@ class Sampler:
             self._release_nvidia("not_requested", retry_seconds=0)
         if self.nvidia:
             try:
+                request_fans = getattr(self.nvidia, "request_fan_rpm", None)
+                if callable(request_fans):
+                    request_fans(fan_targets)
                 reading = self.nvidia.read()
             except (OSError, RuntimeError, AttributeError) as error:
                 self._release_nvidia("read_failed", provider_error(error, "Nvidia.read"))
