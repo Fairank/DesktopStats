@@ -322,6 +322,7 @@ Window {
             Layout.minimumHeight: 28; Layout.preferredHeight: 28; Layout.maximumHeight: 28
             spacing: 6
             MetricIcon {
+                id: detailMetricIcon
                 visible: !root.overflowMode
                 name: ({network:"network",disk_io:"disk",volume:"disk",storage:"disk",cooling:"fan",memory:"memory",cpu:"cpu",gpu:"gpu",battery:"battery",power:"power"})[root.detail.family] || root.detail.icon || "sensors"; ink: root.secondary
                 Layout.preferredWidth: 16; Layout.preferredHeight: 16
@@ -334,7 +335,7 @@ Window {
                 intensity: root.detail.effect_intensity === undefined ? 0.5 : root.detail.effect_intensity
                 speed: root.detail.effect_speed === undefined ? 1 : root.detail.effect_speed
                 available: root.detail.available === true && Number.isFinite(root.detail.numeric_value)
-                motionEnabled: root.barState.motionEnabled === true
+                motionEnabled: root.barState.motionEnabled === true && !root.hostMinimized
             }
             Text {
                 id: detailTitle
@@ -1111,7 +1112,11 @@ Window {
                                     Layout.preferredHeight: 64; Layout.alignment: Qt.AlignTop
                                     active: root.showMetadata && root.visible && !root.hostMinimized
                                         && root.visibility !== Window.Minimized && appearanceSummary.visible
-                                    sourceComponent: HardwareGlyph { appearance: appearanceSummary.appearance; ink: root.secondary }
+                                    sourceComponent: HardwareGlyph {
+                                        appearance: appearanceSummary.appearance; ink: root.secondary
+                                        fanMotionEnabled: detailMetricIcon.gpuFanMotionActive
+                                        fanRotation: detailMetricIcon.gpuFanPhase*360
+                                    }
                                 }
                                 ColumnLayout {
                                     Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 4

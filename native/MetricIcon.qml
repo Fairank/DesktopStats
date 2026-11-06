@@ -40,8 +40,10 @@ Item {
     property real inboundPhase: 0
     property real outboundPhase: 0
     property real spinPhase: 0
+    property real gpuFanPhase: 0
     property double previousTick: 0
     property var clockSubscription: null
+    property bool feedbackReady: false
     readonly property var clockHost: root.Window.window ? root.Window.window.contentItem : null
     readonly property bool effectControlsValid: Number.isFinite(intensity) && intensity >= 0 && intensity <= 1
         && Number.isFinite(speed) && speed >= 0.5 && speed <= 2
@@ -142,14 +144,27 @@ Item {
     readonly property bool windowVisible: root.Window.window !== null
         && root.Window.window.visible && root.Window.window.visibility !== Window.Minimized
     readonly property bool exposed: {
-        if(!(root.width>0 && root.height>0))return false
+        // Item.visible already includes ancestor visibility. Wait until caller
+        // bindings settle before reading exposure or subscribing a new clock.
+        if(!root.feedbackReady || !root.visible || !(root.width>0 && root.height>0))return false
         for (let item = root; item; item = item.parent)
-            if (!item.visible || item.opacity <= 0) return false
+            if (item.opacity <= 0) return false
         return true
     }
     readonly property bool animationRunning: exposed && windowVisible && motionEnabled && (compositeActive?stateAvailable:available)
         && targetActivity > 0 && effectControlsValid && intensity > 0 && resolvedEffect !== "off"
         && (resolvedEffect !== "spin" || name === "fan")
+    readonly property int gpuVisibleFans: {
+        const value=root.hardwareAppearance
+        if (!value || value.kind!=="gpu" || value.confidence!=="model"
+            || !["gpu_axial","gpu_blower","gpu_hybrid"].includes(value.style)) return 0
+        const front=value.visible_fan_count, total=value.fan_count
+        if (Number.isInteger(front) && front>0 && front<=3 && (total==null || Number.isInteger(total) && front<=total)) return front
+        return Number.isInteger(total) && total>0 && total<=3 ? total : 0
+    }
+    readonly property bool gpuFanMotionActive: name==="gpu" && hasHardwareAppearance && animationRunning
+        && gpuVisibleFans>0 && ["solid","miniature","soft"].includes(hardwareAppearance.icon_set)
+        && ["hardware","pulse"].includes(resolvedEffect)
     readonly property real activityStrength: 0.28 + 0.72 * displayedLevel
     readonly property real feedbackStrength: intensity * activityStrength
     readonly property real intensityGain: effectControlsValid?intensity*(1.8-.8*intensity):0
@@ -313,6 +328,10 @@ Item {
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedInbound)/1000:(.82+.36*displayedInbound)/2400))%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedOutbound)/1000:(.82+.36*displayedOutbound)/2400))%1:0
         } else displayedLevel=converge(displayedLevel,level,smoothing)
+        // Decorative, never a measured RPM. Reuse the existing bounded clock;
+        // a delayed tick stays below half the finest radial-blade pitch.
+        if (gpuFanMotionActive)
+            gpuFanPhase=(gpuFanPhase+Math.min(1/48,elapsed*speed*(.30+.55*Math.max(0,Math.min(1,displayedLoad||displayedLevel)))/3000))%1
         // Four identical blades repeat every quarter-turn; bound a delayed
         // rotor step below half that pitch so it cannot appear to reverse.
         phase = (phase + (spinActive?Math.min(.1,elapsed/cycleDuration):elapsed/cycleDuration)) % 1
@@ -373,7 +392,7 @@ Item {
         if(name!=="fan")spinPhase=0
         syncClock()
     }
-    Component.onCompleted: syncClock()
+    Component.onCompleted: { feedbackReady=true; syncClock() }
     Component.onDestruction: EffectClock.unsubscribe(clockSubscription)
     Loader {
         objectName:"metricIconPowerCore";anchors.fill:parent;z:-1
@@ -436,6 +455,8 @@ Item {
         sourceComponent: HardwareGlyph {
             appearance: root.hardwareAppearance
             ink: root.ink
+            fanMotionEnabled: root.gpuFanMotionActive
+            fanRotation: root.gpuFanPhase*360
         }
     }
     // Exact Lucide subpaths separated into fixed structure and moving parts.

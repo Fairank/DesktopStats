@@ -88,6 +88,19 @@ Optional auxiliary fans do not prove what a user installed. Unknown is not zero,
 and unknown layouts do not borrow a fan count from the family name or a nearby
 model. The classic generic glyph does not depict a physical fan layout.
 
+### Decorative fan motion
+
+The 100 reviewed GPU models with confirmed visible impellers can supply separate
+fan layers in Solid, Miniature and Soft. Axial fans, radial blowers and mixed
+layouts retain their own positions and sizes, including opposed-face and
+auxiliary-fan layouts. Unknown layouts and passive cards have no rotating layer.
+Classic and Outline keep their existing static hardware drawings.
+
+Rotation is a decorative response to the existing icon effect and available
+activity channels. It does not report measured RPM or establish whether a real
+fan is currently spinning. CPU and memory load/thermal/electrical feedback keeps
+its existing channel semantics.
+
 ### Memory identity and limits
 
 The 16 reviewed memory part numbers cover CORSAIR, G.SKILL, Kingston, Crucial,
@@ -114,11 +127,22 @@ python tools/export_hardware_gallery.py --output qa-private/hardware-gallery.htm
 ```
 
 Use `--overwrite` when deliberately replacing an existing export. The current
-gallery embeds 1,190 static SVG variants: (103 GPU + 16 memory representatives)
+gallery includes all 122 reviewed model entries and 1,220 complete static SVG
+variants: (103 GPU + 16 memory + 3 CPU representatives)
 × 5 icon versions × 2 themes. It supports hardware type, brand, GPU chip vendor,
 generation and product-line filters, model/series search, style and background
-selection, large illustrations and an 18px top-bar comparison. The 3 CPU
-examples are not included in this GPU/memory gallery.
+selection and an 18px top-bar comparison. Open any illustration for a larger
+view, then browse the filtered items with Previous/Next or the left/right arrow
+keys; Home/End reaches the first/last item.
+
+The gallery opens with static illustrations. Its optional motion preview uses
+the prebuilt base and fan layers of the 100 eligible GPU models, with CSS
+rotating only the small fan images. It runs only for visible illustrations while
+the page is active and the system does not request reduced motion. Leaving the
+viewport, hiding/suspending the page or requesting reduced motion stops it.
+Classic, Outline, CPU, memory, unknown layouts and passive cards remain static
+in this gallery preview. This offline preview is illustrative, without live
+hardware readings or measured fan speeds.
 
 The exporter uses the actual QML drawing code without starting the installed
 application, sampler, native desktop windows or hardware discovery. The generated
@@ -161,15 +185,30 @@ The series shape modules only generate static geometry when the existing
 appearance key changes. They do not discover devices, infer fans, animate, add
 an animation clock or poll hardware.
 
-The appearance is independent of dynamic `hardware_state` and the icon effect
-switch. QML retains a single static SVG image per active hardware glyph, with a
-stable geometry key that includes the selected version. Same-value samples do
-not rebuild the image. Only the selected version produces a texture; the other
-versions do not run animations or load image sets. The existing load/thermal/electrical layers keep their own
-values and clock, including hidden/minimised pause behaviour. Other hardware
-metrics keep their existing glyphs. The original Lucide data stays unchanged.
+The shape identity and geometry key remain independent of dynamic
+`hardware_state` and rotation phase. `HardwareGlyph` defaults to one complete
+static SVG image. For a visible GPU in a modern style, a confirmed fan layout
+and an active Auto/Pulse effect can replace it with one fixed base plus one
+small retained texture per visible fan. Only each fan's local transform rotates;
+the casing and discs stay fixed. Equal identity samples and phase updates do not
+rebuild the key, SVG sources or fan-layer geometry. Only the selected icon version
+loads its textures; inactive versions do not allocate image sets.
+
+`MetricIcon` uses its existing subscription to the shared 34 ms background
+clock. GPU motion adds no subscription, timer or frame-driven cadence. Hidden,
+minimised, Off and motion-disabled states release the rotor Loader and return
+to the complete static illustration. Completion/exposure readiness gates let
+bound visibility settle before activating motion, avoiding an initialization
+binding cycle. Existing CPU/memory feedback and all real metric values remain
+independent of fan phase. Transform updates and compositing still have a cost;
+avoiding SVG regeneration is not a claim of zero CPU or GPU work.
+
 The 64px details illustration exists only while its metadata is expanded and its
-window is visible, and is released on collapse, hiding or minimisation.
+window is visible, and is released on collapse, hiding or minimisation. Its fans
+reuse the details header's existing phase and add no clock subscription. An
+explicit native-host minimised flag also pauses that header when Qt's own window
+visibility remains unchanged. Other metrics keep their existing glyphs, and the
+original Lucide data remains unchanged.
 
 ## Extending coverage
 

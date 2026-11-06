@@ -217,6 +217,7 @@ SOURCES = (
     "tests/test_memory_appearance.py",
     "tests/test_historical_hardware.py",
     "tests/test_hardware_appearance_qml.py",
+    "tests/test_hardware_fan_motion.py",
     "tests/test_hardware_icon_preferences.py",
     "tests/test_top_bar_profiles.py",
     "tests/test_top_bar_groups.py",

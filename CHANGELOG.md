@@ -18,6 +18,18 @@
   drawings and original Classic glyphs as selectable versions.
 - Draw radial impellers for reviewed blowers, the Acer BiFrost's left small
   blower/right axial arrangement and fanless fins for confirmed passive cards.
+- Animate the confirmed visible impellers of 100 reviewed GPU models in Solid,
+  Miniature and Soft with the existing Auto/Pulse feedback. Keep a fixed base
+  and small retained fan textures; phase changes update local transforms without
+  rebuilding shapes or SVG sources. Reuse the existing shared 34 ms clock and
+  metric subscription, without adding a timer or raising frame-driven cadence.
+  Rotation is decorative and does not report measured RPM or actual fan status.
+- Release rotating layers to the original static illustration when hidden,
+  minimized, Off or motion-disabled. Keep Classic/Outline hardware art static
+  and CPU/memory load, thermal and electrical channels unchanged. Share the
+  details header phase with the expanded 64px illustration without another
+  subscription. Gate startup on completed visibility bindings and explicitly
+  pause the details header for native-host minimization.
 - Extend the existing top-bar RAM metrics and expanded details with memory
   appearances. Preserve unknown form factors and mixed-module identities;
   individual module part numbers do not inherit a kit's design by suffix guesses.
@@ -37,9 +49,12 @@
   shroud motifs and feature summaries in expanded details, with an on-demand
   64px illustration. Unknown fan layouts remain neutral rather than guessed.
 - Add an offline, searchable comparison gallery exported from the real QML
-  drawing code: 1,190 embedded SVG variants across the 103 GPU and 16 memory
-  representatives, five versions and two themes, including 18px top-bar
-  comparisons and hardware/brand/vendor/generation/product-line filters.
+  drawing code: all 122 reviewed model entries, including 3 CPUs, with 1,220
+  complete static SVG variants across five versions and two themes. Retain 18px
+  top-bar comparisons and hardware/brand/vendor/generation/product-line filters.
+  Add enlarged per-item browsing with Previous/Next and keyboard navigation.
+  Keep the page static by default; optional CSS fan preview runs only in view,
+  while the page is active and reduced motion is disabled.
 - Reuse existing identity strings with a bounded offline match cache. Retain PCI
   fields already returned by DXGI without adding monitoring queries or polling.
   The series drawings are static vectors and add no sampling or animation clock;

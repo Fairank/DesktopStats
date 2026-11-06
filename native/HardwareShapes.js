@@ -228,3 +228,42 @@ function source(geometryKey) {
         + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>'
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg)
 }
+
+function layers(geometryKey) {
+    const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
+    if (parts.length !== 11) return {baseSource:source(key({}, "#69788c")),rotors:[]}
+    // This public API accepts only the same canonical, allowlisted fields as
+    // source(). No SVG or caller-supplied descriptor body is parsed or trusted.
+    const canonical = key({kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
+        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10]}, parts[7])
+    if (canonical !== geometryKey) return layers(canonical)
+    const count = Number(parts[4])
+    if (parts[0] !== "gpu" || ["solid","miniature","soft"].indexOf(parts[10]) < 0
+            || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
+            || [1,2,3].indexOf(count) < 0)
+        return {baseSource:source(canonical),rotors:[]}
+
+    const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
+        fan_count:count,shroud:parts[5],accent:parts[6],ink:parts[7],series_id:parts[9],icon_set:parts[10]}
+    // One normal style body pass supplies fixed casing/discs and final fan
+    // coordinates. The collector is local, including all per-style offsets and
+    // each fan's reviewed radius/type. No complete-card regeneration per frame.
+    const collector = []
+    const body = parts[10] === "solid" ? Solid.body(state,collector)
+        : parts[10] === "miniature" ? Miniature.body(state,collector)
+        : Soft.body(state,collector)
+    const baseSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
+        + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>'
+    const rotors = collector.map(function(rotor) {
+        // Every small image has a local origin and identical six-unit box.
+        // Soft draws in a 3.1-unit basis, so normalize inside its static SVG,
+        // keeping radius in the same 24-unit card coordinates as cx and cy.
+        const scaled = rotor.basis === 3 ? rotor.body
+            : '<g transform="scale(' + (3 / rotor.basis) + ')">' + rotor.body + '</g>'
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 -3 6 6" width="6" height="6">'
+            + '<g stroke-linecap="round" stroke-linejoin="round">' + scaled + '</g></svg>'
+        return {cx:rotor.cx,cy:rotor.cy,radius:rotor.radius,kind:rotor.kind,
+            source:"data:image/svg+xml;utf8," + encodeURIComponent(svg)}
+    })
+    return {baseSource:"data:image/svg+xml;utf8," + encodeURIComponent(baseSvg),rotors:rotors}
+}
