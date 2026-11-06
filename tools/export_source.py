@@ -28,7 +28,7 @@ FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 HardwareGlyph.qml HardwareShapes.js
-HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js
+HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js
 HardwareFanDesigns.js HardwareFanProfileData.js
 HardwareBoardDesigns.js HardwareBoardProfileData.js
 HardwareVariantGroupA.js HardwareVariantGroupB.js HardwareVariantGroupC.js

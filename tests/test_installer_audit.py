@@ -1333,6 +1333,62 @@ class LocalServerCleanQuitAuditTests(unittest.TestCase):
                 self.assertEqual(self.callbacks, [])
                 self.logger.exception.assert_called_once_with("Local command rejected")
 
+    def style_controller(self, *, applied=True):
+        controller = self.runtime.controller
+        controller.changeTopBar = Mock()
+        controller.applyTopBar = Mock(return_value=applied)
+        controller.revertTopBarDraft = Mock()
+        controller.saved = {"top_bar": {"hardware_icon_style": "miniature"}}
+        return controller
+
+    def test_clean_style_change_uses_scoped_save_without_quit_or_queued_work(self):
+        controller = self.style_controller()
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertEqual(reply, dict(ok=True, pid=7007, hardware_icon_style="miniature"))
+        controller.changeTopBar.assert_called_once_with("hardware_icon_style", "miniature")
+        controller.applyTopBar.assert_called_once_with()
+        controller.revertTopBarDraft.assert_not_called()
+        self.server.application.quit.assert_not_called()
+        self.assertEqual(self.callbacks, [])
+
+    def test_style_change_refuses_unknown_values_stale_instance_and_unsaved_input(self):
+        controller = self.style_controller()
+        cases = [(None, 7007, False, False), ("unknown", 7007, False, False),
+                 ([], 7007, False, False), ("miniature", True, False, False),
+                 ("miniature", 7008, False, False), ("miniature", 7007, True, False),
+                 ("miniature", 7007, False, True)]
+        for style, expected, dirty, pending in cases:
+            with self.subTest(style=style, expected=expected, dirty=dirty, pending=pending):
+                controller.dirty, self.pending = dirty, pending
+                self.assertFalse(self.request(dict(command="hardware_icon_style", style=style,
+                                                  expected_pid=expected))["ok"])
+                controller.changeTopBar.assert_not_called()
+                controller.applyTopBar.assert_not_called()
+                self.server.application.quit.assert_not_called()
+
+    def test_failed_style_save_reverts_only_its_new_draft(self):
+        controller = self.style_controller(applied=False)
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertFalse(reply["ok"])
+        controller.revertTopBarDraft.assert_called_once_with()
+        self.server.application.quit.assert_not_called()
+
+    def test_pending_same_config_replacement_refuses_style_change_without_new_draft(self):
+        controller = self.style_controller()
+        controller.replacementPending = True
+        self.assertFalse(controller.dirty)
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertEqual(reply["reason"], "unsaved_changes")
+        controller.changeTopBar.assert_not_called()
+        controller.applyTopBar.assert_not_called()
+
+    def test_successful_noop_save_cannot_claim_an_unapplied_style(self):
+        controller = self.style_controller()
+        controller.saved["top_bar"]["hardware_icon_style"] = "classic"
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertFalse(reply["ok"])
+        controller.revertTopBarDraft.assert_called_once_with()
+
 
 if __name__ == "__main__":
     unittest.main()

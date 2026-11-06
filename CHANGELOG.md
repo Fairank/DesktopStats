@@ -1,5 +1,17 @@
 # Changes
 
+## 0.29.0-preview.3
+
+- Add an optional Hand-drawn Lines treatment with simple slightly uneven ink
+  contours and no solid color casing or decorative faces. Existing selected
+  illustrations remain unchanged until the user applies another style.
+
+- Update temperature-startup status after a verified fresh CPU reading arrives,
+  retaining one consent attempt per app session and the fullscreen deferral.
+- Support a bounded local hardware-icon preference change without restarting
+  the app or temperature helper. Reject unknown styles, changed instance IDs
+  and unsaved settings; use the existing top-bar-only save and rollback.
+
 ## 0.29.0-preview.2
 
 - Add optional Cute Cartoon artwork for all 178 current GPU, CPU and memory

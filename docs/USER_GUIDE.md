@@ -2,7 +2,7 @@
 
 Native Windows top-bar monitoring and optional desktop widgets, with real
 hardware readings and local history. Preview release
-**0.29.0-preview.2** organizes settings around one live top-bar
+**0.29.0-preview.3** organizes settings around one live top-bar
 preview, separate content/appearance tasks and contextual desktop controls.
 Desktop widgets, top bar and preferences save independently. Original application
 source is licensed under [PolyForm Noncommercial 1.0.0](../LICENSING.md).
@@ -66,9 +66,11 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 
 开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。通用风扇符号与功率流动属于装饰反馈。预览版的实物显卡叶轮单独跟随当前 RPM，以固定 120 倍慢放，速度偏好不改变其比例；详见下文显卡风扇说明。
 
-### 硬件图标与型号（0.28.0 预览版）
+### 硬件图标与型号（0.29.0 预览版）
 
-在 **顶部栏 → 外观 → 硬件图标** 选择 **经典通用、结构线稿、精简实物、微型实物、柔和双色、可爱卡通**。六种版本都可选择，旧设置默认使用经典通用（Classic）；切换后按现有 **应用顶部栏** 流程保存。实物及卡通风格按已核型号绘制盖板、风扇、外露 PCB 边缘、分段金手指、挡板和散热鳍片边缘；有官方依据时保留型号特征。卡通版覆盖现有 178 个型号，以及磁盘、网络、电池、风扇与其他指标符号；圆润描边和小表情属于插画，不代表厂商印刷或实测状态。标准 32 像素顶部栏中，实物及卡通显卡使用 30×22 显示区域，CPU/内存为 22×22；经典与线稿仍为 18×18。未知外形与叶片继续明确标注，不补造内部元件或走线。
+**手绘线稿** 使用简单、略有不齐的线条和留白，不加立体阴影、大片填色或表情。图标切换不需要重启软件，已有 CPU 温度连接会继续使用；只有软件本身重启才需要按已选偏好重新确认系统授权。
+
+在 **顶部栏 → 外观 → 硬件图标** 选择 **经典通用、结构线稿、精简实物、微型实物、柔和双色、可爱卡通、手绘线稿**。七种版本都可选择，旧设置默认使用经典通用（Classic）；切换后按现有 **应用顶部栏** 流程保存。实物及卡通风格按已核型号绘制盖板、风扇、外露 PCB 边缘、分段金手指、挡板和散热鳍片边缘；有官方依据时保留型号特征。卡通版覆盖现有 178 个型号，以及磁盘、网络、电池、风扇与其他指标符号；圆润描边和小表情属于插画，不代表厂商印刷或实测状态。标准 32 像素顶部栏中，实物及卡通显卡使用 30×22 显示区域，CPU/内存为 22×22；经典与原结构线稿仍为 18×18；手绘显卡为 30×22。未知外形与叶片继续明确标注，不补造内部元件或走线。
 
 基础图库包括 103 个显卡代表型号、16 个内存代表型号，以及原有 CPU 示例。经过核实且图示已就绪的完整版本型号会另行加入匹配；同系列的 OC、非 OC、白色、特殊供电和修订版分别记录，不通过删除型号后缀自动合并。有证据证明外观相同的版本才共用图示；结构不同的版本需要单独实现。例如 MSI RTX 5090 SUPRIM SOC/OC 使用独立金属盖板和 STORMFORCE 七叶前扇，不套用 RTX 4090 的外壳；ROG Astral RTX 5090 标准版/OC 版在逐项核对官方图库和外部规格后，共用已核 Astral RTX 5080 OC 的可见散热外观。共用外观不会把另一型号的芯片、显存或读数带过来。
 
@@ -176,8 +178,8 @@ entries: 147 GPU, 28 RAM and 3 CPU. Its 34 explicit artwork registrations includ
 the two earlier SUPRIM 5090 entries and 32 new treatments. This is a bounded
 inventory, not a claim of full market coverage or complete visual verification.
 
-All six selectable icon versions remain available: Classic, Outline, Solid,
-Miniature, Soft and Cute Cartoon. Existing settings retain Classic. Reviewed model colors,
+All seven selectable icon versions remain available: Classic, Outline, Solid,
+Miniature, Soft, Cute Cartoon and Hand-drawn Lines. Existing settings retain Classic. Reviewed model colors,
 exposed PCB edges, separated contacts, bracket and heatsink edges refine the
 hardware drawings. Internal PCB layouts, unverified notches and bare-board
 lengths are not invented. Electrical PCIe lanes do not establish mechanical

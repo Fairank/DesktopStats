@@ -29,7 +29,7 @@ from memory_appearance import appearance_for_memory
 from tests import test_top_bar_module_qml as fixture
 
 ROOT = Path(__file__).resolve().parents[1]
-STYLES = ("solid", "miniature", "soft", "cartoon")
+STYLES = ("solid", "miniature", "soft", "cartoon", "sketch")
 DUAL = "DUAL-RTX4060-O8G"
 
 
@@ -197,8 +197,18 @@ Window {
             cx, cy = [float(part) for part in re.split(r"[,\s]+", match.group(1).strip())]
             scales = [float(part) for part in re.split(r"[,\s]+", match.group(2).strip())]
             self.assertAlmostEqual(scales[0], scales[-1])
-            radius = max(float(child.get("r")) for child in group if child.tag.endswith("circle")) * scales[0]
-            kind = "blower" if group.get("class") == "hardware-blower" else "axial"
+            plane = group
+            if plane.get("class") not in ("hardware-fan", "hardware-blower"):
+                # A line-art rotor can be separate from its fixed opening. Read
+                # that independently drawn ring rather than mistaking its hub
+                # circle for the complete fan; moving descriptors are not used.
+                matches = [node for node in root.iter()
+                           if node.get("class") in ("hardware-fan", "hardware-blower")
+                           and node.get("transform") == group.get("transform")]
+                self.assertEqual(len(matches), 1)
+                plane = matches[0]
+            radius = max(float(child.get("r")) for child in plane if child.tag.endswith("circle")) * scales[0]
+            kind = "blower" if plane.get("class") == "hardware-blower" else "axial"
             result.append((cx, cy, radius, kind))
         return sorted(result)
 

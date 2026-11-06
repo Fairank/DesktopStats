@@ -100,6 +100,73 @@ class StartupTests(unittest.TestCase):
         self.update()
         self.assertEqual(sum(row[0] == "launch" for row in self.api.calls), 2)
 
+    def test_successful_launch_tracks_fresh_cached_temperature_without_any_new_native_work(self):
+        self.assertEqual(self.update()["state"], "launched")
+        calls = list(self.api.calls)
+        foreground = Mock(side_effect=AssertionError("Post-consent samples must not query foreground"))
+        self.data.update(cpu_temp=61.0, metric_timestamps={"cpu_temp": WALL - 1})
+        for _ in range(30):
+            self.assertEqual(self.update(fullscreen=foreground),
+                             dict(state="ready", reason="existing_temperature", attempted=True, error=0))
+        self.assertEqual(self.api.calls, calls)
+        self.factory.assert_called_once_with()
+        foreground.assert_not_called()
+
+    def test_post_launch_ready_waiting_and_recovery_use_sample_timestamp_not_new_frame_time(self):
+        now = [WALL]
+        self.launcher = startup.CpuTemperatureLauncher(**(self.options | {"wall_clock": lambda: now[0]}))
+        self.assertEqual(self.update()["state"], "launched")
+        calls = list(self.api.calls)
+        foreground = Mock(side_effect=AssertionError("No foreground reads after consent"))
+        self.data.update(cpu_temp=62.0, metric_timestamps={"cpu_temp": now[0]})
+        self.assertEqual(self.update(fullscreen=foreground)["state"], "ready")
+        now[0] += startup.FRESH_SECONDS + .01
+        # A fresh overall frame cannot make its expired temperature fresh.
+        self.data["time"] = now[0]
+        self.assertEqual(self.update(fullscreen=foreground),
+                         dict(state="launched", reason="awaiting_sensor", attempted=True, error=0))
+        self.data.update(cpu_temp=None, metric_timestamps={"cpu_temp": now[0]})
+        self.assertEqual(self.update(fullscreen=foreground)["reason"], "awaiting_sensor")
+        self.data.update(cpu_temp=63.0, metric_timestamps={"cpu_temp": now[0]})
+        self.assertEqual(self.update(fullscreen=foreground)["state"], "ready")
+        self.assertEqual(self.api.calls, calls)
+        self.factory.assert_called_once_with()
+        foreground.assert_not_called()
+        self.launcher.close()
+        self.assertEqual(self.update(fullscreen=foreground)["state"], "closed")
+        self.assertEqual(self.api.calls, calls + [("close",)])
+
+    def test_post_launch_invalid_samples_do_not_report_ready_or_relaunch(self):
+        self.update()
+        calls = list(self.api.calls)
+        foreground = Mock(side_effect=AssertionError("No post-launch foreground reads"))
+        for value, stamp in ((False, WALL), (0, WALL), (125, WALL), (float("nan"), WALL),
+                             (float("inf"), WALL), (60, WALL - 8.1), (60, WALL + 1),
+                             (60, None)):
+            with self.subTest(value=value, timestamp=stamp):
+                self.data.update(cpu_temp=value, metric_timestamps={"cpu_temp": stamp})
+                self.assertEqual(self.update(fullscreen=foreground),
+                                 dict(state="launched", reason="awaiting_sensor", attempted=True, error=0))
+        self.assertEqual(self.api.calls, calls)
+        self.factory.assert_called_once_with()
+        foreground.assert_not_called()
+
+    def test_terminal_cancel_or_failure_is_not_replaced_by_a_later_fresh_reading(self):
+        fresh = dict(time=WALL, cpu_temp=60, metric_timestamps={"cpu_temp": WALL})
+        foreground = Mock(side_effect=AssertionError("Terminal failures must not query foreground"))
+        for result in (dict(launched=False, error=1223), dict(launched=False, error=5)):
+            with self.subTest(result=result):
+                api = FakeApi()
+                api.result = result
+                factory = Mock(return_value=api)
+                launcher = startup.CpuTemperatureLauncher(**(self.options | {"api_factory": factory}))
+                terminal = launcher.update(config(), dict(time=WALL), fullscreen=False)
+                calls = list(api.calls)
+                self.assertEqual(launcher.update(config(), fresh, fullscreen=foreground), terminal)
+                self.assertEqual(api.calls, calls)
+                factory.assert_called_once_with()
+        foreground.assert_not_called()
+
     def test_cancel_does_not_retry_even_after_new_samples_and_preference_toggle(self):
         self.api.result = dict(launched=False, error=1223)
         self.assertEqual(self.update()["state"], "cancelled")
@@ -529,6 +596,23 @@ class RuntimeSignalTests(unittest.TestCase):
                     self.runtime.controller.dataChanged.emit()
                 self.app.processEvents()
                 self.assertEqual(events, {key: ["composition_changed"] for key in events})
+
+    def test_post_launch_freshness_changes_do_not_queue_more_consent_or_material_recovery(self):
+        api, events = self.consent_fixture()
+        self.runtime.controller.dataChanged.emit()
+        self.app.processEvents()
+        self.assertEqual(events, {key: ["composition_changed"] for key in events})
+        calls = list(api.calls)
+        with patch.object(self.runtime_module, "foreground_fullscreen",
+                          side_effect=AssertionError("No post-consent foreground queries")):
+            for stamp, expected in ((WALL, "ready"), (WALL - startup.FRESH_SECONDS - .1, "launched"),
+                                    (WALL, "ready")):
+                self.runtime.controller._data.update(cpu_temp=64, metric_timestamps={"cpu_temp": stamp})
+                self.runtime.controller.dataChanged.emit()
+                self.assertEqual(self.runtime.cpu_temperature_launcher.status()["state"], expected)
+            self.app.processEvents()
+        self.assertEqual(api.calls, calls)
+        self.assertEqual(events, {key: ["composition_changed"] for key in events})
 
     def test_healthy_deferred_and_source_sessions_never_queue_recovery(self):
         _api, events = self.consent_fixture()

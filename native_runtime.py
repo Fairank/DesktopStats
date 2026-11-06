@@ -1335,6 +1335,28 @@ class LocalServer(QLocalServer):
             elif self.runtime and action == "diagnose" and isinstance(message.get("path"), str):
                 self.runtime.diagnose(message["path"])
                 response = {"ok": True}
+            elif self.runtime and action == "hardware_icon_style":
+                from top_bar_config import HARDWARE_ICON_STYLES
+
+                selected, expected = message.get("style"), message.get("expected_pid")
+                controller = self.runtime.controller
+                if type(expected) is not int or expected != os.getpid():
+                    response = {"ok": False, "reason": "instance_changed"}
+                elif not isinstance(selected, str) or selected not in HARDWARE_ICON_STYLES:
+                    response = {"ok": False, "reason": "invalid_style"}
+                elif (controller.dirty or getattr(controller, "replacementPending", False)
+                      or bool(self.runtime.settings.property("pendingEdits"))):
+                    response = {"ok": False, "dirty": True, "reason": "unsaved_changes"}
+                else:
+                    # One allowlisted preference uses the existing scoped save;
+                    # sampling, temperature helper and application PID survive.
+                    controller.changeTopBar("hardware_icon_style", selected)
+                    applied = (controller.applyTopBar()
+                               and controller.saved["top_bar"]["hardware_icon_style"] == selected)
+                    if not applied:
+                        controller.revertTopBarDraft()
+                    response = {"ok": bool(applied), "pid": os.getpid(),
+                                "hardware_icon_style": selected if applied else None}
             elif self.runtime and action == "status":
                 try:
                     manager = getattr(self.runtime, "top_bar", None)

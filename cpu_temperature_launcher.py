@@ -68,7 +68,16 @@ class CpuTemperatureLauncher:
                     error=self._error)
 
     def update(self, config, data, *, fullscreen=None):
-        if self._closed or self._terminal or self._updating:
+        if self._closed or self._updating:
+            return self.status()
+        if self._terminal:
+            # Consent remains once per session. After a successful launch only
+            # the existing cached sample can change this diagnostic state; a
+            # missing/stale reading must never trigger another native query.
+            if self._attempted and self._state in ("launched", "ready"):
+                if temperature_ready(data, self._wall()):
+                    return self._set("ready", "existing_temperature")
+                return self._set("launched", "awaiting_sensor")
             return self.status()
         if (self._headless or self._platform != "win32" or not self._frozen
                 or self._environ.get("DESKTOP_STATS_CPU_BRIDGE_DISABLED") == "1"

@@ -277,7 +277,8 @@ ColumnLayout {
             implicitHeight: 34; Accessible.name: ui.t("硬件图标")
             model: [{id:"classic",label:ui.t("经典通用")},{id:"outline",label:ui.t("结构线稿")},
                     {id:"solid",label:ui.t("精简实物")},{id:"miniature",label:ui.t("微型实物")},
-                    {id:"soft",label:ui.t("柔和双色")},{id:"cartoon",label:ui.t("可爱卡通")}]
+                    {id:"soft",label:ui.t("柔和双色")},{id:"cartoon",label:ui.t("可爱卡通")},
+                    {id:"sketch",label:ui.t("手绘线稿")}]
             value: root.config.hardware_icon_style || "classic"
             onPicked: selected => stats.changeTopBar("hardware_icon_style", selected)
         }

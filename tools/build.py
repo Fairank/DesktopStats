@@ -232,6 +232,7 @@ SOURCES = (
     "tests/test_historical_hardware.py",
     "tests/test_hardware_appearance_qml.py",
     "tests/test_hardware_cartoon.py",
+    "tests/test_hardware_sketch.py",
     "tests/test_hardware_fan_motion.py",
     "tests/test_hardware_fan_profiles.py",
     "tests/test_hardware_board_details.py",

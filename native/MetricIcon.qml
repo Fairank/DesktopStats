@@ -16,8 +16,8 @@ Item {
     property var hardwareState: ({})
     property var hardwareAppearance: ({})
     property string iconStyle: "classic"
-    readonly property string cartoonSymbol: iconStyle === "cartoon" && !hasHardwareAppearance
-        ? HardwareShapes.genericSource(name, ink, spinActive) : ""
+    readonly property string cartoonSymbol: ["cartoon","sketch"].includes(iconStyle) && !hasHardwareAppearance
+        ? HardwareShapes.genericSource(name, ink, spinActive, iconStyle) : ""
     readonly property bool hasHardwareAppearance: (processorGlyph || name === "memory")
         && hardwareAppearance && hardwareAppearance.kind === name
         && hardwareAppearance.icon_set !== "classic"
@@ -182,7 +182,7 @@ Item {
     readonly property real gpuFanDisplaySlowdown: 120
     readonly property bool gpuFanCanAnimate: name==="gpu" && hasHardwareAppearance && compositeActive
         && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
-        && gpuVisibleFans>0 && ["solid","miniature","soft","cartoon"].includes(hardwareAppearance.icon_set)
+        && gpuVisibleFans>0 && ["solid","miniature","soft","cartoon","sketch"].includes(hardwareAppearance.icon_set)
         && hardwareAppearance.fan_profile && hardwareAppearance.fan_profile.render_ready===true
         && resolvedEffect==="hardware"
     readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning

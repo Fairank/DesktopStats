@@ -102,7 +102,7 @@ class DemandTests(NoHardwareCase):
                                  items=[dict(metric=metric, prefs=prefs)]))
 
     def test_only_enabled_modern_automatic_gpu_icons_request_selected_target(self):
-        for style in ("solid", "miniature", "soft", "cartoon"):
+        for style in ("solid", "miniature", "soft", "cartoon", "sketch"):
             self.assertEqual(sensors.gpu_fan_rpm_targets(self.config(style)), {"0"})
             self.assertEqual(sensors.gpu_fan_rpm_targets(self.config(style, target="1")), {"1"})
         for style in ("classic", "outline"):

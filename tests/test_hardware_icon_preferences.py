@@ -1,15 +1,18 @@
 """Hardware-icon versions: strict schema, scoped drafts and synthetic offscreen UI."""
 import copy
 import json
+import logging
 import os
+import time
 import unittest
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("QT_QUICK_BACKEND", "software")
 
 from PySide6.QtCore import QCoreApplication, Qt
-from PySide6.QtTest import QTest
+from PySide6.QtTest import QSignalSpy, QTest
 from shiboken6 import getCppPointer
 
 from configuration_scopes import merge_scope, rebase_saved_changes
@@ -36,8 +39,8 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(old, before)
         self.assertEqual(default_top_bar()["hardware_icon_style"], "classic")
 
-    def test_all_six_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
-        self.assertEqual(HARDWARE_ICON_STYLES, ("classic", "outline", "solid", "miniature", "soft", "cartoon"))
+    def test_all_seven_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
+        self.assertEqual(HARDWARE_ICON_STYLES, ("classic", "outline", "solid", "miniature", "soft", "cartoon", "sketch"))
         for style in HARDWARE_ICON_STYLES:
             with self.subTest(style=style):
                 config = copy.deepcopy(DEFAULT)
@@ -73,7 +76,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(rebased["widgets"]["cpu"]["title"], "Pending")
 
     def test_control_labels_and_note_are_available_in_all_eight_languages(self):
-        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通",
+        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通", "手绘线稿",
                 "切换外观版本，自动匹配规则和读数保持一致。")
         self.assertEqual(len(LANGUAGES), 8)
         for language in LANGUAGES.keys() - {"zh-CN"}:
@@ -99,6 +102,65 @@ class HardwareIconSchemaTests(unittest.TestCase):
                     self.assertEqual(controller._draft, before)
                 self.assertEqual(controller.scopeDirty, dict(desktop=False, preferences=False, topbar=True))
                 save.assert_not_called()
+            finally:
+                controller.close()
+            native.assert_not_called()
+            process.assert_not_called()
+
+    def test_live_style_command_commits_only_the_style_without_discarding_cached_temperature(self):
+        import native_controller as controls
+        from PySide6.QtWidgets import QApplication
+        from tests import test_installer_audit as ipc_fixture
+
+        application = QApplication.instance() or QApplication([])
+        source = validate(copy.deepcopy(DEFAULT))
+        source["top_bar"]["hardware_icon_style"] = "cartoon"
+        expected = copy.deepcopy(source)
+        expected["top_bar"]["hardware_icon_style"] = "miniature"
+        now = time.time()
+        readings = dict(time=now, cpu_temp=63.0, cpu_temp_source="Synthetic authorized CPU cache",
+                        metric_timestamps={"cpu_temp": now}, external_sensors={})
+        before = copy.deepcopy(readings)
+        with (patch("ctypes.WinDLL", side_effect=AssertionError("No native API")) as native,
+              patch("subprocess.Popen", side_effect=AssertionError("No process")) as process,
+              patch("threading.Thread.start", side_effect=AssertionError("No worker")),
+              patch.object(controls, "load", return_value=source),
+              patch.object(controls, "save") as save):
+            controller = controls.Controller()
+            try:
+                controller._data = readings
+                applied = QSignalSpy(controller.topBarApplyRequested)
+                ipc_fixture.LocalServerCleanQuitAuditTests.setUpClass()
+                timer = SimpleNamespace(singleShot=Mock(side_effect=AssertionError("No queued restart")))
+                logger = Mock(spec=logging)
+                namespace = dict(json=json, os=SimpleNamespace(getpid=lambda: 7007),
+                                 logging=logger, QTimer=timer)
+                exec(compile(ipc_fixture.LocalServerCleanQuitAuditTests.method,
+                             "<actual LocalServer.read; actual Controller; fake socket>", "exec"), namespace)
+                runtime = SimpleNamespace(
+                    controller=controller,
+                    settings=SimpleNamespace(property=lambda name: False),
+                    show_settings=Mock(side_effect=AssertionError("No settings window")),
+                )
+                server = SimpleNamespace(runtime=runtime, application=SimpleNamespace(quit=Mock()))
+                client = ipc_fixture.FakeClient(dict(command="hardware_icon_style", style="miniature",
+                                                    expected_pid=7007))
+                namespace["read"](server, client)
+                self.assertEqual(json.loads(client.output),
+                                 dict(ok=True, pid=7007, hardware_icon_style="miniature"))
+                self.assertTrue(client.disconnected)
+                save.assert_called_once_with(expected)
+                self.assertEqual(controller.saved, expected)
+                self.assertEqual(controller.draft, expected)
+                self.assertFalse(controller.dirty)
+                self.assertEqual(applied.count(), 1)
+                self.assertIs(controller._data, readings)
+                self.assertEqual(controller._data, before)
+                self.assertIsNone(controller.thread)
+                timer.singleShot.assert_not_called()
+                server.application.quit.assert_not_called()
+                runtime.show_settings.assert_not_called()
+                logger.exception.assert_not_called()
             finally:
                 controller.close()
             native.assert_not_called()

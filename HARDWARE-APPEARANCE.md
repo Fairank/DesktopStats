@@ -1,5 +1,15 @@
 # Hardware appearance catalog
 
+Hand-drawn Lines uses a separate outline renderer: lightly uneven fixed curves,
+open space and sparse structure lines, without solid case colors or faces.
+Reviewed fan contours, centers and directions and RAM key geometry remain fixed.
+The unevenness is generated once with the retained SVG, never on animation ticks.
+
+Local code-only style changes use the existing current-user pipe and scoped
+top-bar save, without restarting the sampler or its temperature bridge. They
+require the expected process ID, an allowlisted style and no pending edits or
+settings-import preview. Failed saves revert only the new style draft.
+
 The 0.29.0 preview adds Cute Cartoon as a sixth optional drawing treatment for
 every current model and the generic metric symbols. Rounded contours and small
 expressions are illustration, while reviewed geometry, unknown fields and real
