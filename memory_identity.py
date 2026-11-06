@@ -20,7 +20,7 @@ MAX_DEVICES = 64
 def requested(config):
     bar = config.get("top_bar", {})
     return bool(bar.get("enabled") is True
-                and bar.get("hardware_icon_style") in ("outline", "solid", "miniature", "soft", "cartoon", "sketch")
+                and bar.get("hardware_icon_style") in ("outline", "solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile")
                 and any(isinstance(item, dict) and str(item.get("metric", "")).startswith("ram_")
                         and not item.get("prefs", {}).get("sensor_bindings")
                         for item in bar.get("items", ())))

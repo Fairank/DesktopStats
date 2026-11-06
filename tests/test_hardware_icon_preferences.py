@@ -40,7 +40,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(default_top_bar()["hardware_icon_style"], "classic")
 
     def test_all_seven_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
-        self.assertEqual(HARDWARE_ICON_STYLES, ("classic", "outline", "solid", "miniature", "soft", "cartoon", "sketch"))
+        self.assertEqual(HARDWARE_ICON_STYLES, ("cartoon", "notebook_smile", "notebook_color", "notebook_line", "classic", "outline", "solid", "miniature", "soft", "sketch"))
         for style in HARDWARE_ICON_STYLES:
             with self.subTest(style=style):
                 config = copy.deepcopy(DEFAULT)
@@ -76,7 +76,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(rebased["widgets"]["cpu"]["title"], "Pending")
 
     def test_control_labels_and_note_are_available_in_all_eight_languages(self):
-        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通", "手绘线稿",
+        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通", "手绘线稿", "随手线条", "手涂淡彩", "笑脸手绘", "1 · 原版", "2 · 可爱笑脸", "3 · 彩色手绘", "4 · 纯线条",
                 "切换外观版本，自动匹配规则和读数保持一致。")
         self.assertEqual(len(LANGUAGES), 8)
         for language in LANGUAGES.keys() - {"zh-CN"}:
@@ -222,14 +222,14 @@ class HardwareIconPreferenceUiTests(unittest.TestCase):
         self.assertLess(point.x(), self.window.width())
         self.ui.change("refresh", .75)
         self.ui.changeWidget("cpu", "title", "Pending")
-        self.choose(1)
+        self.choose(HARDWARE_ICON_STYLES.index("outline"))
         self.click("applyButton")
         self.assertEqual(self.ui._saved["top_bar"]["hardware_icon_style"], "outline")
         self.assertEqual(self.ui._saved["refresh"], DEFAULT["refresh"])
         self.assertEqual(self.ui._draft["refresh"], .75)
         self.assertEqual(self.ui._draft["widgets"]["cpu"]["title"], "Pending")
         self.assertEqual(self.save.call_count, 1)
-        self.choose(4)
+        self.choose(HARDWARE_ICON_STYLES.index("soft"))
         self.click("revertButton")
         self.assertEqual(self.ui._draft["top_bar"]["hardware_icon_style"], "outline")
         self.assertEqual(self.ui._draft["refresh"], .75)

@@ -4,13 +4,15 @@
 .import "HardwareSoft.js" as Soft
 .import "HardwareCartoon.js" as Cartoon
 .import "HardwareSketch.js" as Sketch
+.import "HardwareNotebook.js" as Notebook
 .import "HardwareSeriesShapes.js" as SeriesCatalog
 .import "HardwareMemoryShapes.js" as Memory
 .import "HardwareBoardDesigns.js" as Board
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
-// No mutable cache, polling, external resources, SVG text or frame work.
+// No mutable cache, polling, external resources or frame work. Notebook CPU
+// marks use bounded catalog text; arbitrary hardware names never enter SVG.
 
 var vendors = ["intel", "amd", "nvidia", "unknown"]
 var boards = ["asus", "msi", "gigabyte", "zotac", "sapphire", "powercolor", "asrock",
@@ -71,10 +73,13 @@ function key(appearance, ink) {
     const defaults = {intel: "#2479b5", amd: "#c65b56", nvidia: "#729b42", unknown: "#77818f"}
     const parts = [kind, vendor, board, style, count, shroud,
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
-        choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon", "sketch"], "outline")]
+        choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon", "sketch",
+            "notebook_line", "notebook_color", "notebook_smile"], "outline")]
     // Original Outline keys and art stay byte-stable. Exact exterior details
     // require an independently guarded model identity, including on old cards.
-    const model=parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):""
+    const model=kind==="cpu" && parts[10].indexOf("notebook_")===0
+        ? Notebook.cpuModelKey({kind:kind,id:input.id,style:style,vendor:vendor,confidence:input.confidence})
+        : parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):""
     if(model)parts.push(model)
     return parts.join("|")
 }
@@ -233,7 +238,8 @@ function source(geometryKey) {
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
-    const body = parts[10] === "sketch" ? Sketch.body(state)
+    const body = parts[10].indexOf("notebook_")===0 ? Notebook.body(state)
+        : parts[10] === "sketch" ? Sketch.body(state)
         : parts[10] === "cartoon" ? Cartoon.body(state)
         : parts[0] === "memory" ? Memory.body(state) : parts[10] === "solid" ? Solid.body(state)
         : parts[10] === "miniature" ? Miniature.body(state)
@@ -252,7 +258,8 @@ function layers(geometryKey) {
     const canonical = key(inputFromParts(parts), parts[7])
     if (canonical !== geometryKey) return layers(canonical)
     const count = Number(parts[4])
-    if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon","sketch"].indexOf(parts[10]) < 0
+    if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon","sketch",
+            "notebook_line","notebook_color","notebook_smile"].indexOf(parts[10]) < 0
             || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
             || [1,2,3].indexOf(count) < 0)
         return {baseSource:source(canonical),rotors:[]}
@@ -263,7 +270,8 @@ function layers(geometryKey) {
     // coordinates. The collector is local, including all per-style offsets and
     // each fan's reviewed radius/type. No complete-card regeneration per frame.
     const collector = []
-    const body = parts[10] === "sketch" ? Sketch.body(state,collector)
+    const body = parts[10].indexOf("notebook_")===0 ? Notebook.body(state,collector)
+        : parts[10] === "sketch" ? Sketch.body(state,collector)
         : parts[10] === "cartoon" ? Cartoon.body(state,collector)
         : parts[10] === "solid" ? Solid.body(state,collector)
         : parts[10] === "miniature" ? Miniature.body(state,collector)
@@ -286,7 +294,9 @@ function layers(geometryKey) {
 
 // Generic quantity/device symbols deliberately carry no retail identity.
 function genericSource(kind, ink, moving, style) {
-    const body = style === "sketch" ? Sketch.generic(kind, hex(ink,"#69788c"), moving === true)
+    const body = ["notebook_line","notebook_color","notebook_smile"].indexOf(style)>=0
+        ? Notebook.generic(kind, hex(ink,"#69788c"), moving === true, style)
+        : style === "sketch" ? Sketch.generic(kind, hex(ink,"#69788c"), moving === true)
         : Cartoon.generic(kind, hex(ink,"#69788c"), moving === true)
     if (!body) return ""
     return "data:image/svg+xml;utf8," + encodeURIComponent(

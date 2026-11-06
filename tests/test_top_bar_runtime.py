@@ -2045,10 +2045,10 @@ class QmlTopBarTests(unittest.TestCase):
     def test_modern_hardware_icon_boxes_fit_all_bar_heights_and_measured_hit_regions(self):
         cases = [('gpu', 'gpu_usage', height, icon_set)
                  for height in (28, 32, 40)
-                 for icon_set in ('classic', 'outline', 'solid', 'miniature', 'soft', 'cartoon', 'sketch')]
+                 for icon_set in ('classic', 'outline', 'solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile')]
         cases += [(kind, metric, 32, icon_set)
                   for kind, metric in (('cpu', 'cpu_usage'), ('memory', 'ram_percent'))
-                  for icon_set in ('classic', 'outline', 'solid', 'miniature', 'soft', 'cartoon', 'sketch')]
+                  for icon_set in ('classic', 'outline', 'solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile')]
         for kind, metric, height, icon_set in cases:
             with self.subTest(kind=kind, height=height, icon_set=icon_set):
                 configuration = config()
@@ -2072,7 +2072,7 @@ class QmlTopBarTests(unittest.TestCase):
                 icon = item.findChild(QObject, 'topBarContentIcon')
                 number = item.findChild(QObject, 'topBarContentValue')
                 unit = item.findChild(QObject, 'topBarContentUnit')
-                modern = icon_set in ('solid', 'miniature', 'soft', 'cartoon', 'sketch')
+                modern = icon_set in ('solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile')
                 expected_height = max(18, min(26, height - 10)) if modern else 18
                 expected_width = round(expected_height * 15 / 11) if modern and kind == 'gpu' else expected_height
                 self.assertEqual((icon.width(), icon.height()), (expected_width, expected_height))

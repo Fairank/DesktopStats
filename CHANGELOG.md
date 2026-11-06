@@ -1,5 +1,21 @@
 # Changes
 
+## 0.30.0-preview.1
+
+- Add three optional notebook treatments: Loose Pen, Pencil Color and Smiley
+  Doodle. Existing artwork and the saved selection remain available. All 178
+  catalog entries share their reviewed identities, cooler layouts and memory
+  forms across the new treatments; this is a bounded catalog, not every retail SKU.
+- Keep sparse, uneven casing lines and transparent pencil gaps instead of a
+  technical wireframe. Confirmed fan blades retain their leading curves, tips,
+  linked rings and relative directions; unknown blades remain static.
+- Distinguish the registered Intel LGA1700 and AMD AM5 front packages. AM5
+  models share the same real lid shape and use bounded model marks to differ;
+  arbitrary device names never enter SVG text. Notebook artwork adds no
+  sampling, animation clock, driver or background service.
+- Retain the temperature-startup status fix and scoped style switching from
+  the previous prepared build, without requiring a restart to change artwork.
+
 ## 0.29.0-preview.3
 
 - Add an optional Hand-drawn Lines treatment with simple slightly uneven ink

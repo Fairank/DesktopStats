@@ -45,7 +45,7 @@ _NVML_CLEANUP_RETAINERS = set()
 def gpu_fan_rpm_targets(config):
     """Only configured modern automatic GPU glyphs request current fan RPM."""
     bar = config.get("top_bar", {})
-    if not bar.get("enabled") or bar.get("hardware_icon_style") not in ("solid", "miniature", "soft", "cartoon", "sketch"):
+    if not bar.get("enabled") or bar.get("hardware_icon_style") not in ("solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile"):
         return frozenset()
     targets = set()
     for item in bar.get("items", ()):

@@ -15,14 +15,14 @@ ROOT = Path(__file__).resolve().parents[1]
 QML = '''import QtQuick
 import "../native" as Product
 Window {
-    id:scene; visible:false; width:1844; height:866
+    id:scene; visible:false; width:2540; height:866
     property bool dark:false
     property var cases:[]
     property var styles:[]
     readonly property color ink:dark?"#e8edf4":"#303a48"
     readonly property color muted:dark?"#a1aebf":"#68768a"
     color:dark?"#1c222b":"#eff2f6"
-    Text {x:28;y:22;text:"硬件图标 · 七种外观版本";font.family:"Microsoft YaHei UI"
+    Text {x:28;y:22;text:"硬件图标 · 十种外观版本";font.family:"Microsoft YaHei UI"
         font.pixelSize:23;font.weight:Font.DemiBold;color:scene.ink}
     Text {x:28;y:61;text:"放大外观 + 18px 顶部栏实际大小  /  静态矢量，无新增动画或采样"
         font.family:"Microsoft YaHei UI";font.pixelSize:12;color:scene.muted}
@@ -102,7 +102,10 @@ def render(output, scratch, *, dark=False):
         ("solid", "精简实物", "实体外壳 / 清晰风扇"), ("miniature", "微型实物", "薄顶边 / 立体厚度"),
         ("soft", "柔和双色", "圆角色块 / 简单可爱"),
         ("cartoon", "可爱卡通", "圆润描边 / 保留型号结构"),
-        ("sketch", "手绘线稿", "简洁线条 / 轻微手绘不齐"))]
+        ("sketch", "手绘线稿", "原线稿 / 保留可选"),
+        ("notebook_line", "随手线条", "不齐笔触 / 透明留白"),
+        ("notebook_color", "手涂淡彩", "铅笔淡彩 / 保留型号结构"),
+        ("notebook_smile", "笑脸手绘", "淡彩表情 / 独立可选"))]
     samples = (
         ("Intel Core i7-13700KF\n长方形顶盖", "cpu", "Intel Core i7-13700KF", "42%"),
         ("ZOTAC SOLO\n单风扇 · 紧凑短卡", "gpu", "ZOTAC GAMING GeForce RTX 4060 8GB SOLO", "36%"),
@@ -142,10 +145,10 @@ def render(output, scratch, *, dark=False):
         capture = window.grabWindow()
         if capture.isNull() or not capture.save(str(output)):
             raise RuntimeError("Could not save comparison image")
-        result = dict(image=str(output), theme="dark" if dark else "light", glyphs=50,
+        result = dict(image=str(output), theme="dark" if dark else "light", glyphs=len(styles)*len(cases)*2,
                       styles=styles, cases=cases, warnings=warnings, actual_size=18)
         output.with_suffix(".json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-        return dict(image=str(output), glyphs=50, warnings=0)
+        return dict(image=str(output), glyphs=len(styles)*len(cases)*2, warnings=0)
     finally:
         window.hide()
         window.destroy()

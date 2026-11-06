@@ -861,3 +861,11 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 附送背板外观，未确认实际安装|附送背板外觀，未確認實際安裝|Included backplate; installation unconfirmed|付属バックプレートの外観、装着は未確認|부속 백플레이트 외관, 실제 장착 여부 미확인|Beiliegende Rückplatte; Einbau unbestätigt|Plaque arrière fournie ; installation non confirmée|Placa trasera incluida; instalación sin confirmar
 布局示意|佈局示意|Layout schematic|配置の概略|배치 개략도|Schematische Anordnung|Schéma de disposition|Esquema de disposición
 该型号外壳与叶片尚未核实，当前为布局示意|該型號外殼與葉片尚未核實，目前為佈局示意|This model’s cover and blades are unverified; a layout schematic is shown|このモデルの外装と羽根は未確認のため、配置の概略を表示しています|이 모델의 커버와 날개는 미확인 상태이며 배치 개략도를 표시합니다|Gehäuse und Blätter dieses Modells sind unbestätigt; gezeigt wird ein Schema|Le capot et les pales de ce modèle ne sont pas vérifiés ; un schéma est affiché|La carcasa y las aspas de este modelo no están verificadas; se muestra un esquema
+
+随手线条|隨手線條|Loose pen|ラフペン|자유로운 펜선|Lockere Linien|Traits libres|Trazo libre
+手涂淡彩|手塗淡彩|Pencil color|色えんぴつ|연필 색칠|Buntstift|Crayon de couleur|Lápiz de color
+笑脸手绘|笑臉手繪|Smiley doodle|にっこり落書き|웃는 낙서|Lächelnde Kritzelei|Gribouillis souriant|Garabato sonriente
+1 · 原版|1 · 原版|1 · Original|1 · オリジナル|1 · 원본|1 · Original|1 · Original|1 · Original
+2 · 可爱笑脸|2 · 可愛笑臉|2 · Cute smiley|2 · にっこり|2 · 귀여운 웃는 얼굴|2 · Lächeln|2 · Sourire|2 · Sonrisa
+3 · 彩色手绘|3 · 彩色手繪|3 · Pencil color|3 · 色えんぴつ|3 · 색연필|3 · Buntstift|3 · Crayon de couleur|3 · Lápiz de color
+4 · 纯线条|4 · 純線條|4 · Pen lines|4 · ペン線|4 · 펜선|4 · Linien|4 · Traits|4 · Líneas
