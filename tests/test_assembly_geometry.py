@@ -131,7 +131,11 @@ class AssemblyGeometryTests(unittest.TestCase):
         scene=build_scene({'gpu':{'appearance':value}})
         self.assertEqual(scene.metadata['physical_total_fans'],4)
         self.assertEqual(scene.metadata['front_fan_count'],3)
-        self.assertEqual(scene.metadata['unplaced_fans'],1)
+        self.assertEqual(scene.metadata['unplaced_fans'],0)
+        self.assertEqual(scene.metadata['rear_fan_count'],1)
+        self.assertEqual(scene.metadata['rotor_count'],3)
+        self.assertEqual(scene.metadata['detail']['gpu']['rear_rotation_direction'],'unverified')
+        self.assertEqual(build_scene({'gpu':{'appearance':value},'detail_level':'eco'}).metadata['unplaced_fans'],1)
 
     def test_same_input_rebuilds_same_buffers_without_render_or_polling_state(self):
         spec={'cpu':{'style':'am5'},'memory':{'count':2}}
@@ -176,7 +180,7 @@ class AssemblyGeometryTests(unittest.TestCase):
         self.assertEqual(sum(m.name=='ram-spreader' for m in scene.meshes),1)
         self.assertEqual(sum(m.name=='ram-diffuser' for m in scene.meshes),1)
         pcbs=[m for m in scene.meshes if m.name=='ram-pcb']
-        self.assertAlmostEqual(extent(pcbs[0],2),133.35)
+        self.assertAlmostEqual(extent(pcbs[0],1),133.35)
         self.assertAlmostEqual(extent(pcbs[1],2),69.6)
         self.assertNotEqual(pcbs[0].color,pcbs[1].color)
 

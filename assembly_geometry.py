@@ -253,6 +253,15 @@ def gpu_plane(vertices, rear=False):
     return tuple(out)
 
 
+def memory_plane(vertices):
+    """A DIMM stands perpendicular to the board: length Y, height -X."""
+    out=[]
+    for n in range(0,len(vertices),6):
+        for start in (0,3):
+            x,y,z=vertices[n+start:n+start+3];out.extend((-y,x,z))
+    return tuple(out)
+
+
 def unit_polygon(value,width,height,margin=.1):
     if not isinstance(value,list) or not 3<=len(value)<=512:return ()
     if not all(isinstance(p,(list,tuple)) and len(p)==2 and all(type(v) in (int,float) and math.isfinite(v) and -margin<=v<=1+margin for v in p) for p in value):return ()
@@ -498,9 +507,13 @@ def build_scene(spec=None):
         cube('psu-shroud',(w-12,h*.17,d-12),(0,-h*.405,0),dark)
     board=spec.get('board') or {};board_dims=board.get('dimensions_mm') or {}
     board_h=number(board_dims.get('height'),305,70,370);board_d=number(board_dims.get('width'),244,70,370)
-    cube('motherboard-reference',(1.6,board_h,board_d),(board_x,h*.02,-d*.10),green,'board')
-    for yy in (-.29,-.20,-.11):cube('board-expansion-slot',(7,5,board_d*.52),(board_x-6,board_h*yy,-d*.10),dark,'board')
-    cpu=spec.get('cpu') or {};style=cpu.get('style','chip');cpu_y=h*.20;cpu_z=-d*.17
+    board_rear=-d/2+14.;board_z=board_rear+board_d/2;board_y=h*.02
+    primary_pcie_y=board_y-board_h*.10;pcie_length=min(89.,board_d*.78)
+    pcie_z=board_rear+15.+pcie_length/2
+    cube('motherboard-reference',(1.6,board_h,board_d),(board_x,board_y,board_z),green,'board')
+    for index in range(3):
+        cube('board-expansion-slot',(7,5,pcie_length),(board_x-6,primary_pcie_y-index*40.64,pcie_z),dark,'board')
+    cpu=spec.get('cpu') or {};style=cpu.get('style','chip');cpu_y=board_y+board_h*.27;cpu_z=board_z-board_d*.13
     pw,ph=(37.5,45.) if style=='lga_rect' else (40.,40.)
     cube('cpu-substrate',(2,ph,pw),(board_x-3,cpu_y,cpu_z),green,'cpu')
     lid_polygon=unit_polygon(cpu.get('lid_polygon'),pw,ph)
@@ -538,19 +551,27 @@ def build_scene(spec=None):
         bare=module.get('heat_spreader') is False or memory_appearance.get('shroud')=='bare'
         tones=module.get('colors') or {};pcb_color=color(tones.get('pcb'),'#2f5960')
         cover_color=color(tones.get('body'),'#879caa');diffuser_color=color(tones.get('glass'),'#d4e5e5')
-        mx=board_x-8-index*10;mz=cpu_z+57
-        if pcb:add('ram-pcb',rotate_vertices(extrude(pcb,1.2),'left'),pcb_color,(mx,cpu_y,mz),'memory')
-        else:cube('ram-pcb',(1.2,memory_h,memory_w),(mx,cpu_y,mz),pcb_color,'memory')
+        mx=board_x-4 if short else board_x-memory_h/2-2
+        my=cpu_y-index*(memory_h+4) if short else cpu_y-8
+        mz=cpu_z+57 if short else cpu_z+57+index*10
+        orient=(lambda vertices:rotate_vertices(vertices,'left')) if short else memory_plane
+        if pcb:add('ram-pcb',orient(extrude(pcb,1.2)),pcb_color,(mx,my,mz),'memory')
+        else:cube('ram-pcb',(1.2,memory_h,memory_w) if short else (memory_h,memory_w,1.2),(mx,my,mz),pcb_color,'memory')
         if not bare:
-            if case_polygon:add('ram-spreader',rotate_vertices(extrude(case_polygon,3.2),'left'),cover_color,(mx,cpu_y,mz),'memory')
-            else:cube('ram-spreader',(3.2,memory_h*.81,memory_w*.96),(mx,cpu_y+3,mz),cover_color,'memory')
-            if module.get('rgb_diffuser') is True or module.get('diffuser') is True:cube('ram-diffuser',(3.8,3,memory_w*.94),(mx,cpu_y+memory_h*.55,mz),diffuser_color,'memory')
+            if case_polygon:add('ram-spreader',orient(extrude(case_polygon,3.2)),cover_color,(mx,my,mz),'memory')
+            else:cube('ram-spreader',(3.2,memory_h*.81,memory_w*.96) if short else (memory_h*.81,memory_w*.96,3.2),
+                      (mx,my+3,mz) if short else (mx-3,my,mz),cover_color,'memory')
+            if module.get('rgb_diffuser') is True or module.get('diffuser') is True:
+                cube('ram-diffuser',(3.8,3,memory_w*.94) if short else (3,memory_w*.94,3.8),
+                     (mx,my+memory_h*.55,mz) if short else (mx-memory_h*.55,my,mz),diffuser_color,'memory')
     gpu=spec.get('gpu') or {};appearance=gpu.get('appearance') or {}
     fan_count=0
     if gpu and gpu.get('present',True) is not False and appearance.get('style')!='gpu_integrated':
-        length=number(gpu.get('length_mm'),min(310,d*.70),80,450)
-        width=number(gpu.get('width_mm'),135,50,190);thickness=number(gpu.get('thickness_mm'),55,8,110)
-        gx=board_x-width*.48;gy=-h*.13;gz=-d*.11
+        facts=appearance.get('board_details') or {};nominal=facts.get('dimensions_mm') or {}
+        length=number(gpu.get('length_mm'),number(nominal.get('length'),min(310,d*.70),80,450),80,450)
+        width=number(gpu.get('width_mm'),number(nominal.get('height'),135,50,190),50,190)
+        thickness=number(gpu.get('thickness_mm'),number(nominal.get('thickness'),55,8,110),8,110)
+        gx=board_x-width*.48;gy=primary_pcie_y-thickness/2+3.3;gz=board_rear+length/2
         tones=gpu.get('colors') or {};body_color=color(tones.get('body'),'#536779')
         pcb_color=color(tones.get('pcb'),'#2f5960');metal_color=color(tones.get('metal'),'#b2c0cb')
         shell=unit_polygon(gpu.get('shell_polygon'),length,width)
@@ -605,6 +626,9 @@ def build_scene(spec=None):
             add('gpu-fan-hub',fan_plane(hub_mesh),color(fan_colors.get('hub'),'#c3cdd3' if profile.get('hub_tone')=='silver' else '#8095a6'),(pos[0],pos[1]+(.8 if rear else -.8),pos[2]),'gpu')
         if appearance.get('fan_count')==0:
             for i in range(20):cube('passive-gpu-fin',(width,thickness*.94,1.2),(gx,gy,gz-length*.44+length*.88*i/19),edge,'gpu')
+    from assembly_detail import enrich_components,detail_level,component_level,TRIANGLE_BUDGETS
+    level=detail_level(spec.get('detail_level'))
+    meshes,component_details=enrich_components(meshes,spec)
     # Case layout changes pose, never component dimensions. Known ATX/GPU sizes
     # can protrude from an incompatible compact case instead of shrinking.
     vertical_gpu='vertical_gpu_mount' in features
@@ -612,7 +636,7 @@ def build_scene(spec=None):
         transformed=[]
         def pose(p):
             x,y,z=p
-            return (z,y,-x) if winged else (x,z,-y) if layout=='vertical' else (y,-x,z)
+            return (z,y,-x) if winged else (x,-z,y) if layout=='vertical' else (y,-x,z)
         for mesh in meshes:
             if mesh.component in ('board','cpu','memory','gpu'):
                 if vertical_gpu and layout not in ('vertical','horizontal'):
@@ -630,7 +654,24 @@ def build_scene(spec=None):
                 mesh=Mesh(mesh.name,tuple(out),mesh.color,pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,pose(mesh.axis))
             transformed.append(mesh)
         meshes=transformed
-    rear_count=sum(row.get('face')=='rear' for row in (gpu.get('fans') or []) if isinstance(row,dict))
+    from assembly_case_detail import enrich_case
+    meshes=enrich_case(meshes,(w,h,d),case,component_level(spec,'case'))
+    budget=TRIANGLE_BUDGETS[level]-64
+    triangles=sum(mesh.vertex_count//3 for mesh in meshes);removed=0
+    if triangles>budget:
+        kept=list(meshes)
+        optional_reference={'detail-board-reference-small-packages','detail-board-reference-capacitors',
+                            'detail-ram-reference-ic-packages','detail-ram-reference-package-leads'}
+        for index in range(len(kept)-1,-1,-1):
+            mesh=kept[index]
+            if mesh.name in optional_reference and triangles>budget:
+                triangles-=mesh.vertex_count//3;kept.pop(index);removed+=1
+        if triangles>budget:
+            raise ValueError('Mechanical illustration exceeds its detail budget; use a lower detail level')
+        meshes=kept
+    observed_rear=component_details.get('gpu',{}).get('observed_rear_fans',0)
+    fan_count+=observed_rear
+    rear_count=sum(row.get('face')=='rear' for row in (gpu.get('fans') or []) if isinstance(row,dict))+observed_rear
     physical_count=appearance.get('fan_count') if type(appearance.get('fan_count')) is int else None
     meta=dict(case_id=case.get('id',''),schematic=True,geometry_unit='mm',installed_case_fans_assumed=0,
               front_fan_count=fan_count-rear_count,rear_fan_count=rear_count,rotor_count=sum(mesh.rotor for mesh in meshes),memory_count=actual_count,memory_rendered_count=count,
@@ -640,6 +681,11 @@ def build_scene(spec=None):
               gpu_mount='vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
               board_layout_schematic=True,connector_positions_schematic=True,
               dimensions_verified=case.get('dimensions_verified') is True,cad_or_fit_guarantee=False)
+    meta.update(detail_level=level,detail_focus=spec.get('detail_focus'),detail=component_details,
+                triangle_budget=TRIANGLE_BUDGETS[level],optional_detail_meshes_removed=removed,
+                memory_orientation='standing_dimm_or_flat_sodimm',case_detail_schematic=True,
+                canonical_board_rear_mm=board_rear,canonical_gpu_bracket_mm=board_rear,
+                mechanical_alignment_schematic=True)
     from assembly_style import apply_colors,expression_vertices,resolve_style,style_for
     visual_style=resolve_style(spec.get('visual_style'))
     visual_policy=style_for(visual_style)

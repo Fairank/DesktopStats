@@ -1,5 +1,29 @@
 # Changes
 
+## 0.34.0-preview.1
+
+- Replace solid GPU slabs with perforated thin shells, recessed fan openings,
+  schematic heatsink fins, PCB edges, separated contacts and reviewed port counts.
+  Keep verified envelopes, original fan profiles and unknown-data boundaries.
+- Add the Astral 5090 rear seven-blade fan from an official rear product photo,
+  with a schematic backplate opening. Keep it static while rotation direction
+  and an independent tachometer remain unverified; preserve the three RPM-driven
+  front fans and distinguish photo ratios from manufacturer dimensions.
+- Align the motherboard, rear I/O, expansion bracket and edge connector to one
+  schematic mounting reference. Stand DIMMs perpendicular to the motherboard;
+  preserve the separate SO-DIMM reference pose and per-module identity.
+- Refine known ASUS Z790-A D4 colors, slots, heatsinks and rear connector counts.
+  Add source-linked front I/O facts for twelve cases, real bevels, finer mesh,
+  recessed sockets and folded case edges. Placement and internal layouts remain
+  original schematic construction, not manufacturer CAD or fit guarantees.
+- Add three bounded on-demand detail levels, keeping real-time reading updates
+  independent from mesh generation. Refine metal, glass, wood and contact light
+  within the existing OpenGL passes, without new dependencies or postprocessing.
+- Give all thirteen artwork styles distinct selection effects lasting 400–850 ms.
+  Reuse the shared clock and existing buffers; complete even with unknown RPM,
+  then stop. Hide, minimize, close and reduced motion cancel rather than loop.
+  Preserve the expression-free Original and existing top-bar preferences.
+
 ## 0.33.0-preview.1
 
 - Expand the source-linked chassis catalog from 24 to 64 cases across 18 brands

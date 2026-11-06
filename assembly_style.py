@@ -1,6 +1,6 @@
 """Bounded original illustration treatments for the same physical 3D meshes.
 
-Only colors and static crease ink change. Dimensions, model silhouettes, fan
+Colors, retained crease ink and draw materials change. Dimensions, model silhouettes, fan
 axes and tachometer data do not. No I/O, random state, images or animation.
 """
 from dataclasses import replace
@@ -41,7 +41,25 @@ def style_for(value):
                               else "#eff4f6"),
         dark_background=rgba("#182a35" if style in _PAPER else "#1b2530"),
         grid_light=rgba("#8db7c6"),grid_dark=rgba("#749bab"),
+        contact_shadow=0. if style in _LINE else .20 if style=='miniature' else .12,
         expressions=style in _EXPRESSIVE)
+
+
+def material_for(mesh,style):
+    """Static roughness/reflectance classification, cached when the VBO is built."""
+    if style not in ('miniature','solid'):
+        return (0.,1.,1. if mesh.color[3]<.999 else 0.,0.)
+    name=mesh.name.casefold();component=mesh.component
+    if mesh.color[3]<.999:return (.08,.10,1.,0.)
+    wood_slat=(name=='front-slat' and component=='case' and mesh.color[0]>mesh.color[1]>mesh.color[2]
+               and mesh.color[0]-mesh.color[2]>.15)
+    if 'wood' in name or wood_slat:return (0.,.88,0.,2.)
+    if 'pcb' in name or 'motherboard' in name:return (.02,.82,0.,0.)
+    if any(value in name for value in ('screw','heatsink','lid','bracket','metal','contact')):
+        return (.82,.25,0.,1.)
+    if component=='cpu':return (.65,.31,0.,1.)
+    if component=='memory':return (.38,.42,0.,0.)
+    return (.23,.48,0.,1. if component=='case' else 0.)
 
 
 def _mix(a,b,t):return tuple(x*(1-t)+y*t for x,y in zip(a,b))

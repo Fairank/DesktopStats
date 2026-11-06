@@ -117,6 +117,9 @@ def snapshot(data,spec,config,component='all',*,now=None):
         size=_dimensions(board.get('dimensions_mm'),('width','height'))
         rows=[_static('主板规格',form,form is not None),_static('尺寸',size,size is not None)]
         rows.extend(_static(label,None,False,'未提供此部件的独立传感器读数。') for label in ('温度','功率'))
+        slots=mapping(board.get('slot_counts'))
+        for key,label in (('dimm','DIMM 插槽'),('m2','M.2 插槽')):
+            if type(slots.get(key)) is int and slots[key]>0:rows.append(_static(label,slots[key]))
         notes.append('未提供此部件的独立传感器读数。')
     else:
         identity=case.get('label') or '参考机箱（未识别）'
@@ -125,6 +128,12 @@ def snapshot(data,spec,config,component='all',*,now=None):
         rows=[_static('宽 × 高 × 深' if case.get('dimensions_verified') else '参考尺寸',size,size is not None),
               _static('机箱参考限值',f'{limit:g} mm' if numeric(limit) else None,numeric(limit))]
         rows.extend(_static(label,None,False,'未提供此部件的独立传感器读数。') for label in ('温度','功率'))
+        io=mapping(mapping(case.get('exterior_details')).get('io'))
+        usb=[]
+        for key,label in (('usb_a','A'),('usb_c','C')):
+            if type(io.get(key)) is int and io[key]>=0:usb.append(f'{label} × {io[key]}')
+        if usb:rows.append(_static('原厂前置 USB',' · '.join(usb)))
+        if type(io.get('audio')) is int and io['audio']>=0:rows.append(_static('原厂音频接口',io['audio']))
         source=case.get('selection_source')
         notes.append('手动外观' if source=='manual' else '已按机箱固件标识匹配。'
                      if source=='automatic' else '参考机箱（未识别）')

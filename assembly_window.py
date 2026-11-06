@@ -8,7 +8,7 @@ from PySide6.QtQml import QQmlComponent
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QPushButton,QCheckBox,QComboBox,QSizePolicy)
 
 from assembly_profiles import bake_profiles
-from assembly_config import HARDWARE_ICON_STYLES,style_choices
+from assembly_config import HARDWARE_ICON_STYLES,detail_choices,style_choices
 from assembly_inspection import COMPONENT_LABELS,snapshot as inspection_snapshot
 from stats_config import ASSETS
 from top_bar_feedback import GPU_FAN_MAX_AGE
@@ -60,7 +60,11 @@ class AssemblyWindow(QWidget):
         style_row=QHBoxLayout();style_row.addWidget(QLabel(controller.tr("整机外观")))
         self.style_choice=QComboBox();self.style_choice.setAccessibleName(controller.tr("整机外观"))
         for row in style_choices(controller.tr):self.style_choice.addItem(row['label'],row['id'])
-        style_row.addWidget(self.style_choice);style_row.addStretch(1);layout.addLayout(style_row)
+        style_row.addWidget(self.style_choice)
+        self.preview_effect=QPushButton(controller.tr("预览特效"));self.preview_effect.setObjectName('previewAssemblyEffect')
+        style_row.addWidget(self.preview_effect)
+        self.selection_effects=QCheckBox(controller.tr("风格特效"));style_row.addWidget(self.selection_effects)
+        style_row.addStretch(1);layout.addLayout(style_row)
         scene_row=QHBoxLayout();scene_row.setSpacing(16)
         self.viewport=viewport_factory(self);self.viewport.set_dark(dark)
         self.viewport.setMinimumHeight(240)
@@ -97,6 +101,12 @@ class AssemblyWindow(QWidget):
         inspector_layout.addLayout(self._inspection_grid)
         self.inspection_note=QLabel();self.inspection_note.setTextFormat(Qt.PlainText);self.inspection_note.setWordWrap(True)
         self.inspection_note.setStyleSheet('font-size:11px;');inspector_layout.addWidget(self.inspection_note)
+        detail_row=QHBoxLayout();detail_label=QLabel(controller.tr('模型细节'));detail_label.setWordWrap(True)
+        detail_label.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred);detail_row.addWidget(detail_label,1)
+        self.detail_choice=QComboBox();self.detail_choice.setObjectName('assemblyDetailChoice');self.detail_choice.setFixedWidth(140)
+        self.detail_choice.setAccessibleName(controller.tr('模型细节'))
+        for row in detail_choices(controller.tr):self.detail_choice.addItem(row['label'],row['id'])
+        detail_row.addWidget(self.detail_choice);inspector_layout.addLayout(detail_row)
         scene_row.addWidget(inspector);layout.addLayout(scene_row,1)
         tools=QHBoxLayout()
         self.exploded=QCheckBox(controller.tr("展开组件"));tools.addWidget(self.exploded)
@@ -108,6 +118,11 @@ class AssemblyWindow(QWidget):
         self.animate.toggled.connect(lambda value:controller.changeAssembly("fan_animation",value))
         self.style_choice.currentIndexChanged.connect(
             lambda _:controller.changeAssembly("appearance_style",self.style_choice.currentData()))
+        self.selection_effects.toggled.connect(lambda value:controller.changeAssembly('selection_effects',value))
+        self.detail_choice.currentIndexChanged.connect(lambda _:controller.changeAssembly('detail_level',self.detail_choice.currentData()))
+        self.preview_effect.clicked.connect(lambda:self.viewport.preview_effect(
+            self.focus_choice.currentData() if self.focus_choice.currentData()!='all'
+            else self.selected_component if self.selected_component!='all' else 'case'))
         self.component_choice.currentIndexChanged.connect(self._choose_component)
         self.viewport.componentSelected.connect(self._component_selected)
         reset.clicked.connect(self.viewport.reset_camera)
@@ -137,17 +152,26 @@ class AssemblyWindow(QWidget):
         resolved=spec.get('visual_style','miniature')
         if resolved not in HARDWARE_ICON_STYLES:resolved='miniature'
         geometry['visual_style']=resolved
+        detail=spec.get('detail_level','balanced')
+        if detail not in ('eco','balanced','close'):detail='balanced'
+        geometry['detail_level']=detail
         signature=json.dumps(geometry,sort_keys=True,ensure_ascii=True)
         if signature!=self._geometry_key:
             baked=bake_profiles(spec,self.engine)
             baked['visual_style']=resolved
+            baked['detail_level']=detail
             self.viewport.set_scene(baked);self._geometry_key=signature
         options=spec['options']
+        self.detail_choice.blockSignals(True);self.detail_choice.setCurrentIndex(self.detail_choice.findData(detail))
+        self.detail_choice.blockSignals(False)
         self.style_choice.blockSignals(True)
         self.style_choice.setCurrentIndex(self.style_choice.findData(options.get('appearance_style','follow')))
         self.style_choice.blockSignals(False)
         for control,field in ((self.exploded,'exploded'),(self.animate,'fan_animation')):
             control.blockSignals(True);control.setChecked(options[field]);control.blockSignals(False)
+        self.selection_effects.blockSignals(True);self.selection_effects.setChecked(options.get('selection_effects',True))
+        self.selection_effects.blockSignals(False)
+        self.viewport.set_selection_effects_enabled(options.get('selection_effects',True))
         self.viewport.set_exploded(options['exploded'])
         self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled and not self._renderer_error)
         self.title.setText(self.controller.tr(spec['case']['label']))
@@ -156,11 +180,14 @@ class AssemblyWindow(QWidget):
     def update_readings(self):
         if self._closing or not self.isVisible() or self.isMinimized():return
         self._last_fan=self.controller.assembly_fan_state()
+        motion=self.controller.motionEnabled and not self._renderer_error
+        self.viewport.set_motion_enabled(motion)
         self.viewport.set_fan_state(self._last_fan.get('rpm'),self._last_fan.get('available') is True,
                                     self._last_fan.get('timestamp'))
         enabled=bool(self._spec and self._spec['options']['fan_animation'] and self.controller.motionEnabled
                      and not self._renderer_error)
         self.viewport.set_fan_animation_enabled(enabled)
+        self.preview_effect.setEnabled(motion and bool(self._spec and self._spec['options'].get('selection_effects',True)))
         self._update_status()
         self._update_inspection()
 
@@ -204,6 +231,7 @@ class AssemblyWindow(QWidget):
     def _render_failed(self,_message):
         self._renderer_error=True
         self.viewport.set_fan_animation_enabled(False)
+        self.viewport.set_motion_enabled(False)
         self._clock_active(False)
         self._update_status()
 
@@ -229,10 +257,10 @@ class AssemblyWindow(QWidget):
     def advanceFrame(self,elapsed):
         if self._closing:return
         timestamp=self._last_fan.get('timestamp')
-        if (type(timestamp) not in (int,float) or not 0<=time.time()-timestamp<=GPU_FAN_MAX_AGE):
+        if (type(timestamp) not in (int,float) or not 0<=time.time()-timestamp<=GPU_FAN_MAX_AGE) and self._last_fan.get('available') is True:
             self._last_fan=dict(available=False)
-            self.viewport.set_fan_state(None,False);self._update_status();self._update_inspection();return
-        self.viewport.advance_fans(elapsed)
+            self.viewport.set_fan_state(None,False);self._update_status()
+        self.viewport.advance_animations(elapsed)
 
     def showEvent(self,event):
         super().showEvent(event);self.update_readings()

@@ -939,3 +939,16 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 未提供此部件的独立传感器读数。|未提供此元件的獨立感測器讀數。|No separate sensor reading was provided for this component.|この部品専用のセンサー値は取得できていません。|이 부품의 개별 센서 측정값은 제공되지 않았습니다.|Für diese Komponente liegt kein eigener Sensorwert vor.|Aucune mesure de capteur distincte n’est fournie pour ce composant.|No se proporcionó una lectura de sensor independiente para este componente.
 桌面 3D 检视|桌面 3D 檢視|Desktop 3D inspection|デスクトップ3D検査|데스크톱 3D 살펴보기|3D-Desktopansicht|Inspection 3D du bureau|Inspección 3D del escritorio
 此屏幕正在运行全屏应用，暂不打开三维检视。|此螢幕正在執行全螢幕應用程式，暫不開啟三維檢視。|This screen has a fullscreen app; 3D inspection will stay closed.|この画面では全画面アプリが動作中のため、3D検査を開きません。|이 화면에서 전체 화면 앱이 실행 중이므로 3D 살펴보기를 열지 않습니다.|Auf diesem Bildschirm läuft eine Vollbildanwendung; die 3D-Ansicht bleibt geschlossen.|Une application en plein écran est active sur cet écran ; l’inspection 3D reste fermée.|Hay una aplicación a pantalla completa en esta pantalla; la inspección 3D permanecerá cerrada.
+预览特效|預覽特效|Preview effect|効果をプレビュー|효과 미리 보기|Effektvorschau|Aperçu de l’effet|Vista previa del efecto
+风格特效|風格特效|Style effects|スタイル効果|스타일 효과|Stileffekte|Effets de style|Efectos de estilo
+模型细节|模型細節|Model detail|モデルの詳細|모델 세부 수준|Modelldetails|Détail du modèle|Detalle del modelo
+简洁|簡潔|Simple|シンプル|간단|Einfach|Simple|Simple
+精细|精細|Detailed|精細|정밀|Detailliert|Détaillé|Detallado
+近看细节|近看細節|Close inspection|近接表示|근접 살펴보기|Nahansicht|Vue rapprochée|Vista cercana
+模型细节设置不正确|模型細節設定不正確|Invalid model detail setting|モデル詳細設定が無効です|모델 세부 설정이 잘못되었습니다|Ungültige Modelldetaileinstellung|Niveau de détail du modèle invalide|Ajuste de detalle de modelo no válido
+精细适合日常查看，近看细节用于局部观察。|精細適合日常查看，近看細節用於局部觀察。|Detailed suits everyday viewing; Close-up adds detail for inspection.|通常の表示には「詳細」、部分の確認には「クローズアップ」を使います。|일상적인 보기에는 정밀, 부분 확인에는 근접 세부를 사용하세요.|Detail eignet sich für den Alltag, Nahansicht für die Prüfung einzelner Teile.|Détaillé convient au quotidien ; Gros plan sert à examiner les pièces.|Detallado sirve para el uso diario; Primer plano permite examinar las piezas.
+选择部件时短暂播放，结束后停止。|選取部件時短暫播放，結束後停止。|Plays briefly on selection, then stops.|部品選択時に短く再生し、その後停止します。|부품 선택 시 잠시 재생된 뒤 멈춥니다.|Wird bei der Auswahl kurz abgespielt und stoppt dann.|Se joue brièvement à la sélection, puis s’arrête.|Se reproduce brevemente al seleccionar y luego se detiene.
+DIMM 插槽|DIMM 插槽|DIMM slots|DIMMスロット|DIMM 슬롯|DIMM-Steckplätze|Emplacements DIMM|Ranuras DIMM
+M.2 插槽|M.2 插槽|M.2 slots|M.2スロット|M.2 슬롯|M.2-Steckplätze|Emplacements M.2|Ranuras M.2
+原厂前置 USB|原廠前置 USB|Factory front USB|標準フロントUSB|기본 전면 USB|Front-USB ab Werk|USB avant d’origine|USB frontales de fábrica
+原厂音频接口|原廠音訊介面|Factory audio jacks|標準オーディオ端子|기본 오디오 잭|Audioanschlüsse ab Werk|Prises audio d’origine|Conectores de audio de fábrica

@@ -212,6 +212,10 @@ from chassis_catalog_group_c import records as _group_c
 _CASES += _group_a(_case, _mount, _ATX, _EATX)
 _CASES += _group_b(_case, _mount, _ATX, _EATX)
 _CASES += _group_c(_case, _mount, _ATX, _EATX)
+from chassis_detail_catalog import details_for as _exterior_details
+for _entry in _CASES:
+    _details=_exterior_details(_entry['id'])
+    if _details:_entry['exterior_details']=_details
 _BY_ID = {row["id"]: row for row in _CASES}
 # A detached export is offered for catalog tooling. Runtime getters use the
 # private records, so an accidental caller mutation cannot corrupt later views.

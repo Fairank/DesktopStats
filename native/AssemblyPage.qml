@@ -88,6 +88,10 @@ ScrollView {
         }
         SettingsGroup {
             Layout.fillWidth:true;title:ui.t("查看方式")
+            SettingRow {id:assemblyDetailSetting;Layout.fillWidth:true;label:ui.t("模型细节");note:ui.t("精细适合日常查看，近看细节用于局部观察。")
+                Choice {objectName:"assemblyDetailChoice";width:Math.min(220,Math.max(150,assemblyDetailSetting.width*.42))
+                    model:stats.assemblyDetails;value:root.config.detail_level || "balanced"
+                    Accessible.name:ui.t("模型细节");onPicked:selected=>stats.changeAssembly("detail_level",selected)}}
             SettingRow {id:assemblyStyleSetting;Layout.fillWidth:true;label:ui.t("整机外观");note:ui.t("默认跟随顶部栏，也可单独选择。")
                 Choice {objectName:"assemblyStyleChoice";width:Math.min(220,Math.max(150,assemblyStyleSetting.width*.42))
                     model:stats.assemblyStyles;value:root.config.appearance_style || "follow"
@@ -96,6 +100,8 @@ ScrollView {
                 Toggle {checked:root.config.exploded===true;onToggled:stats.changeAssembly("exploded",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风扇随转速转动");note:ui.t("仅在三维视图可见且转速有效时运行。")
                 Toggle {checked:root.config.fan_animation===true;onToggled:stats.changeAssembly("fan_animation",checked)}}
+            SettingRow {Layout.fillWidth:true;label:ui.t("风格特效");note:ui.t("选择部件时短暂播放，结束后停止。")
+                Toggle {checked:root.config.selection_effects!==false;onToggled:stats.changeAssembly("selection_effects",checked)}}
         }
         Text {
             Layout.fillWidth:true

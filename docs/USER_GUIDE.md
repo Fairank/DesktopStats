@@ -2,9 +2,8 @@
 
 Native Windows top-bar monitoring and optional desktop widgets, with real
 hardware readings and local history. Preview release
-**0.33.0-preview.1** expands the optional 3D case catalog and refines default desktop
-widget layouts, alongside one live top-bar preview, separate content/appearance
-tasks and contextual desktop controls.
+**0.34.0-preview.1** refines optional 3D mechanical geometry, materials and finite
+style effects, preserving the 64-case catalog, top-bar workflow and scoped settings.
 Desktop widgets, top bar and preferences save independently. Original application
 source is licensed under [PolyForm Noncommercial 1.0.0](../LICENSING.md).
 
@@ -71,6 +70,13 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 彩色手绘、纯线条及其余旧方案。风格选择只属于整机视图偏好，不会反向改动顶部栏。
 同一型号的尺寸、安装限制、面板结构和风扇保留；配色、光照、描边与手绘笔触随方案
 改变。无表情原版继续保留，笑脸只属于可爱笑脸和笑脸手绘。
+
+**模型细节** 提供简洁、精细和近看细节三档，默认精细；可在设置页或三维窗口
+右侧面板选择。切换细节重新生成模型，实时数值更新不重复生成。
+选择部件会播放对应风格的短时特效，400–850 毫秒后停止；可关闭 **风格特效**，
+或点击 **预览特效** 手动查看。它不改变几何或点击区域，也不启动额外传感器。
+关闭动效、隐藏、最小化与关闭窗口均停止播放。结构与来源范围见
+[模型质量与特效说明](ASSEMBLY_QUALITY.md)。
 
 系统读取的机箱标识来自 Windows SMBIOS。读取仅在该页或三维窗口需要身份时
 进行并缓存，没有新增 WMI 工作进程、驱动、网络检索或周期轮询；返回数据不含

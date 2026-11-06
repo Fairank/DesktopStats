@@ -172,6 +172,16 @@ def _check(report, output):
             result=build_scene(styled)
             assert result.dimensions==scene.dimensions and result.metadata['visual_style']==style
         report["checks"].append("assembly-style-catalog-no-graphics")
+        from assembly_effects import SelectionEffect,policies
+        assert len(policies())==13 and len({row['kind'] for row in policies()})==13
+        for policy in policies():
+            effect=SelectionEffect();assert effect.start(policy['style'],'gpu')
+            for _ in range(26):effect.advance(34.)
+            assert not effect.active and effect.sample()['amount']==0.
+        assert scene.metadata.get('detail_level')=='balanced'
+        assert scene.triangle_count<=40000
+        report['assembly_effects']=13
+        report["checks"].append("assembly-finite-effects-no-graphics")
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

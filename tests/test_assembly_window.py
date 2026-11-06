@@ -38,6 +38,7 @@ class Controller(QObject):
     def changeAssembly(self,key,value):
         self.spec['options'][key]=value
         if key=='appearance_style':self.spec['visual_style']=self.follow_style if value=='follow' else value
+        if key=='detail_level':self.spec['detail_level']=value
         self.assemblyChanged.emit()
 
 
@@ -46,12 +47,24 @@ class Viewport(QWidget):
     def __init__(self,parent):
         super().__init__(parent);self.scenes=[];self.frames=[];self.fan=None;self.enabled=False;self.released=False
         self.selected='all';self.focus='all'
+        self.motion=True;self.effects_enabled=True;self.effect_active=False;self.animation_ticks=0
     def set_dark(self,value):pass
     def set_scene(self,spec):self.scenes.append(spec)
     def set_exploded(self,value):self.exploded=value
     def set_fan_animation_enabled(self,value):self.enabled=value
+    def set_motion_enabled(self,value):
+        self.motion=value
+        if not value:self.effect_active=False
+    def set_selection_effects_enabled(self,value):
+        self.effects_enabled=value
+        if not value:self.effect_active=False
+    def preview_effect(self,name='case'):
+        self.effect_active=True;self.animationActiveChanged.emit(True);return True
     def set_fan_state(self,rpm,available,timestamp=None):self.fan=(rpm,available,timestamp)
     def advance_fans(self,elapsed):self.frames.append(elapsed)
+    def advance_animations(self,elapsed):
+        self.animation_ticks+=1
+        if self.effect_active or self.enabled and self.fan and self.fan[1]:self.frames.append(elapsed)
     def focus_component(self,name):self.focus=name
     def select_component(self,name):
         if name!=self.selected:self.selected=name;self.componentSelected.emit(name)
@@ -113,6 +126,17 @@ class AssemblyWindowTests(unittest.TestCase):
         self.window.synchronize(self.controller.spec)
         self.assertEqual(len(viewport.scenes),2)
         self.assertEqual(self.controller.spec['options']['appearance_style'],'notebook_line')
+
+    def test_detail_choice_rebuilds_only_for_user_detail_change_and_effect_preferences_do_not(self):
+        viewport=self.window.viewport
+        self.assertEqual(self.window.detail_choice.currentData(),'balanced')
+        self.window.detail_choice.setCurrentIndex(self.window.detail_choice.findData('close'))
+        self.assertEqual(len(viewport.scenes),2)
+        self.assertEqual(viewport.scenes[-1]['detail_level'],'close')
+        self.window.selection_effects.setChecked(False)
+        self.assertFalse(viewport.effects_enabled)
+        self.assertEqual(len(viewport.scenes),2)
+        self.assertEqual(self.controller.spec['options']['selection_effects'],False)
 
     def test_long_case_names_wrap_without_forcing_header_controls_outside_minimum_window(self):
         self.controller.spec['case']['label']='GIGABYTE C500 PANORAMIC STEALTH · Cooler Master MasterFrame 700'
@@ -201,10 +225,56 @@ class AssemblyWindowTests(unittest.TestCase):
         self.assertFalse(self.window._clock.property('active'))
         self.assertEqual(self.window.status.text(),'当前环境无法显示三维视图')
 
+    def test_transient_effect_uses_and_retires_the_real_shared_clock_without_rpm(self):
+        from assembly_effects import SelectionEffect,effect_for
+        from assembly_geometry import build_scene
+        from assembly_viewer import AssemblyViewport
+        class EffectViewport(QWidget):
+            rendererError=Signal(str);animationActiveChanged=Signal(bool);componentSelected=Signal(str)
+            def __init__(self,parent):
+                super().__init__(parent);self._effect=SelectionEffect();self._effect_active=False
+                self._clock_active_state=False;self._active=False;self._motion=True;self._selection_effects=True
+                self._animate=False;self._fan_available=False;self._fan_expiry=0.;self._rpm=0.;self._phase=0.
+                self._closed=False;self._error='';self._focus='all';self._selected='';self.ticks=0;self.scenes=0
+                self._scene=build_scene({})
+            def set_scene(self,spec):self.scenes+=1;self._scene=build_scene(spec)
+            def set_dark(self,value):pass
+            def set_exploded(self,value):pass
+            def reset_camera(self):pass
+            def focus_component(self,value):self._focus=value
+            _update_animation_state=AssemblyViewport._update_animation_state
+            set_fan_state=AssemblyViewport.set_fan_state
+            set_fan_animation_enabled=AssemblyViewport.set_fan_animation_enabled
+            set_motion_enabled=AssemblyViewport.set_motion_enabled
+            set_selection_effects_enabled=AssemblyViewport.set_selection_effects_enabled
+            select_component=AssemblyViewport.select_component
+            preview_effect=AssemblyViewport.preview_effect
+            def advance_animations(self,elapsed):
+                self.ticks+=1;return AssemblyViewport.advance_animations(self,elapsed)
+            def showEvent(self,event):super().showEvent(event);self._update_animation_state()
+            def hideEvent(self,event):super().hideEvent(event);self._update_animation_state()
+            def changeEvent(self,event):
+                super().changeEvent(event)
+                if hasattr(self,'_effect'):self._update_animation_state()
+            def closeEvent(self,event):self._closed=True;self._update_animation_state();event.accept()
+        self.window.close();QCoreApplication.sendPostedEvents(None,QEvent.DeferredDelete)
+        self.controller.fan=dict(available=False,rpm=None,timestamp=None)
+        self.window=AssemblyWindow(self.controller,self.engine,self.controller.spec,viewport_factory=EffectViewport)
+        self.window.show();self.app.processEvents();viewport=self.window.viewport
+        self.window.preview_effect.click()
+        self.assertTrue(self.window._clock.property('active'))
+        duration=effect_for(self.controller.spec['visual_style'])['duration_ms']
+        QTest.qWait(duration+220)
+        self.assertGreater(viewport.ticks,2);self.assertEqual(viewport._phase,0.)
+        self.assertFalse(viewport._effect.active);self.assertFalse(self.window._clock.property('active'))
+        self.assertIsNone(self.window._clock.property('subscription'))
+        ticks=viewport.ticks;QTest.qWait(80);self.assertEqual(viewport.ticks,ticks)
+        self.assertEqual(viewport.scenes,1)
+
     def test_close_releases_renderer_disconnects_signals_and_retires_clock(self):
         self.assertTrue(self.controller.active)
         window=self.window;viewport=window.viewport;spy=QSignalSpy(window.closed)
-        viewport.animationActiveChanged.emit(True);QTest.qWait(55)
+        viewport.effect_active=True;viewport.animationActiveChanged.emit(True);QTest.qWait(55)
         self.assertGreater(len(viewport.frames),0)
         self.assertTrue(window.close());self.window=None
         self.assertTrue(viewport.released);self.assertFalse(self.controller.active)

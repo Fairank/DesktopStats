@@ -52,6 +52,18 @@ class AssemblyInspectionTests(unittest.TestCase):
         del self.data['gpus']['1'];self.data.update(gpu_temp=88,gpu_fan_rpm=3000)
         self.assertTrue(all(not row['available'] for row in self.inspect('gpu')['rows']))
 
+    def test_verified_factory_counts_are_static_facts_and_unknown_models_add_none(self):
+        board={row['label']:row for row in self.inspect('board')['rows']}
+        self.assertEqual(board['DIMM 插槽']['value'],'4')
+        self.assertEqual(board['M.2 插槽']['value'],'4')
+        case={row['label']:row for row in self.inspect('case')['rows']}
+        self.assertEqual(case['原厂前置 USB']['value'],'A × 2 · C × 1')
+        self.assertEqual(case['原厂音频接口']['value'],'1')
+        self.spec['board'].pop('slot_counts')
+        self.spec['case'].pop('exterior_details')
+        self.assertNotIn('DIMM 插槽',{row['label'] for row in self.inspect('board')['rows']})
+        self.assertNotIn('原厂前置 USB',{row['label'] for row in self.inspect('case')['rows']})
+
     def test_channel_failure_blocks_cached_numeric_and_nonfinite_or_boolean_values_are_gaps(self):
         self.data['gpus']['1']['channel_status']['gpu_temp']=dict(state='unavailable')
         rows={row['metric']:row for row in self.inspect('gpu')['rows']}

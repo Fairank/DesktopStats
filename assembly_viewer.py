@@ -9,13 +9,14 @@ import struct
 import time
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QMatrix4x4, QVector3D, QVector4D, QSurfaceFormat
+from PySide6.QtGui import QMatrix4x4, QVector2D, QVector3D, QVector4D, QSurfaceFormat
 from PySide6.QtOpenGL import (QOpenGLBuffer, QOpenGLFunctions_3_3_Core, QOpenGLShader,
                              QOpenGLShaderProgram, QOpenGLVertexArrayObject)
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from assembly_geometry import build_scene, number, vertex_bytes
-from assembly_style import edge_batches,style_for
+from assembly_style import edge_batches,material_for,style_for
+from assembly_effects import SelectionEffect
 from top_bar_feedback import GPU_FAN_MAX_AGE
 
 GL_FLOAT=0x1406
@@ -76,34 +77,114 @@ VERTEX_SHADER='''#version 330 core
 layout(location=0) in vec3 position;
 layout(location=1) in vec3 normal;
 uniform mat4 matrix;
+uniform mat4 modelMatrix;
 uniform mat3 normalMatrix;
 uniform float backgroundMode;
 out vec3 worldNormal;
+out vec3 worldPosition;
 void main() {
  if(backgroundMode>0.5) {
   vec2 point=gl_VertexID==0?vec2(-1.0,-1.0):gl_VertexID==1?vec2(3.0,-1.0):vec2(-1.0,3.0);
-  worldNormal=vec3(0.0,0.0,1.0);gl_Position=vec4(point,0.0,1.0);
- } else {worldNormal=normalMatrix*normal; gl_Position=matrix*vec4(position,1.0);}
+  worldNormal=vec3(0.0,0.0,1.0);worldPosition=vec3(0.0);gl_Position=vec4(point,0.0,1.0);
+ } else {worldNormal=normalMatrix*normal;worldPosition=(modelMatrix*vec4(position,1.0)).xyz;
+  gl_Position=matrix*vec4(position,1.0);}
 }
 '''
 FRAGMENT_SHADER='''#version 330 core
 in vec3 worldNormal;
+in vec3 worldPosition;
 uniform vec4 baseColor;
 uniform float shadeMix;
 uniform float backgroundMode;
 uniform vec4 paperColor;
 uniform vec4 paperGridColor;
+uniform vec3 eyePosition;
+uniform vec4 surfaceMaterial;
+uniform vec4 effectParams;
+uniform vec3 effectCenter;
+uniform vec3 effectScale;
+uniform vec4 shadowInverse;
+uniform vec2 shadowCenter;
+uniform vec4 shadowColor;
 out vec4 fragment;
+float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float thin(float value,float width){return 1.0-smoothstep(width,width+0.016,abs(value));}
 void main() {
  if(backgroundMode>0.5) {
   vec2 cell=mod(gl_FragCoord.xy,24.0);
-  float line=1.0-step(0.9,min(cell.x,cell.y));
-  fragment=vec4(mix(paperColor.rgb,paperGridColor.rgb,line*0.17),1.0);return;
+  float line=backgroundMode<1.5?1.0-step(0.9,min(cell.x,cell.y)):0.0;
+  vec3 paper=mix(paperColor.rgb,paperGridColor.rgb,line*0.17);
+  vec2 delta=gl_FragCoord.xy-shadowCenter;
+  vec2 local=vec2(dot(delta,shadowInverse.xy),dot(delta,shadowInverse.zw));
+  float blob=exp(-dot(local,local)*3.4);
+  float contact=exp(-dot(local*vec2(1.8,2.5),local*vec2(1.8,2.5))*3.0);
+  fragment=vec4(mix(paper,shadowColor.rgb,shadowColor.a*(blob*.64+contact*.36)),1.0);return;
  }
  vec3 n=normalize(worldNormal);
- float key=max(0.0,dot(n,normalize(vec3(-0.7,1.0,0.8))));
- float rim=max(0.0,dot(n,normalize(vec3(0.8,0.3,-0.6))));
- fragment=vec4(baseColor.rgb*mix(1.0,0.52+0.36*key+0.18*rim,shadeMix),baseColor.a);
+ vec3 v=normalize(eyePosition-worldPosition);
+ vec3 l=normalize(vec3(-0.7,1.0,0.8));
+ float key=max(0.0,dot(n,l));
+ float fill=max(0.0,dot(n,normalize(vec3(0.8,0.3,-0.6))));
+ float edge=pow(1.0-max(0.0,abs(dot(n,v))),3.0);
+ float rough=surfaceMaterial.y;
+ float spec=pow(max(0.0,dot(n,normalize(v+l))),mix(100.0,7.0,rough));
+ vec3 f0=mix(vec3(.045),baseColor.rgb,surfaceMaterial.x);
+ vec3 studio=baseColor.rgb*(.56+.30*key+.15*fill)+f0*spec*(.85-.45*rough)+f0*edge*.18;
+ float grain=sin(worldPosition.y*2.8+sin(worldPosition.z*.13)*.8);
+ if(surfaceMaterial.w>.5&&surfaceMaterial.w<1.5)studio*=1.0+grain*.018;
+ if(surfaceMaterial.w>1.5)studio*=.97+.025*sin(worldPosition.x*.28+sin(worldPosition.y*.09)*2.0);
+ vec3 rgb=mix(baseColor.rgb,studio,shadeMix);
+ float alpha=baseColor.a;
+ if(surfaceMaterial.z>.5&&shadeMix>.5){
+  float reflection=pow(max(0.0,dot(reflect(-v,n),normalize(vec3(-.2,.85,.5)))),18.0);
+  rgb=mix(baseColor.rgb,vec3(.89,.95,.98),reflection*.42+edge*.24);
+  alpha=clamp(baseColor.a*.45+edge*.18+reflection*.08,.025,.35);
+ }
+ float kind=effectParams.x;float p=effectParams.y;float amount=effectParams.z;
+ bool ink=effectParams.w>.5;
+ vec3 q=(worldPosition-effectCenter)*effectScale+.5;
+ vec3 axis=abs(n);vec2 uv=axis.x>axis.y&&axis.x>axis.z?q.zy:axis.y>axis.z?q.xz:q.xy;
+ vec3 accent=vec3(.25,.66,.88);float signal=0.0;
+ if(kind>.5&&kind<1.5){
+  signal=thin(uv.x*.65+uv.y*.35-(p*1.45-.2),.045);rgb+=vec3(.74,.82,.88)*signal*amount*.40;
+ }else if(kind<2.5&&kind>1.5){
+  float pulse=sin(p*6.28318)*sin(p*6.28318);signal=pow(edge,.45)*(.30+.70*pulse);
+  rgb=mix(rgb,vec3(.98,.83,.64),signal*amount*.46);
+ }else if(kind<3.5&&kind>2.5){
+  vec2 cell=floor(uv*vec2(20.0,24.0));float dotInk=step(hash21(cell),p);
+  signal=dotInk*(.35+.65*hash21(cell+3.1));rgb=mix(rgb,accent,signal*amount*.30);
+ }else if(kind<4.5&&kind>3.5){
+  if(ink){float drawn=smoothstep(uv.y-.018,uv.y+.018,p*1.1);
+   rgb=mix(paperColor.rgb,rgb,.15+.85*drawn);rgb+=vec3(.16,.35,.42)*thin(uv.y-p,.025)*amount;}
+ }else if(kind<5.5&&kind>4.5){
+  float radius=length((uv-.5)*vec2(1.0,1.12));signal=thin(radius-p*.85,.025);
+  rgb=mix(rgb,vec3(1.,.96,.83),signal*amount*.72);
+ }else if(kind<6.5&&kind>5.5){
+  float band=floor(uv.y*6.0);float reveal=smoothstep(band/8.0,band/8.0+.18,p);
+  float seam=1.0-smoothstep(.0,.045,fract(uv.y*6.0));
+  rgb*=1.0-amount*(.13*(1.0-reveal)+seam*.15);
+ }else if(kind<7.5&&kind>6.5){
+  float radius=length(uv-.5);float tide=.03*sin(uv.x*23.+uv.y*13.);
+  float wash=1.0-smoothstep(p*.8-.14+tide,p*.8+tide,radius);
+  signal=wash*(.65+.35*hash21(floor(uv*38.0)));rgb=mix(rgb,vec3(.18,.40,.57),signal*amount*.30);
+ }else if(kind<8.5&&kind>7.5){
+  signal=thin(uv.x-p,.018);rgb=mix(rgb,accent,signal*amount*.55);
+ }else if(kind<9.5&&kind>8.5){
+  if(ink){signal=step(.60,fract((q.x+q.y+q.z)*8.0-p*2.5));rgb=mix(rgb,accent,signal*amount*.80);}
+ }else if(kind<10.5&&kind>9.5){
+  signal=edge*thin(uv.y-p,.10);rgb+=vec3(.68,.82,.94)*signal*amount*.80;
+ }else if(kind<11.5&&kind>10.5){
+  signal=exp(-pow((uv.x-p)/.32,2.0))*(.35+.65*edge);rgb=mix(rgb,vec3(.93,.96,.98),signal*amount*.35);
+ }else if(kind<12.5&&kind>11.5){
+  float a=thin(fract((uv.x+uv.y)*30.)-.5,.055);
+  float b=thin(fract((uv.x-uv.y)*25.)-.5,.035);
+  signal=max(a,b)*smoothstep(uv.y-.08,uv.y+.08,p);rgb=mix(rgb,vec3(.24,.31,.36),signal*amount*.48);
+ }else if(kind<13.5&&kind>12.5){
+  float radius=length((uv-.5)*vec2(1.,1.2));
+  signal=max(thin(radius-.23,.012),thin(radius-.29,.009));
+  signal*=.60+.40*hash21(floor(uv*75.));rgb=mix(rgb,vec3(.43,.27,.39),signal*amount*.78);
+ }
+ fragment=vec4(clamp(rgb,0.0,1.0),alpha);
 }
 '''
 
@@ -126,6 +207,7 @@ class AssemblyRenderer:
         self.policy=style_for('miniature');self._uniforms={};self.bounds={};self.pick_bounds={}
         self._pick_inverse=None;self._pick_projection=None;self._pick_camera_key=None
         self._pick_state=None;self.upload_count=0;self.draw_count=0
+        self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
 
     def initialize(self):
         self.functions=QOpenGLFunctions_3_3_Core()
@@ -149,6 +231,8 @@ class AssemblyRenderer:
     def upload(self,scene):
         if self.program is None:raise RuntimeError('3-D context is not ready')
         self.scene=scene;raw=vertex_bytes(scene);self.policy=style_for(scene.metadata.get('visual_style'))
+        self._materials={id(mesh):material_for(mesh,self.policy['id']) for mesh in scene.meshes}
+        self._shadow_key=None
         self.ranges=[];start=0
         for mesh in scene.meshes:
             self.ranges.append((mesh,start,mesh.vertex_count));start+=mesh.vertex_count
@@ -195,7 +279,26 @@ class AssemblyRenderer:
         # can select an integer uniform overload for Python float arguments.
         self.functions.glUniform1f(self._uniforms[name],float(value))
 
-    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected=''):
+    def _shadow(self,projection,width,height,focus,exploded):
+        """A cached projected ground ellipse, not a scene mesh or a render target."""
+        key=(self._pick_camera_key,focus,exploded)
+        if key==self._shadow_key:return self._shadow_parameters
+        low,high=self.pick_bounds.get((focus,exploded),self.pick_bounds[('all',False)])
+        center=((low[0]+high[0])/2,low[1],(low[2]+high[2])/2)
+        def project(point):
+            value=projection.map(QVector4D(*point,1.))
+            if abs(value.w())<1e-8:return (width/2.,height*.15)
+            return ((value.x()/value.w()+1)*width/2.,(value.y()/value.w()+1)*height/2.)
+        point=project(center)
+        x=project((center[0]+max(8.,high[0]-low[0])*.64,center[1],center[2]))
+        z=project((center[0],center[1],center[2]+max(8.,high[2]-low[2])*.64))
+        a,b=x[0]-point[0],z[0]-point[0];c,d=x[1]-point[1],z[1]-point[1]
+        determinant=a*d-b*c
+        inverse=(d/determinant,-b/determinant,-c/determinant,a/determinant) if abs(determinant)>4 else (1/max(16.,abs(a)+abs(b)),0.,0.,1/6.)
+        self._shadow_key=key;self._shadow_parameters=(point,inverse)
+        return self._shadow_parameters
+
+    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None):
         f=self.functions
         if f is None or self.scene is None:return
         f.glViewport(0,0,max(1,width),max(1,height))
@@ -221,14 +324,26 @@ class AssemblyRenderer:
             self._pick_inverse=inverse if valid else None;self._pick_projection=combined
             self._pick_camera_key=camera_key
         self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus)
+        self._frame_effect=effect if isinstance(effect,dict) and effect.get('active') is True else None
         self.program.bind();self.vao.bind()
+        self.program.setUniformValue('eyePosition',eye)
+        self.program.setUniformValue('paperColor',QVector4D(*background))
+        target=self._frame_effect.get('component','') if self._frame_effect else ''
+        limits=self.pick_bounds.get((target,exploded),self.pick_bounds[('all',False)])
+        effect_center=tuple((limits[0][n]+limits[1][n])/2 for n in range(3))
+        effect_scale=tuple(1/max(1.,limits[1][n]-limits[0][n]) for n in range(3))
+        self.program.setUniformValue('effectCenter',QVector3D(*effect_center))
+        self.program.setUniformValue('effectScale',QVector3D(*effect_scale))
         self._scalar('backgroundMode',0.)
         self._scalar('shadeMix',self.policy['shading'])
-        if self.policy['paper_grid']:
+        if self.policy['paper_grid'] or self.policy['contact_shadow']:
             f.glDisable(GL_DEPTH_TEST);f.glDepthMask(False)
-            self._scalar('backgroundMode',1.)
-            self.program.setUniformValue('paperColor',QVector4D(*background))
+            self._scalar('backgroundMode',1. if self.policy['paper_grid'] else 2.)
             self.program.setUniformValue('paperGridColor',QVector4D(*self.policy['grid_dark' if dark else 'grid_light']))
+            shadow_center,shadow_inverse=self._shadow(self._pick_projection,width,height,focus,exploded)
+            self.program.setUniformValue('shadowCenter',QVector2D(*shadow_center))
+            self.program.setUniformValue('shadowInverse',QVector4D(*shadow_inverse))
+            self.program.setUniformValue('shadowColor',QVector4D(.01,.025,.04,self.policy['contact_shadow']*(.7 if dark else 1.)))
             f.glDrawArrays(GL_TRIANGLES,0,3)
             self._scalar('backgroundMode',0.)
             f.glEnable(GL_DEPTH_TEST);f.glDepthMask(True)
@@ -317,8 +432,17 @@ class AssemblyRenderer:
         model.translate(x,y,z)
         if mesh.rotor:model.rotate(phase*mesh.direction,*mesh.axis)
         self.program.setUniformValue('matrix',projection*view*model)
+        self.program.setUniformValue('modelMatrix',model)
         self.program.setUniformValue('normalMatrix',model.normalMatrix())
         self.program.setUniformValue('baseColor',QVector4D(*(mesh.color if tone is None else tone)))
+        material=self._materials.get(id(mesh),(0.,1.,0.,0.)) if mode!=GL_LINES else (0.,1.,0.,0.)
+        self.program.setUniformValue('surfaceMaterial',QVector4D(*material))
+        effect=self._frame_effect
+        if effect and self._matches_selection(mesh,effect.get('component')):
+            params=(number(effect.get('kind'),0,0,13),number(effect.get('progress'),1,0,1),
+                    number(effect.get('amount'),0,0,1),1. if mode==GL_LINES else 0.)
+        else:params=(0.,0.,0.,1. if mode==GL_LINES else 0.)
+        self.program.setUniformValue('effectParams',QVector4D(*params))
         self.functions.glDrawArrays(mode,start,count)
 
     def close(self):
@@ -328,6 +452,7 @@ class AssemblyRenderer:
         self.vao=self.buffer=self.program=self.functions=None
         self.scene=None;self.ranges=[];self.edge_ranges=[];self.edge_segments=0;self.bounds={};self.pick_bounds={};self._uniforms={}
         self._pick_inverse=self._pick_projection=self._pick_camera_key=self._pick_state=None
+        self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
 
 
 class AssemblyViewport(QOpenGLWidget):
@@ -352,6 +477,8 @@ class AssemblyViewport(QOpenGLWidget):
         self._yaw=-34.;self._pitch=18.;self._zoom=1.;self._exploded=False;self._dark=False
         self._phase=0.;self._rpm=0.;self._fan_available=False;self._animate=False;self._active=False
         self._fan_expiry=0.
+        self._effect=SelectionEffect();self._effect_active=False;self._clock_active_state=False
+        self._motion=True;self._selection_effects=True
         self._focus='all'
         self._selected='';self._press_position=None;self._dragging=False
         self._pointer=None;self._error='';self._closed=False
@@ -368,11 +495,14 @@ class AssemblyViewport(QOpenGLWidget):
                     visual_style=self._scene.metadata.get('visual_style','miniature'),
                     static_ink_segments=self._renderer.edge_segments,
                     selected_component=self._selected,
+                    effect_active=self._effect_active,effect=self._effect.sample(),
+                    animation_active=self._clock_active_state,
                     framebuffer_cap='host controls widget dimensions; no multisampling or post-processing')
 
     def set_scene(self,spec):
         scene=build_scene(spec)
         if scene==self._scene:return
+        self._effect.cancel()
         self._scene=scene;self._pending=True;self.sceneChanged.emit();self._update_animation_state();self.update()
 
     def set_fan_state(self,rpm,available=True,timestamp=None):
@@ -389,14 +519,47 @@ class AssemblyViewport(QOpenGLWidget):
     def set_fan_animation_enabled(self,enabled):
         self._animate=enabled is True;self._update_animation_state()
 
-    def advance_fans(self,elapsed_ms):
+    def set_motion_enabled(self,enabled):
+        self._motion=enabled is True
+        canceled=self._effect.cancel() if not self._motion else False
+        self._update_animation_state()
+        if canceled:self.update()
+
+    def set_selection_effects_enabled(self,enabled):
+        self._selection_effects=enabled is True
+        canceled=self._effect.cancel() if not self._selection_effects else False
+        self._update_animation_state()
+        if canceled:self.update()
+
+    def preview_effect(self,component='case'):
+        if (self._closed or self._error or not self._motion or not self._selection_effects
+                or not self.isVisible() or self.window().isMinimized()):return False
+        if self._focus!='all' and self._focus!=component:return False
+        if not any(AssemblyRenderer._matches_selection(mesh,component) for mesh in self._scene.meshes):return False
+        if not self._effect.start(self._scene.metadata.get('visual_style'),component):return False
+        self._update_animation_state();self.update();return True
+
+    def _step_fans(self,elapsed_ms):
         if self._fan_available and time.monotonic()>self._fan_expiry:
             self._fan_available=False;self._update_animation_state()
         if not self._active:return False
         elapsed=number(elapsed_ms,0,0,136)
         if elapsed<=0:return False
         self._phase=(self._phase+elapsed*self._rpm*360/(60000*120))%360
-        self.update();return True
+        return True
+
+    def advance_fans(self,elapsed_ms):
+        changed=AssemblyViewport._step_fans(self,elapsed_ms)
+        if changed:self.update()
+        return changed
+
+    def advance_animations(self,elapsed_ms):
+        """Advance one shared bounded tick; RPM absence does not block ink FX."""
+        fan_changed=AssemblyViewport._step_fans(self,elapsed_ms)
+        effect_changed=self._effect.advance(elapsed_ms) if self._effect_active else False
+        self._update_animation_state()
+        if fan_changed or effect_changed:self.update()
+        return fan_changed or effect_changed
 
     def set_exploded(self,enabled):
         if self._exploded!=(enabled is True):self._exploded=enabled is True;self.update()
@@ -408,9 +571,12 @@ class AssemblyViewport(QOpenGLWidget):
         layout=self._scene.metadata.get('case_layout')
         self._yaw=-34.;self._pitch=18.;self._zoom=1.
         if self._focus=='gpu':
-            self._pitch=10. if layout=='vertical' else -62.
-            if self._scene.metadata.get('gpu_mount')=='vertical':self._yaw=-76.;self._pitch=12.
-        elif self._focus in ('cpu','memory','board'):
+            if layout=='vertical':self._yaw=145.;self._pitch=10.
+            elif self._scene.metadata.get('gpu_mount')=='vertical':self._yaw=-76.;self._pitch=12.
+            else:self._pitch=-62.
+        elif self._focus=='memory':
+            self._yaw=-20.;self._pitch=-55. if layout=='vertical' else 60. if layout=='horizontal' else 12.
+        elif self._focus in ('cpu','board'):
             self._yaw=-80.;self._pitch=60. if layout=='horizontal' else 12.
         self.update()
 
@@ -423,16 +589,32 @@ class AssemblyViewport(QOpenGLWidget):
         selected='' if name=='all' else name
         if selected not in ('','case','cpu','memory','gpu','board'):return False
         if selected!=self._selected:
-            self._selected=selected;self.componentSelected.emit(selected or 'all');self.update()
+            self._selected=selected;self.componentSelected.emit(selected or 'all')
+            preview=getattr(self,'preview_effect',None)
+            if selected and callable(preview):
+                if not preview(selected):self.update()
+            else:
+                effect=getattr(self,'_effect',None)
+                if effect is not None:effect.cancel();self._update_animation_state()
+                self.update()
         return True
 
     def _update_animation_state(self):
-        active=bool(not self._closed and not self._error and self._animate and self._fan_available and self._rpm>0
+        visible=bool(not self._closed and not self._error and self.isVisible() and not self.window().isMinimized())
+        motion=getattr(self,'_motion',True)
+        active=bool(visible and motion and self._animate and self._fan_available and self._rpm>0
                     and time.monotonic()<=self._fan_expiry
                     and self._focus in ('all','gpu')
-                    and self.isVisible() and not self.window().isMinimized()
                     and any(mesh.rotor for mesh in self._scene.meshes))
-        if active!=self._active:self._active=active;self.animationActiveChanged.emit(active)
+        self._active=active
+        effect=getattr(self,'_effect',None)
+        if effect is not None:
+            if (not visible or not motion or not self._selection_effects
+                    or self._focus!='all' and self._focus!=effect.component):effect.cancel()
+            self._effect_active=bool(effect.active and visible and motion and self._selection_effects)
+        combined=active or getattr(self,'_effect_active',False)
+        if combined!=getattr(self,'_clock_active_state',False):
+            self._clock_active_state=combined;self.animationActiveChanged.emit(combined)
 
     def initializeGL(self):
         try:
@@ -449,6 +631,8 @@ class AssemblyViewport(QOpenGLWidget):
             options=dict(yaw=self._yaw,pitch=self._pitch,zoom=self._zoom,exploded=self._exploded,
                          phase=self._phase,dark=self._dark,focus=self._focus)
             if getattr(self,'_selected',''):options['selected']=self._selected
+            effect=getattr(self,'_effect',None)
+            if effect is not None and effect.active:options['effect']=effect.sample()
             self._renderer.draw(round(self.width()*ratio),round(self.height()*ratio),**options)
         except Exception as error:
             self._error=str(error);self._update_animation_state();self.rendererError.emit('3-D rendering could not be completed')

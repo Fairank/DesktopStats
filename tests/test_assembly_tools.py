@@ -77,12 +77,28 @@ class AssemblyToolsTests(unittest.TestCase):
 
     def test_old_preferences_default_to_static_automatic_assembly_and_invalid_types_fail(self):
         old=copy.deepcopy(DEFAULT);old.pop('assembly')
-        self.assertEqual(validate(old)['assembly'],dict(case_model='',exploded=False,fan_animation=False,appearance_style='follow'))
+        self.assertEqual(validate(old)['assembly'],dict(case_model='',exploded=False,fan_animation=False,appearance_style='follow',detail_level='balanced',selection_effects=True))
         prior=dict(case_model='hyte-y60',exploded=True,fan_animation=False)
-        self.assertEqual(validate_assembly(prior),dict(prior,appearance_style='follow'))
+        self.assertEqual(validate_assembly(prior),dict(prior,appearance_style='follow',detail_level='balanced',selection_effects=True))
         for value in ([],dict(case_model='../bad'),dict(fan_animation=1),dict(exploded='yes'),
-                      dict(appearance_style='unknown'),dict(appearance_style=1),dict(appearance_style=None)):
+                      dict(appearance_style='unknown'),dict(appearance_style=1),dict(appearance_style=None),
+                      dict(detail_level='ultra'),dict(detail_level=None),dict(detail_level=True),
+                      dict(selection_effects=1),dict(selection_effects='yes'),dict(selection_effects=None)):
             with self.assertRaises(ValueError):validate_assembly(value)
+
+    def test_quality_and_effect_preferences_persist_without_touching_other_scopes(self):
+        self.ui.setAssemblyActive(True)
+        before=copy.deepcopy(self.ui.saved)
+        for level in ('eco','balanced','close'):
+            self.ui.changeAssembly('detail_level',level)
+            self.assertEqual(self.ui.assembly_specification()['detail_level'],level)
+        self.ui.changeAssembly('selection_effects',False)
+        self.assertEqual(self.ui.scopeDirty,dict(desktop=False,preferences=True,topbar=False))
+        with patch.object(controls,'save'):self.assertTrue(self.ui.applyPreferences())
+        self.assertEqual(self.ui.saved['assembly']['detail_level'],'close')
+        self.assertIs(self.ui.saved['assembly']['selection_effects'],False)
+        self.assertEqual(self.ui.saved['widgets'],before['widgets'])
+        self.assertEqual(self.ui.saved['top_bar'],before['top_bar'])
 
     def test_all_bar_styles_are_available_without_changing_any_bar_or_case_setting(self):
         self.assertEqual(set(STYLE_LABELS),set(HARDWARE_ICON_STYLES))

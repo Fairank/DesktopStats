@@ -93,7 +93,11 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     board_maker = text(boards[0].get("manufacturer")).casefold() if len(boards) == 1 and isinstance(boards[0], dict) else ""
     if (board_name.casefold() == "rog strix z790-a gaming wifi d4"
             and board_maker in ("asus", "asustek computer inc.", "asustek computer inc")):
-        board.update(form_factor="atx", dimensions_mm=dict(height=305, width=244), source=BOARD_SOURCE)
+        board.update(form_factor="atx", dimensions_mm=dict(height=305, width=244), source=BOARD_SOURCE,
+            detail_profile='asus_z790_a_d4',pcb_color='#242a2d',heatsink_color='#c5cbd0',
+            slot_counts=dict(dimm=4,pcie_x16=3,pcie_x1=1,m2=4,sata=4),
+            rear_ports=dict(usb_a=8,usb_c=2,displayport=1,hdmi=1,audio_3_5=5,spdif=1,lan=1,buttons=2),
+            count_source=BOARD_SOURCE,finish_source=BOARD_SOURCE.replace('/spec/','/'))
     checks = []
     if (known_case and 'no_expansion_slots' in case.get('features',())
             and gpu['present'] and appearance.get('style')!='gpu_integrated'):
@@ -112,6 +116,7 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
         checks.append(dict(kind="board_form", state="within_limit" if board["form_factor"] in forms else "exceeds_limit"))
     return dict(case=case, case_identity=identity, gpu=gpu, cpu=cpu, memory=memory, board=board,
                 options=options, checks=checks, schematic=True,visual_style=visual_style(config),
+                detail_level=options['detail_level'],
                 limitations=["比例与安装位置为三维示意，不能代替实物安装检查。",
                              "散热器、电源和机箱风扇的实际型号尚未识别。"])
 
