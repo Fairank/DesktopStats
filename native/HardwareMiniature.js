@@ -99,6 +99,7 @@ function gpu(state, colors) {
     g.centers=g.centers.map(function(value){return value-.8})
     g.y+=.75
     g.h-=.3
+    if(g.fan_y)g.fan_y=g.fan_y.map(function(value){return value+.75-.3*.51})
     const x=g.x,y=g.y,e=x+g.w,b=y+g.h
     let result=shadow(g)
         +Solid.r(x-.7,y-.2,.85,g.h+1.0,.2,colors.rim)
@@ -115,7 +116,7 @@ function gpu(state, colors) {
             +Solid.p("M"+(x+2)+" "+(y+2.3)+"H"+(x+7.5)+"M"+(x+2)+" "+(y+4)+"H"+(x+7.5)
                 +"M"+(x+2)+" "+(y+5.7)+"H"+(x+7.5),"none",.8,colors.side,.8)
     } else if(g.centers.length) {
-        g.centers.forEach(function(cx){result+=fan(cx,cy,g.radius*.97,colors)})
+        g.centers.forEach(function(cx,index){result+=fan(cx,g.fan_y?g.fan_y[index]:cy,(g.radii?g.radii[index]:g.radius)*.97,colors)})
     } else {
         // A neutral backplate with a beveled inset and diagonal vent slots.
         // Neither an unverified series nor a missing count creates fan circles.

@@ -25,9 +25,102 @@ class HardwareAppearanceTests(unittest.TestCase):
             match = appearance.appearance_for(row[1], row[-1][0])
             if row[1] == "gpu":
                 self.assertEqual(match["confidence"], "model")
-                self.assertIn(match["fan_count"], (1, 2, 3))
+                self.assertIn(match["fan_count"], (None, 0, 1, 2, 3, 4))
+                self.assertIn(match["visible_fan_count"], (None, 0, 1, 2, 3))
                 covered.add(match["series_id"])
         self.assertEqual(covered, {row["id"] for row in appearance.SERIES_CATALOG})
+
+    def test_all_recognised_gpu_brands_have_independent_series_entries(self):
+        self.assertEqual({row["board_vendor"] for row in appearance.SERIES_CATALOG},
+                         set(appearance.BRANDS) - {"unknown"})
+
+    def test_reference_boards_need_a_reference_identity_not_just_the_gpu_name(self):
+        pairs = (("NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090 Founders Edition", "nvidia_founders"),
+                 ("AMD Radeon RX 7900 XTX", "AMD Radeon RX 7900 XTX Reference", "amd_reference"),
+                 ("Intel Arc A770", "Intel Arc A770 Limited Edition", "intel_limited"))
+        for bare, reference, series in pairs:
+            result = appearance.appearance_for("gpu", bare)
+            self.assertEqual(result["board_vendor"], "unknown")
+            self.assertIsNone(result["fan_count"])
+            self.assertNotEqual(result["confidence"], "model")
+            self.assertEqual(appearance.appearance_for("gpu", reference)["series_id"], series)
+
+    def test_reference_model_cannot_override_a_conflicting_explicit_board_vendor(self):
+        cases = (
+            ("NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 5090 Founders Edition", "nvidia"),
+            ("AMD Radeon RX 7900 XTX", "AMD Radeon RX 7900 XTX Reference", "amd"),
+            ("Intel Arc A770", "Intel Arc A770 Limited Edition", "intel"),
+        )
+        for name, model, correct_board in cases:
+            for supplied_name, supplied_model in ((name, model), (model, "")):
+                with self.subTest(name=supplied_name, board=correct_board):
+                    correct = appearance.appearance_for("gpu", supplied_name,
+                                                        model=supplied_model,
+                                                        board_vendor=correct_board)
+                    self.assertEqual(correct["confidence"], "model")
+                    self.assertEqual(correct["board_vendor"], correct_board)
+                    self.assertIsNotNone(correct["fan_count"])
+                for board in ({"intel", "amd", "nvidia"} - {correct_board}) | {"ASUS", "MSI"}:
+                    with self.subTest(name=supplied_name, model=supplied_model, board=board):
+                        wrong = appearance.appearance_for("gpu", supplied_name,
+                                                          model=supplied_model,
+                                                          board_vendor=board)
+                        self.assertNotIn(wrong["confidence"], ("model", "series"))
+                        self.assertEqual(wrong["board_vendor"], "unknown")
+                        self.assertEqual(wrong["series_id"], "")
+                        self.assertIsNone(wrong["fan_count"])
+                        self.assertIsNone(wrong["visible_fan_count"])
+
+    def test_reference_board_metadata_cannot_override_an_aib_name(self):
+        for board in ("ASUS", "MSI", "GIGABYTE"):
+            with self.subTest(board=board):
+                result = appearance.appearance_for(
+                    "gpu", board + " NVIDIA GeForce RTX 5090",
+                    model="NVIDIA GeForce RTX 5090 Founders Edition",
+                    board_vendor="nvidia")
+                self.assertNotIn(result["confidence"], ("model", "series"))
+                self.assertEqual(result["board_vendor"], "unknown")
+                self.assertEqual(result["series_id"], "")
+                self.assertIsNone(result["fan_count"])
+                self.assertIsNone(result["visible_fan_count"])
+
+    def test_subfamilies_do_not_conflict_with_their_parent_or_broad_marketing_name(self):
+        for name, expected in (("PNY XLR8 GAMING VERTO EPIC-X RGB", "pny_xlr8"),
+                               ("Yeston Sakura Atlantis GPU", "yeston_atlantis"),
+                               ("INNO3D iCHILL X3 GPU", "inno3d_ichill_x3"),
+                               ("铭瑄 终结者 NVIDIA GPU", "maxsun_terminator")):
+            self.assertEqual(appearance.appearance_for("gpu", name)["series_id"], expected)
+        self.assertEqual(appearance.appearance_for("gpu", "铭瑄终结者 NVIDIA GPU")["series_id"], "maxsun_terminator")
+
+    def test_physical_total_and_front_plane_are_separate_model_facts(self):
+        cases = (
+            ("ROG-ASTRAL-RTX5080-O16G-GAMING", "asus_astral", 4, 3),
+            ("GALAX GeForce RTX 5080 HOF Extreme", "galax_hof", 4, 3),
+            ("INNO3D GeForce RTX 3080 iCHILL X4", "inno3d_ichill_x4", 4, 3),
+            ("MSI GeForce RTX 4080 SUPER 16G EXPERT", "msi_expert", 2, 1),
+            ("GALAX GeForce RTX 4070 Ti SUPER SG Plus 1-Click OC", "galax_sg", None, 3),
+        )
+        for model, series, physical, front in cases:
+            with self.subTest(model=model):
+                result = appearance.appearance_for("gpu", model)
+                self.assertEqual((result["confidence"], result["series_id"]), ("model", series))
+                self.assertEqual((result["fan_count"], result["visible_fan_count"]), (physical, front))
+                self.assertEqual(result["style"], "gpu_axial")
+                # Mutating either projection must not poison the cached facts.
+                result["fan_count"] = result["visible_fan_count"] = 99
+                again = appearance.appearance_for("gpu", model)
+                self.assertEqual((again["fan_count"], again["visible_fan_count"]), (physical, front))
+
+    def test_special_front_plane_facts_do_not_leak_to_series_or_nearby_model_variants(self):
+        for name in ("ASUS ROG Astral unreviewed GPU", "GALAX HOF unreviewed GPU",
+                     "INNO3D iCHILL X4 unreviewed GPU", "MSI EXPERT unreviewed GPU",
+                     "GALAX SG unreviewed GPU", "GALAX GeForce RTX 5080 HOF Extreme revised",
+                     "INNO3D GeForce RTX 3080 Ti iCHILL X4"):
+            with self.subTest(name=name):
+                result = appearance.appearance_for("gpu", name)
+                self.assertNotEqual(result["confidence"], "model")
+                self.assertIsNone(result["fan_count"])
+                self.assertIsNone(result["visible_fan_count"])
 
     def test_actual_intel_registry_name_matches_package(self):
         result = appearance.appearance_for("cpu", "13th Gen Intel(R) Core(TM) i7-13700KF")
@@ -109,6 +202,20 @@ class HardwareAppearanceTests(unittest.TestCase):
                 result = appearance.appearance_for("gpu", name)
                 self.assertNotEqual(result["confidence"], "model")
                 self.assertIsNone(result["fan_count"])
+
+    def test_every_reviewed_gpu_alias_rejects_unreviewed_color_revision_and_laptop_suffixes(self):
+        # Cover complete aliases/SKUs across the expanded catalog, rather than
+        # just a seed model. A close name must not inherit either fan fact.
+        for row in appearance.CATALOG:
+            if row[1] != "gpu":
+                continue
+            for alias in row[9]:
+                for suffix in (" WHITE", " revised", " Laptop GPU"):
+                    with self.subTest(model=row[0], alias=alias, suffix=suffix):
+                        result = appearance.appearance_for("gpu", alias + suffix)
+                        self.assertNotEqual(result["confidence"], "model")
+                        self.assertIsNone(result["fan_count"])
+                        self.assertIsNone(result["visible_fan_count"])
 
     def test_explicit_board_model_resolves_but_conflicts_fall_back(self):
         result = appearance.appearance_for("gpu", "NVIDIA GeForce RTX 4060",

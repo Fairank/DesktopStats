@@ -10,7 +10,12 @@ count, dimensions, cooling type or physical colors. UI accents are decorative.
 More specific series take precedence over generic GAMING/WINDFORCE wording.
 """
 
-SERIES_CATALOG = (
+from hardware_catalog_core_expansion import SERIES as CORE_SERIES
+from hardware_catalog_group_a import SERIES as GROUP_A_SERIES
+from hardware_catalog_group_b import SERIES as GROUP_B_SERIES
+from hardware_catalog_group_c import SERIES as GROUP_C_SERIES
+
+BASE_SERIES_CATALOG = (
     dict(
         id="asus_dual", board_vendor="asus", label="ASUS Dual", motif="asus_dual",
         aliases=("dual",),
@@ -96,3 +101,5 @@ SERIES_CATALOG = (
         features=("棱角装甲饰面", "多面切割装饰"),
     ),
 )
+SERIES_CATALOG = (BASE_SERIES_CATALOG + GROUP_A_SERIES + GROUP_B_SERIES
+                  + GROUP_C_SERIES + CORE_SERIES)

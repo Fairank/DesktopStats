@@ -1,4 +1,8 @@
 .pragma library
+.import "HardwareSeriesGroupA.js" as GroupA
+.import "HardwareSeriesGroupB.js" as GroupB
+.import "HardwareSeriesGroupC.js" as GroupC
+.import "HardwareSeriesCoreExpansion.js" as Core
 
 // Static, original series illustrations, using the representative design
 // language sourced in hardware_series.py. These are not factory drawings or
@@ -9,6 +13,7 @@
 var ids = ["asus_dual", "asus_tuf", "asus_rog_strix", "msi_ventus", "msi_suprim",
     "msi_gaming", "gigabyte_aorus", "gigabyte_aero", "gigabyte_windforce", "zotac_solo",
     "sapphire_pulse", "sapphire_nitro", "powercolor_hellhound", "powercolor_red_devil"]
+    .concat(GroupA.ids, GroupB.ids, GroupC.ids, Core.ids)
 
 function known(state) {
     return !!state && typeof state.series_id === "string"
@@ -17,6 +22,10 @@ function known(state) {
 }
 
 function profile(id) {
+    if (GroupA.ids.indexOf(id)>=0) return GroupA.profile(id)
+    if (GroupB.ids.indexOf(id)>=0) return GroupB.profile(id)
+    if (GroupC.ids.indexOf(id)>=0) return GroupC.profile(id)
+    if (Core.ids.indexOf(id)>=0) return Core.profile(id)
     // Widths and heights for unknown/zero, one, two and three confirmed fans.
     // They are illustration proportions, not measured product dimensions.
     // The last two entries are fan inset and a small whole-layout offset.
@@ -65,7 +74,15 @@ function geometry(state, base) {
         radius = Math.min(h * .39, step * .44, (left - x) * .86, (x + w - right) * .86)
         for (var index = 0; index < count; index++) centers.push(left + step * index)
     }
-    return {x:x,y:y,w:w,h:h,centers:centers,radius:radius}
+    if (state.series_id === "msi_expert" && count === 1) centers[0]=x+w*.75
+    var radii=centers.map(function(){return radius})
+    var fanY=centers.map(function(){return y+h*.51})
+    if (state.series_id === "colorful_advanced" && count === 3)
+        radii=[radius*.88,radius*1.10,radius*.88]
+    if (state.series_id === "galax_ex_gamer" && count === 3)
+        radii=[radius*.94,radius*.94*102/92,radius*.94]
+    if (state.series_id === "evga_ftw3" && count === 3) fanY[1]+=h*.08
+    return {x:x,y:y,w:w,h:h,centers:centers,radius:radius,radii:radii,fan_y:fanY}
 }
 
 function p(d, fill) {
@@ -121,7 +138,11 @@ function bridges(g, colors, type) {
 function face(state, g, colors) {
     if (!known(state)) return ""
     var c=colors, result="", id=state.series_id
-    switch (id) {
+    if (GroupA.ids.indexOf(id)>=0) result=GroupA.face(state,g,colors)
+    else if (GroupB.ids.indexOf(id)>=0) result=GroupB.face(state,g,colors)
+    else if (GroupC.ids.indexOf(id)>=0) result=GroupC.face(state,g,colors)
+    else if (Core.ids.indexOf(id)>=0) result=Core.face(state,g,colors)
+    else switch (id) {
     case "asus_dual":
         // Asymmetric two-zone enclosure with a stepped shoulder.
         result = p("M0 21L7 6H48L56 0H94L100 14V87L90 100H48L40 94H5L0 82Z",c.caseBody)

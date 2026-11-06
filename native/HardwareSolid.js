@@ -164,7 +164,7 @@ function gpu(state, colors) {
             + p("M"+(x+2)+" "+(y+2.4)+"H"+(x+7.5)+"M"+(x+2)+" "+(y+4.1)+"H"+(x+7.5)
                 +"M"+(x+2)+" "+(y+5.8)+"H"+(x+7.5),"none",.7,colors.disk,.85)
     } else if (g.centers.length) {
-        g.centers.forEach(function(cx){result+=fan(cx,cy,g.radius,colors)})
+        g.centers.forEach(function(cx,index){result+=fan(cx,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,colors)})
     } else {
         // A backplate-like vented panel, never a made-up cooler assembly.
         result += p("M"+(x+3.6)+" "+(y+2.5)+"L"+(x+2.5)+" "+(y+6.6)

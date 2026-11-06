@@ -14,13 +14,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 34643,
-      "sha256": "eb20a2498c32ab81e441b6474a41138e091fc1999f87902e3919641db79d76c6"
+      "bytes": 35241,
+      "sha256": "debf5d38835c24a6f4ec4d84a8434480f3815ef0ecb61310b8992eafdeb777f7"
     },
     {
       "path": "HARDWARE-APPEARANCE.md",
-      "bytes": 6015,
-      "sha256": "55de5e8b9a14857f67fc8e0361f21aa074d0a778332312809bef78cd28e3090f"
+      "bytes": 8195,
+      "sha256": "6d23cf603e910050def0d79c6cb37fb8950780796fbbfb23edb31378634e32e5"
     },
     {
       "path": "Install.cmd",
@@ -629,8 +629,28 @@
     },
     {
       "path": "hardware_appearance.py",
-      "bytes": 11508,
-      "sha256": "181d01adf60d59fa6d0c0f1088052bdc88276e156245e4908bfc1ecf1d1b5c74"
+      "bytes": 14662,
+      "sha256": "eb719e7e638c454abdfd7b43f9550069108893b633207ac23e4a3314967b3527"
+    },
+    {
+      "path": "hardware_catalog_core_expansion.py",
+      "bytes": 6844,
+      "sha256": "dba52bf3e55a6aa3e3ee091acf237b78b4779514847eaa44531d27e2cb074eaf"
+    },
+    {
+      "path": "hardware_catalog_group_a.py",
+      "bytes": 8115,
+      "sha256": "b63244ed0ae47b3f30ab5da6e1164de054ce63e71dbc7f77705d20d3dc65b4bd"
+    },
+    {
+      "path": "hardware_catalog_group_b.py",
+      "bytes": 10341,
+      "sha256": "e295a59b6bc8879d60204bf7f91d52325b88c82311b791fa0fdbebc1d930701b"
+    },
+    {
+      "path": "hardware_catalog_group_c.py",
+      "bytes": 10422,
+      "sha256": "853ce8031393ec4f34cbc7d3c392dd3bb0d6a2e211800a3a181c58a6e66d338d"
     },
     {
       "path": "hardware_model_extensions.py",
@@ -639,8 +659,8 @@
     },
     {
       "path": "hardware_series.py",
-      "bytes": 4897,
-      "sha256": "1044748299ac7612a7e8b4123205bca4ed47b9a12c40de6bcc47eb1add639547"
+      "bytes": 5277,
+      "sha256": "d98a0d107801dda1b5dd23fc6d49dc19197ae8dcde17ae29839adafb3011ba03"
     },
     {
       "path": "history_store.py",
@@ -999,8 +1019,8 @@
     },
     {
       "path": "locales.txt",
-      "bytes": 157393,
-      "sha256": "0666526a2c3fe4e50902496131c629e9ba2fd562e236606da4c9f33f0aedb4d5"
+      "bytes": 161623,
+      "sha256": "44fd9d401b007dca9e412b2c33edae5c5d320a7e4900d646822200bc133fa194"
     },
     {
       "path": "localization.py",
@@ -1109,28 +1129,48 @@
     },
     {
       "path": "native/HardwareMiniature.js",
-      "bytes": 6268,
-      "sha256": "a396c8b14b8782f0c4213c5b52fe22f1dac3b2235f4abfbba269a0cb39b2322a"
+      "bytes": 6399,
+      "sha256": "e807c0bf7b3077bd661dc700956457f5c817c42d5ee55594f38e4a37f7be382a"
+    },
+    {
+      "path": "native/HardwareSeriesCoreExpansion.js",
+      "bytes": 7400,
+      "sha256": "13828081923b2bd48da3168c8eed8609cbd2f01420fe00b0c0429589e2a214c1"
+    },
+    {
+      "path": "native/HardwareSeriesGroupA.js",
+      "bytes": 8386,
+      "sha256": "8341d86f096f996573e1a2e0c5c794f0f3aba4c67053c87415fc4386f46f87c4"
+    },
+    {
+      "path": "native/HardwareSeriesGroupB.js",
+      "bytes": 11656,
+      "sha256": "30c505cfecf71f2bc3cd3da56a94496fd0cebc51573aa9b5f2163a6d07f878b8"
+    },
+    {
+      "path": "native/HardwareSeriesGroupC.js",
+      "bytes": 9227,
+      "sha256": "200a1cd5f593080acee95d3639e04213bd12bbb6b1eecb5d9fa7b785ec37f680"
     },
     {
       "path": "native/HardwareSeriesShapes.js",
-      "bytes": 13034,
-      "sha256": "a123c51d445202b4940891d4bbba3a6882933d5434a4d28f5644d54acf81e879"
+      "bytes": 14316,
+      "sha256": "9eada8d960320cf8000aadeb9145374792fe7d76ee126501e5bb89b4dcabda88"
     },
     {
       "path": "native/HardwareShapes.js",
-      "bytes": 12564,
-      "sha256": "041df00422df39a0aeb97e39b3247342b33213eb08fcfd0544397c5a91c5a556"
+      "bytes": 12918,
+      "sha256": "a0f9c00508597af8e4ea9e72e6b90dbb590b4081f83234a21d65691bf291ea78"
     },
     {
       "path": "native/HardwareSoft.js",
-      "bytes": 11595,
-      "sha256": "ab0afb6333e3810d842c6ccc27b2334d483f7f0e894db3c3bec18fd86c72d332"
+      "bytes": 11647,
+      "sha256": "b2c370fe563218a3bbbbf0d890bf41ad6710a60576ce33e715c4dccb8884459d"
     },
     {
       "path": "native/HardwareSolid.js",
-      "bytes": 9128,
-      "sha256": "497fc20863b451832e8038c52d68f434a19b9af9bc28eae7cff4016685c4dfb6"
+      "bytes": 9180,
+      "sha256": "8c87cb24567c16132ac9b0ca94e69b24a4f9b18082971cad5d6cc3dbe6fc3be5"
     },
     {
       "path": "native/HistoryPage.qml",
@@ -1249,8 +1289,8 @@
     },
     {
       "path": "native/TopBarDetails.qml",
-      "bytes": 79473,
-      "sha256": "24913268b0642e95916ef08bd36f05395430c97409089b6c862a1a479a4a6ce4"
+      "bytes": 80044,
+      "sha256": "fa55741c57251012d2c7237ec7b415d692128635b578560270cbd37b5a0b7639"
     },
     {
       "path": "native/TopBarGroupContent.qml",
@@ -1619,13 +1659,13 @@
     },
     {
       "path": "tests/test_hardware_appearance.py",
-      "bytes": 11246,
-      "sha256": "aa978443369697bb957e7428821b31522c92d69437ec33277db1390e4b43b58f"
+      "bytes": 18238,
+      "sha256": "ea7d709531dae5d92bf116bc3cd6c75b920207c541346854bac16e25ff58b4b1"
     },
     {
       "path": "tests/test_hardware_appearance_qml.py",
-      "bytes": 25612,
-      "sha256": "1b4267fd4523d987376430332b62be70b0dade786e4de1d6bb2f680ce90ade23"
+      "bytes": 37476,
+      "sha256": "2c3415a4117e74230d43e84a4c64a1316e410b597fce37070f6e0dae72be3081"
     },
     {
       "path": "tests/test_hardware_icon_preferences.py",
@@ -2164,8 +2204,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 18034,
-      "sha256": "5942988da53a46c71e37cde825604b6b73c9025ccd230f9210aa498f8a443308"
+      "bytes": 18221,
+      "sha256": "65a8d84113813e33a0ad23912d5d5ea9a2d1e0a58ff1d9fc44f6a650289390b4"
     },
     {
       "path": "tools/build_collector.py",
@@ -2178,9 +2218,14 @@
       "sha256": "9714ce8e7e2da01e419f6ccd0d8e85b069c7b97b6a3bb30fbe7799468c651080"
     },
     {
+      "path": "tools/export_hardware_gallery.py",
+      "bytes": 11201,
+      "sha256": "21f066de47143a7668d7f1a5ca77fe21051e8d46ce4bb48387f343fe72f7335e"
+    },
+    {
       "path": "tools/export_source.py",
-      "bytes": 21105,
-      "sha256": "13f9ee246a2bdfab606cf8ed3033d567ba7dd5beb0bdc673c487a998533b6291"
+      "bytes": 21208,
+      "sha256": "aeb3efd67c1bdadfebc18a0f98dd4f1931edf2d2a38cbe9f4f90bf3ceceb858c"
     },
     {
       "path": "tools/fetch_qt_licenses.py",
@@ -2204,8 +2249,8 @@
     },
     {
       "path": "tools/render_hardware_catalog.py",
-      "bytes": 11742,
-      "sha256": "f596af2e09e73e9479bd6a7cb1b6ef8447aec33bbc22dbcc40fba8bdde0cbd07"
+      "bytes": 18377,
+      "sha256": "5daaea7afd8f0c17f6fe82078edfdb9de57e7b7e2e8d77c9ad546ed58da47812"
     },
     {
       "path": "tools/render_hardware_styles.py",

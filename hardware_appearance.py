@@ -9,6 +9,10 @@ The bounded cache stores immutable tuples; callers receive their own small map.
 import re
 from functools import lru_cache
 
+import hardware_catalog_core_expansion as core_catalog
+import hardware_catalog_group_a as group_a_catalog
+import hardware_catalog_group_b as group_b_catalog
+import hardware_catalog_group_c as group_c_catalog
 from hardware_model_extensions import CATALOG_EXTENSIONS, MODEL_SERIES
 from hardware_series import SERIES_CATALOG
 
@@ -44,12 +48,19 @@ _ALIASES = {
     "asus": ("asus", "asustek"),
     "msi": ("msi", "micro star", "microstar"),
     "gigabyte": ("gigabyte", "aorus"),
-    "galax": ("galax", "kfa2"),
-    "colorful": ("colorful", "colourful", "igame"),
+    "galax": ("galax", "kfa2", "影驰"),
+    "colorful": ("colorful", "colourful", "igame", "七彩虹"),
     "amd": ("amd", "radeon", "advanced micro devices", "ryzen", "threadripper", "epyc"),
     "nvidia": ("nvidia", "geforce", "quadro"),
     "intel": ("intel", "genuineintel"),
 }
+_ALIASES.update({"asus": (*_ALIASES["asus"], "华硕"), "msi": (*_ALIASES["msi"], "微星"),
+                 "gigabyte": (*_ALIASES["gigabyte"], "技嘉"), "zotac": ("zotac", "索泰"),
+                 "sapphire": ("sapphire", "蓝宝石"), "powercolor": ("powercolor", "撼讯"),
+                 "asrock": ("asrock", "华擎"), "xfx": ("xfx", "讯景"), "pny": ("pny", "必恩威"),
+                 "inno3d": ("inno3d", "映众"), "gainward": ("gainward", "耕升"),
+                 "leadtek": ("leadtek", "丽台"), "maxsun": ("maxsun", "铭瑄"),
+                 "yeston": ("yeston", "盈通"), "biostar": ("biostar", "映泰")})
 
 # Exact reviewed seed models, not family-wide fan-count guesses. Each row is
 # id, kind, silicon vendor, board brand, label, style, fans, shroud, URL, aliases.
@@ -89,7 +100,11 @@ _SEED_CATALOG = (
      "https://www.sapphiretech.com/en/consumer/pulse-radeon-rx-7600-8g-gddr6",
      ("SAPPHIRE PULSE AMD Radeon RX 7600 8G GDDR6", "SAPPHIRE PULSE RX 7600")),
 )
-CATALOG = _SEED_CATALOG + CATALOG_EXTENSIONS
+_EXTRA_CATALOGS = (group_a_catalog, group_b_catalog, group_c_catalog, core_catalog)
+CATALOG = (_SEED_CATALOG + CATALOG_EXTENSIONS
+           + tuple(row for package in _EXTRA_CATALOGS for row in package.CATALOG))
+_VISIBLE_FANS = {key: count for package in _EXTRA_CATALOGS
+                 for key, count in getattr(package, "VISIBLE_FANS", {}).items()}
 
 _FIELDS = ("id", "kind", "vendor", "board_vendor", "label", "style", "fan_count",
            "shroud", "source_url", "confidence", "accent", "series_id", "series_label", "features")
@@ -102,10 +117,12 @@ def _text(value):
         return ""
     text = value[:256].casefold()
     text = re.sub(r"\((?:r|tm)\)|[®™]", " ", text)
-    return " ".join(re.sub(r"[^a-z0-9]+", " ", text).split())
+    return " ".join(re.sub(r"[^a-z0-9\u3400-\u9fff]+", " ", text).split())
 
 
 def _has(text, token):
+    if any("\u3400" <= char <= "\u9fff" for char in token):
+        return bool(token and token in text)
     return bool(token and f" {token} " in f" {text} ")
 
 
@@ -113,11 +130,6 @@ def _brands(text, *, silicon=False):
     keys = ("intel", "amd", "nvidia") if silicon else tuple(
         key for key in BRANDS if key not in ("intel", "amd", "nvidia", "unknown"))
     return [key for key in keys if any(_has(text, alias) for alias in _ALIASES[key])]
-
-
-def _brand(text, *, silicon=False):
-    found = _brands(text, silicon=silicon)
-    return found[0] if len(found) == 1 else "unknown"
 
 
 def _gpu_chips(text):
@@ -133,7 +145,9 @@ _MODEL_SERIES = {
     "msi-ventus-4060-2x-oc": "msi_ventus", "gigabyte-windforce-4060-oc": "gigabyte_windforce",
     "zotac-solo-4060": "zotac_solo", "sapphire-pulse-7600": "sapphire_pulse",
     **MODEL_SERIES,
+    **{key: series for package in _EXTRA_CATALOGS for key, series in package.MODEL_SERIES.items()},
 }
+_SERIES_METADATA = {row["id"]: row for row in SERIES_CATALOG}
 _CPU_FEATURES = {"lga_rect": ("长方形金属顶盖",), "am5": ("八处边缘缺口", "中央金属顶盖")}
 _MOBILE = re.compile(r"\b(?:laptop|mobile|notebook|max q)\b|\b\d{4,5}(?:hx|hs|hk|h|u|m)\b")
 
@@ -142,9 +156,20 @@ def _series(board, text, *, exact_id=""):
     matches = [row for row, aliases in _SERIES if row["board_vendor"] == board
                and (row["id"] == exact_id or any(_has(text, alias) for alias in aliases))]
     if len(matches) > 1:
-        specific = [row for row in matches if row["id"] not in ("msi_gaming", "gigabyte_windforce")]
+        # Broader cooling/marketing names can accompany a precise family name.
+        weak = ("msi_gaming", "gigabyte_windforce", "pny_verto")
+        specific = [row for row in matches if row["id"] not in weak]
         if len(specific) == 1:
             return specific[0]
+        # A genuine subfamily phrase can contain its parent's whole phrase:
+        # Sakura Atlantis/Sakura, iCHILL X3/X3. Unrelated TUF + Dual stays ambiguous.
+        candidates = specific or matches
+        for row in candidates:
+            phrases = [_text(alias) for alias in row["aliases"] if _has(text, _text(alias))]
+            if any(all(other["id"] == row["id"] or
+                       any(_has(phrase, _text(alias)) for alias in other["aliases"])
+                       for other in candidates) for phrase in phrases):
+                return row
     return matches[0] if len(matches) == 1 else None
 
 
@@ -156,13 +181,28 @@ def _series_fields(series, *, style=""):
 @lru_cache(maxsize=128)
 def _resolve(kind, name, model, board):
     name, model, board = _text(name), _text(model), _text(board)
-    vendor = _brand(name, silicon=True)
-    board_vendor = _brand(board) if board else _brand(name)
-    name_boards, explicit_boards = _brands(name), _brands(board)
+    name_vendors = _brands(name, silicon=True)
+    vendor = name_vendors[0] if len(name_vendors) == 1 else "unknown"
+    name_boards = _brands(name)
+    # In the explicit board field, the chip makers can identify their own
+    # reference boards. An opposite supplied maker must not be overwritten by
+    # a Founders/Reference/Limited phrase in the model name.
+    reference_boards = _brands(board, silicon=True) if board else []
+    explicit_boards = _brands(board) + reference_boards if board else []
+    boards = explicit_boards if board else name_boards
+    board_vendor = boards[0] if len(boards) == 1 else "unknown"
+    if kind == "gpu" and board_vendor == "unknown":
+        identity = name + " " + model + " " + board
+        reference = ((vendor == "nvidia" and _has(identity, "founders edition"))
+                     or (vendor == "amd" and (_has(identity, "reference") or _has(identity, "made by amd")))
+                     or (vendor == "intel" and _has(identity, "limited edition")))
+        if reference:
+            board_vendor = vendor
     name_chips = _gpu_chips(name) if kind == "gpu" else set()
-    conflict = len(_brands(name, silicon=True)) > 1
+    conflict = len(name_vendors) > 1
     if kind == "gpu":
         conflict |= (len(name_boards) > 1 or len(explicit_boards) > 1 or len(name_chips) > 1
+                     or bool(reference_boards and vendor not in ("unknown", reference_boards[0]))
                      or bool(name_boards and explicit_boards and name_boards != explicit_boards))
     text = model or name
     mobile = bool(_MOBILE.search(name + " " + model))
@@ -212,6 +252,8 @@ def appearance_for(kind, name, *, model="", board_vendor=""):
         return value[:256] if isinstance(value, str) else ""
     result = dict(zip(_FIELDS, _resolve(kind, bounded(name), bounded(model), bounded(board_vendor))))
     result["features"] = list(result["features"])
+    result["visible_fan_count"] = _VISIBLE_FANS.get(result["id"], result["fan_count"])
+    result["legacy"] = bool(_SERIES_METADATA.get(result["series_id"], {}).get("legacy", False))
     return result
 
 

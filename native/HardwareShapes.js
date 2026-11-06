@@ -2,6 +2,7 @@
 .import "HardwareSolid.js" as Solid
 .import "HardwareMiniature.js" as Miniature
 .import "HardwareSoft.js" as Soft
+.import "HardwareSeriesShapes.js" as SeriesCatalog
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
@@ -12,9 +13,7 @@ var boards = ["asus", "msi", "gigabyte", "zotac", "sapphire", "powercolor", "asr
     "pny", "palit", "gainward", "galax", "inno3d", "colorful", "xfx", "evga", "leadtek",
     "maxsun", "yeston", "biostar", "intel", "amd", "nvidia", "unknown"]
 var shrouds = ["neutral", "angular", "soft", "box", "reference"]
-var seriesIds = ["asus_dual", "asus_tuf", "asus_rog_strix", "msi_ventus", "msi_gaming", "msi_suprim",
-    "gigabyte_windforce", "gigabyte_aorus", "gigabyte_aero", "zotac_solo", "sapphire_pulse", "sapphire_nitro",
-    "powercolor_hellhound", "powercolor_red_devil"]
+var seriesIds = SeriesCatalog.ids
 
 function choice(value, allowed, fallback) {
     if (typeof value !== "string" || value.length > 40) return fallback
@@ -46,10 +45,17 @@ function key(appearance, ink) {
     const style = choice(input.style, styles, kind === "cpu" ? "chip" : "gpu_neutral")
     // A neutral family never asserts a cooler. Counts are used only after an
     // explicit axial/blower match; string/boolean/out-of-range counts stay unknown.
+    const physical = typeof input.fan_count === "number" && Number.isInteger(input.fan_count)
+        && input.fan_count >= 0 && input.fan_count <= 4 ? input.fan_count : -1
+    // Python None can arrive as undefined through QVariantMap. Both nullish
+    // forms mean an unknown total; neither invalid strings nor booleans do.
+    const visible = typeof input.visible_fan_count === "number" && Number.isInteger(input.visible_fan_count)
+        && input.visible_fan_count >= 0 && input.visible_fan_count <= 3
+        && (physical >= input.visible_fan_count || input.fan_count == null && input.confidence === "model")
+        ? input.visible_fan_count : physical <= 3 ? physical : -1
     const count = style === "gpu_integrated" ? 0
         : style === "gpu_neutral" ? -1
-        : typeof input.fan_count === "number" && Number.isInteger(input.fan_count)
-            && input.fan_count >= 0 && input.fan_count <= 3 ? input.fan_count : -1
+        : visible
     const shroud = choice(input.shroud, shrouds, "neutral")
     let series = kind === "gpu" ? choice(input.series_id, seriesIds, "") : ""
     if (series && series.split("_")[0] !== board) series = ""

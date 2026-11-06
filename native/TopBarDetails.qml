@@ -1125,9 +1125,15 @@ Window {
                                                 : confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
                                             if (["model", "brand"].includes(confidence) && typeof appearance.label === "string" && appearance.label.trim())
                                                 parts.push(appearance.label.trim())
-                                            if (appearance.kind === "gpu" && confidence === "model"
-                                                    && Number.isInteger(appearance.fan_count) && [1, 2, 3].includes(appearance.fan_count))
-                                                parts.push(root.tr("风扇数量") + ": " + appearance.fan_count)
+                                            if (appearance.kind === "gpu" && confidence === "model") {
+                                                const total = appearance.fan_count
+                                                const front = appearance.visible_fan_count
+                                                const knownTotal = Number.isInteger(total) && [0, 1, 2, 3, 4].includes(total)
+                                                if (knownTotal) parts.push(root.tr("风扇数量") + ": " + total)
+                                                else if (total == null) parts.push(root.tr("风扇总数未确认"))
+                                                if (Number.isInteger(front) && [0, 1, 2, 3].includes(front) && front !== total)
+                                                    parts.push(root.tr("正面可见风扇") + ": " + front)
+                                            }
                                             return parts.join(" · ")
                                         }
                                         textFormat: Text.PlainText

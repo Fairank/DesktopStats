@@ -2,25 +2,34 @@
 
 ## Unreleased — hardware appearances
 
-- Give all 14 existing GPU series a separate casing profile with distinct major
-  panel divisions, shoulders, end caps and illustration proportions. Reuse these
-  profiles across Solid, Miniature and Soft without changing Outline.
-- Add eight source-checked GPU model representatives so each existing series has
-  a confirmed exact example, without assigning fan counts to other variants.
-- Keep the previous drawings as the optional Outline version. Add Solid,
-  Miniature and Soft two-tone versions with compact single-fan, longer dual-fan
-  and slimmer triple-fan card proportions, real hubs and simplified curved vanes.
-- Add a five-version hardware-icon selector to top-bar Appearance settings.
+- Expand the source-linked GPU catalog to 22 brands and 67 series/product lines,
+  each with a reviewed representative and an independent casing profile. Keep
+  the 3 CPU examples, for 70 model records; this is not an exhaustive historical
+  catalog or coverage of every CPU family.
+- Give Solid, Miniature and Soft distinct major panels, shoulders, end caps and
+  illustration proportions for each series. Preserve the earlier Outline
+  drawings and original Classic glyphs as selectable versions.
+- Keep all five hardware-icon versions in top-bar Appearance settings.
   Existing preferences default to Classic, preserving original glyphs. Switching
   versions updates the shared preview and follows the existing scoped Apply flow.
-- Add original static CPU/GPU silhouettes, including reviewed desktop processor
-  packages and exact-model single/dual/triple-fan layouts. Keep temperature,
-  usage, electrical effects and their shared clock independent of appearance.
+- Distinguish physical fan totals from front-visible fans: opposed MSI EXPERT
+  and rear/side auxiliary layouts retain their true totals. Keep the GALAX SG+
+  total unknown when auxiliary installation is optional, and keep BIOSTAR's
+  unverified layout neutral. Complete reviewed identities establish layouts;
+  bare chip names do not automatically select a reference board.
+- Preserve confirmed front fans when Qt represents an unknown Python total as
+  an undefined QML value. Retain the larger center fans of Advanced and EX Gamer
+  representatives and the lowered central FTW3 fan.
 - Recognise brand, series and exact-model identities separately. Show series
   shroud motifs and feature summaries in expanded details, with an on-demand
   64px illustration. Unknown fan layouts remain neutral rather than guessed.
+- Add an offline, searchable comparison gallery exported from the real QML
+  drawing code: 670 embedded SVG variants across the 67 GPU representatives,
+  five versions and two themes, including 18px top-bar comparisons.
 - Reuse existing identity strings with a bounded offline match cache. Retain PCI
   fields already returned by DXGI without adding monitoring queries or polling.
+  The series drawings are static vectors and add no sampling or animation clock;
+  real temperature/load effects and hidden/minimized pause behavior remain.
 
 ## 0.27.0-preview.2
 

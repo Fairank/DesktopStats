@@ -216,7 +216,7 @@ function seriesGpu(state, p, count) {
     if (state.style === "gpu_blower" && count === 1)
         return result + fan(g.x+g.w-4.5,cy,3.4,p)
     if (g.centers.length) {
-        g.centers.forEach(function(x){result += fan(x,cy,g.radius,p)})
+        g.centers.forEach(function(x,index){result += fan(x,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,p)})
     } else {
         // Unknown cooling retains a neutral vented panel, never fan openings.
         result += rect(g.x+g.w*.14,g.y+g.h*.26,g.w*.66,g.h*.48,.7,p.shade)

@@ -3,8 +3,10 @@ import base64
 import copy
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
+import re
 import time
 import unittest
 from unittest.mock import patch
@@ -117,6 +119,50 @@ Window {
         source = item.property("svgSource").toString()
         header, body = source.split(",", 1)
         return base64.b64decode(body).decode() if ";base64" in header else unquote(body)
+
+    def fan_layout(self, svg):
+        """Measure actual rendered SVG fan discs, including per-fan offsets.
+
+        Checking the facade's intermediate geometry alone would miss a theme
+        dropping variable radii or vertical placement when emitting its SVG.
+        """
+        tree = ET.fromstring(svg)
+        parents = {child: parent for parent in tree.iter() for child in parent}
+        layout = []
+        for hub in tree.iter():
+            if hub.get("class") != "hardware-fan-hub":
+                continue
+            group = parents[hub]
+            match = re.fullmatch(r"translate\(([^)]+)\)\s*scale\(([^)]+)\)", group.get("transform", ""))
+            self.assertIsNotNone(match, "A front fan must have a measurable circular plane")
+            center = [float(value) for value in re.split(r"[,\s]+", match.group(1).strip())]
+            scale = [float(value) for value in re.split(r"[,\s]+", match.group(2).strip())]
+            self.assertEqual(len(center), 2)
+            self.assertIn(len(scale), (1, 2))
+            sx, sy = scale[0], scale[-1]
+            self.assertAlmostEqual(sx, sy, msg="Front fan discs must stay round in every theme")
+            radii = [float(node.get("r")) for node in group if node.tag.endswith("circle")]
+            self.assertGreater(len(radii), 1)
+            radius = max(radii) * sx
+            self.assertTrue(all(math.isfinite(number) for number in (*center, radius)))
+            self.assertGreater(radius, 0)
+            # A parent transform could silently change these measurements.
+            ancestor = parents.get(group)
+            while ancestor is not None:
+                self.assertNotIn("transform", ancestor.attrib)
+                ancestor = parents.get(ancestor)
+            layout.append((center[0], center[1], radius))
+        return sorted(layout)
+
+    def assert_front_fans_fit(self, layout):
+        for x, y, radius in layout:
+            self.assertGreaterEqual(x - radius, 0)
+            self.assertGreaterEqual(y - radius, 0)
+            self.assertLessEqual(x + radius, 24)
+            self.assertLessEqual(y + radius, 24)
+        for left, right in zip(layout, layout[1:]):
+            distance = math.hypot(left[0] - right[0], left[1] - right[1])
+            self.assertGreater(distance, left[2] + right[2], "Adjacent physical fans must remain separate")
 
     def test_verified_fan_layouts_are_distinct_and_unknown_is_not_a_two_fan_guess(self):
         self.load_icon()
@@ -249,6 +295,63 @@ Window {
         controller._saved["top_bar"]["items"] = [dict(id="b_cpu", metric="cpu_usage", prefs=dict(icon_effect="off"))]
         self.assertEqual(controller.topBarRows()[0]["hardware_appearance"]["kind"], "cpu")
 
+    def test_real_controller_to_bar_state_keeps_optional_sg_front_when_none_crosses_qvariant_map(self):
+        import native_controller as controls
+        from stats_config import DEFAULT, validate
+        from top_bar_runtime import BarViewState
+        config = copy.deepcopy(DEFAULT)
+        config["language"] = "zh-CN"
+        config["top_bar"]["hardware_icon_style"] = "solid"
+        config["top_bar"]["items"] = [dict(id="b_sg", metric="gpu_usage", prefs=dict(
+            gpu_target="0", style="icon_value", icon_effect="off"))]
+        with patch.object(controls, "load", return_value=validate(config)):
+            controller = controls.Controller()
+        self.addCleanup(controller.close)
+        # Demand may register a synthetic lease, but must never start a process
+        # monitor. All values originate in this test, not a collector.
+        controller._process_sampling_enabled = False
+        controller._data = dict(time=time.time(), gpus={"0": dict(
+            label="GALAX GeForce RTX 4070 Ti SUPER SG Plus 1-Click OC",
+            gpu_usage=20, gpu_temp=40, gpu_power=30)})
+        manager = QObject()
+        manager.controller = controller
+        manager.enter_panel = lambda: None
+        manager.leave = lambda: None
+        self.addCleanup(manager.deleteLater)
+        self.state = BarViewState(manager, "synthetic-sg")
+        self.state._config = copy.deepcopy(controller._saved)
+        self.state._detail = controller.topBarDetailRow("b_sg")
+        actual = self.state._detail["hardware_appearance"]
+        self.assertEqual(actual["confidence"], "model")
+        self.assertIsNone(actual["fan_count"])
+        self.assertEqual(actual["visible_fan_count"], 3)
+        self.engine.rootContext().setContextProperty("stats", controller)
+        self.component = QQmlComponent(self.engine, QUrl.fromLocalFile(str(ROOT / "native/TopBarDetails.qml")))
+        self.window = self.component.createWithInitialProperties({"barState": self.state})
+        self.assertIsNotNone(self.window, [row.toString() for row in self.component.errors()])
+        self.window.show()
+        self.window.setProperty("showMetadata", True)
+        QTest.qWait(20)
+        for style in ("solid", "miniature", "soft"):
+            with self.subTest(style=style):
+                controller._saved["top_bar"]["hardware_icon_style"] = style
+                self.state._detail = controller.topBarDetailRow("b_sg")
+                self.state.detailChanged.emit()
+                self.app.processEvents()
+                # Unlike JSON.parse fixtures, Python None can become JS
+                # undefined at the real QVariantMap property boundary.
+                self.assertTrue(self.evaluate(self.window, "detail.hardware_appearance.fan_count == null"))
+                caption = self.find("topBarDetailAppearance").property("text")
+                self.assertIn("风扇总数未确认", caption)
+                self.assertIn("正面可见风扇: 3", caption)
+                self.assertNotIn("风扇数量: 3", caption)
+                glyph = self.find("topBarDetailAppearanceLoader").property("item")
+                self.assertIsNotNone(glyph)
+                layout = self.fan_layout(self.svg(glyph))
+                self.assertEqual(len(layout), 3)
+                self.assert_front_fans_fit(layout)
+                self.assertIsNone(controller._process_monitor)
+
     def test_real_details_metadata_distinguishes_match_levels_and_only_confirms_model_fan_counts(self):
         self.state = fixture.ModuleState()
         self.state.details.update(family="gpu", icon="gpu", hardware_name="Synthetic GPU", source="Synthetic provider")
@@ -266,9 +369,15 @@ Window {
                  (gpu(3, confidence="brand"), "品牌外观 · Synthetic GPU"),
                  (gpu(None, confidence="series"), "系列外观"),
                  (gpu(3, confidence="series"), "系列外观"),
-                 (gpu(None), "型号外观 · Synthetic GPU"),
+                 (gpu(None), "型号外观 · Synthetic GPU · 风扇总数未确认"),
                  (gpu("2"), "型号外观 · Synthetic GPU"),
                  (gpu(2), "型号外观 · Synthetic GPU · 风扇数量: 2"),
+                 (dict(gpu(4), visible_fan_count=3),
+                  "型号外观 · Synthetic GPU · 风扇数量: 4 · 正面可见风扇: 3"),
+                 (dict(gpu(2), visible_fan_count=1),
+                  "型号外观 · Synthetic GPU · 风扇数量: 2 · 正面可见风扇: 1"),
+                 (dict(gpu(None), visible_fan_count=3),
+                  "型号外观 · Synthetic GPU · 风扇总数未确认 · 正面可见风扇: 3"),
                  (dict(kind="cpu", confidence="model", label="Synthetic CPU", fan_count=3), "型号外观 · Synthetic CPU")]
         for index, (appearance, expected) in enumerate(cases):
             self.window.setProperty("showMetadata", False)
@@ -280,7 +389,8 @@ Window {
             self.assertEqual(self.window.height(), collapsed_height)
             self.window.setProperty("showMetadata", True)
             QTest.qWait(10)
-            self.assertEqual(text.property("text"), expected)
+            self.assertEqual(text.property("text"), expected, (appearance,
+                self.evaluate(self.window, "typeof detail.hardware_appearance.fan_count")))
             self.assertTrue(text.isVisible())
             self.assertTrue(self.evaluate(text, "textFormat === Text.PlainText"))
             glyph = loader.property("item")
@@ -395,6 +505,99 @@ Window {
                 self.assertFalse(any(node.get("class") == "hardware-fan-hub"
                                      for node in ET.fromstring(self.svg(glyph)).iter()))
         self.assertEqual(len(set(distinct)), 3)
+
+    def test_verified_front_planes_draw_separately_from_physical_totals_in_all_modern_styles(self):
+        from hardware_appearance import appearance_for
+        cases = (
+            ("ROG-ASTRAL-RTX5080-O16G-GAMING", 4, 3),
+            ("GALAX GeForce RTX 5080 HOF Extreme", 4, 3),
+            ("INNO3D GeForce RTX 3080 iCHILL X4", 4, 3),
+            ("MSI GeForce RTX 4080 SUPER 16G EXPERT", 2, 1),
+            ("GALAX GeForce RTX 4070 Ti SUPER SG Plus 1-Click OC", None, 3),
+        )
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        for style in ("solid", "miniature", "soft"):
+            for model, physical, front in cases:
+                with self.subTest(style=style, model=model):
+                    value = appearance_for("gpu", model)
+                    self.assertEqual(value["confidence"], "model")
+                    self.assertEqual((value["fan_count"], value["visible_fan_count"]), (physical, front))
+                    self.assign("appearance", dict(value, icon_set=style))
+                    layout = self.fan_layout(self.svg(glyph))
+                    self.assertEqual(len(layout), front)
+                    self.assert_front_fans_fit(layout)
+                    # EXPERT's push/pull second fan belongs to the back. Its
+                    # one visible front fan sits at the right end of the slab.
+                    if front == 1:
+                        self.assertGreater(layout[0][0], 13)
+
+    def test_four_physical_fans_without_a_valid_front_count_never_become_three(self):
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        for style in ("solid", "miniature", "soft"):
+            value = dict(gpu(4), icon_set=style, board_vendor="asus", series_id="asus_astral")
+            # The known series silhouette is not evidence for a front layout.
+            for front in ("absent", None, "3", True, -1, 4, [], {}):
+                with self.subTest(style=style, front=front):
+                    candidate = dict(value)
+                    if front != "absent":
+                        candidate["visible_fan_count"] = front
+                    self.assign("appearance", candidate)
+                    self.assertEqual(self.fan_layout(self.svg(glyph)), [])
+            for silhouette in ("gpu_neutral", "gpu_integrated"):
+                self.assign("appearance", dict(value, style=silhouette, visible_fan_count=3))
+                self.assertEqual(self.fan_layout(self.svg(glyph)), [])
+            # An impossible front total is rejected without losing the known
+            # ordinary two-fan layout; optional fronts require a model match.
+            self.assign("appearance", dict(gpu(2), icon_set=style, visible_fan_count=3))
+            self.assertEqual(len(self.fan_layout(self.svg(glyph))), 2)
+            self.assign("appearance", dict(gpu(None, confidence="series"), icon_set=style,
+                                           visible_fan_count=3))
+            self.assertEqual(self.fan_layout(self.svg(glyph)), [])
+
+    def test_total_only_metadata_updates_keep_the_same_static_front_texture(self):
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        for style in ("solid", "miniature", "soft"):
+            value = dict(gpu(3), icon_set=style, visible_fan_count=3)
+            self.assign("appearance", value)
+            source = glyph.property("svgSource")
+            changed = QSignalSpy(glyph.svgSourceChanged)
+            # Synthetic metadata-only updates model an optional rear fan being
+            # confirmed; the already-confirmed front must not be re-encoded.
+            for total in (None, 4, 3, None):
+                self.assign("appearance", dict(value, fan_count=total))
+                self.assertEqual(glyph.property("svgSource"), source)
+                self.assertEqual(len(self.fan_layout(self.svg(glyph))), 3)
+            self.assertEqual(changed.count(), 0)
+
+    def test_larger_advanced_and_ex_center_and_lower_ftw3_center_survive_every_modern_theme(self):
+        from hardware_appearance import appearance_for
+        self.load_icon()
+        glyph = self.find("controlGlyph")
+        cases = (("Colorful iGame GeForce RTX 4070 Ti Advanced OC-V", "colorful_advanced", 1.15),
+                 ("GALAX GeForce RTX 4070 EX Gamer 1-Click OC D6", "galax_ex_gamer", 1.05),
+                 ("10G-P5-3895-KR", "evga_ftw3", None))
+        for style in ("solid", "miniature", "soft"):
+            for model, series, minimum_center_ratio in cases:
+                with self.subTest(style=style, series=series):
+                    value = appearance_for("gpu", model)
+                    self.assertEqual(value["series_id"], series)
+                    self.assign("appearance", dict(value, icon_set=style))
+                    layout = self.fan_layout(self.svg(glyph))
+                    self.assertEqual(len(layout), 3)
+                    self.assert_front_fans_fit(layout)
+                    left, center, right = layout
+                    self.assertAlmostEqual(left[2], right[2])
+                    if minimum_center_ratio is not None:
+                        self.assertGreater(center[2], left[2] * minimum_center_ratio)
+                        self.assertAlmostEqual(left[1], center[1])
+                        self.assertAlmostEqual(center[1], right[1])
+                    else:
+                        self.assertGreater(center[1] - left[1], .4)
+                        self.assertAlmostEqual(left[1], right[1])
+                        self.assertAlmostEqual(left[2], center[2])
 
     def test_version_switch_preserves_existing_feedback_phase_and_clock(self):
         self.load_icon()

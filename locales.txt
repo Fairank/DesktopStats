@@ -802,3 +802,23 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 灯效饰面|燈效飾面|Lighting accents|ライティングの装飾|조명 장식|Lichtakzente|Accents lumineux|Detalles luminosos
 棱角装甲饰面|稜角裝甲飾面|Angular armor detailing|角張った装甲風の装飾|각진 장갑형 장식|Kantige Panzerungsakzente|Détails d’armure anguleux|Detalles de blindaje anguloso
 多面切割装饰|多面切割裝飾|Multi-faceted detailing|多面カットの装飾|다면 컷 장식|Facettierte Verzierungen|Détails à facettes|Detalles facetados
+中央环形饰框|中央環形飾框|Central ring trim|中央のリング装飾|중앙 고리 장식|Mittige Ringverzierung|Ornement annulaire central|Adorno anular central
+交叉金属框架|交叉金屬框架|Crossed metal frame|交差する金属フレーム|교차형 금속 프레임|Gekreuzter Metallrahmen|Cadre métallique croisé|Marco metálico cruzado
+交叉飘带护罩|交叉飄帶護罩|Crossed ribbon shroud|交差するリボン状カバー|교차 리본형 덮개|Abdeckung mit gekreuzten Bändern|Carénage à rubans croisés|Carcasa de bandas cruzadas
+侧置辅助风扇|側置輔助風扇|Side-mounted auxiliary fan|側面の補助ファン|측면 보조 팬|Seitlicher Zusatzlüfter|Ventilateur auxiliaire latéral|Ventilador auxiliar lateral
+分层飘带框架|分層飄帶框架|Layered ribbon frame|層状のリボン型フレーム|층을 이룬 리본형 프레임|Rahmen mit geschichteten Bändern|Cadre à rubans superposés|Marco de bandas superpuestas
+双面推拉布局|雙面推拉佈局|Two-sided push-pull layout|両面プッシュプル構成|양면 푸시풀 배치|Beidseitige Push-Pull-Anordnung|Disposition push-pull sur deux faces|Disposición push-pull en ambas caras
+可选外接辅助风扇|可選外接輔助風扇|Optional external auxiliary fan|オプションの外付け補助ファン|선택형 외장 보조 팬|Optionaler externer Zusatzlüfter|Ventilateur auxiliaire externe en option|Ventilador auxiliar externo opcional
+合金装甲外壳|合金裝甲外殼|Alloy armored shroud|合金の装甲型カバー|합금 장갑형 외장|Gepanzerte Abdeckung aus Legierung|Carénage blindé en alliage|Carcasa blindada de aleación
+圆润一体护罩|圓潤一體護罩|Rounded one-piece shroud|丸みのある一体型カバー|둥근 일체형 덮개|Abgerundete einteilige Abdeckung|Carénage monobloc arrondi|Carcasa redondeada de una pieza
+弧形端部开口|弧形端部開口|Curved end opening|端部の曲線的な開口|곡선형 끝부분 개구부|Geschwungene Endöffnung|Ouverture incurvée en extrémité|Abertura curva en el extremo
+弧形连接框架|弧形連接框架|Curved connecting frame|曲線的な連結フレーム|곡선형 연결 프레임|Geschwungener Verbindungsrahmen|Cadre de liaison incurvé|Marco de unión curvo
+斜向连接桥|斜向連接橋|Diagonal connecting bridge|斜めの連結ブリッジ|대각선 연결 브리지|Diagonaler Verbindungssteg|Pont de liaison diagonal|Puente de unión diagonal
+方格面板分区|方格面板分區|Grid panel sections|格子状に区切られたパネル|격자로 나뉜 패널|Rasterförmige Paneelsegmente|Sections de panneau quadrillées|Secciones de panel en cuadrícula
+波折装甲边框|波折裝甲邊框|Zigzag armored frame|ジグザグの装甲型フレーム|지그재그 장갑형 프레임|Gezackter Panzerrahmen|Cadre blindé en zigzag|Marco blindado en zigzag
+流线弧形外壳|流線弧形外殼|Streamlined curved shroud|流線形の曲面カバー|유선형 곡면 외장|Stromlinienförmige geschwungene Abdeckung|Carénage incurvé et profilé|Carcasa curva y aerodinámica
+独立侧屏模块|獨立側屏模組|Separate side-display module|独立した側面ディスプレイ|독립형 측면 디스플레이 모듈|Separates seitliches Displaymodul|Module d’affichage latéral distinct|Módulo de pantalla lateral independiente
+背置辅助风扇|背置輔助風扇|Rear-mounted auxiliary fan|背面の補助ファン|후면 보조 팬|Rückseitiger Zusatzlüfter|Ventilateur auxiliaire arrière|Ventilador auxiliar trasero
+贯通风道|貫通風道|Flow-through air channel|貫通式の通風路|관통형 공기 통로|Durchgehender Luftkanal|Canal d’air traversant|Conducto de aire pasante
+正面可见风扇|正面可見風扇|Fans visible from the front|正面から見えるファン|정면에서 보이는 팬|Von vorn sichtbare Lüfter|Ventilateurs visibles de face|Ventiladores visibles de frente
+风扇总数未确认|風扇總數未確認|Total fan count unconfirmed|ファン総数は未確認|총 팬 수 미확인|Gesamtzahl der Lüfter unbestätigt|Nombre total de ventilateurs non confirmé|Número total de ventiladores sin confirmar
