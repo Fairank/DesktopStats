@@ -481,6 +481,16 @@ Window {
         self.assertTrue(icon.property("gpuFanMotionActive"))
         self.assertEqual(icon.property("gpuFanRpm"), 2400)
 
+    def test_unreviewed_fan_faces_stay_static_even_when_card_rpm_is_available(self):
+        icon, glyph = self.find("fanMetric"), self.metric_glyph()
+        self.assign("appearance", appearance("APBF-IA770-16G-OC"))
+        self.assign("channels", processor_channels(rpm=1800))
+        self.stop_clock()
+        self.assertEqual(icon.property("gpuFanRpm"), 1800)
+        self.assertFalse(icon.property("gpuFanMotionActive"))
+        self.assertIsNone(self.motion_loader(glyph).property("item"))
+        self.assertEqual(self.find("hardwareGlyphImage", glyph).property("source"), glyph.property("svgSource"))
+
     def test_hidden_minimized_off_and_reduced_motion_release_rotors_and_keep_phase(self):
         icon = self.find("fanMetric")
         glyph = self.metric_glyph()

@@ -179,6 +179,7 @@ Item {
     readonly property bool gpuFanCanAnimate: name==="gpu" && hasHardwareAppearance && compositeActive
         && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
         && gpuVisibleFans>0 && ["solid","miniature","soft"].includes(hardwareAppearance.icon_set)
+        && hardwareAppearance.fan_profile && hardwareAppearance.fan_profile.render_ready===true
         && resolvedEffect==="hardware"
     readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning
     readonly property real activityStrength: 0.28 + 0.72 * displayedLevel

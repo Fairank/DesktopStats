@@ -14,8 +14,12 @@ def profile_for(appearance):
     value = PROFILES.get(appearance.get("series_id"), {})
     if value.get("model_ids") and appearance.get("id") not in value["model_ids"]:
         return {}
+    counts=[fan.get('blades', value.get('blades')) for fan in value.get('fans', ())] or [value.get('blades')]
+    ready=all(type(count) is int and count>0 for count in counts)
     return dict(label=value.get("label", ""), technology=value.get("technology", "unknown"),
                 blades=value.get("blades"), source_url=value.get("source_url", ""),
                 blade_counts=[fan.get('blades', value.get('blades'))
                               for fan in value.get('fans', ())],
+                render_ready=ready, artwork_status=('not_applicable' if appearance.get('fan_count')==0
+                                                    else 'reviewed' if ready else 'pending'),
                 verified=value.get("technology", "unknown") != "unknown")

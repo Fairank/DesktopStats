@@ -1,6 +1,7 @@
 """Reviewed exact-board fan studies and actual SVG rotors; no hardware or windows."""
 import base64
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -14,8 +15,9 @@ os.environ.setdefault("QT_QUICK_BACKEND", "software")
 os.environ.setdefault("QML_DISABLE_DISK_CACHE", "1")
 
 from PySide6.QtCore import QCoreApplication, QEvent, QUrl
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QImage, QPainter
 from PySide6.QtQml import QQmlComponent, QQmlEngine, QQmlExpression, qmlContext
+from PySide6.QtSvg import QSvgRenderer
 
 import hardware_appearance as hardware
 from hardware_fan_profiles import GROUP_A, GROUP_B, PROFILES, profile_for
@@ -49,6 +51,33 @@ def blade_paths(tree):
     # Blade copies rotate individually; tip arcs and the hub are separate paths.
     return [node for node in tree.iter()
             if node.tag.endswith("path") and re.fullmatch(r"rotate\([-+.0-9eE]+\)", node.get("transform", ""))]
+
+
+def rendered_blade_sections(node):
+    """Measure the exported leaf silhouette, independently of its SVG commands."""
+    leaf = ET.Element("path", {"d": node.get("d"), "fill": "#ffffff"})
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 -3 6 6">'
+           + ET.tostring(leaf, encoding="unicode") + '</svg>')
+    image = QImage(600, 600, QImage.Format_ARGB32)
+    image.fill(0)
+    renderer = QSvgRenderer(svg.encode())
+    painter = QPainter(image)
+    renderer.render(painter)
+    painter.end()
+    sections = []
+    for radius in (1.25, 2.4):
+        angles = []
+        for step in range(-480, 481):
+            angle = step / 4
+            radians = math.radians(angle - 90)
+            x = round(300 + math.cos(radians) * radius * 100)
+            y = round(300 + math.sin(radians) * radius * 100)
+            if image.pixelColor(x, y).alpha() >= 128:
+                angles.append(angle)
+        if not angles:
+            raise AssertionError("The actual leaf has no visible section at radius " + str(radius))
+        sections.append(((min(angles) + max(angles)) / 2, max(angles) - min(angles)))
+    return sections
 
 
 class HardwareFanProfileDataTests(unittest.TestCase):
@@ -206,6 +235,22 @@ QtObject {
         # Gravity Rim is part of the fixed Advanced casing, not a blade-tip band.
         self.assertFalse(PROFILES["colorful_advanced"]["outer_ring"])
         self.assertFalse(PROFILES["asrock_steel_legend"]["outer_ring"])
+
+    def test_rendered_axial_leaves_have_sweep_and_open_space_instead_of_radial_spokes(self):
+        # Dense 11/13-leaf fans once lost almost all curvature. Rendering the
+        # actual single leaf catches that regression without mirroring JS math.
+        for series, index in (("asus_rog_strix", 0), ("msi_suprim", 0),
+                              ("asus_dual", 0), ("asus_tuf_rdna2", 1)):
+            with self.subTest(series=series, fan=index):
+                row = self.study(series, index)
+                leaf = blade_paths(ET.fromstring(row["svg"]))[0]
+                inner, outer = rendered_blade_sections(leaf)
+                sweep = abs(outer[0] - inner[0])
+                self.assertGreaterEqual(sweep, 16, "Leaf silhouette collapsed into a radial spoke")
+                self.assertLess(sweep, 50, "Leaf folds around the hub instead of sweeping outward")
+                pitch = 360 / row["profile"]["blades"]
+                self.assertGreater(outer[1] / pitch, .25, "Leaf became an outer-edge wire")
+                self.assertLess(outer[1] / pitch, .85, "Leaves close into a featureless full disc")
 
     def test_source_confirmed_reversal_and_mixed_blades_survive_projection(self):
         for series in ("asus_tuf", "asrock_phantom", "asrock_taichi", "asrock_taichi_rdna4", "gigabyte_aorus"):

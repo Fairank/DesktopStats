@@ -15,6 +15,8 @@ function profile(series,index,kind) {
     result.group_size=[1,2,3].indexOf(result.group_size)>=0?result.group_size:1
     result.direction=result.direction===-1?-1:1
     result.hub_shape=result.hub_shape==="triangle"?"triangle":"circle"
+    result.tone=result.tone==="light"?"light":"dark"
+    result.paintKey=String(series).replace(/[^a-z0-9_]/g,"")+"_"+index
     result.kind=kind
     return result
 }
@@ -24,15 +26,32 @@ function point(angle,radius) {
     return (Math.cos(a)*radius).toFixed(4)+" "+(Math.sin(a)*radius).toFixed(4)
 }
 
+function contour(p) {
+    // Sweep is independent of blade pitch: dense 11/13-blade rotors must
+    // retain curved vanes instead of collapsing into almost radial spokes.
+    return p.shape==="wide"?{sweep:34,lead:.35,trail:.34,root:.23}
+        :p.shape==="paired"?{sweep:34,lead:.31,trail:.30,root:.18}
+        :p.shape==="claw"?{sweep:36,lead:.33,trail:.31,root:.20}
+        :{sweep:34,lead:.28,trail:.28,root:.20}
+}
+
 function blade(p) {
-    var pitch=360/p.blades,hub=Math.max(.45,p.hub_ratio*3*.90)
+    var pitch=360/p.blades,hub=Math.max(.45,p.hub_ratio*3*.90),g=contour(p),s=g.sweep
     if(p.kind==="blower" || p.shape==="radial")
         return "M"+point(-pitch*.19,Math.max(1.15,hub))+"L"+point(-pitch*.39,2.60)
             +"Q"+point(0,2.72)+" "+point(pitch*.30,2.54)+"L"+point(pitch*.17,Math.max(1.15,hub))+"Z"
-    var width=p.shape==="wide"?.43:p.shape==="claw"?.42:.35
-    return "M"+point(-pitch*.18,hub)+"Q"+point(-pitch*.57,1.66)+" "+point(-pitch*.46,2.53)
-        +"Q"+point(-pitch*.06,2.94)+" "+point(pitch*width,2.54)
-        +"Q"+point(pitch*.49,1.75)+" "+point(pitch*.19,hub)+"Z"
+    return "M"+point(-pitch*g.root,hub)
+        +"C"+point(-s*.25-pitch*.10,1.15)+" "+point(-s*.90-pitch*(g.lead+.07),1.85)+" "+point(-s-pitch*g.lead,2.52)
+        +"Q"+point(-s+pitch*.02,2.78)+" "+point(-s+pitch*g.trail,2.50)
+        +"C"+point(-s*.85+pitch*(g.trail+.04),1.85)+" "+point(-s*.20+pitch*.25,1.14)+" "+point(pitch*g.root,hub)+"Z"
+}
+
+function fanPalette(p) {
+    // Object colours belong to the rotor, not the CPU/board highlight palette.
+    // Keep a dark recess and an independent cap; white retail fans opt in.
+    return p.tone==="light"
+        ? {rim:"#a6b6be",disk:"#637684",blade:"#d3dde2",hub:"#bdcbd3",edge:"#eef3f6",ridge:"#a4b6c2",shade:"#acbfca",light:"#eef3f6"}
+        : {rim:"#738795",disk:"#253440",blade:"#586c7b",hub:"#344450",edge:"#8297a5",ridge:"#91a3af",shade:"#3c4f5e",light:"#738b9c"}
 }
 
 function tipArc(start,end,color) {
@@ -41,13 +60,31 @@ function tipArc(start,end,color) {
 }
 
 function rotor(p,c) {
+    c=fanPalette(p)
     var out="",count=p.blades
     if(count!==null && p.shape!=="neutral") {
+        // A small static SVG paint gives the curved plastic a raised face.
+        // It is baked into the same retained sprite, never a live shader.
+        var paint="fan-leaf-"+p.paintKey
+        out+='<defs><linearGradient id="'+paint+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c.shade+'"/><stop offset=".38" stop-color="'+c.blade+'"/><stop offset=".62" stop-color="'+c.light+'"/><stop offset="1" stop-color="'+c.shade+'"/></linearGradient></defs>'
         var path=blade(p)
-        for(var i=0;i<count;i++)out+='<path d="'+path+'" transform="rotate('+(i*360/count)+')" fill="'+c.blade+'"/>'
+        for(var i=0;i<count;i++) {
+            out+='<path class="hardware-fan-blade" d="'+path+'" transform="rotate('+(i*360/count)+')" fill="url(#'+paint+')"/>'
+            if(p.shape==="claw") {
+                // The documented surface ridges stay on the leaf, never
+                // become extra blades or a second full-size rotating plane.
+                var sweep=contour(p).sweep,pitch=360/count
+                var ridge="M"+point(-sweep*.58,1.40)+"Q"+point(-sweep*.82,1.95)+" "+point(-sweep+pitch*.10,2.39)
+                out+='<g transform="rotate('+(i*360/count)+')"><path class="hardware-fan-ridge" d="'+ridge+'" fill="none" stroke="'+c.ridge+'" stroke-opacity=".44" stroke-width=".065"/></g>'
+            }
+        }
         if(p.outer_ring===true)out+='<circle r="2.62" fill="none" stroke="'+c.blade+'" stroke-width=".22"/>'
         else if(p.group_size>1 && count%p.group_size===0)
-            for(var j=0;j<count;j+=p.group_size)out+=tipArc((j-.38)*360/count,(j+p.group_size-.62)*360/count,c.blade)
+            for(var j=0;j<count;j+=p.group_size) {
+                var geometry=contour(p),step=360/count
+                out+=tipArc(j*step-geometry.sweep-geometry.lead*step,
+                    (j+p.group_size-1)*step-geometry.sweep+geometry.trail*step,c.blade)
+            }
     } else {
         // Known rotor presence with unreviewed blades: broad shaded disc,
         // no arbitrary repeated spokes that could be mistaken for a count.
@@ -57,7 +94,7 @@ function rotor(p,c) {
     if(p.direction===-1)out='<g transform="scale(-1 1)">'+out+'</g>'
     var hub=p.hub_ratio*3
     if(p.hub_shape==="triangle")out+='<path class="hardware-fan-hub" d="M'+point(0,hub*1.15)+'L'+point(120,hub*1.15)+'L'+point(240,hub*1.15)+'Z" fill="'+c.hub+'"/>'
-    else out+='<circle class="hardware-fan-hub" r="'+hub+'" fill="'+c.hub+'"/>'
+    else out+='<circle class="hardware-fan-hub" r="'+hub+'" fill="'+c.hub+'" stroke="'+c.edge+'" stroke-width=".06"/>'
     return out
 }
 
@@ -65,9 +102,10 @@ function fan(cx,cy,radius,c,kind) {
     var index=c.fanDesignIndex || 0
     c.fanDesignIndex=index+1
     var p=profile(c.fanDesignSeries,index,kind)
+    var colors=fanPalette(p)
     var moving=rotor(p,c)
     var base='<g class="'+(kind==="blower"?'hardware-blower':'hardware-fan')+'" transform="translate('+cx+' '+cy+') scale('+(radius/3)+')">'
-        +'<circle r="3" fill="'+c.rim+'"/><circle r="2.76" fill="'+c.disk+'"/>'
+        +'<circle r="3" fill="'+colors.rim+'"/><circle r="2.90" fill="'+colors.disk+'"/>'
     if(c.rotorCollector) {
         c.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:kind,basis:3,body:moving,direction:p.direction})
         return base+'</g>'

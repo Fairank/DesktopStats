@@ -23,6 +23,12 @@
   rotors for unconfirmed counts. Distinguish source-backed rings, linked blade
   groups, triangular hubs and relative counter-rotation. Illustration dimensions
   remain visual approximations rather than engineering measurements.
+- Correct the modern fan faces: use visibly swept vanes with open curved gaps,
+  a recessed dark cavity and an independent cap, rather than bright radial
+  discs. Distinguish wide, linked and claw-textured contours; align linked tip
+  arcs with the leaf ends. Preserve the reviewed PURE's white rotor. Label the
+  53 unreviewed active fan faces as pending and keep them static; the gallery
+  offers fan motion on the 48 reviewed representatives, not empty placeholders.
 - Animate confirmed visible fans in Solid, Miniature and Soft only when Auto
   receives fresh same-card RPM. Keep a fixed base
   and small retained fan textures; phase changes update local transforms without

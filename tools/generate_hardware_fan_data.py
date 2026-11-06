@@ -10,7 +10,7 @@ sys.path.insert(0,str(ROOT))
 def payload():
     from hardware_fan_profiles import PROFILES
     from hardware_series import SERIES_CATALOG
-    allowed=("technology","blades","hub_ratio","outer_ring","group_size","shape","direction","hub_shape","ring_width")
+    allowed=("technology","blades","hub_ratio","outer_ring","group_size","shape","direction","hub_shape","ring_width","tone")
     if set(PROFILES)!={row["id"] for row in SERIES_CATALOG}:
         raise ValueError("Every reviewed GPU design needs explicit fan-profile status")
     result={}

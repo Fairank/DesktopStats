@@ -15,12 +15,12 @@ No file/network/hardware access, timers, mutable runtime caches or discovery.
 
 def _p(technology, label, source_url, *, blades=None, hub_ratio=None,
        outer_ring=False, shape="neutral", evidence="family_description",
-       group_size=1, fans=(), hub_shape="circle", model_ids=(), representative=""):
+       group_size=1, fans=(), hub_shape="circle", model_ids=(), representative="", tone="dark"):
     return dict(technology=technology, label=label, blades=blades,
                 hub_ratio=hub_ratio, outer_ring=outer_ring, shape=shape,
                 group_size=group_size, source_url=source_url, evidence=evidence,
                 fans=fans, hub_shape=hub_shape, model_ids=model_ids,
-                representative=representative)
+                representative=representative, tone=tone)
 
 
 # Exact representative images are linked on the cited official product pages.
@@ -209,7 +209,7 @@ PROFILES = {
     ),
     'sapphire_pure': _p('sapphire_angular_velocity', 'Angular Velocity Fan Blade',
         'https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6',
-        blades=9, hub_ratio=0.29, outer_ring=True, shape='wide', evidence='official_front_view',
+        blades=9, hub_ratio=0.29, outer_ring=True, shape='wide', evidence='official_front_view', tone='light',
         model_ids=('sapphire-pure-7800xt',), representative='SAPPHIRE PURE AMD Radeon RX 7800 XT 16G GDDR6'
     ),
     'powercolor_fighter': _p('powercolor_ring', 'Ring-fan Blade',

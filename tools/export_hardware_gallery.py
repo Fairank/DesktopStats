@@ -108,7 +108,7 @@ def fan_profile_text(appearance):
         detail = " / ".join(str(value) if valid else "未确认"
                             for value, valid in zip(counts, confirmed))
         return label + " · 正面从左到右：" + detail + " 叶 · 部分已确认", "partial"
-    return label + " · 叶片数未确认", "unknown"
+    return label + " · 风扇外观待核实（简化占位）", "unknown"
 
 
 def export_gallery(output):
@@ -194,7 +194,7 @@ function layersFor(value,ink) { return JSON.stringify(Shapes.layers(Shapes.key(v
                 if not svg.startswith("<svg"):
                     raise ValueError("Invalid static SVG for " + value["id"])
                 art[style][theme] = "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
-                if value["kind"] != "gpu" or style not in MODERN:
+                if value["kind"] != "gpu" or style not in MODERN or not value.get("fan_profile", {}).get("render_ready"):
                     continue
                 layers = json.loads(evaluate("layersFor", selected, ink))
                 if not layers.get("rotors"):

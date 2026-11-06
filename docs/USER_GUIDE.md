@@ -153,6 +153,12 @@ rotation are applied only where model-specific references support them. A bare
 GPU chip name does not establish a retail cooler. Illustration proportions are
 visual estimates, not measured factory dimensions.
 
+Unreviewed active fan faces are explicitly labelled pending and remain static.
+They are not completed brand-specific fan designs. Reviewed faces use curved,
+separated vanes and a recessed cap; the confirmed PURE white fan keeps its light
+rotor instead of inheriting the common dark fan palette. The offline gallery
+enables fan motion only for the 48 reviewed faces.
+
 Solid, Miniature and Soft Auto effects use fresh same-card current RPM, displayed
 unchanged and animated at a fixed 120x slow-motion scale. Higher RPM rotates
 faster in the same proportion. Zero stops; missing, failed or stale readings
