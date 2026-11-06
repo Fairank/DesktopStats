@@ -822,3 +822,19 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 贯通风道|貫通風道|Flow-through air channel|貫通式の通風路|관통형 공기 통로|Durchgehender Luftkanal|Canal d’air traversant|Conducto de aire pasante
 正面可见风扇|正面可見風扇|Fans visible from the front|正面から見えるファン|정면에서 보이는 팬|Von vorn sichtbare Lüfter|Ventilateurs visibles de face|Ventiladores visibles de frente
 风扇总数未确认|風扇總數未確認|Total fan count unconfirmed|ファン総数は未確認|총 팬 수 미확인|Gesamtzahl der Lüfter unbestätigt|Nombre total de ventilateurs non confirmé|Número total de ventiladores sin confirmar
+外露散热鳍片|外露散熱鰭片|Exposed heatsink fins|露出したヒートシンクのフィン|노출된 방열판 핀|Freiliegende Kühlrippen|Ailettes de radiateur apparentes|Aletas de disipación visibles
+外露热管轮廓|外露熱管輪廓|Exposed heatpipe silhouette|露出したヒートパイプの輪郭|노출된 히트파이프 윤곽|Sichtbare Heatpipe-Kontur|Contour de caloducs apparents|Contorno de tubos de calor visibles
+外露板卡布局|外露板卡佈局|Exposed circuit board layout|基板が見える構成|기판이 드러나는 배치|Sichtbares Platinenlayout|Circuit imprimé apparent|Diseño con placa visible
+全长扩散罩|全長擴散罩|Full-length diffuser|全長ディフューザー|전체 길이 확산 커버|Durchgehender Diffusor|Diffuseur sur toute la longueur|Difusor de longitud completa
+分段顶盖|分段頂蓋|Segmented top cover|分割された上部カバー|분할형 상단 커버|Segmentierte obere Abdeckung|Capot supérieur segmenté|Cubierta superior segmentada
+双面大块扩散罩|雙面大塊擴散罩|Broad two-sided diffuser|両面を広く覆うディフューザー|양면을 넓게 덮는 확산 커버|Großer beidseitiger Diffusor|Large diffuseur sur les deux faces|Difusor amplio de dos caras
+斜切肩部|斜切肩部|Angled shoulders|斜めにカットした肩部|비스듬한 상단 모서리|Abgeschrägte Schultern|Épaulements biseautés|Hombros biselados
+晶体切面扩散罩|晶體切面擴散罩|Crystal-faceted diffuser|クリスタルカットのディフューザー|크리스털 면 형태의 확산 커버|Kristallartig facettierter Diffusor|Diffuseur à facettes cristallines|Difusor facetado de cristal
+标准长条模块|標準長條模組|Standard long module|標準の長型モジュール|표준 긴 모듈|Langes Standardmodul|Module long standard|Módulo largo estándar
+直立散热鳍片|直立散熱鰭片|Upright cooling fins|垂直の冷却フィン|수직 방열 핀|Aufrechte Kühlrippen|Ailettes de refroidissement verticales|Aletas de refrigeración verticales
+短型笔记本模块|短型筆記型電腦模組|Short laptop module|ノートPC用の短型モジュール|노트북용 짧은 모듈|Kurzes Notebook-Modul|Module court pour ordinateur portable|Módulo corto para portátil
+矮式散热片|矮式散熱片|Low-profile heatspreader|低背ヒートスプレッダー|낮은 방열판|Niedriger Heatspreader|Dissipateur à profil bas|Disipador de perfil bajo
+裸露PCB与芯片|裸露PCB與晶片|Exposed PCB and chips|露出した基板とチップ|노출된 PCB와 칩|Freiliegende Platine und Chips|Circuit imprimé et puces apparents|PCB y chips visibles
+高低错层鳍片|高低錯層鰭片|Staggered-height fins|高さを変えたフィン|높이가 다른 핀|Höhenversetzte Kühlrippen|Ailettes de hauteurs décalées|Aletas de alturas escalonadas
+混合内存|混合記憶體|Mixed memory modules|異なるメモリの混在|혼합 메모리|Gemischte Speichermodule|Modules mémoire différents|Módulos de memoria distintos
+不同型号内存条|不同型號記憶體模組|Different memory-module models|異なる型番のメモリモジュール|서로 다른 모델의 메모리 모듈|Unterschiedliche Speichermodulmodelle|Modules mémoire de modèles différents|Módulos de memoria de distintos modelos

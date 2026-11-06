@@ -3,6 +3,7 @@
 .import "HardwareMiniature.js" as Miniature
 .import "HardwareSoft.js" as Soft
 .import "HardwareSeriesShapes.js" as SeriesCatalog
+.import "HardwareMemoryShapes.js" as Memory
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
@@ -11,7 +12,7 @@
 var vendors = ["intel", "amd", "nvidia", "unknown"]
 var boards = ["asus", "msi", "gigabyte", "zotac", "sapphire", "powercolor", "asrock",
     "pny", "palit", "gainward", "galax", "inno3d", "colorful", "xfx", "evga", "leadtek",
-    "maxsun", "yeston", "biostar", "intel", "amd", "nvidia", "unknown"]
+    "maxsun", "yeston", "biostar", "sparkle", "acer", "intel", "amd", "nvidia", "unknown"]
 var shrouds = ["neutral", "angular", "soft", "box", "reference"]
 var seriesIds = SeriesCatalog.ids
 
@@ -37,12 +38,13 @@ function hex(value, fallback) {
 
 function key(appearance, ink) {
     const input = appearance && typeof appearance === "object" && !Array.isArray(appearance) ? appearance : ({})
-    const kind = choice(input.kind, ["cpu", "gpu"], "cpu")
+    const kind = choice(input.kind, ["cpu", "gpu", "memory"], "cpu")
     const vendor = choice(input.vendor, vendors, "unknown")
-    const board = choice(input.board_vendor, boards, "unknown")
+    const board = choice(input.board_vendor, kind === "memory" ? Memory.brands : boards, "unknown")
     const styles = kind === "cpu" ? ["chip", "lga_rect", "am5"]
-        : ["gpu_neutral", "gpu_axial", "gpu_blower", "gpu_integrated"]
-    const style = choice(input.style, styles, kind === "cpu" ? "chip" : "gpu_neutral")
+        : kind === "memory" ? ["memory_neutral", "dimm", "sodimm"]
+        : ["gpu_neutral", "gpu_axial", "gpu_blower", "gpu_hybrid", "gpu_integrated"]
+    const style = choice(input.style, styles, kind === "cpu" ? "chip" : kind === "memory" ? "memory_neutral" : "gpu_neutral")
     // A neutral family never asserts a cooler. Counts are used only after an
     // explicit axial/blower match; string/boolean/out-of-range counts stay unknown.
     const physical = typeof input.fan_count === "number" && Number.isInteger(input.fan_count)
@@ -53,13 +55,14 @@ function key(appearance, ink) {
         && input.visible_fan_count >= 0 && input.visible_fan_count <= 3
         && (physical >= input.visible_fan_count || input.fan_count == null && input.confidence === "model")
         ? input.visible_fan_count : physical <= 3 ? physical : -1
-    const count = style === "gpu_integrated" ? 0
+    const count = kind === "memory" ? -1 : style === "gpu_integrated" ? 0
         : style === "gpu_neutral" ? -1
         : visible
-    const shroud = choice(input.shroud, shrouds, "neutral")
-    let series = kind === "gpu" ? choice(input.series_id, seriesIds, "") : ""
+    const allowedSeries = kind === "memory" ? Memory.ids : seriesIds
+    const shroud = choice(input.shroud, kind === "memory" ? ["neutral", "bare", "low", "spreader", "rgb"] : shrouds, "neutral")
+    let series = kind !== "cpu" ? choice(input.series_id, allowedSeries, "") : ""
     if (series && series.split("_")[0] !== board) series = ""
-    const requestedMotif = choice(input.motif, seriesIds, series)
+    const requestedMotif = choice(input.motif, allowedSeries, series)
     const motif = requestedMotif === series ? series : ""
     if (!motif) series = ""
     const defaults = {intel: "#2479b5", amd: "#c65b56", nvidia: "#729b42", unknown: "#77818f"}
@@ -213,11 +216,11 @@ function source(geometryKey) {
         fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10]}, parts[7])
     if (canonical !== geometryKey) return source(canonical)
     const ink = parts[7], accent = parts[6]
-    const outlineBody = parts[10] === "outline" ? (parts[0] === "cpu" ? cpu(parts[3], ink, accent)
+    const outlineBody = parts[10] === "outline" && parts[0] !== "memory" ? (parts[0] === "cpu" ? cpu(parts[3], ink, accent)
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9]}
-    const body = parts[10] === "solid" ? Solid.body(state)
+        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10]}
+    const body = parts[0] === "memory" ? Memory.body(state) : parts[10] === "solid" ? Solid.body(state)
         : parts[10] === "miniature" ? Miniature.body(state)
         : parts[10] === "soft" ? Soft.body(state)
         : outlineBody

@@ -14,7 +14,7 @@ Item {
     property var level: null
     property var hardwareState: ({})
     property var hardwareAppearance: ({})
-    readonly property bool hasHardwareAppearance: processorGlyph
+    readonly property bool hasHardwareAppearance: (processorGlyph || name === "memory")
         && hardwareAppearance && hardwareAppearance.kind === name
         && hardwareAppearance.icon_set !== "classic"
     property bool available: false

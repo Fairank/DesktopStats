@@ -3,6 +3,8 @@
 .import "HardwareSeriesGroupB.js" as GroupB
 .import "HardwareSeriesGroupC.js" as GroupC
 .import "HardwareSeriesCoreExpansion.js" as Core
+.import "HardwareSeriesNvidiaLegacy.js" as NvidiaLegacy
+.import "HardwareSeriesRadeonArc.js" as RadeonArc
 
 // Static, original series illustrations, using the representative design
 // language sourced in hardware_series.py. These are not factory drawings or
@@ -13,7 +15,7 @@
 var ids = ["asus_dual", "asus_tuf", "asus_rog_strix", "msi_ventus", "msi_suprim",
     "msi_gaming", "gigabyte_aorus", "gigabyte_aero", "gigabyte_windforce", "zotac_solo",
     "sapphire_pulse", "sapphire_nitro", "powercolor_hellhound", "powercolor_red_devil"]
-    .concat(GroupA.ids, GroupB.ids, GroupC.ids, Core.ids)
+    .concat(GroupA.ids, GroupB.ids, GroupC.ids, Core.ids, NvidiaLegacy.ids, RadeonArc.ids)
 
 function known(state) {
     return !!state && typeof state.series_id === "string"
@@ -26,6 +28,8 @@ function profile(id) {
     if (GroupB.ids.indexOf(id)>=0) return GroupB.profile(id)
     if (GroupC.ids.indexOf(id)>=0) return GroupC.profile(id)
     if (Core.ids.indexOf(id)>=0) return Core.profile(id)
+    if (NvidiaLegacy.ids.indexOf(id)>=0) return NvidiaLegacy.profile(id)
+    if (RadeonArc.ids.indexOf(id)>=0) return RadeonArc.profile(id)
     // Widths and heights for unknown/zero, one, two and three confirmed fans.
     // They are illustration proportions, not measured product dimensions.
     // The last two entries are fan inset and a small whole-layout offset.
@@ -75,14 +79,24 @@ function geometry(state, base) {
         for (var index = 0; index < count; index++) centers.push(left + step * index)
     }
     if (state.series_id === "msi_expert" && count === 1) centers[0]=x+w*.75
+    if (state.style === "gpu_blower" && count === 1 && spec[9] === 0)
+        centers[0]=x+w-4.5
     var radii=centers.map(function(){return radius})
     var fanY=centers.map(function(){return y+h*.51})
+    if (state.series_id === "gigabyte_fx5200" && count === 1) radii[0]*=.65
     if (state.series_id === "colorful_advanced" && count === 3)
         radii=[radius*.88,radius*1.10,radius*.88]
     if (state.series_id === "galax_ex_gamer" && count === 3)
         radii=[radius*.94,radius*.94*102/92,radius*.94]
     if (state.series_id === "evga_ftw3" && count === 3) fanY[1]+=h*.08
-    return {x:x,y:y,w:w,h:h,centers:centers,radius:radius,radii:radii,fan_y:fanY}
+    var blowers=[]
+    if (state.series_id === "acer_bifrost_arc_a770" && count === 2) {
+        // Official front view: smaller left turbine, larger right axial fan.
+        // The illustration ratio is visual, not a claimed physical diameter.
+        radii=[radius*.78,radius]
+        blowers=[0]
+    }
+    return {x:x,y:y,w:w,h:h,centers:centers,radius:radius,radii:radii,fan_y:fanY,blowers:blowers}
 }
 
 function p(d, fill) {
@@ -142,6 +156,8 @@ function face(state, g, colors) {
     else if (GroupB.ids.indexOf(id)>=0) result=GroupB.face(state,g,colors)
     else if (GroupC.ids.indexOf(id)>=0) result=GroupC.face(state,g,colors)
     else if (Core.ids.indexOf(id)>=0) result=Core.face(state,g,colors)
+    else if (NvidiaLegacy.ids.indexOf(id)>=0) result=NvidiaLegacy.face(state,g,colors)
+    else if (RadeonArc.ids.indexOf(id)>=0) result=RadeonArc.face(state,g,colors)
     else switch (id) {
     case "asus_dual":
         // Asymmetric two-zone enclosure with a stepped shoulder.

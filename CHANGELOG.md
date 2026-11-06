@@ -2,13 +2,26 @@
 
 ## Unreleased — hardware appearances
 
-- Expand the source-linked GPU catalog to 22 brands and 67 series/product lines,
-  each with a reviewed representative and an independent casing profile. Keep
-  the 3 CPU examples, for 70 model records; this is not an exhaustive historical
-  catalog or coverage of every CPU family.
+- Expand the source-linked GPU catalog to 103 models and dedicated designs
+  across 24 GPU brands. Add 16 memory designs and 16 complete reviewed part
+  numbers across 6 memory brands. With the 3 CPU examples, the catalogs contain
+  122 model records, 119 GPU/memory designs and 30 GPU/memory brand identities;
+  coverage remains limited to reviewed representatives.
+- Add 16 NVIDIA historical designs from GTX/GT 10 through GTX 900/700/600/500/
+  400/200 to GeForce 8800 GTS and FX 5200, plus 20 Radeon/Arc representatives.
+  Keep era-specific enclosures tied to exact SKUs instead of reusing a current
+  cooler with the same series name. Add generation and product-line filters;
+  entry/mainstream/flagship labels describe the board line within its era,
+  rather than GPU performance rankings.
 - Give Solid, Miniature and Soft distinct major panels, shoulders, end caps and
   illustration proportions for each series. Preserve the earlier Outline
   drawings and original Classic glyphs as selectable versions.
+- Draw radial impellers for reviewed blowers, the Acer BiFrost's left small
+  blower/right axial arrangement and fanless fins for confirmed passive cards.
+- Extend the existing top-bar RAM metrics and expanded details with memory
+  appearances. Preserve unknown form factors and mixed-module identities;
+  individual module part numbers do not inherit a kit's design by suffix guesses.
+  Physical diffuser covers do not claim current lighting or add RGB animation.
 - Keep all five hardware-icon versions in top-bar Appearance settings.
   Existing preferences default to Classic, preserving original glyphs. Switching
   versions updates the shared preview and follows the existing scoped Apply flow.
@@ -24,12 +37,20 @@
   shroud motifs and feature summaries in expanded details, with an on-demand
   64px illustration. Unknown fan layouts remain neutral rather than guessed.
 - Add an offline, searchable comparison gallery exported from the real QML
-  drawing code: 670 embedded SVG variants across the 67 GPU representatives,
-  five versions and two themes, including 18px top-bar comparisons.
+  drawing code: 1,190 embedded SVG variants across the 103 GPU and 16 memory
+  representatives, five versions and two themes, including 18px top-bar
+  comparisons and hardware/brand/vendor/generation/product-line filters.
 - Reuse existing identity strings with a bounded offline match cache. Retain PCI
   fields already returned by DXGI without adding monitoring queries or polling.
   The series drawings are static vectors and add no sampling or animation clock;
   real temperature/load effects and hidden/minimized pause behavior remain.
+- Keep memory matching pure and acquire Windows module identity separately,
+  only when an enabled top bar requests a non-Classic RAM appearance. Attempt
+  one bounded SMBIOS snapshot per process using a size query and data read,
+  caching failures as well as success. Limit input to 4 MiB and 64 populated
+  modules; retain manufacturer/part/form only, without serials, asset tags or
+  raw firmware data. Add no SPD/SMBus scan, WMI query, administrator prompt,
+  service or polling loop.
 
 ## 0.27.0-preview.2
 

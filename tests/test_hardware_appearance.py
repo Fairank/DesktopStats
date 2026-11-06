@@ -155,6 +155,10 @@ class HardwareAppearanceTests(unittest.TestCase):
 
     def test_series_match_has_its_own_identity_but_cannot_invent_a_fan_count(self):
         for row in appearance.SERIES_CATALOG:
+            if not row["aliases"]:
+                # Historical generation designs require their reviewed SKU;
+                # a reused series word cannot prove that cooler's generation.
+                continue
             name = f"{row['board_vendor']} {row['aliases'][0]} unidentified GPU"
             with self.subTest(series=row["id"]):
                 result = appearance.appearance_for("gpu", name)
@@ -172,6 +176,14 @@ class HardwareAppearanceTests(unittest.TestCase):
             with self.subTest(name=name):
                 result = appearance.appearance_for("gpu", name)
                 self.assertNotEqual(result["confidence"], "series")
+                self.assertIsNone(result["fan_count"])
+
+    def test_reused_marketing_names_do_not_put_current_enclosures_on_other_eras(self):
+        for name in ("ASUS ROG Strix GTX 1080 Ti", "MSI SUPRIM GTX 980 Ti",
+                     "ASRock Challenger Intel Arc A380 unknown edition", "XFX SWFT Radeon RX 7900 XTX"):
+            with self.subTest(name=name):
+                result = appearance.appearance_for("gpu", name)
+                self.assertEqual(result["series_id"], "")
                 self.assertIsNone(result["fan_count"])
 
     def test_specific_series_can_disambiguate_generic_marketing_words(self):
@@ -296,7 +308,9 @@ class HardwareAppearanceTests(unittest.TestCase):
     def test_external_sensor_and_unrelated_resource_do_not_inherit_cpu_identity(self):
         data = dict(cpu_name="AMD Ryzen 9 9950X", gpu_name="DUAL-RTX4060-O8G")
         self.assertEqual(appearance.metric_appearance(data, "external_1", {}, external=True), {})
-        self.assertEqual(appearance.metric_appearance(data, "ram_percent", {}), {})
+        memory = appearance.metric_appearance(data, "ram_percent", {})
+        self.assertEqual((memory["kind"], memory["confidence"]), ("memory", "generic"))
+        self.assertEqual(memory["series_id"], "")
         self.assertEqual(appearance.metric_appearance(data, "cpu_temp", {})["style"], "am5")
 
 

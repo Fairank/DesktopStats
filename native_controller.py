@@ -715,6 +715,8 @@ class Controller(WorkspaceTools):
             if appearance:
                 appearance["icon_set"] = config["top_bar"].get("hardware_icon_style", "classic")
                 appearance["features"] = [translate(feature, language) for feature in appearance["features"]]
+                if appearance.get("kind") == "memory" and (appearance.get("reported_label") or appearance.get("label")):
+                    hardware_name = translate(appearance.get("reported_label") or appearance["label"], language)
             result.append(
                 dict(
                     id=item["id"],

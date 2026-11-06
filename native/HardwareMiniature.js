@@ -112,12 +112,12 @@ function gpu(state, colors) {
     result+=Solid.p("M"+(x+2.35)+" "+(y-1.5)+"H"+(e+1.0),"none",.65,colors.edge,.35)
     const cy=y+g.h*.51
     if(state.style==="gpu_blower"&&state.fan_count===1) {
-        result+=fan(e-4.5,cy,3.5,colors)
+        result+=Solid.turbine(g.centers.length?g.centers[0]:e-4.5,cy,Math.min(3.5,g.h*.37),colors)
             +Solid.p("M"+(x+2)+" "+(y+2.3)+"H"+(x+7.5)+"M"+(x+2)+" "+(y+4)+"H"+(x+7.5)
                 +"M"+(x+2)+" "+(y+5.7)+"H"+(x+7.5),"none",.8,colors.side,.8)
     } else if(g.centers.length) {
-        g.centers.forEach(function(cx,index){result+=fan(cx,g.fan_y?g.fan_y[index]:cy,(g.radii?g.radii[index]:g.radius)*.97,colors)})
-    } else {
+        g.centers.forEach(function(cx,index){result+=(g.blowers && g.blowers.indexOf(index)>=0?Solid.turbine:fan)(cx,g.fan_y?g.fan_y[index]:cy,(g.radii?g.radii[index]:g.radius)*.97,colors)})
+    } else if (state.fan_count !== 0) {
         // A neutral backplate with a beveled inset and diagonal vent slots.
         // Neither an unverified series nor a missing count creates fan circles.
         result+=Solid.p("M"+(x+2.1)+" "+(y+2.0)+"H"+(e-3.5)+"L"+(e-1.9)+" "+(y+3.6)

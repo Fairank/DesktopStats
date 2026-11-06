@@ -10,11 +10,15 @@ import re
 from functools import lru_cache
 
 import hardware_catalog_core_expansion as core_catalog
+import hardware_catalog_nvidia_legacy as nvidia_legacy_catalog
+import hardware_catalog_radeon_arc as radeon_arc_catalog
 import hardware_catalog_group_a as group_a_catalog
 import hardware_catalog_group_b as group_b_catalog
 import hardware_catalog_group_c as group_c_catalog
 from hardware_model_extensions import CATALOG_EXTENSIONS, MODEL_SERIES
 from hardware_series import SERIES_CATALOG
+from hardware_catalog_metadata import fields as catalog_fields, generation as catalog_generation
+from memory_appearance import appearance_for_memory
 
 # These are restrained interface accents, not claims about a product's paint.
 BRANDS = {
@@ -40,6 +44,8 @@ BRANDS = {
     "maxsun": ("MAXSUN", "#879dc6"),
     "yeston": ("Yeston", "#b08fab"),
     "biostar": ("BIOSTAR", "#a98864"),
+    "sparkle": ("SPARKLE", "#7088b4"),
+    "acer": ("Acer", "#829c6c"),
     "unknown": ("", "#83909e"),
 }
 
@@ -100,7 +106,8 @@ _SEED_CATALOG = (
      "https://www.sapphiretech.com/en/consumer/pulse-radeon-rx-7600-8g-gddr6",
      ("SAPPHIRE PULSE AMD Radeon RX 7600 8G GDDR6", "SAPPHIRE PULSE RX 7600")),
 )
-_EXTRA_CATALOGS = (group_a_catalog, group_b_catalog, group_c_catalog, core_catalog)
+_EXTRA_CATALOGS = (group_a_catalog, group_b_catalog, group_c_catalog, core_catalog,
+                   nvidia_legacy_catalog, radeon_arc_catalog)
 CATALOG = (_SEED_CATALOG + CATALOG_EXTENSIONS
            + tuple(row for package in _EXTRA_CATALOGS for row in package.CATALOG))
 _VISIBLE_FANS = {key: count for package in _EXTRA_CATALOGS
@@ -133,9 +140,22 @@ def _brands(text, *, silicon=False):
 
 
 def _gpu_chips(text):
-    return {(family, number, variant.replace(" ", "")) for family, number, variant in
+    chips = {(family, number, variant.replace(" ", "")) for family, number, variant in
             re.findall(r"\b(rtx|gtx|rx|arc)\s*([ab]?\d{3,4})"
                        r"\s*(ti\s*super|super|ti|xtx|xt|gre|m)?\b", text)}
+    chips.update((family, number, variant) for family, number, variant in
+                 re.findall(r"\b(hd|gt)\s*(\d{3,4})\s*(x2|xt|x|m)?\b", text))
+    # R5450/R7970 are MSI HD-series product codes, not R5 450 / R7 970.
+    # Compact R9/R7/R5 chip names need the Radeon context; spaced names are clear.
+    for pattern in (r"\b(r9|r7|r5)\s+(\d{3})\s*(x2|x|m)?\b",
+                    r"\bradeon\s+(r9|r7|r5)\s*(\d{3})\s*(x2|x|m)?\b"):
+        chips.update(re.findall(pattern, text))
+    chips.update(("geforce_fx" if fx else "geforce", number, variant)
+                 for fx, number, variant in re.findall(
+                     r"\bgeforce\s*(fx\s*)?(\d{4})\s*(gtx|gts|gt|gs|ultra|le)?\b", text))
+    chips.update(("vega", number, "") for number in re.findall(r"\bvega\s*(\d{2})\b", text))
+    chips.update(("fury", "", variant) for variant in re.findall(r"\bfury\s*(x)?\b", text))
+    return chips
 
 
 _MODELS = tuple((row, tuple(_text(alias) for alias in row[-1])) for row in CATALOG)
@@ -147,7 +167,16 @@ _MODEL_SERIES = {
     **MODEL_SERIES,
     **{key: series for package in _EXTRA_CATALOGS for key, series in package.MODEL_SERIES.items()},
 }
+_MODEL_CHIP_NAMES = {key: value for package in _EXTRA_CATALOGS
+                     for key, value in getattr(package, "MODEL_CHIPS", {}).items()}
+_MODEL_CHIPS = {row[0]: _gpu_chips(_text(_MODEL_CHIP_NAMES.get(row[0], row[4])))
+                for row in CATALOG if row[1] == "gpu"}
 _SERIES_METADATA = {row["id"]: row for row in SERIES_CATALOG}
+_SERIES_FILTERS = {row["id"]: catalog_fields(row) for row in SERIES_CATALOG}
+_MODEL_FILTERS = {row[0]: catalog_fields(_SERIES_METADATA.get(_MODEL_SERIES.get(row[0])), row[4])
+                  for row in CATALOG if row[1] == "gpu"}
+_SERIES_REP_ERAS = {_MODEL_SERIES[row[0]]: _MODEL_FILTERS[row[0]]["era"]
+                    for row in CATALOG if row[1] == "gpu" and row[0] in _MODEL_SERIES}
 _CPU_FEATURES = {"lga_rect": ("长方形金属顶盖",), "am5": ("八处边缘缺口", "中央金属顶盖")}
 _MOBILE = re.compile(r"\b(?:laptop|mobile|notebook|max q)\b|\b\d{4,5}(?:hx|hs|hk|h|u|m)\b")
 
@@ -213,7 +242,7 @@ def _resolve(kind, name, model, board):
         row = matches[0]
         # An explicit conflicting board/chip identity invalidates a model alias.
         chip_conflict = (kind == "gpu" and name_chips
-                         and name_chips != _gpu_chips(_text(row[4])))
+                         and name_chips != _MODEL_CHIPS[row[0]])
         if (not conflict and not chip_conflict and vendor in ("unknown", row[2])
                 and board_vendor in ("unknown", row[3])):
             brand = row[3] if row[3] != "unknown" else row[2]
@@ -232,6 +261,13 @@ def _resolve(kind, name, model, board):
     confidence = "brand" if brand != "unknown" else "generic"
     series = (_series(board_vendor, name + " " + model)
               if kind == "gpu" and style == "gpu_neutral" and not matches and not conflict else None)
+    if series:
+        supplied_era = catalog_generation(name + " " + model)
+        represented_era = _SERIES_REP_ERAS.get(series["id"], "unspecified")
+        if supplied_era != "unspecified" and represented_era != "unspecified" and supplied_era != represented_era:
+            # A reused marketing family cannot put a modern enclosure on an
+            # unreviewed older card. Its exact era/SKU needs its own drawing.
+            series = None
     if series:
         return (f"gpu-{series['id']}", kind, vendor, board_vendor, BRANDS[brand][0], style,
                 None, "neutral", series["source_url"], "series", BRANDS[brand][1],
@@ -254,7 +290,45 @@ def appearance_for(kind, name, *, model="", board_vendor=""):
     result["features"] = list(result["features"])
     result["visible_fan_count"] = _VISIBLE_FANS.get(result["id"], result["fan_count"])
     result["legacy"] = bool(_SERIES_METADATA.get(result["series_id"], {}).get("legacy", False))
+    result.update(_MODEL_FILTERS.get(result["id"]) or _SERIES_FILTERS.get(result["series_id"]) or {})
     return result
+
+
+def memory_appearance(data):
+    """An aggregate RAM reading never borrows one arbitrary stick's appearance."""
+    if not isinstance(data, dict):
+        return appearance_for_memory()
+    devices = data.get("memory_modules")
+    if "memory_modules" in data:
+        if not isinstance(devices, list) or not devices or len(devices) > 64 or any(not isinstance(row, dict) for row in devices):
+            return appearance_for_memory()
+        keys = ("manufacturer", "part_number", "form_factor")
+        if any(not isinstance(row.get(key, ""), str) for row in devices for key in keys):
+            return appearance_for_memory()
+        identities = {tuple(row.get(key, "")[:256] for key in keys) for row in devices}
+        if len(identities) != 1:
+            result = appearance_for_memory()
+            result.update(label="混合内存", features=["不同型号内存条"])
+            return result
+        row = devices[0]
+        result = appearance_for_memory(model=row.get("part_number", ""), manufacturer=row.get("manufacturer", ""))
+        form = {"cudimm": "dimm", "csodimm": "sodimm"}.get(row.get("form_factor"), row.get("form_factor"))
+        if result["confidence"] != "model" and form in ("dimm", "sodimm"):
+            result["style"] = form
+            result["form_factor"] = form
+        # A source-backed full SKU cannot override an opposite known form.
+        if result["confidence"] == "model" and form in ("dimm", "sodimm") and result["style"] != form:
+            result = appearance_for_memory()
+            result["style"] = form
+            result["form_factor"] = form
+        # Preserve the actual firmware part for details even when its retail
+        # enclosure is unconfirmed. Never turn it into an exact catalog claim.
+        result["reported_label"] = " ".join("".join(char for char in row.get(key, "")[:128]
+                                             if char.isprintable()).strip()
+                                           for key in ("manufacturer", "part_number")).strip()
+        return result
+    return appearance_for_memory(name=data.get("memory_name", ""),
+                                 model=data.get("memory_model", ""), manufacturer=data.get("memory_manufacturer", ""))
 
 
 def metric_appearance(data, metric, prefs, *, scope=None, target=None, external=False):
@@ -267,6 +341,8 @@ def metric_appearance(data, metric, prefs, *, scope=None, target=None, external=
         return {}
     if metric.startswith("cpu_"):
         return appearance_for("cpu", data.get("cpu_name"))
+    if metric.startswith("ram_") and scope != "gpus":
+        return memory_appearance(data)
     if scope != "gpus":
         return {}
     selected = str(target if target is not None else prefs.get("gpu_target") or "0")

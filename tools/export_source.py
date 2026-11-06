@@ -31,6 +31,7 @@ HardwareGlyph.qml HardwareShapes.js
 HardwareSolid.js HardwareMiniature.js HardwareSoft.js
 HardwareSeriesShapes.js
 HardwareSeriesGroupA.js HardwareSeriesGroupB.js HardwareSeriesGroupC.js HardwareSeriesCoreExpansion.js
+HardwareSeriesNvidiaLegacy.js HardwareSeriesRadeonArc.js HardwareMemoryShapes.js
 OptionTabs.qml Preview.qml SamplingControl.qml SensorBrowser.qml SettingRow.qml
 Settings.qml SettingsGroup.qml SkinPicker.qml Theme.qml Toggle.qml TopBar.qml
 TopBarDetails.qml TopBarItemInspector.qml TopBarMetricContent.qml TopBarGroupContent.qml TopBarChrome.qml ProcessUsageCard.qml

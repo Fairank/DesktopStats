@@ -24,6 +24,7 @@ from cpu_temperature import AsusCpuTemperature, is_requested as cpu_temperature_
 from energy_sensor import CpuPackagePower
 from external_engine import ExternalEngine
 from metrics import METRICS, metric_value, required_sources, variable
+from memory_identity import modules as memory_modules, requested as memory_identity_requested
 from stats_config import BASE, load
 from storage_sensor import StorageHealth
 
@@ -665,6 +666,7 @@ class Sampler:
         self.first = True
         self._hwinfo_cache = {}
         self._closed = False
+        self._memory_modules = None
         try:
             self.asus = AsusTemperature()
             self.asus_status = dict(state="connected", reason="", error={})
@@ -840,6 +842,10 @@ class Sampler:
         )
         inspecting = time.monotonic() < INSPECT_UNTIL
         needed = required_sources(config)
+        if memory_identity_requested(config):
+            if getattr(self, "_memory_modules", None) is None:
+                self._memory_modules = memory_modules()
+            data["memory_modules"] = self._memory_modules
         extended = self.external.read("external" in needed or inspecting, EXTERNAL_RESCAN)
         catalog = extended.pop("external_sensors")
         data.update(extended)

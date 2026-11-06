@@ -14,6 +14,8 @@ from hardware_catalog_core_expansion import SERIES as CORE_SERIES
 from hardware_catalog_group_a import SERIES as GROUP_A_SERIES
 from hardware_catalog_group_b import SERIES as GROUP_B_SERIES
 from hardware_catalog_group_c import SERIES as GROUP_C_SERIES
+from hardware_catalog_nvidia_legacy import SERIES as NVIDIA_LEGACY_SERIES
+from hardware_catalog_radeon_arc import SERIES as RADEON_ARC_SERIES
 
 BASE_SERIES_CATALOG = (
     dict(
@@ -102,4 +104,4 @@ BASE_SERIES_CATALOG = (
     ),
 )
 SERIES_CATALOG = (BASE_SERIES_CATALOG + GROUP_A_SERIES + GROUP_B_SERIES
-                  + GROUP_C_SERIES + CORE_SERIES)
+                  + GROUP_C_SERIES + CORE_SERIES + NVIDIA_LEGACY_SERIES + RADEON_ARC_SERIES)

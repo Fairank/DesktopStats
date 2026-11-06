@@ -153,6 +153,18 @@ def variants(catalog, icon_set="outline"):
     sys.path.insert(0, str(ROOT))
     from hardware_appearance import CATALOG, appearance_for
 
+    if catalog == "memory":
+        from memory_appearance import CATALOG as MEMORY_MODELS, SERIES_CATALOG as MEMORY_SERIES, appearance_for_memory
+        by_series = {row["id"]: row for row in MEMORY_SERIES}
+        result = []
+        for model in MEMORY_MODELS:
+            appearance = appearance_for_memory(model=model["aliases"][0])
+            appearance["icon_set"] = icon_set
+            row = by_series[appearance["series_id"]]
+            result.append(dict(label=row["label"], model_label=appearance["label"],
+                               note=" / ".join(appearance["features"]), source_url=appearance["source_url"], appearance=appearance))
+        return result
+
     if catalog == "models":
         result = []
         for row in CATALOG:
@@ -166,7 +178,7 @@ def variants(catalog, icon_set="outline"):
     from hardware_series import SERIES_CATALOG
     result = []
     models = {}
-    if catalog in ("series_models", "brands"):
+    if catalog in ("series_models", "brands", "series"):
         for model in CATALOG:
             appearance = appearance_for(model[1], model[-1][0])
             if model[1] == "gpu" and appearance["series_id"]:
@@ -203,7 +215,10 @@ def variants(catalog, icon_set="outline"):
                                model_label=appearance["label"],
                                source_url=appearance["source_url"], appearance=appearance))
             continue
-        appearance = appearance_for("gpu", row["board_vendor"] + " " + row["aliases"][0] + " unidentified GPU")
+        if not row["aliases"]:
+            appearance = dict(models[row["id"]], fan_count=None, visible_fan_count=None, style="gpu_neutral", confidence="series")
+        else:
+            appearance = appearance_for("gpu", row["board_vendor"] + " " + row["aliases"][0] + " unidentified GPU")
         assert appearance["series_id"] == row["id"] and appearance["fan_count"] is None
         assert appearance["style"] == "gpu_neutral"
         appearance["icon_set"] = icon_set
@@ -240,17 +255,19 @@ def render(destination, scratch, catalog, icon_set="outline", compact=False):
     warnings = []
     engine.warnings.connect(lambda errors: warnings.extend(error.toString() for error in errors))
     component = QQmlComponent(engine)
-    compact = compact or catalog == "brands"
+    compact = compact or catalog in ("brands", "memory")
     component.setData((OVERVIEW_QML if compact else QML).encode("utf-8"),
                       QUrl.fromLocalFile(str(ROOT / "tools/hardware-catalog.qml")))
     if component.isError():
         raise RuntimeError("; ".join(error.toString() for error in component.errors()))
     cases = variants(catalog, icon_set)
-    title = (f"{len(cases)} board brands · {len(cases)} 品牌代表型号" if catalog == "brands" else
+    title = (f"{len(cases)} memory designs · {len(cases)} 内存条代表设计" if catalog == "memory" else
+             f"{len(cases)} board brands · {len(cases)} 品牌代表型号" if catalog == "brands" else
              "Confirmed hardware models · 已确认型号" if catalog == "models" else
              "Individual cooler series · 逐系列外观" if catalog == "series_models" else "GPU cooler families · 系列外观示意")
     note = ("64 / 32 / literal 18px · Light + dark / " if compact else
             "18px actual size · 40px · 128px / " if catalog == "series_models" else "18px actual size · 32px · 64px / ") + ("Exact catalog identities; simplified physical layouts" if catalog in ("models", "series_models", "brands")
+                                                else "Verified module form; enclosure details are static" if catalog == "memory"
                                                 else "Family cues only; fan counts UNKNOWN, no fan circles")
     sizes = [128, 40, 18] if catalog == "series_models" and not compact else [64, 32, 18]
     window = component.createWithInitialProperties(dict(variants=cases, catalogTitle=title, catalogNote=note,
@@ -304,7 +321,7 @@ def render(destination, scratch, catalog, icon_set="outline", compact=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "qa-private/hardware-catalog.png")
-    parser.add_argument("--catalog", choices=("models", "series", "series_models", "brands"), default="models")
+    parser.add_argument("--catalog", choices=("models", "series", "series_models", "brands", "memory"), default="models")
     parser.add_argument("--icon-set", choices=("outline", "solid", "miniature", "soft"), default="outline")
     parser.add_argument("--compact", action="store_true", help="Four-column cards with both themes and full model labels")
     parser.add_argument("--overwrite", action="store_true")

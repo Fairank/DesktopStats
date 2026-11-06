@@ -1,7 +1,8 @@
 # Hardware appearance catalog
 
 The top bar can use small original hardware silhouettes without changing metric
-meaning, live temperature, load colours or the existing motion clock. These are
+meaning, live temperature, load colours or the existing motion clock. CPU, GPU
+and RAM appearances also reach the expanded hardware details. These are
 stylised illustrations, not product photos, official logos or manufacturing drawings.
 Small brand accents are UI colours, not a claim about a card's physical colour.
 
@@ -13,13 +14,18 @@ Top bar → Appearance → Hardware icons offers five versions:
 - `outline`: the previous original line drawings, preserved as an explicit option.
 - `solid`: simplified physical objects, filled metal shrouds and clear fan wells.
 - `miniature`: visible top/side thickness and fixed geometric shadows, without filters.
-- `soft`: rounder, two-tone objects with broad shapes and five separated fan blades.
+- `soft`: rounder, two-tone objects with broad shapes and separated fan blades.
 
 Solid, Miniature and Soft share dedicated series casing profiles: broad panel
 divisions, end shapes, shoulders and illustration proportions, rather than just
 different accents. Their front-view fans follow the reviewed visible layout;
 contacts and brackets remain small. All versions consume the same identity map
-and real readings. Choosing a version changes
+and real readings. Radial blowers use an impeller rather than an axial-fan
+symbol. The reviewed Acer BiFrost combines a small left blower and a right axial
+fan; reviewed passive cards have no fan. Memory designs distinguish exposed
+boards, low heatspreaders, taller enclosures and physical diffuser covers.
+These shapes do not introduce lighting effects or report the current LED state.
+Choosing a version changes
 the draft and shared preview; the existing top-bar Apply action persists it.
 The source-export tools include a synthetic offscreen comparison renderer,
 `tools/render_hardware_styles.py`, which never opens a desktop window.
@@ -28,9 +34,11 @@ The source-export tools include a synthetic offscreen comparison renderer,
 
 - CPU manufacturer and GPU chip vendor are different from the manufacturer of a
   complete graphics card. A motherboard's ASUS identity says nothing about a GPU.
-- The current catalog recognises 22 brand identities and 67 GPU series/product
-  lines, with one reviewed GPU representative per entry. Together with 3 CPU
-  examples, that is 70 model records, each with an official reference URL.
+- The GPU catalog contains 103 dedicated designs and 103 reviewed GPU models
+  across 24 GPU brand identities. The memory catalog adds 16 designs and 16
+  complete reviewed part numbers across 6 memory brands. Together with 3 CPU
+  examples, that is 122 model records and 119 GPU/memory designs, with 30 brand
+  identities across the GPU and memory catalogs and official reference URLs.
   This is a bounded catalog, not coverage of every current or historical SKU.
   The CPU examples do not establish coverage of all processor families.
 - Each GPU series has a dedicated static casing profile in Solid, Miniature and
@@ -38,6 +46,15 @@ The source-export tools include a synthetic offscreen comparison renderer,
   on-demand larger illustration. These summarize the cited representative's
   design language; geometry can differ across generations, revisions and SKUs.
   Outline remains the preserved earlier version.
+- Historical additions include 16 NVIDIA designs from GTX/GT 10 through GTX
+  900, 700, 600, 500, 400 and 200 to GeForce 8800 GTS and FX 5200. Another 20
+  Radeon/Arc designs span Radeon HD, R9, Polaris, Vega, RDNA and Intel Arc.
+  These are specific reviewed representatives, not every card in those eras.
+  Exact SKU maps keep an older GAMING, LIGHTNING, NITRO or STRIX enclosure
+  separate from a current design with the same long-lived line name.
+- Generation and entry/mainstream/flagship/reference metadata describe the
+  representative and its board product line within that era. They are gallery
+  filters, not a ranking of GPU chip performance across manufacturers or years.
 - A complete reviewed model/SKU alias can supply a verified cooler layout.
   A series or brand match alone never assigns physical fans. A matching SKU
   still keeps unknown fields unknown when its source does not confirm them.
@@ -71,6 +88,23 @@ Optional auxiliary fans do not prove what a user installed. Unknown is not zero,
 and unknown layouts do not borrow a fan count from the family name or a nearby
 model. The classic generic glyph does not depict a physical fan layout.
 
+### Memory identity and limits
+
+The 16 reviewed memory part numbers cover CORSAIR, G.SKILL, Kingston, Crucial,
+TEAMGROUP and ADATA/XPG representatives. A complete reviewed part number can
+select its model; a confirmed manufacturer and unambiguous series phrase can
+select a series illustration. Kit part numbers and individual module part
+numbers remain distinct. No suffix is removed to turn an unreviewed module into
+a reviewed kit, and firmware's G.SKILL module identity alone does not establish
+the enclosure shown on a kit's official page.
+
+An unknown form stays neutral. DDR generation, capacity, speed and motherboard
+brand do not establish DIMM versus SO-DIMM, heatspreader shape, chip count or
+lighting. Mixed or conflicting installed modules use a mixed/generic identity
+rather than selecting the first module as the machine's appearance. A missing
+official product image also leaves that representative's unverified enclosure
+neutral. RAM's existing usage/capacity readings and effects retain their meaning.
+
 ## Offline review gallery
 
 Generate a self-contained HTML comparison using the project's Python environment:
@@ -80,10 +114,11 @@ python tools/export_hardware_gallery.py --output qa-private/hardware-gallery.htm
 ```
 
 Use `--overwrite` when deliberately replacing an existing export. The current
-gallery embeds 670 static SVG variants: 67 GPU representatives × 5 icon versions
-× 2 themes. It supports brand filtering, model/series search, style and background
-selection, large illustrations and an 18px top-bar comparison. CPU examples are
-not included in this GPU gallery.
+gallery embeds 1,190 static SVG variants: (103 GPU + 16 memory representatives)
+× 5 icon versions × 2 themes. It supports hardware type, brand, GPU chip vendor,
+generation and product-line filters, model/series search, style and background
+selection, large illustrations and an 18px top-bar comparison. The 3 CPU
+examples are not included in this GPU/memory gallery.
 
 The exporter uses the actual QML drawing code without starting the installed
 application, sampler, native desktop windows or hardware discovery. The generated
@@ -92,14 +127,32 @@ site. The gallery is a separate review artifact, not a resident app window.
 
 ## Runtime cost
 
-`hardware_appearance.py`, `hardware_series.py` and the catalog data modules are
+`hardware_appearance.py`, `memory_appearance.py`, `hardware_series.py` and the catalog data modules are
 offline, with no system queries, threads, polling, network access, privilege
 changes or hardware-monitoring dependencies. Matching consumes
-existing cached CPU names and already delivered GPU identities. A bounded cache
-holds at most 128 immutable matches. Optional `board_vendor` and `board_model`
+existing cached CPU names and already delivered GPU identities. Each identity
+matcher caches at most 128 immutable matches. Optional `board_vendor` and `board_model`
 fields must describe the selected GPU. They are not currently supplied by the
 standard NVML provider, so common NVML chip names correctly fall back to a brand
 outline rather than claiming a precise retail cooler.
+
+Memory identity acquisition is a separate, demand-gated operation in
+`memory_identity.py`. An enabled top bar configured with a RAM metric and any
+of the four non-Classic icon versions can request it. On Windows it attempts
+one read-only SMBIOS snapshot per process: one size query and one data read via
+`GetSystemFirmwareTable('RSMB')`, at most two API calls. Success and failure are
+cached, so later projections do not retry or poll. Classic-only configurations
+and configurations without an eligible top-bar RAM metric do not request this
+read.
+
+The snapshot is bounded to 4 MiB and 64 populated memory devices. Only Type 17
+manufacturer, complete part number and form factor survive parsing; serial
+numbers, asset tags and the raw firmware buffer are not retained or written.
+Malformed, oversized or unavailable data leaves the appearance unknown. This
+path does not read SPD/SMBus, invoke WMI, request administrator rights, install a
+service or add a monitoring thread or timer. The firmware interface and Type 17
+layout are documented by [Microsoft](https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable)
+and [DMTF SMBIOS 3.9.0, section 7.18](https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.9.0.pdf).
 
 `process_gpu.dxgi_adapters` retains four PCI identity integers that GetDesc1 already
 returned; this does not start Top 5, add an API call or resolve a retail SKU by itself.
@@ -113,7 +166,7 @@ switch. QML retains a single static SVG image per active hardware glyph, with a
 stable geometry key that includes the selected version. Same-value samples do
 not rebuild the image. Only the selected version produces a texture; the other
 versions do not run animations or load image sets. The existing load/thermal/electrical layers keep their own
-values and clock, including hidden/minimised pause behaviour. Unknown/non-CPU/GPU
+values and clock, including hidden/minimised pause behaviour. Other hardware
 metrics keep their existing glyphs. The original Lucide data stays unchanged.
 The 64px details illustration exists only while its metadata is expanded and its
 window is visible, and is released on collapse, hiding or minimisation.
@@ -134,4 +187,6 @@ inherit the standard model's fan count; they require their own reviewed entries.
 At present the stock sensor path automatically identifies chip/CPU brands; retail
 board-level matches require a complete model identity from a provider. An offline
 PCI-subsystem catalog can be added later when its exact SKU mapping is verified.
-No online recognition service or full motherboard scan is enabled for this feature.
+Memory uses the bounded firmware identity path described above and retains a
+neutral result for an unreviewed part or inconsistent modules. No online
+recognition service or full motherboard scan is enabled for this feature.

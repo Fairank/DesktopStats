@@ -19,7 +19,7 @@ Item {
         anchors.fill: parent
         active: root.classic
         sourceComponent: Icon {
-            name: root.appearance.kind === "gpu" ? "gpu" : "cpu"
+            name: root.appearance.kind === "gpu" ? "gpu" : root.appearance.kind === "memory" ? "memory" : "cpu"
             ink: root.ink
         }
     }

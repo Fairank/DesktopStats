@@ -102,6 +102,14 @@ function fan(cx, cy, radius, p) {
         + circle(0, 0, .22, p.base) + '</g>'
 }
 
+function turbine(cx, cy, radius, p) {
+    var result='<g class="hardware-blower" transform="translate('+cx+' '+cy+') scale('+(radius/3.1)+')">'
+        +circle(0,0,3.1,p.well,p.base,.35)
+    for(var angle=0;angle<360;angle+=36)
+        result+='<path d="M.75-1.06L1.44-2.39L1.84-2.13L1.14-.75Z" transform="rotate('+angle+')" fill="'+p.blade+'"/>'
+    return result+circle(0,0,1.13,p.hub,null,null,"hardware-fan-hub")+'</g>'
+}
+
 function series(state) {
     var id = state.series_id || ""
     // A series token cannot independently establish a board manufacturer.
@@ -188,7 +196,7 @@ function gpu(state, p) {
             + rect(4.5, 9.5, 7.2, 4.2, 1.2, p.shade)
             + rect(5.4, 10.4, 5, .65, .3, p.base)
             + rect(5.4, 12.1, 5, .65, .3, p.base)
-            + fan(16.4, 11.5, 3.6, p)
+            + turbine(16.4, 11.5, 3.6, p)
     }
     if (count === 1)
         return shell(6.1, 4.9, 13.1, 12.1, state, p) + fan(12.65, 11.2, 4.35, p)
@@ -214,10 +222,10 @@ function seriesGpu(state, p, count) {
         + Series.face(state,g,colors)
     var cy = g.y+g.h*.51
     if (state.style === "gpu_blower" && count === 1)
-        return result + fan(g.x+g.w-4.5,cy,3.4,p)
+        return result + turbine(g.centers.length?g.centers[0]:g.x+g.w-4.5,cy,Math.min(3.4,g.h*.37),p)
     if (g.centers.length) {
-        g.centers.forEach(function(x,index){result += fan(x,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,p)})
-    } else {
+        g.centers.forEach(function(x,index){result += (g.blowers && g.blowers.indexOf(index)>=0?turbine:fan)(x,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,p)})
+    } else if (state.fan_count !== 0) {
         // Unknown cooling retains a neutral vented panel, never fan openings.
         result += rect(g.x+g.w*.14,g.y+g.h*.26,g.w*.66,g.h*.48,.7,p.shade)
             + path("M"+(g.x+g.w*.22)+" "+(g.y+g.h*.42)+"H"+(g.x+g.w*.68),"none",p.base,.75)

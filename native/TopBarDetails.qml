@@ -1104,7 +1104,7 @@ Window {
                                 id: appearanceSummary
                                 readonly property var appearance: root.detail.hardware_appearance || ({})
                                 Layout.fillWidth: true; spacing: 12
-                                visible: ["cpu", "gpu"].includes(appearance.kind)
+                                visible: ["cpu", "gpu", "memory"].includes(appearance.kind)
                                 Loader {
                                     objectName: "topBarDetailAppearanceLoader"
                                     Layout.preferredWidth: 64; Layout.minimumWidth: 64; Layout.maximumWidth: 64

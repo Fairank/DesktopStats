@@ -75,6 +75,15 @@ function fan(cx, cy, radius, colors) {
     return result + '<circle class="hardware-fan-hub" r=".51" fill="' + colors.hub + '"/></g>'
 }
 
+function turbine(cx, cy, radius, colors) {
+    let result = '<g class="hardware-blower" transform="translate('+cx+' '+cy+') scale('+radius/3+')">'
+        + '<circle r="3" fill="'+colors.rim+'"/><circle r="2.68" fill="'+colors.disk+'"/>'
+    for (let angle=0;angle<360;angle+=30)
+        result += p("M.72-1.03L1.38-2.30L1.78-2.07L1.12-.72Z",colors.blade)
+            .replace("<path ",'<path transform="rotate('+angle+')" ')
+    return result+'<circle class="hardware-fan-hub" r="1.1" fill="'+colors.hub+'"/></g>'
+}
+
 function geometry(state) {
     return Series.geometry(state, baseGeometry(state))
 }
@@ -160,12 +169,12 @@ function gpu(state, colors) {
         + underlay(state,g,colors) + front(state,g,colors)
     const cy=y+g.h*.51
     if (state.style === "gpu_blower" && state.fan_count === 1) {
-        result += fan(end-4.5,cy,3.55,colors)
+        result += turbine(g.centers.length?g.centers[0]:end-4.5,cy,Math.min(3.55,g.h*.37),colors)
             + p("M"+(x+2)+" "+(y+2.4)+"H"+(x+7.5)+"M"+(x+2)+" "+(y+4.1)+"H"+(x+7.5)
                 +"M"+(x+2)+" "+(y+5.8)+"H"+(x+7.5),"none",.7,colors.disk,.85)
     } else if (g.centers.length) {
-        g.centers.forEach(function(cx,index){result+=fan(cx,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,colors)})
-    } else {
+        g.centers.forEach(function(cx,index){result+=(g.blowers && g.blowers.indexOf(index)>=0?turbine:fan)(cx,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,colors)})
+    } else if (state.fan_count !== 0) {
         // A backplate-like vented panel, never a made-up cooler assembly.
         result += p("M"+(x+3.6)+" "+(y+2.5)+"L"+(x+2.5)+" "+(y+6.6)
             +"M"+(x+5.9)+" "+(y+2.5)+"L"+(x+4.8)+" "+(y+6.6)
