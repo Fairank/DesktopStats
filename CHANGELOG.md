@@ -1,5 +1,18 @@
 # Changes
 
+## 0.31.0-preview.1
+
+- Add optional Cream Sticker, Paper Cutout and Blue Ink Journal illustrations,
+  with no expressions. Every scheme uses the same 178-entry catalog as Original:
+  147 GPUs, 28 RAM modules and 3 CPUs. Existing choices and Original artwork
+  remain unchanged; the new schemes are illustrative colors, not factory paint.
+- Keep exact reviewed fan geometry, DDR keys and bounded CPU model marks.
+  New fan planes reuse the same RPM feedback, shared clock and retained textures;
+  unknown blade profiles remain static. Add full-catalog and motion regressions.
+- Make the noncommercial scope prominent in README, LICENSING and NOTICE,
+  explicitly covering original hardware illustrations and rendering code while
+  preserving all third-party and prior-license rights. LICENSE remains unchanged.
+
 ## 0.30.0-preview.2
 
 - Correct the four primary artwork choices: Original is the pre-smiley

@@ -5,6 +5,7 @@
 .import "HardwareCartoon.js" as Cartoon
 .import "HardwareSketch.js" as Sketch
 .import "HardwareNotebook.js" as Notebook
+.import "HardwareVariants.js" as Variants
 .import "HardwareSeriesShapes.js" as SeriesCatalog
 .import "HardwareMemoryShapes.js" as Memory
 .import "HardwareBoardDesigns.js" as Board
@@ -74,10 +75,10 @@ function key(appearance, ink) {
     const parts = [kind, vendor, board, style, count, shroud,
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
         choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon", "sketch",
-            "notebook_line", "notebook_color", "notebook_smile"], "outline")]
+            "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"], "outline")]
     // Original Outline keys and art stay byte-stable. Exact exterior details
     // require an independently guarded model identity, including on old cards.
-    const model=kind==="cpu" && parts[10].indexOf("notebook_")===0
+    const model=kind==="cpu" && (parts[10].indexOf("notebook_")===0 || Variants.styles.indexOf(parts[10])>=0)
         ? Notebook.cpuModelKey({kind:kind,id:input.id,style:style,vendor:vendor,confidence:input.confidence})
         : parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):""
     if(model)parts.push(model)
@@ -238,7 +239,8 @@ function source(geometryKey) {
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
-    const body = parts[10].indexOf("notebook_")===0 ? Notebook.body(state)
+    const body = Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state)
+        : parts[10].indexOf("notebook_")===0 ? Notebook.body(state)
         : parts[10] === "sketch" ? Sketch.body(state)
         : parts[10] === "cartoon" ? Cartoon.body(state)
         : parts[0] === "memory" ? Memory.body(state) : parts[10] === "solid" ? Solid.body(state)
@@ -259,7 +261,7 @@ function layers(geometryKey) {
     if (canonical !== geometryKey) return layers(canonical)
     const count = Number(parts[4])
     if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon","sketch",
-            "notebook_line","notebook_color","notebook_smile"].indexOf(parts[10]) < 0
+            "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash"].indexOf(parts[10]) < 0
             || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
             || [1,2,3].indexOf(count) < 0)
         return {baseSource:source(canonical),rotors:[]}
@@ -270,7 +272,8 @@ function layers(geometryKey) {
     // coordinates. The collector is local, including all per-style offsets and
     // each fan's reviewed radius/type. No complete-card regeneration per frame.
     const collector = []
-    const body = parts[10].indexOf("notebook_")===0 ? Notebook.body(state,collector)
+    const body = Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state,collector)
+        : parts[10].indexOf("notebook_")===0 ? Notebook.body(state,collector)
         : parts[10] === "sketch" ? Sketch.body(state,collector)
         : parts[10] === "cartoon" ? Cartoon.body(state,collector)
         : parts[10] === "solid" ? Solid.body(state,collector)
@@ -294,7 +297,8 @@ function layers(geometryKey) {
 
 // Generic quantity/device symbols deliberately carry no retail identity.
 function genericSource(kind, ink, moving, style) {
-    const body = ["notebook_line","notebook_color","notebook_smile"].indexOf(style)>=0
+    const body = Variants.styles.indexOf(style)>=0 ? Variants.generic(kind, hex(ink,"#69788c"), moving===true, style)
+        : ["notebook_line","notebook_color","notebook_smile"].indexOf(style)>=0
         ? Notebook.generic(kind, hex(ink,"#69788c"), moving === true, style)
         : style === "sketch" ? Sketch.generic(kind, hex(ink,"#69788c"), moving === true)
         : Cartoon.generic(kind, hex(ink,"#69788c"), moving === true)

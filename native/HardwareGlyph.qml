@@ -15,9 +15,9 @@ Item {
     readonly property string geometryKey: classic ? "" : Shapes.key(appearance, ink)
     readonly property url svgSource: classic ? "" : Shapes.source(geometryKey)
     readonly property bool fanShapeEligible: !classic && appearance && appearance.kind === "gpu"
-        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile"].includes(appearance.icon_set)
+        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(appearance.icon_set)
     readonly property bool wideGpu: appearance && appearance.kind === "gpu"
-        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile"].includes(appearance.icon_set)
+        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(appearance.icon_set)
         && root.width > root.height
     readonly property var fanLayerData: fanMotionEnabled && fanShapeEligible
         ? Shapes.layers(geometryKey) : null

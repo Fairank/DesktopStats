@@ -23,7 +23,7 @@ Item {
     readonly property var iconAppearance: row.hardware_appearance || ({})
     readonly property bool modernHardwareIcon: ["cpu", "gpu", "memory"].includes(row.icon)
         && iconAppearance.kind === row.icon
-        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile"].includes(iconAppearance.icon_set)
+        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(iconAppearance.icon_set)
     readonly property real iconHeight: modernHardwareIcon ? Math.max(18, Math.min(26, barHeight - 10)) : 18
     readonly property real iconWidth: modernHardwareIcon && iconAppearance.kind === "gpu"
         ? Math.round(iconHeight * 15 / 11) : iconHeight

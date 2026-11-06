@@ -28,7 +28,7 @@ FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 HardwareGlyph.qml HardwareShapes.js
-HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js HardwareNotebook.js HardwareNotebookParts.js
+HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js HardwareNotebook.js HardwareNotebookParts.js HardwareVariants.js
 HardwareFanDesigns.js HardwareFanProfileData.js
 HardwareBoardDesigns.js HardwareBoardProfileData.js
 HardwareVariantGroupA.js HardwareVariantGroupB.js HardwareVariantGroupC.js
@@ -78,6 +78,7 @@ REVIEWED_FILES = frozenset(
         "assets/" + name
         for name in (
             "icon-manifest.json",
+            "showcase/hardware-schemes.png",
             "ICON-NOTES.md",
             "icon.ico",
             "icon.png",

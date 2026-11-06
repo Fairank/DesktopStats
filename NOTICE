@@ -4,6 +4,12 @@ The original Desktop Stats application in versions starting with
 0.19.0-preview.1 is offered under the PolyForm Noncommercial License 1.0.0.
 See LICENSE and LICENSING.md for the scope and third-party exceptions.
 
+Original model-specific hardware illustrations and original fan-rendering code
+in this snapshot are included in that noncommercial scope. Commercial use,
+commercial integration, sale or use for commercial gain require separate written
+permission from the applicable rights holders. This does not relicense generic
+third-party symbols, earlier licensed artwork or hardware manufacturers' marks.
+
 The third-party libraries, symbols and previously licensed artwork identified
 in THIRD_PARTY_NOTICES.md retain their own licenses. This notice does not
 withdraw permissions already granted for earlier MIT-licensed copies.

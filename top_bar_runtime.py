@@ -1570,7 +1570,7 @@ class TopBarManager(QObject):
         icon_width = 18
         if (row.get('icon') in ('cpu', 'gpu', 'memory')
                 and appearance.get('kind') == row.get('icon')
-                and appearance.get('icon_set') in ('solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile')):
+                and appearance.get('icon_set') in ('solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile', 'sticker', 'papercut', 'inkwash')):
             icon_height = max(18, min(26, self._config.get('top_bar', {}).get('height', 32) - 10))
             icon_width = round(icon_height * 15 / 11) if appearance['kind'] == 'gpu' else icon_height
         return {'value': 0, 'icon_value': icon_width + 5, 'trend_value': 42,

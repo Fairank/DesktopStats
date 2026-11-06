@@ -869,3 +869,7 @@ Windows 明确报告没有电池，这不是权限错误。|Windows 明確報告
 2 · 可爱笑脸|2 · 可愛笑臉|2 · Cute smiley|2 · にっこり|2 · 귀여운 웃는 얼굴|2 · Lächeln|2 · Sourire|2 · Sonrisa
 3 · 彩色手绘|3 · 彩色手繪|3 · Pencil color|3 · 色えんぴつ|3 · 색연필|3 · Buntstift|3 · Crayon de couleur|3 · Lápiz de color
 4 · 纯线条|4 · 純線條|4 · Pen lines|4 · ペン線|4 · 펜선|4 · Linien|4 · Traits|4 · Líneas
+5 · 奶油贴纸|5 · 奶油貼紙|5 · Cream sticker|5 · クリームステッカー|5 · 크림 스티커|5 · Creme-Sticker|5 · Autocollant crème|5 · Pegatina crema
+6 · 拼色剪纸|6 · 拼色剪紙|6 · Paper cutout|6 · 切り絵|6 · 종이 오리기|6 · Papierschnitt|6 · Papier découpé|6 · Papel recortado
+7 · 蓝墨手账|7 · 藍墨手帳|7 · Blue ink journal|7 · 青インク手帳|7 · 파란 잉크 노트|7 · Blaues Tintenbuch|7 · Carnet à encre bleue|7 · Cuaderno de tinta azul
+插画配色；每套型号目录和读数相同。|插畫配色；每套型號目錄和讀數相同。|Illustrative colors; every style shares the same models and readings.|イラスト配色。全スタイルで機種一覧と測定値は共通です。|일러스트 색상입니다. 모든 스타일은 동일한 모델과 측정값을 사용합니다.|Illustrative Farben; alle Stile verwenden dieselben Modelle und Messwerte.|Couleurs illustratives ; tous les styles partagent les mêmes modèles et mesures.|Colores ilustrativos; todos los estilos comparten modelos y lecturas.

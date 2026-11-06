@@ -15,14 +15,14 @@ ROOT = Path(__file__).resolve().parents[1]
 QML = '''import QtQuick
 import "../native" as Product
 Window {
-    id:scene; visible:false; width:2540; height:866
+    id:scene; visible:false; width:3236; height:866
     property bool dark:false
     property var cases:[]
     property var styles:[]
     readonly property color ink:dark?"#e8edf4":"#303a48"
     readonly property color muted:dark?"#a1aebf":"#68768a"
     color:dark?"#1c222b":"#eff2f6"
-    Text {x:28;y:22;text:"硬件图标 · 十种外观版本";font.family:"Microsoft YaHei UI"
+    Text {x:28;y:22;text:"硬件图标 · 十三种外观版本";font.family:"Microsoft YaHei UI"
         font.pixelSize:23;font.weight:Font.DemiBold;color:scene.ink}
     Text {x:28;y:61;text:"放大外观 + 18px 顶部栏实际大小  /  静态矢量，无新增动画或采样"
         font.family:"Microsoft YaHei UI";font.pixelSize:12;color:scene.muted}
@@ -105,7 +105,10 @@ def render(output, scratch, *, dark=False):
         ("sketch", "手绘线稿", "原线稿 / 保留可选"),
         ("notebook_line", "随手线条", "不齐笔触 / 透明留白"),
         ("notebook_color", "手涂淡彩", "铅笔淡彩 / 保留型号结构"),
-        ("notebook_smile", "笑脸手绘", "淡彩表情 / 独立可选"))]
+        ("notebook_smile", "笑脸手绘", "淡彩表情 / 独立可选"),
+        ("sticker", "奶油贴纸", "奶油浅色 / 细描边"),
+        ("papercut", "拼色剪纸", "平面拼色 / 简洁面板"),
+        ("inkwash", "蓝墨手账", "蓝墨线条 / 淡色笔触"))]
     samples = (
         ("Intel Core i7-13700KF\n长方形顶盖", "cpu", "Intel Core i7-13700KF", "42%"),
         ("ZOTAC SOLO\n单风扇 · 紧凑短卡", "gpu", "ZOTAC GAMING GeForce RTX 4060 8GB SOLO", "36%"),

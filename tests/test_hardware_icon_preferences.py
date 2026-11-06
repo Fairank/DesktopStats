@@ -40,7 +40,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(default_top_bar()["hardware_icon_style"], "classic")
 
     def test_all_seven_styles_roundtrip_as_topbar_fields_without_changing_material_or_metrics(self):
-        self.assertEqual(HARDWARE_ICON_STYLES, ("miniature", "cartoon", "notebook_color", "notebook_line", "classic", "outline", "solid", "soft", "sketch", "notebook_smile"))
+        self.assertEqual(HARDWARE_ICON_STYLES, ("miniature", "cartoon", "notebook_color", "notebook_line", "sticker", "papercut", "inkwash", "classic", "outline", "solid", "soft", "sketch", "notebook_smile"))
         for style in HARDWARE_ICON_STYLES:
             with self.subTest(style=style):
                 config = copy.deepcopy(DEFAULT)
@@ -76,7 +76,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
         self.assertEqual(rebased["widgets"]["cpu"]["title"], "Pending")
 
     def test_control_labels_and_note_are_available_in_all_eight_languages(self):
-        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通", "手绘线稿", "随手线条", "手涂淡彩", "笑脸手绘", "1 · 原版", "2 · 可爱笑脸", "3 · 彩色手绘", "4 · 纯线条",
+        keys = ("硬件图标", "经典通用", "结构线稿", "精简实物", "微型实物", "柔和双色", "可爱卡通", "手绘线稿", "随手线条", "手涂淡彩", "笑脸手绘", "1 · 原版", "2 · 可爱笑脸", "3 · 彩色手绘", "4 · 纯线条", "5 · 奶油贴纸", "6 · 拼色剪纸", "7 · 蓝墨手账", "插画配色；每套型号目录和读数相同。",
                 "切换外观版本，自动匹配规则和读数保持一致。")
         self.assertEqual(len(LANGUAGES), 8)
         for language in LANGUAGES.keys() - {"zh-CN"}:

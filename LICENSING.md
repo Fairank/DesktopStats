@@ -9,6 +9,17 @@
 目的的商业活动。教育、公益、公共研究和政府等机构的允许用途按许可证原文确定。
 因此这是**源码可见的非商业项目**，不声称符合 OSI 的开源定义。
 
+上述限制同时适用于本版本新增的原创硬件插画、原创风扇图形及对应绘制代码：
+未经权利人另行书面授权，**禁止商业使用、商业集成、出售或用于商用盈利**。
+切换插画风格不会改变许可。修改、重新配色或重新打包也须遵守许可证；
+分享本项目副本或许可允许的修改版时，须保留 LICENSE、NOTICE 及相关来源声明。
+
+这一范围仅涉及可受版权保护的原创表达。Lucide/Feather 通用符号及其衍生片段、
+既有年糕图标和第三方组件继续适用下文各自的许可，不能用本项目的非商业限制
+撤销它们已授予的权利。硬件品牌、产品名称及商标属于各自权利人；这些简化硬件
+插画不提供商标授权，不表示硬件厂商参与、认可或背书。参考来源用于核对外观和
+规格，厂商产品照片不作为本项目原创插画重新授权或随源码包发布。
+
 公开 GitHub 仓库允许浏览、fork 和下载。许可证约束使用权，不能从技术上阻止
 下载、复制或违规使用，也不保证侵权行为不会发生。需要商业授权时，请联系仓库
 所有者 Fairank；仓库公开、下载免费或提交 issue 均不构成商业授权。
@@ -20,6 +31,13 @@ offered under the unmodified PolyForm Noncommercial License 1.0.0 in LICENSE.
 This includes the original Python/QML application, except
 for the third-party material identified below. The license is a restriction on
 permitted purposes, not download protection or an OSI-approved open-source license.
+
+Original model-specific hardware illustrations, fan drawings and their original
+rendering code are included in this scope. Commercial use, commercial integration,
+sale and other use for commercial gain require separate written permission.
+Third-party or previously licensed symbols and artwork retain their existing
+permissions; generic fragments derived from Lucide/Feather are not relicensed.
+Hardware product names and trademarks remain with their respective owners.
 
 - **Third-party software:** Qt/PySide/Shiboken, Python, psutil, Lucide/Feather,
   the identified Three r150 noise/lightning algorithm portions,
