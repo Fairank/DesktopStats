@@ -57,7 +57,7 @@ def export(destination):
             raw=target.read_bytes()
             packs.append(dict(kind=kind,models=len(models),svg_files=len(rows)*len(HARDWARE_ICON_STYLES),
                 file=name,bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest(),
-                download_url='https://github.com/Fairank/DesktopStats/releases/download/v'+VERSION+'/'+name))
+                download_url='https://github.com/Fairank/DesktopStats/releases/download/models-v'+VERSION+'/'+name))
     finally:clear_cache()
     report=dict(version=VERSION,styles=len(HARDWARE_ICON_STYLES),models=sum(row['models'] for row in packs),
                 svg_files=sum(row['svg_files'] for row in packs),market_exhaustive=False,collections=packs)

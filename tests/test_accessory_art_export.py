@@ -15,7 +15,7 @@ import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 ID=re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z',re.ASCII)
-COUNTS={'case':64,'cooler':42,'psu':21,'fan':38}
+COUNTS={'case':80,'cooler':54,'psu':21,'fan':54}
 SVG='{http://www.w3.org/2000/svg}'
 
 
@@ -114,14 +114,15 @@ print(json.dumps(dict(reports=reports,cache_sizes=cache_sizes,
         index=self.first/('DesktopStats-'+report['version']+'-SVG-index.json')
         self.assertEqual(json.loads(index.read_text(encoding='utf-8')),report)
         for collection in report['collections']:
+            self.assertIn('/releases/download/models-v'+report['version']+'/',collection['download_url'])
             raw=(self.first/collection['file']).read_bytes()
             self.assertEqual(collection['bytes'],len(raw))
             self.assertEqual(collection['sha256'],hashlib.sha256(raw).hexdigest())
 
     def test_all_records_are_named_products_and_one_reference_combination(self):
         report=self.export_run['reports'][0]
-        self.assertEqual(report['models'],165)
-        self.assertEqual(report['svg_files'],2145)
+        self.assertEqual(report['models'],209)
+        self.assertEqual(report['svg_files'],2717)
         self.assertEqual(report['styles'],13)
         self.assertFalse(report['market_exhaustive'])
         self.assertEqual({c['kind']:c['models'] for c in report['collections']},COUNTS)
@@ -144,9 +145,9 @@ print(json.dumps(dict(reports=reports,cache_sizes=cache_sizes,
                 all_models.append(model)
         products=[m for m in all_models if m['record_type']=='product']
         combinations=[m for m in all_models if m['record_type']=='reference_combination']
-        self.assertEqual(len(products),164)
+        self.assertEqual(len(products),208)
         self.assertEqual([m['id'] for m in combinations],['custom-loop-360-reference'])
-        self.assertEqual(len({m['id'] for m in all_models}),165)
+        self.assertEqual(len({m['id'] for m in all_models}),209)
 
     def test_each_svg_matches_its_manifest_hash_size_and_safe_relative_path(self):
         svg_count=0
@@ -181,7 +182,7 @@ print(json.dumps(dict(reports=reports,cache_sizes=cache_sizes,
                         svg_count+=1
                 self.assertEqual(declared,{name for name in names if name.endswith('.svg')})
                 self.assertEqual(len(declared),collection['svg_files'])
-        self.assertEqual(svg_count,2145)
+        self.assertEqual(svg_count,2717)
 
     def test_all_exported_xml_is_static_and_has_no_external_assets_or_scripts(self):
         forbidden={'script','foreignObject','image','iframe','object','embed','text','font','font-face','style'}

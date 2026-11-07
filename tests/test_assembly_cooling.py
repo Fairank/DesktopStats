@@ -32,8 +32,8 @@ def _hit(vertices,origin,direction):
 
 class CoolingCatalogTests(unittest.TestCase):
     def test_sources_and_dimensions_are_explicit(self):
-        self.assertEqual(len(choices_coolers()),42)
-        self.assertEqual(len(choices_fans()),38)
+        self.assertEqual(len(choices_coolers()),54)
+        self.assertEqual(len(choices_fans()),54)
         self.assertEqual({get_fan(c['id'])['size_mm'] for c in choices_fans()},{80,92,120,140,160,180,200})
         for choice in choices_coolers():
             row=get_cooler(choice['id']);self.assertTrue(row['sources']);self.assertEqual(row['reviewed'],'2026-11-07')
@@ -132,12 +132,13 @@ class CoolingGeometryTests(unittest.TestCase):
     def test_sensor_semantics_air_header_not_aio_pump_or_vrm(self):
         for choice in choices_coolers():
             _,meta=add_cooling((),{'cooling':{'cpu_cooler':choice['id']}},anchors=ANCHORS)
-            air=choice['kind'] not in ('aio','custom_loop')
+            passive=choice['kind']=='passive_tower'
+            air=choice['kind'] not in ('aio','custom_loop','passive_tower')
             self.assertEqual(meta['cpu_fan_tach_usable'],air)
             main=[fan for fan in meta['fans'] if fan['role']=='cpu_main']
             reviewed=bool(main) and all(fan.get('blade_geometry_reviewed') for fan in main)
             self.assertEqual(meta['real_cpu_rotor_parts'],['cooler:cpu'] if air and reviewed else [])
-            self.assertIn('representative' if air else 'pump',meta['fan_tach_mapping'])
+            self.assertIn('Passive' if passive else 'representative' if air else 'pump',meta['fan_tach_mapping'])
 
     def test_posed_cpu_normal_is_used_exactly_once(self):
         anchors=copy.deepcopy(ANCHORS);anchors['cpu']={'position':(50,40,30),'normal':(0,1,0),'up':(0,0,1)}

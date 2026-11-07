@@ -90,7 +90,7 @@ class AccessoryGalleryTests(unittest.TestCase):
         self.assertNotIn('assembly_geometry',sys.modules)
         self.assertNotIn('assembly_viewer',sys.modules)
         from top_bar_config import HARDWARE_ICON_STYLES
-        for category,count in (('case',64),('cooler',42),('psu',21),('fan',38)):
+        for category,count in (('case',80),('cooler',54),('psu',21),('fan',54)):
             gallery.setProperty('category',category);QTest.qWait(25)
             self.assertEqual(len(value(gallery,'entries')),count)
             for style in HARDWARE_ICON_STYLES:
@@ -143,7 +143,7 @@ class AccessoryGalleryTests(unittest.TestCase):
             gallery.setProperty('category','psu');self.find('accessoryDownload').clicked.emit()
             self.assertEqual(browser.call_count,1)
             self.assertEqual(browser.call_args.args[0].toString(),
-                'https://github.com/Fairank/DesktopStats/releases/download/v'+VERSION+'/DesktopStats-'+VERSION+'-psus-SVG.zip')
+                'https://github.com/Fairank/DesktopStats/releases/download/models-v'+VERSION+'/DesktopStats-'+VERSION+'-psus-SVG.zip')
             self.controller.downloadAccessoryArt('../bad')
             self.assertEqual(browser.call_count,1)
 

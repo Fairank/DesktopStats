@@ -152,7 +152,7 @@ class AssemblyTools(WorkspaceTools):
         from PySide6.QtCore import QUrl
         from PySide6.QtGui import QDesktopServices
         from product_version import VERSION
-        QDesktopServices.openUrl(QUrl('https://github.com/Fairank/DesktopStats/releases/download/v'+VERSION
+        QDesktopServices.openUrl(QUrl('https://github.com/Fairank/DesktopStats/releases/download/models-v'+VERSION
             +'/DesktopStats-'+VERSION+'-'+keys[kind]+'-SVG.zip'))
 
     @Property("QVariantList", notify=assemblyCasesChanged)

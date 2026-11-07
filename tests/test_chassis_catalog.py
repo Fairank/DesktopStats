@@ -11,8 +11,8 @@ import chassis_catalog as catalog
 class ChassisCatalogTests(unittest.TestCase):
     def test_coverage_is_explicit_and_identical_for_every_style(self):
         result = catalog.coverage()
-        self.assertEqual(result["cases"], 64)
-        self.assertEqual(result["brands"], 18)
+        self.assertEqual(result["cases"], 80)
+        self.assertEqual(result["brands"], 25)
         self.assertFalse(result["complete_market"])
         self.assertEqual(result["verified_firmware_identities"], 0)
         self.assertEqual(result["geometry_accuracy"], "schematic")
@@ -39,7 +39,7 @@ class ChassisCatalogTests(unittest.TestCase):
                  "www.jonsbo.com", "www.antec.com", "www.montechpc.com", "uk.msi.com",
                  "download.msi.com", "storage-asset.msi.com", "www.msi.com", "legacy.coolermaster.com",
                  "thermaltake.com", "www.deepcool.com", "deepcool.com", "www.silverstonetek.com",
-                 "device.report", "resources.mini-box.com", "www.in-win.com", "www.gigabyte.com", "download.gigabyte.com"}
+                 "device.report", "resources.mini-box.com", "www.in-win.com", "www.gigabyte.com", "download.gigabyte.com", "havn.global", "streacom.com", "www.dan-cases.com", "ncased.com", "ssupd.co", "www.geometricfuture.com", "geometricfuture.com", "cougargaming.com", "fractaldesign.freshdesk.com"}
         forms = {"atx", "micro_atx", "mini_itx", "e_atx", "mini_dtx", "dtx", "ssi_eeb", "ssi_ceb"}
         for choice in catalog.choices():
             row = catalog.get_case(choice["id"])

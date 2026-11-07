@@ -132,11 +132,9 @@ class Runtime(QObject):
             self.settings_material.start()
         if self.settings_host:
             self.settings_host.paintFailed.connect(self._settings_paint_failed)
-        self.component = QQmlComponent(
-            self.engine, QUrl.fromLocalFile(str(ASSETS / "native/DesktopWidget.qml"))
-        )
-        if self.component.isError():
-            raise RuntimeError("; ".join(error.toString() for error in self.component.errors()))
+        # The top bar has its own component. Compile desktop cards only when
+        # a real card is first created; keep one reusable component thereafter.
+        self.component = None
         self.settings.visibleChanged.connect(self.refresh_appearance)
         self.top_bar = TopBarManager(self)
         self.controller.applyRequested.connect(self.apply)
@@ -835,6 +833,16 @@ class Runtime(QObject):
             return
         window.requestActivate()
 
+    def desktop_widget_component(self):
+        if self.component is None:
+            component = QQmlComponent(
+                self.engine, QUrl.fromLocalFile(str(ASSETS / "native/DesktopWidget.qml"))
+            )
+            if component.isError():
+                raise RuntimeError("; ".join(error.toString() for error in component.errors()))
+            self.component = component
+        return self.component
+
     def apply_top_bar(self):
         """A bar-only commit does not recreate widgets or discard editor drafts."""
         self.top_bar.apply(self.controller._saved)
@@ -909,7 +917,7 @@ class Runtime(QObject):
                 window.setProperty("spec", spec)
                 window.resize(spec["width"], spec["height"])
             else:
-                window = self.component.createWithInitialProperties(
+                window = self.desktop_widget_component().createWithInitialProperties(
                     {"spec": spec, "nativeFlags": desired_flags}
                 )
                 if not window:

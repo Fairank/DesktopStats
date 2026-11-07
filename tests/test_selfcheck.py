@@ -2,6 +2,8 @@
 
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,6 +13,22 @@ import native_selfcheck
 
 
 class SelfCheckTests(unittest.TestCase):
+    def test_real_isolated_selfcheck_follows_the_current_catalog(self):
+        root=Path(__file__).resolve().parents[1]
+        result=subprocess.run([sys.executable,'-X','utf8','-c',
+            'import native_selfcheck,sys; raise SystemExit(native_selfcheck.run(sys.argv[1]))',str(self.output)],
+            cwd=root,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+            timeout=60,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0)|getattr(subprocess,'BELOW_NORMAL_PRIORITY_CLASS',0))
+        self.assertEqual(result.returncode,0,result.stdout.decode('utf8',errors='replace')[-2000:])
+        report=json.loads(self.output.read_text(encoding='utf8'))
+        self.assertTrue(report['ok'])
+        self.assertEqual(len(report['checks']),15)
+        self.assertFalse(report['hardware'])
+        self.assertFalse(report['foreground_windows'])
+        self.assertEqual(report['qml_warnings'],[])
+        from accessory_art import choices
+        self.assertEqual(report['accessory_catalog_counts'],{key:len(rows) for key,rows in choices().items()})
+
     def setUp(self):
         directory = Path(__file__).resolve().parents[1] / "qa-private/selfcheck-unit-temp"
         directory.mkdir(parents=True, exist_ok=True)

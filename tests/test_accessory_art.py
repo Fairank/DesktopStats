@@ -28,7 +28,7 @@ class AccessoryArtTests(unittest.TestCase):
         artwork.clear_cache()
         rows=artwork.choices()
         self.assertEqual({key:len(value) for key,value in rows.items()},
-                         dict(cases=64,coolers=42,psus=21,fans=38))
+                         dict(cases=80,coolers=54,psus=21,fans=54))
         catalog_rows=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                       component_catalog.choices('psu'),cooling_catalog.choices_fans())
         for key,source in zip(KINDS,catalog_rows):
@@ -186,7 +186,7 @@ class Guard(importlib.abc.MetaPathFinder):
 sys.meta_path.insert(0,Guard())
 import accessory_art
 assert accessory_art.cache_info()['entries']==0
-assert len(accessory_art.choices()['cases'])==64
+assert len(accessory_art.choices()['cases'])==80
 for kind,identity in [('case','hyte-y70'),('cooler','noctua-nh-d15-g2'),('psu','corsair-rm1000x-2024'),('fan','arctic-p12-pwm')]:
     assert accessory_art.art(kind,identity)['svg']
 '''

@@ -349,7 +349,7 @@ def build_scene(spec=None):
     is interpreted as an installed case fan.
     """
     spec=spec if isinstance(spec,dict) else {};case=spec.get('case') or {};dims=case.get('dimensions_mm') or {}
-    w=number(dims.get('width'),230,60,800);h=number(dims.get('height'),470,150,900);d=number(dims.get('depth'),460,150,900)
+    w=number(dims.get('width'),230,60,800);h=number(dims.get('height'),470,60,900);d=number(dims.get('depth'),460,150,900)
     meshes=[];steel=color(case.get('color'),'#4d5965');edge=color('#a9b8c4');dark=color('#25313e');green=color('#2f5960');gold=color('#d7b36d')
     features=case.get('features') or []
     open_frame=case.get('layout')=='open_frame'
@@ -717,20 +717,32 @@ def build_scene(spec=None):
                 up=(0.,1.,0.),u=(0.,1.,0.),v=(0.,0.,-1.)),connectors={})
     # Case layout changes pose, never component dimensions. Known ATX/GPU sizes
     # can protrude from an incompatible compact case instead of shrinking.
-    vertical_gpu='vertical_gpu_mount' in features;gpu_mount_observation={}
+    vertical_gpu='vertical_gpu_mount' in features;front_gpu='front_gpu_chamber' in features;gpu_mount_observation={}
     identity_pose=lambda p:tuple(p)
-    board_pose=identity_pose;gpu_pose=identity_pose;gpu_vector=identity_pose
-    if layout in ('vertical','horizontal') or vertical_gpu or winged:
+    board_pose=identity_pose;gpu_pose=identity_pose;gpu_vector=identity_pose;board_vector=identity_pose
+    bench='horizontal_test_bench' in features
+    if layout in ('vertical','horizontal') or vertical_gpu or front_gpu or winged or bench:
         transformed=[]
-        def pose(p):
+        def vector_pose(p):
             x,y,z=p
             return (z,y,-x) if winged else (x,-z,y) if layout=='vertical' else (y,-x,z)
-        board_pose=pose;gpu_pose=pose;gpu_vector=pose
-        if vertical_gpu and layout not in ('vertical','horizontal'):
+        def pose(p):
+            x,y,z=vector_pose(p)
+            return (x-board_y,y+board_x+66.3,z-board_z) if bench else (x,y,z)
+        board_pose=pose;gpu_pose=pose;gpu_vector=vector_pose;board_vector=vector_pose
+        if (vertical_gpu or front_gpu) and layout not in ('vertical','horizontal'):
             board_pose=identity_pose
-            def gpu_vector(p):x,y,z=p;return (y,-x,z)
+            board_vector=identity_pose
+            def gpu_vector(p):
+                x,y,z=p
+                return (x,z,-y) if front_gpu else (y,-x,z)
             target=gpu_anchor_position
-            if case.get('id')=='hyte-y70' and gpu_anchor_size:
+            if front_gpu and gpu_anchor_size:
+                gw,gt,gl=gpu_anchor_size
+                target=(0.,h*.03,d/2-min(96.,d*.24)+gt/2-3.3)
+                gpu_mount_observation=dict(method='official_front_gpu_layout_with_schematic_rail_position',
+                    source='https://lian-li.com/product/sup-01/',cad_verified=False,position_dimensions_verified=False)
+            elif case.get('id')=='hyte-y70' and gpu_anchor_size:
                 # Source-observed factory riser: PCB plane near 1/3 of case
                 # width from the glass, contact row near the cold-floor mount.
                 # This is a rigid pose, never a card-envelope adjustment.
@@ -744,20 +756,20 @@ def build_scene(spec=None):
                 return tuple(rotated[i]+target[i] for i in range(3))
         for mesh in meshes:
             if mesh.component in ('board','cpu','memory','gpu'):
-                if vertical_gpu and layout not in ('vertical','horizontal'):
+                if (vertical_gpu or front_gpu) and layout not in ('vertical','horizontal'):
                     if mesh.component!='gpu':transformed.append(mesh);continue
                     def point_pose(p):
-                        x,y,z=p;return (y,-x,z)
+                        return gpu_vector(p)
                     local=[]
                     for n in range(0,len(mesh.vertices),6):local.extend((*point_pose(mesh.vertices[n:n+3]),*point_pose(mesh.vertices[n+3:n+6])))
                     mesh=Mesh(mesh.name,tuple(local),mesh.color,gpu_pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,point_pose(mesh.axis),mesh.part_id)
                     transformed.append(mesh);continue
                 out=[]
-                for n in range(0,len(mesh.vertices),6):out.extend((*pose(mesh.vertices[n:n+3]),*pose(mesh.vertices[n+3:n+6])))
-                mesh=Mesh(mesh.name,tuple(out),mesh.color,pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,pose(mesh.axis),mesh.part_id)
+                for n in range(0,len(mesh.vertices),6):out.extend((*vector_pose(mesh.vertices[n:n+3]),*vector_pose(mesh.vertices[n+3:n+6])))
+                mesh=Mesh(mesh.name,tuple(out),mesh.color,pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,vector_pose(mesh.axis),mesh.part_id)
             transformed.append(mesh)
         meshes=transformed
-    attachment_anchors=final_anchors(anchors,board_pose,gpu_pose,gpu_anchor_position,gpu_anchor_size,spec,gpu_vector=gpu_vector)
+    attachment_anchors=final_anchors(anchors,board_pose,gpu_pose,gpu_anchor_position,gpu_anchor_size,spec,gpu_vector=gpu_vector,board_vector=board_vector)
     cooling_meta={};auxiliary_meta={}
     from assembly_case_detail import enrich_case
     meshes=enrich_case(meshes,(w,h,d),case,component_level(spec,'case'))
@@ -817,7 +829,7 @@ def build_scene(spec=None):
               physical_total_fans=physical_count,unplaced_fans=max(0,physical_count-fan_count) if physical_count is not None else None,
               memory_models=memory_models,cpu_model_mark=cpu_id if cpu_package_meta.get('model_mark_lines') or mark and mark[0]==style else '',
               cpu_style=style,board_is_reference=board.get('schematic',True) is not False,gpu_model=appearance.get('id',''),case_layout=layout,
-              gpu_mount='vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
+              gpu_mount='front_vertical' if front_gpu else 'vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
               board_layout_schematic=True,connector_positions_schematic=True,
               dimensions_verified=case.get('dimensions_verified') is True,cad_or_fit_guarantee=False)
     meta.update(detail_level=level,detail_focus=spec.get('detail_focus'),detail=component_details,

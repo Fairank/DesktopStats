@@ -190,6 +190,8 @@ def _rotor(row, style, x, y, width, height):
     if pen.hand:
         contour = contour.replace(' 7 C',' 7.35 C').replace(' 23 C',' 22.65 C')
     pen.parts.append('<g data-blade-count="'+str(blades)+'" data-contour="original-reference">')
+    if row.get('reverse_blade'):
+        pen.parts.append('<g data-foil="reverse-pitch" transform="translate(100 0) scale(-1 1)">')
     for i in range(blades):
         pen.parts.append('<g data-leaf="'+str(i+1)+'" transform="rotate('+_n(i*360/blades)+' 50 50)">')
         pen.path(contour,leaf,.65)
@@ -201,6 +203,8 @@ def _rotor(row, style, x, y, width, height):
                 pen.path('M'+_n(35+offset)+' 12 Q'+_n(27+offset)+' 24 '+_n(42+offset*.7)+' 32',width=.45,opacity=.65)
         elif family=='fractal-notched':
             pen.path('M52 33 L48 30 L49 35',width=.65)
+        pen.parts.append('</g>')
+    if row.get('reverse_blade'):
         pen.parts.append('</g>')
     if row.get('outer_ring'):
         pen.ellipse(50,50,43,43,'none',2.7)
@@ -243,7 +247,8 @@ def _fan_frame(pen, x, y, size, row):
         pen.rect(x+size*.99,y+size*.39,size*.025,size*.19,pen.accent,.3,.4)
     for dx, dy in ((.085,.085),(.915,.085),(.085,.915),(.915,.915)):
         if row.get('pads'):
-            pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
+            if row.get('pad_style')=='round':pen.ellipse(x+dx*size,y+dy*size,size*.052,size*.052,pad_color,.5)
+            else:pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
         pen.ellipse(x+dx*size,y+dy*size,size*.018,size*.018,pen.light,.5)
 
 
@@ -262,12 +267,118 @@ def _fan_foreground(pen, x, y, size, row):
     pen.parts.append('<path d="'+outer+hole+'" fill-rule="evenodd"'+pen._attrs(color,.6)+'/>')
     for dx,dy in ((.085,.085),(.915,.085),(.085,.915),(.915,.915)):
         if row.get('pads'):
-            pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
+            if row.get('pad_style')=='round':pen.ellipse(x+dx*size,y+dy*size,size*.052,size*.052,pad_color,.5)
+            else:pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
         pen.ellipse(x+dx*size,y+dy*size,size*.018,size*.018,pen.light,.45)
+    if row.get('hub_display'):
+        pen.parts.append('<g data-display="stationary-blank-lcd">')
+        pen.ellipse(cx,cy,size*.182,size*.182,pen.light,.7)
+        pen.ellipse(cx,cy,size*.164,size*.164,pen.dark,.5)
+        pen.parts.append('</g>')
+    elif row.get('metal_hub'):
+        tone='#b6c5cd' if pen.style in ('miniature','classic','solid') else pen.light
+        pen.ellipse(cx,cy,size*.095,size*.095,tone,.6)
+    if row.get('directional_grille'):
+        pen.parts.append('<g data-grille="stationary-reference">')
+        for i in range(12):
+            a=i*math.tau/12
+            pen.path('M'+_n(cx+radius*.27*math.cos(a))+' '+_n(cy+radius*.27*math.sin(a))+
+                     ' Q'+_n(cx+radius*.65*math.cos(a+.2))+' '+_n(cy+radius*.65*math.sin(a+.2))+
+                     ' '+_n(cx+radius*math.cos(a+.28))+' '+_n(cy+radius*math.sin(a+.28)),width=.85)
+        pen.parts.append('</g>')
+
+
+def _distinct_case(p, row):
+    """Bounded original outlines for documented structures, shared by all styles."""
+    features=set(row.get('features',()))
+    if 'tubular_open_frame' in features:
+        p.parts.append('<g data-case-structure="tubular-open-frame">')
+        for x in (31,74):
+            p.path('M'+str(x)+' 88 L'+str(x)+' 20 Q'+str(x)+' 13 '+str(x+6)+' 13 L'+str(x+15)+' 13 Q'+str(x+21)+' 13 '+str(x+21)+' 20 L'+str(x+21)+' 80',width=3.1)
+        p.poly([(39,28),(76,23),(76,77),(39,82)],p.dark,.7)
+        for yy in (32,66):p.line_to(33,yy+7,90,yy-3,2)
+        for yy in (23,81):p.line_to(33,yy+8,74,yy,2.9)
+        p.rect(48,38,20,25,p.body,1,.6)
+        p.face(58,50,8)
+        p.parts.append('</g>')
+    elif 'horizontal_test_bench' in features:
+        p.parts.append('<g data-case-structure="horizontal-test-bench">')
+        for xx,yy in ((24,45),(77,30),(101,51),(47,66)):
+            p.rect(xx-2,yy,4,20,p.dark,1,.6)
+            p.ellipse(xx,yy+20,3.5,1.4,p.body,.6)
+        outline=[(22,43),(77,27),(103,49),(47,66)]
+        p.poly([(xx,yy+3) for xx,yy in outline],p.dark,.7)
+        p.poly(outline,p.body,.9)
+        for xx,yy in ((37,43),(62,36),(61,54),(85,46)):
+            p.ellipse(xx,yy,2,1.1,p.dark,.45)
+            p.line_to(xx,yy,xx,yy-5,1.2)
+        p.poly([(30,44),(42,40),(47,44),(35,48)],p.dark,.5)
+        p.face(67,48,6)
+        p.parts.append('</g>')
+    elif 'passive_finned_cube' in features:
+        p.parts.append('<g data-case-structure="passive-finned-cube">')
+        p.poly([(26,29),(47,16),(96,26),(75,39)],p.light,.8)
+        p.poly([(75,39),(96,26),(96,77),(75,90)],p.dark,.8)
+        p.poly([(26,29),(75,39),(75,90),(26,80)],p.body,.8)
+        for i in range(11):
+            xx=29+i*4.2
+            p.line_to(xx,31+i*.86,xx,79+i*.86,1)
+        for i in range(6):
+            xx=78+i*3
+            p.line_to(xx,38-i*1.85,xx,87-i*1.85,.9)
+        p.poly([(33,81),(71,89),(89,79),(89,83),(71,94),(33,86)],p.dark,.7)
+        p.face(52,59,8)
+        p.parts.append('</g>')
+    elif 'fabric_column' in features:
+        p.parts.append('<g data-case-structure="fabric-rounded-column">')
+        p.rect(41,12,38,76,p.body,8,.9)
+        p.ellipse(60,17,18,6,p.dark,.75)
+        for i in range(10):
+            xx=44+i*3.5
+            p.line_to(xx,27,xx,79,.38,.55)
+        for yy in range(30,79,7):p.line_to(44,yy,76,yy,.3,.42)
+        for yy in (14,17,20):p.line_to(47,yy,73,yy,.55)
+        p.rect(44,83,32,6,p.dark,2,.6)
+        p.face(60,53,8)
+        p.parts.append('</g>')
+    elif 'front_gpu_chamber' in features:
+        p.parts.append('<g data-case-structure="front-gpu-chamber">')
+        p.poly([(30,17),(48,9),(89,9),(71,17)],p.dark,.8)
+        p.poly([(71,17),(89,9),(89,82),(71,90)],p.glass,.8)
+        p.rect(30,17,41,73,p.body,1,.8)
+        p.rect(33,23,15,59,p.dark,1,.6)
+        for xx in (36,45):p.line_to(xx,25,xx,80,.7)
+        for yy in range(28,81,4):p.line_to(34,yy,47,yy,.45)
+        p.rect(51,24,17,57,p.glass,1,.65)
+        p.poly([(31,89),(73,89),(87,83),(87,89),(73,95),(31,95)],p.dark,.7)
+        p.face(60,53,6)
+        p.parts.append('</g>')
+    elif 'origami_vent_tabs' in features:
+        p.parts.append('<g data-case-structure="folded-vent-tabs">')
+        p.poly([(32,17),(49,8),(89,16),(72,25)],p.light,.8)
+        p.poly([(72,25),(89,16),(89,80),(72,90)],p.dark,.8)
+        p.poly([(32,17),(72,25),(72,90),(32,82)],p.body,.8)
+        for yy in range(30,75,13):
+            for xx in (39,54):
+                p.poly([(xx,yy),(xx+10,yy+2),(xx+5,yy+12)],p.dark,.5)
+                p.poly([(xx,yy),(xx+5,yy+4),(xx+5,yy+12)],p.accent,.4)
+        p.face(61,80,5)
+        p.parts.append('</g>')
+    elif 'reversible_u_frame' in features:
+        p.parts.append('<g data-case-structure="u-frame-feet-down">')
+        p.rect(29,19,53,64,p.dark,2,.8)
+        p.rect(32,23,47,55,p.glass,2,.7)
+        p.path('M24 13 L24 82 Q24 91 33 91 L80 91 Q89 91 89 82 L89 13',width=3.3)
+        for yy in range(30,77,6):p.line_to(33,yy,44,yy,.55)
+        p.face(61,53,9)
+        p.parts.append('</g>')
+    else:return False
+    return True
 
 
 def _case(row, style):
     p = _Pen(style)
+    if _distinct_case(p,row):return p.finish(),[],''
     dims = row['dimensions_mm']
     features = set(row.get('features',()))
     height = 72
@@ -466,6 +577,14 @@ def _case(row, style):
         p.rect(x-2,y+height-1,width+5,5,p.glass,1,.7)
     if 'front_psu_mount' in features:
         p.rect(x+width+5,y+3,7,14,p.body,.5,.5)
+    if 'wood_top_panel' in features:
+        top_tone='#aa815d' if style in ('miniature','classic','solid') else p.accent
+        p.parts.append('<g data-case-detail="vented-wood-top">')
+        p.poly([(x+1,y-1),(x+side,y-7),(x+width+side-2,y-7),(x+width-1,y-1)],top_tone,.7)
+        for index in range(6):
+            xx=x+6+index*(width-12)/6
+            p.line_to(xx,y-2,xx+9,y-5,.65)
+        p.parts.append('</g>')
     for foot in (x+4,x+width-10):
         p.rect(foot,y+height,6,3,p.dark,.6)
     p.ellipse(x+width-6,y+2,1,1,p.accent,.5)
@@ -479,6 +598,9 @@ def _case(row, style):
 def _fan(row, style):
     p=_Pen(style)
     _fan_frame(p,23,13,74,row)
+    extra=max(0,row.get('width_mm',row['size_mm'])/row['size_mm']-1)*37
+    if extra:
+        for xx in (23-extra,97):p.rect(xx,18,extra,64,p.body,.4,.5)
     fg=_Pen(style)
     if row.get('stator_vanes'):
         # Air-guide stators are stationary, behind the impeller in this front view.
@@ -493,8 +615,8 @@ def _cooler_fan(row):
     fan=cooling_catalog.get_fan(row.get('fan_model'))
     if not fan:
         # Explicit bundled/reference leaf layout, not an invented retail identity.
-        fan=dict(family=row.get('fan_family','bundled-reference'),blades=7,
-                 hub_ratio=.25,blade_count_verified=False,frame='square',
+        fan=dict(family=row.get('fan_family','bundled-reference'),blades=row.get('fan_reference_blades',7),
+                 hub_ratio=.25,blade_count_verified=row.get('fan_blade_count_verified',False),frame='square',outer_ring=row.get('fan_outer_ring',False),
                  frame_color='#35434d',blade_color='#60727d',
                  rgb=bool(row.get('fan_reference_rgb')),reference_details=True)
     fan['open_back']=True
@@ -508,7 +630,15 @@ def _pump(p, fg, row, cx, cy, scale=1):
     if row.get('pump_dimensions_verified'):
         dims=row['pump_reference_mm']
         h=max(20,min(33,32*dims['depth']/dims['width']))*scale
-    if family in ('nzxt_lcd','aorus_round_lcd','lianli_infinity','thermaltake_mirror','id_white_ring','arctic_vrm','cm_dual_chamber'):
+    if family=='tryx_panorama':
+        p.poly([(cx-w*.6,cy-h*.55),(cx-w*.32,cy-h*.8),(cx+w*.6,cy-h*.45),(cx+w*.6,cy+h*.43),(cx-w*.3,cy+h*.64),(cx-w*.6,cy+h*.35)],p.dark,.9)
+        p.path('M'+_n(cx-w*.55)+' '+_n(cy-h*.50)+' Q'+_n(cx-w*.4)+' '+_n(cy-h*.66)+' '+_n(cx-w*.28)+' '+_n(cy-h*.51)+' L'+_n(cx+w*.53)+' '+_n(cy-h*.28)+' L'+_n(cx+w*.53)+' '+_n(cy+h*.35)+' L'+_n(cx-w*.28)+' '+_n(cy+h*.55)+' Q'+_n(cx-w*.47)+' '+_n(cy+h*.57)+' '+_n(cx-w*.55)+' '+_n(cy+h*.3)+' Z',p.glass,.7)
+        p.line_to(cx-w*.28,cy-h*.48,cx-w*.28,cy+h*.49,.55)
+    elif family=='ek_nucleus':
+        p.rect(cx-w/2,cy-h/2,w,h,p.dark,3)
+        p.ellipse(cx+1,cy,w*.43,h*.49,p.body,.8)
+        p.ellipse(cx+1,cy,w*.35,h*.40,'none',1.4)
+    elif family in ('nzxt_lcd','aorus_round_lcd','lianli_infinity','thermaltake_mirror','id_white_ring','arctic_vrm','cm_dual_chamber'):
         p.ellipse(cx,cy+3*scale,w*.51,h*.5,p.dark)
         p.ellipse(cx,cy,w*.51,h*.5,p.body)
         if family=='arctic_vrm':
@@ -550,6 +680,9 @@ def _pump(p, fg, row, cx, cy, scale=1):
                    ' L'+_n(cx+w*.04)+' '+_n(cy+h*.06)+' L'+_n(cx+w*.27)+' '+_n(cy-h*.18),width=.8)
         if family=='phanteks_bridge':
             p.rect(cx-w*.45,cy-h*.2,w*.9,h*.4,p.accent,2,.65)
+        if family=='alphacool_square':
+            for dx in (-.36,.36):
+                for dy in (-.34,.34):p.ellipse(cx+w*dx,cy+h*dy,.8,.8,p.light,.4)
     if family=='msi_radiator_pump':
         # Here the remote piece is a CPU block; the pump is in the radiator.
         p.rect(cx-7*scale,cy-5*scale,14*scale,10*scale,p.dark,1,.5)
@@ -565,6 +698,21 @@ def _cooler(row, style):
     rotors=[]
     fan=_cooler_fan(row)
     count=row.get('fan_count',1)
+    if row['kind']=='passive_tower':
+        p.parts.append('<g data-cooler-structure="thirteen-passive-fins">')
+        original=style in ('miniature','classic','solid')
+        tone=row.get('fin_color',p.body) if original else p.body
+        for index in range(row['documented_fin_count']):
+            xx=24+index*4.0;yy=28-index*.85
+            p.poly([(xx,yy),(xx+17,yy-8),(xx+17,yy+45),(xx,yy+54)],tone,.55)
+            for yy_hole in (yy+8,yy+23,yy+38):p.ellipse(xx+8.5,yy_hole,1.7,2.4,p.dark,.35)
+        for index in range(row.get('heatpipes',0)):
+            xx=34+index*6
+            p.path('M'+str(xx)+' 78 Q'+str(xx)+' 87 61 88',width=1)
+        p.rect(47,87,28,4,p.light,1,.7)
+        p.face(72,47,6)
+        p.parts.append('</g>')
+        return p.finish(),[],''
     if row['kind'] in ('aio','custom_loop'):
         radiator=row['radiator_mm']
         radiator_width=min(98,45+53*(radiator['length']-156)/(458-156))
@@ -683,6 +831,8 @@ def _cooler(row, style):
                 # Listed sizes identify front then centre on mixed-fan coolers;
                 # the visible rear plane is rendered first for correct overlap.
                 size_index=count-1-i
+                fan_models=row.get('fan_models',[])
+                if size_index<len(fan_models):fan=_cooler_fan(dict(row,fan_model=fan_models[size_index]))
                 size=base_size*fan_sizes[size_index]/max(fan_sizes)
                 xx=starts[i][0]+(base_size-size)/2
                 yy=starts[i][1]+(base_size-size)/2
@@ -866,7 +1016,9 @@ def art(kind, model_id, style='miniature'):
     elif kind=='fan':
         details.update(family=row.get('family','reference'),blade_count=row['blades'],
                        blade_count_verified=bool(row.get('blade_count_verified')),
-                       leaf_contour=row.get('leaf_contour_accuracy','original_reference'))
+                       leaf_contour=row.get('leaf_contour_accuracy','original_reference'),
+                       reverse_pitch=bool(row.get('reverse_blade')),stationary_lcd=bool(row.get('hub_display')),
+                       stationary_directional_grille=bool(row.get('directional_grille')))
     result=dict(id=model_id,kind=kind,label=row['label'],brand=row['brand'],style=style,
                 svg=_svg(combined),body_svg=_svg(body),foreground_svg=_svg(foreground) if foreground else '',
                 rotors=rotors,reference_details=True,sources=sources,

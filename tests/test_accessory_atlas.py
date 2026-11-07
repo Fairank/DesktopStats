@@ -13,7 +13,7 @@ from unittest.mock import patch
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-COUNTS={'case':64,'cooler':42,'psu':21,'fan':38}
+COUNTS={'case':80,'cooler':54,'psu':21,'fan':54}
 PREFIX='window.DesktopStatsAtlas.receive('
 
 
@@ -90,8 +90,8 @@ print(json.dumps(dict(reports=reports,refused=refused,denied_modules_loaded=load
 
     def test_all_models_have_light_metadata_and_exactly_52_independent_classic_shards(self):
         self.assertEqual(self.manifest['counts'],COUNTS)
-        self.assertEqual(self.manifest['models'],165)
-        self.assertEqual(self.manifest['combinations'],2145)
+        self.assertEqual(self.manifest['models'],209)
+        self.assertEqual(self.manifest['combinations'],2717)
         self.assertEqual(self.manifest['data_shards'],52)
         self.assertEqual(len(self.manifest['styles']),13)
         seen=set()
@@ -144,8 +144,8 @@ print(json.dumps(dict(reports=reports,refused=refused,denied_modules_loaded=load
         for name in ('LICENSE','NOTICE','LICENSING.md','THIRD_PARTY_NOTICES.md'):
             self.assertEqual(self.archive.read(name),(ROOT/name).read_bytes())
         sources=json.loads(self.archive.read('SOURCES.json'))['models']
-        self.assertEqual(len(sources),165)
-        self.assertEqual(sum(row['record_type']=='product' for row in sources),164)
+        self.assertEqual(len(sources),209)
+        self.assertEqual(sum(row['record_type']=='product' for row in sources),208)
         self.assertEqual([row['id'] for row in sources if row['record_type']=='reference_combination'],['custom-loop-360-reference'])
         self.assertTrue(all(row['sources'] and row['reference_details'] for row in sources))
         self.assertTrue(all(url.startswith('https://') for row in sources for url in row['sources']))

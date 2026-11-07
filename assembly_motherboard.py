@@ -396,21 +396,22 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     return tuple((*out,*parts)),meta
 
 
-def final_anchors(anchors,board_pose,gpu_pose,gpu_position,gpu_size,spec,*,gpu_vector=None):
+def final_anchors(anchors,board_pose,gpu_pose,gpu_position,gpu_size,spec,*,gpu_vector=None,board_vector=None):
     """Return detached final case-space endpoints for cooling/auxiliary modules."""
     result=copy.deepcopy(anchors or {});result.setdefault('case',copy.deepcopy(spec.get('case') or {}))
+    board_direction=board_vector or board_pose
     for key in ('cpu','board'):
         row=result.get(key)
         if not row:continue
         for vector in ('normal','up','u','v','along'):
-            if vector in row:row[vector]=board_pose(row[vector])
+            if vector in row:row[vector]=board_direction(row[vector])
         row['position']=board_pose(row['position']);row.update(zip(('x','y','z'),row['position']))
     for rows in result.get('connectors',{}).values():
         for row in rows:
             for key in ('position','rear_position'): 
                 if key in row:row[key]=board_pose(row[key])
             for key in ('normal','along'):
-                if key in row:row[key]=board_pose(row[key])
+                if key in row:row[key]=board_direction(row[key])
     if 'dimm_centers' in result:result['dimm_centers']=[board_pose(p) for p in result['dimm_centers']]
     if gpu_position is not None:
         vector=gpu_vector or gpu_pose

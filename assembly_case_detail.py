@@ -116,6 +116,14 @@ def _port_meshes(io,dimensions,case):
 
 def enrich_case(meshes,dimensions,case,level='balanced'):
     """Replace crude case surfaces and append bounded batched mechanical detail."""
+    from assembly_case_exteriors import replace_shell
+    meshes=replace_shell(meshes,dimensions,case,level)
+    if any(flag in case.get('features',()) for flag in
+           ('tubular_open_frame','horizontal_test_bench','passive_finned_cube','fabric_column')):
+        # Open frames, a bare bench and a fabric sleeve have no tower rear folds.
+        details=case.get('exterior_details') or {};io=details.get('io') if isinstance(details,dict) else None
+        ports=_port_meshes(io,dimensions,case) if isinstance(io,dict) else ()
+        return tuple((*meshes,*ports))
     if level=='eco':
         # A lower detail level may simplify machining, but a source-known
         # physical connector must remain present if cables attach to it.

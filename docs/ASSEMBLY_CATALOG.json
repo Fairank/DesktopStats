@@ -11,7 +11,7 @@
     ],
     "market_exhaustive": false,
     "motion": "explicit_reference_demonstration",
-    "records": 165,
+    "records": 209,
     "sensor_binding": false,
     "styles": [
       "miniature",
@@ -2702,6 +2702,51 @@
       "taxonomy_status": "series_pending"
     },
     {
+      "brand": "COUGAR",
+      "dimensions_mm": {
+        "depth": 685,
+        "height": 580,
+        "width": 255
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "COUGAR CONQUER",
+      "model_id": "cougar-conquer",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://cougargaming.com/products/cases/conquer/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "DAN Cases",
+      "dimensions_mm": {
+        "depth": 326,
+        "height": 244,
+        "width": 140
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "DAN Cases × Lian Li A4-H2O",
+      "model_id": "dan-cases-a4-h2o",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://lian-li.com/product/a4h2o/",
+        "https://www.dan-cases.com/downloads/a4h2o_user-manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
       "brand": "DeepCool",
       "dimensions_mm": {
         "depth": 336,
@@ -2794,6 +2839,29 @@
     {
       "brand": "Fractal Design",
       "dimensions_mm": {
+        "depth": 366,
+        "height": 314,
+        "width": 165
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Fractal Design Era 2",
+      "model_id": "fractal-era-2",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://www.fractal-design.com/products/cases/era-series/era-2/era-2-midnight-blue/",
+        "https://fractaldesign.freshdesk.com/support/solutions/articles/4000210379-era-2-cpu-cooler-gpu-support"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Fractal Design",
+      "dimensions_mm": {
         "depth": 542,
         "height": 474,
         "width": 240
@@ -2810,6 +2878,29 @@
       "source_urls": [
         "https://www.fractal-design.com/products/cases/meshify-series/meshify-2/meshify-2-black-light-tg/",
         "https://www.fractal-design.com/news/introducing-meshify-2-and-meshify-2-xl/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Fractal Design",
+      "dimensions_mm": {
+        "depth": 212,
+        "height": 453,
+        "width": 212
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Fractal Design Mood",
+      "model_id": "fractal-mood",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://www.fractal-design.com/products/cases/mood-series/mood/mood-black/",
+        "https://www.fractal-design.com/app/uploads/2024/06/Mood-Product-Sheet-EN.pdf"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "series_pending"
@@ -2927,6 +3018,28 @@
       "taxonomy_status": "series_pending"
     },
     {
+      "brand": "Geometric Future",
+      "dimensions_mm": {
+        "depth": 500,
+        "height": 500,
+        "width": 230
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Geometric Future Model 8 CowBoy",
+      "model_id": "geometric-future-model-8-cowboy",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://www.geometricfuture.com/product-1/3"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
       "brand": "GIGABYTE",
       "dimensions_mm": {
         "depth": 430,
@@ -2945,6 +3058,28 @@
       "source_urls": [
         "https://www.gigabyte.com/PC-Case/GB-C500P-ST/sp",
         "https://download.gigabyte.com/FileList/Manual/GIGABYTE_C500_PANORAMIC_STEALTH_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "HAVN",
+      "dimensions_mm": {
+        "depth": 541,
+        "height": 547,
+        "width": 259.5
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "HAVN HS 420",
+      "model_id": "havn-hs-420",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://havn.global/products/hs-420"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "series_pending"
@@ -3038,6 +3173,51 @@
       "taxonomy_status": "series_pending"
     },
     {
+      "brand": "InWin",
+      "dimensions_mm": {
+        "depth": 523,
+        "height": 543,
+        "width": 244
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "InWin DUBILI (Feet Mode)",
+      "model_id": "inwin-dubili",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://www.in-win.com/en/ibuild-ishare/dubili",
+        "https://www.in-win.com/uploads/Product/ibuild-ishare/dubili_new/user-manual/dubili_eum_en.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "InWin",
+      "dimensions_mm": {
+        "depth": 256,
+        "height": 423,
+        "width": 278
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "InWin POC",
+      "model_id": "inwin-poc",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://www.in-win.com/en/ibuild-ishare/poc"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
       "brand": "Jonsbo",
       "dimensions_mm": {
         "depth": 452,
@@ -3122,6 +3302,28 @@
       "source_urls": [
         "https://www.jonsbo.com/en/products/TK2Black.html",
         "https://www.jonsbo.com/Upfiles/down/TK-2%20Installation%20Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Lian Li",
+      "dimensions_mm": {
+        "depth": 443,
+        "height": 321.5,
+        "width": 194
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Lian Li × DAN A3-mATX (Mesh)",
+      "model_id": "lian-li-a3-matx",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://lian-li.com/product/a3-matx/"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "series_pending"
@@ -3259,6 +3461,28 @@
       "taxonomy_status": "series_pending"
     },
     {
+      "brand": "Lian Li",
+      "dimensions_mm": {
+        "depth": 403.45,
+        "height": 534,
+        "width": 212
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Lian Li SUP01",
+      "model_id": "lian-li-sup01",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://lian-li.com/product/sup-01/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
       "brand": "Montech",
       "dimensions_mm": {
         "depth": 478,
@@ -3367,6 +3591,28 @@
         "https://uk.msi.com/PC-Case/MAG-PANO-100R-PZ/Specification",
         "https://download.msi.com/archive/mnu_exe/case/MAGPANO100L100RPZWHITE_English.pdf",
         "https://storage-asset.msi.com/datasheet/pcc/hk/MAG-PANO-100R-PZ.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "NCASE",
+      "dimensions_mm": {
+        "depth": 372,
+        "height": 262,
+        "width": 166
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "NCASE M2 Round",
+      "model_id": "ncase-m2-round",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://ncased.com/products/m2-limited-editions"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "series_pending"
@@ -3577,6 +3823,95 @@
       "taxonomy_status": "series_pending"
     },
     {
+      "brand": "SSUPD",
+      "dimensions_mm": {
+        "depth": 247,
+        "height": 365,
+        "width": 167
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "SSUPD Meshroom S V2 (Variant B)",
+      "model_id": "ssupd-meshroom-s-v2",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://ssupd.co/products/cases-meshroom-s-v2"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Streacom",
+      "dimensions_mm": {
+        "depth": 260,
+        "height": 115,
+        "width": 370
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Streacom BC1 V2 (Bench Mode)",
+      "model_id": "streacom-bc1-v2",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://streacom.com/products/bc1-v2-open-benchtable/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Streacom",
+      "dimensions_mm": {
+        "depth": 215,
+        "height": 431,
+        "width": 215
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Streacom DA6",
+      "model_id": "streacom-da6",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://streacom.com/products/da6-mini-itx-case/",
+        "https://streacom.com/downloads/mk/da6_product_intro.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Streacom",
+      "dimensions_mm": {
+        "depth": 260,
+        "height": 270,
+        "width": 260
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Streacom DB4",
+      "model_id": "streacom-db4",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://streacom.com/products/db4-fanless-mini-itx-case/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
       "brand": "Thermaltake",
       "dimensions_mm": {
         "depth": 500,
@@ -3594,6 +3929,28 @@
       "series": null,
       "source_urls": [
         "https://thermaltake.com/products/core-p3-tg-pro"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "series_pending"
+    },
+    {
+      "brand": "Thermaltake",
+      "dimensions_mm": {
+        "depth": 424,
+        "height": 336,
+        "width": 320
+      },
+      "firmware_mapping": "unverified",
+      "geometry_scope": "exterior_and_reference_installation",
+      "kind": "case",
+      "label": "Thermaltake Core V21",
+      "model_id": "thermaltake-core-v21",
+      "model_status": "original_schematic",
+      "native_io_status": "unverified",
+      "record_type": "product",
+      "series": null,
+      "source_urls": [
+        "https://thermaltakeusa.com/products/core-v21-ca-1d5-00s1wn-00"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "series_pending"
@@ -3666,6 +4023,26 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "Alphacool",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Alphacool Core Ocean T38 360 · 38mm 厚排",
+      "model_id": "alphacool-core-ocean-t38-360",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Alphacool Core Ocean T38 360",
+      "source_urls": [
+        "https://www.alphacool.com/download/datasheet/ENG_13052_Alphacool_Core_Ocean_T38_AIO_360mm_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "AMD",
       "dimensions_mm": {
         "depth": 110,
@@ -3708,6 +4085,30 @@
       "series": "AMD Wraith Stealth",
       "source_urls": [
         "https://www.amd.com/en/products/processors/ecosystem/cpu-cooler-solutions.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ARCTIC",
+      "dimensions_mm": {
+        "depth": 104,
+        "height": 159,
+        "width": 126
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "ARCTIC Freezer 36 · 双风扇单塔",
+      "model_id": "arctic-freezer36",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ARCTIC Freezer 36",
+      "source_urls": [
+        "https://www.arctic.de/us/Freezer-36"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4054,6 +4455,30 @@
       "blade_geometry_reviewed": false,
       "brand": "DeepCool",
       "dimensions_mm": {
+        "depth": 122,
+        "height": 67,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "DeepCool AN600 · 62鳍片薄扇下压",
+      "model_id": "deepcool-an600",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "DeepCool AN600",
+      "source_urls": [
+        "https://global.deepcool.com/products/Cooling/cpuaircoolers/AN600-Top-Flow-Low-Profile-Cooler-1700-AM5/2023/16837.shtml"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "DeepCool",
+      "dimensions_mm": {
         "depth": 144,
         "height": 164,
         "width": 147
@@ -4109,6 +4534,27 @@
       "series": "DeepCool MYSTIQUE 360",
       "source_urls": [
         "https://deepcool.com/products/Cooling/cpuliquidcoolers/MYSTIQUE-360-5th-Gen-Liquid-Cooler-with-LCD-1851-1700-AM5/2024/18059.shtml"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "EK Water Blocks",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "EK Nucleus CR360 Lux D-RGB · 分区旋转顶盖",
+      "model_id": "ek-nucleus-cr360-lux-drgb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "EK Nucleus CR360 Lux D-RGB",
+      "source_urls": [
+        "https://www.ekwb.com/solutions/all-in-one/",
+        "https://www.ekwb.com/shop/EK-IM/EK-IM-3831109851661.pdf"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4406,6 +4852,31 @@
       "blade_geometry_reviewed": false,
       "brand": "Noctua",
       "dimensions_mm": {
+        "depth": 152,
+        "height": 158,
+        "width": 154
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Noctua NH-P1 · 无扇被动塔",
+      "model_id": "noctua-nh-p1",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Noctua NH-P1",
+      "source_urls": [
+        "https://www.noctua.at/en/products/nh-p1/specifications",
+        "https://www.noctua.at/en/products/nh-p1"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Noctua",
+      "dimensions_mm": {
         "depth": 112,
         "height": 158,
         "width": 125
@@ -4483,6 +4954,103 @@
         "https://www.ekwb.com/shop/quantum/ek-quantum-kinetic-tbe-200-d5-pwm-d-rgb-acetal",
         "https://www.corsair.com/ww/en/p/custom-liquid-cooling/cx-9030003-ww/hydro-x-series-xr5-360mm-water-cooling-radiator-cx-9030003-ww",
         "https://www.corsair.com/ww/en/p/custom-liquid-cooling/cx-9010021-ww/icue-link-XC7-rgb-elite-water-block-cx-9010021-ww"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Scythe",
+      "dimensions_mm": {
+        "depth": 122,
+        "height": 67,
+        "width": 122
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Scythe Big Shuriken 3 Rev.B · 67mm 偏置下压",
+      "model_id": "scythe-bigshuriken3-revb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Scythe Big Shuriken 3 Rev.B",
+      "source_urls": [
+        "https://www.scythe.co.jp/product/cpu-cooler/air-cooling/low-profile/scbsk-3100/",
+        "https://www.scytheus.com/bigshuriken3-rev-b"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Scythe",
+      "dimensions_mm": {
+        "depth": 128,
+        "height": 154,
+        "width": 138
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Scythe Fuma 3 · 异厚双扇偏置双塔",
+      "model_id": "scythe-fuma3",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Scythe Fuma 3",
+      "source_urls": [
+        "https://www.scytheus.com/fuma-3"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Scythe",
+      "dimensions_mm": {
+        "depth": 106,
+        "height": 154,
+        "width": 132
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Scythe Mugen 6 · 六热管偏置单塔",
+      "model_id": "scythe-mugen6",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Scythe Mugen 6",
+      "source_urls": [
+        "https://www.scytheus.com/mugen6"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Thermalright",
+      "dimensions_mm": {
+        "depth": 123.5,
+        "height": 67,
+        "width": 120
+      },
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Thermalright AXP120-X67 · 六热管薄扇下压",
+      "model_id": "thermalright-axp120-x67",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright AXP120-X67",
+      "source_urls": [
+        "https://www.thermalright.com/product/axp120-x67/"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4586,6 +5154,30 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "Thermalright",
+      "dimensions_mm": {
+        "depth": 120,
+        "height": 99.8,
+        "width": 120
+      },
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Thermalright SI-100 · 悬高六热管下压",
+      "model_id": "thermalright-si100",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright SI-100",
+      "source_urls": [
+        "https://www.thermalright.com/product/si-100/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "Thermaltake",
       "dimensions_mm": null,
       "dimensions_verified": false,
@@ -4599,6 +5191,50 @@
       "series": "Thermaltake TOUGHLIQUID 360 ARGB Sync",
       "source_urls": [
         "https://thermaltake.com/products/toughliquid-360-argb-sync-all-in-one-liquid-cooler"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "TRYX",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "TRYX PANORAMA SE 360 ARGB · 曲面屏冷头",
+      "model_id": "tryx-panorama-se360",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "TRYX PANORAMA SE 360 ARGB",
+      "source_urls": [
+        "https://www.tryxzone.com/api/product-models/1"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Zalman",
+      "dimensions_mm": {
+        "depth": 95,
+        "height": 155,
+        "width": 135
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Zalman CNPS10X Performa Black · 135mm 环叶单塔",
+      "model_id": "zalman-cnps10x-performa-black",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Zalman CNPS10X Performa Black",
+      "source_urls": [
+        "https://www.zalman.com/EN/Product/ProductDetail.do?productSeq=1182"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4729,6 +5365,46 @@
       "telemetry": "not_bound_to_installed_sensor"
     },
     {
+      "blade_geometry_reviewed": false,
+      "brand": "Alphacool",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Alphacool Rise Aurora 120 · 框轴双区光",
+      "model_id": "alphacool-rise-aurora120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Alphacool Rise Aurora 120",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/fans/pc-fans/l12-alphacool-rise-aurora-120-mm-fan-120x120x25mm-pht-eol"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ARCTIC",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "ARCTIC P12 Max · 加固叶尖环",
+      "model_id": "arctic-p12-max",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ARCTIC P12 Max",
+      "source_urls": [
+        "https://www.arctic.de/en/P12-Max/ACFAN00280A/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
       "blade_geometry_reviewed": true,
       "brand": "ARCTIC",
       "dimensions_mm": null,
@@ -4744,6 +5420,26 @@
       "source_urls": [
         "https://support.arctic.de/en/p12-pwm/docs",
         "https://www.arctic.de/media/8c/5d/bd/1693305992/Spec_Sheet_P12_PWM_EN.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ARCTIC",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "ARCTIC P12 Slim PWM PST · 15mm",
+      "model_id": "arctic-p12-slim-pwm-pst",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ARCTIC P12 Slim PWM PST",
+      "source_urls": [
+        "https://www.arctic.de/en/P12-Slim-PWM-PST/"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4784,6 +5480,26 @@
       "series": "ASUS ROG Strix XF120",
       "source_urls": [
         "https://rog.asus.com/us/cooling/fans/rog-strix-xf-120-model/spec/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "be quiet!",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "be quiet! Light Wings 120 PWM high-speed · 双面光环",
+      "model_id": "bequiet-light-wings120-hs",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "be quiet! Light Wings 120 PWM high-speed",
+      "source_urls": [
+        "https://www.bequiet.com/de/casefans/3454"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4845,6 +5561,26 @@
       "source_urls": [
         "https://www.coolermaster.com/en-us/products/mobius-120.html",
         "https://www.coolermaster.com/on/demandware.static/-/Sites-cooler-master-main/default/dw31bcba12/Assets/mobius-120/large/mobius-120-01-gallery-01.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Cooler Master",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Cooler Master Mobius 120 OC · 27mm 金属轴心",
+      "model_id": "coolermaster-mobius120-oc",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master Mobius 120 OC",
+      "source_urls": [
+        "https://www.coolermaster.com/en-my/products/mobius-120-oc.html"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -4954,6 +5690,26 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "EK Water Blocks",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "EK-Loop FPT 120 D-RGB · 全框压力扇",
+      "model_id": "ek-loop-fpt120-drgb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "EK-Loop FPT 120 D-RGB",
+      "source_urls": [
+        "https://www.ekwb.com/shop/ek-loop-fan-fpt-120-d-rgb-black-550-2300rpm"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "ENERMAX",
       "dimensions_mm": null,
       "dimensions_verified": true,
@@ -4967,6 +5723,26 @@
       "series": "ENERMAX SquA RGB ADV",
       "source_urls": [
         "https://www.enermax.com/en/products/aquafusion-adv-series-360mm-cpu-liquid-cooler"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Fractal Design",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Fractal Design Prisma AL-18 PWM · 180×38",
+      "model_id": "fractal-prisma-al18-pwm",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Fractal Design Prisma AL-18 PWM",
+      "source_urls": [
+        "https://www.fractal-design.com/products/fans/prisma/prisma-al-18-pwm/white-rgb"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -5133,6 +5909,26 @@
       "telemetry": "explicit_channel_mapping_only"
     },
     {
+      "blade_geometry_reviewed": false,
+      "brand": "Lian Li",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Lian Li UNI FAN TL LCD 120 · 中央屏幕",
+      "model_id": "lian-li-uni-tllcd120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Lian Li UNI FAN TL LCD 120",
+      "source_urls": [
+        "https://lian-li.com/product/uni-fan-TL-LCD/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
       "blade_geometry_reviewed": true,
       "brand": "MSI",
       "dimensions_mm": null,
@@ -5148,6 +5944,26 @@
       "source_urls": [
         "https://us.msi.com/PC-Component/MEG-SILENT-GALE-P12/Specification",
         "https://storage-asset.msi.com/datasheet/pccs/global/MEG-SILENT-GALE-P12.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Noctua",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Noctua NF-A12x15 PWM · 15mm 薄扇",
+      "model_id": "noctua-nf-a12x15-pwm",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Noctua NF-A12x15 PWM",
+      "source_urls": [
+        "https://www.noctua.at/en/products/nf-a12x15-pwm/specifications"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -5396,6 +6212,26 @@
       "telemetry": "explicit_channel_mapping_only"
     },
     {
+      "blade_geometry_reviewed": false,
+      "brand": "Phanteks",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Phanteks D30-120 Reverse · 30mm 反叶",
+      "model_id": "phanteks-d30-120-reverse",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Phanteks D30-120 Reverse",
+      "source_urls": [
+        "https://phanteks.com/product/d30-120-black/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
       "blade_geometry_reviewed": true,
       "brand": "Phanteks",
       "dimensions_mm": null,
@@ -5411,6 +6247,68 @@
       "source_urls": [
         "https://phanteks.com/product/t30-120/",
         "https://phanteks.com/wp-content/uploads/2024/02/PH-F120T30_BG-2.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Scythe",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Scythe Kaze Flex II 120 PWM · KFS1225FD15-P",
+      "model_id": "scythe-kaze-flex-ii120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Scythe Kaze Flex II 120 PWM",
+      "source_urls": [
+        "https://www.scytheus.com/kazeflexii-120",
+        "https://static.wixstatic.com/media/9ccab7_68364a7953504fd3a7502cc3d71b1991~mv2.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Scythe",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Scythe Kaze Flex II 120 Slim PWM · KFS1215FD15-P",
+      "model_id": "scythe-kaze-flex-ii120-slim",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Scythe Kaze Flex II 120 Slim PWM",
+      "source_urls": [
+        "https://www.scytheus.com/kaze-flex-ii-120-slim",
+        "https://static.wixstatic.com/media/9ccab7_6224139beb9b4e5e864d2e2299c4c3a0~mv2.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "SilverStone",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "SilverStone Air Penetrator AP183 · 定向导流网",
+      "model_id": "silverstone-ap183",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "SilverStone Air Penetrator AP183",
+      "source_urls": [
+        "https://silverstone.en.taiwantrade.com/product/ap183-1787350.html"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -5438,6 +6336,26 @@
       "telemetry": "explicit_channel_mapping_only"
     },
     {
+      "blade_geometry_reviewed": false,
+      "brand": "Thermalright",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Thermalright TL-B12 Extrem LCP · 25.6mm",
+      "model_id": "thermalright-tlb12-extrem-lcp",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright TL-B12 Extrem LCP",
+      "source_urls": [
+        "https://www.thermalright.com/product/tl-b12-extrem-lcp/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
       "blade_geometry_reviewed": true,
       "brand": "Thermalright",
       "dimensions_mm": null,
@@ -5453,6 +6371,26 @@
       "source_urls": [
         "https://www.thermalright.com/product/tl-c12c/",
         "https://www.thermalright.com/wp-content/uploads/2026/08/tl-c12c.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Thermaltake",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Thermaltake CT120 · 四角圆形减震",
+      "model_id": "thermaltake-ct120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermaltake CT120",
+      "source_urls": [
+        "https://thermaltake.com/products/ct120-pc-cooling-fan-2-pack.html"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -5493,6 +6431,26 @@
       "series": "Thermaltake TOUGHFAN 12",
       "source_urls": [
         "https://thermaltake.com/products/toughliquid-360-argb-sync-all-in-one-liquid-cooler"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "XPG",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "XPG VENTO PRO 120 PWM · Gentle Typhoon 衍生",
+      "model_id": "xpg-vento-pro120-pwm",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "XPG VENTO PRO 120 PWM",
+      "source_urls": [
+        "https://www.xpg.com/tw/xpg/691?tab=spec"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -9816,22 +10774,22 @@
     "notebook_smile"
   ],
   "summary": {
-    "brands": 56,
+    "brands": 69,
     "by_kind": {
       "board": 16,
-      "case": 64,
-      "cooler": 42,
+      "case": 80,
+      "cooler": 54,
       "cpu": 3,
       "expansion": 3,
-      "fan": 38,
+      "fan": 54,
       "gpu": 147,
       "memory": 28,
       "psu": 21,
       "storage": 5
     },
-    "products": 366,
-    "records": 367,
+    "products": 410,
+    "records": 411,
     "reference_combinations": 1,
-    "series_pending": 64
+    "series_pending": 80
   }
 }

@@ -174,9 +174,11 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
             from assembly_feedback import cpu_fan_state
             feedback=cpu_fan_state(data,now=now)
             if cpu.get('telemetry_bound') is False:feedback=dict(available=False,rpm=None)
-            rows.append(_static('CPU_FAN 通道',f"{feedback['rpm']:.0f} RPM" if feedback['available'] else None,feedback['available']))
+            passive=model.get('kind')=='passive_tower'
+            rows.append(_static('风扇数量',0,True) if passive else
+                        _static('CPU_FAN 通道',f"{feedback['rpm']:.0f} RPM" if feedback['available'] else None,feedback['available']))
             usable=mapping(details.get('cooling')).get('cpu_fan_tach_usable')
-            if model:
+            if model and not passive:
                 notes.append('CPU_FAN 是代表通道，不是每把风扇的独立测速。' if usable
                              else '水泵与风扇测速尚未匹配，实测模式保持静止。' if model.get('kind') in ('aio','custom_loop')
                              else '风扇结构或测速尚未匹配，实测模式保持静止。')

@@ -120,7 +120,7 @@ class AssemblyEffectTests(unittest.TestCase):
         from chassis_catalog import CASES
         from hardware_appearance import appearance_for
         vertical=[case for case in CASES if case['layout']=='vertical']
-        self.assertEqual(len(vertical),4)
+        self.assertEqual(len(vertical),7)
         def direction(camera):
             yaw,pitch=math.radians(camera._yaw),math.radians(camera._pitch)
             return math.sin(yaw)*math.cos(pitch),math.sin(pitch),math.cos(yaw)*math.cos(pitch)

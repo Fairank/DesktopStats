@@ -313,7 +313,7 @@ class AssemblyPageTests(unittest.TestCase):
     def test_overview_counts_reuse_the_parts_catalog_and_follow_catalog_changes(self):
         from assembly_parts import choices
         self.show_assembly(width=720,height=600)
-        for key,expected in (('cases',64),('coolers',42),('psus',21),('fans',38)):
+        for key,expected in (('cases',80),('coolers',54),('psus',21),('fans',54)):
             self.assertEqual(self.find('assemblyCatalogCount_'+key).property('modelCount'),expected)
         # One existing catalog binding supplies both the editor and the new
         # first-screen counts; the overview must not issue a second query.
@@ -334,7 +334,7 @@ class AssemblyPageTests(unittest.TestCase):
             self.assertEqual(self.find('assemblyCatalogCount_fans').property('modelCount'),2)
             self.assertEqual(catalog.call_count,single_binding_reads)
         self.controller.assemblyCasesChanged.emit();self.app.processEvents()
-        self.assertEqual(self.find('assemblyCatalogCount_fans').property('modelCount'),38)
+        self.assertEqual(self.find('assemblyCatalogCount_fans').property('modelCount'),54)
         self.assertNotIn('assembly_viewer',sys.modules)
 
     def test_first_screen_examples_click_open_a_populated_draft_without_saving_or_changing_the_bar(self):

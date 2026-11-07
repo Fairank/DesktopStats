@@ -211,9 +211,9 @@ class AssemblyGeometryTests(unittest.TestCase):
         renderer.draw.assert_called_once_with(1200,900,pixel_scale=1.5,yaw=-80.,pitch=12.,zoom=.9,
             exploded=True,phase=35.,dark=True,focus='cpu')
 
-    def test_all_64_cases_keep_source_dimensions_and_no_installed_fan_guess(self):
+    def test_all_80_cases_keep_source_dimensions_and_no_installed_fan_guess(self):
         from chassis_catalog import CASES
-        self.assertEqual(len(CASES),64)
+        self.assertEqual(len(CASES),80)
         for case in CASES:
             scene=build_scene({'case':case})
             self.assertEqual(scene.dimensions,tuple(case['dimensions_mm'][key] for key in ('width','height','depth')))

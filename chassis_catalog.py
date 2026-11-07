@@ -208,10 +208,12 @@ _CASES = (
 from chassis_catalog_group_a import records as _group_a
 from chassis_catalog_group_b import records as _group_b
 from chassis_catalog_group_c import records as _group_c
+from chassis_catalog_group_d import records as _group_d
 
 _CASES += _group_a(_case, _mount, _ATX, _EATX)
 _CASES += _group_b(_case, _mount, _ATX, _EATX)
 _CASES += _group_c(_case, _mount, _ATX, _EATX)
+_CASES += _group_d(_case, _mount, _ATX, _EATX)
 from chassis_detail_catalog import details_for as _exterior_details
 for _entry in _CASES:
     _details=_exterior_details(_entry['id'])
