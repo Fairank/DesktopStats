@@ -10,6 +10,8 @@
 .import "HardwareMemoryShapes.js" as Memory
 .import "HardwareBoardDesigns.js" as Board
 .import "HardwareCpuPackages.js" as Cpu
+.import "HardwareCpuModel.js" as CpuModel
+.import "HardwareModelDetails.js" as ModelDetails
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
@@ -22,6 +24,12 @@ var boards = ["asus", "msi", "gigabyte", "zotac", "sapphire", "powercolor", "asr
     "maxsun", "yeston", "biostar", "sparkle", "acer", "intel", "amd", "nvidia", "unknown"]
 var shrouds = ["neutral", "angular", "soft", "box", "reference"]
 var seriesIds = SeriesCatalog.ids
+var modelStyles = ["classic","outline","solid","miniature","soft","cartoon","sketch",
+    "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash"]
+function modelStyle(value) {
+    return typeof value==="string" && value.indexOf("model_")===0
+        && modelStyles.indexOf(value.slice(6))>=0 ? value.slice(6) : ""
+}
 
 function choice(value, allowed, fallback) {
     if (typeof value !== "string" || value.length > 40) return fallback
@@ -78,7 +86,7 @@ function key(appearance, ink) {
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
         choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon", "sketch",
             "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].concat(cpuPackageKey?["classic"]:[]), "outline")]
-    if(input.model_mode===true && ["classic","outline"].indexOf(input.icon_set)>=0)
+    if(input.model_mode===true && kind!=="memory" && modelStyles.indexOf(input.icon_set)>=0)
         parts[10]="model_"+input.icon_set
     // Original Outline keys and art stay byte-stable. Exact exterior details
     // require an independently guarded model identity, including on old cards.
@@ -91,7 +99,7 @@ function key(appearance, ink) {
 
 function inputFromParts(parts) {
     const cpuPackage=Cpu.fromKey(parts[11])
-    const modelMode=["model_classic","model_outline"].indexOf(parts[10])>=0
+    const modelMode=!!modelStyle(parts[10])
     return {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:modelMode?parts[10].slice(6):parts[10],model_mode:modelMode,
         id:cpuPackage?cpuPackage.model_id:parts[11]||"",confidence:parts.length===12?"model":"",cpu_package:cpuPackage}
@@ -265,6 +273,29 @@ function cpuBody(state) {
     }):body
 }
 
+// Desktop models have their own cache key and bounded static detail pass. The
+// old small-icon renderers remain the source of physical outlines/fan planes;
+// ordinary top-bar keys, SVGs and retained fan layers take their original path.
+function modelArtwork(state,collector) {
+    const style=modelStyle(state.icon_set)
+    const input=Object.assign({},state,{icon_set:style,model_mode:true})
+    if(input.kind==="cpu" && input.cpu_package)return CpuModel.modelBody(input)
+    const rotors=collector || []
+    const body=["classic","outline"].indexOf(style)>=0?modelBody(state,rotors)
+        : Variants.styles.indexOf(style)>=0?Variants.body(input,rotors)
+        : style.indexOf("notebook_")===0?Notebook.body(input,rotors)
+        : style==="sketch"?Sketch.body(input,rotors)
+        : style==="cartoon"?Cartoon.body(input,rotors)
+        : style==="solid"?Solid.body(input,rotors)
+        : style==="miniature"?Miniature.body(input,rotors)
+        : Soft.body(input,rotors)
+    let result=input.kind==="gpu"?ModelDetails.body(input,body,rotors):body
+    if(!collector)rotors.forEach(function(rotor){
+        result+='<g transform="translate('+rotor.cx+' '+rotor.cy+') scale('+(rotor.radius/(rotor.basis || 3))+')">'+rotor.body+'</g>'
+    })
+    return result
+}
+
 function source(geometryKey) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
     if (parts.length !== 11 && parts.length !== 12) return source(key({}, "#69788c"))
@@ -276,7 +307,8 @@ function source(geometryKey) {
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||"",cpu_package:Cpu.fromKey(parts[11])}
-    const body = state.kind==="cpu" && state.cpu_package ? cpuBody(state)
+    const body = modelStyle(state.icon_set) ? modelArtwork(state)
+        : state.kind==="cpu" && state.cpu_package ? cpuBody(state)
         : ["model_classic","model_outline"].indexOf(parts[10])>=0 ? modelBody(state)
         : Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state)
         : parts[10].indexOf("notebook_")===0 ? Notebook.body(state)
@@ -298,9 +330,9 @@ function layers(geometryKey) {
     // source(). No SVG or caller-supplied descriptor body is parsed or trusted.
     const canonical = key(inputFromParts(parts), parts[7])
     if (canonical !== geometryKey) return layers(canonical)
-    const count = Number(parts[4])
+    const count = Number(parts[4]),desktopStyle=modelStyle(parts[10])
     if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon","sketch",
-            "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash","model_classic","model_outline"].indexOf(parts[10]) < 0
+            "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash"].indexOf(parts[10]) < 0 && !desktopStyle
             || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
             || [1,2,3].indexOf(count) < 0)
         return {baseSource:source(canonical),rotors:[]}
@@ -311,7 +343,8 @@ function layers(geometryKey) {
     // coordinates. The collector is local, including all per-style offsets and
     // each fan's reviewed radius/type. No complete-card regeneration per frame.
     const collector = []
-    const body = ["model_classic","model_outline"].indexOf(parts[10])>=0 ? modelBody(state,collector)
+    const body = desktopStyle ? modelArtwork(state,collector)
+        : ["model_classic","model_outline"].indexOf(parts[10])>=0 ? modelBody(state,collector)
         : Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state,collector)
         : parts[10].indexOf("notebook_")===0 ? Notebook.body(state,collector)
         : parts[10] === "sketch" ? Sketch.body(state,collector)

@@ -28,7 +28,7 @@ ContentLayoutEditor.qml DesktopWidget.qml DesktopHardwareModel.qml Details.qml F
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
-HardwareGlyph.qml HardwareShapes.js
+HardwareGlyph.qml HardwareShapes.js HardwareCpuModel.js HardwareModelDetails.js
 HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js HardwareNotebook.js HardwareNotebookParts.js HardwareVariants.js
 HardwareFanDesigns.js HardwareFanProfileData.js
 HardwareBoardDesigns.js HardwareBoardProfileData.js

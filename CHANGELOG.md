@@ -1,5 +1,24 @@
 # Changes
 
+## 0.41.0-preview.1 (development candidate)
+
+- Refine CPU model artwork using all seven existing package contours: thin
+  substrate edges, IHS lips, restrained metal finish and specific model marks.
+  Keep all75 available CPU identities and13 styles, with expressions confined
+  to the two existing expressive styles. Added depth/finish remains reference.
+- Separate every model artwork key from the ordinary top-bar key. Reuse exact
+  GPU casing/fan planes and refine reviewed model-specific leaf/hub contours;
+  unknown geometry stays unknown. Compose static and moving art from the same
+  retained descriptors, without a new sampling or animation loop.
+- Let small widgets display complete hardware identities on two lines while
+  reserving separate image, caption and reading regions. Preserve existing
+  device binding, RPM validity, frame choices and fullscreen protection.
+- Clip model-only pen trim around the actual fan apertures without deleting
+  PCB/connector branches. Keep the same retained textures while stopped and
+  moving, so notebook ink does not shift from a separate rasterization path.
+- Source/local candidate only; no installed Windows or live-game acceptance is
+  inferred from software/offscreen previews and tests.
+
 ## 0.40.0-preview.1 (development candidate)
 
 - Add CPU/GPU model widgets with large retained hardware artwork, current

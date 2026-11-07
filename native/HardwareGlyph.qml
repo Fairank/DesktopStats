@@ -25,8 +25,14 @@ Item {
         && (["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(appearance.icon_set)
             || modelMode && ["classic","outline"].includes(appearance.icon_set))
         && root.width > root.height
-    readonly property var fanLayerData: fanMotionEnabled && fanShapeEligible
+    readonly property var fanLayerData: (modelMode || fanMotionEnabled) && fanShapeEligible
         ? Shapes.layers(geometryKey) : null
+    // A large model keeps the same cached base/rotor textures at zero RPM.
+    // Switching between a whole SVG and separately rasterized fractional-size
+    // sprites changed antialiasing visibly on notebook ink. Only transforms
+    // change now; retaining these few small textures creates no idle clock.
+    readonly property bool layeredArtwork: !!((modelMode || fanMotionActive)
+        && fanLayerData && fanLayerData.rotors.length>0)
     readonly property bool windowVisible: root.Window.window !== null
         && root.Window.window.visible && root.Window.window.visibility !== Window.Minimized
     readonly property bool exposed: {
@@ -40,6 +46,12 @@ Item {
     readonly property real artworkUnit: (wideGpu ? Math.max(root.width,root.height) : Math.min(root.width,root.height))/24
     readonly property real artworkLeft: (root.width-artworkUnit*24)/2
     readonly property real artworkTop: (root.height-artworkUnit*24)/2
+    // Large/high-DPI desktop models must not allocate an8K square texture for
+    // a small schematic. Normal widget sizes keep their requested density.
+    function rasterEdge(value,rotor) {
+        const pixels=Math.max(1,Math.ceil(value*Screen.devicePixelRatio))
+        return modelMode?Math.min(rotor?1024:2048,pixels):pixels
+    }
     implicitWidth: 18
     implicitHeight: 18
     Component.onCompleted: glyphReady=true
@@ -58,10 +70,10 @@ Item {
         objectName: "hardwareGlyphImage"
         anchors.fill: parent
         visible: !root.classic
-        source: root.fanMotionActive ? root.fanLayerData.baseSource : root.svgSource
+        source: root.layeredArtwork ? root.fanLayerData.baseSource : root.svgSource
         opacity: root.ink.a
-        sourceSize.width: Math.max(1, Math.ceil((root.wideGpu ? Math.max(root.width,root.height) : root.width) * Screen.devicePixelRatio))
-        sourceSize.height: Math.max(1, Math.ceil((root.wideGpu ? Math.max(root.width,root.height) : root.height) * Screen.devicePixelRatio))
+        sourceSize.width: root.rasterEdge(root.wideGpu?Math.max(root.width,root.height):root.width,false)
+        sourceSize.height: root.rasterEdge(root.wideGpu?Math.max(root.width,root.height):root.height,false)
         fillMode: root.wideGpu ? Image.PreserveAspectCrop : Image.PreserveAspectFit
         asynchronous: false
         cache: true
@@ -72,7 +84,7 @@ Item {
     Loader {
         objectName: "hardwareFanMotionLoader"
         anchors.fill: parent
-        active: root.fanMotionActive
+        active: root.layeredArtwork
         sourceComponent: Item {
             Repeater {
                 model: root.fanLayerData ? root.fanLayerData.rotors : []
@@ -86,15 +98,15 @@ Item {
                     width: modelData.radius*2*root.artworkUnit
                     height: width
                     transformOrigin: Item.Center
-                    rotation: Number.isFinite(root.fanRotation)
+                    rotation: root.fanMotionActive && Number.isFinite(root.fanRotation)
                         ? (((root.fanRotation*(modelData.direction===-1?-1:1))%360)+360)%360 : 0
                     Image {
                         objectName: "hardwareFanRotorImage_"+rotor.index
                         anchors.fill: parent
                         source: rotor.modelData.source
                         opacity: root.ink.a
-                        sourceSize.width: Math.max(1,Math.ceil(rotor.width*Screen.devicePixelRatio))
-                        sourceSize.height: Math.max(1,Math.ceil(rotor.height*Screen.devicePixelRatio))
+                        sourceSize.width: root.rasterEdge(rotor.width,true)
+                        sourceSize.height: root.rasterEdge(rotor.height,true)
                         fillMode: Image.PreserveAspectFit
                         asynchronous: false; cache: true; smooth: true; mipmap: false
                     }

@@ -71,7 +71,9 @@ Item {
         width: area.width || 0; height: area.height || 0
         text: root.snapshot.name || ui.t(root.prefs.kind === "gpu" ? "显卡型号尚未读取" : "处理器型号尚未读取")
         textFormat: Text.PlainText
-        color: ui.muted; font.family: ui.fontFamily; font.pixelSize: 10
+        color: ui.muted; font.family: ui.fontFamily; font.pixelSize: root.width<280?11:12
+        wrapMode: Text.WordWrap
+        maximumLineCount: 2
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight

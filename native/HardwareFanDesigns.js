@@ -33,6 +33,10 @@ function point(angle,radius) {
 }
 
 function contour(p) {
+    if(p.model_detail===true) {
+        var detail=modelContour(p)
+        if(detail)return detail
+    }
     // Sweep is independent of blade pitch: dense 11/13-blade rotors must
     // retain curved vanes instead of collapsing into almost radial spokes.
     if(p.blade_variant==="dispersion")return {sweep:44,lead:.46,trail:.33,root:.30}
@@ -46,6 +50,10 @@ function contour(p) {
 
 function blade(p) {
     var pitch=360/p.blades,hub=Math.max(.45,p.hub_ratio*3*.88),g=contour(p),s=g.sweep
+    if(p.model_detail===true && (p.kind==="blower" || p.shape==="radial"))
+        return "M"+point(-pitch*.18,Math.max(1.15,hub))+"L"+point(-pitch*.25,2.61)
+            +"Q"+point(-pitch*.03,2.72)+" "+point(pitch*.21,2.60)
+            +"L"+point(pitch*.14,Math.max(1.15,hub))+"Z"
     if(p.kind==="blower" || p.shape==="radial")
         return "M"+point(-pitch*.19,Math.max(1.15,hub))+"L"+point(-pitch*.39,2.60)
             +"Q"+point(0,2.72)+" "+point(pitch*.30,2.54)+"L"+point(pitch*.17,Math.max(1.15,hub))+"Z"
@@ -95,6 +103,12 @@ function rotor(p,c) {
         }
         for(var i=0;i<count;i++) {
             out+='<path class="hardware-fan-blade" d="'+(alternating?leaves[i%2]:path)+'" transform="rotate('+(i*360/count)+')" fill="url(#'+paint+')"/>'
+            if(p.model_detail===true && p.kind!=="blower" && p.shape!=="radial") {
+                var shaped=alternating?modelContour(Object.assign({},p,{blade_variant:i%2===0?"dispersion":"traditional"})):contour(p)
+                var edge="M"+point(-shaped.sweep*.18,Math.max(1.24,p.hub_ratio*3+.10))
+                    +"Q"+point(-shaped.sweep*.77,2.06)+" "+point(-shaped.sweep+360/count*shaped.trail*.58,2.53)
+                out+='<path class="hardware-model-leaf-bevel" d="'+edge+'" transform="rotate('+(i*360/count)+')" fill="none" stroke="'+c.ridge+'" stroke-opacity=".42" stroke-width=".045"/>'
+            }
             if(p.shape==="claw") {
                 // The documented surface ridges stay on the leaf, never
                 // become extra blades or a second full-size rotating plane.
@@ -144,4 +158,32 @@ function fan(cx,cy,radius,c,kind) {
         return base+'</g>'
     }
     return base+moving+'</g>'
+}
+
+// Model-only qualitative contours from the already reviewed family studies.
+// These are illustration proportions, never measured blade pitch or CAD.
+// No caller of profile()/rotor()/fan() opts in implicitly: the bar stays exact.
+function modelContour(p) {
+    if(p.blade_variant==="dispersion")return {sweep:41,lead:.55,trail:.31,root:.31}
+    if(p.blade_variant==="traditional")return {sweep:49,lead:.22,trail:.19,root:.16}
+    if(p.technology==="dual_flow_through_blackwell")return {sweep:43,lead:.48,trail:.33,root:.38}
+    if(p.technology==="axial_tech_ada_strix")return {sweep:55,lead:.38,trail:.26,root:.23}
+    if(p.technology==="amd_reference_axial")return {sweep:36,lead:.43,trail:.27,root:.29}
+    if(p.technology==="torx_5")return {sweep:57,lead:.36,trail:.31,root:.25}
+    if(p.technology==="torx_original")return {sweep:46,lead:.34,trail:.25,root:.24}
+    if(p.technology==="icestorm_2_twin_edge")return {sweep:48,lead:.37,trail:.29,root:.26}
+    return null
+}
+
+function modelRotor(profile,details) {
+    var p=Object.assign({},profile,{model_detail:true}),out=rotor(p),hub=p.hub_ratio*3
+    var c=fanPalette(p),silver=p.hub_tone==="silver"
+    if(silver || details && details.machined_hub) {
+        var edge=silver?"#83939e":c.edge
+        out+='<g class="hardware-model-cap-finish"><circle r="'+(hub*.88)+'" fill="none" stroke="'+edge+'" stroke-opacity=".8" stroke-width=".045"/>'
+            +'<path d="M'+point(-68,hub*.73)+'A'+(hub*.73)+' '+(hub*.73)+' 0 0 1 '+point(48,hub*.73)+'" fill="none" stroke="'+(silver?'#edf2f5':c.ridge)+'" stroke-opacity=".6" stroke-width=".055"/></g>'
+    }
+    if(details && details.red_label_edge)
+        out+='<circle class="hardware-model-label-edge" r="'+(hub*.89)+'" fill="none" stroke="#9b4148" stroke-width=".055"/>'
+    return out
 }

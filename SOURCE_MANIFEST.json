@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.40.0-preview.1",
-  "archive_root": "DesktopStats-0.40.0-preview.1-source/",
+  "version": "0.41.0-preview.1",
+  "archive_root": "DesktopStats-0.41.0-preview.1-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed original image/video assets retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 59601,
-      "sha256": "faa9882cb6e6ae426a582d97dbd9c660c20b88b0db1086bfbaf08e2d6ff17715"
+      "bytes": 60845,
+      "sha256": "21b0a2ba5bec40a2c6a446000e518e2bec514247375a19a221a747f55627c0b5"
     },
     {
       "path": "HARDWARE-APPEARANCE.md",
@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 25028,
-      "sha256": "5a815330a0e6bd26408c26963a7f444ed0a242f72051a466f452dd80410c5474"
+      "bytes": 25762,
+      "sha256": "035976846416000562ab0c71715195718d6fd411c63d0599c077fd646f864511"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1494,8 +1494,8 @@
     },
     {
       "path": "native/DesktopHardwareModel.qml",
-      "bytes": 3341,
-      "sha256": "3d0eb7709236a63c6e9a1ef5644812108f499eb924b582076b446863faee38d2"
+      "bytes": 3419,
+      "sha256": "edc0dcde6d972d3503076d2d9428ac9a8e052baf60002f493ef8422bd0e94b64"
     },
     {
       "path": "native/DesktopWidget.qml",
@@ -1558,14 +1558,19 @@
       "sha256": "831d4061ca8f3ce6b9c07b8e05b6214586dae8695a38f87a481b4043aa099ee8"
     },
     {
+      "path": "native/HardwareCpuModel.js",
+      "bytes": 8501,
+      "sha256": "12651fc047108ed5b23747b3d062c0dcb44cbf0eceb2a6e6910de4537ac344a6"
+    },
+    {
       "path": "native/HardwareCpuPackages.js",
       "bytes": 8272,
       "sha256": "1e63484544a31ea0f873852ebc0971941572773314268300992e304c039c7d42"
     },
     {
       "path": "native/HardwareFanDesigns.js",
-      "bytes": 8739,
-      "sha256": "885d6d6c2af2ce030071c49289d5d9ab7b34deabead91021f9efc1736e4521d9"
+      "bytes": 11541,
+      "sha256": "7d6e511b1b72858f6afeaaa94b71b2919fc9098388d85b68504940141eacb977"
     },
     {
       "path": "native/HardwareFanProfileData.js",
@@ -1574,8 +1579,8 @@
     },
     {
       "path": "native/HardwareGlyph.qml",
-      "bytes": 5397,
-      "sha256": "e87451da4e526881d3388c37042664a19f62239357b952010e09be7ded6c0a99"
+      "bytes": 6100,
+      "sha256": "1665b8c5d0e50c26a716bdadb147c78db5263599b4d421ecb3fad47523a94224"
     },
     {
       "path": "native/HardwareMemoryShapes.js",
@@ -1586,6 +1591,11 @@
       "path": "native/HardwareMiniature.js",
       "bytes": 6247,
       "sha256": "9397f43dae617cc3321978cf4e7623e33c9dcdc88bf9d69c249d2bff9dcf8fed"
+    },
+    {
+      "path": "native/HardwareModelDetails.js",
+      "bytes": 11390,
+      "sha256": "b8f0143d751b2434688aace731d7dfa5615bbb059e976d02440771545ee15bae"
     },
     {
       "path": "native/HardwareNotebook.js",
@@ -1639,8 +1649,8 @@
     },
     {
       "path": "native/HardwareShapes.js",
-      "bytes": 21200,
-      "sha256": "91af32a914fdee9c3a62fe77db7d1f22acabf2bf788b0a93cfbb0ad367f3199d"
+      "bytes": 23013,
+      "sha256": "fda94925113e0781d4679995b0ac02a71d0b92afa917eac5536a2103ae459067"
     },
     {
       "path": "native/HardwareSketch.js",
@@ -1930,7 +1940,7 @@
     {
       "path": "product_version.py",
       "bytes": 29,
-      "sha256": "b98eb8d9698ab81afe61241258931f20cdeed190028220a73ad2311a3b29ad82"
+      "sha256": "d5731a60b583da10e4dfc7262316ee2c8a14b17ae8fed9d781e3d94e9120987a"
     },
     {
       "path": "profile_paths.py",
@@ -1964,8 +1974,8 @@
     },
     {
       "path": "responsive_layout.py",
-      "bytes": 17161,
-      "sha256": "e16c56583c5074c7bcb1409071d2292d8de7b0749fede1f7023da7ec6bd0a0b1"
+      "bytes": 17231,
+      "sha256": "92df93f975645c5cb662db0bc045977a946978a06d96abc0770b3ca111ad279b"
     },
     {
       "path": "sensor_diagnostics.py",
@@ -2278,6 +2288,11 @@
       "sha256": "eca4620143cfccce3fa5c400ed53e14f59fc9391cd164b7ecf2cff5584b1049d"
     },
     {
+      "path": "tests/test_cpu_model_art041.py",
+      "bytes": 8075,
+      "sha256": "f6dd76a278d96b9091c3a3ed69ed092b02d00109c29290de5ba1c06a6b4e3a81"
+    },
+    {
       "path": "tests/test_cpu_temperature.py",
       "bytes": 7402,
       "sha256": "5f0d609b1a7bcc7404c4d210139e913f96ec63d8b5b64ef62ac9c19c1243eb3a"
@@ -2368,6 +2383,11 @@
       "sha256": "84784c07b5f4795037a16214ab56388013381b9271c9cdf4e3ba6994531412f8"
     },
     {
+      "path": "tests/test_gpu_model_art041.py",
+      "bytes": 15803,
+      "sha256": "75e92016433e5ed9c28c37421549f5a048d37fbe174ebad16379ccad300d4d7d"
+    },
+    {
       "path": "tests/test_hardware_appearance.py",
       "bytes": 19623,
       "sha256": "54f6b6eff6431b64c0451b0c7982fde56b9e5ffdd2549e82d67cfc1d0135d573"
@@ -2401,6 +2421,16 @@
       "path": "tests/test_hardware_icon_preferences.py",
       "bytes": 13464,
       "sha256": "11b3640f0000aa75323dd960a4fe4a8e402d85fa8f5743dba2be52feefba8c40"
+    },
+    {
+      "path": "tests/test_hardware_model_layout041.py",
+      "bytes": 4970,
+      "sha256": "49ee061755452b5e6c4be801c9b54cb85a1cdc7d05c697edb0bd2d6e221a526d"
+    },
+    {
+      "path": "tests/test_hardware_model_motion041.py",
+      "bytes": 12512,
+      "sha256": "f0fb97f74eaec6311a7ae0698002525ece12a363a7f5a78011a2c403810e4ba1"
     },
     {
       "path": "tests/test_hardware_model_selection.py",
@@ -3019,8 +3049,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 23321,
-      "sha256": "aa7e5e9a6f103349adbc633ee2cdcd31664e69fbe3f55d7703b3216449823833"
+      "bytes": 23489,
+      "sha256": "81b050c3204e18632aacbcd6dd989d8115f27d75116e529273a91fcb239d4dfc"
     },
     {
       "path": "tools/build_collector.py",
@@ -3064,8 +3094,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 22394,
-      "sha256": "01acdc8066f4b070dd1bb2310943c0d910403a8cb87612665e4a9226d080d0a8"
+      "bytes": 22438,
+      "sha256": "a0a188e04046d4ff444d35a9773ae853a3eefe5c978a143b1f01db1992b4edce"
     },
     {
       "path": "tools/fetch_qt_licenses.py",

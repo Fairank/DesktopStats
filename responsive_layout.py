@@ -65,12 +65,13 @@ def hardware_model_geometry(width, height, metrics, prefs):
         raise ResponsiveLayoutError("Hardware models need at least 220 × 220 DIP and 2–3 readings")
     inset = max(14, min(24, width * .065))
     title = Box(inset, 12, width - 2 * inset, 20) if _title(prefs) else None
-    top = 39 if title else 14
-    band_height = max(58, min(76, height * .25))
-    bottom = height - 12
+    top = 39 if title else 10
+    band_height = max(52, min(68, height * .225))
+    bottom = height - 8
     body = Box(inset, top, width - 2 * inset, bottom - top)
     band_top = bottom - band_height
-    art_bottom = band_top - 27
+    caption_height = 32
+    art_bottom = band_top - caption_height - 12
     if prefs["kind"] == "cpu":
         edge = min(body.width * .78, art_bottom - top)
         image = Box((width - edge) / 2, top + (art_bottom - top - edge) / 2, edge, edge)
@@ -83,7 +84,7 @@ def hardware_model_geometry(width, height, metrics, prefs):
     slot_width = (body.width - gap * (len(metrics) - 1)) / len(metrics)
     readings = tuple(Box(inset + i * (slot_width + gap), band_top, slot_width, band_height)
                      for i in range(len(metrics)))
-    caption = Box(inset, band_top - 23, body.width, 17)
+    caption = Box(inset, band_top - caption_height - 6, body.width, caption_height)
     return dict(body=body, title=title, image=image, caption=caption, readings=readings)
 
 
