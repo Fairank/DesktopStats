@@ -7,7 +7,78 @@
 可自由组合的原生 Windows 顶部状态栏与桌面监控组件。可只保留上方栏，
 也可按需添加卡片、横条或竖条；悬停查看趋势，点击固定硬件详情。
 
-**0.43.0-preview.1 · 开发候选 · Windows x64 · 仅限许可规定的非商业用途**
+**0.44.0-preview.1 · 开发候选 · Windows x64 · 仅限许可规定的非商业用途**
+
+本轮把水冷的冷排和风扇拆成独立部件。24款独立冷排来自 CORSAIR、EK、Alphacool、XSPC、
+Hardware Labs、Thermaltake、Watercool、Aqua Computer；按具体产品保留尺寸、厚度、端箱与已观察接口差别。
+主冷排、第二冷排可分别选型号与风扇，可用单面、夹心或无扇检视；每把风扇有独立点选／风格身份。
+一体式水冷保留原厂冷排。尺寸或框架不合时不强装；标称孔距差异提示安装间隙待核，不据此断言实物不兼容。未使用的旧风扇设置不会阻断无扇检视。
+末端安装孔、端口喉口是实际开口；折边轨、端箱接缝、扁管与折鳍片分别构建，airplex采用对应铝叠片／铜圆管参考。
+未核的内部管数、鳍片数量、精确端口位置继续明确标记；不能把可见细节当成厂商CAD。
+水箱／泵／冷排的水温、流量和独立RPM未绑定时显示不可用，不再借CPU／CPU_FAN作部件读数。
+
+本体当前502个具名产品＋1套参考组合，可选CPU包另72款，共574个产品记录；没有把风格或参考组合重复计算成产品。
+预览文件只保留在对应源码／文档中，运行资源不再重复带一份文档图；这降低安装包冗余，不表示整款软件RAM占用降幅。
+
+![24款独立冷排原版图鉴；未知接口明确标注](assets/showcase/radiators-atlas044.png)
+
+![同一冷排与独立风扇的六版结构；合成转速参考](assets/showcase/liquid-six044.gif)
+
+**全篇需求已经逐项列在下表，尚未全部完成。** 尤其是全品牌全系列、完整水冷配件库、
+PCBS级细节、非CPU扩展包、磁盘／网络Top5与新版原生验收仍有明确缺口；不把24款冷排当作这些目标已完成。
+
+<!-- REQUIREMENTS:BEGIN -->
+## 全文需求逐项核对与未完成清单
+
+核对日期：2026-11-08。重复要求已合并为 29 项，核心约束和后续补充全部保留。
+**当前没有达到“全部做完”的交付条件。** 源码存在、离屏测试通过、旧版实测与当前新版原生验收分别记录；不能用候选包生成或旧版温度读数给新版打勾。
+用户要求逐项核对、报告问题与缺项；未完成项继续保留，不因本轮上传或文档更新而关闭。
+游戏期间只做代码、后台和离屏检查，不安装、不重启 Stats，不弹出系统授权或可见测试窗。需要这些操作的验收等待之后明确允许的桌面时段。
+
+| 编号 | 原始重点／验收要求 | 当前状态 | 实现与证据 | 问题、缺项或下一步 |
+| --- | --- | --- | --- | --- |
+| 1 | 保留原顶部栏；悬停/点击看历史趋势；可只留顶部栏。 | 已实现；新版原生待验 | 顶部栏、悬停详情、点击固定与历史存储路径均保留，并有专门测试。<br>[top_bar_runtime.py](top_bar_runtime.py) / [history_store.py](history_store.py) | 尚未在本机安装0.44验证真实交互；现有测试文件不等于本轮全部通过。 |
+| 2 | Stats优先屏幕2，持久化所选显示器且适配显示器变化。 | 已实现；新版原生待验 | 存在按稳定显示器身份选择、保存和路由窗口的实现，本次不读取实际显示器或用户配置。<br>[top_bar_config.py](top_bar_config.py) / [top_bar_runtime.py](top_bar_runtime.py) | 0.44尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。 |
+| 3 | 游戏不能覆盖；同屏前台全屏、锁屏和未知桌面状态须隐藏并停动效，安全后恢复。 | 已实现；新版原生待验 | 顶部栏、详情、模型小组件和整机窗口已有按屏幕全屏与安全桌面状态的关闭式门禁。<br>[fullscreen_guard.py](fullscreen_guard.py) / [top_bar_runtime.py](top_bar_runtime.py) | 0.44真实游戏前台、跨屏、锁屏及桌面恢复尚未验收；继续遵守当前不重启要求。 |
+| 4 | 排查自行退出、空白栏，恢复并防止再次意外退出。 | 部分完成 | 已实现Explorer替换恢复、初始化/关闭防护和安装包自检。<br>[top_bar_runtime.py](top_bar_runtime.py) / [native_runtime.py](native_runtime.py) | Explorer恢复不等于整个应用进程崩溃后自动恢复；新版长时间无崩溃仍待实际运行。 |
+| 5 | CPU温度在每次启动Stats时通过一次授权恢复；只读会话桥接随Stats退出，不开机启动。 | 已实现；新版原生待验 | 有启动恢复开关、一次会话只授权一次、游戏延后、桥接文件校验与跟随父进程退出。<br>[cpu_temperature.py](cpu_temperature.py) / [cpu_temperature_launcher.py](cpu_temperature_launcher.py) | 未对0.44重启或提权，未取得新版真实温度；0.36温度不作为0.44验收。<br>自动恢复默认需用户开启且依赖支持来源；无法保证所有电脑都有CPU温度。 |
+| 6 | 顶部栏、设置、详情都应恢复真实磨砂，并保留颜色底色与连续透明度。 | 已实现；新版原生待验 | 三类窗口有原生材质、宿主桥接和生命周期实现，离屏测试只能验证契约。<br>[native_glass.py](native_glass.py) / [material_policy.py](material_policy.py) | 顶部栏、设置、详情三个真实Windows窗口仍待0.44桌面验收；不能以离屏底色冒充真实磨砂。 |
+| 7 | 持续优化CPU/内存/GPU负担，并最终报告实际控制到多少。 | 部分完成 | 已有设置/桌面组件延后加载、按需几何、共享时钟、按需Top5和基础图层裁切。<br>[native_runtime.py](native_runtime.py) / [HardwareGlyph.qml](native/HardwareGlyph.qml) | 没有0.44安装版静置或游戏占用实测值。约65MiB隔离设置加载差值、39.85%基础图层像素减少均有范围，不能写成整机常驻降幅。<br>打开3D与仅顶部栏的负担不同，不能承诺通用占用上限。<br>0.43的39.85%仅为典型GPU基础图层像素预算；新增详细冷排是按需静态几何，不能据此宣称整机内存减少。 |
+| 8 | 每类硬件显示消耗最多的前5个软件，按需采集以降低占用。 | 部分完成 | 实现CPU、内存、GPU与专用显存的临时按需进程排行。<br>[process_usage.py](process_usage.py) / [process_gpu.py](process_gpu.py) | KINDS仅cpu/memory/gpu/vram；磁盘和网络进程Top5尚未实现。<br>用户曾为恢复顶部栏暂缓此项，不能据此把最初每硬件排行请求标为全部完成。<br>温度／转速等物理读数不能直接按进程归因，不编造其Top5。 |
+| 9 | 原版不得加笑脸；保留可爱/手绘/线条等六版编号及所有13保存选项。 保留上传版12的布局／动效与原图标，新方案不能替换掉旧方案。 | 已实现；保留离屏证据 | 六套固定展示方案与13个保存值共存；原版无表情，可爱笑脸/笑脸手绘独立。<br>[top_bar_config.py](top_bar_config.py) / [HardwareShapes.js](native/HardwareShapes.js) | 固定展示六套不等于运行时只剩六项；额外蓝墨手账编号7与早期六版沿革需要统一说明。 |
+| 10 | 每套硬件数量、型号与结构跟原版一致，不能不同风格换壳/减配。 | 已实现；未核结构仍是参考 | 全部风格共用型号、外壳与风扇数据；混搭只调表现，不改物理网格。<br>[HardwareModelDetails.js](native/HardwareModelDetails.js) / [HardwareShapes.js](native/HardwareShapes.js) | 目录和风扇数量相同，不代表全部视觉特征已精确复核；装饰、PCB与部分内部结构仍为参考。 |
+| 11 | 风扇每版能转；必须按真实对应RPM调整，过期/未知/零速停止；风扇设计须符合型号。 | 部分完成；未知测速保持静止 | GPU叶型和RPM有型号/时效门禁，沿用同一时钟；Fuma只表达有来源的相对反向；演示模式单独标记。<br>[hardware_fan_profiles.py](hardware_fan_profiles.py) / [top_bar_feedback.py](top_bar_feedback.py) | 0.43来源审计仍有20个GPU叶型待核。机箱、冷排和电源风扇测速并非普遍可映射，未知必须静止。<br>CPU_FAN可能是水泵RPM，不能拿来驱动所有冷排风扇。 |
+| 12 | 全部显卡品牌/系列/年代、丐版及旗舰非公、10系列及更早、AMD和Intel都要覆盖并保真。 | 部分完成 | 当前147款显卡含92款NVIDIA、46款AMD、9款Intel，涵盖一部分旧卡、公版和非公型号。<br>[hardware_variants.py](hardware_variants.py) / [hardware_variant_art.py](hardware_variant_art.py) | 仍是有限目录，未涵盖所有市售品牌/系列/版本；20款叶型待核，隐藏PCB、电路和接口次序没有全面精确复刻。 |
+| 13 | 不同CPU/内存品牌与型号结构也要分开，所有风格均覆盖。 | 部分完成 | 基础3款CPU、可选72款CPU与28个内存型号有共享目录；同封装CPU诚实共用结构。<br>[cpu_catalog.py](cpu_catalog.py) / [cpu_package_runtime.py](cpu_package_runtime.py) | 尚未覆盖全部CPU/内存品牌型号；75个CPU产品共享7类封装，未核封装尺寸、触点位置保留参考。 |
+| 14 | 自动识别具体品牌/系列与实物外观，不能仅靠通用GPU名称误选非公版本。 | 部分完成 | 有型号置信度、精确匹配与手动覆盖，不确定时明确回退。<br>[hardware_appearance.py](hardware_appearance.py) / [hardware_variants.py](hardware_variants.py) | 通用RTX5090驱动名称不足以区分品牌非公；DIY机箱、散热器和电源通常无可识别固件型号，仍需手选参考。 |
+| 15 | CPU/GPU图标要够大，布局清晰可爱，去掉角落可见缩放边角，支持有框/无框。 | 已实现；新版原生待验 | 已有大图CPU/GPU模板、共享响应式布局、真正QML动态图层、读数和每组件框架开关。<br>[widget_catalog.py](widget_catalog.py) / [responsive_layout.py](responsive_layout.py) | 原生透明命中、屏2缩放和实际尺寸仍待0.44验收；布局测试不能单独证明美术细节达到用户审美要求。 |
+| 16 | CPU效果/GPU叶轮是动态图标；只改变换，不添加轮询，隐藏/锁屏/游戏时停止。 | 已实现；新版原生待验 | MetricIcon/HardwareGlyph沿用已有时钟与数据时效，Runtime控制modelMotionAllowed。<br>[MetricIcon.qml](native/MetricIcon.qml) / [HardwareGlyph.qml](native/HardwareGlyph.qml) | 0.44真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。 |
+| 17 | 桌面可旋转缩放3D机箱加硬件；点选配件查看状态，有框或无框。 | 已实现；新版原生待验 | 已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。<br>[assembly_desktop_widget.py](assembly_desktop_widget.py) / [assembly_window.py](assembly_window.py) | 参考配件不能借其他硬件的实时读数；机箱/电源/存储等不都有独立实时状态。<br>关闭事件返回时viewport._scene等引用可能保留至QObject实际销毁；不能声称瞬间全部释放。 |
+| 18 | 机箱要多、各品牌系列结构像实物，支持风格切换并自动匹配。 | 部分完成 | 已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。<br>[chassis_catalog.py](chassis_catalog.py) / [assembly_case_exteriors.py](assembly_case_exteriors.py) | 尚未覆盖全部机箱，当前没有已核零售机箱固件映射；很多内部安装位置仍为参考。 |
+| 19 | 主板应像，插槽、PCB、接口与位置要细致。 | 部分完成 | 已有16块主板及有来源的插槽、针座与接口空腔，新接点保留原锚点。<br>[assembly_motherboard.py](assembly_motherboard.py) / [motherboard_catalog.py](motherboard_catalog.py) | 仅16块主板，隐藏走线、IC排布和部分精确接口位置仍是示意，不等于制造CAD或任意配件都相容。 |
+| 20 | 散热器/风扇按品牌系列真实细化，风冷、水冷、机箱风扇全部风格都有。 | 部分完成 | 现有66套散热方案与70个风扇条目，包含被动、C形、双塔、双层下压、LCD等结构。<br>[cooling_catalog.py](cooling_catalog.py) / [assembly_cooling.py](assembly_cooling.py) | 未覆盖每品牌系列；部分叶型、绝对方向、孔位、细鳍片及间隙未核，LCD留空而非伪造实时画面。 |
+| 21 | 电源、存储、扩展卡等装机模拟器有的品类都要有，型号/外形也需逐类完善。 | 部分完成 | 现有21电源、29存储、3扩展卡；新增24存储覆盖多种M.2长度、原厂HS、SATA与HDD。<br>[component_catalog.py](component_catalog.py) / [component_storage043.py](component_storage043.py) | 未覆盖所有产品；存储IC布局、电源内部插座等仍有示意字段，其他装机模拟器品类也不完整。 |
+| 22 | 全部配件可自由换型号并混搭所有风格装入同机箱。 | 已实现；兼容检查不完整 | 有逐型号选择、逐部件风格覆盖与安装拒绝/提示，几何保持一致。<br>[assembly_config.py](assembly_config.py) / [assembly_parts.py](assembly_parts.py) | 自由选择不等于任意实际组合必定可装；长度、槽位、键位、厚度及未知间隙必须保留诊断。 |
+| 23 | 每品牌水冷；冷排与风扇可独立选择，支持无扇/单面/夹心并保持AIO原厂边界。 | 已集成；验收范围见报告 | 24款独立冷排／8品牌已接入；主、第二冷排和风扇分别选择；单面、夹心、无扇布局，独立点选和混搭风格。未知口不补造接头或管路。<br>[liquid_cooling_catalog044.py](liquid_cooling_catalog044.py) / [assembly_radiator044.py](assembly_radiator044.py) | 8品牌之外及同品牌大量系列／尺寸仍缺；不是全品牌水冷库。<br>6款口位全未知、6款仅部分已观察，全部端口精确坐标未核；自定义回路其它零售配件目录尚缺。 |
+| 24 | 不同风格提供特效/灯区，固定白灯不变彩灯，不新增未知RGB。 | 已实现；保留离屏证据 | 已有灯区静态配色/熄灯，特效有限时；Infinity轴心灯环漏分类已向Root报告并确认修复。<br>[assembly_lighting.py](assembly_lighting.py) / [assembly_style.py](assembly_style.py) | 不是真实灯控、RGB时间轴或全局泛光；只处理已有模型灯区。沿用插画模式保留原画法，指定配色时固定白灯不变彩灯。<br>目前是已有灯区的静态预览和风格短时效果；尚无逐设备灯控／RGB时序仿真。 |
+| 25 | GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。 | 部分完成 | CPU Intel/AMD数据包可导入移除，具有限额/哈希/结构校验，按需读入；SVG/HTML图鉴为独立预览产物。<br>[hardware_packs.py](hardware_packs.py) / [cpu_package_runtime.py](cpu_package_runtime.py) | 可导入数据包格式目前只CPU；其它类别仍在本体，SVG图集和HTML查看器不是运行时扩展模型包。 |
+| 26 | 上传GitHub并标版权，原创作品禁止商业使用盈利，保留应有第三方例外。 | 原创非商用；保留既有许可例外 | PolyForm非商用范围、原创插画/3D说明、来源及第三方/既有授权例外均有文档。<br>[LICENSE](LICENSE) / [LICENSING.md](LICENSING.md) | 不能撤销MIT/LGPL等已有许可，不能技术阻止复制；商标权未获授权，本次未做法律审查。 |
+| 27 | 合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。 | PR#1已合并；新版发布／安装待验 | GitHub PR#1已于2026-11-05合并（远程核对）；0.43源码分支已上传。0.44仍以本轮检查／候选状态推进，当前安装不替换。<br>[product_version.py](product_version.py) / [export_source.py](tools/export_source.py) | 当前明确禁止重启优先于之前安装请求，原生验收保持待办。 |
+| 28 | 品类、覆盖与真实细节达到并超过Steam装机模拟器1/2；高标准慢慢打磨全部细节。 | 尚未达到 | 现有0.43文档统计550产品，本轮新增24冷排；目录数不等于独立高精度外壳数。<br>[HARDWARE_COVERAGE.md](docs/HARDWARE_COVERAGE.md) / [ASSEMBLY_QUALITY.md](docs/ASSEMBLY_QUALITY.md) | 即便暂按550+24=574，也未达到PCBS2公开1200+的数值门槛，而且口径不完全可比。<br>没有覆盖/精度基准证明达到或超过PCBS1/2；品类、真实细节与主观视觉验收仍有大量缺口。 |
+| 29 | 全文所有重点写入README；全部完成后逐一核对并汇报问题和缺项。 | 已逐项核对；项目仍未全部完成 | 本README内嵌全部29项需求与验收状态，另有结构化清单和一致性检查；问题与缺项不隐藏。<br>[README.md](README.md) / [export_requirements.py](tools/export_requirements.py) | 其余未完成需求必须继续保留；本表核对完成不表示全部产品功能交付完成。 |
+
+**硬件覆盖与质量未完成项：** 全品牌全系列、完整旧代非公显卡、全部机箱／主板／散热器仍未覆盖；
+部分显卡叶型／独立 RPM、非 CPU 运行时扩展包、磁盘与网络 Top5、逐品牌零售冷头／泵／水箱／接头目录仍缺。
+现有冷排、机箱与硬件都保留未核孔位、内部 PCB、细小封装或安装间隙标记。不得把“有这个型号”写成“所有细节已核”。
+**原生验收未完成项：** 新版重启后的 CPU 温度授权恢复、顶部栏／设置／详情真实磨砂、屏幕二定位、游戏隐藏与恢复、关闭资源释放及整款程序 CPU／RAM／GPU 占用。
+具体源码、测试路径和逐项缺口以 [结构化需求清单](docs/REQUIREMENTS.json) 为准；逐产品进度见 [覆盖清单](docs/ASSEMBLY_CATALOG.json)。
+<!-- REQUIREMENTS:END -->
+
+## 0.43 六版演示与已保留功能
+
+以下保留上一候选的实际CPU／GPU离屏动效和参考整机预览。0.44的独立冷排与新结构另外提供新预览，
+不把旧整机截图当作新版原生Windows验收。
+
 
 本轮完整展示并保留 **六套编号外观**：**1 原版、2 可爱笑脸、3 彩色手绘、4 纯线条、
 5 奶油贴纸、6 拼色剪纸**。原版没有笑脸；其它七套旧选项继续保留。

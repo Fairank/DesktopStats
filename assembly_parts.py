@@ -22,6 +22,7 @@ def _gpu_rows():
 def choices(translate=lambda text:text):
     from motherboard_catalog import choices as boards,get_model as get_board
     from cooling_catalog import choices_coolers,choices_fans
+    from liquid_cooling_catalog044 import records as radiator_records
     from component_catalog import choices as components,get_component
     from hardware_appearance import CATALOG,BRANDS
     from cpu_package_runtime import reference_choices
@@ -33,6 +34,11 @@ def choices(translate=lambda text:text):
         boards=empty('按系统主板识别')+[dict(row,label=row['label']+(' · '+translate('外观待核实') if (get_board(row['id']) or {}).get('finish_status')!='photo_reviewed' else '')) for row in boards()],
         coolers=empty('未选择散热器')+list(choices_coolers()),
         fans=empty('不放置风扇')+list(choices_fans()),
+        radiators=empty('沿用参考冷排')+[dict(id=row['id'],label=row['label'],brand=row['brand'],fan_size_mm=row['fan_size_mm'],fan_count=row['fan_count'],fan_mount_pitch_mm=row.get('fan_mount_pitch_mm'),
+            fan_mount_pitch_verified=row.get('fan_mount_pitch_verified',False)) for row in radiator_records()],
+        radiator_fans=empty('沿用原配／参考风扇')+list(choices_fans()),
+        radiator_layouts=[dict(id=key,label=translate(label)) for key,label in
+            (('single','单面风扇'),('push_pull','双面夹心'),('none','不装风扇（结构检视）'))],
         psus=empty('未选择电源')+list(components('psu')),
         storage=empty('不放置存储设备')+[dict(row,label=row['label']+(' · '+translate('外观待核实') if (get_component(row['id']) or {}).get('appearance_unverified') else '')) for row in components('storage')],
         expansion=empty('不放置扩展卡')+list(components('expansion')),
@@ -46,7 +52,9 @@ def choices(translate=lambda text:text):
 def selected_parts(options):
     """Only explicit chosen IDs; unknown parts are not inferred from a board."""
     return dict(cooling=dict(cpu_cooler=options['cooler_model'] or 'none',gpu_waterblock=options['gpu_waterblock'],
-        radiator_mount=options['cooler_mount'],case_fans=copy.deepcopy(options['case_fans'])),
+        radiator_mount=options['cooler_mount'],case_fans=copy.deepcopy(options['case_fans']),
+        **{key:options[key] for key in ('radiator_model','radiator_fan_model','radiator_fan_layout',
+           'secondary_radiator_model','secondary_radiator_fan_model','secondary_radiator_fan_layout')}),
         auxiliary=dict(psu=dict(model_id=options['psu_model']),storage=copy.deepcopy(options['storage']),
             expansion_cards=copy.deepcopy(options['expansion_cards']),
             cables_enabled=options['cables_enabled'],cable_color=CABLE_COLORS[options['cable_color']]))
@@ -58,7 +66,9 @@ def reference_preset(options,kind):
     result=validate_assembly(options)
     cooler={'air':'noctua-nh-u12a','aio':'arctic-liquid-freezer-iii-360',
             'loop':'custom-loop-360-reference'}[kind]
-    result.update(case_model='corsair-5000d-airflow' if kind=='air' else 'hyte-y70',
+    result.update(radiator_model='',radiator_fan_model='',radiator_fan_layout='single',
+        secondary_radiator_model='',secondary_radiator_fan_model='',secondary_radiator_fan_layout='single',
+        case_model='corsair-5000d-airflow' if kind=='air' else 'hyte-y70',
         cooler_model=cooler,cooler_mount='top',gpu_waterblock=kind=='loop',
         psu_model='corsair-rm1000x-2024',
         storage=[dict(model_id='samsung-990-pro-2tb',count=1)],
@@ -87,6 +97,12 @@ def fit_messages(spec,metadata):
         'no_expansion_slot':'所选扩展卡没有可用插槽。',
         'expansion_slot_obstructed':'所选扩展卡没有可用插槽。',
         'low_profile_bracket_required':'机箱仅支持半高扩展卡。',
+         'unknown_radiator_model':'所选冷排型号尚未收录，未强行替换。',
+        'unknown_radiator_fan_model':'所选冷排风扇尚未收录。',
+         'radiator_fan_size_mismatch':'风扇尺寸与冷排安装规格不同。',
+        'radiator_fan_mount_requires_review':'圆框或无框风扇的冷排安装方式尚未核实，未强行装入。',
+        'radiator_fan_mount_pattern_mismatch':'风扇与冷排的已核孔距不同，未强行装入。',
+        'aio_radiator_is_fixed':'一体式水冷保留原厂冷排；独立冷排用于自定义回路。',
         'no_m2_slot':'所选 M.2 数量超出已核插槽。',
         'no_supported_m2_length':'所选 M.2 长度没有已核可用安装位。',
     }
@@ -100,6 +116,10 @@ def fit_messages(spec,metadata):
             result.append(reasons.get(row.get('reason'),'部分自选配件未能放入当前参考装机。'))
     if metadata.get('attachments_outside_reference'):
         result.append('部分配件超出机箱参考外形，请检查安装位置。')
+    if metadata.get('cooling',{}).get('mounting_issues'):
+        result.append('风扇标称孔距与冷排不同，安装间隙待核。')
+    if metadata.get('cooling',{}).get('connection_issues'):
+        result.append('部分冷排接口位置尚未核实，对应管路未强行连接。')
     if metadata.get('auxiliary',{}).get('omitted_routes'):
         result.append('部分线缆缺少对应接口或可用路线，未强行连接。')
     for row in spec.get('checks',()):

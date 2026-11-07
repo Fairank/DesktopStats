@@ -148,7 +148,7 @@ class CoolingGeometryTests(unittest.TestCase):
 
     def test_custom_loop_has_real_categories_and_no_gpu_block(self):
         meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':'custom-loop-360-reference'}},anchors=ANCHORS)
-        self.assertEqual({p['kind'] for p in meta['parts']},{'radiator','pump_reservoir','cpu_waterblock'})
+        self.assertEqual({p['kind'] for p in meta['parts']},{'radiator','radiator_fan','pump_reservoir','cpu_waterblock'})
         self.assertTrue(any('liquid-tubes' in m.name for m in meshes));self.assertTrue(any('d5-pump' in m.name for m in meshes))
         self.assertFalse(any(m.component=='gpu' or 'gpu-block' in m.name for m in meshes))
 
@@ -219,7 +219,7 @@ class CoolingGeometryTests(unittest.TestCase):
         self.assertAlmostEqual(min(v+m.position[0] for m in frames for v in m.vertices[0::6]),83.8)
         self.assertFalse(meta['mount_plane_sources']['side']['dimensions_verified'])
         meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':'arctic-liquid-freezer-iii-360','radiator_mount':'side'}},anchors=anchors)
-        rails=[m for m in meshes if m.name=='cooler-radiator-rails']
+        rails=[m for m in meshes if m.name=='cooler-radiator044-folded-rails']
         self.assertAlmostEqual(max(v+m.position[0] for m in rails for v in m.vertices[0::6]),108.8)
         self.assertTrue(all(f['position'][0]<108.8-38 for f in meta['fans'] if f['role']=='radiator'))
 

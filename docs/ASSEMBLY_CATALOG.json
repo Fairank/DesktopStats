@@ -6138,7 +6138,8 @@
       "series": "ARCTIC P12 PWM",
       "source_urls": [
         "https://support.arctic.de/en/p12-pwm/docs",
-        "https://www.arctic.de/media/8c/5d/bd/1693305992/Spec_Sheet_P12_PWM_EN.pdf"
+        "https://www.arctic.de/media/8c/5d/bd/1693305992/Spec_Sheet_P12_PWM_EN.pdf",
+        "https://support.arctic.de/products/p12-pwm/techdocs/P12%20Series%20-%202D%20Drawing.pdf"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -6883,7 +6884,8 @@
       "rotation_direction_verified": false,
       "series": "Noctua NF-A14x25 G2",
       "source_urls": [
-        "https://cdn.noctua.at/media/noctua_nf_a14x25_g2_pwm_infosheet_en_web.pdf?download=true"
+        "https://cdn.noctua.at/media/noctua_nf_a14x25_g2_pwm_infosheet_en_web.pdf?download=true",
+        "https://www.noctua.at/en/products/nf-a14x25-g2-pwm/specifications"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -6923,7 +6925,8 @@
       "rotation_direction_verified": false,
       "series": "Noctua NF-A15 PWM",
       "source_urls": [
-        "https://noctua.at/pub/media/blfa_files/infosheet/noctua_nh_d15_datasheet_en_web_4.pdf"
+        "https://noctua.at/pub/media/blfa_files/infosheet/noctua_nh_d15_datasheet_en_web_4.pdf",
+        "https://www.noctua.at/en/products/nf-a15-pwm"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -11604,6 +11607,718 @@
       "telemetry": "not_bound_to_installed_sensor"
     },
     {
+      "brand": "Alphacool",
+      "dimensions_mm": {
+        "length": 394.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Alphacool NexXxoS ST30 V.2 360",
+      "model_id": "alphacool-st30-v2-360",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "NexXxoS ST30 V.2",
+      "source_urls": [
+        "https://www.alphacool.com/download/ENG_1015507_NexXxoS_V2_ST30_360.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Alphacool",
+      "dimensions_mm": {
+        "length": 397,
+        "thickness": 60,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Alphacool NexXxoS UT60 360 · Full Copper",
+      "model_id": "alphacool-ut60-360",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 6,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "NexXxoS UT60",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_14174_Alphacool_NexXxoS_UT60_Full_Copper_360mm_Radiator_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Alphacool",
+      "dimensions_mm": {
+        "length": 316.5,
+        "thickness": 45.5,
+        "width": 143
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Alphacool NexXxoS XT45 V.2 280",
+      "model_id": "alphacool-xt45-v2-280",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "NexXxoS XT45 V.2",
+      "source_urls": [
+        "https://www.alphacool.com/download/ENG_1015516_NexXxoS_V2_XT45_280.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Aqua Computer",
+      "dimensions_mm": {
+        "length": 280,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Aqua Computer airplex radical 2/240 · aluminium fins",
+      "model_id": "aquacomputer-airplex-radical2-240",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "airplex radical 2",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Wasserkuehlung/Radiatoren-Zub/airplex-radical/airplex-radical-2-240-Alu-Lamellen%3A%3A3332.html",
+        "https://shop.aquacomputer.de/images/product_images/popup_images/33703_2.jpg"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Aqua Computer",
+      "dimensions_mm": {
+        "length": 400,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Aqua Computer airplex radical 2/360 · aluminium fins",
+      "model_id": "aquacomputer-airplex-radical2-360",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "airplex radical 2",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Wasserkuehlung/Radiatoren-Zub/airplex-radical/airplex-radical-2-360-Alu-Lamellen%3A%3A3219.html",
+        "https://shop.aquacomputer.de/images/product_images/popup_images/33707_2.jpg"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Aqua Computer",
+      "dimensions_mm": {
+        "length": 460,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Aqua Computer airplex radical 2/420 · aluminium fins",
+      "model_id": "aquacomputer-airplex-radical2-420",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "airplex radical 2",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Wasserkuehlung/Radiatoren-Zub/airplex-radical/airplex-radical-2-420-Alu-Lamellen%3A%3A3337.html",
+        "https://shop.aquacomputer.de/images/product_images/popup_images/33709_2.jpg"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "CORSAIR",
+      "dimensions_mm": {
+        "length": 280,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "CORSAIR Hydro X XR5 240",
+      "model_id": "corsair-xr5-240",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "Hydro X XR5",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9030002-ww/hydro-x-series-xr5-240mm-water-cooling-radiator-cx-9030002-ww",
+        "https://assets.corsair.com/image/upload/c_pad,q_auto,h_1024,w_1024,f_auto/products/Custom-Cooling/CX-9030002-WW/Gallery/XR5_240_01.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "CORSAIR",
+      "dimensions_mm": {
+        "length": 396,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "CORSAIR Hydro X XR5 360",
+      "model_id": "corsair-xr5-360",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "Hydro X XR5",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9030003-ww/hydro-x-series-xr5-360mm-water-cooling-radiator-cx-9030003-ww",
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9070018-ww/hydro-x-series-icue-link-xh505i-rx-360-rgb-custom-cooling-kit-cx-9070018-ww",
+        "https://assets.corsair.com/image/upload/c_pad,q_auto,h_1024,w_1024,f_auto/products/Custom-Cooling/CX-9030003-WW/Gallery/XR5_360_01.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "CORSAIR",
+      "dimensions_mm": {
+        "length": 395,
+        "thickness": 55,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "CORSAIR Hydro X XR7 360",
+      "model_id": "corsair-xr7-360",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "Hydro X XR7",
+      "source_urls": [
+        "https://www.corsair.com/ww/en/p/custom-liquid-cooling/cx-9030005-ww/hydro-x-series-xr7-360mm-water-cooling-radiator-cx-9030005-ww",
+        "https://assets.corsair.com/image/upload/c_pad,q_auto,h_1024,w_1024,f_auto/products/Custom-Cooling/CX-9030005-WW/Gallery/XR7_360_01.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "EK",
+      "dimensions_mm": {
+        "length": 405,
+        "thickness": 44,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "EK-Quantum Surface P360M · Black",
+      "model_id": "ek-quantum-surface-p360m",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Quantum Surface P Multiport",
+      "source_urls": [
+        "https://www.ekwb.com/shop/quantum/pc-water-cooling-radiators/p-series-radiators/ek-quantum-surface-p360m-black"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "EK",
+      "dimensions_mm": {
+        "length": 285,
+        "thickness": 30,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "EK-Quantum Surface S240 · Black",
+      "model_id": "ek-quantum-surface-s240",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 2,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Quantum Surface S",
+      "source_urls": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-s240-black"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "EK",
+      "dimensions_mm": {
+        "length": 465,
+        "thickness": 58,
+        "width": 145
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "EK-Quantum Surface X420M · Black",
+      "model_id": "ek-quantum-surface-x420m",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Quantum Surface X Multiport",
+      "source_urls": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-x420m-black"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Hardware Labs",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 31.3,
+        "width": 133
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Hardware Labs Black Ice Nemesis 240GTS",
+      "model_id": "hardwarelabs-nemesis-240gts",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 2,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Black Ice Nemesis",
+      "source_urls": [
+        "https://hardwarelabs.com/2016/wp-content/uploads/2016/10/N240GTS_MountingDiagram.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Hardware Labs",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 55.7,
+        "width": 133
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Hardware Labs Black Ice Nemesis 360GTX",
+      "model_id": "hardwarelabs-nemesis-360gtx",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 2,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Black Ice Nemesis",
+      "source_urls": [
+        "https://hardwarelabs.com/2016/wp-content/uploads/2016/10/N360GTX_MountingDiagram.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Hardware Labs",
+      "dimensions_mm": {
+        "length": 452,
+        "thickness": 31.3,
+        "width": 153
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Hardware Labs Black Ice Nemesis 420GTS",
+      "model_id": "hardwarelabs-nemesis-420gts",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 2,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Black Ice Nemesis",
+      "source_urls": [
+        "https://hardwarelabs.com/2016/wp-content/uploads/2016/10/N420GTS_MountingDiagram.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Thermaltake",
+      "dimensions_mm": {
+        "length": 405,
+        "thickness": 64,
+        "width": 132
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Thermaltake Pacific CL360",
+      "model_id": "thermaltake-pacific-cl360",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Pacific CL",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-cl360-radiator",
+        "https://cdn.shopify.com/s/files/1/0985/3206/5560/files/key3_db_products_cooler_CL360_pic1.jpg?v=1786697912"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Thermaltake",
+      "dimensions_mm": {
+        "length": 467.5,
+        "thickness": 64,
+        "width": 147.8
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Thermaltake Pacific CL420",
+      "model_id": "thermaltake-pacific-cl420",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Pacific CL",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-cl420-radiator",
+        "https://cdn.shopify.com/s/files/1/0985/3206/5560/files/key3_db_products_cooler_CL360_main_420.jpg?v=1786697924"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Thermaltake",
+      "dimensions_mm": {
+        "length": 285.4,
+        "thickness": 40,
+        "width": 119
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Thermaltake Pacific CLD240",
+      "model_id": "thermaltake-pacific-cld240",
+      "model_status": "original_schematic",
+      "port_layout_verified": false,
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "record_type": "product",
+      "series": "Pacific CLD",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-cld-240-radiator",
+        "https://thermaltake.com/cdn/shop/files/pacific_cld_240_1_3086a32d-8a2b-42c9-8d23-2e6f66806fb3.jpg?v=1786946735"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Watercool",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Watercool HEATKILLER RAD 240-S · Black",
+      "model_id": "watercool-heatkiller-rad-240-s",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "HEATKILLER RAD",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-RAD-240-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Watercool",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 48,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Watercool HEATKILLER RAD 360-L · Black",
+      "model_id": "watercool-heatkiller-rad-360-l",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "HEATKILLER RAD",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-RAD-360-L-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Watercool",
+      "dimensions_mm": {
+        "length": 460,
+        "thickness": 30,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "Watercool HEATKILLER RAD 420-S · Black",
+      "model_id": "watercool-heatkiller-rad-420-s",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "HEATKILLER RAD",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-RAD-420-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "XSPC",
+      "dimensions_mm": {
+        "length": 320.5,
+        "thickness": 36,
+        "width": 143
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 140,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "XSPC EX280 Dual Fan · Black",
+      "model_id": "xspc-ex280",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "EX",
+      "source_urls": [
+        "https://www.xs-pc.com/discontinued3/ex280-dual-fan-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1370302365903-ODEFIJ6E43LUVLQ29A6F/ex280-schematic.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "XSPC",
+      "dimensions_mm": {
+        "length": 398.5,
+        "thickness": 56,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 3,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "XSPC RX360 Triple Fan V3 · Black",
+      "model_id": "xspc-rx360-v3",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "RX V3",
+      "source_urls": [
+        "https://www.xs-pc.com/radiators-rx-series/rx360-triple-fan-radiator-v2",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1390523796244-KYNKJWCTYZVEX604O4MB/V3-360.jpg"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "XSPC",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 20.5,
+        "width": 125
+      },
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "fan_mount_capacity_per_side": 2,
+      "fan_size_mm": 120,
+      "geometry_scope": "standalone_custom_loop_body",
+      "installed_fans_inferred": false,
+      "kind": "radiator",
+      "label": "XSPC TX240 Ultrathin · Black",
+      "model_id": "xspc-tx240",
+      "model_status": "original_schematic",
+      "port_layout_verified": true,
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "record_type": "product",
+      "series": "TX Ultrathin",
+      "source_urls": [
+        "https://www.xs-pc.com/radiators-tx-series/tx240-ultrathin-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1532587788803-W7S3VGZVBV6WUW5JLWRG/tx240-drawing.jpg"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
       "brand": "ADATA",
       "dimensions_mm": {
         "height": 7,
@@ -12272,7 +12987,7 @@
     "notebook_smile"
   ],
   "summary": {
-    "brands": 79,
+    "brands": 84,
     "by_kind": {
       "board": 16,
       "case": 96,
@@ -12283,10 +12998,11 @@
       "gpu": 147,
       "memory": 28,
       "psu": 21,
+      "radiator": 24,
       "storage": 29
     },
-    "products": 478,
-    "records": 479,
+    "products": 502,
+    "records": 503,
     "reference_combinations": 1,
     "series_pending": 96
   }

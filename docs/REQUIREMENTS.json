@@ -1,0 +1,724 @@
+{
+  "all_requirements_complete": false,
+  "completion_rule": "Every requirement must have its own fulfilled acceptance criterion; candidate packaging, prior runtime readings or source presence cannot close incomplete requirements.",
+  "issues_fixed_in_044": [
+    "冷排和风扇共用身份，无法独立点选／换风格：拆成独立part。",
+    "未知端口冷排错误生成AIO通用接头：删除臆造位置，省略对应管路并提示。",
+    "无扇检视被未使用的旧风扇尺寸阻断：无扇布局不校验未安装的风扇。",
+    "水箱／泵误显示CPU温度和CPU_FAN：改为独立水温／流量／泵RPM未知；未匹配AIO测速也不借CPU_FAN。",
+    "风扇外形尺寸被当成孔距：补5款官方孔距，NF-A15的140mm外形与105mm孔距分开。",
+    "AIO参考接头与壳体有间隙：贴合壳面，仍不宣称精确制造孔位。",
+    "风扇减振垫随孔中心移动后越出外框：改为框内垫片与偏移穿孔，回归检查外包络和孔口贯通。",
+    "冷排选扇页只看外径而遗漏已核孔距：UI与后台均保留数值差异的待核警示；缺孔径／螺钉／公差证据时不把微小标称差异认定为实物不兼容。"
+  ],
+  "items": [
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "尚未在本机安装0.44验证真实交互；现有测试文件不等于本轮全部通过。"
+      ],
+      "id": "topbar_history",
+      "implementation": "顶部栏、悬停详情、点击固定与历史存储路径均保留，并有专门测试。",
+      "native_acceptance_pending": true,
+      "requirement": "保留原顶部栏；悬停/点击看历史趋势；可只留顶部栏。",
+      "source_files": [
+        "top_bar_runtime.py",
+        "history_store.py",
+        "native/TopBarDetails.qml",
+        "native/HistoryPage.qml"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_top_bar_workflow.py",
+        "tests/test_top_bar_history_identity.py",
+        "tests/test_history_store.py",
+        "tests/test_history_sampling.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "0.44尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。"
+      ],
+      "id": "screen_two",
+      "implementation": "存在按稳定显示器身份选择、保存和路由窗口的实现，本次不读取实际显示器或用户配置。",
+      "native_acceptance_pending": true,
+      "requirement": "Stats优先屏幕2，持久化所选显示器且适配显示器变化。",
+      "source_files": [
+        "top_bar_config.py",
+        "top_bar_runtime.py",
+        "assembly_config.py",
+        "native_runtime.py"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_top_bar_monitor_selection.py",
+        "tests/test_top_bar_display_config.py",
+        "tests/test_workspace_routing.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "0.44真实游戏前台、跨屏、锁屏及桌面恢复尚未验收；继续遵守当前不重启要求。"
+      ],
+      "id": "game_hide",
+      "implementation": "顶部栏、详情、模型小组件和整机窗口已有按屏幕全屏与安全桌面状态的关闭式门禁。",
+      "native_acceptance_pending": true,
+      "requirement": "游戏不能覆盖；同屏前台全屏、锁屏和未知桌面状态须隐藏并停动效，安全后恢复。",
+      "source_files": [
+        "fullscreen_guard.py",
+        "top_bar_runtime.py",
+        "native_runtime.py",
+        "native/DesktopWidget.qml"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_fullscreen_guard.py",
+        "tests/test_top_bar_interaction_policy.py",
+        "tests/test_hardware_model_motion041.py",
+        "tests/test_assembly_desktop.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "Explorer恢复不等于整个应用进程崩溃后自动恢复；新版长时间无崩溃仍待实际运行。"
+      ],
+      "id": "crash_recovery",
+      "implementation": "已实现Explorer替换恢复、初始化/关闭防护和安装包自检。",
+      "native_acceptance_pending": true,
+      "requirement": "排查自行退出、空白栏，恢复并防止再次意外退出。",
+      "source_files": [
+        "top_bar_runtime.py",
+        "native_runtime.py",
+        "native_selfcheck.py"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_top_bar_shell_recovery.py",
+        "tests/test_top_bar_shutdown.py",
+        "tests/test_runtime_lazy_settings_extended.py",
+        "tests/test_selfcheck.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "未对0.44重启或提权，未取得新版真实温度；0.36温度不作为0.44验收。",
+        "自动恢复默认需用户开启且依赖支持来源；无法保证所有电脑都有CPU温度。"
+      ],
+      "id": "cpu_temperature_restart",
+      "implementation": "有启动恢复开关、一次会话只授权一次、游戏延后、桥接文件校验与跟随父进程退出。",
+      "native_acceptance_pending": true,
+      "requirement": "CPU温度在每次启动Stats时通过一次授权恢复；只读会话桥接随Stats退出，不开机启动。",
+      "source_files": [
+        "cpu_temperature.py",
+        "cpu_temperature_launcher.py",
+        "collector/AsusCpuTemperatureBridge.cs",
+        "tools/build_cpu_temperature_bridge.py"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_cpu_temperature.py",
+        "tests/test_cpu_temperature_launcher.py",
+        "tests/test_sensor_source_isolation.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "顶部栏、设置、详情三个真实Windows窗口仍待0.44桌面验收；不能以离屏底色冒充真实磨砂。"
+      ],
+      "id": "glass_three_surfaces",
+      "implementation": "三类窗口有原生材质、宿主桥接和生命周期实现，离屏测试只能验证契约。",
+      "native_acceptance_pending": true,
+      "requirement": "顶部栏、设置、详情都应恢复真实磨砂，并保留颜色底色与连续透明度。",
+      "source_files": [
+        "native_glass.py",
+        "material_policy.py",
+        "settings_material_bridge.py",
+        "settings_acrylic_material.py",
+        "top_bar_runtime.py"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_native_glass.py",
+        "tests/test_settings_material_integration.py",
+        "tests/test_settings_material_lifecycle.py",
+        "tests/test_top_bar_backdrop_host.py",
+        "tests/test_alpha_material.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "没有0.44安装版静置或游戏占用实测值。约65MiB隔离设置加载差值、39.85%基础图层像素减少均有范围，不能写成整机常驻降幅。",
+        "打开3D与仅顶部栏的负担不同，不能承诺通用占用上限。",
+        "0.43的39.85%仅为典型GPU基础图层像素预算；新增详细冷排是按需静态几何，不能据此宣称整机内存减少。"
+      ],
+      "id": "low_overhead",
+      "implementation": "已有设置/桌面组件延后加载、按需几何、共享时钟、按需Top5和基础图层裁切。",
+      "native_acceptance_pending": true,
+      "requirement": "持续优化CPU/内存/GPU负担，并最终报告实际控制到多少。",
+      "source_files": [
+        "native_runtime.py",
+        "native/HardwareGlyph.qml",
+        "native/MetricIcon.qml",
+        "hardware_packs.py",
+        "assembly_scene_cache.py",
+        "process_usage.py"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_runtime_lazy_settings.py",
+        "tests/test_runtime_lazy_widgets.py",
+        "tests/test_hardware_model_optimization043.py",
+        "tests/test_performance_contracts.py",
+        "tests/test_assembly_scene_cache.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "KINDS仅cpu/memory/gpu/vram；磁盘和网络进程Top5尚未实现。",
+        "用户曾为恢复顶部栏暂缓此项，不能据此把最初每硬件排行请求标为全部完成。",
+        "温度／转速等物理读数不能直接按进程归因，不编造其Top5。"
+      ],
+      "id": "top_five_processes",
+      "implementation": "实现CPU、内存、GPU与专用显存的临时按需进程排行。",
+      "native_acceptance_pending": true,
+      "requirement": "每类硬件显示消耗最多的前5个软件，按需采集以降低占用。",
+      "source_files": [
+        "process_usage.py",
+        "process_gpu.py",
+        "native/TopBarDetails.qml",
+        "native/Details.qml"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_process_usage.py",
+        "tests/test_process_usage_controller.py",
+        "tests/test_process_usage_qml.py",
+        "tests/test_process_gpu.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "固定展示六套不等于运行时只剩六项；额外蓝墨手账编号7与早期六版沿革需要统一说明。"
+      ],
+      "id": "style_versions",
+      "implementation": "六套固定展示方案与13个保存值共存；原版无表情，可爱笑脸/笑脸手绘独立。",
+      "native_acceptance_pending": false,
+      "requirement": "原版不得加笑脸；保留可爱/手绘/线条等六版编号及所有13保存选项。 保留上传版12的布局／动效与原图标，新方案不能替换掉旧方案。",
+      "source_files": [
+        "top_bar_config.py",
+        "native/HardwareShapes.js",
+        "native/HardwareNotebook.js",
+        "assembly_style.py",
+        "README.md",
+        "native/MetricIcon.qml"
+      ],
+      "status": "implemented_source_offscreen_evidence",
+      "status_label": "已实现；保留离屏证据",
+      "test_files": [
+        "tests/test_hardware_icon_preferences.py",
+        "tests/test_desktop_hardware_models040.py",
+        "tests/test_hardware_notebook.py",
+        "tests/test_assembly_styles.py",
+        "tests/test_metric_state_feedback_qml.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "目录和风扇数量相同，不代表全部视觉特征已精确复核；装饰、PCB与部分内部结构仍为参考。"
+      ],
+      "id": "same_model_all_styles",
+      "implementation": "全部风格共用型号、外壳与风扇数据；混搭只调表现，不改物理网格。",
+      "native_acceptance_pending": false,
+      "requirement": "每套硬件数量、型号与结构跟原版一致，不能不同风格换壳/减配。",
+      "source_files": [
+        "native/HardwareModelDetails.js",
+        "native/HardwareShapes.js",
+        "assembly_style.py",
+        "hardware_variants.py",
+        "cooling_catalog.py"
+      ],
+      "status": "implemented_source_with_reference_limits",
+      "status_label": "已实现；未核结构仍是参考",
+      "test_files": [
+        "tests/test_gpu_model_art042.py",
+        "tests/test_desktop_hardware_models040.py",
+        "tests/test_assembly_mixed_styles.py",
+        "tests/test_assembly_styles.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "0.43来源审计仍有20个GPU叶型待核。机箱、冷排和电源风扇测速并非普遍可映射，未知必须静止。",
+        "CPU_FAN可能是水泵RPM，不能拿来驱动所有冷排风扇。"
+      ],
+      "id": "fan_motion",
+      "implementation": "GPU叶型和RPM有型号/时效门禁，沿用同一时钟；Fuma只表达有来源的相对反向；演示模式单独标记。",
+      "native_acceptance_pending": false,
+      "requirement": "风扇每版能转；必须按真实对应RPM调整，过期/未知/零速停止；风扇设计须符合型号。",
+      "source_files": [
+        "hardware_fan_profiles.py",
+        "top_bar_feedback.py",
+        "native/MetricIcon.qml",
+        "native/HardwareGlyph.qml",
+        "assembly_cooling.py"
+      ],
+      "status": "partial_with_safe_unknowns",
+      "status_label": "部分完成；未知测速保持静止",
+      "test_files": [
+        "tests/test_hardware_fan_motion.py",
+        "tests/test_gpu_fan_feedback.py",
+        "tests/test_gpu_fan_rpm_sensor.py",
+        "tests/test_gpu_verified043.py",
+        "tests/test_assembly_cooling.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "仍是有限目录，未涵盖所有市售品牌/系列/版本；20款叶型待核，隐藏PCB、电路和接口次序没有全面精确复刻。"
+      ],
+      "id": "all_gpu_brands_series",
+      "implementation": "当前147款显卡含92款NVIDIA、46款AMD、9款Intel，涵盖一部分旧卡、公版和非公型号。",
+      "native_acceptance_pending": false,
+      "requirement": "全部显卡品牌/系列/年代、丐版及旗舰非公、10系列及更早、AMD和Intel都要覆盖并保真。",
+      "source_files": [
+        "hardware_variants.py",
+        "hardware_variant_art.py",
+        "native/HardwareModelNvidia042.js",
+        "native/HardwareModelRadeonArc042.js",
+        "docs/GPU_MODEL_PROGRESS.md"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_historical_hardware.py",
+        "tests/test_gpu_nvidia042.py",
+        "tests/test_gpu_radeon_arc042.py",
+        "tests/test_gpu_model_art042.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "尚未覆盖全部CPU/内存品牌型号；75个CPU产品共享7类封装，未核封装尺寸、触点位置保留参考。"
+      ],
+      "id": "cpu_memory_variants",
+      "implementation": "基础3款CPU、可选72款CPU与28个内存型号有共享目录；同封装CPU诚实共用结构。",
+      "native_acceptance_pending": false,
+      "requirement": "不同CPU/内存品牌与型号结构也要分开，所有风格均覆盖。",
+      "source_files": [
+        "cpu_catalog.py",
+        "cpu_package_runtime.py",
+        "hardware_appearance.py",
+        "hardware_series.py",
+        "native/HardwareShapes.js"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_cpu_catalog.py",
+        "tests/test_hardware_structure_qml.py",
+        "tests/test_hardware_appearance.py",
+        "tests/test_hardware_pack_integration.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "通用RTX5090驱动名称不足以区分品牌非公；DIY机箱、散热器和电源通常无可识别固件型号，仍需手选参考。"
+      ],
+      "id": "hardware_auto_match",
+      "implementation": "有型号置信度、精确匹配与手动覆盖，不确定时明确回退。",
+      "native_acceptance_pending": false,
+      "requirement": "自动识别具体品牌/系列与实物外观，不能仅靠通用GPU名称误选非公版本。",
+      "source_files": [
+        "hardware_appearance.py",
+        "hardware_variants.py",
+        "assembly_spec.py",
+        "native_controller.py"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_hardware_appearance.py",
+        "tests/test_hardware_model_selection.py",
+        "tests/test_hardware_variants.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "原生透明命中、屏2缩放和实际尺寸仍待0.44验收；布局测试不能单独证明美术细节达到用户审美要求。"
+      ],
+      "id": "model_widget_layout",
+      "implementation": "已有大图CPU/GPU模板、共享响应式布局、真正QML动态图层、读数和每组件框架开关。",
+      "native_acceptance_pending": true,
+      "requirement": "CPU/GPU图标要够大，布局清晰可爱，去掉角落可见缩放边角，支持有框/无框。",
+      "source_files": [
+        "widget_catalog.py",
+        "responsive_layout.py",
+        "native_card.py",
+        "native/DesktopHardwareModel.qml",
+        "native/DesktopWidget.qml",
+        "native/WidgetInspector.qml"
+      ],
+      "status": "implemented_source_offscreen_evidence_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_desktop_hardware_models040.py",
+        "tests/test_hardware_model_layout041.py",
+        "tests/test_widget_refinement.py",
+        "tests/test_widget_material_geometry.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "0.44真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。"
+      ],
+      "id": "model_widget_animation",
+      "implementation": "MetricIcon/HardwareGlyph沿用已有时钟与数据时效，Runtime控制modelMotionAllowed。",
+      "native_acceptance_pending": true,
+      "requirement": "CPU效果/GPU叶轮是动态图标；只改变换，不添加轮询，隐藏/锁屏/游戏时停止。",
+      "source_files": [
+        "native/MetricIcon.qml",
+        "native/HardwareGlyph.qml",
+        "native/DesktopHardwareModel.qml",
+        "native_runtime.py"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_hardware_model_motion041.py",
+        "tests/test_hardware_model_optimization043.py",
+        "tests/test_hardware_fan_motion.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "参考配件不能借其他硬件的实时读数；机箱/电源/存储等不都有独立实时状态。",
+        "关闭事件返回时viewport._scene等引用可能保留至QObject实际销毁；不能声称瞬间全部释放。"
+      ],
+      "id": "desktop_3d_inspection",
+      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。",
+      "native_acceptance_pending": true,
+      "requirement": "桌面可旋转缩放3D机箱加硬件；点选配件查看状态，有框或无框。",
+      "source_files": [
+        "assembly_desktop_widget.py",
+        "assembly_window.py",
+        "assembly_viewer.py",
+        "assembly_inspection.py",
+        "native/AssemblyPage.qml"
+      ],
+      "status": "implemented_source_native_pending",
+      "status_label": "已实现；新版原生待验",
+      "test_files": [
+        "tests/test_assembly_desktop_widget.py",
+        "tests/test_assembly_desktop_controls.py",
+        "tests/test_assembly_inspection.py",
+        "tests/test_assembly_desktop.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "尚未覆盖全部机箱，当前没有已核零售机箱固件映射；很多内部安装位置仍为参考。"
+      ],
+      "id": "case_library",
+      "implementation": "已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。",
+      "native_acceptance_pending": false,
+      "requirement": "机箱要多、各品牌系列结构像实物，支持风格切换并自动匹配。",
+      "source_files": [
+        "chassis_catalog.py",
+        "assembly_case_exteriors.py",
+        "assembly_geometry.py",
+        "assembly_config.py"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_chassis_catalog.py",
+        "tests/test_assembly_case_detail.py",
+        "tests/test_assembly_geometry.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "仅16块主板，隐藏走线、IC排布和部分精确接口位置仍是示意，不等于制造CAD或任意配件都相容。"
+      ],
+      "id": "motherboard_detail",
+      "implementation": "已有16块主板及有来源的插槽、针座与接口空腔，新接点保留原锚点。",
+      "native_acceptance_pending": false,
+      "requirement": "主板应像，插槽、PCB、接口与位置要细致。",
+      "source_files": [
+        "assembly_motherboard.py",
+        "motherboard_catalog.py",
+        "assembly_geometry.py"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_assembly_motherboard.py",
+        "tests/test_assembly_board_detail043.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "未覆盖每品牌系列；部分叶型、绝对方向、孔位、细鳍片及间隙未核，LCD留空而非伪造实时画面。"
+      ],
+      "id": "cooler_fan_brand_library",
+      "implementation": "现有66套散热方案与70个风扇条目，包含被动、C形、双塔、双层下压、LCD等结构。",
+      "native_acceptance_pending": false,
+      "requirement": "散热器/风扇按品牌系列真实细化，风冷、水冷、机箱风扇全部风格都有。",
+      "source_files": [
+        "cooling_catalog.py",
+        "assembly_cooling.py",
+        "accessory_cooling_details040.py",
+        "native/AccessoryGlyph.qml"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_cooling_expansion040.py",
+        "tests/test_cooling_geometry040.py",
+        "tests/test_assembly_cooling.py",
+        "tests/test_accessory_cooling_details040.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "未覆盖所有产品；存储IC布局、电源内部插座等仍有示意字段，其他装机模拟器品类也不完整。"
+      ],
+      "id": "all_other_parts",
+      "implementation": "现有21电源、29存储、3扩展卡；新增24存储覆盖多种M.2长度、原厂HS、SATA与HDD。",
+      "native_acceptance_pending": false,
+      "requirement": "电源、存储、扩展卡等装机模拟器有的品类都要有，型号/外形也需逐类完善。",
+      "source_files": [
+        "component_catalog.py",
+        "component_storage043.py",
+        "assembly_auxiliary.py"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_assembly_auxiliary.py",
+        "tests/test_component_storage043.py",
+        "tests/test_storage_geometry043.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "自由选择不等于任意实际组合必定可装；长度、槽位、键位、厚度及未知间隙必须保留诊断。"
+      ],
+      "id": "free_mixed_assembly",
+      "implementation": "有逐型号选择、逐部件风格覆盖与安装拒绝/提示，几何保持一致。",
+      "native_acceptance_pending": false,
+      "requirement": "全部配件可自由换型号并混搭所有风格装入同机箱。",
+      "source_files": [
+        "assembly_config.py",
+        "assembly_parts.py",
+        "assembly_spec.py",
+        "assembly_style.py",
+        "native/AssemblyParts.qml"
+      ],
+      "status": "implemented_source_with_compatibility_limits",
+      "status_label": "已实现；兼容检查不完整",
+      "test_files": [
+        "tests/test_assembly_parts.py",
+        "tests/test_assembly_mixed_styles.py",
+        "tests/test_assembly_catalog.py",
+        "tests/test_assembly_tools.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "8品牌之外及同品牌大量系列／尺寸仍缺；不是全品牌水冷库。",
+        "6款口位全未知、6款仅部分已观察，全部端口精确坐标未核；自定义回路其它零售配件目录尚缺。"
+      ],
+      "id": "liquid_radiator_fan_split",
+      "implementation": "24款独立冷排／8品牌已接入；主、第二冷排和风扇分别选择；单面、夹心、无扇布局，独立点选和混搭风格。未知口不补造接头或管路。",
+      "native_acceptance_pending": true,
+      "requirement": "每品牌水冷；冷排与风扇可独立选择，支持无扇/单面/夹心并保持AIO原厂边界。",
+      "source_files": [
+        "liquid_cooling_catalog044.py",
+        "assembly_radiator044.py",
+        "assembly_cooling.py",
+        "liquid_selection044.py",
+        "native/AssemblyParts.qml"
+      ],
+      "status": "implemented_source_acceptance_pending",
+      "status_label": "已集成；验收范围见报告",
+      "test_files": [
+        "tests/test_liquid_cooling_catalog044.py",
+        "tests/test_assembly_radiator044.py",
+        "tests/test_modular_liquid044.py",
+        "tests/test_liquid_controls044.py",
+        "tests/test_fan_mounting044.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "不是真实灯控、RGB时间轴或全局泛光；只处理已有模型灯区。沿用插画模式保留原画法，指定配色时固定白灯不变彩灯。",
+        "目前是已有灯区的静态预览和风格短时效果；尚无逐设备灯控／RGB时序仿真。"
+      ],
+      "id": "lighting",
+      "implementation": "已有灯区静态配色/熄灯，特效有限时；Infinity轴心灯环漏分类已向Root报告并确认修复。",
+      "native_acceptance_pending": false,
+      "requirement": "不同风格提供特效/灯区，固定白灯不变彩灯，不新增未知RGB。",
+      "source_files": [
+        "assembly_lighting.py",
+        "assembly_style.py",
+        "assembly_viewer.py",
+        "native/AssemblyPage.qml"
+      ],
+      "status": "implemented_source_offscreen_evidence",
+      "status_label": "已实现；保留离屏证据",
+      "test_files": [
+        "tests/test_assembly_lighting043.py",
+        "tests/test_assembly_effects.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "可导入数据包格式目前只CPU；其它类别仍在本体，SVG图集和HTML查看器不是运行时扩展模型包。"
+      ],
+      "id": "github_optional_packs",
+      "implementation": "CPU Intel/AMD数据包可导入移除，具有限额/哈希/结构校验，按需读入；SVG/HTML图鉴为独立预览产物。",
+      "native_acceptance_pending": false,
+      "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
+      "source_files": [
+        "hardware_packs.py",
+        "cpu_package_runtime.py",
+        "tools/export_hardware_packs.py",
+        "tools/export_accessory_atlas.py",
+        "docs/HARDWARE_PACKS.md"
+      ],
+      "status": "partial",
+      "status_label": "部分完成",
+      "test_files": [
+        "tests/test_hardware_packs.py",
+        "tests/test_hardware_pack_integration.py",
+        "tests/test_source_export.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "不能撤销MIT/LGPL等已有许可，不能技术阻止复制；商标权未获授权，本次未做法律审查。"
+      ],
+      "id": "copyright_noncommercial",
+      "implementation": "PolyForm非商用范围、原创插画/3D说明、来源及第三方/既有授权例外均有文档。",
+      "native_acceptance_pending": false,
+      "requirement": "上传GitHub并标版权，原创作品禁止商业使用盈利，保留应有第三方例外。",
+      "source_files": [
+        "LICENSE",
+        "LICENSING.md",
+        "NOTICE",
+        "THIRD_PARTY_NOTICES.md",
+        "docs/HARDWARE_PACKS.md"
+      ],
+      "status": "implemented_notice_with_legal_limits",
+      "status_label": "原创非商用；保留既有许可例外",
+      "test_files": [
+        "tests/test_source_export.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "当前明确禁止重启优先于之前安装请求，原生验收保持待办。"
+      ],
+      "id": "github_publish_merge_install",
+      "implementation": "GitHub PR#1已于2026-11-05合并（远程核对）；0.43源码分支已上传。0.44仍以本轮检查／候选状态推进，当前安装不替换。",
+      "native_acceptance_pending": true,
+      "requirement": "合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。",
+      "source_files": [
+        "product_version.py",
+        "tools/export_source.py",
+        "README.md"
+      ],
+      "status": "prior_publication_evidence_current_candidate_pending",
+      "status_label": "PR#1已合并；新版发布／安装待验",
+      "test_files": [
+        "tests/test_source_export.py",
+        "tests/test_selfcheck.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "即便暂按550+24=574，也未达到PCBS2公开1200+的数值门槛，而且口径不完全可比。",
+        "没有覆盖/精度基准证明达到或超过PCBS1/2；品类、真实细节与主观视觉验收仍有大量缺口。"
+      ],
+      "id": "pcbs_benchmark",
+      "implementation": "现有0.43文档统计550产品，本轮新增24冷排；目录数不等于独立高精度外壳数。",
+      "native_acceptance_pending": false,
+      "requirement": "品类、覆盖与真实细节达到并超过Steam装机模拟器1/2；高标准慢慢打磨全部细节。",
+      "source_files": [
+        "docs/HARDWARE_COVERAGE.md",
+        "docs/ASSEMBLY_QUALITY.md",
+        "docs/ASSEMBLY_CATALOG.json",
+        "liquid_cooling_catalog044.py"
+      ],
+      "status": "not_met",
+      "status_label": "尚未达到",
+      "test_files": [
+        "tests/test_assembly_catalog.py",
+        "tests/test_assembly_detail.py"
+      ]
+    },
+    {
+      "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
+      "gaps": [
+        "其余未完成需求必须继续保留；本表核对完成不表示全部产品功能交付完成。"
+      ],
+      "id": "readme_full_requirements_ledger",
+      "implementation": "本README内嵌全部29项需求与验收状态，另有结构化清单和一致性检查；问题与缺项不隐藏。",
+      "native_acceptance_pending": false,
+      "requirement": "全文所有重点写入README；全部完成后逐一核对并汇报问题和缺项。",
+      "source_files": [
+        "README.md",
+        "tools/export_requirements.py",
+        "docs/REQUIREMENTS.json"
+      ],
+      "status": "audited_with_open_items",
+      "status_label": "已逐项核对；项目仍未全部完成",
+      "test_files": []
+    }
+  ],
+  "native_044_accepted": false,
+  "operating_constraints": [
+    "Code-only operations",
+    "Keep current Stats session running while user is gaming",
+    "No visible windows, native GL, UAC, installation or restart during gaming"
+  ],
+  "reviewed": "2026-11-08",
+  "schema_version": 1,
+  "target_version": "0.44.0-preview.1"
+}

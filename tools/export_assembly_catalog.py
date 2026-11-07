@@ -24,6 +24,7 @@ def build_report():
     from top_bar_config import HARDWARE_ICON_STYLES
     from tools.export_hardware_coverage import sources
     from cpu_catalog import MODELS as CPU_MODELS
+    from liquid_cooling_catalog044 import records as radiator_records
     rows=[]
 
     def add(kind,raw,brand,series='',**status):
@@ -71,6 +72,12 @@ def build_report():
             finish_status='unverified_reference' if raw.get('appearance_unverified') else
                 'photo_observed_schematic' if raw.get('appearance_sources') else 'reference',
             telemetry='not_bound_to_installed_sensor')
+    for raw in radiator_records():
+        add('radiator',raw,raw['brand'],raw['series'],geometry_scope='standalone_custom_loop_body',
+            dimensions_verified=raw['dimensions_verified'],ports_count=raw['ports_count'],
+            port_layout_verified=raw['port_layout_verified'],ports_geometry_complete=raw['ports_geometry_complete'],
+            exact_port_positions_verified=False,fan_mount_capacity_per_side=raw['fan_count'],
+            fan_size_mm=raw['fan_size_mm'],installed_fans_inferred=False,telemetry='not_bound_to_installed_sensor')
     rows.sort(key=lambda row:(row['kind'],row['brand'].casefold(),row['series'] or '',row['model_id']))
     keys=[(row['kind'],row['model_id']) for row in rows]
     if len(keys)!=len(set(keys)):raise ValueError('Duplicate assembly product identity')

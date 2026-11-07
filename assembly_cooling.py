@@ -129,7 +129,7 @@ class _Builder:
     def __init__(self,level):
         self.level=level if level in ('eco','balanced','close') else 'balanced'
         self.segments={'eco':16,'balanced':24,'close':32}[self.level]
-        self.static=defaultdict(list);self.rotors=[];self.fans=[];self.parts=[];self.wire_anchors=[]
+        self.static=defaultdict(list);self.rotors=[];self.fans=[];self.parts=[];self.wire_anchors=[];self.connection_issues=[]
 
     def put(self,name,vertices,tint,center=(0.,0.,0.),basis=((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),component='cooler',part='cooler:cpu',alpha=1.):
         if alpha!=1.:
@@ -156,6 +156,9 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
     from assembly_detail import perforated_plate,chamfer_rect
     size=model['size_mm'];width=model.get('width_mm',size);depth=model['depth_mm'];basis=_basis(normal,up)
     radius=size*.465;corner=size*.095
+    pitch=model.get('mount_pitch_mm') or {120:105.,140:124.5}.get(size,size*.83)
+    hole_radius=(model.get('mount_hole_diameter_mm') or size*.036)/2
+    corner=min(corner,max(1.,(width+size-2*pitch)/2-hole_radius*math.sqrt(2)-1.))
     if model.get('frameless'):
         pass  # A fin-supported impeller must not acquire a fictional square frame.
     elif model.get('frame')=='round':
@@ -163,21 +166,25 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
         builder.put(name+'-frame',frame,model['frame_color'],center,basis,component,part)
         for x in (-1,1):
             for y in (-1,1):
-                p=_add(center,_add(_mul(basis[0],x*width*.39),_mul(basis[1],y*size*.39)))
-                builder.put(name+'-frame',box(size*.19,size*.19,depth),model['frame_color'],p,basis,component,part)
+                p=_add(center,_add(_mul(basis[0],x*pitch/2),_mul(basis[1],y*pitch/2)))
+                builder.put(name+'-frame',perforated_plate(chamfer_rect(size*.19,size*.19,1.2),[(0.,0.,hole_radius)],depth,segments=12),model['frame_color'],p,basis,component,part)
     else:
         # The large circular aperture is actual missing geometry; no solid slab
         # or dark painted disk can obscure the blades from either face.
-        holes=[(0.,0.,radius)]+[(x*width*.415,y*size*.415,size*.018) for x in (-1,1) for y in (-1,1)]
+        holes=[(0.,0.,radius)]+[(x*pitch/2,y*pitch/2,hole_radius) for x in (-1,1) for y in (-1,1)]
         frame=perforated_plate(chamfer_rect(width,size,corner),holes,depth,segments=builder.segments)
         builder.put(name+'-frame',frame,model['frame_color'],center,basis,component,part)
     if model.get('pads'):
         for x in (-1,1):
             for y in (-1,1):
                 for side in (-1,1):
-                    p=_add(center,_add(_mul(basis[0],x*width*.414),_add(_mul(basis[1],y*size*.414),_mul(basis[2],side*(depth/2+.35)))))
-                    pad=(ring(size*.08,size*.018,.7,12) if model.get('pad_style')=='round' else
-                         perforated_plate(chamfer_rect(size*.16,size*.16,2),[(0.,0.,size*.018)],.7,segments=12))
+                    round_pad=model.get('pad_style')=='round'
+                    px=x*pitch/2 if round_pad else x*min(width*.414,width/2-size*.08)
+                    py=y*pitch/2 if round_pad else y*min(size*.414,size/2-size*.08)
+                    p=_add(center,_add(_mul(basis[0],px),_add(_mul(basis[1],py),_mul(basis[2],side*(depth/2+.35)))))
+                    pad_radius=min(size*.08,width/2-pitch/2-.25,size/2-pitch/2-.25)
+                    pad=(ring(pad_radius,hole_radius,.7,12) if round_pad else
+                         perforated_plate(chamfer_rect(size*.16,size*.16,2),[(x*pitch/2-px,y*pitch/2-py,hole_radius)],.7,segments=12))
                     builder.put(name+'-pads',pad,'#74584d' if model['family'].startswith('noctua') else '#141b20',p,basis,component,part)
     # Rear stator arms terminate at the frame and hub, never rotating with leaves.
     stator_z=-depth*.35;hub=size*model.get('hub_ratio',.25)*.44
@@ -259,7 +266,7 @@ def _reference_fan(cooler):
     fan=get_fan(cooler.get('fan_model'))
     if fan:return fan
     size=cooler.get('fan_reference_mm',120)
-    return dict(id=cooler['id']+'-documented-fan-reference',size_mm=size,width_mm=size,depth_mm=cooler.get('fan_reference_depth_mm',25 if size>=100 else 15),
+    return dict(id=('generic-radiator-fan-'+str(size)+'-reference') if cooler.get('_neutral_radiator_fan') else cooler['id']+'-documented-fan-reference',size_mm=size,width_mm=size,depth_mm=cooler.get('fan_reference_depth_mm',25 if size>=100 else 15),
                 family=cooler.get('fan_family','stock-reference'),blades=cooler.get('fan_reference_blades',7),blade_count_verified=cooler.get('fan_blade_count_verified',False),shape='wide',
                 frame='round' if cooler['kind'] in ('stock_intel','stock_amd') else 'square',frame_color='#242c30',blade_color='#3d474d',hub_ratio=.27,outer_ring=cooler.get('fan_outer_ring',False),
                 rgb=cooler.get('fan_reference_rgb',cooler['kind']=='stock_prism'),frame_rgb_ring=cooler['kind']=='stock_prism',
@@ -502,36 +509,64 @@ def _mount_check(case,mount,size,count):
 
 
 def _radiator(builder,cooler,mount,dimensions,part='cooler:radiator',planes=None):
-    from assembly_geometry import box
+    from assembly_geometry import ring
+    from assembly_radiator044 import build_radiator_detail
     rad=cooler['radiator_mm'];length,width,thick=(rad[k] for k in ('length','width','thickness'))
-    fan=_reference_fan(cooler);p,basis,span=_mount_plane(mount,dimensions,thick/2+10,planes)
+    fan=_reference_fan(cooler);layout=cooler.get('_radiator_fan_layout','single')
+    extra=fan['depth_mm']+.8 if layout=='push_pull' else 0.
+    p,basis,span=_mount_plane(mount,dimensions,thick/2+10+extra,planes)
     if width>span[0]+1 or length>span[1]+1:return None
-    # Local X spans radiator width; local Y runs its length, Z points outward.
-    for sign in (-1,1):
-        builder.box('cooler-radiator-rails',(6,length,thick),'#222b31',_add(p,_mul(basis[0],sign*(width/2-3))),basis,part=part,bevel=True)
-        builder.box('cooler-radiator-end-tanks',(width-10,17,thick),'#27333a',_add(p,_mul(basis[1],sign*(length/2-8.5))),basis,part=part,bevel=True)
-    fin_count={'eco':28,'balanced':54,'close':92}[builder.level]
-    for i in range(fin_count):
-        y=-(length-40)/2+i*(length-40)/max(1,fin_count-1)
-        builder.put('cooler-radiator-fins',box(width-14,.7,thick*.82),'#45535c',_add(p,_mul(basis[1],y)),basis,part=part)
-    for i in range(7):
-        builder.put('cooler-radiator-water-channels',box(1.6,length-34,thick*.88),'#313d45',_add(p,_mul(basis[0],(i-3)*(width-18)/7)),basis,part=part)
+    profile=cooler.get('_radiator_profile')
+    # A standalone radiator's photographed front ports face the case interior.
+    # Rotate about the long axis (proper rigid pose), never mirror its geometry.
+    detail_basis=(_mul(basis[0],-1),basis[1],_mul(basis[2],-1)) if profile else basis
+    detail=build_radiator_detail(builder,dict(rad,fan_size_mm=fan['size_mm'],fan_count=cooler['fan_count'],fan_mount_pitch_mm=fan.get('mount_pitch_mm')),p,detail_basis,part,profile)
     if cooler.get('pump_location')=='radiator':
-        # MSI's manufacturer exploded view places the pump in the fin field.
-        # Its enclosure here is explicitly illustrative, wholly inside the
-        # documented radiator envelope; no unknown internal rotor is invented.
         builder.box('cooler-radiator-integrated-pump',(38,38,thick),'#202b32',p,basis,part=part,bevel=True)
         for sign in (-1,1):
             builder.box('cooler-radiator-pump-service-cover',(34,34,.3),'#3c4951',_add(p,_mul(basis[2],sign*(thick/2+.15))),basis,part=part,bevel=True)
-    for i in range(cooler['fan_count']):
-        offset=(i-(cooler['fan_count']-1)/2)*fan['size_mm']
-        center=_add(p,_add(_mul(basis[1],offset),_mul(basis[2],-(thick+fan['depth_mm'])/2-.8)))
-        _fan(builder,fan,center,_mul(basis[2],-1),basis[0],component='cooler',part=part,name='cooler-radiator-fan',role='radiator',direction='exhaust')
+    # Separate physical fans keep their own identity, picking and style. Both
+    # faces have the same through-flow orientation; a pull fan is not mirrored.
+    sides=() if layout=='none' else (('front',-1),('rear',1)) if layout=='push_pull' else (('front',-1),)
+    for face,sign in sides:
+        for i in range(cooler['fan_count']):
+            offset=(i-(cooler['fan_count']-1)/2)*fan['size_mm']
+            center=_add(p,_add(_mul(basis[1],offset),_mul(basis[2],sign*((thick+fan['depth_mm'])/2+.8))))
+            identity=part+':'+face+':'+str(i)
+            _fan(builder,fan,center,_mul(basis[2],-1),basis[0],component='cooler',part=identity,name='cooler-radiator-fan',role='radiator',direction='exhaust')
+            builder.parts.append(dict(id=identity,label=fan.get('label',str(fan['size_mm'])+' mm 参考风扇')+' · '+('内侧' if face=='front' else '外侧')+' '+str(i+1),
+                kind='radiator_fan',model_id=fan['id'],radiator_part_id=part,face=face,
+                size_mm=fan['size_mm'],depth_mm=fan['depth_mm'],telemetry_bound=False,
+                geometry_verified=fan.get('blade_geometry_reviewed',False)))
+    ports=detail.get('ports') or []
+    active=[port for port in ports if port.get('open') is not False and not port.get('capped') and port.get('role') not in ('capped','plugged','auxiliary')][:2]
     barbs=[]
-    for sign in (-1,1):
-        b=_add(p,_add(_mul(basis[0],sign*width*.28),_add(_mul(basis[1],length/2-12),_mul(basis[2],-thick/2-6))))
-        builder.tube('cooler-radiator-fittings',[b,_add(b,_mul(basis[2],-9))],5,'#687882',part=part);barbs.append(_add(b,_mul(basis[2],-9)))
-    builder.parts.append(dict(id=part,label=cooler.get('radiator_model',cooler['label'])+' · '+mount+' 冷排',kind='radiator',model_id=cooler['id']))
+    if len(active)==2:
+        for port in active:
+            normal=_unit(port['normal']);position=tuple(port['position']);out=_add(position,_mul(normal,10.))
+            # Original hollow collar; thread designation comes only from the
+            # reviewed radiator. Thread teeth/compression fitting SKU is unknown.
+            collar_basis=_basis(normal,basis[0])
+            builder.put('cooler-radiator-reference-hose-collars',ring(7.,4.,10.,builder.segments),'#687882',
+                _add(position,_mul(normal,5.)),collar_basis,part=part)
+            barbs.append(out)
+    elif profile is None:
+        # Existing sealed-AIO or explicitly generic-reference hose outlets, schematic. No universal
+        # G1/4 thread or user-replaceable AIO radiator is inferred.
+        for sign in (-1,1):
+            b=_add(p,_add(_mul(basis[0],sign*width*.28),_add(_mul(basis[1],length/2-12),_mul(basis[2],-thick/2))))
+            axis=_mul(basis[2],-1);end=_add(b,_mul(axis,9))
+            builder.put('cooler-radiator-fittings',ring(6.,3.8,9.,builder.segments),'#687882',
+                _add(b,_mul(axis,4.5)),_basis(axis,basis[0]),part=part);barbs.append(end)
+    if profile is not None and len(barbs)!=2:
+        builder.connection_issues.append(dict(part_id=part,model_id=profile['id'],reason='radiator_ports_unverified'))
+    builder.parts.append(dict(id=part,label=cooler.get('radiator_model',cooler['label'])+' · '+mount+' 冷排',kind='radiator',
+        model_id=profile['id'] if profile else cooler['id'],dimensions_mm=dict(rad),mount=mount,
+        hose_connections_ready=len(barbs)==2,
+        fan_size_mm=fan['size_mm'],fan_capacity_per_face=cooler['fan_count'],fan_layout=layout,
+        installed_fan_count=len(sides)*cooler['fan_count'],ports_count=profile.get('ports_count') if profile else 2,
+        port_thread=profile.get('port_thread') if profile else None,telemetry_bound=False,
+        detail_metadata=detail.get('metadata',{})))
     return barbs
 
 
@@ -713,7 +748,7 @@ def _family_pump(builder,cooler,p,basis,part):
     return True
 
 
-def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount='side',planes=None,floor_deck=None):
+def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount='side',planes=None,floor_deck=None,secondary_cooler=None):
     from assembly_geometry import ring,extrude
     barbs=_radiator(builder,cooler,mount,dimensions,planes=planes)
     if barbs is None:return False
@@ -746,8 +781,8 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
     gpu_ports=None;second_barbs=None
     if cooler['kind']=='custom_loop':
         if gpu_pcb:
-            second_barbs=_radiator(builder,cooler,secondary_mount,dimensions,'cooler:radiator:'+secondary_mount,planes)
-            if second_barbs:gpu_ports=_gpu_block(builder,gpu_pcb)
+            second_barbs=_radiator(builder,secondary_cooler or cooler,secondary_mount,dimensions,'cooler:gpu-radiator',planes)
+            if second_barbs and barbs:gpu_ports=_gpu_block(builder,gpu_pcb)
         reservoir=cooler['reservoir_mm'];r=reservoir['diameter']/2;rh=reservoir['height'];w,h,d=dimensions
         reservoir_y=-h/2+rh/2+35
         if isinstance(floor_deck,dict):
@@ -762,7 +797,7 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
         for sign in (-1,1):builder.put('cooler-reservoir-caps',ring(r+2,0,15,builder.segments),'#26343c',_add(rp,(0.,sign*(rh-32)/2+12,0.)),rb,part='cooler:reservoir')
         builder.put('cooler-d5-pump',ring(r*.94,0,34,builder.segments),'#1c282f',_add(rp,(0.,-rh/2+18,0.)),rb,part='cooler:reservoir')
         for sign in (-1,1):builder.box('cooler-reservoir-clamps',(reservoir['diameter']+8,5,8),'#75858e',_add(rp,(0.,sign*rh*.26,-r)),((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),part='cooler:reservoir')
-        targets=[barbs[0],_add(rp,(0.,-rh/2+19,r+8))];extra_start=barbs[1];extra_end=_add(rp,(0.,rh/2+5,0.))
+        targets=[barbs[0],_add(rp,(0.,-rh/2+19,r+8))] if barbs else [];extra_start=barbs[1] if barbs else None;extra_end=_add(rp,(0.,rh/2+5,0.))
         builder.parts.append(dict(id='cooler:reservoir',label=cooler['reservoir_model'],kind='pump_reservoir',model_id=cooler['id']))
     else:targets=barbs;extra_start=extra_end=None
     for start,end in zip(ports,targets):
@@ -798,21 +833,32 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
     if cooler:
         p,basis=_cpu_frame(anchors);kind=cooler['kind'];mount=selection.get('radiator_mount','top')
         if kind in ('aio','custom_loop'):
-            fan=_reference_fan(cooler);check=_mount_check(case,mount,fan['size_mm'],cooler['fan_count']) if mount in _MOUNT_NORMALS else 'unsupported'
+            from liquid_selection044 import resolve_liquid_choices
+            selected,secondary_cooler,selection_issues=resolve_liquid_choices(cooler,selection)
+            meta['rejected'].extend(dict(row,kind='cooling_selection') for row in selection_issues if row.get('severity')!='review')
+            meta['mounting_issues']=[dict(row) for row in selection_issues if row.get('severity')=='review']
+            if selected is None:
+                cooler=None
+            else:cooler=selected
+            fan=_reference_fan(cooler) if cooler else None
+            check=_mount_check(case,mount,fan['size_mm'],cooler['fan_count']) if cooler and mount in _MOUNT_NORMALS else 'unsupported'
             gpu_pcb=None;secondary_mount='side' if mount!='side' else 'top'
-            if selection.get('gpu_waterblock') is True:
+            if cooler and secondary_cooler and selection.get('gpu_waterblock') is True:
                 pcb=(anchors.get('gpu') or {}).get('pcb',{})
                 valid_position=pcb.get('position',pcb.get('center')) if isinstance(pcb,dict) else None
                 valid_size=all(type(pcb.get(k)) in (int,float) and math.isfinite(pcb[k]) and 45<=pcb[k]<=500 for k in ('width_mm','length_mm')) if isinstance(pcb,dict) else False
-                supported=_mount_check(case,secondary_mount,fan['size_mm'],cooler['fan_count'])!='unsupported'
+                secondary_fan=_reference_fan(secondary_cooler)
+                supported=_mount_check(case,secondary_mount,secondary_fan['size_mm'],secondary_cooler['fan_count'])!='unsupported'
                 _,_,span=_mount_plane(secondary_mount,dimensions,0,planes)
-                fits=cooler['radiator_mm']['width']<=span[0]+1 and cooler['radiator_mm']['length']<=span[1]+1
+                fits=secondary_cooler['radiator_mm']['width']<=span[0]+1 and secondary_cooler['radiator_mm']['length']<=span[1]+1
                 if kind=='custom_loop' and valid_size and isinstance(valid_position,(tuple,list)) and len(valid_position)==3 and all(type(v) in (int,float) and math.isfinite(v) for v in valid_position) and supported and fits:
                     gpu_pcb=pcb
                 else:meta['warnings'].append('GPU block omitted: requires custom loop, explicit posed PCB reference and a separate supported full-size radiator mount; original GPU cooler retained.')
-            if check=='unsupported':meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
-            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck')):
+            if cooler is None:pass
+            elif check=='unsupported':meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
+            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck'),secondary_cooler):
                 occupied.add(mount);meta['cooler']=cooler;meta['radiator_mount_compatibility']=check
+                occupied.update(row['mount'] for row in builder.parts if row['kind']=='radiator')
                 meta['replace_gpu_cooler']=any(part['kind']=='gpu_waterblock' for part in builder.parts)
                 if meta['replace_gpu_cooler']:
                     occupied.add(secondary_mount);meta['secondary_radiator_mount']=secondary_mount
@@ -828,7 +874,9 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
             if main_fans and all(fan.get('blade_geometry_reviewed') for fan in main_fans):
                 meta['real_cpu_rotor_parts']=['cooler:cpu']
             elif cooler['fan_count']>0:meta['warnings'].append('Air-cooler leaf contours/count are reference geometry pending primary-photo review; real-RPM rotation is gated off, explicit demo remains available.')
-        if 'cooler' in meta:meta['sources'].extend(cooler['sources'])
+        if 'cooler' in meta:
+            meta['sources'].extend(cooler['sources'])
+            if kind=='custom_loop' and meta.get('replace_gpu_cooler') and secondary_cooler:meta['sources'].extend(secondary_cooler['sources'])
     groups=selection.get('case_fans',[]);groups=groups if isinstance(groups,(tuple,list)) else []
     used_mounts=set()
     for group in groups[:12]:
@@ -859,9 +907,13 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
         meta['warnings'].append('Manufacturer documents an embedded VRM fan; its unverified internal pose is not invented in this reference model.')
     if 'cooler' in meta:
         selected=meta['cooler']
-        meta['documented_cooler_fans']=selected['fan_count']*(2 if meta['replace_gpu_cooler'] else 1)+int(bool(selected.get('vrm_fan')))
+        meta['documented_cooler_fans']=(selected['fan_count']+int(bool(selected.get('vrm_fan')))) if selected['kind']!='custom_loop' else None
+        meta['radiator_fan_count']=sum(f['role']=='radiator' for f in builder.fans)
+        meta['radiators']=[dict(row) for row in builder.parts if row['kind']=='radiator']
         meta['rendered_cooler_fans']=sum(f['role']!='case' for f in builder.fans)
         meta['fin_sampling']=dict(documented_per_tower=selected.get('documented_fin_count'),rendered_reference_per_bank={'eco':12,'balanced':24,'close':44}[builder.level],exact_internal_construction=False)
+    meta['connection_issues']=builder.connection_issues
+    if builder.connection_issues:meta['warnings'].append('Some standalone radiator port positions are unverified; associated hoses and GPU-block replacement are omitted, never assigned invented connections.')
     additions=builder.finish();meta['parts']=builder.parts;meta['fans']=builder.fans;meta['wire_anchors']=builder.wire_anchors;meta['sources']=list(dict.fromkeys(meta['sources']))
     meta['triangle_count']=sum(mesh.vertex_count for mesh in additions)//3
     meta['mesh_count']=len(additions)

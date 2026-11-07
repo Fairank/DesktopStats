@@ -29,8 +29,10 @@ HOSTS={
 
 class CoolingExpansion040Tests(unittest.TestCase):
     def test_previous_108_records_have_only_the_two_authorized_fuma_keys_added(self):
+        # Preserve the original static catalog hash; the 0.44 mounting overlay
+        # has independent provenance/geometry checks in test_fan_mounting044.
         old={'coolers':[catalog.get_cooler(c['id']) for c in catalog.choices_coolers()[:54]],
-             'fans':[catalog.get_fan(c['id']) for c in catalog.choices_fans()[:54]]}
+             'fans':[dict(catalog._FAN_BY_ID[c['id']]) for c in catalog.choices_fans()[:54]]}
         fama=next(row for row in old['coolers'] if row['id']=='scythe-fuma3')
         self.assertEqual(fama.pop('fan_relative_directions'),[1,-1])
         self.assertTrue(fama.pop('relative_rotation_verified'))

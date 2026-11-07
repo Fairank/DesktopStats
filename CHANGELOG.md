@@ -1,5 +1,27 @@
 # Changes
 
+## 0.44.0-preview.1 (development candidate)
+
+- Separate standalone custom-loop radiators and each radiator fan, with primary
+  and secondary models, single-side/push-pull/structure-only layouts, independent
+  picking and per-part styles. Preserve the factory body of sealed AIO products.
+- Add24 exact radiators from8 brands with linked manufacturer evidence. Draw
+  actual open mounting flanges and observed connection throats, folded foil or
+  source-specific sheet/tube cores, and stepped tank seams. Unknown ports remain
+  missing; hoses are omitted rather than attached to invented AIO outlets.
+- Correct5 fans' manufacturer mounting facts, including the105mm hole spacing
+  of the round140mm NF-A15. Reject unverified round-frame radiator mounting.
+- Keep coolant temperature/flow/pump RPM unbound in reservoir/radiator/fan
+  inspection; do not substitute CPU or CPU_FAN readings. An unused stored fan
+  cannot block structure-only inspection.
+- Put the complete29-group requirement audit and explicit unfinished work into
+  README and a reproducible structured ledger. PCBS-level coverage/detail is
+  still an unmet target; do not claim full completion or native acceptance.
+- Keep documentation showcase media in source, without a duplicate unused
+  runtime asset copy. No added sampler, device-control service or motion clock.
+- Code/software-only work while gaming; no installation, restart or UAC.
+
+
 ## 0.43.0-preview.1 (development candidate)
 
 - Show the six current numbered styles in actual CPU/GPU widget animations

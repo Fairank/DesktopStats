@@ -137,6 +137,10 @@ REVIEWED_FILES = frozenset(
             "showcase/assembly-air-six043.png",
             "showcase/assembly-aio-six043.png",
             "showcase/assembly-loop-six043.png",
+            "showcase/radiators-atlas044.png",
+            "showcase/liquid-six044.png",
+            "showcase/liquid-six044.gif",
+            "showcase/liquid-six044.mp4",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]

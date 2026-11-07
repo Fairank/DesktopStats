@@ -66,6 +66,17 @@ SOURCES = (
     "component_catalog.py",
     "component_storage043.py",
     "assembly_lighting.py",
+    "assembly_radiator044.py",
+    "liquid_cooling_catalog044.py",
+    "liquid_selection044.py",
+    "fan_mounting044.py",
+    "docs/REQUIREMENTS.json",
+    "tools/export_requirements.py",
+    "tests/test_liquid_cooling_catalog044.py",
+    "tests/test_assembly_radiator044.py",
+    "tests/test_modular_liquid044.py",
+    "tests/test_liquid_controls044.py",
+    "tests/test_fan_mounting044.py",
     "cpu_temperature.py",
     "cpu_catalog.py",
     "cpu_package_runtime.py",
@@ -489,8 +500,13 @@ def main():
         "--workpath",
         str(ROOT / "build/native"),
     ]
-    for directory in ("native", "assets"):
-        command += ["--add-data", str(ROOT / directory) + ";" + directory]
+    command += ["--add-data", str(ROOT / "native") + ";native"]
+    # Documentation previews remain in corresponding source, without a second
+    # unused runtime copy. Preserve subdirectories used by icons/shaders/motion.
+    for asset in sorted((ROOT / "assets").iterdir()):
+        if asset.name == "showcase":continue
+        destination = "assets/" + asset.name if asset.is_dir() else "assets"
+        command += ["--add-data", str(asset) + ";" + destination]
     command += ["--add-data", str(ROOT / "locales.txt") + ";."]
     for file in collector:
         command += ["--add-data", str(file) + ";collector"]

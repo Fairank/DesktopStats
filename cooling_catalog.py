@@ -675,7 +675,8 @@ _COOLER_BY_ID={row['id']:row for row in _COOLERS}
 
 
 def get_fan(model_id):
-    return deepcopy(_FAN_BY_ID.get(model_id,{})) if isinstance(model_id,str) else {}
+    from fan_mounting044 import apply_mounting_facts
+    return apply_mounting_facts(deepcopy(_FAN_BY_ID.get(model_id,{}))) if isinstance(model_id,str) else {}
 
 
 def get_cooler(model_id):
@@ -683,8 +684,12 @@ def get_cooler(model_id):
 
 
 def choices_coolers():
-    return tuple(dict(id=row['id'],label=row['label'],kind=row['kind'],brand=row['brand'],series=row['series']) for row in _COOLERS)
+    return tuple(dict(id=row['id'],label=row['label'],kind=row['kind'],brand=row['brand'],series=row['series'],
+        fan_size_mm=row.get('fan_reference_mm') or _FAN_BY_ID.get(row.get('fan_model'),{}).get('size_mm')) for row in _COOLERS)
 
 
 def choices_fans():
-    return tuple(dict(id=row['id'],label=row['label'],size_mm=row['size_mm'],brand=row['brand'],series=row['series']) for row in _FANS)
+    return tuple(dict(id=row['id'],label=row['label'],size_mm=row['size_mm'],brand=row['brand'],series=row['series'],
+        frame=row.get('frame'),frameless=bool(row.get('frameless')),
+        mount_pitch_mm=row.get('mount_pitch_mm'),mount_pitch_verified=row.get('mount_pitch_verified',False))
+        for row in (get_fan(item['id']) for item in _FANS))

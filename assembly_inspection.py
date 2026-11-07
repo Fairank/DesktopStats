@@ -166,7 +166,30 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
         from component_catalog import get_component
         cooling=mapping(spec.get('cooling'));auxiliary=mapping(spec.get('auxiliary'))
         model_id=part.get('model_id','')
-        if component=='cooler':
+        if component=='cooler' and part.get('kind')=='pump_reservoir':
+            identity=part['label']
+            rows=[_static('水温',None,False,'未提供此部件的独立传感器读数。'),
+                _static('流量',None,False,'未提供此部件的独立传感器读数。'),
+                _static('水泵转速',None,False,'未提供此部件的独立传感器读数。')]
+            notes.append('水箱与水泵尚未绑定独立传感器，不借用 CPU 或 CPU_FAN 读数。')
+        elif component=='cooler' and part.get('kind')=='radiator':
+            identity=part['label'];size=_dimensions(part.get('dimensions_mm'),('length','width','thickness'))
+            nominal=part.get('fan_size_mm');count=part.get('installed_fan_count');thread=part.get('port_thread')
+            rows=[_static('尺寸',size,size is not None),
+                _static('风扇安装规格',f'{nominal:g} mm' if numeric(nominal) else None,numeric(nominal)),
+                _static('已装风扇数量',count,type(count) is int),
+                _static('接口',thread,bool(thread)),
+                _static('水温',None,False,'未提供此部件的独立传感器读数。'),
+                _static('流量',None,False,'未提供此部件的独立传感器读数。')]
+            notes.append('冷排水温、流量与独立测速尚未绑定；不借用 CPU 温度。')
+        elif component=='cooler' and part.get('kind')=='radiator_fan':
+            model=get_fan(model_id);identity=part['label'];size=part.get('size_mm');depth=part.get('depth_mm');pitch=model.get('mount_pitch_mm')
+            rows=[_static('数量',1),_static('风扇尺寸',f'{size:g} mm' if numeric(size) else None,numeric(size)),
+                _static('厚度',f'{depth:g} mm' if numeric(depth) else None,numeric(depth)),
+                _static('安装孔距',f'{pitch:g} mm' if numeric(pitch) else None,numeric(pitch)),
+                _static('实测转速',None,False,'未提供此部件的独立传感器读数。')]
+            notes.append('水泵与风扇测速尚未匹配，实测模式保持静止。')
+        elif component=='cooler':
             model=get_cooler(model_id or cooling.get('cpu_cooler'))
             identity=part.get('label') or model.get('label') or '未选择散热器'
             size=_dimensions(model.get('dimensions_mm'),('width','height','depth'))
@@ -174,10 +197,11 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
             from assembly_feedback import cpu_fan_state
             feedback=cpu_fan_state(data,now=now)
             if cpu.get('telemetry_bound') is False:feedback=dict(available=False,rpm=None)
+            usable=mapping(details.get('cooling')).get('cpu_fan_tach_usable') is True
+            if not usable:feedback=dict(available=False,rpm=None)
             passive=model.get('kind')=='passive_tower'
             rows.append(_static('风扇数量',0,True) if passive else
                         _static('CPU_FAN 通道',f"{feedback['rpm']:.0f} RPM" if feedback['available'] else None,feedback['available']))
-            usable=mapping(details.get('cooling')).get('cpu_fan_tach_usable')
             if model and not passive:
                 notes.append('CPU_FAN 是代表通道，不是每把风扇的独立测速。' if usable
                              else '水泵与风扇测速尚未匹配，实测模式保持静止。' if model.get('kind') in ('aio','custom_loop')

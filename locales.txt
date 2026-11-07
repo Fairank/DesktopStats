@@ -1184,3 +1184,31 @@ be quiet! Dark Rock TF2 夹层扇 · Silent Wings135|be quiet! Dark Rock TF2 中
 薄荷|薄荷|Mint|ミント|민트|Mintgrün|Menthe|Menta
 紫色|紫色|Violet|バイオレット|보라색|Violett|Violet|Violeta
 所选 M.2 长度没有已核可用安装位。|所選 M.2 長度沒有已核可用安裝位。|No verified free mount supports this M.2 length.|このM.2の長さに対応する確認済みの空き取付位置がありません。|이 M.2 길이를 지원하는 확인된 빈 장착 위치가 없습니다.|Kein geprüfter freier Montageplatz für diese M.2-Länge.|Aucun emplacement libre vérifié pour cette longueur M.2.|No hay un montaje libre verificado para esta longitud M.2.
+主冷排|主冷排|Primary radiator|||||
+第二冷排|第二冷排|Second radiator|||||
+独立冷排|獨立冷排|Standalone radiator|||||
+冷排风扇|冷排風扇|Radiator fans|||||
+风扇布局|風扇配置|Fan layout|||||
+单面风扇|單面風扇|Single side|||||
+双面夹心|雙面夾心|Push-pull|||||
+不装风扇（结构检视）|不裝風扇（結構檢視）|No fans (structure inspection)|||||
+沿用参考冷排|沿用參考冷排|Use reference radiator|||||
+沿用原配／参考风扇|沿用原配／參考風扇|Stock / reference fans|||||
+一体式水冷保留原厂冷排；独立冷排用于自定义回路。|一體式水冷保留原廠冷排；獨立冷排用於自訂迴路。|Sealed AIOs retain the factory radiator. Standalone radiators are for custom loops.|||||
+所选冷排型号尚未收录，未强行替换。|所選冷排型號尚未收錄，未強行替換。|The selected radiator is not registered and was not substituted.|||||
+所选冷排风扇尚未收录。|所選冷排風扇尚未收錄。|The selected radiator fan is not registered.|||||
+风扇尺寸与冷排安装规格不同。|風扇尺寸與冷排安裝規格不同。|Fan size differs from the radiator mounting format.|||||
+圆框或无框风扇的冷排安装方式尚未核实，未强行装入。|圓框或無框風扇的冷排安裝方式尚未核實，未強行裝入。|Radiator mounting for this round or frameless fan is unverified; it was not forced into place.|||||
+风扇与冷排的已核孔距不同，未强行装入。|風扇與冷排的已核孔距不同，未強行裝入。|The verified fan and radiator hole spacings differ; the fan was not forced into place.|||||
+部分冷排接口位置尚未核实，对应管路未强行连接。|部分冷排接口位置尚未核實，對應管路未強行連接。|Some radiator port positions are unverified; their hoses were not connected to invented positions.|||||
+风扇安装规格|風扇安裝規格|Fan mounting format|||||
+已装风扇数量|已裝風扇數量|Selected fan count|||||
+水温|水溫|Coolant temperature|||||
+流量|流量|Flow rate|||||
+厚度|厚度|Thickness|||||
+安装孔距|安裝孔距|Mounting-hole spacing|||||
+冷排水温、流量与独立测速尚未绑定；不借用 CPU 温度。|冷排水溫、流量與獨立測速尚未綁定；不借用 CPU 溫度。|Radiator coolant temperature, flow and independent tachometers are unbound; CPU temperature is not substituted.|||||
+当前风扇与冷排规格不匹配，请重新选择。|目前風扇與冷排規格不符，請重新選擇。|The selected fan does not match this radiator; select a compatible fan.|||||
+水泵转速|水泵轉速|Pump speed|||||
+水箱与水泵尚未绑定独立传感器，不借用 CPU 或 CPU_FAN 读数。|水箱與水泵尚未綁定獨立感測器，不借用 CPU 或 CPU_FAN 讀數。|The reservoir and pump have no bound sensors; CPU and CPU_FAN readings are not substituted.|||||
+风扇标称孔距与冷排不同，安装间隙待核。|風扇標稱孔距與冷排不同，安裝間隙待核。|Published fan and radiator hole spacings differ; mounting clearance needs review.|Published fan and radiator hole spacings differ; mounting clearance needs review.|Published fan and radiator hole spacings differ; mounting clearance needs review.|Published fan and radiator hole spacings differ; mounting clearance needs review.|Published fan and radiator hole spacings differ; mounting clearance needs review.|Published fan and radiator hole spacings differ; mounting clearance needs review.

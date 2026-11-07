@@ -22,6 +22,27 @@ ColumnLayout {
     spacing: 18
     Theme { id: ui }
     function fan(mount) {return (config.case_fans || []).find(row=>row.mount===mount) || ({model:"",count:1,direction:mount==="top"||mount==="rear"?"exhaust":"intake"})}
+    function radiatorFanSize(prefix) {
+        const radiator=(root.catalog.radiators || []).find(row=>row.id===root.config[prefix+"radiator_model"])
+        const cooler=(root.catalog.coolers || []).find(row=>row.id===root.config.cooler_model)
+        return root.coolerKind==="custom_loop"&&radiator&&radiator.id?radiator.fan_size_mm:(cooler || {}).fan_size_mm
+    }
+    function radiatorFanFits(prefix,fan) {
+        if(!fan||!fan.id)return true
+        return fan.size_mm===radiatorFanSize(prefix)&&fan.frame!=="round"&&!fan.frameless
+    }
+    function radiatorMountReview(prefix) {
+        const radiator=root.coolerKind==="custom_loop"?(root.catalog.radiators || []).find(row=>row.id===root.config[prefix+"radiator_model"]):null
+        const fan=(root.catalog.radiator_fans || []).find(row=>row.id===root.config[prefix+"radiator_fan_model"])
+        return root.config[prefix+"radiator_fan_layout"]!=="none"&&radiator&&fan&&radiator.fan_mount_pitch_mm&&fan.mount_pitch_verified&&Math.abs(radiator.fan_mount_pitch_mm-fan.mount_pitch_mm)>0.05
+    }
+    function radiatorFansFor(prefix) {
+        return (root.catalog.radiator_fans || []).filter(row=>radiatorFanFits(prefix,row)||row.id===root.config[prefix+"radiator_fan_model"])
+    }
+    function radiatorFanConflict(prefix) {
+        const fan=(root.catalog.radiator_fans || []).find(row=>row.id===root.config[prefix+"radiator_fan_model"])
+        return root.config[prefix+"radiator_fan_layout"]!=="none"&&((root.config[prefix+"radiator_fan_model"]&&!fan)||!radiatorFanFits(prefix,fan))
+    }
     function chooseGpuBrand(value) {gpuSeries="";gpuBrand=value}
     function changeFan(mount,key,value) {const row=Object.assign({},fan(mount));row[key]=value;stats.changeAssemblyFan(mount,row.model,Number(row.count),row.direction)}
     function fansFor(mount) {
@@ -80,6 +101,46 @@ ColumnLayout {
             Choice {objectName:"assemblyRadiatorMountChoice";Layout.fillWidth:true;model:root.catalog.mounts || [];value:root.config.cooler_mount || "top"
                 Accessible.name:ui.t("冷排位置");onPicked:selected=>stats.changeAssembly("cooler_mount",selected)}
         }
+        Repeater {
+            model:[{prefix:"",label:ui.t("主冷排"),secondary:false},
+                   {prefix:"secondary_",label:ui.t("第二冷排"),secondary:true}]
+            ColumnLayout {
+                required property var modelData
+                readonly property string prefix:modelData.prefix
+                Layout.fillWidth:true;spacing:8
+                visible:(root.coolerKind==="aio"||root.coolerKind==="custom_loop")&&(!modelData.secondary||(root.coolerKind==="custom_loop"&&root.config.gpu_waterblock===true))
+                Text {text:modelData.label;font.family:ui.fontFamily;font.pixelSize:12;font.weight:Font.DemiBold;color:ui.ink}
+                RowLayout {
+                    Layout.fillWidth:true;spacing:12;visible:root.coolerKind==="custom_loop"
+                    Text {Layout.preferredWidth:90;text:ui.t("独立冷排");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}
+                    Choice {objectName:"assemblyRadiatorChoice_"+prefix;Layout.fillWidth:true;model:root.catalog.radiators || []
+                        value:root.config[prefix+"radiator_model"] || "";Accessible.name:modelData.label+" "+ui.t("独立冷排")
+                        onPicked:selected=>stats.changeAssembly(prefix+"radiator_model",selected)}
+                }
+                RowLayout {
+                    Layout.fillWidth:true;spacing:12
+                    Text {Layout.preferredWidth:90;text:ui.t("冷排风扇");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}
+                    Choice {objectName:"assemblyRadiatorFanChoice_"+prefix;Layout.fillWidth:true;model:root.radiatorFansFor(prefix)
+                        value:root.config[prefix+"radiator_fan_model"] || "";Accessible.name:modelData.label+" "+ui.t("冷排风扇")
+                        onPicked:selected=>stats.changeAssembly(prefix+"radiator_fan_model",selected)}
+                }
+                Text {objectName:"assemblyRadiatorFanConflict_"+prefix;Layout.fillWidth:true;visible:root.radiatorFanConflict(prefix)
+                    text:ui.t("当前风扇与冷排规格不匹配，请重新选择。")
+                    font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
+                Text {objectName:"assemblyRadiatorMountReview_"+prefix;Layout.fillWidth:true;visible:!!root.radiatorMountReview(prefix)
+                    text:ui.t("风扇标称孔距与冷排不同，安装间隙待核。")
+                    font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
+                RowLayout {
+                    Layout.fillWidth:true;spacing:12
+                    Text {Layout.preferredWidth:90;text:ui.t("风扇布局");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}
+                    Choice {objectName:"assemblyRadiatorLayoutChoice_"+prefix;Layout.fillWidth:true;model:root.catalog.radiator_layouts || []
+                        value:root.config[prefix+"radiator_fan_layout"] || "single";Accessible.name:modelData.label+" "+ui.t("风扇布局")
+                        onPicked:selected=>stats.changeAssembly(prefix+"radiator_fan_layout",selected)}
+                }
+            }
+        }
+        Text {Layout.fillWidth:true;visible:root.coolerKind==="aio";text:ui.t("一体式水冷保留原厂冷排；独立冷排用于自定义回路。")
+            font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
         SettingRow {Layout.fillWidth:true;visible:root.coolerKind==="custom_loop";label:ui.t("显卡水冷头（参考）")
             note:ui.t("仅替换三维外观，不代表检测到本机改装。")
             Toggle {checked:root.config.gpu_waterblock===true;onToggled:stats.changeAssembly("gpu_waterblock",checked)}}
