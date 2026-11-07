@@ -38,14 +38,6 @@ ColumnLayout {
     SettingsGroup {
         Layout.fillWidth:true;title:ui.t("配件与安装")
         note:ui.t("选择参考型号补全装机外观，不会把自选模型当作系统识别结果。")
-        Flow {
-            Layout.fillWidth:true;spacing:8
-            ActionButton {text:ui.t("风冷参考装机");onClicked:stats.useAssemblyReference("air")}
-            ActionButton {text:ui.t("一体水冷参考装机");onClicked:stats.useAssemblyReference("aio")}
-            ActionButton {text:ui.t("分体水冷参考装机");onClicked:stats.useAssemblyReference("loop")}
-        }
-        Text {Layout.fillWidth:true;text:ui.t("参考方案会替换机箱和配件选择；按应用偏好保存。顶部栏布局保持原样。")
-            font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
         Repeater {
             model:[{key:"cpu_model",label:ui.t("处理器"),rows:root.catalog.cpus || []},
                    {key:"gpu_model",label:ui.t("显卡"),rows:root.filteredGpus}]
@@ -187,7 +179,6 @@ ColumnLayout {
         }
         Text {Layout.fillWidth:true;text:ui.t("单件设置优先于同类设置，同类设置优先于整机外观。")
             font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
-        ActionButton {objectName:"assemblyResetPartStyles";text:ui.t("恢复统一外观");onClicked:stats.resetAssemblyPartStyles()}
     }
     SettingsGroup {
         Layout.fillWidth:true;title:ui.t("线缆与转动")

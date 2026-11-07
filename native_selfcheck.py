@@ -209,6 +209,25 @@ def _check(report, output):
         assert assembly['cpu']['appearance']['cpu_package']['model_id']=='intel-13700kf'
         assert scene.metadata['cpu_package']['available']
         report['checks'].append('optional-pack-lazy-runtime-and-base-cpu-no-graphics')
+        assert 'accessory_art' not in sys.modules,'Dormant accessory gallery loaded its artwork'
+        from accessory_art import choices as accessory_choices,art as accessory_art,clear_cache,cache_info
+        from PySide6.QtCore import QByteArray
+        from PySide6.QtSvg import QSvgRenderer
+        accessory_catalog=accessory_choices()
+        report['accessory_catalog_counts']={key:len(rows) for key,rows in accessory_catalog.items()}
+        assert report['accessory_catalog_counts']==dict(cases=64,coolers=42,psus=6,fans=38)
+        for kind,key in (('case','cases'),('cooler','coolers'),('psu','psus'),('fan','fans')):
+            for style in ('miniature','notebook_line'):
+                artwork=accessory_art(kind,accessory_catalog[key][0]['id'],style)
+                svg=QSvgRenderer(QByteArray(artwork['svg'].encode('utf8')))
+                assert svg.isValid(),(kind,style)
+                sample=QImage(120,100,QImage.Format_ARGB32_Premultiplied);sample.fill(Qt.transparent)
+                paint=QPainter(sample)
+                try:svg.render(paint)
+                finally:paint.end()
+                assert any(sample.pixelColor(x,50).alpha()>0 for x in range(120)),(kind,style)
+        clear_cache();assert cache_info()['entries']==0
+        report['checks'].append('accessory-svg-catalog-render-and-release-no-graphics')
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

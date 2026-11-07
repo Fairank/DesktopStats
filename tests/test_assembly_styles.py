@@ -67,6 +67,67 @@ class AssemblyStyleTests(unittest.TestCase):
         self.assertNotIn(((0,0,0),(10,10,0)),edges)
         self.assertEqual(crease_edges(square,0),())
 
+    def test_t_junctions_cancel_coplanar_partition_edges_without_inventing_chords(self):
+        from assembly_geometry import _quad
+        vertices=[]
+        for left,right,bottom,top in ((0,10,0,20),(10,20,0,10),(10,20,10,20)):
+            _quad(vertices,(left,bottom,0),(right,bottom,0),(right,top,0),(left,top,0))
+        edges=crease_edges(tuple(vertices),4)
+        self.assertEqual(set(edges),{((0,0,0),(0,20,0)),((0,0,0),(20,0,0)),
+                                     ((0,20,0),(20,20,0)),((20,0,0),(20,20,0))})
+
+    def test_main_fan_blades_and_hub_survive_dense_acceleration_grooves_whole(self):
+        from assembly_cooling import add_cooling
+        from assembly_style import _edge_groups,MAX_MESH_EDGES
+        meshes,_=add_cooling((),{'cooling':{'case_fans':[dict(model='noctua-nf-a12x25-pwm',mount='front',count=1)]}},
+                            anchors={'case_dimensions':(600,800,800)})
+        rotor=next(mesh for mesh in meshes if mesh.rotor)
+        raw=crease_edges(rotor.vertices,MAX_STYLE_EDGES);retained=set(crease_edges(rotor.vertices))
+        main=[group for group,span in _edge_groups(raw) if span>=20]
+        self.assertEqual(len(main),11)  # Nine separate leaves and two hub rims.
+        self.assertEqual(sum(map(len,main)),480)
+        self.assertLessEqual(len(retained),MAX_MESH_EDGES)
+        self.assertTrue(all(raw[index] in retained for group in main for index in group))
+        batches=edge_batches(meshes,'notebook_line')
+        vertices=next(points for mesh,points in batches if mesh is rotor)
+        ink={tuple(vertices[i:i+3]) for i in range(0,len(vertices),6)}
+        self.assertTrue(all(point in ink for group in main for index in group for point in raw[index]))
+
+    def test_dense_psu_grille_keeps_closed_apertures_with_bounded_candidates_and_final_ink(self):
+        from assembly_auxiliary import add_auxiliary
+        from assembly_style import _edge_groups,MAX_GRILLE_EDGES
+        meshes,_=add_auxiliary({'auxiliary':{'psu':{'model_id':'corsair-rm1000x-2024'}}},
+                              {'case_dimensions':(600,800,800),'psu':{'position':(0,0,0)}})
+        panel=next(mesh for mesh in meshes if mesh.name=='psu-fan-panel')
+        original=panel.vertices;edges=crease_edges(panel.vertices,MAX_GRILLE_EDGES)
+        self.assertLessEqual(len(edges),MAX_GRILLE_EDGES)
+        apertures=[group for group,span in _edge_groups(edges) if 5<span<20]
+        self.assertGreater(len(apertures),40)
+        for group in apertures:
+            degree={}
+            for index in group:
+                for point in edges[index]:degree[point]=degree.get(point,0)+1
+            self.assertGreaterEqual(min(degree.values()),2)
+        batches=edge_batches(meshes,'notebook_line')
+        self.assertLessEqual(sum(len(points)//12 for _,points in batches),MAX_STYLE_EDGES)
+        self.assertIs(panel.vertices,original)
+
+    def test_all_eight_fan_corner_pad_contours_survive_batched_partitions(self):
+        from assembly_cooling import add_cooling
+        from assembly_style import _edge_groups,MAX_MESH_EDGES
+        meshes,_=add_cooling((),{'cooling':{'case_fans':[dict(model='noctua-nf-a12x25-pwm',mount='front',count=1)]}},
+                            anchors={'case_dimensions':(600,800,800)})
+        pads=next(mesh for mesh in meshes if mesh.name=='case-fan-pads')
+        edges=crease_edges(pads.vertices,repair_partitions=True)
+        self.assertLessEqual(len(edges),MAX_MESH_EDGES)
+        contours=[group for group,span in _edge_groups(edges) if span>=15]
+        self.assertEqual(len(contours),8)  # Four front and four back pads.
+        self.assertEqual({len(group) for group in contours},{24})
+        batches=edge_batches(meshes,'notebook_line')
+        vertices=next(points for mesh,points in batches if mesh is pads)
+        ink={tuple(vertices[i:i+3]) for i in range(0,len(vertices),6)}
+        self.assertTrue(all(point in ink for group in contours for index in group for point in edges[index]))
+
     def test_wobbly_ink_has_one_bounded_static_budget_and_preserves_rotor_identity(self):
         vertices=box(10,10,10)
         meshes=tuple(Mesh('test-box',vertices,(.3,.4,.5,1.),rotor=n==799,direction=-1) for n in range(800))

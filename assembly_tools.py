@@ -24,6 +24,7 @@ class AssemblyTools(WorkspaceTools):
         self._assembly_spec = None
         self._assembly_summary = dict(initialized=False)
         self._pack_status = ''
+        self._accessory_gallery_active = False
 
     def initialize_assembly_signals(self):
         self.dataChanged.connect(self._refresh_assembly)
@@ -126,6 +127,33 @@ class AssemblyTools(WorkspaceTools):
     def assemblyParts(self):
         from assembly_parts import choices
         return choices(self.tr)
+
+    @Property('QVariantMap', notify=assemblyCasesChanged)
+    def accessoryCatalog(self):
+        from accessory_art import choices
+        return choices()
+
+    @Slot(str,str,str,result='QVariantMap')
+    def accessoryModelArt(self,kind,model,style):
+        from accessory_art import art
+        return art(kind,model,style)
+
+    @Slot(bool)
+    def setAccessoryGalleryActive(self,active):
+        self._accessory_gallery_active=active is True
+        if not self._accessory_gallery_active:
+            from accessory_art import clear_cache
+            clear_cache()
+
+    @Slot(str)
+    def downloadAccessoryArt(self,kind):
+        keys={'case':'cases','cooler':'coolers','psu':'psus','fan':'fans'}
+        if not isinstance(kind,str) or kind not in keys:return
+        from PySide6.QtCore import QUrl
+        from PySide6.QtGui import QDesktopServices
+        from product_version import VERSION
+        QDesktopServices.openUrl(QUrl('https://github.com/Fairank/DesktopStats/releases/download/v'+VERSION
+            +'/DesktopStats-'+VERSION+'-'+keys[kind]+'-SVG.zip'))
 
     @Property("QVariantList", notify=assemblyCasesChanged)
     def assemblyStyleTargets(self):

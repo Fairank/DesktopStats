@@ -92,6 +92,11 @@ def build_report():
             series_pending=sum(row['series'] is None for row in rows)),
         optional_summary=dict(cpu_products=len(optional_cpus),available_cpu_products=len(CPU_MODELS),
                               packs=2,installed_by_default=False,executable_content=False),
+        artwork_2d=dict(kinds=['case','cooler','psu','fan'],
+            records=sum(counts[kind] for kind in ('case','cooler','psu','fan')),
+            styles=list(HARDWARE_ICON_STYLES),generator='on_demand_svg',cache_max_entries=16,
+            motion='explicit_reference_demonstration',sensor_binding=False,
+            download_format='standalone_svg_collections',market_exhaustive=False),
         optional_products=optional_cpus,products=rows)
 
 

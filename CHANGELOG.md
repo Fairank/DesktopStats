@@ -1,5 +1,24 @@
 # Changes
 
+## 0.37.0-preview.1
+
+- Add a lazy searchable 2D model gallery for all 64 cases, 42 cooling references,
+  six PSUs and 38 fans in the current catalog. Every record has all 13 styles;
+  Original remains expression-free. The custom loop is a reference combination.
+- Preserve model-family shells, pumps, radiator layouts, grilles and fan profiles
+  in original schematic SVG artwork, with explicit reference-detail status.
+  Export four independent noncommercial SVG collections with source links,
+  per-file checksums, the complete license, Required Notice and scope statement.
+- Keep the gallery static by default, generate visible cards on demand and clear
+  its bounded cache on close. Optional rotor demonstration transforms retained
+  layers using one shared clock; it never polls hardware or claims a measured RPM.
+- Move assembly style and accessory counts to the first screen. Add a direct
+  gallery entry, three complete reference presets and an explicit action that
+  clears independent part-style overrides without changing chosen hardware.
+- Preserve connected fan-blade, hub, corner-pad and PSU-grille ink contours.
+  Stitch coplanar T-junctions and retain complete contours within existing bounds;
+  leave physical triangles, depth testing, Original and the 8,192-edge cap intact.
+
 ## 0.36.0-preview.1
 
 - Add optional, data-only Intel and AMD CPU packs: 72 additional named SKUs,

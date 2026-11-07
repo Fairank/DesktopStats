@@ -4,8 +4,11 @@ import QtQuick.Layouts
 ScrollView {
     id: root
     property bool active: false
+    signal browseModelsRequested()
     property var config: stats.draft.assembly || ({case_model:"",exploded:false,fan_animation:false,appearance_style:"follow"})
     readonly property var info: stats.assemblySummary || ({initialized:false})
+    readonly property var partCatalog: assemblyParts.catalog
+    readonly property int independentStyles: Object.keys(root.config.part_styles || ({})).length
     property string brandFilter: ""
     readonly property var allCases: stats.assemblyCases
     readonly property var brandChoices: {
@@ -19,6 +22,10 @@ ScrollView {
     clip: true
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
     Theme { id: ui }
+    function showExample(kind) {
+        stats.useAssemblyReference(kind)
+        stats.openAssemblyView()
+    }
     ColumnLayout {
         width: root.availableWidth
         spacing: 22
@@ -31,10 +38,65 @@ ScrollView {
                 onClicked:stats.openAssemblyView()
             }
         }
-        Text {
-            Layout.fillWidth:true
-            text:ui.t("按已识别的组件查看可旋转的三维布局。")
-            font.family:ui.fontFamily;font.pixelSize:13;color:ui.muted;wrapMode:Text.WordWrap
+        SettingsGroup {
+            objectName:"assemblyAppearanceOverview"
+            Layout.fillWidth:true;title:ui.t("硬件模型与外观");spacing:8
+            note:ui.t("机箱、散热器、电源与风扇均支持全部外观。")
+            Flow {
+                objectName:"assemblyCatalogCounts"
+                Layout.fillWidth:true;spacing:16
+                Repeater {
+                    model:[{key:"cases",label:ui.t("机箱"),count:root.allCases.filter(row=>!!row.id).length},
+                           {key:"coolers",label:ui.t("CPU 散热器"),count:(root.partCatalog.coolers || []).filter(row=>!!row.id).length},
+                           {key:"psus",label:ui.t("电源"),count:(root.partCatalog.psus || []).filter(row=>!!row.id).length},
+                           {key:"fans",label:ui.t("机箱风扇"),count:(root.partCatalog.fans || []).filter(row=>!!row.id).length}]
+                    Text {
+                        required property var modelData
+                        objectName:"assemblyCatalogCount_"+modelData.key
+                        property int modelCount:modelData.count
+                        text:modelData.label+" · "+modelData.count
+                        font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted
+                    }
+                }
+            }
+            RowLayout {
+                Layout.fillWidth:true;spacing:12
+                Text {Layout.preferredWidth:88;text:ui.t("整机外观");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}
+                Choice {objectName:"assemblyStyleChoice";Layout.fillWidth:true
+                    model:stats.assemblyStyles;value:root.config.appearance_style || "follow"
+                    Accessible.name:ui.t("整机外观");onPicked:selected=>stats.changeAssembly("appearance_style",selected)}
+            }
+            RowLayout {
+                Layout.fillWidth:true;spacing:12
+                ActionButton {
+                    objectName:"assemblyResetPartStyles"
+                    text:ui.t("统一应用此风格");enabled:root.independentStyles>0
+                    onClicked:stats.resetAssemblyPartStyles()
+                }
+                Text {
+                    objectName:"assemblyIndependentStyles"
+                    Layout.fillWidth:true
+                    text:ui.t("独立外观设置")+" · "+root.independentStyles
+                    font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap
+                }
+            }
+            Flow {
+                Layout.fillWidth:true;spacing:8
+                ActionButton {objectName:"browseAssemblyModelsButton";text:ui.t("浏览全部型号与外观");accent:true
+                    enabled:root.active;onClicked:root.browseModelsRequested()}
+                ActionButton {objectName:"assemblyExample_air";text:ui.t("风冷配件示例")
+                    enabled:root.active&&root.info.initialized===true;onClicked:root.showExample("air")}
+                ActionButton {objectName:"assemblyExample_aio";text:ui.t("一体水冷配件示例")
+                    enabled:root.active&&root.info.initialized===true;onClicked:root.showExample("aio")}
+                ActionButton {objectName:"assemblyExample_loop";text:ui.t("分体水冷配件示例")
+                    enabled:root.active&&root.info.initialized===true;onClicked:root.showExample("loop")}
+            }
+            Text {
+                objectName:"assemblyExamplesNote"
+                Layout.fillWidth:true
+                text:ui.t("示例替换未保存的机箱与配件选择，沿用当前 CPU、显卡和内存。转动仅为演示；按应用偏好保存。")
+                font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap;lineHeight:1.2
+            }
         }
         SettingsGroup {
             Layout.fillWidth:true;title:ui.t("机箱外观")
@@ -86,7 +148,7 @@ ScrollView {
                 }
             }
         }
-        AssemblyParts {Layout.fillWidth:true;config:root.config;caseInfo:root.info}
+        AssemblyParts {id:assemblyParts;Layout.fillWidth:true;config:root.config;caseInfo:root.info}
         HardwarePacks {Layout.fillWidth:true}
         SettingsGroup {
             Layout.fillWidth:true;title:ui.t("查看方式")
@@ -94,10 +156,6 @@ ScrollView {
                 Choice {objectName:"assemblyDetailChoice";width:Math.min(220,Math.max(150,assemblyDetailSetting.width*.42))
                     model:stats.assemblyDetails;value:root.config.detail_level || "balanced"
                     Accessible.name:ui.t("模型细节");onPicked:selected=>stats.changeAssembly("detail_level",selected)}}
-            SettingRow {id:assemblyStyleSetting;Layout.fillWidth:true;label:ui.t("整机外观");note:ui.t("默认跟随顶部栏，也可单独选择。")
-                Choice {objectName:"assemblyStyleChoice";width:Math.min(220,Math.max(150,assemblyStyleSetting.width*.42))
-                    model:stats.assemblyStyles;value:root.config.appearance_style || "follow"
-                    Accessible.name:ui.t("整机外观");onPicked:selected=>stats.changeAssembly("appearance_style",selected)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("展开组件");note:ui.t("将硬件分开，查看机箱内部布局。")
                 Toggle {checked:root.config.exploded===true;onToggled:stats.changeAssembly("exploded",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风扇随转速转动");note:ui.t("仅在三维视图可见且转速有效时运行。")

@@ -1,4 +1,34 @@
 {
+  "artwork_2d": {
+    "cache_max_entries": 16,
+    "download_format": "standalone_svg_collections",
+    "generator": "on_demand_svg",
+    "kinds": [
+      "case",
+      "cooler",
+      "psu",
+      "fan"
+    ],
+    "market_exhaustive": false,
+    "motion": "explicit_reference_demonstration",
+    "records": 150,
+    "sensor_binding": false,
+    "styles": [
+      "miniature",
+      "cartoon",
+      "notebook_color",
+      "notebook_line",
+      "sticker",
+      "papercut",
+      "inkwash",
+      "classic",
+      "outline",
+      "solid",
+      "soft",
+      "sketch",
+      "notebook_smile"
+    ]
+  },
   "machine_inventory": false,
   "market_exhaustive": false,
   "optional_products": [

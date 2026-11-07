@@ -147,8 +147,7 @@ class AssemblyPageTests(unittest.TestCase):
         proof = os.environ.get("DESKTOP_STATS_ASSEMBLY_PAGE_PROOF")
         if proof:
             Path(proof).mkdir(parents=True, exist_ok=True)
-        sizes = [(1280,760,"zh-CN"),(1280,760,"en")]
-        sizes.extend((720,600,language) for language in LANGUAGES)
+        sizes = [(width,height,language) for width,height in ((720,600),(1280,760)) for language in LANGUAGES]
         for width, height, language in sizes:
             self.controller.change("language", language)
             self.window.resize(width,height)
@@ -170,6 +169,15 @@ class AssemblyPageTests(unittest.TestCase):
             self.assertLessEqual(top.x()+button.width(),width)
             self.assertGreaterEqual(top.y(),34)
             self.assertLessEqual(top.y()+button.height(),height-72)
+            for name in ('assemblyStyleChoice','assemblyResetPartStyles',
+                         'assemblyCatalogCount_cases','assemblyCatalogCount_coolers',
+                         'assemblyCatalogCount_psus','assemblyCatalogCount_fans',
+                         'browseAssemblyModelsButton','assemblyExample_air','assemblyExample_aio','assemblyExample_loop'):
+                item=self.find(name);point=item.mapToScene(QPointF(0,0))
+                self.assertGreaterEqual(point.x(),self.window.property('railWidth'),(language,name))
+                self.assertLessEqual(point.x()+item.width(),width,(language,name))
+                self.assertGreaterEqual(point.y(),34,(language,name))
+                self.assertLessEqual(point.y()+item.height(),height-72,(language,name))
             loader = self.find("assemblyPageLoader")
             pending = [loader.property("item")]
             found_label = None
@@ -273,7 +281,7 @@ class AssemblyPageTests(unittest.TestCase):
         self.assertEqual([r['id'] for r in choice.property('model')],['follow',*HARDWARE_ICON_STYLES])
         self.assertEqual(choice.property('value'),'follow')
         page=self.find('assemblyPageLoader').property('item');scroll=page.property('contentItem')
-        scroll.setProperty('contentY',max(0,scroll.property('contentHeight')-scroll.height()))
+        scroll.setProperty('contentY',0)
         QTest.qWait(30)
         choice.forceActiveFocus();QTest.keyClick(self.window,Qt.Key_End);QTest.keyClick(self.window,Qt.Key_Return)
         QTest.qWait(30)
@@ -293,7 +301,7 @@ class AssemblyPageTests(unittest.TestCase):
             self.assertEqual(self.window.property('layoutWidth'),720)
             for language in ('zh-CN','de','fr','ja'):
                 self.controller.change('language',language);QTest.qWait(50)
-                scroll.setProperty('contentY',max(0,scroll.property('contentHeight')-scroll.height()))
+                scroll.setProperty('contentY',0)
                 QTest.qWait(30)
                 top=choice.mapToScene(QPointF(0,0))
                 self.assertGreaterEqual(top.x(),self.window.property('railWidth'))
@@ -301,6 +309,74 @@ class AssemblyPageTests(unittest.TestCase):
                 self.assertGreaterEqual(top.y(),34)
                 self.assertLessEqual(top.y()+choice.height(),self.window.height()-72)
                 self.assertTrue(self.window.grabWindow().save(str(Path(proof)/f'assembly-style-choice-{language}.png')))
+
+    def test_overview_counts_reuse_the_parts_catalog_and_follow_catalog_changes(self):
+        from assembly_parts import choices
+        self.show_assembly(width=720,height=600)
+        for key,expected in (('cases',64),('coolers',42),('psus',6),('fans',38)):
+            self.assertEqual(self.find('assemblyCatalogCount_'+key).property('modelCount'),expected)
+        # One existing catalog binding supplies both the editor and the new
+        # first-screen counts; the overview must not issue a second query.
+        original=choices(self.controller.tr);changed=copy.deepcopy(original)
+        changed['fans']=changed['fans'][:3]
+        with patch('assembly_parts.choices',return_value=changed) as catalog:
+            # PySide reads QVariantMap twice while evaluating a binding. Compare
+            # against one minimal binding, rather than mistaking that Qt work
+            # for a second production query introduced by the overview.
+            baseline=QQmlComponent(self.engine)
+            baseline.setData(b'import QtQuick\nItem { readonly property var catalog: stats.assemblyParts || ({}) }',QUrl())
+            item=baseline.create();self.assertIsNotNone(item)
+            single_binding_reads=catalog.call_count
+            item.deleteLater();baseline.deleteLater()
+            QCoreApplication.sendPostedEvents(None,QEvent.DeferredDelete)
+            catalog.reset_mock()
+            self.controller.assemblyCasesChanged.emit();self.app.processEvents()
+            self.assertEqual(self.find('assemblyCatalogCount_fans').property('modelCount'),2)
+            self.assertEqual(catalog.call_count,single_binding_reads)
+        self.controller.assemblyCasesChanged.emit();self.app.processEvents()
+        self.assertEqual(self.find('assemblyCatalogCount_fans').property('modelCount'),38)
+        self.assertNotIn('assembly_viewer',sys.modules)
+
+    def test_first_screen_examples_click_open_a_populated_draft_without_saving_or_changing_the_bar(self):
+        self.show_assembly(width=720,height=600)
+        saved=copy.deepcopy(self.controller.saved);bar=copy.deepcopy(self.controller.draft['top_bar'])
+        core={key:copy.deepcopy(self.controller.draft['assembly'][key])
+              for key in ('cpu_model','gpu_model','memory_models','board_model')}
+        opened=QSignalSpy(self.controller.assemblyViewRequested)
+        expected={'air':'noctua-nh-u12a','aio':'arctic-liquid-freezer-iii-360','loop':'custom-loop-360-reference'}
+        for index,(kind,cooler) in enumerate(expected.items()):
+            button=self.find('assemblyExample_'+kind);self.assertTrue(button.isEnabled())
+            self.click(button)
+            self.assertEqual(opened.count(),index+1)
+            spec=opened.at(index)[0]
+            self.assertEqual(spec['cooling']['cpu_cooler'],cooler)
+            self.assertEqual(spec['auxiliary']['psu']['model_id'],'corsair-rm1000x-2024')
+            self.assertEqual(sum(row['count'] for row in spec['cooling']['case_fans']),4)
+            self.assertEqual(spec['options']['fan_motion'],'demo');self.assertTrue(spec['options']['fan_animation'])
+            self.assertEqual({key:spec['options'][key] for key in core},core)
+            self.assertEqual(self.controller.saved,saved)
+            self.assertEqual(self.controller.draft['top_bar'],bar)
+            self.assertEqual(self.controller.scopeDirty,dict(desktop=False,preferences=True,topbar=False))
+        self.snapshot.assert_called_once();self.modules.assert_called_once()
+        self.assertNotIn('assembly_viewer',sys.modules)
+
+    def test_global_style_preserves_overrides_until_the_explicit_unify_button_is_clicked(self):
+        self.show_assembly(width=720,height=600)
+        self.controller.changeAssemblyPartStyle('case','miniature')
+        self.controller.changeAssemblyPartStyle('psu','cartoon')
+        self.controller.changeAssemblyPartStyle('fans:rear:0','sketch')
+        self.app.processEvents();saved=copy.deepcopy(self.controller.saved)
+        self.find('assemblyStyleChoice').picked.emit('notebook_line');self.app.processEvents()
+        self.assertEqual(len(self.controller.draft['assembly']['part_styles']),3)
+        counter=self.find('assemblyIndependentStyles')
+        self.assertTrue(counter.property('text').endswith(' · 3'))
+        before=copy.deepcopy(self.controller.draft);opened=QSignalSpy(self.controller.assemblyViewRequested)
+        button=self.find('assemblyResetPartStyles');self.assertTrue(button.isEnabled())
+        self.click(button)
+        expected=copy.deepcopy(before);expected['assembly']['part_styles']={}
+        self.assertEqual(self.controller.draft,expected)
+        self.assertEqual(self.controller.saved,saved);self.assertEqual(opened.count(),0)
+        self.assertTrue(counter.property('text').endswith(' · 0'));self.assertFalse(button.isEnabled())
 
 
     def test_optional_pack_import_and_remove_preserves_settings_and_handles_bad_archive(self):

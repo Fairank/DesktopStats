@@ -9,6 +9,7 @@ Window {
     property bool hostMinimized:false
     readonly property bool uiActive:visible && !hostMinimized && visibility!==Window.Minimized
     property int page: 0
+    property bool accessoryGalleryOpen:false
     property string selectedKey: root.draftConfig.widget_order[0] || ""
     property bool nativeHosted:false
     property var frameWindow:null
@@ -50,8 +51,8 @@ Window {
     }
     onClosing:function(close){close.accepted=false;root.hide()}
     onSelectedKeyChanged:{root.previewInspectionNeeded=false;root.scheduleInspectionRefresh();Qt.callLater(root.revealSelected)}
-    onPageChanged:{root.previewInspectionNeeded=false;root.scheduleInspectionRefresh()}
-    onUiActiveChanged:{if(!uiActive)previewInspectionNeeded=false;root.scheduleInspectionRefresh()}
+    onPageChanged:{root.previewInspectionNeeded=false;if(page!==5)accessoryGalleryOpen=false;root.scheduleInspectionRefresh()}
+    onUiActiveChanged:{if(!uiActive){previewInspectionNeeded=false;accessoryGalleryOpen=false}root.scheduleInspectionRefresh()}
     function refreshInspectionDemand(){
         inspectionRefreshQueued=false
         if(typeof stats.setAssemblyActive==="function")stats.setAssemblyActive(uiActive && page===5)
@@ -83,7 +84,7 @@ Window {
     Shortcut {sequence:"Ctrl+N";enabled:!root.atWidgetLimit && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:root.showGallery()}
     Shortcut {sequence:"Ctrl+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(false)}
     Shortcut {sequence:"Ctrl+Shift+Z";enabled:root.page!==4 && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen && !root.textEditing();onActivated:root.undo(true)}
-    Shortcut {sequence:"Escape";enabled:!gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:{if(root.page===4 && historyPage.cancelInspection())return;if(!widgetEditorLoader.item || !widgetEditorLoader.item.cancelEditing())root.hide()}}
+    Shortcut {sequence:"Escape";enabled:!accessoryGalleryOpen && !gallery.opened && !scenePopup.opened && !topBarEditor.groupPopupOpen;onActivated:{if(root.page===4 && historyPage.cancelInspection())return;if(!widgetEditorLoader.item || !widgetEditorLoader.item.cancelEditing())root.hide()}}
     Timer {objectName:"settingsInspectTimer";interval:3000;running:root.uiActive && (root.page===2 || root.previewInspectionNeeded);repeat:true;triggeredOnStart:true;onTriggered:stats.inspect()}
     Item {
         id:settingsBody;objectName:"settingsBackdropSource";y:root.clientY;width:root.width;height:root.clientHeight
@@ -186,7 +187,7 @@ Window {
                 SensorBrowser {objectName:"sensorBrowser";active:root.visible && root.page===2;readingsActive:root.uiActive && root.page===2;Layout.fillWidth:true;Layout.fillHeight:true}
             }
             HistoryPage {id:historyPage;anchors.fill:parent;alignContentLeft:true;visible:root.page===4;active:root.uiActive && root.page===4}
-            Loader {objectName:"assemblyPageLoader";anchors.fill:parent;anchors.margins:root.contentGutter;active:root.page===5;sourceComponent:AssemblyPage {active:root.uiActive && root.page===5}}
+            Loader {objectName:"assemblyPageLoader";anchors.fill:parent;anchors.margins:root.contentGutter;active:root.page===5;sourceComponent:AssemblyPage {active:root.uiActive && root.page===5;onBrowseModelsRequested:root.accessoryGalleryOpen=true}}
         }}
         Rectangle {objectName:"replacementPreviewBanner";x:root.railWidth;y:parent.height-72-root.replacementBannerHeight;width:parent.width-x;height:root.replacementBannerHeight;visible:stats.replacementPending;color:ui.selection
             Text {anchors.fill:parent;anchors.leftMargin:28;anchors.rightMargin:28;text:ui.t("将替换全部设置");verticalAlignment:Text.AlignVCenter;font.family:ui.fontFamily;font.pixelSize:ui.captionSize;font.weight:Font.Medium;color:ui.ink}
@@ -201,6 +202,17 @@ Window {
     }
     WindowChrome {objectName:"settingsWindowChrome";anchors.fill:parent;targetWindow:root.frameWindow||root;titleText:"Desktop Stats"}
     Gallery {id:gallery;backdropSource:settingsBody;readingsActive:root.uiActive;onDismissed:root.restoreGalleryFocus();onChosen:key=>root.selectWidget(key)}
+    Loader {
+        objectName:"accessoryGalleryLoader"
+        active:root.accessoryGalleryOpen && root.uiActive && root.page===5
+        onLoaded:item.open()
+        sourceComponent:AccessoryGallery {
+            ownerActive:root.uiActive && root.page===5
+            initialStyle:(root.draftConfig.assembly.appearance_style || "follow")==="follow"
+                ? root.draftConfig.top_bar.hardware_icon_style || "miniature":root.draftConfig.assembly.appearance_style
+            onClosed:root.accessoryGalleryOpen=false
+        }
+    }
     Popup {
         id:scenePopup;objectName:"scenePopup";parent:Overlay.overlay
         property string selectedId:""

@@ -10,6 +10,7 @@ from top_bar_config import HARDWARE_ICON_STYLES
 
 MAX_STYLE_EDGES = 8192
 MAX_MESH_EDGES = 512
+MAX_GRILLE_EDGES = 4096
 _PAPER = ("notebook_color", "notebook_line", "notebook_smile")
 _LINE = ("outline", "notebook_line", "sketch")
 _EXPRESSIVE = ("cartoon", "notebook_smile")
@@ -159,17 +160,115 @@ def expression_vertices(dimensions):
 def _key(point):return tuple(round(v,5) for v in point)
 
 
-def crease_edges(vertices,limit=MAX_MESH_EDGES):
+def _edge_groups(edges):
+    """Deterministic connected contours, retaining only existing surface edges."""
+    touching={}
+    for index,edge in enumerate(edges):
+        for point in edge:touching.setdefault(point,[]).append(index)
+    seen=set();groups=[]
+    for first in range(len(edges)):
+        if first in seen:continue
+        pending=[first];seen.add(first);indices=[];low=list(edges[first][0]);high=low.copy()
+        while pending:
+            index=pending.pop();indices.append(index)
+            for point in edges[index]:
+                for axis,value in enumerate(point):
+                    low[axis]=min(low[axis],value);high[axis]=max(high[axis],value)
+                for neighbor in touching[point]:
+                    if neighbor not in seen:seen.add(neighbor);pending.append(neighbor)
+        groups.append((tuple(sorted(indices)),max(b-a for a,b in zip(low,high))))
+    return groups
+
+
+def _individual_sample(edges,limit):
+    prominent=sorted(range(len(edges)),key=lambda n:(-math.dist(*edges[n]),n))[:max(1,limit//4)]
+    chosen=set(prominent);others=[n for n in range(len(edges)) if n not in chosen]
+    count=limit-len(chosen)
+    chosen.update(others[n*len(others)//count] for n in range(count))
+    return tuple(edge for n,edge in enumerate(edges) if n in chosen)
+
+
+def _stitch_boundaries(candidates,edge_normals,vertices):
+    """Cancel coplanar T-junctions before spending ink on a clipped plate.
+
+    A long triangle edge may meet several shorter ones. Exact endpoint keys
+    alone call all of those boundaries; interval coverage restores the actual
+    crease. Endpoints remain existing vertices and only collinear runs merge.
+    """
+    wanted={point for edge in candidates for point in edge};positions={}
+    for start in range(0,len(vertices),6):
+        point=tuple(vertices[start:start+3]);key=_key(point)
+        if key in wanted and key not in positions:positions[key]=point
+    lines={}
+    for edge in candidates:
+        p,q=(positions[point] for point in edge);delta=tuple(b-a for a,b in zip(p,q));length=math.sqrt(sum(v*v for v in delta))
+        if length<1e-8:continue
+        direction=tuple(v/length for v in delta)
+        if next(v for v in direction if abs(v)>1e-10)<0:direction=tuple(-v for v in direction)
+        distance=sum(a*b for a,b in zip(p,direction));origin=tuple(p[n]-distance*direction[n] for n in range(3))
+        key=tuple(round(v,7) for v in direction)+tuple(round(v,5) for v in origin)
+        item=lines.setdefault(key,[direction,{},{}]);axis,events,points=item
+        ends=sorted((round(sum(a*b for a,b in zip(point,axis)),6),original) for point,original in zip((p,q),edge))
+        if ends[0][0]==ends[1][0]:continue
+        for (value,point),sign in zip(ends,(1,-1)):
+            points.setdefault(value,point)
+            for normal in edge_normals[edge]:events.setdefault(value,[]).append((normal,sign))
+    threshold=math.cos(math.radians(35.));result=[];seen=set()
+    for axis,events,points in lines.values():
+        active={};values=sorted(events);begin=end=None
+        for i,value in enumerate(values):
+            for normal,sign in events[value]:
+                count=active.get(normal,0)+sign
+                if count:active[normal]=count
+                else:active.pop(normal,None)
+            keep=False
+            if i+1<len(values) and active:
+                normals=tuple(active);first=normals[0]
+                keep=(sum(active.values())==1 or any(sum(a*b for a,b in zip(first,n))<threshold for n in normals[1:]))
+            if keep:
+                if begin is None:begin=points[value]
+                end=points[values[i+1]]
+            elif begin is not None:
+                edge=(begin,end) if begin<end else (end,begin)
+                if begin!=end and edge not in seen:result.append(edge);seen.add(edge)
+                begin=end=None
+    return result
+
+
+def _contour_sample(edges,limit):
+    groups=_edge_groups(edges)
+    # One very complex joined shell retains the established bounded fallback.
+    # Separate blades, hub circles and perforations can instead remain whole.
+    if max(len(indices) for indices,_ in groups)>limit:return _individual_sample(edges,limit)
+    span=max(value for _,value in groups);threshold=max(span*.14,min(12.,span*.30))
+    chosen=set()
+    for indices,size in sorted(groups,key=lambda group:(-group[1],group[0][0])):
+        if size>=threshold and len(chosen)+len(indices)<=limit:chosen.update(indices)
+    remaining=[indices for indices,_ in groups if indices[0] not in chosen]
+    # Sample complete small holes across the panel, rather than scattering
+    # isolated segments. This changes ink density, never physical geometry.
+    room=limit-len(chosen)
+    if remaining:
+        count=min(len(remaining),room//min(map(len,remaining)))
+        order=[n*len(remaining)//count for n in range(count)] if count else []
+        for index in order:
+            indices=remaining[index]
+            if len(indices)<=room:chosen.update(indices);room-=len(indices)
+    return tuple(edge for n,edge in enumerate(edges) if n in chosen)
+
+
+def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False):
     """Return boundary/crease edges, excluding coplanar triangulation diagonals."""
     if type(limit) is not int or limit<=0:return ()
-    limit=min(limit,MAX_MESH_EDGES);edges={}
+    limit=min(limit,MAX_STYLE_EDGES);edges={}
     for start in range(0,len(vertices),18):
         row=vertices[start:start+18]
         if len(row)!=18:continue
         points=[tuple(row[n:n+3]) for n in (0,6,12)]
+        keyed=[_key(point) for point in points]
         normal=tuple(row[3:6])
         for a,b in ((0,1),(1,2),(2,0)):
-            p,q=_key(points[a]),_key(points[b])
+            p,q=keyed[a],keyed[b]
             if p==q:continue
             key=(p,q) if p<q else (q,p)
             edges.setdefault(key,[]).append(normal)
@@ -178,13 +277,11 @@ def crease_edges(vertices,limit=MAX_MESH_EDGES):
         if len(normals)==1 or any(sum(a*b for a,b in zip(normals[0],n))<threshold for n in normals[1:]):
             result.append(edge)
     if len(result)>limit:
-        # A perforated panel must retain its exterior before sampling tiny
-        # holes. Uniform sampling alone can remove the whole PCB/frame outline.
-        prominent=sorted(range(len(result)),key=lambda n:(-math.dist(*result[n]),n))[:max(1,limit//4)]
-        chosen=set(prominent);others=[n for n in range(len(result)) if n not in chosen]
-        count=limit-len(chosen)
-        chosen.update(others[n*len(others)//count] for n in range(count))
-        result=[edge for n,edge in enumerate(result) if n in chosen]
+        groups=_edge_groups(result)
+        if repair_partitions or max(len(indices) for indices,_ in groups)>limit:
+            result=_stitch_boundaries(result,edges,vertices)
+    if len(result)>limit:
+        result=_contour_sample(result,limit)
     return tuple(result)
 
 
@@ -198,7 +295,16 @@ def edge_batches(meshes,style,styles=None):
         if not policy['edges']:continue
         if mesh.name.startswith('style-'):continue
         if policy['hardware_ink_only'] and mesh.component in ('case','panel'):continue
-        edges=crease_edges(mesh.vertices)
+        # These sampled physical PSU grilles contain complete repeated Y/slot
+        # apertures. Permit bounded preparation candidates while the final
+        # whole-scene VBO still obeys the same8192-segment limit.
+        contour_limit=(MAX_GRILLE_EDGES if mesh.name=='psu-fan-panel' else
+                       MAX_GRILLE_EDGES//2 if mesh.name=='psu-rear-vent-panel' else MAX_MESH_EDGES)
+        # A fan's eight front/back corner pads are batched together. Each
+        # rounded pad has clipped coplanar partitions, so repair those before
+        # sampling rather than silently omitting several complete corners.
+        edges=crease_edges(mesh.vertices,contour_limit,
+                           repair_partitions=mesh.name.endswith('fan-pads'))
         if edges:candidates.append((mesh,index,edges,policy))
     fine_words=('spring-head','small-smd','small-package','pins','contacts','silkscreen','model-mark',
                 'label-rule','fastener','screw','water-channel','stator')
@@ -215,12 +321,22 @@ def edge_batches(meshes,style,styles=None):
         cap=(len(edges) if len(edges)<=64 else 256 if name=='gpu-shroud' else 128) if structural else 0
         if dense and mesh.component in ('case','panel') and span>=80:cap=32
         desired=set(ordered[:cap])
+        if mesh.rotor:
+            groups=_edge_groups(edges)
+            span=max(value for _,value in groups);threshold=max(span*.14,min(12.,span*.30))
+            desired={n for indices,size in groups if size>=threshold for n in indices}
         weight=(.035 if micro else .10 if mesh.component=='cables' else .22 if dense else 2.5 if mesh.rotor else 1.)
         if policy['line_only'] and micro:weight=0.
         plans.append(dict(mesh=mesh,index=index,edges=edges,policy=policy,costs=costs,ordered=ordered,
                           desired=desired,selected=set(),weight=weight))
     reserved=sum(sum(row['costs'][n] for n in row['desired']) for row in plans)
     remaining=MAX_STYLE_EDGES
+    if sum(sum(row['costs']) for row in plans)<=MAX_STYLE_EDGES:
+        # A single model frequently fits comfortably. Do not thin its already
+        # bounded connected contours a second time merely because one material
+        # has a lower weight than another.
+        for row in plans:row['selected'].update(range(len(row['edges'])))
+        remaining=0
     # Keep one trace for every mesh when possible, then close important frames.
     for row in plans:
         n=row['ordered'][0]
@@ -230,6 +346,13 @@ def edge_batches(meshes,style,styles=None):
             for n in sorted(row['desired']):
                 if n not in row['selected'] and row['costs'][n]<=remaining:
                     row['selected'].add(n);remaining-=row['costs'][n]
+    else:
+        # On crowded builds retain complete main blade/hub groups when they
+        # fit, before using the residual budget for grooves, pins and cables.
+        for row in plans:
+            if not row['mesh'].rotor:continue
+            missing=row['desired']-row['selected'];cost=sum(row['costs'][n] for n in missing)
+            if cost<=remaining:row['selected'].update(missing);remaining-=cost
     weighted=sum(sum(cost for n,cost in enumerate(row['costs']) if n not in row['selected'])*row['weight'] for row in plans)
     allowance=remaining
     for row in plans:
