@@ -183,7 +183,12 @@ Window {
                         self.assertFalse(glyph.property('fanMotionActive'))
                         self.assertGreater(sum(v>0 for v in bytes(static.constBits())[3::4]),500)
                         textures=self.texture_identity()
-                        source=glyph.property('svgSource');self.assertEqual(source,QUrl(self.evaluate('direct()')))
+                        # 0.42 reuses the base URL instead of retaining an
+                        # unused complete-card URL. The vector test above
+                        # still verifies complete SVG versus base+rotor pixels.
+                        source=glyph.property('svgSource')
+                        base=json.loads(self.evaluate('retainedLayers()'))['baseSource']
+                        self.assertEqual(source,QUrl(base))
                         self.assign('retained',True);zero=self.capture()
                         self.assertTrue(glyph.property('fanMotionActive'))
                         if static!=zero:self.fail((identity,style,'QML stopped->zero',self.delta(static,zero)))

@@ -29,6 +29,7 @@ FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
 HardwareGlyph.qml HardwareShapes.js HardwareCpuModel.js HardwareModelDetails.js
+HardwareModelNvidia042.js HardwareModelRadeonArc042.js
 HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js HardwareNotebook.js HardwareNotebookParts.js HardwareVariants.js
 HardwareFanDesigns.js HardwareFanProfileData.js
 HardwareBoardDesigns.js HardwareBoardProfileData.js
@@ -123,6 +124,7 @@ REVIEWED_FILES = frozenset(
             "showcase/hardware-motion-dark.gif",
             "showcase/motion-continuity-light.gif",
             "showcase/motion-continuity-dark.gif",
+            "showcase/model-widgets042.png",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]

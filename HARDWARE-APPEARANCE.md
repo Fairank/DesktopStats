@@ -10,7 +10,7 @@ top-bar save, without restarting the sampler or its temperature bridge. They
 require the expected process ID, an allowlisted style and no pending edits or
 settings-import preview. Failed saves revert only the new style draft.
 
-The 0.29.0 preview adds Cute Cartoon as a sixth optional drawing treatment for
+Historically, the 0.29.0 preview added Cute Cartoon as the sixth drawing treatment for
 every current model and the generic metric symbols. Rounded contours and small
 expressions are illustration, while reviewed geometry, unknown fields and real
 fan-speed semantics remain intact. Modern top-bar GPU frames grow to 30×22 at
@@ -27,13 +27,30 @@ and exposed PCB edges.
 
 ## Selectable icon versions
 
-Top bar → Appearance → Hardware icons offers five versions:
+Top bar → Appearance → Hardware icons currently offers thirteen saved styles.
+The original six (recorded by commit `6f567ee`) remain available:
 
 - `classic`: the original generic Lucide glyphs; the default for existing settings.
 - `outline`: the previous original line drawings, preserved as an explicit option.
 - `solid`: simplified physical objects, filled metal shrouds and clear fan wells.
 - `miniature`: visible top/side thickness and fixed geometric shadows, without filters.
 - `soft`: rounder, two-tone objects with broad shapes and separated fan blades.
+- `cartoon`: the sixth original option, now labelled Cute Smile.
+
+Later additions are `sketch`, `notebook_color`, `notebook_line`,
+`notebook_smile`, `sticker`, `papercut` and `inkwash`. The complete label/key
+mapping and expression rules are maintained in the
+[README style table](README.md#硬件外观清单六版沿革与现有选项).
+Original (`miniature`) never receives a face. All saved choices are retained;
+the numbered1–7 illustration menu and six widget material skins are distinct.
+
+Desktop CPU/GPU model widgets retain exact package/board identities across
+these styles. Model-only source-panel studies cover all147 catalog GPU records;
+145 have source-linked contours and two BIOSTAR exteriors remain unverified.
+See the [per-SKU progress and unknowns](docs/GPU_MODEL_PROGRESS.md). Only that
+model view receives the extra panel/rotor finish; ordinary top-bar SVG output
+is preserved. A model GPU reuses its retained base URL without building another
+unused whole-card URL. No inactive style textures or new clocks are loaded.
 
 Solid, Miniature and Soft share dedicated series casing profiles: broad panel
 divisions, end shapes, shoulders and illustration proportions, rather than just

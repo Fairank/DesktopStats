@@ -17,7 +17,11 @@ Item {
         && !(appearance.kind === "cpu" && Cpu.key(appearance))
     readonly property var geometryInput: modelMode ? Object.assign({},appearance,{model_mode:true}) : appearance
     readonly property string geometryKey: classic ? "" : Shapes.key(geometryInput, ink)
-    readonly property url svgSource: classic ? "" : Shapes.source(geometryKey)
+    // Models already build a retained base plus local rotors below. Reuse that
+    // base instead of also generating/retaining an unused whole-card SVG.
+    // CPU and ordinary small icons keep their original source path.
+    readonly property url svgSource: classic ? "" : modelMode && fanLayerData
+        ? fanLayerData.baseSource : Shapes.source(geometryKey)
     readonly property bool fanShapeEligible: !classic && appearance && appearance.kind === "gpu"
         && (["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(appearance.icon_set)
             || modelMode && ["classic","outline"].includes(appearance.icon_set))

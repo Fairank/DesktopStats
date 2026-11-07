@@ -1,5 +1,29 @@
 # Changes
 
+## 0.42.0-preview.1 (development candidate)
+
+- Extend model-only panel studies to every one of the 147 catalog GPUs:
+  NVIDIA92, AMD46 and Intel9. Retain exact source face/variant traces across
+  all13 styles, with the miniature front-plane offset and baked fan-hole
+  exclusion.145 have source-linked traces; two unverified BIOSTAR exteriors
+  remain neutral with explicit unknowns. Shared OC shells stay shared.
+- Apply retained model rotor treatment using each exact board's existing
+  profile, without changing physical fan counts, planes, known blades,
+  relative direction or freshness/zero-RPM guards. Unknown remains unknown.
+- Reuse a model GPU's retained base URL instead of also building and retaining
+  an unused complete-card SVG. Allocate the two exact-contour directories only
+  on a matching model request; pure top-bar mode leaves them uninitialized.
+  No new sensor, service, polling or motion clock.
+- Correct model-only HD7970 metal-cover selection and Sakura ribbon perimeter;
+  constrain panel ink to the actual hand-drawn shroud while preserving the
+  source-confirmed protruding White Taichi LCD frame. Use shorter contextual
+  labels in CPU/GPU models while retaining distinct package/ASIC source names.
+- Record the original six icon options and all later additions in README;
+  preserve all13 saved values and the expression-free Original. Keep the CPU
+  package artwork, two-line captions, frame options and fullscreen protection.
+- Source/local review candidate only; do not restart or replace the running
+  application during gaming, or infer live Windows acceptance from offscreen QA.
+
 ## 0.41.0-preview.1 (development candidate)
 
 - Refine CPU model artwork using all seven existing package contours: thin

@@ -98,13 +98,24 @@ function shapeStudy(state,g,c,front,layout) {
         return {d:Sketch.wobblyPath("M0 17H31V6H99V91H31V84H0Z",seed+":passive",1.2,15),m:m,
             trim:group(path("M31 18Q31.4 50 31 82",c.ink,.9),matrixText(m)),passive:true,finRange:[.40,.92]}
     }
-    var main=shapes[passive?1:0]
+    // This exact model front starts with a recessed dark rectangle; the next
+    // shape is the actual raised metal shroud. Only the large model view opts
+    // into the corrected cover; the retained small top-bar artwork stays exact.
+    var mainIndex=passive || state.model_mode===true && state.series_id==='msi_twin_frozr_hd7970'?1:0
+    var main=shapes[mainIndex]
+    if(state.model_mode===true && state.series_id==='yeston_sakura') {
+        // Source GroupC shapes0..4 together reach every outer edge: the two
+        // crossing ribbons/corner panels extend beyond shape0's chamfers.
+        // Their union has this perimeter; keep the real extensions attached
+        // instead of leaving ribbon ink floating outside an undersized case.
+        main={d:'M0 4H100V98H0Z',m:m}
+    }
     if(!main)main={d:Sketch.rectPath({x:g.x,y:g.y,width:g.w,height:g.h,rx:.6}),m:[1,0,0,1,0,0]}
     var scale=Math.sqrt(Math.abs(main.m[0]*main.m[3]-main.m[1]*main.m[2]))||1
     var trims="",kept=0
     // Two short pen excerpts preserve the reviewed cover's panel language.
     // Repeated fan bays, whole filled panels and dense heatsink meshes stay out.
-    for(var i=passive?shapes.length:1;i<Math.min(shapes.length,14) && kept<2;i++) {
+    for(var i=passive?shapes.length:mainIndex+1;i<Math.min(shapes.length,14) && kept<2;i++) {
         var row=shapes[i],commands=row.d.match(/[A-Za-z][^A-Za-z]*/g)||[]
         if(row.a.opacity!==undefined && Number(row.a.opacity)<.70)continue
         if(commands.length<2 || commands.length>12 || /[Aa]/.test(row.d))continue

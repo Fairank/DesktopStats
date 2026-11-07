@@ -9,7 +9,7 @@ from PySide6.QtQuick import QQuickPaintedItem
 
 from battery_sensor import power_state
 from card_layout import Box, core_boxes, plan
-from compact_labels import label_options
+from compact_labels import label_options, model_label_options
 from localization import translate
 from metrics import display_value, metric_info, metric_value, numeric
 from native_surface import paint_surface
@@ -289,7 +289,8 @@ class HardwareCard(QQuickPaintedItem):
                 labels = label_options(metric, metric_label(metric), config["language"])
                 box = reading.box
                 if reading.mode == "model":
-                    draw.responsive_stack(labels, value, unit, box, reading.size)
+                    model_labels = model_label_options(metric, metric_label(metric), config["language"], prefs.get("kind"))
+                    draw.responsive_stack(model_labels, value, unit, box, reading.size)
                 elif reading.mode == "compact":
                     draw.compact(labels, value, unit, box, reading.size)
                 elif reading.mode == "row":

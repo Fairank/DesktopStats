@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.41.0-preview.1",
-  "archive_root": "DesktopStats-0.41.0-preview.1-source/",
+  "version": "0.42.0-preview.1",
+  "archive_root": "DesktopStats-0.42.0-preview.1-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed original image/video assets retained.",
   "dependency_preparation_required": true,
@@ -14,13 +14,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 60845,
-      "sha256": "21b0a2ba5bec40a2c6a446000e518e2bec514247375a19a221a747f55627c0b5"
+      "bytes": 62462,
+      "sha256": "64ebfa177ef4e25125e95ed9dc0f724dbc45fd0290172e534b292595b6d876ac"
     },
     {
       "path": "HARDWARE-APPEARANCE.md",
-      "bytes": 22011,
-      "sha256": "c245e33b3e07a9dbe52154bff60e57dc4f172394280afb5616c935bdbc65d0a2"
+      "bytes": 23146,
+      "sha256": "09322d8a4ce3185ada9442786bdd3ce6f8e59f10c5928488ce79cf7e1751ee9b"
     },
     {
       "path": "Install.cmd",
@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 25762,
-      "sha256": "035976846416000562ab0c71715195718d6fd411c63d0599c077fd646f864511"
+      "bytes": 28381,
+      "sha256": "5009b6e606c8461e62bf0a67491d17ea41532398d2d958672f168cbe4b80a58d"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -668,6 +668,11 @@
       "sha256": "c82d8b3e08b8e2b56f37caab313720be991702d0d919485fd916b5253b63053a"
     },
     {
+      "path": "assets/showcase/model-widgets042.png",
+      "bytes": 363208,
+      "sha256": "630987cef782933ec716e3d3011f635b1cd3a75e3a00dd45fcdbea4202016638"
+    },
+    {
       "path": "assets/showcase/motion-continuity-dark.gif",
       "bytes": 2156521,
       "sha256": "f140f6aef1a64109b817cc572b8b17bf629b912191c6acb7a587473bd03ef3db"
@@ -804,8 +809,8 @@
     },
     {
       "path": "compact_labels.py",
-      "bytes": 6116,
-      "sha256": "01d5c917e0052c16ff6eaae5d605331d1b0de8abb936a08540694ac898fc3bd0"
+      "bytes": 6874,
+      "sha256": "82e1442c50da49c76944b98a026fb4dfe89fdea42bac4cea39925d8c6962caac"
     },
     {
       "path": "component_catalog.py",
@@ -866,6 +871,11 @@
       "path": "docs/ASSEMBLY_QUALITY.md",
       "bytes": 11149,
       "sha256": "cdc0203d910ea46a7de299a2831a00099eda7eb08c83a7245dd01292b813b4b8"
+    },
+    {
+      "path": "docs/GPU_MODEL_PROGRESS.md",
+      "bytes": 36912,
+      "sha256": "20c02a552e27fc258691648095f053d54b961eac99721a188d354e85956f22e9"
     },
     {
       "path": "docs/HARDWARE_COVERAGE.json",
@@ -1579,8 +1589,8 @@
     },
     {
       "path": "native/HardwareGlyph.qml",
-      "bytes": 6100,
-      "sha256": "1665b8c5d0e50c26a716bdadb147c78db5263599b4d421ecb3fad47523a94224"
+      "bytes": 6386,
+      "sha256": "da6420ad2fc0f68355c8d09169fef2ee8e9cbab595e891aedcd7070fb0e77aeb"
     },
     {
       "path": "native/HardwareMemoryShapes.js",
@@ -1594,13 +1604,23 @@
     },
     {
       "path": "native/HardwareModelDetails.js",
-      "bytes": 11390,
-      "sha256": "b8f0143d751b2434688aace731d7dfa5615bbb059e976d02440771545ee15bae"
+      "bytes": 14986,
+      "sha256": "9eb66c5f8e7ec5a6ec23937531f4fe0ac256bcc4d56abe50d13c788b61d051ba"
+    },
+    {
+      "path": "native/HardwareModelNvidia042.js",
+      "bytes": 111997,
+      "sha256": "b9fb3ff931533f8c8f608085631e61da950fcbfbfef58349e8d25c5cb7780c00"
+    },
+    {
+      "path": "native/HardwareModelRadeonArc042.js",
+      "bytes": 71874,
+      "sha256": "e4355c2bd87b9f64e42b8cc4f5336ac133d365e3984ca3c5758a7377bbc36895"
     },
     {
       "path": "native/HardwareNotebook.js",
-      "bytes": 22491,
-      "sha256": "73c67124e47c1434e0893f4b7ea92e2ef8c73b334f2b9cc0a0eaf998b984a463"
+      "bytes": 23261,
+      "sha256": "dd79a9ab56dbcfe690a4d723c767aa17fcebf68d620fbb9dd87841fa84573802"
     },
     {
       "path": "native/HardwareNotebookParts.js",
@@ -1864,8 +1884,8 @@
     },
     {
       "path": "native_card.py",
-      "bytes": 38329,
-      "sha256": "f7f89d41235c22c7d8a2ad7d58f0db7ac2c8480998f4ebac4a7f2c9e01b577c3"
+      "bytes": 38480,
+      "sha256": "0948960e54a35d40fbcf39f86514bf9f204125c4a90fabbd7ae9211042c84daa"
     },
     {
       "path": "native_controller.py",
@@ -1940,7 +1960,7 @@
     {
       "path": "product_version.py",
       "bytes": 29,
-      "sha256": "d5731a60b583da10e4dfc7262316ee2c8a14b17ae8fed9d781e3d94e9120987a"
+      "sha256": "e683066cac693e66ed3e0ad6a796e62b8b0edc92850680b82c4b77d5855498ac"
     },
     {
       "path": "profile_paths.py",
@@ -2388,6 +2408,21 @@
       "sha256": "75e92016433e5ed9c28c37421549f5a048d37fbe174ebad16379ccad300d4d7d"
     },
     {
+      "path": "tests/test_gpu_model_art042.py",
+      "bytes": 7490,
+      "sha256": "7494a898d2625bb4b080b2c037dbba6f6697875b7c979ff924a21a2fde1436cc"
+    },
+    {
+      "path": "tests/test_gpu_nvidia042.py",
+      "bytes": 10792,
+      "sha256": "fbd859214b358859e49b24b5e280f348ce97b774176d87addd15b2b9a0382dfa"
+    },
+    {
+      "path": "tests/test_gpu_radeon_arc042.py",
+      "bytes": 18134,
+      "sha256": "2cdb8cdc877df00b9d9e2a353dfa5a67b87fec90a1b579e5d99f178f55b2a995"
+    },
+    {
       "path": "tests/test_hardware_appearance.py",
       "bytes": 19623,
       "sha256": "54f6b6eff6431b64c0451b0c7982fde56b9e5ffdd2549e82d67cfc1d0135d573"
@@ -2429,13 +2464,18 @@
     },
     {
       "path": "tests/test_hardware_model_motion041.py",
-      "bytes": 12512,
-      "sha256": "f0fb97f74eaec6311a7ae0698002525ece12a363a7f5a78011a2c403810e4ba1"
+      "bytes": 12833,
+      "sha256": "d576c1513df69272ea895d2f57817aa5b4f16811d0f7bde23d1120736c92cd75"
     },
     {
       "path": "tests/test_hardware_model_selection.py",
       "bytes": 19977,
       "sha256": "5d63a8eb1f8f90ecdcd59ed188ffe6b4adcf5dd228c1b5bfc4fb5f79ff827ccc"
+    },
+    {
+      "path": "tests/test_hardware_model_source042.py",
+      "bytes": 3259,
+      "sha256": "a439349fd2134264b963604267429af3465f94006bddab330e81eede6b3c3cca"
     },
     {
       "path": "tests/test_hardware_notebook.py",
@@ -3049,8 +3089,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 23489,
-      "sha256": "81b050c3204e18632aacbcd6dd989d8115f27d75116e529273a91fcb239d4dfc"
+      "bytes": 23681,
+      "sha256": "9b03f4b47dffdfcdbbab35bf35add3231f1f45e88a86255dbd012d655199dfc5"
     },
     {
       "path": "tools/build_collector.py",
@@ -3094,8 +3134,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 22438,
-      "sha256": "a0a188e04046d4ff444d35a9773ae853a3eefe5c978a143b1f01db1992b4edce"
+      "bytes": 22538,
+      "sha256": "99dabbe8b1d3248993105cd5ab6b01af92847a3a18eda1951f96b227a4007677"
     },
     {
       "path": "tools/fetch_qt_licenses.py",

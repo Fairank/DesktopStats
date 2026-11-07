@@ -6,13 +6,15 @@
 .import "HardwareNotebook.js" as Notebook
 .import "HardwareCartoon.js" as Cartoon
 .import "HardwareVariants.js" as Variants
+.import "HardwareModelNvidia042.js" as Nvidia
+.import "HardwareModelRadeonArc042.js" as RadeonArc
 
 // Original model-view artwork: PolyForm Noncommercial 1.0.0; see LICENSE.
-// These exact boards use existing reviewed profiles and local manufacturer
-// reference studies. Unknown blades stay unknown. Added lips and cap glints
+// Exact-board contours use the existing reviewed profiles, not a ten-card gate.
+// Unknown blades stay unknown. Added lips and cap glints
 // are schematic material contours, not new RGB, parts, logos or dimensions.
 // This module is called only while a model SVG is built, never on a frame.
-var reviewed={
+var capDetails={
     "nvidia-founders-rtx5090-32g":"nvidia_founders",
     "nvidia-gtx1080-founders":"nvidia_founders_pascal",
     "nvidia-gtx780ti-reference":"nvidia_reference_kepler",
@@ -23,6 +25,62 @@ var reviewed={
     "msi-suprim-x-4090-24g":"msi_suprim",
     "zotac-twin-4060ti-oc-white":"zotac_twin_edge",
     "msi-vega64-8g-reference":"msi_vega64_reference"
+}
+function modelProfile(state) {
+    return Nvidia.profile(state) || RadeonArc.profile(state)
+}
+function faceGeometry(state) {
+    var g=Solid.geometry(state)
+    // Miniature has the same parallel front plane as the retained legacy art.
+    // Its separate top/right planes must not shift the source panel traces.
+    if(state.icon_set==="miniature") {
+        g.x-=.8;g.y+=.75;g.h-=.3
+        g.centers=g.centers.map(function(x){return x-.8})
+        if(g.fan_y)g.fan_y=g.fan_y.map(function(y){return y+.75-.3*.51})
+    }
+    return g
+}
+function contours(state,row,holes) {
+    if(!row || !row.traces || !row.traces.length)return ''
+    var g=faceGeometry(state),matrix=[g.w/100,0,0,g.h/100,g.x,g.y]
+    var hand=["sketch","notebook_color","notebook_line","notebook_smile","inkwash"].indexOf(state.icon_set)>=0
+    var line=hand || ["classic","outline"].indexOf(state.icon_set)>=0
+    var color=line?state.ink:state.icon_set==="papercut"?'#2b485a':state.icon_set==="sticker"?'#415d60':Board.colors(state,Solid.palette(state)).edge
+    var out='',region=contourRegion(state,g,holes)
+    row.traces.forEach(function(trace,index){
+        var m=trace.m?Notebook.matrix(matrix,trace.m):matrix
+        var width=Math.max(.055,Math.min(.14,Number(trace.width)||.09))
+        if(hand)width=Math.max(.095,width)
+        var d=hand?Sketch.wobblyPath(trace.d,state.model_id+':model-panel:'+index,.35,14):trace.d
+        // Build clipped paths once. Holes remain true circles and no seam can
+        // pass over a rotating leaf. No SVG clipPath/filter dependency on Qt.
+        // The reviewed White Taichi LCD frame projects above the main cover.
+        // Keep only this explicitly sourced external component outside it;
+        // normal panel seams still stop at the hand-drawn casing boundary.
+        var external=row.recipe==='b_taichi9070_white_lcd' && trace.feature==='external_display'
+        var traceRegion=external?[[0,0],[24,0],[24,24],[0,24]]:region
+        var parts=d.match(/[Mm][^Mm]*/g)||[],clipped=''
+        parts.forEach(function(part){
+            var points=Notebook.casePolygon({d:part,m:m})
+            if(/[Zz]\s*$/.test(part) && points.length)points.push(points[0])
+            clipped+=Notebook.clippedStroke(points,traceRegion,holes,width)
+        })
+        if(clipped)out+='<path'+(external?' data-model-feature="external_display"':'')+' d="'+clipped+'" fill="none" stroke="'+color+'" stroke-width="'+n(width)+'" stroke-opacity="'+(line?'.78':'.55')+'"/>'
+    })
+    return out?'<g class="hardware-model-sku-contours" data-model="'+state.model_id+'">'+out+'</g>':''
+}
+function contourRegion(state,g,holes) {
+    // Earlier notebook studies intentionally have their own slightly uneven
+    // silhouette. Clip added source facets inside that exact silhouette too:
+    // a straight Pascal panel must not protrude beyond the hand-drawn cover.
+    if(state.icon_set.indexOf('notebook_')===0 || state.icon_set==='inkwash') {
+        var c=Board.colors(state,Solid.palette(state));c.ink=state.ink
+        var front=Object.prototype.hasOwnProperty.call(Notebook.cases,state.model_id)?'':Solid.front(state,g,c)
+        var study=Notebook.shapeStudy(state,g,c,front,holes)
+        var polygon=Notebook.casePolygon(study)
+        if(polygon.length>=3)return polygon
+    }
+    return [[0,0],[24,0],[24,24],[0,24]]
 }
 function n(value){return Number(value).toFixed(5).replace(/\.?0+$/,"")||"0"}
 function profile(state,index,kind) {
@@ -142,16 +200,20 @@ function notebookBand(state,holes) {
 function body(state,base,collector) {
     if(!state || state.kind!=="gpu" || typeof base!=="string" || !Array.isArray(collector)
             || !Board.profile(state))return base
+    var row=modelProfile(state)
+    if(!row)return base
     var hand=["sketch","notebook_line","notebook_color","notebook_smile","inkwash"].indexOf(state.icon_set)>=0
+    var openings=Notebook.fanLayout(state,faceGeometry(state))
     if(hand) {
         // All reviewed model covers get the same physical hole exclusion,
         // including partial/unknown rotor collections. Filled paper and fixed
         // circular frames remain untouched. Ordinary topbar never calls here.
-        var openings=Notebook.fanLayout(state,Solid.geometry(state))
         base=casingInk(base,openings)
-        if(reviewed[state.model_id]===state.series_id)base+=notebookBand(state,openings)
+        if(capDetails[state.model_id]===state.series_id)base+=notebookBand(state,openings)
     }
-    if(reviewed[state.model_id]!==state.series_id)return base
+    // Per-SKU source panels survive every style. Entries with unverified
+    // casing retain the neutral original and explicitly have no new traces.
+    base+=contours(state,row,openings)
     var holes=apertures(base,collector)
     var physical=collector.slice().sort(function(a,b){return a.cx-b.cx})
     var complete=collector.length===state.fan_count && physical.every(function(r,index){
