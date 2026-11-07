@@ -7,7 +7,7 @@ import math
 import os
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QPoint, Qt, QTimer, QUrl, QVariantAnimation
+from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QTimer, QUrl, QVariantAnimation
 from PySide6.QtGui import QActionGroup, QCursor, QIcon
 from PySide6.QtNetwork import QLocalServer
 from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent, qmlRegisterType
@@ -55,6 +55,86 @@ from widget_catalog import TEMPLATES
 from widget_material_geometry import backdrop_shapes, rounded_mask
 
 
+_input_desktop_api = None
+
+
+def _desktop_session_ready():
+    """Read input-desktop identity only; never switch desktops or request rights.
+
+    Default + UOI_IO positively identifies our interactive input desktop. Lock,
+    secure consent, inaccessible/disconnected or unknown state stays disallowed.
+    https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-openinputdesktop
+    https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-getuserobjectinformationw
+    """
+    global _input_desktop_api
+    if os.name != 'nt':return None
+    try:
+        if _input_desktop_api is None:
+            user=c.WinDLL('user32',use_last_error=True)
+            signatures=((user.OpenInputDesktop,c.c_void_p,[c.c_uint32,c.c_int32,c.c_uint32]),
+                        (user.GetUserObjectInformationW,c.c_int32,[c.c_void_p,c.c_int32,c.c_void_p,c.c_uint32,c.POINTER(c.c_uint32)]),
+                        (user.CloseDesktop,c.c_int32,[c.c_void_p]))
+            for function,result,args in signatures:function.restype=result;function.argtypes=args
+            _input_desktop_api=user
+        user=_input_desktop_api;handle=user.OpenInputDesktop(0,False,1)  # DESKTOP_READOBJECTS
+        if not handle:return None
+        result=None
+        try:
+            name=c.create_unicode_buffer(256);needed=c.c_uint32();receives=c.c_int32()
+            if (user.GetUserObjectInformationW(handle,2,name,c.sizeof(name),c.byref(needed))
+                    and user.GetUserObjectInformationW(handle,6,c.byref(receives),c.sizeof(receives),c.byref(needed))):
+                result=name.value.casefold()=='default' and bool(receives.value)
+        finally:
+            if not user.CloseDesktop(handle):result=None
+        return result
+    except (OSError,AttributeError,TypeError,ValueError):return None
+
+
+class _DesktopAwareTopBarManager(TopBarManager):
+    """Extend the one existing event guard to models, without changing bar hosts.
+
+    A disabled/paused bar still has no AppBar hosts. Only its existing queued
+    WinEvent refresh and guard remain while a visible hardware model needs them.
+    The guard's normal shutdown still releases all native hooks on application
+    exit or after the last model and bar host have gone. No second guard/timer.
+    """
+    def _model_monitors(self):
+        return {**getattr(self.runtime,'_model_guard_monitors',{}),
+                **getattr(self.runtime,'_assembly_guard_monitors',{})}
+
+    def _queue_foreground_visibility(self):
+        if self._model_monitors():
+            if not self.closed and self._fullscreen_guard is not None and not self._foreground_timer.isActive():
+                self._foreground_timer.start()
+        else:super()._queue_foreground_visibility()
+
+    def _read_foreground_visibility(self):
+        if not self._model_monitors():return super()._read_foreground_visibility()
+        if self._fullscreen_guard is None:
+            self._foreground_hidden_screens=frozenset();return
+        monitors={name:host.binding.monitor for name,host in self.hosts.items()
+                  if not host.closing and host.binding is not None}
+        monitors.update(self._model_monitors())
+        try:
+            self._foreground_hidden_screens=self._fullscreen_guard.blocked(monitors)
+            self._fullscreen_guard_error=None
+        except Exception as error:
+            self._fullscreen_guard_error=type(error).__name__
+            self._foreground_hidden_screens=frozenset(monitors)
+
+    def _foreground_visibility_changed(self):
+        if self.closed:return
+        if self.paused and self._model_monitors():self._read_foreground_visibility()
+        else:super()._foreground_visibility_changed()
+        Runtime.refresh_model_motion(self.runtime,query=False)
+
+    def _stop_fullscreen_guard(self):
+        guard=self._fullscreen_guard
+        if (not self.closed and not getattr(self.runtime,'shutting_down',False)
+                and self._model_monitors() and guard is not None and not guard.closed):return
+        super()._stop_fullscreen_guard()
+
+
 class Runtime(QObject):
     def __init__(self, application, background=False, headless=False):
         super().__init__()
@@ -86,6 +166,12 @@ class Runtime(QObject):
         self.position_timer.timeout.connect(self.save_positions)
         self.controller = Controller()
         self._assembly_window = None
+        self._model_guard_monitors = {}
+        self._model_guard_hidden = {}
+        self._assembly_guard_monitors = {}
+        self._model_monitor_cache = {}
+        self._model_motion_refreshing = False
+        self._assembly_guard_hidden = False
         self.controller.assemblyViewRequested.connect(self.open_assembly_view)
         self.controller.set_motion_enabled(not headless and animations_enabled())
         self.frame_bridge = (
@@ -102,41 +188,21 @@ class Runtime(QObject):
         self.engine = QQmlApplicationEngine()
         self.engine.warnings.connect(self.qml_warnings)
         self.engine.rootContext().setContextProperty("stats", self.controller)
-        self.engine.load(QUrl.fromLocalFile(str(ASSETS / "native/Settings.qml")))
-        if not self.engine.rootObjects():
-            raise RuntimeError("Native settings could not load")
-        self.settings = self.engine.rootObjects()[0]
-        self.settings.setIcon(application.windowIcon())
+        # A background top bar does not need the hidden settings object tree.
+        # Keep the engine/context shared; load the editor on its first Show.
+        self.settings = None
+        self.settings_host = None
+        self.settings_blur = None
+        self.settings_material = None
+        self._settings_loading = False
         self.settings_theme = self.controller._draft["theme"]
         self.controller.draftChanged.connect(self.settings_draft_changed)
-        self.settings.setPersistentGraphics(True)
-        self.settings.setPersistentSceneGraph(True)
-        self.settings_host = (SettingsBackdropHost(self.settings)
-                              if not headless and application.platformName() == "windows" else None)
-        self.settings_blur = (ThinRasterAcrylicMaterial(paint_background=self.settings_host.paint_background)
-                              if self.settings_host is not None
-                              else SettingsBlurMaterial()
-                              if not headless and application.platformName() == "windows" else None)
-        self.settings_material = None if headless else SettingsMaterialBridge(
-            Runtime._settings_window(self), self,
-            backend="system-blur",
-            frame_source=self.settings if self.settings_host is not None else None,
-            allow_hidden_prepare=self.settings_host is not None,
-            wait_for_first_frame=True, activation_requests=self.settings_host is not None,
-            compose_once=self._settings_material_request,
-            policy_reader=transparency_policy,
-            publish=self._publish_settings_material,
-            release_surface=self._release_settings_surface,
-        )
-        if self.settings_material:
-            self.settings_material.start()
-        if self.settings_host:
-            self.settings_host.paintFailed.connect(self._settings_paint_failed)
         # The top bar has its own component. Compile desktop cards only when
         # a real card is first created; keep one reusable component thereafter.
         self.component = None
-        self.settings.visibleChanged.connect(self.refresh_appearance)
-        self.top_bar = TopBarManager(self)
+        self.top_bar = _DesktopAwareTopBarManager(self)
+        self.controller.motionChanged.connect(lambda:Runtime.refresh_model_motion(self))
+        self.app.applicationStateChanged.connect(lambda *_:Runtime.refresh_model_motion(self))
         self.controller.applyRequested.connect(self.apply)
         self.controller.topBarApplyRequested.connect(self.apply_top_bar)
         self.controller.settingsRequested.connect(self.show_settings)
@@ -192,11 +258,105 @@ class Runtime(QObject):
         for warning in warnings:
             logging.warning("Native interface: %s", warning.toString())
 
+    def ensure_settings(self):
+        """Create the editor once, preserving its draft and existing glass lifecycle."""
+        if self.shutting_down or self._settings_loading:
+            return None
+        if self.settings is not None:
+            return self.settings
+        self._settings_loading = True
+        roots = tuple(self.engine.rootObjects())
+
+        def discard():
+            for owner_name, method in (("settings_material", "close"), ("settings_blur", "close"),
+                                       ("settings_host", "dispose")):
+                owner = getattr(self, owner_name, None)
+                if owner is not None:
+                    try:
+                        getattr(owner, method)()
+                    except Exception:
+                        logging.exception("Could not release incomplete settings: %s", owner_name)
+                setattr(self, owner_name, None)
+            for root in self.engine.rootObjects():
+                if root not in roots:
+                    root.deleteLater()
+            self.settings = None
+
+        def cancelled():
+            if not self.shutting_down:
+                return False
+            discard()
+            return True
+
+        try:
+            self.engine.load(QUrl.fromLocalFile(str(ASSETS / "native/Settings.qml")))
+            created = [root for root in self.engine.rootObjects() if root not in roots]
+            if cancelled():
+                return None
+            settings = next((root for root in created if root.objectName() == "settingsWindow"), None)
+            if settings is None:
+                raise RuntimeError("Native settings could not load")
+            self.settings = settings
+            settings.setIcon(self.app.windowIcon())
+            if cancelled():
+                return None
+            self.settings_theme = self.controller._draft["theme"]
+            settings.setPersistentGraphics(True)
+            settings.setPersistentSceneGraph(True)
+            if cancelled():
+                return None
+            self.settings_host = (SettingsBackdropHost(settings)
+                if not self.headless and self.app.platformName() == "windows" else None)
+            if cancelled():
+                return None
+            self.settings_blur = (ThinRasterAcrylicMaterial(paint_background=self.settings_host.paint_background)
+                if self.settings_host is not None else SettingsBlurMaterial()
+                if not self.headless and self.app.platformName() == "windows" else None)
+            if cancelled():
+                return None
+            self.settings_material = None if self.headless else SettingsMaterialBridge(
+                Runtime._settings_window(self), self, backend="system-blur",
+                frame_source=settings if self.settings_host is not None else None,
+                allow_hidden_prepare=self.settings_host is not None,
+                wait_for_first_frame=True, activation_requests=self.settings_host is not None,
+                compose_once=self._settings_material_request, policy_reader=transparency_policy,
+                publish=self._publish_settings_material, release_surface=self._release_settings_surface)
+            if cancelled():
+                return None
+            settings.visibleChanged.connect(self.refresh_appearance)
+            if self.settings_host:
+                self.settings_host.paintFailed.connect(self._settings_paint_failed)
+            if self.settings_material:
+                self.settings_material.start()
+            if cancelled():
+                return None
+            return settings
+        except Exception:
+            discard()
+            raise
+        finally:
+            self._settings_loading = False
+
+    def _settings_visible(self):
+        settings = getattr(self, "settings", None)
+        return settings is not None and settings.isVisible()
+
+    def _settings_pending(self):
+        settings = getattr(self, "settings", None)
+        return settings is not None and bool(settings.property("pendingEdits"))
+
+    def _settings_window_state(self):
+        window = Runtime._settings_window(self)
+        return dict(settings_loaded=getattr(self, "settings", None) is not None,
+                    settings_visible=window is not None and window.isVisible(),
+                    settings_active=window is not None and window.isActive(),
+                    settings_minimized=bool(window is not None and window.windowState() & Qt.WindowMinimized))
+
     def settings_draft_changed(self):
         theme = self.controller._draft["theme"]
         if theme != self.settings_theme:
             self.settings_theme = theme
-            if self.settings.isVisible():
+            if Runtime._settings_visible(self):
                 self.compose(self.settings, "settings")
         self.refresh_appearance()
 
@@ -209,7 +369,7 @@ class Runtime(QObject):
         if self.headless or self.shutting_down:
             return
         config = project_appearance(
-            self.controller._saved, self.controller._draft, self.settings.isVisible()
+            self.controller._saved, self.controller._draft, Runtime._settings_visible(self)
         )
         previous = getattr(self, "_appearance_states", {})
         states = {}
@@ -258,7 +418,7 @@ class Runtime(QObject):
         self.controller.set_window_materials(self.composition)
         bar = getattr(self, "top_bar", None)
         if bar is not None:
-            active = self.settings.isVisible()
+            active = Runtime._settings_visible(self)
             bar.preview_appearance(project_top_bar_appearance(
                 self.controller._saved, self.controller._draft, active
             ), active=active)
@@ -751,6 +911,16 @@ class Runtime(QObject):
         self.controller.set_window_materials(self.composition)
 
     def show_settings(self, key=""):
+        if self.shutting_down or getattr(self, "_settings_loading", False):
+            return
+        if getattr(self, "settings", None) is None:
+            try:
+                if Runtime.ensure_settings(self) is None:
+                    return
+            except Exception:
+                logging.exception("Native settings could not open")
+                self.controller.set_status("无法打开设置", error=True)
+                return
         host = getattr(self, "settings_host", None)
         settings = self.settings
 
@@ -846,6 +1016,7 @@ class Runtime(QObject):
     def apply_top_bar(self):
         """A bar-only commit does not recreate widgets or discard editor drafts."""
         self.top_bar.apply(self.controller._saved)
+        Runtime.refresh_model_motion(self)
         self.update_menu()
 
     def apply(self, rearrange=False):
@@ -923,6 +1094,9 @@ class Runtime(QObject):
                 if not window:
                     raise RuntimeError("Native widget could not load")
                 self.widgets[key] = window
+                window.installEventFilter(self)
+                for signal in (window.visibleChanged,window.visibilityChanged,window.screenChanged):
+                    signal.connect(lambda *_:Runtime.refresh_model_motion(self))
             if self.frame_bridge:
                 if native_frame and setup_frame and not self.frame_bridge.register(window, key):
                     window.hide()
@@ -942,18 +1116,23 @@ class Runtime(QObject):
             self._widget_appearance_config[key] = config
             self.ensure_widget_material(key, window)
         self.arrange(specs, rearrange)
+        # A pinned hardware model must be admitted before its first Show, not
+        # briefly published over a game and hidden by a later exposure event.
+        model_windows=Runtime._admit_model_windows(self)
         for key, window in self.widgets.items():
-            window.show()
+            if key not in model_windows:window.show()
+            elif not window.isVisible():continue
             spec = window.property("spec")
             if hasattr(spec, "toVariant"):
                 spec = spec.toVariant()
             enabled = spec["material_policy"]["translucent"]
             self.compose(window, key, enabled)
             window.setProperty("registered", True)
-        if self.settings.isVisible():
+        if Runtime._settings_visible(self):
             self.compose(self.settings, "settings")
         self._appearance_states = {}
         self.refresh_appearance()
+        Runtime.refresh_model_motion(self)
         self.update_menu()
 
     def arrange(self, specs, rearrange):
@@ -1098,6 +1277,7 @@ class Runtime(QObject):
             logging.exception("Desktop position save failed")
 
     def fit_windows(self):
+        self._model_monitor_cache = {}
         if not self.shutting_down and not self.headless:
             # Recompute sizes as well as positions after monitor/work-area changes.
             self.apply(False)
@@ -1136,6 +1316,130 @@ class Runtime(QObject):
                     pinned_level(int(window.winId()))
                 else:
                     desktop_level(int(window.winId()))
+        Runtime.refresh_model_motion(self)
+
+    def eventFilter(self,watched,event):
+        if (event.type() in (QEvent.Expose,QEvent.Show,QEvent.Hide,QEvent.WindowStateChange)
+                and (any(window is watched for window in self.widgets.values())
+                     or getattr(self,'_assembly_window',None) is watched)):
+            Runtime.refresh_model_motion(self)
+        return super().eventFilter(watched,event)
+
+    def _model_screen_fact(self,screen):
+        cache=getattr(self,'_model_monitor_cache',{})
+        if screen in cache:return cache[screen]
+        if screen is None:raise ValueError('Model screen is unavailable')
+        adapter=self.top_bar.adapter;identity=adapter.screen_identity(screen)
+        identifier=identity.native_id
+        if type(identifier) is not str or not identifier:raise ValueError('Model monitor identity is unavailable')
+        bounds=adapter._monitor_info(identity.monitor_handle).rcMonitor
+        rect=tuple(getattr(bounds,key) for key in ('left','top','right','bottom'))
+        if any(type(value) is not int for value in rect) or rect[2]<=rect[0] or rect[3]<=rect[1]:
+            raise ValueError('Model monitor bounds are unavailable')
+        cache[screen]=(identifier,rect);self._model_monitor_cache=cache
+        return cache[screen]
+
+    def _has_hardware_model(self,key,window):
+        try:
+            spec=window.property('spec')
+            if hasattr(spec,'toVariant'):spec=spec.toVariant()
+            config=getattr(self,'_widget_appearance_config',{}).get(key,self.controller._saved)
+            return any(config.get('widgets',{}).get(cell.get('key'),{}).get('presentation')=='hardware'
+                       for cell in (spec or {}).get('cells',()) if isinstance(cell,dict))
+        except (AttributeError,RuntimeError,TypeError,ValueError):return False
+
+    def _admit_model_windows(self):
+        hidden=getattr(self,'_model_guard_hidden',{})
+        self._model_guard_hidden=hidden;models=set()
+        for key,window in self.widgets.items():
+            if Runtime._has_hardware_model(self,key,window):models.add(key);hidden[key]=window
+        Runtime.refresh_model_motion(self)
+        return models
+
+    def refresh_model_motion(self,*,query=True):
+        """Reuse WinEvents/window signals/the existing floor tick; no new poller."""
+        if getattr(self,'_model_motion_refreshing',False):return
+        self._model_motion_refreshing=True
+        try:
+            candidates=[];monitors={}
+            hidden=getattr(self,'_model_guard_hidden',{})
+            hidden={key:window for key,window in hidden.items() if self.widgets.get(key) is window}
+            self._model_guard_hidden=hidden
+            stopped=getattr(self,'shutting_down',False) or getattr(self,'headless',True)
+            for key,window in tuple(getattr(self,'widgets',{}).items()):
+                hardware=False;identifier=None
+                try:
+                    hardware=Runtime._has_hardware_model(self,key,window)
+                    exposed=(not stopped and (hardware or hidden.get(key) is window)
+                             and (hidden.get(key) is window or window.isVisible() is True and window.isExposed() is True)
+                             and not bool(window.windowState()&Qt.WindowMinimized))
+                    if exposed:
+                        identifier,rect=Runtime._model_screen_fact(self,window.screen());monitors[identifier]=rect
+                except (AttributeError,RuntimeError,TypeError,ValueError):pass
+                candidates.append((key,window,identifier,hardware))
+            self._model_guard_monitors=monitors
+            assembly=getattr(self,'_assembly_window',None)
+            if assembly is not None and hasattr(assembly,'screen'):
+                try:
+                    identifier,rect=Runtime._model_screen_fact(self,assembly.screen())
+                    self._assembly_guard_monitors={identifier:rect}
+                except (AttributeError,RuntimeError,TypeError,ValueError):self._assembly_guard_monitors={}
+            bar=getattr(self,'top_bar',None)
+            all_monitors={**monitors,**getattr(self,'_assembly_guard_monitors',{})}
+            if bar is not None:
+                if all_monitors and not stopped:bar._ensure_fullscreen_guard()
+                elif not getattr(bar,'hosts',{}):bar._stop_fullscreen_guard()
+            guard=getattr(bar,'_fullscreen_guard',None)
+            if query and all_monitors and guard is not None:bar._read_foreground_visibility()
+            known=(guard is not None and getattr(guard,'_known',False) is True
+                   and not getattr(guard,'closed',True)
+                   and not getattr(guard,'failure',None) and not getattr(bar,'_fullscreen_guard_error',None))
+            session=bool(all_monitors) and _desktop_session_ready() is True
+            for key,window,identifier,hardware in candidates:
+                if self.widgets.get(key) is not window:continue
+                safe=bool(session and known and identifier in monitors
+                          and identifier not in getattr(bar,'_foreground_hidden_screens',()))
+                if (not safe and hardware and window.isVisible() is True
+                        and not bool(window.windowState()&Qt.WindowMinimized)):
+                    hidden[key]=window;window.hide()
+                elif safe and hidden.get(key) is window:
+                    if window.isVisible() is not True:window.show();window.lower()
+                    if window.isExposed() is True:hidden.pop(key,None)
+                allowed=bool(hardware and safe and window.isVisible() is True and window.isExposed() is True)
+                if window.property('modelMotionAllowed') is not allowed:window.setProperty('modelMotionAllowed',allowed)
+            Runtime._update_assembly_motion(self,known,session,bar)
+        except Exception:
+            # Any query/identity failure leaves every owned model quiet.
+            for key,window in tuple(getattr(self,'widgets',{}).items()):
+                try:
+                    window.setProperty('modelMotionAllowed',False)
+                    if (Runtime._has_hardware_model(self,key,window) and window.isVisible() is True
+                            and not bool(window.windowState()&Qt.WindowMinimized)):
+                        self._model_guard_hidden[key]=window;window.hide()
+                except RuntimeError:pass
+            Runtime._update_assembly_motion(self,False,False,getattr(self,'top_bar',None))
+        finally:self._model_motion_refreshing=False
+
+    def _update_assembly_motion(self,known,session,bar):
+        window=getattr(self,'_assembly_window',None)
+        if window is None:return
+        identifiers=getattr(self,'_assembly_guard_monitors',{})
+        safe=bool(known and session and identifiers
+                  and not set(identifiers)&set(getattr(bar,'_foreground_hidden_screens',())))
+        desktop=getattr(window,'window_mode',None)=='desktop'
+        minimized=window.isMinimized() is True
+        if desktop and not safe and window.isVisible() is True and not minimized:
+            self._assembly_guard_hidden=True;window.hide()
+        elif desktop and safe and getattr(self,'_assembly_guard_hidden',False) and not minimized:
+            self._assembly_guard_hidden=False
+            window.setAttribute(Qt.WA_ShowWithoutActivating,True);window.showNormal();window.lower()
+        allowed=bool(safe and window.isVisible() is True and not minimized
+                     and not getattr(self,'shutting_down',False))
+        if window.property('modelMotionAllowed') is not allowed:window.setProperty('modelMotionAllowed',allowed)
+        if not allowed:
+            window._clock_active(False)
+            window.viewport.set_motion_enabled(False)
+        window.update_readings()
 
     def screen_inventory(self):
         primary = self.app.primaryScreen()
@@ -1194,11 +1498,24 @@ class Runtime(QObject):
         self.details.show()
         self.details.requestActivate()
 
+    def _assembly_target_allowed(self,target):
+        """Use the same screen-aware guard before creating/showing an own view."""
+        identifier,rect=Runtime._model_screen_fact(self,target)
+        self._assembly_guard_monitors={identifier:rect}
+        bar=self.top_bar;bar._ensure_fullscreen_guard();bar._read_foreground_visibility()
+        guard=getattr(bar,'_fullscreen_guard',None)
+        return (guard is not None and getattr(guard,'_known',False) is True
+                and not getattr(guard,'closed',True)
+                and not getattr(guard,'failure',None) and not getattr(bar,'_fullscreen_guard_error',None)
+                and identifier not in getattr(bar,'_foreground_hidden_screens',()))
+
     def open_assembly_view(self, specification):
         """A user-requested native viewer, kept on the selected bar screen."""
         if self.headless or self.shutting_down:
             return
         window = None
+        previous_monitors=getattr(self,'_assembly_guard_monitors',{}).copy()
+        admitted=False
         try:
             configured = self.controller.saved.get("top_bar", {})
             from assembly_config import target_screen
@@ -1207,26 +1524,35 @@ class Runtime(QObject):
             if target is None:
                 self.controller.set_status("所选屏幕不可用", error=True)
                 return
-            identifier = self.top_bar.adapter.screen_identity(target).native_id
-            refresh = getattr(self.top_bar,"_read_foreground_visibility",None)
-            if callable(refresh):refresh()
-            if identifier in getattr(self.top_bar,"_foreground_hidden_screens",()):
+            if _desktop_session_ready() is not True:
+                self.controller.set_status("桌面当前不可交互，暂不打开三维检视。",error=True)
+                return
+            if not Runtime._assembly_target_allowed(self,target):
                 self.controller.set_status("此屏幕正在运行全屏应用，暂不打开三维检视。",error=True)
                 return
-            activate = foreground_fullscreen() is False
+            options=specification.get('options',{})
+            mode=options.get('window_mode','inspect') if isinstance(options,dict) else 'inspect'
+            mode=mode if type(mode) is str and mode in ('inspect','desktop') else 'inspect'
+            activate = mode=='inspect' and foreground_fullscreen() is False
             current = self._assembly_window
+            current_mode=getattr(current,'window_mode','inspect')
+            if type(current_mode) is not str:current_mode='inspect'
+            if current is not None and current_mode!=mode:
+                current.close()
+                if self._assembly_window is current:self._assembly_window=None
+                current=None;previous_monitors={}
             if current is not None:
                 current.synchronize(specification)
                 window = current
             else:
-                from assembly_window import AssemblyWindow
-                window = AssemblyWindow(self.controller, self.engine, specification)
+                from assembly_window import create_assembly_window
+                window = create_assembly_window(self.controller, self.engine, specification)
             area = target.availableGeometry()
-            minimum_width = min(760, max(320, area.width()))
-            minimum_height = min(520, max(240, area.height()))
+            minimum_width = min(280,max(1,area.width())) if mode=='desktop' else min(760,max(320,area.width()))
+            minimum_height = min(300,max(1,area.height())) if mode=='desktop' else min(520,max(240,area.height()))
             window.setMinimumSize(minimum_width, minimum_height)
-            width = min(1080, max(minimum_width, area.width() - 64))
-            height = min(800, max(minimum_height, area.height() - 64))
+            width = min(420,max(minimum_width,area.width()-32)) if mode=='desktop' else min(1080,max(minimum_width,area.width()-64))
+            height = min(480,max(minimum_height,area.height()-32)) if mode=='desktop' else min(800,max(minimum_height,area.height()-64))
             window.resize(width, height)
             window.winId()
             window.windowHandle().setScreen(target)
@@ -1234,27 +1560,43 @@ class Runtime(QObject):
                         area.y() + max(0, (area.height() - height) // 2))
             if current is None:
                 self._assembly_window = window
-                window.closed.connect(lambda: setattr(self, "_assembly_window", None))
+                window.installEventFilter(self)
+                window.windowHandle().screenChanged.connect(lambda *_:Runtime.refresh_model_motion(self))
+                def closed(owner=window):
+                    if self._assembly_window is owner:
+                        self._assembly_window=None;self._assembly_guard_monitors={};self._assembly_guard_hidden=False
+                        Runtime.refresh_model_motion(self)
+                window.closed.connect(closed)
+            # A queued foreground/secure-desktop change during profile baking
+            # must be checked again before publishing the newly built surface.
+            if _desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target):
+                window.close();previous_monitors={};return
+            admitted=True
             window.setAttribute(Qt.WA_ShowWithoutActivating,not activate)
             window.showNormal()
-            if activate:
+            if mode=='desktop':window.lower()
+            elif activate:
                 window.raise_();window.activateWindow()
         except Exception:
             if window is not None:
                 window.close()
+                if self._assembly_window is None:previous_monitors={}
             logging.exception("Assembly view could not open")
             self.controller.set_status("无法打开三维视图", error=True)
+        finally:
+            if not admitted:self._assembly_guard_monitors=previous_monitors
+            Runtime.refresh_model_motion(self)
 
     def diagnose(self, output):
         output = Path(output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        if self.settings.isVisible():
+        if Runtime._settings_visible(self):
             self.settings.grabWindow().save(str(output.with_suffix(".png")))
         report = {
             "version": self.controller.version,
             "windows": {},
             "composition": self.composition,
-            "settings_visible": self.settings.isVisible(),
+            "settings_visible": Runtime._settings_visible(self),
             "sensor_timestamp": self.controller._data.get("time"),
             "cpu_temperature_startup": (
                 self.cpu_temperature_launcher.status()
@@ -1386,7 +1728,7 @@ class LocalServer(QLocalServer):
                 def clean():
                     return bool(self.runtime) and not (
                         self.runtime.controller.dirty
-                        or bool(self.runtime.settings.property("pendingEdits"))
+                        or Runtime._settings_pending(self.runtime)
                     )
 
                 if clean():
@@ -1414,7 +1756,7 @@ class LocalServer(QLocalServer):
                 elif not isinstance(selected, str) or selected not in HARDWARE_ICON_STYLES:
                     response = {"ok": False, "reason": "invalid_style"}
                 elif (controller.dirty or getattr(controller, "replacementPending", False)
-                      or bool(self.runtime.settings.property("pendingEdits"))):
+                      or Runtime._settings_pending(self.runtime)):
                     response = {"ok": False, "dirty": True, "reason": "unsaved_changes"}
                 else:
                     # One allowlisted preference uses the existing scoped save;
@@ -1456,9 +1798,9 @@ class LocalServer(QLocalServer):
                         }
                         for item in self.runtime.controller._saved["top_bar"]["items"]
                     ],
-                    "settings_visible": Runtime._settings_window(self.runtime).isVisible(),
+                    **Runtime._settings_window_state(self.runtime),
                     "dirty": self.runtime.controller.dirty
-                    or bool(self.runtime.settings.property("pendingEdits")),
+                    or Runtime._settings_pending(self.runtime),
                     "pid": os.getpid(),
                     "top_bar": dict(self.runtime.controller._top_bar_status),
                     "top_bar_details": top_bar_details,
@@ -1481,8 +1823,6 @@ class LocalServer(QLocalServer):
                         for key, report in getattr(self.runtime, "composition", {}).items()
                         if key in self.runtime.widgets
                     },
-                    "settings_active": Runtime._settings_window(self.runtime).isActive(),
-                    "settings_minimized": bool(Runtime._settings_window(self.runtime).windowState() & Qt.WindowMinimized),
                 }
         except (ValueError, TypeError, OSError):
             logging.exception("Local command rejected")

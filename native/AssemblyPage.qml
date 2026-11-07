@@ -33,8 +33,13 @@ ScrollView {
             Layout.fillWidth:true;spacing:16
             Text {Layout.fillWidth:true;text:ui.t("整机视图");font.family:ui.fontFamily;font.pixelSize:25;font.weight:Font.DemiBold;color:ui.ink;elide:Text.ElideRight}
             ActionButton {
+                objectName:"openAssemblyDesktopButton"
+                text:ui.t("放到桌面");accent:true;enabled:root.active&&root.info.initialized===true
+                onClicked:stats.openAssemblyDesktop()
+            }
+            ActionButton {
                 objectName:"openAssemblyViewButton"
-                text:ui.t("打开三维视图");accent:true;enabled:root.active&&root.info.initialized===true
+                text:ui.t("打开三维视图");enabled:root.active&&root.info.initialized===true
                 onClicked:stats.openAssemblyView()
             }
         }
@@ -96,6 +101,33 @@ ScrollView {
                 Layout.fillWidth:true
                 text:ui.t("示例替换未保存的机箱与配件选择，沿用当前 CPU、显卡和内存。转动仅为演示；按应用偏好保存。")
                 font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap;lineHeight:1.2
+            }
+        }
+        SettingsGroup {
+            objectName:"assemblyWindowModeGroup"
+            Layout.fillWidth:true;title:ui.t("桌面显示")
+            note:ui.t("将整机模型放到桌面，点击部件查看真实状态；也可保留完整检视窗口。")
+            RowLayout {
+                Layout.fillWidth:true;spacing:12
+                Text {Layout.preferredWidth:88;text:ui.t("查看方式");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted}
+                Choice {
+                    objectName:"assemblyWindowModeChoice";Layout.fillWidth:true
+                    model:[{id:"inspect",label:ui.t("完整检视窗口")},{id:"desktop",label:ui.t("桌面小组件")}]
+                    value:root.config.window_mode || "inspect"
+                    Accessible.name:ui.t("查看方式");onPicked:selected=>stats.changeAssembly("window_mode",selected)
+                }
+            }
+            SettingRow {
+                Layout.fillWidth:true;label:ui.t("小组件边框");note:ui.t("关闭后仅保留模型与紧凑读数，背景透明。")
+                Toggle {objectName:"assemblyDesktopFrameToggle";checked:root.config.desktop_frame!==false
+                    onToggled:stats.changeAssembly("desktop_frame",checked)}
+            }
+            ActionButton {objectName:"openAssemblyInspectButton";text:ui.t("完整检视")
+                enabled:root.active&&root.info.initialized===true;onClicked:stats.openAssemblyInspect()}
+            Text {
+                Layout.fillWidth:true
+                text:ui.t("桌面小组件不置顶、不抢焦点。拖动模型旋转，滚轮缩放；按住 Alt 拖动移动位置，右键打开菜单。")
+                font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap
             }
         }
         SettingsGroup {

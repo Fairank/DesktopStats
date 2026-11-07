@@ -1,5 +1,28 @@
 # Changes
 
+## 0.40.0-preview.1 (development candidate)
+
+- Add CPU/GPU model widgets with large retained hardware artwork, current
+  identity, compact readings, per-widget styles and a real frameless option.
+  Preserve hardware identity/counts across all13 styles and keep Original
+  expression-free. Reuse sampled readings, valid device RPM and the shared clock.
+- Add a compact interactive assembly desktop mode with optional rounded frame,
+  alpha background, part selection and nonactivating placement. Share the
+  existing foreground guard; stop motion and hide the assembly desktop widget
+  for same-screen fullscreen games. Native desktop acceptance remains pending.
+- Defer the settings QML tree until explicitly opened, preserve edits thereafter
+  and keep read-only status/clean-exit paths from creating the editor.
+- Add16 cases,12 cooler references and16 fan entries, including two documented
+  bundled-only fans. Current accessory inventory is253 records across13 styles;
+  retail availability and unverified internal geometry remain explicit.
+- Redraw four low-profile/radial coolers with one world projection, attached
+  heatpipes, open fin channels and correctly interleaved static/fan layers.
+  Rotate circular leaves before affine projection in Qt and the offline atlas.
+- Pause offscreen gallery rotors and honor reduced motion. Keep shared clocks,
+  bounded caches and the existing scene ink cap; add no hardware poller/service.
+- Candidate only: do not infer installed CPU temperature, desktop glass or live
+  gaming performance from isolated renders/tests. The running install is intact.
+
 ## 0.38.0-preview.1
 
 - Expand PSUs from six to 21 models across 11 brands using manufacturer

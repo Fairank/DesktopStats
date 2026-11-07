@@ -17,6 +17,7 @@ from assembly_effects import component_family
 
 class AssemblyWindow(QWidget):
     closed=Signal()
+    window_mode='inspect'
 
     def __init__(self,controller,engine,spec,*,viewport_factory=None):
         super().__init__()
@@ -33,9 +34,8 @@ class AssemblyWindow(QWidget):
         if viewport_factory is None:
             from assembly_viewer import AssemblyViewport
             viewport_factory=AssemblyViewport
-        self._geometry_key=None;self._last_fan={};self._last_cpu_fan={};self._spec=None;self._renderer_error=False
-        self._profile_key=None;self._profile_shapes=None
-        self.selected_component='all';self.inspection_state=None;self._inspection_columns=0
+        self._initialize_state()
+
         self.setAttribute(Qt.WA_DeleteOnClose,True)
         self.setWindowTitle(controller.tr("整机视图")+" · Desktop Stats")
         self.resize(1080,780);self.setMinimumSize(760,520)
@@ -45,6 +45,15 @@ class AssemblyWindow(QWidget):
             +";} QPushButton,QComboBox{padding:7px 12px;border:1px solid "
             +("#52606e" if dark else "#c8d2db")+";border-radius:6px;} QPushButton:hover{background:"
             +("#34404c" if dark else "#e2eaf0")+";}")
+        self._build_inspector(controller,viewport_factory,dark)
+        self._attach_session(controller,engine,spec)
+
+    def _initialize_state(self):
+        self._geometry_key=None;self._last_fan={};self._last_cpu_fan={};self._spec=None;self._renderer_error=False
+        self._profile_key=None;self._profile_shapes=None
+        self.selected_component='all';self.inspection_state=None;self._inspection_columns=0
+
+    def _build_inspector(self,controller,viewport_factory,dark):
         layout=QVBoxLayout(self);layout.setContentsMargins(18,16,18,14);layout.setSpacing(8)
         header=QHBoxLayout();self.title=QLabel();self.title.setTextFormat(Qt.PlainText)
         self.title.setWordWrap(True);self.title.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
@@ -153,6 +162,8 @@ class AssemblyWindow(QWidget):
         self.focus_choice.currentIndexChanged.connect(lambda _:self.viewport.focus_component(self.focus_choice.currentData()))
         self.viewport.rendererError.connect(self._render_failed)
         self.viewport.animationActiveChanged.connect(self._clock_active)
+
+    def _attach_session(self,controller,engine,spec):
         self._clock_component=QQmlComponent(engine,QUrl.fromLocalFile(str(ASSETS/'native/AssemblyClock.qml')))
         self._clock=self._clock_component.createWithInitialProperties(dict(backend=self,active=False))
         if self._clock is None:raise RuntimeError("Assembly animation bridge could not load")
@@ -170,7 +181,27 @@ class AssemblyWindow(QWidget):
         if spec:self.synchronize(spec)
 
     def synchronize(self,spec):
-        if self._closing:return
+        if not self._apply_scene(spec):return
+        options=spec['options']
+        detail=spec.get('detail_level','balanced')
+        if detail not in ('eco','balanced','close'):detail='balanced'
+        self.detail_choice.blockSignals(True);self.detail_choice.setCurrentIndex(self.detail_choice.findData(detail))
+        self.detail_choice.blockSignals(False)
+        self.style_choice.blockSignals(True)
+        self.style_choice.setCurrentIndex(self.style_choice.findData(options.get('appearance_style','follow')))
+        self.style_choice.blockSignals(False)
+        for control,field in ((self.exploded,'exploded'),(self.animate,'fan_animation')):
+            control.blockSignals(True);control.setChecked(options[field]);control.blockSignals(False)
+        self.selection_effects.blockSignals(True);self.selection_effects.setChecked(options.get('selection_effects',True))
+        self.selection_effects.blockSignals(False)
+        self._sync_part_style()
+        self._apply_motion_options(options)
+        self.title.setText(self.controller.tr(spec['case']['label']))
+        self.update_readings()
+
+    def _apply_scene(self,spec):
+        """Shared bounded scene/profile cache, independent of window chrome."""
+        if self._closing:return False
         previous_spec=self._spec
         self._spec=copy.deepcopy(spec)
         geometry={key:spec[key] for key in ('case','gpu','cpu','memory','board')}
@@ -197,30 +228,21 @@ class AssemblyWindow(QWidget):
                 self._spec=previous_spec
                 self.fit_notice.setText(self.controller.tr('暂未应用本次视图更改，请减少配件或调整模型细节。'))
                 self.fit_notice.setVisible(True)
-                return
+                return False
             self._geometry_key=signature
             self._refresh_part_choices()
             from assembly_parts import fit_messages
             notes=fit_messages(spec,getattr(getattr(self.viewport,'scene',None),'metadata',{}))
             self.fit_notice.setText(' · '.join(self.controller.tr(note) for note in notes))
             self.fit_notice.setVisible(bool(notes))
-        options=spec['options']
-        self.detail_choice.blockSignals(True);self.detail_choice.setCurrentIndex(self.detail_choice.findData(detail))
-        self.detail_choice.blockSignals(False)
-        self.style_choice.blockSignals(True)
-        self.style_choice.setCurrentIndex(self.style_choice.findData(options.get('appearance_style','follow')))
-        self.style_choice.blockSignals(False)
-        for control,field in ((self.exploded,'exploded'),(self.animate,'fan_animation')):
-            control.blockSignals(True);control.setChecked(options[field]);control.blockSignals(False)
-        self.selection_effects.blockSignals(True);self.selection_effects.setChecked(options.get('selection_effects',True))
-        self.selection_effects.blockSignals(False)
+        return True
+
+    def _apply_motion_options(self,options):
         self.viewport.set_selection_effects_enabled(options.get('selection_effects',True))
         self.viewport.set_exploded(options['exploded'])
-        self._sync_part_style()
         if hasattr(self.viewport,'set_fan_motion'):self.viewport.set_fan_motion(options.get('fan_motion','measured'))
-        self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled and not self._renderer_error)
-        self.title.setText(self.controller.tr(spec['case']['label']))
-        self.update_readings()
+        self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled
+            and self.property('modelMotionAllowed') is not False and not self._renderer_error)
 
     def update_readings(self):
         if self._closing or not self.isVisible() or self.isMinimized():return
@@ -234,7 +256,7 @@ class AssemblyWindow(QWidget):
             self._last_fan=dict(available=False,rpm=None)
         if self._spec and self._spec.get('cpu',{}).get('telemetry_bound') is False:
             self._last_cpu_fan=dict(available=False,rpm=None)
-        motion=self.controller.motionEnabled and not self._renderer_error
+        motion=self.controller.motionEnabled and self.property('modelMotionAllowed') is not False and not self._renderer_error
         self.viewport.set_motion_enabled(motion)
         self.viewport.set_fan_state(self._last_fan.get('rpm'),self._last_fan.get('available') is True,
                                     self._last_fan.get('timestamp'))
@@ -242,9 +264,10 @@ class AssemblyWindow(QWidget):
             self.viewport.set_cpu_fan_state(self._last_cpu_fan.get('rpm'),self._last_cpu_fan.get('available') is True,
                                            self._last_cpu_fan.get('timestamp'))
         enabled=bool(self._spec and self._spec['options']['fan_animation'] and self.controller.motionEnabled
-                     and not self._renderer_error)
+                     and self.property('modelMotionAllowed') is not False and not self._renderer_error)
         self.viewport.set_fan_animation_enabled(enabled)
-        self.preview_effect.setEnabled(motion and bool(self._spec and self._spec['options'].get('selection_effects',True)))
+        if hasattr(self,'preview_effect'):
+            self.preview_effect.setEnabled(motion and bool(self._spec and self._spec['options'].get('selection_effects',True)))
         self._update_status()
         self._update_inspection()
 
@@ -341,7 +364,9 @@ class AssemblyWindow(QWidget):
 
     def _clock_active(self,active):
         if hasattr(self,'_clock') and self._clock is not None:
-            self._clock.setProperty('active',active is True and not self._closing and not self._renderer_error)
+            self._clock.setProperty('active',active is True and not self._closing and not self._renderer_error
+                                    and self.property('modelMotionAllowed') is not False
+                                    and self.isVisible() and not self.isMinimized())
 
     @Slot(float)
     def advanceFrame(self,elapsed):
@@ -360,9 +385,16 @@ class AssemblyWindow(QWidget):
     def showEvent(self,event):
         super().showEvent(event);self.update_readings()
 
+    def hideEvent(self,event):
+        self._clock_active(False)
+        super().hideEvent(event)
+
     def changeEvent(self,event):
         super().changeEvent(event)
-        if hasattr(self,'viewport'):self.update_readings()
+        if hasattr(self,'viewport'):
+            if hasattr(self.viewport,'refresh_visibility'):self.viewport.refresh_visibility()
+            if self.isMinimized():self._clock_active(False)
+            self.update_readings()
 
     def _dispose(self):
         if self._closing:return
@@ -382,3 +414,11 @@ class AssemblyWindow(QWidget):
     def closeEvent(self,event):
         self._dispose()
         self.closed.emit();event.accept()
+
+
+def create_assembly_window(controller,engine,spec,*,viewport_factory=None):
+    """Lazy factory. Caller owns screen/fullscreen checks and showing the window."""
+    if spec.get('options',{}).get('window_mode')=='desktop':
+        from assembly_desktop_widget import AssemblyWidgetWindow
+        return AssemblyWidgetWindow(controller,engine,spec,viewport_factory=viewport_factory)
+    return AssemblyWindow(controller,engine,spec,viewport_factory=viewport_factory)

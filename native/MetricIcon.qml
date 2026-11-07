@@ -16,11 +16,12 @@ Item {
     property var hardwareState: ({})
     property var hardwareAppearance: ({})
     property string iconStyle: "classic"
+    property bool modelMode: false
     readonly property string cartoonSymbol: ["cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(iconStyle) && !hasHardwareAppearance
         ? HardwareShapes.genericSource(name, ink, spinActive, iconStyle) : ""
     readonly property bool hasHardwareAppearance: (processorGlyph || name === "memory")
         && hardwareAppearance && hardwareAppearance.kind === name
-        && hardwareAppearance.icon_set !== "classic"
+        && (hardwareAppearance.icon_set !== "classic" || modelMode)
     property bool available: false
     property bool motionEnabled: false
     property real intensity: 0.5
@@ -182,7 +183,8 @@ Item {
     readonly property real gpuFanDisplaySlowdown: 120
     readonly property bool gpuFanCanAnimate: name==="gpu" && hasHardwareAppearance && compositeActive
         && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
-        && gpuVisibleFans>0 && ["solid","miniature","soft","cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(hardwareAppearance.icon_set)
+        && gpuVisibleFans>0 && (["solid","miniature","soft","cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(hardwareAppearance.icon_set)
+            || modelMode && ["classic","outline"].includes(hardwareAppearance.icon_set))
         && hardwareAppearance.fan_profile && hardwareAppearance.fan_profile.render_ready===true
         && resolvedEffect==="hardware"
     readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning
@@ -487,6 +489,7 @@ Item {
         active: root.hasHardwareAppearance
         sourceComponent: HardwareGlyph {
             appearance: root.hardwareAppearance
+            modelMode: root.modelMode
             ink: root.ink
             fanMotionEnabled: root.gpuFanMotionActive
             fanRotation: root.gpuFanPhase*360

@@ -32,9 +32,9 @@ def _hit(vertices,origin,direction):
 
 class CoolingCatalogTests(unittest.TestCase):
     def test_sources_and_dimensions_are_explicit(self):
-        self.assertEqual(len(choices_coolers()),54)
-        self.assertEqual(len(choices_fans()),54)
-        self.assertEqual({get_fan(c['id'])['size_mm'] for c in choices_fans()},{80,92,120,140,160,180,200})
+        self.assertEqual(len(choices_coolers()),66)
+        self.assertEqual(len(choices_fans()),70)
+        self.assertEqual({get_fan(c['id'])['size_mm'] for c in choices_fans()},{80,92,120,135,140,160,180,200})
         for choice in choices_coolers():
             row=get_cooler(choice['id']);self.assertTrue(row['sources']);self.assertEqual(row['reviewed'],'2026-11-07')
             self.assertTrue(row['brand']);self.assertTrue(row['series'])

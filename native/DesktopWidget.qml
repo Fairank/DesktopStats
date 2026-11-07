@@ -7,6 +7,8 @@ Window {
     required property var spec
     property bool registered: false
     property bool resizing: false
+    // Runtime owns exposure/lock/fullscreen gating; a missing gate stays quiet.
+    property bool modelMotionAllowed: false
     property int nativeFlags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint | Qt.WindowDoesNotAcceptFocus
     property var composition: ({material:"solid"})
     property var appearanceConfig: null
@@ -45,6 +47,7 @@ Window {
         id:cards
         model:root.spec.cells
         HardwareCard {
+            id: hardwareCard
             required property var modelData
             property var cardPrefs: root.paintConfig.widgets[modelData.key] || ({})
             x:modelData.x*root.width/root.spec.width; y:modelData.y*root.height/root.spec.height
@@ -64,6 +67,17 @@ Window {
             history:cardPrefs.chart===false?[]:stats.history
             frosted:root.composition.coating_translucent===true
             surface:root.surfacePolicy.card_surfaces
+            Loader {
+                anchors.fill: parent
+                active: hardwareCard.cardPrefs.presentation === "hardware"
+                sourceComponent: DesktopHardwareModel {
+                    moduleKey: hardwareCard.moduleKey
+                    config: hardwareCard.config
+                    draftMode: root.appearanceConfig !== null
+                    active: root.visible && !root.resizing
+                    motionAllowed: root.modelMotionAllowed && root.visible && !root.resizing
+                }
+            }
         }
     }
     MouseArea {

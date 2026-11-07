@@ -90,7 +90,7 @@ class AccessoryGalleryTests(unittest.TestCase):
         self.assertNotIn('assembly_geometry',sys.modules)
         self.assertNotIn('assembly_viewer',sys.modules)
         from top_bar_config import HARDWARE_ICON_STYLES
-        for category,count in (('case',80),('cooler',54),('psu',21),('fan',54)):
+        for category,count in (('case',96),('cooler',66),('psu',21),('fan',70)):
             gallery.setProperty('category',category);QTest.qWait(25)
             self.assertEqual(len(value(gallery,'entries')),count)
             for style in HARDWARE_ICON_STYLES:
@@ -133,6 +133,35 @@ class AccessoryGalleryTests(unittest.TestCase):
         self.window.hide();QTest.qWait(80)
         self.assertFalse(self.controller._accessory_gallery_active)
         self.assertIsNone(self.find('accessoryGalleryLoader').property('item'))
+
+    def test_motion_preferences_and_card_visibility_stop_unseen_rotor_work(self):
+        gallery=self.open_gallery(720,600);gallery.setProperty('category','fan')
+        gallery.setProperty('demoMotion',True);QTest.qWait(90)
+        self.assertTrue(gallery.property('motionActive'))
+        self.controller.set_motion_enabled(False);QTest.qWait(60)
+        self.assertFalse(gallery.property('motionActive'))
+        phase=gallery.property('phase');QTest.qWait(90)
+        self.assertEqual(gallery.property('phase'),phase)
+        self.controller.set_motion_enabled(True);QTest.qWait(70)
+        grid=self.find('accessoryModelGrid')
+        grid.setProperty('contentY',grid.property('cellHeight')*3);QTest.qWait(90)
+        visible=0
+        pending=[self.window.contentItem()];glyphs=[]
+        while pending:
+            item=pending.pop()
+            if item.objectName()=='accessoryCardGlyph':glyphs.append(item)
+            pending.extend(item.childItems())
+        self.assertTrue(glyphs,'GridView delegates live in the visual tree')
+        for glyph in glyphs:
+            card=glyph.parentItem()
+            while card is not None and card.property('inViewport') is None:
+                card=card.parentItem()
+            self.assertIsNotNone(card,'Every delegate must expose its viewport intersection')
+            inside=card.property('inViewport')
+            if inside is not None:
+                self.assertEqual(glyph.property('moving'),bool(inside and (value(glyph,'art').get('rotors') or [])))
+                visible+=bool(inside)
+        self.assertGreater(visible,0)
 
     def test_e_download_is_explicit_and_selects_only_the_requested_collection(self):
         from PySide6.QtGui import QDesktopServices

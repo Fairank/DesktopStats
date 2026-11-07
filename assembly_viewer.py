@@ -223,6 +223,7 @@ def surface_format():
     fmt.setProfile(QSurfaceFormat.CoreProfile)
     fmt.setDepthBufferSize(24)
     fmt.setStencilBufferSize(8)
+    fmt.setAlphaBufferSize(8)
     fmt.setSamples(0)
     return fmt
 
@@ -344,17 +345,17 @@ class AssemblyRenderer:
         self._shadow_key=key;self._shadow_parameters=(point,inverse)
         return self._shadow_parameters
 
-    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.):
+    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False):
         f=self.functions
         if f is None or self.scene is None:return
         f.glViewport(0,0,max(1,width),max(1,height))
         original=self.policy['id']=='miniature'
         background=((.075,.095,.12,1.) if dark else (.94,.955,.965,1.)) if original else self.policy['dark_background' if dark else 'light_background']
-        f.glClearColor(*background)
+        f.glClearColor(*((0.,0.,0.,0.) if transparent_background else background))
         f.glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         f.glEnable(GL_DEPTH_TEST);f.glEnable(GL_BLEND)
-        # The clear color is opaque. Keep alpha opaque while mixing glass RGB;
-        # Qt's premultiplied widget/FBO composition must not see RGB > alpha.
+        # Separate alpha blending produces premultiplied RGB from the zero-alpha
+        # clear used by a transparent desktop widget, including glass edges.
         f.glBlendFuncSeparate(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ONE_MINUS_SRC_ALPHA)
         if focus!='all':exploded=False
         center,radius=self.bounds.get((focus,exploded),self.bounds[('all',False)])
@@ -385,7 +386,7 @@ class AssemblyRenderer:
         self._scalar('backgroundMode',0.)
         self._scalar('shadeMix',self.policy['shading'])
         self._frame_shade=self.policy['shading']
-        if self.policy['paper_grid'] or self.policy['contact_shadow']:
+        if not transparent_background and (self.policy['paper_grid'] or self.policy['contact_shadow']):
             f.glDisable(GL_DEPTH_TEST);f.glDepthMask(False)
             self._scalar('backgroundMode',1. if self.policy['paper_grid'] else 2.)
             self.program.setUniformValue('paperGridColor',QVector4D(*self.policy['grid_dark' if dark else 'grid_light']))
@@ -560,6 +561,7 @@ class AssemblyViewport(QOpenGLWidget):
         self._focus='all'
         self._selected='';self._press_position=None;self._dragging=False
         self._pointer=None;self._error='';self._closed=False
+        self._transparent_background=False
 
     @property
     def scene(self):return self._scene
@@ -589,6 +591,14 @@ class AssemblyViewport(QOpenGLWidget):
             self._selected='';self.componentSelected.emit('all')
         if ':' in self._focus and not any(getattr(mesh,'part_id','')==self._focus for mesh in scene.meshes):self._focus='all'
         self.sceneChanged.emit();self._update_animation_state();self.update()
+
+    def set_transparent_background(self,enabled):
+        """Real zero-alpha FBO clear, with no color-key or background quad."""
+        enabled=enabled is True
+        if self._transparent_background==enabled:return
+        self._transparent_background=enabled
+        self.setAutoFillBackground(False)
+        self.update()
 
     def set_fan_state(self,rpm,available=True,timestamp=None):
         valid=available is True and type(rpm) in (int,float) and math.isfinite(rpm) and 0<=rpm<=100000
@@ -746,6 +756,7 @@ class AssemblyViewport(QOpenGLWidget):
                        else dict(gpu=self._phase,**{key:self._cpu_phase for key in self._real_cpu_rotor_parts}))
             options=dict(yaw=self._yaw,pitch=self._pitch,zoom=self._zoom,exploded=self._exploded,
                          phase=phase,dark=self._dark,focus=self._focus)
+            if self._transparent_background:options['transparent_background']=True
             if getattr(self,'_selected',''):options['selected']=self._selected
             effect=getattr(self,'_effect',None)
             if effect is not None and effect.active:options['effect']=effect.sample()
@@ -758,6 +769,9 @@ class AssemblyViewport(QOpenGLWidget):
 
     def showEvent(self,event):
         super().showEvent(event);self._update_animation_state()
+
+    def refresh_visibility(self):
+        self._update_animation_state()
 
     def hideEvent(self,event):
         self._pointer=None;self._press_position=None;self._dragging=False

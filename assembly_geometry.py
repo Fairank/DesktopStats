@@ -721,9 +721,13 @@ def build_scene(spec=None):
     identity_pose=lambda p:tuple(p)
     board_pose=identity_pose;gpu_pose=identity_pose;gpu_vector=identity_pose;board_vector=identity_pose
     bench='horizontal_test_bench' in features
-    if layout in ('vertical','horizontal') or vertical_gpu or front_gpu or winged or bench:
+    tilted='forward_tilted_open_frame' in features
+    if tilted:
+        from assembly_case_exteriors040 import torque_pose,hardware_pose
+    if layout in ('vertical','horizontal') or vertical_gpu or front_gpu or winged or bench or tilted:
         transformed=[]
         def vector_pose(p):
+            if tilted:return torque_pose(p,vector=True)
             x,y,z=p
             return (z,y,-x) if winged else (x,-z,y) if layout=='vertical' else (y,-x,z)
         def pose(p):
@@ -741,7 +745,7 @@ def build_scene(spec=None):
                 gw,gt,gl=gpu_anchor_size
                 target=(0.,h*.03,d/2-min(96.,d*.24)+gt/2-3.3)
                 gpu_mount_observation=dict(method='official_front_gpu_layout_with_schematic_rail_position',
-                    source='https://lian-li.com/product/sup-01/',cad_verified=False,position_dimensions_verified=False)
+                    source=(case.get('sources') or [''])[0],cad_verified=False,position_dimensions_verified=False)
             elif case.get('id')=='hyte-y70' and gpu_anchor_size:
                 # Source-observed factory riser: PCB plane near 1/3 of case
                 # width from the glass, contact row near the cold-floor mount.
@@ -832,6 +836,7 @@ def build_scene(spec=None):
               gpu_mount='front_vertical' if front_gpu else 'vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
               board_layout_schematic=True,connector_positions_schematic=True,
               dimensions_verified=case.get('dimensions_verified') is True,cad_or_fit_guarantee=False)
+    if tilted:meta['hardware_pose_reference']=hardware_pose(case)
     meta.update(detail_level=level,detail_focus=spec.get('detail_focus'),detail=component_details,
                 triangle_budget=TRIANGLE_BUDGETS[level],optional_detail_meshes_removed=removed,
                 memory_orientation='standing_dimm_or_flat_sodimm',case_detail_schematic=True,

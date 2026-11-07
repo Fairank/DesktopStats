@@ -15,7 +15,7 @@ import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 ID=re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z',re.ASCII)
-COUNTS={'case':80,'cooler':54,'psu':21,'fan':54}
+COUNTS={'case':96,'cooler':66,'psu':21,'fan':70}
 SVG='{http://www.w3.org/2000/svg}'
 
 
@@ -121,8 +121,8 @@ print(json.dumps(dict(reports=reports,cache_sizes=cache_sizes,
 
     def test_all_records_are_named_products_and_one_reference_combination(self):
         report=self.export_run['reports'][0]
-        self.assertEqual(report['models'],209)
-        self.assertEqual(report['svg_files'],2717)
+        self.assertEqual(report['models'],253)
+        self.assertEqual(report['svg_files'],3289)
         self.assertEqual(report['styles'],13)
         self.assertFalse(report['market_exhaustive'])
         self.assertEqual({c['kind']:c['models'] for c in report['collections']},COUNTS)
@@ -145,9 +145,9 @@ print(json.dumps(dict(reports=reports,cache_sizes=cache_sizes,
                 all_models.append(model)
         products=[m for m in all_models if m['record_type']=='product']
         combinations=[m for m in all_models if m['record_type']=='reference_combination']
-        self.assertEqual(len(products),208)
+        self.assertEqual(len(products),252)
         self.assertEqual([m['id'] for m in combinations],['custom-loop-360-reference'])
-        self.assertEqual(len({m['id'] for m in all_models}),209)
+        self.assertEqual(len({m['id'] for m in all_models}),253)
 
     def test_each_svg_matches_its_manifest_hash_size_and_safe_relative_path(self):
         svg_count=0
@@ -182,7 +182,7 @@ print(json.dumps(dict(reports=reports,cache_sizes=cache_sizes,
                         svg_count+=1
                 self.assertEqual(declared,{name for name in names if name.endswith('.svg')})
                 self.assertEqual(len(declared),collection['svg_files'])
-        self.assertEqual(svg_count,2717)
+        self.assertEqual(svg_count,3289)
 
     def test_all_exported_xml_is_static_and_has_no_external_assets_or_scripts(self):
         forbidden={'script','foreignObject','image','iframe','object','embed','text','font','font-face','style'}

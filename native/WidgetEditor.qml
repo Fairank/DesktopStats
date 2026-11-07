@@ -143,7 +143,7 @@ Item {
             ActionButton {objectName:"expandCanvasButton";text:ui.t("精细排版");quiet:!root.expandedCanvas;Layout.maximumWidth:130;implicitWidth:100;implicitHeight:32;leftPadding:8;rightPadding:8;Accessible.name:ui.t("精细排版");checkable:true;checked:root.expandedCanvas;onClicked:{canvas.cancelDrag();root.expandedCanvas=!root.expandedCanvas;workspace.contentItem.contentY=0}
                 Icon {objectName:"expandCanvasIcon";visible:false;width:16;height:16;ink:ui.muted;name:root.expandedCanvas?"collapse":"expand"}
                 ToolTip.visible:hovered;ToolTip.text:ui.t(root.expandedCanvas?"收起画布":"展开画布")}
-            ActionButton {objectName:"addReadingButton";implicitHeight:32;enabled:canvas.contents.length<6;text:"＋ "+ui.t("添加指标");onClicked:root.requestReadings(root.selectedKey)}
+            ActionButton {objectName:"addReadingButton";implicitHeight:32;enabled:canvas.contents.length<(root.prefs.presentation==="hardware"?3:6);text:"＋ "+ui.t("添加指标");onClicked:root.requestReadings(root.selectedKey)}
         }
         RowLayout {
             id:selectionTools
@@ -153,7 +153,7 @@ Item {
             Text {objectName:"selectedLayoutReading";visible:false;text:""
                 color:ui.ink;font.family:ui.fontFamily;font.pixelSize:13;font.weight:Font.DemiBold}
             IconButton {id:layoutAlignmentButton;objectName:"layoutAlignmentButton";symbol:"sliders";label:ui.t("对齐与均分");enabled:canvas.manual && canvas.selectedIds.length>0;onClicked:alignMenu.open()}
-            IconButton {objectName:"removeSelectedMetric";symbol:"close";label:ui.t("移除");enabled:canvas.contents.length>1 && !!canvas.selectedMetric;onClicked:canvas.removeMetricById(canvas.selectedMetric)}
+            IconButton {objectName:"removeSelectedMetric";symbol:"close";label:ui.t("移除");enabled:canvas.contents.length>(root.prefs.presentation==="hardware"?2:1) && !!canvas.selectedMetric;onClicked:canvas.removeMetricById(canvas.selectedMetric)}
             EditorMenu {
                 id:alignMenu;objectName:"layoutAlignmentMenu"
                 x:layoutAlignmentButton.x+layoutAlignmentButton.width-width;y:layoutAlignmentButton.y+layoutAlignmentButton.height+4
@@ -193,7 +193,7 @@ Item {
                     id:canvasTools;objectName:"canvasTools";x:0;y:canvas.height+8;width:parent.width;height:visible?30:0;spacing:8;visible:root.expandedCanvas
                     IconButton {objectName:"undoDraftButton";symbol:"undo";label:ui.t("撤销");enabled:stats.canUndoDraft;onClicked:{canvas.cancelDrag();stats.undoDraft()}}
                     IconButton {objectName:"redoDraftButton";symbol:"redo";label:ui.t("重做");enabled:stats.canRedoDraft;onClicked:{canvas.cancelDrag();stats.redoDraft()}}
-                    Check {objectName:"manualLayoutToggle";text:ui.t("自由摆放");checked:canvas.manual;onToggled:{canvas.cancelDrag();stats.changeWidget(root.selectedKey,"layout_mode",checked?"manual":"auto")}}
+                    Check {objectName:"manualLayoutToggle";visible:root.prefs.presentation!=="hardware";text:ui.t("自由摆放");checked:canvas.manual;onToggled:{canvas.cancelDrag();stats.changeWidget(root.selectedKey,"layout_mode",checked?"manual":"auto")}}
                     Check {objectName:"canvasSnapToggle";text:ui.t("吸附");visible:canvas.manual;checked:canvas.snapEnabled;onToggled:canvas.snapEnabled=checked;ToolTip.visible:hovered;ToolTip.text:ui.t("按住 Alt 暂时关闭吸附")}
                     Item {Layout.fillWidth:true}
                     ActionButton {objectName:"actualCanvasSizeButton";text:Math.round(canvas.designWidth)+" × "+Math.round(canvas.designHeight);quiet:true;implicitHeight:28;font.pixelSize:10;leftPadding:4;rightPadding:4;onClicked:canvas.setZoom(1);ToolTip.visible:hovered;ToolTip.text:ui.t("实际大小")}
@@ -219,7 +219,7 @@ Item {
                                     color:ui.ink;font.family:ui.fontFamily;font.pixelSize:12;font.weight:Font.DemiBold;Layout.preferredWidth:root.compactWorkspace?72:100;horizontalAlignment:Text.AlignRight;elide:Text.ElideRight}
                                 IconButton {objectName:"metricListUp_"+metricRow.modelData;symbol:"up";label:ui.t("上移");implicitWidth:26;implicitHeight:26;enabled:metricRow.index>0;onClicked:root.metricStep(metricRow.modelData,-1)}
                                 IconButton {objectName:"metricListDown_"+metricRow.modelData;symbol:"down";label:ui.t("下移");implicitWidth:26;implicitHeight:26;enabled:metricRow.index<canvas.contents.length-1;onClicked:root.metricStep(metricRow.modelData,1)}
-                                IconButton {objectName:"metricListRemove_"+metricRow.modelData;symbol:"close";label:ui.t("移除");implicitWidth:26;implicitHeight:26;enabled:canvas.contents.length>1;onClicked:canvas.removeMetricById(metricRow.modelData)}
+                                IconButton {objectName:"metricListRemove_"+metricRow.modelData;symbol:"close";label:ui.t("移除");implicitWidth:26;implicitHeight:26;enabled:canvas.contents.length>(root.prefs.presentation==="hardware"?2:1);onClicked:canvas.removeMetricById(metricRow.modelData)}
                             }
                         }
                     }

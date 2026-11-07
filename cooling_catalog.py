@@ -530,12 +530,141 @@ for _row in _COOLERS[-12:]:
         _row['pump_axis_orientation_verified']=False
     if _row.get('envelope_is_reference'):_row['dimensions_verified']=False
 
+# 0.40: signs use one common front-to-rear viewing axis for both Fuma fans.
+# This expresses documented relative contra-rotation only, never a measured
+# speed, an absolute CW/CCW direction, or the view from each fan's own face.
+for _row in _COOLERS:
+    if _row['id']=='scythe-fuma3':
+        _row['fan_relative_directions']=[1,-1]
+        _row['relative_rotation_verified']=True
+
+_FANS+=(
+    _fan('noctua-nfp12-redux1700-pwm','Noctua NF-P12 redux-1700 PWM · 九叶缺口',120,25,'noctua-redux-p',9,
+         'https://www.noctua.at/en/products/nf-p12-redux-1700-pwm/specifications',blade_verified=True,
+         frame_color='#aeb1b4',blade_color='#666b70',hub=.28,power_connector_verified=True,vortex_notches=True,
+         appearance_sources=['https://noctua.at/pub/media/blfa_files/infosheet/noctua_nf_p12_redux_1700_pwm_datasheet_en_web_2.pdf'],
+         notes='Official Nine Blade Design with VCN; bundled redux fan has no anti-vibration pads. Not the seven-leaf A-series or Sterrox A12 rotor. Absolute viewing convention is not inferred from marketing CW/CCW.'),
+    _fan('arctic-f8-pwm-pst','ARCTIC F8 PWM PST · 80mm 机箱扇',80,25,'arctic-flow',9,
+         'https://www.arctic.de/media/f9/28/58/1654783278/Spec_Sheet_F8_PWM_PST_EN.pdf',hub=.28,power_connector_verified=True,
+         notes='F airflow family, not P pressure family. Manufacturer80×80×25; nine-leaf count/curve remain an original reference; PST is the cable splitter.'),
+    _fan('arctic-f14-pwm-pst','ARCTIC F14 PWM PST · 27mm 风量型',140,27,'arctic-flow',9,
+         'https://www.arctic.de/media/40/77/52/1690271547/Spec_Sheet_F14_PWM_PST_EN.pdf',hub=.27,power_connector_verified=True,
+         notes='Official140×140×27, not25mm P14. Nine-leaf count/curve remain reference; this is the FDB PWM PST version, not CO dual-ball variant.'),
+    _fan('scythe-kazeflex140-square','Scythe Kaze Flex 140 Square PWM · 27mm 方框',140,27,'scythe-kaze140',11,
+         'https://www.scytheus.com/kazeflex-140-square',pads=True,hub=.28,power_connector_verified=True,
+         notes='27mm includes anti-vibration rubber. Non-RGB140 square version, distinct from the round-frame140 and 12V four-pin lighting version. Eleven-leaf count/curve remain reference.'),
+    _fan('cryorig-qf120-led-balance','CRYORIG QF120 LED Balance · 四角侧进气',120,25.4,'cryorig-qf',11,
+         'https://en.cryorig.com/news_detail/28',pads=True,blade_color='#c6d2d6',hub=.26,side_air_inlets=True,
+         fixed_led_color='#dbe8ee',notes='Documented120×120×25.4, white LED Balance, not RGB. Quad Air Inlet geometry is documented qualitatively; eleven-leaf count/curvature remain reference.'),
+    _fan('silverstone-airslimmer120','SilverStone Air Slimmer 120 · 15.6mm 弯刀九叶',120,15.6,'silverstone-scimitar',9,
+         'https://www.silverstonetek.com/en/product/info/fans/AirSlimmer120/',blade_verified=True,hub=.29,power_connector_verified=True,
+         notes='SST-AS120B. Manufacturer explicitly specifies15.6mm and nine scimitar leaves; rear bevelled grille is not an AirPenetrator column grille. Leaf curvature remains a schematic reference.'),
+    _fan('coolermaster-mf200r-argb','Cooler Master MasterFan MF200R ARGB · 200mm',200,25,'cm-mf200',9,
+         'https://legacy.coolermaster.com/en-global/products/masterfan-mf200r-argb/?tab=tech_spec',rgb=True,blade_color='#becdd2',hub=.25,
+         power_connector_verified=True,lighting_connector='argb3',lighting_connector_verified=True,
+         notes='R4-200R-08FA-R1,200×200×25 addressable RGB. Not the12V RGB model; nine-leaf count/contour and frame corner cuts remain original references.'),
+    _fan('thermaltake-pure20-argb','Thermaltake Pure 20 ARGB Sync · 200×30 十一叶',200,30,'thermaltake-pure',11,
+         'https://thermaltake.com/products/pure-20-argb-sync-case-fan-tt-premium-edition-1-fan-pack',frame='round',rgb=True,
+         blade_color='#bacbd0',hub=.23,blade_verified=True,power_connector_verified=True,lighting_connector='argb3',lighting_connector_verified=True,
+         notes='Official11 Fan Blade Design and200×200×30 envelope. ARGB Sync TT Premium Edition, not the plain200mm Pure20; curved leaf outline/mount ears remain schematic.'),
+    _fan('corsair-lx120r-rgb','Corsair iCUE LINK LX120-R RGB · 反叶双光环',120,25,'corsair-lx',9,
+         'https://www.corsair.com/us/en/p/case-fans/co-9051049-ww/icue-link-lx120-r-rgb-120mm-pwm-reverse-fan-expansion-co-9051049-ww',
+         pads=True,rgb=True,blade_color='#c4d1d5',hub=.28,reverse_blade=True,frame_rgb_ring=True,interlock_bridges=True,
+         notes='CO-9051049-WW proprietary iCUE LINK connection; no direct PWM4/ARGB3 plug is claimed. Reverse rotor and dual light loops verified; nine-leaf count/curvature and absolute shaft direction remain reference.'),
+    _fan('antec-fusion120-argb-white','Antec Fusion 120 ARGB White · 十二边光环',120,25,'antec-fusion',9,
+         'https://www.antec.com/product/cooling/fusion120-argb-white',pads=True,rgb=True,frame_color='#d8e0e2',blade_color='#c6d4d9',hub=.26,
+         frame_rgb_polygon=12,power_connector_verified=True,lighting_connector='argb3',lighting_connector_verified=True,
+         notes='Manufacturer dodecagon stationary16-LED frame ring. Nine-leaf count/contour remains reference; polygonal ring does not rotate with the rotor.'),
+    _fan('montech-ax120-pwm','Montech AX120 PWM · 六角光环',120,25,'montech-ax',9,
+         'https://www.montechpc.com/ax120-pwm',pads=True,rgb=True,blade_color='#b6cbd3',hub=.27,frame_rgb_polygon=6,pad_style='round',
+         power_connector_verified=True,lighting_connector='argb3',lighting_connector_verified=True,
+         notes='Normal AX120, not reverse-airflow RX120. Official120×120×25 and hexagon20-LED frame ring; nine-leaf count/contour reference. Round pads stay attached to the frame.'),
+    _fan('apnx-fp1-120','APNX FP1-120 PWM ARGB · 30mm 厚框',120,30,'apnx-fp1',9,
+         'https://www.apnx.com/product/fp1/',pads=True,rgb=True,blade_color='#c6d4d9',hub=.27,power_connector_verified=True,
+         lighting_connector='argb3',lighting_connector_verified=True,
+         notes='120mm variant is74.6CFM;86.9CFM marketing headline belongs to140mm. Official30mm frame; nine-leaf count/shape and corner-pad profile remain reference.'),
+    _fan('fractal-aspect14-pwm','Fractal Design Aspect 14 PWM · 七叶风量型',140,25,'fractal-aspect',7,
+         'https://www.fractal-design.com/app/uploads/2021/05/Aspect_Product-Sheet_EN.pdf',blade_verified=True,hub=.25,power_connector_verified=True,
+         notes='Non-RGB PWM140×140×25. Official seven leaves; Trip Wire and aerodynamic stator detail are qualitative references, not the38mm Prisma AL18 geometry.'),
+    _fan('thermalright-ty147a','Thermalright TY-147A · 152×140 异形框',140,26.5,'thermalright-ty',7,
+         'https://www.thermalright.com/product/macho-rev-b/',width=152,frame='round',hub=.27,power_connector_verified=True,
+         notes='Official152×140×26.5 fan envelope, MachoRevB supplied model. Seven-leaf count/contour and orientation of the152mm dimension on the motherboard remain reference.'),
+    _fan('bequiet-tf2-upper135','be quiet! Dark Rock TF2 上扇 · Silent Wings3 135',135,25,'bequiet-grooved',7,
+         'https://www.bequiet.com/en/cpucooler/3351',frame='round',hub=.28,power_connector_verified=True,marketed_separately_verified=False,
+         notes='Documented135×135×25 upper bundled fan with funnel inlet. Not a retail140mm fan. Seven-leaf count/curvature remain reference; no retail availability is claimed.'),
+    _fan('bequiet-tf2-lower135','be quiet! Dark Rock TF2 夹层扇 · Silent Wings135',135,22,'bequiet-grooved',9,
+         'https://www.bequiet.com/tw/cpucooler/3351',frame='round',hub=.29,blade_verified=True,power_connector_verified=True,marketed_separately_verified=False,
+         notes='Official135×135×22 lower bundled fan; Chinese manufacturer description explicitly gives nine leaves. Positioned between two fin banks, not beneath both. Fine contour remains reference.'),
+)
+
+_COOLERS.extend([
+    _air('noctua-nh-l12s','Noctua NH-L12S · 底置薄扇C形下压','low_profile',(128,70,146),'noctua-nf-a12x15-pwm',1,4,
+         ('https://www.noctua.at/en/products/nh-l12s/specifications','https://noctua.at/en/nh-l12s?c=70'),
+         c_shape=True,fan_placement='under',documented_fin_count=58,
+         notes='Low-profile factory arrangement: fan below fin stack,70mm total. Top-mounted mode is86/87mm across official revisions and is not this record. C-bend radius, offsets and inner RAM clearance remain reference.'),
+    _air('noctua-nh-c14s','Noctua NH-C14S · 上置140扇C形下压','low_profile',(140,142,163),'noctua-nf-a14-pwm',1,6,
+         ('https://www.noctua.at/en/products/nh-c14s/specifications',),c_shape=True,fan_placement='above',documented_fin_count=66,
+         notes='High-clearance arrangement with one fan above the fins,142mm. Underslung115mm mode and optional dual-fan142mm arrangement are not represented as installed fans.'),
+    _air('bequiet-dark-rock-tf2','be quiet! Dark Rock TF 2 · 双水平鳍片双扇','dual_top_flow',(140,134,163),
+         'bequiet-tf2-upper135',2,6,('https://www.bequiet.com/en/cpucooler/3351','https://www.bequiet.com/es/insidebequiet/5033'),
+         fan_models=['bequiet-tf2-upper135','bequiet-tf2-lower135'],fan_sizes=[135,135],fan_depths=[25,22],
+         fan_placements=['above','between'],horizontal_fin_banks=2,c_shape=True,fin_color='#30393e',pipe_color='#3d4449',top_style='brushed_caps',
+         notes='Official cooler guide confirms134mm total height; current product table swaps107mm overall and134mm heatsink rows. Two135mm fans are25/22mm thick, upper and between the fin banks. Individual bank height/spacing remain reference.'),
+    _air('cryorig-h7-quad-lumi','CRYORIG H7 Quad Lumi · 蜂巢鳍片灯塔','single_tower',(123,145,98),
+         'cryorig-qf120-led-balance',1,4,('https://www.cryorig.com/news_detail/13',),fin_style='honeycomb',top_style='dark_caps',base_led=True,
+         notes='Quad Lumi has four6mm pipes and QF120 Balanced LED fan, unlike original three-pipe H7. Official98L×123W×145H. Honeycomb channel depths and RGB edge layout remain schematic, with no logos.'),
+    _air('cryorig-c7','CRYORIG C7 · 47mm 四管紧凑下压','low_profile',(97,47,97),None,1,4,
+         ('https://www.cryorig.com/news_detail/10',),fan_reference_mm=92,fan_reference_depth_mm=15,
+         fan_dimensions_verified=True,fan_power_connector_verified=True,fan_family='cryorig-c7',
+         notes='Original aluminium-fin C7, not copper C7Cu or graphene C7G. Official47mm overall and92×92×15 dedicated QuadAirInlet fan; leaf count and fin cuts remain reference.'),
+    _air('zalman-cnps9900-max','Zalman CNPS9900 MAX · 镀镍双环鳍片','radial_tower',(131,152,94),None,1,3,
+         ('https://www.zalman.com/US/Product/ProductDetail.do?productSeq=324',),fan_reference_mm=125,fan_reference_depth_mm=25,
+         fan_dimensions_verified=False,fan_family='zalman-radial',frameless_fan=True,heatpipe_count_verified=False,
+         radial_fin_banks=2,radial_outer_reference_mm=126,radial_inner_reference_mm=74,radial_geometry_verified=False,
+         fin_color='#6c7478',pipe_color='#8d969b',
+         notes='Official131W×152H×94D overall is verified. Two curved copper fin banks with black-pearl nickel plating and middle frameless rotor are qualitative exterior references. Ring126/74mm, fan125×25 and three heatpipes are explicitly schematic values, not measured/model-specific specifications.'),
+    _air('scythe-ninja5','Scythe Ninja 5 · 巨型静音单塔双扇','single_tower',(138.5,155,180),None,2,6,
+         ('https://www.scythe.co.jp/product/cpu-cooler/scnj-5000/',),fan_reference_mm=120,fan_reference_depth_mm=27,
+         fan_dimensions_verified=True,fan_power_connector_verified=True,fan_family='scythe-kaze-original',top_style='dark_caps',
+         notes='SCNJ-5000 original with two800RPM KazeFlex120×27mm, not RevB or KazeFlexII26mm. Wide square fin block and stepped RAM cuts remain schematic; two fans are opposite sides of one tower.'),
+    _air('thermalright-macho-revb','Thermalright Macho Rev.B · 偏置穿孔宽塔','single_tower',(152,162,128.5),'thermalright-ty147a',1,6,
+         ('https://www.thermalright.com/product/macho-rev-b/',),asymmetric=True,perforated_fins=True,top_style='exposed_caps',
+         heatsink_dimensions_mm=dict(width=140,height=162,depth=102),envelope_is_reference=True,
+         notes='Manufacturer140×102×162 is heatsink only; supplied TY147A is152×140×26.5.152W/128.5D envelope is a conservative schematic combination, not a verified installed measurement. Factory includes one fan despite fanless-design marketing.'),
+    _air('thermaltake-toughair510','Thermaltake TOUGHAIR 510 · 四管推挽单塔','single_tower',(123.6,159.5,98.8),None,2,4,
+         ('https://thermaltake.com/products/toughair-510-cpu-cooler',),fan_reference_mm=120,fan_reference_depth_mm=25,
+         fan_dimensions_verified=True,fan_power_connector_verified=True,fan_family='thermaltake-toughfan',asymmetric=True,top_style='dark_caps',
+         notes='Official123.6×98.8×159.5 L×W×H; catalog front width follows123.6mm fan face. Two supplied120×25 fans leverage Toughfan design but are not substituted with retail Toughfan12 performance data.'),
+    _aio('fractal-lumen-s28-v2','Fractal Design Lumen S28 v2 · 冷排内泵280',(313,140,27),'fractal-aspect14-pwm',2,
+         'https://www.fractal-design.com/products/water-cooling/lumen-series/lumen-s28/lumen-s28-v2/',
+         pump='fractal_lumen',tube=400,fan_size=140,tube_length_verified=True,pump_location='radiator',
+         notes='V2 FD-W-L1-S2811, not recalled original Lumen generation. Round illuminated CPU block cap is not the pump location. Official313mm radiator; CPU block dimensions and internal impeller remain reference.'),
+    _aio('xpg-levante-x360','XPG LEVANTE X 360 · 方形无限镜冷头',(394,121,27),None,3,
+         'https://www.xpg.com/zw/xpg/pc-component-levante-x-360?tab=spec',pump='xpg_infinity',tube=400,
+         tube_length_verified=True,fan_rgb=True,fan_dimensions_verified=True,fan_family='xpg-levante',
+         notes='LEVANTE X, not plain LEVANTE. Official394×121×27 radiator,400mm tube,120×25 fans; block72.5×72.5×50 is documented with contradictory H/W/D labels across languages, so block-axis mapping remains reference.'),
+    _aio('deepcool-lt720','DeepCool LT720 · 多维无限镜冷头',(402,120,27),None,3,
+         'https://www.deepcool.com/products/Cooling/cpuliquidcoolers/LT720-360mm-Liquid-CPU-Cooler-1700-AM5/2022/16286.shtml',
+         pump='deepcool_lt_mirror',tube=410,tube_length_verified=True,fan_dimensions_verified=True,fan_power_connector_verified=True,
+         fan_family='deepcool-fk120',notes='Original LT720 with non-RGB FK120 fans, not LT720WH or newer LX display models. Multidimensional mirror top is lit; fan blades remain dark.'),
+])
+
+for _row in _COOLERS[-12:]:
+    if _row['id']=='deepcool-lt720':
+        _row['pump_reference_mm']=dict(width=80,height=68,depth=94)
+        _row['pump_dimensions_verified']=True
+    if _row['id']=='xpg-levante-x360':
+        _row['pump_reference_mm']=dict(width=72.5,height=50,depth=72.5)
+        _row['pump_axis_orientation_verified']=False
+    if _row.get('envelope_is_reference'):_row['dimensions_verified']=False
+
 _BRANDS={'intel':'Intel','amd':'AMD','noctua':'Noctua','deepcool':'DeepCool','thermalright':'Thermalright',
          'arctic':'ARCTIC','corsair':'Corsair','nzxt':'NZXT','lian':'Lian Li','fractal':'Fractal Design',
          'bequiet':'be quiet!','thermaltake':'Thermaltake','asus':'ASUS','custom':'Reference combination',
          'coolermaster':'Cooler Master','idcooling':'ID-COOLING','enermax':'ENERMAX','msi':'MSI',
          'gigabyte':'GIGABYTE','phanteks':'Phanteks','scythe':'Scythe','zalman':'Zalman','alphacool':'Alphacool',
-         'ek':'EK Water Blocks','tryx':'TRYX','silverstone':'SilverStone','xpg':'XPG'}
+         'ek':'EK Water Blocks','tryx':'TRYX','silverstone':'SilverStone','xpg':'XPG','cryorig':'CRYORIG',
+         'antec':'Antec','montech':'Montech','apnx':'APNX'}
 for _row in (*_FANS,*_COOLERS):
     _row['brand']=_BRANDS[_row['id'].split('-')[0]]
     _row['series']=_row['label'].split(' · ')[0]

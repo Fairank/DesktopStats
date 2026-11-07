@@ -246,7 +246,9 @@ class AssemblyWindowTests(unittest.TestCase):
         runtime=SimpleNamespace(headless=False,shutting_down=False,controller=controller,_assembly_window=current,
             app=SimpleNamespace(screens=lambda:[first,second],primaryScreen=lambda:first),
             top_bar=SimpleNamespace(adapter=SimpleNamespace(screen_identity=lambda s:SimpleNamespace(native_id='second' if s is second else 'first'))))
-        with patch('native_runtime.foreground_fullscreen',return_value=False):
+        with patch('native_runtime.foreground_fullscreen',return_value=False),\
+                patch('native_runtime._desktop_session_ready',return_value=True),\
+                patch.object(Runtime,'_assembly_target_allowed',new=lambda self,target:True):
             Runtime.open_assembly_view(runtime,dict(example=True))
         current.windowHandle.return_value.setScreen.assert_called_once_with(second)
         current.move.assert_called_once();current.synchronize.assert_called_once_with(dict(example=True))

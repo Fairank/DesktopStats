@@ -78,6 +78,8 @@ function key(appearance, ink) {
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
         choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon", "sketch",
             "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].concat(cpuPackageKey?["classic"]:[]), "outline")]
+    if(input.model_mode===true && ["classic","outline"].indexOf(input.icon_set)>=0)
+        parts[10]="model_"+input.icon_set
     // Original Outline keys and art stay byte-stable. Exact exterior details
     // require an independently guarded model identity, including on old cards.
     const model=cpuPackageKey || (kind==="cpu" && (parts[10].indexOf("notebook_")===0 || Variants.styles.indexOf(parts[10])>=0)
@@ -89,8 +91,9 @@ function key(appearance, ink) {
 
 function inputFromParts(parts) {
     const cpuPackage=Cpu.fromKey(parts[11])
+    const modelMode=["model_classic","model_outline"].indexOf(parts[10])>=0
     return {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10],
+        fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:modelMode?parts[10].slice(6):parts[10],model_mode:modelMode,
         id:cpuPackage?cpuPackage.model_id:parts[11]||"",confidence:parts.length===12?"model":"",cpu_package:cpuPackage}
 }
 
@@ -231,6 +234,37 @@ function gpu(style, count, shroud, board, ink, accent, motif) {
     return result + (motif ? "" : boardMark(board, accent, shroud))
 }
 
+// Model-only monochrome treatments retain the reviewed board geometry. The
+// classic bar symbol remains untouched. Colour conversion happens at source
+// construction, including local rotor textures, never on an animation tick.
+function modelTreatment(body, state) {
+    const line=state.icon_set==="model_outline",ink=state.ink
+    let result=body.replace(/fill="(#[0-9a-fA-F]{6})"/g,function(all,color) {
+        // Opaque paper shapes hide the heatsink/PCB lines behind the casing;
+        // only the exterior stays transparent. Otherwise every hidden edge
+        // shines through and turns a board study into a wire tangle.
+        if(line)return 'fill="#f4f6f8"'
+        const light=.2126*parseInt(color.slice(1,3),16)+.7152*parseInt(color.slice(3,5),16)+.0722*parseInt(color.slice(5,7),16)
+        return 'fill="'+(light<90?'#485666':light<170?'#9aa7b5':'#e2e8ed')+'"'
+    }).replace(/fill="url\(#[^"]+\)"/g,'fill="'+(line?'#f4f6f8':'#9aa7b5')+'"')
+        .replace(/stroke="#[0-9a-fA-F]{6}"/g,'stroke="'+ink+'"')
+        .replace(/stroke-width="([0-9.]+)"/g,function(all,width){return 'stroke-width="'+Math.min(Number(width),line?.18:.16)+'"'})
+    return '<g stroke="'+ink+'" stroke-width="'+(line?'.18':'.12')+'">'+result+'</g>'
+}
+function modelBody(state, collector) {
+    const body=Solid.body(state,collector)
+    if(collector)collector.forEach(function(rotor){rotor.body=modelTreatment(rotor.body,state)})
+    return modelTreatment(body,state)
+}
+function cpuBody(state) {
+    const model=["model_classic","model_outline"].indexOf(state.icon_set)>=0
+    const input=model?Object.assign({},state,{icon_set:state.icon_set.slice(6)}):state
+    const body=Cpu.body(input)
+    return model?body.replace(/stroke-width="([0-9.]+)"/g,function(all,width){
+        return 'stroke-width="'+(Number(width)*(input.icon_set==="classic"?.44:.48)).toFixed(3)+'"'
+    }):body
+}
+
 function source(geometryKey) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
     if (parts.length !== 11 && parts.length !== 12) return source(key({}, "#69788c"))
@@ -242,7 +276,8 @@ function source(geometryKey) {
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||"",cpu_package:Cpu.fromKey(parts[11])}
-    const body = state.kind==="cpu" && state.cpu_package ? Cpu.body(state)
+    const body = state.kind==="cpu" && state.cpu_package ? cpuBody(state)
+        : ["model_classic","model_outline"].indexOf(parts[10])>=0 ? modelBody(state)
         : Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state)
         : parts[10].indexOf("notebook_")===0 ? Notebook.body(state)
         : parts[10] === "sketch" ? Sketch.body(state)
@@ -265,7 +300,7 @@ function layers(geometryKey) {
     if (canonical !== geometryKey) return layers(canonical)
     const count = Number(parts[4])
     if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon","sketch",
-            "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash"].indexOf(parts[10]) < 0
+            "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash","model_classic","model_outline"].indexOf(parts[10]) < 0
             || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
             || [1,2,3].indexOf(count) < 0)
         return {baseSource:source(canonical),rotors:[]}
@@ -276,7 +311,8 @@ function layers(geometryKey) {
     // coordinates. The collector is local, including all per-style offsets and
     // each fan's reviewed radius/type. No complete-card regeneration per frame.
     const collector = []
-    const body = Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state,collector)
+    const body = ["model_classic","model_outline"].indexOf(parts[10])>=0 ? modelBody(state,collector)
+        : Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state,collector)
         : parts[10].indexOf("notebook_")===0 ? Notebook.body(state,collector)
         : parts[10] === "sketch" ? Sketch.body(state,collector)
         : parts[10] === "cartoon" ? Cartoon.body(state,collector)

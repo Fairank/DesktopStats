@@ -44,6 +44,7 @@ from product_version import VERSION
 from responsive_layout import (
     ResponsiveLayoutError,
     dimensions,
+    hardware_model_geometry,
     is_responsive,
     metric_rects,
     minimum_dimensions,
@@ -1479,6 +1480,10 @@ class Controller(AssemblyTools):
             value = int(value)
         draft = copy.deepcopy(self._draft)
         draft["widgets"][key][field] = value
+        if field == "gpu_target":
+            draft["widgets"][key]["hardware_model"] = ""
+        if field == "presentation" and value == "hardware":
+            draft["widgets"][key].update(layout_mode="auto", metric_positions={}, chart=False)
         if field == "layout_mode" and value == "manual":
             self._seed_manual(draft, key)
         if field == "content":
@@ -1677,6 +1682,73 @@ class Controller(AssemblyTools):
         except ValueError:
             return {}
 
+    @Slot(float, float, "QVariantMap", result="QVariantMap")
+    def widgetHardwareLayout(self, width, height, prefs):
+        """Pure geometry, also used by the painter and editor hit regions."""
+        if isinstance(prefs, QJSValue):
+            prefs = prefs.toVariant()
+        if not isinstance(prefs, dict) or prefs.get("presentation") != "hardware":
+            return {}
+        try:
+            geometry = hardware_model_geometry(width, height, self._content_for(prefs), prefs)
+            return dict(image=asdict(geometry["image"]), body=asdict(geometry["body"]),
+                        caption=asdict(geometry["caption"]))
+        except (ValueError, TypeError, KeyError):
+            return {}
+
+    @Slot(str, bool, result="QVariantMap")
+    def widgetHardwareState(self, key, draftMode):
+        """Expose sampled identity and feedback; opening a widget never samples."""
+        config = self._draft if draftMode else self._saved
+        prefs = config["widgets"].get(key, {})
+        return self._hardware_model_snapshot(prefs)
+
+    @Slot("QVariantMap", result="QVariantMap")
+    def widgetHardwarePreviewState(self, prefs):
+        """Templates and skin previews use their own validated presentation copy."""
+        if isinstance(prefs, QJSValue):
+            prefs = prefs.toVariant()
+        return self._hardware_model_snapshot(prefs) if isinstance(prefs, dict) else {}
+
+    def _hardware_model_snapshot(self, prefs):
+        kind = prefs.get("kind")
+        if prefs.get("presentation") != "hardware" or kind not in ("cpu", "gpu"):
+            return {}
+        if (not isinstance(prefs.get("gpu_target", "0"), str)
+                or not isinstance(prefs.get("hardware_model", ""), str)):
+            return {}
+        data = self._data
+        stamp = data.get("time")
+        stale = not numeric(stamp) or not 0 <= time.time() - stamp < 35
+        metric = kind + "_usage"
+        appearance = metric_appearance(data, metric, prefs,
+            scope="gpus" if kind == "gpu" else None, target=prefs.get("gpu_target", "0"))
+        appearance["icon_set"] = prefs.get("hardware_icon_style", "miniature")
+        feedback = hardware_feedback(data, metric, prefs, stale=stale)
+        # Authoritative per-device tables never borrow identity from flat GPU 0.
+        if kind == "gpu":
+            devices = data.get("gpus")
+            device = devices.get(str(prefs.get("gpu_target", "0")), {}) if isinstance(devices, dict) else (
+                data if prefs.get("gpu_target", "0") == "0" else {})
+            device = device if isinstance(device, dict) else {}
+            name = device.get("gpu_name") or device.get("label") or ""
+            if name and prefs.get("hardware_model") and appearance.get("confidence") == "model":
+                name = appearance.get("label") or name
+        else:
+            name = data.get("cpu_name") or ""
+        return dict(kind=kind, appearance=appearance, hardware_state=feedback,
+                    available=not stale and feedback.get("available", False), name=str(name))
+
+    @Slot(str, result="QVariantList")
+    def widgetHardwareChoices(self, key):
+        from hardware_appearance import appearance_choices
+
+        prefs = self._draft["widgets"].get(key, {})
+        if prefs.get("kind") != "gpu" or prefs.get("presentation") != "hardware":
+            return []
+        return [dict(id="", label=translate("自动匹配", self._draft["language"]))] + appearance_choices(
+            self._data, "gpu_usage", prefs)
+
     @Slot(str, result="QVariantList")
     def widgetContentIds(self, key):
         prefs = self._draft["widgets"].get(key)
@@ -1869,7 +1941,7 @@ class Controller(AssemblyTools):
             return
         prefs = self._draft["widgets"][key]
         content = list(prefs["content"] or [])
-        if len(content) >= 6:
+        if len(content) >= (3 if prefs.get("presentation") == "hardware" else 6):
             return
         if metric in self._discovered_ids:
             row = self._external_rows.get(self._discovered_ids[metric])
@@ -1899,8 +1971,8 @@ class Controller(AssemblyTools):
         prefs = candidate["widgets"][key]
         content = self._content_for(prefs)
         for metric in metrics:
-            if not isinstance(metric, str) or len(content) >= 6:
-                self.set_status("自由内容请选择 1–6 项指标")
+            if not isinstance(metric, str) or len(content) >= (3 if prefs.get("presentation") == "hardware" else 6):
+                self.set_status("硬件模型请选择 2–3 项读数" if prefs.get("presentation") == "hardware" else "自由内容请选择 1–6 项指标")
                 return False
             if metric in self._discovered_ids:
                 channel = self._external_rows.get(self._discovered_ids[metric])
@@ -1943,7 +2015,8 @@ class Controller(AssemblyTools):
         if key not in self._draft["widgets"]:
             return
         content = list(self._draft["widgets"][key]["content"] or [])
-        if len(content) > 1 and 0 <= index < len(content):
+        minimum = 2 if self._draft["widgets"][key].get("presentation") == "hardware" else 1
+        if len(content) > minimum and 0 <= index < len(content):
             removed = content.pop(index)
             value = copy.deepcopy(self._draft)
             value["widgets"][key]["content"] = content
@@ -2001,7 +2074,7 @@ class Controller(AssemblyTools):
         if template not in TEMPLATES:
             return {}
         prefs = from_template(template)
-        if prefs["presentation"] != "cores":
+        if prefs["presentation"] not in ("cores", "hardware"):
             prefs["content"] = prefs["content"][:1]
             prefs["presentation"] = "auto"
         return dict(self._draft, widgets={"gallery": prefs})

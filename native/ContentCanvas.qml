@@ -116,7 +116,7 @@ ghostPositions=all}
     }
     function tileFor(id){for(let i=0;i<tiles.count;i++){const item=tiles.itemAt(i);if(item && item.modelData.id===id)return item}return null}
     function restoreMetricFocus(id){Qt.callLater(()=>{const item=tileFor(id);if(item){item.forceActiveFocus();ensureVisible(id)}})}
-    function removeMetricById(id){if(contents.length<=1)return;const at=contents.indexOf(id);if(at<0)return;const next=contents[at+1] || contents[at-1];cancelDrag();stats.removeMetric(widgetKey,at);selectedMetric=next;if(!selectedIds.includes(next))selectedIds=[next];restoreMetricFocus(next)}
+    function removeMetricById(id){if(contents.length<=(prefs.presentation==="hardware"?2:1))return;const at=contents.indexOf(id);if(at<0)return;const next=contents[at+1] || contents[at-1];cancelDrag();stats.removeMetric(widgetKey,at);selectedMetric=next;if(!selectedIds.includes(next))selectedIds=[next];restoreMetricFocus(next)}
     function operation(command){const draft=root.config;return stats.previewLayoutOperation(widgetKey,command,selectedIds)}
     function applyOperation(command){const result=operation(command);if(result.valid && stats.commitMetricPositions(widgetKey,result.positions))notice="";else notice=result.reason || ui.t("当前选择无法这样排列。")}
     function keyboard(event,id){
@@ -142,7 +142,7 @@ ghostPositions=all}
             WheelHandler {target:null;acceptedModifiers:Qt.KeyboardModifierMask;onWheel:event=>{if(event.modifiers&Qt.ControlModifier){root.setZoom(root.viewScale*(event.angleDelta.y>0?1.15:1/1.15));event.accepted=true}else if(viewport.contentWidth>viewport.width+1 && viewport.contentHeight<=viewport.height+1){viewport.contentX=Math.max(0,Math.min(viewport.contentWidth-viewport.width,viewport.contentX-event.angleDelta.y));event.accepted=true}else event.accepted=false}}
             Item {
                 id:plane;objectName:"workbenchArtboard";x:root.widgetResizing?root.resizePlaneX:(viewport.contentWidth-width)/2;y:root.widgetResizing?root.resizePlaneY:(viewport.contentHeight-height)/2;width:root.designWidth*root.viewScale;height:root.designHeight*root.viewScale
-                WidgetPreview {objectName:"workbenchActualPreview";anchors.fill:parent;moduleKey:root.widgetKey;config:root.viewConfig;previewInfo:({width:root.geometry.width || root.requestedWidth,height:root.geometry.height || root.requestedHeight,card_surfaces:true,coating_translucent:root.coatingAllowed});readings:root.previewReadings;history:root.previewHistory;renderScale:root.viewScale}
+                WidgetPreview {objectName:"workbenchActualPreview";anchors.fill:parent;moduleKey:root.widgetKey;config:root.viewConfig;previewInfo:({width:root.geometry.width || root.requestedWidth,height:root.geometry.height || root.requestedHeight,card_surfaces:true,coating_translucent:root.coatingAllowed});readings:root.previewReadings;history:root.previewHistory;renderScale:root.viewScale;modelMotionAllowed:root.active && !root.resizing && !root.widgetResizing}
                 Repeater {
                     id:tiles;model:root.readings
                     FocusScope {

@@ -45,7 +45,7 @@ def effect_sample(style,elapsed_ms,component="gpu"):
     known=component_family(component) in COMPONENTS
     active=known and valid and elapsed<policy['duration_ms']
     return dict(style=policy['style'],component=component if known else '',
-                kind=policy['kind'],progress=progress,amount=math.sin(math.pi*progress) if active else 0.,
+                kind=policy['kind'],progress=progress,amount=math.sin(math.pi*progress)**2 if active else 0.,
                 active=active,elapsed_ms=elapsed)
 
 

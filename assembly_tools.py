@@ -176,7 +176,8 @@ class AssemblyTools(WorkspaceTools):
     @Slot(str, "QVariant")
     def changeAssembly(self, field, selected):
         from assembly_config import PART_FIELDS
-        if field not in ("case_model", "exploded", "fan_animation", "appearance_style", "detail_level", "selection_effects",*PART_FIELDS):
+        if field not in ("case_model", "exploded", "fan_animation", "appearance_style", "detail_level", "selection_effects",
+                         "window_mode", "desktop_frame",*PART_FIELDS):
             return
         value = copy.deepcopy(self._draft)
         value["assembly"][field] = selected
@@ -243,6 +244,16 @@ class AssemblyTools(WorkspaceTools):
         finally:
             self._assembly_page_active = before
         self.assemblyViewRequested.emit(copy.deepcopy(self._assembly_spec))
+
+    @Slot()
+    def openAssemblyDesktop(self):
+        self.changeAssembly('window_mode','desktop')
+        self.openAssemblyView()
+
+    @Slot()
+    def openAssemblyInspect(self):
+        self.changeAssembly('window_mode','inspect')
+        self.openAssemblyView()
 
     def assembly_specification(self):
         self._refresh_assembly()

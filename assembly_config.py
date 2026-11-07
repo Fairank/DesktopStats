@@ -3,7 +3,7 @@ import re
 from top_bar_config import HARDWARE_ICON_STYLES
 
 DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, fan_animation=False, appearance_style="follow",
-                        detail_level="balanced",selection_effects=True,
+                        detail_level="balanced",selection_effects=True,window_mode="inspect",desktop_frame=True,
                         board_model="",cooler_model="",cooler_mount="top",case_fans=[],
                         psu_model="",storage=[],expansion_cards=[],cables_enabled=False,
                         cable_color="black",fan_motion="measured",gpu_waterblock=False,part_styles={},
@@ -14,6 +14,7 @@ PART_FIELDS = ("board_model","cooler_model","cooler_mount","case_fans","psu_mode
 FAN_MOUNTS = ("front","top","rear","bottom","side")
 CABLE_COLORS = {"black":"#252d35","white":"#dddfe3","red":"#a63f4b","blue":"#3c6d9b"}
 DETAIL_LEVELS = ("eco","balanced","close")
+WINDOW_MODES = ("inspect","desktop")
 DETAIL_LABELS = {"eco":"简洁","balanced":"精细","close":"近看细节"}
 STYLE_LABELS = {
     "miniature":"1 · 原版", "cartoon":"2 · 可爱笑脸", "notebook_color":"3 · 彩色手绘",
@@ -77,7 +78,11 @@ def validate_assembly(value=None):
     if type(detail) is not str or detail not in DETAIL_LEVELS:
         raise ValueError("模型细节设置不正确")
     result['detail_level']=detail
-    for field in ("exploded", "fan_animation", "selection_effects", "cables_enabled", "gpu_waterblock"):
+    mode=value.get('window_mode','inspect')
+    if type(mode) is not str or mode not in WINDOW_MODES:
+        raise ValueError("整机显示方式设置不正确")
+    result['window_mode']=mode
+    for field in ("exploded", "fan_animation", "selection_effects", "cables_enabled", "gpu_waterblock", "desktop_frame"):
         if field in value:
             if type(value[field]) is not bool:
                 raise ValueError("整机视图开关设置不正确")

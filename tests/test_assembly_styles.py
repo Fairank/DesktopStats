@@ -18,8 +18,8 @@ class AssemblyStyleTests(unittest.TestCase):
         for name in ('ctypes.WinDLL','subprocess.Popen','threading.Thread.start'):
             self.enterContext(patch(name,side_effect=AssertionError('Artwork cannot access devices/workers')))
 
-    def test_every_scheme_keeps_all_80_cases_and_component_shapes(self):
-        self.assertEqual(len(CASES),80);self.assertEqual(len(HARDWARE_ICON_STYLES),13)
+    def test_every_scheme_keeps_all_96_cases_and_component_shapes(self):
+        self.assertEqual(len(CASES),96);self.assertEqual(len(HARDWARE_ICON_STYLES),13)
         gpu={'appearance':appearance_for('gpu','ROG-ASTRAL-RTX5090-32G-GAMING')}
         def physical(mesh):return (mesh.name,mesh.vertices,mesh.position,mesh.component,mesh.rotor,mesh.direction,mesh.axis)
         for case in CASES:

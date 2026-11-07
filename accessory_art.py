@@ -94,7 +94,7 @@ class _Pen:
             self.parts.append('<path d="'+data+'" fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>')
         self.parts.append('<path d="' + data + '"' + self._attrs(fill, width, opacity) + '/>')
 
-    def poly(self, points, fill='none', width=None, close=True, opacity=1):
+    def poly(self, points, fill='none', width=None, close=True, opacity=1, retrace=True):
         if not points:
             return
         self.index += 1
@@ -123,7 +123,7 @@ class _Pen:
         self.path(data, fill, (self.width*pressure if width is None and self.hand else width), opacity)
         # Retrace a few long outlines, never every tiny grille cell. This reads
         # as drawn linework while keeping fine openings clean and bounded.
-        if self.hand and self.style in ('notebook_color','notebook_line','notebook_smile','sketch') and close and perimeter>=45:
+        if retrace and self.hand and self.style in ('notebook_color','notebook_line','notebook_smile','sketch') and close and perimeter>=45:
             self.parts.append('<path d="' + data + '" transform="translate(.32 -.22)"' + self._attrs('none', .28, .45) + '/>')
 
     def rect(self, x, y, w, h, fill='none', radius=0, width=None, opacity=1):
@@ -165,6 +165,9 @@ def _rotor(row, style, x, y, width, height):
     hub = float(row.get('hub_ratio', .25))*45
     family = row.get('family','reference')
     leaf = row.get('blade_color', '#617482')
+    if family=='bequiet-grooved' and style in ('miniature','classic','solid'):
+        # Keep black leaves readable without recoloring the hardware body.
+        pen.ink='#75818a'
     if style in ('cartoon','notebook_color','notebook_smile','sticker','papercut','inkwash','soft'):
         leaf = pen.accent
     # A featureless aperture under the leaves gives overlapping fan planes a
@@ -178,6 +181,11 @@ def _rotor(row, style, x, y, width, height):
     if broad:
         contour = ('M47 '+_n(50-hub)+' C16 35 15 11 37 6 C60 1 82 13 85 29 '
                    'C66 25 67 43 54 '+_n(50-hub+3)+' Z')
+    elif family=='noctua-a':
+        # Broad swept pressure leaves with a straighter tip, rather than a
+        # round flower petal. This remains an original qualitative contour.
+        contour = ('M47 '+_n(50-hub)+' C32 30 25 20 30 12 L39 7 '
+                   'C52 3 66 8 75 18 L71 23 C59 25 60 36 54 '+_n(50-hub+3)+' Z')
     elif family in ('noctua-sterrox','noctua-g2','msi-lcp','thermaltake-toughfan'):
         contour = ('M48 '+_n(50-hub)+' C31 27 26 14 38 7 C49 3 65 5 74 16 '
                    'C59 18 61 32 55 '+_n(50-hub+4)+' Z')
@@ -195,7 +203,10 @@ def _rotor(row, style, x, y, width, height):
     for i in range(blades):
         pen.parts.append('<g data-leaf="'+str(i+1)+'" transform="rotate('+_n(i*360/blades)+' 50 50)">')
         pen.path(contour,leaf,.65)
-        if family in ('noctua-sterrox','noctua-g2'):
+        if family=='noctua-a':
+            for offset in (0,3,6):
+                pen.path('M'+_n(54+offset)+' 11 Q'+_n(51+offset)+' 15 '+_n(51+offset)+' 20',width=.35,opacity=.6)
+        elif family in ('noctua-sterrox','noctua-g2'):
             for offset in (0,3,6):
                 pen.path('M'+_n(48+offset)+' 12 Q'+_n(42+offset)+' 23 '+_n(48+offset*.7)+' 31',width=.45,opacity=.55)
         elif family=='bequiet-grooved':
@@ -209,6 +220,8 @@ def _rotor(row, style, x, y, width, height):
     if row.get('outer_ring'):
         pen.ellipse(50,50,43,43,'none',2.7)
     pen.ellipse(50,50,hub,hub,leaf,.8)
+    if row.get('id')=='noctua-nf-a12x15-pwm' and style in ('miniature','classic','solid'):
+        pen.ellipse(50,50,hub*.58,hub*.58,'#b8bfc0',.28)
     if family=='noctua-g2':
         for a in range(0,360,60):
             angle=math.radians(a)
@@ -236,7 +249,7 @@ def _fan_frame(pen, x, y, size, row):
     else:
         pen.rect(x,y,size,size,frame_color,size*.06)
     pen.ellipse(x+size/2,y+size/2,size*.437,size*.437,pen.dark,.65)
-    if row.get('rgb'):
+    if row.get('rgb') and not row.get('frame_rgb_polygon'):
         pen.ellipse(x+size/2,y+size/2,size*.418,size*.418,'none',size*.022,.8)
     if row.get('frame_rgb_ring'):
         pen.ellipse(x+size/2,y+size/2,size*.473,size*.473,'none',size*.025)
@@ -278,6 +291,11 @@ def _fan_foreground(pen, x, y, size, row):
     elif row.get('metal_hub'):
         tone='#b6c5cd' if pen.style in ('miniature','classic','solid') else pen.light
         pen.ellipse(cx,cy,size*.095,size*.095,tone,.6)
+    if row.get('frame_rgb_polygon') in (6,12):
+        sides=row['frame_rgb_polygon']
+        pen.parts.append('<g data-frame-light="stationary-'+str(sides)+'-sided-reference">')
+        pen.poly([(cx+size*.472*math.cos(i*math.tau/sides+math.pi/6),cy+size*.472*math.sin(i*math.tau/sides+math.pi/6)) for i in range(sides)],'none',size*.018)
+        pen.parts.append('</g>')
     if row.get('directional_grille'):
         pen.parts.append('<g data-grille="stationary-reference">')
         for i in range(12):
@@ -290,6 +308,8 @@ def _fan_foreground(pen, x, y, size, row):
 
 def _distinct_case(p, row):
     """Bounded original outlines for documented structures, shared by all styles."""
+    from accessory_case_details040 import draw_case
+    if draw_case(p,row):return True
     features=set(row.get('features',()))
     if 'tubular_open_frame' in features:
         p.parts.append('<g data-case-structure="tubular-open-frame">')
@@ -638,7 +658,14 @@ def _pump(p, fg, row, cx, cy, scale=1):
         p.rect(cx-w/2,cy-h/2,w,h,p.dark,3)
         p.ellipse(cx+1,cy,w*.43,h*.49,p.body,.8)
         p.ellipse(cx+1,cy,w*.35,h*.40,'none',1.4)
-    elif family in ('nzxt_lcd','aorus_round_lcd','lianli_infinity','thermaltake_mirror','id_white_ring','arctic_vrm','cm_dual_chamber'):
+    elif family in ('xpg_infinity','deepcool_lt_mirror'):
+        p.poly([(cx-w/2,cy-h/2),(cx-w*.28,cy-h*.76),(cx+w*.63,cy-h*.55),(cx+w/2,cy-h/2)],p.light,.7)
+        p.poly([(cx+w/2,cy-h/2),(cx+w*.63,cy-h*.55),(cx+w*.63,cy+h*.3),(cx+w/2,cy+h/2)],p.dark,.7)
+        p.rect(cx-w/2,cy-h/2,w,h,p.dark,2,.8)
+        for ratio in (.36,.25,.14):p.rect(cx-w*ratio,cy-h*ratio,w*ratio*2,h*ratio*2,'none',1,.65)
+        if family=='deepcool_lt_mirror':
+            p.poly([(cx+w*.51,cy-h*.36),(cx+w*.61,cy-h*.41),(cx+w*.61,cy+h*.24),(cx+w*.51,cy+h*.38)],p.glass,.5)
+    elif family in ('nzxt_lcd','aorus_round_lcd','lianli_infinity','thermaltake_mirror','id_white_ring','arctic_vrm','cm_dual_chamber','fractal_lumen'):
         p.ellipse(cx,cy+3*scale,w*.51,h*.5,p.dark)
         p.ellipse(cx,cy,w*.51,h*.5,p.body)
         if family=='arctic_vrm':
@@ -696,6 +723,9 @@ def _cooler(row, style):
     p=_Pen(style)
     fg=_Pen(style)
     rotors=[]
+    from accessory_cooling_details040 import draw_air
+    custom=draw_air(p,fg,row,style,_cooler_fan,_rotor)
+    if custom is not None:return p.finish(),custom,fg.finish()
     fan=_cooler_fan(row)
     count=row.get('fan_count',1)
     if row['kind']=='passive_tower':
@@ -839,6 +869,8 @@ def _cooler(row, style):
                 _fan_frame(p,xx,yy,size,fan)
                 inset=size*.07
                 rotors.append(_rotor(fan,style,xx+inset,yy+inset,size-2*inset,size-2*inset))
+                relative=row.get('fan_relative_directions',[]) if row.get('relative_rotation_verified') else []
+                if size_index<len(relative):rotors[-1]['direction']=-1 if relative[size_index]==-1 else 1
                 if i==count-1:
                     _fan_foreground(fg,xx,yy,size,fan)
             p.rect(47,84,25,4,copper,1,.65)
@@ -994,7 +1026,12 @@ def art(kind, model_id, style='miniature'):
     combined=body
     for rotor in rotors:
         inner=rotor['svg'].split('>',1)[1].rsplit('</svg>',1)[0]
-        combined+='<g transform="translate('+_n(rotor['x'])+' '+_n(rotor['y'])+') scale('+_n(rotor['width']/100)+' '+_n(rotor['height']/100)+')">'+inner+'</g>'
+        if rotor.get('affine'):
+            transform='matrix('+' '.join(_n(v) for v in rotor['affine'])+')'
+        else:transform='translate('+_n(rotor['x'])+' '+_n(rotor['y'])+') scale('+_n(rotor['width']/100)+' '+_n(rotor['height']/100)+')'
+        combined+='<g transform="'+transform+'">'+inner+'</g>'
+        if rotor.get('after_svg'):
+            combined+=rotor['after_svg'].split('>',1)[1].rsplit('</svg>',1)[0]
     combined+=foreground
     fan_source=cooling_catalog.get_fan(row.get('fan_model')) if kind=='cooler' else {}
     sources=list(dict.fromkeys([*row.get('sources',[]),*row.get('appearance_sources',[]),
@@ -1003,6 +1040,9 @@ def art(kind, model_id, style='miniature'):
                  features=list(row.get('features',[])))
     if kind=='cooler':
         details.update(fan_count=row.get('fan_count',0),heatpipes=row.get('heatpipes',0),
+                       heatpipe_count_verified=bool(row.get('heatpipe_count_verified',False)),
+                       fan_placement=row.get('fan_placement','reference'),
+                       relative_rotation_verified=bool(row.get('relative_rotation_verified')),
                        top_style=row.get('top_style','reference'),pump_style=row.get('pump_style','none'))
     elif kind=='psu':
         details.update(grille=row.get('grille_pattern','reference'),fan_count=row['fan_count'],
@@ -1018,7 +1058,9 @@ def art(kind, model_id, style='miniature'):
                        blade_count_verified=bool(row.get('blade_count_verified')),
                        leaf_contour=row.get('leaf_contour_accuracy','original_reference'),
                        reverse_pitch=bool(row.get('reverse_blade')),stationary_lcd=bool(row.get('hub_display')),
-                       stationary_directional_grille=bool(row.get('directional_grille')))
+                       stationary_directional_grille=bool(row.get('directional_grille')),
+                       stationary_light_polygon=row.get('frame_rgb_polygon'),
+                       marketed_separately_verified=row.get('marketed_separately_verified'))
     result=dict(id=model_id,kind=kind,label=row['label'],brand=row['brand'],style=style,
                 svg=_svg(combined),body_svg=_svg(body),foreground_svg=_svg(foreground) if foreground else '',
                 rotors=rotors,reference_details=True,sources=sources,

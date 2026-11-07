@@ -28,7 +28,7 @@ class AccessoryArtTests(unittest.TestCase):
         artwork.clear_cache()
         rows=artwork.choices()
         self.assertEqual({key:len(value) for key,value in rows.items()},
-                         dict(cases=80,coolers=54,psus=21,fans=54))
+                         dict(cases=96,coolers=66,psus=21,fans=70))
         catalog_rows=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                       component_catalog.choices('psu'),cooling_catalog.choices_fans())
         for key,source in zip(KINDS,catalog_rows):
@@ -84,7 +84,7 @@ class AccessoryArtTests(unittest.TestCase):
                         counts.add(len(art['rotors']))
                         planes.add(tuple((r['x'],r['y'],r['width'],r['height']) for r in art['rotors']))
                         for rotor in art['rotors']:
-                            self.assertEqual(rotor['direction'],1)
+                            self.assertEqual(rotor['direction'],-1 if row['id']=='scythe-fuma3' and rotor is art['rotors'][0] else 1)
                             self.assertTrue(all(math.isfinite(rotor[k]) for k in ('x','y','width','height')))
                             self.assertTrue(0<=rotor['x']<120 and 0<=rotor['y']<100)
                             self.assertTrue(0<rotor['width']<=120-rotor['x'])
@@ -186,7 +186,7 @@ class Guard(importlib.abc.MetaPathFinder):
 sys.meta_path.insert(0,Guard())
 import accessory_art
 assert accessory_art.cache_info()['entries']==0
-assert len(accessory_art.choices()['cases'])==80
+assert len(accessory_art.choices()['cases'])==96
 for kind,identity in [('case','hyte-y70'),('cooler','noctua-nh-d15-g2'),('psu','corsair-rm1000x-2024'),('fan','arctic-p12-pwm')]:
     assert accessory_art.art(kind,identity)['svg']
 '''

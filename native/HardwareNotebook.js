@@ -10,6 +10,10 @@
 // The transparent retained SVG is built on identity/style changes only. There
 // are no timers, filters, random numbers, sensor requests or runtime I/O here.
 var cases = {
+    "nvidia-founders-rtx5090-32g": {d:"M12 0H88Q100 0 100 14V86Q100 100 88 100H12Q0 100 0 86V14Q0 0 12 0Z",
+        feature:"hardware-notebook-fe-xbrace",trim:[
+            "M30 2H35L53 41L70 2H75L57 49L75 98H70L53 58L35 98H30L47 49Z",
+            "M6 17Q6 6 15 6H28M75 6H85Q94 6 94 17M6 83Q6 94 15 94H28M75 94H85Q94 94 94 83"]},
     "asus-astral-5090": {d:"M5 6Q44 2 91 5L99 17Q97 50 99 83L91 96Q45 99 6 94L1 82Q3 45 1 17Z",trim:["M12 12Q45 10 88 12","M7 83Q46 88 92 84","M9 22L9 75M92 24L92 74"]},
     "asus-dual-4060-oc": {d:"M13 5Q47 2 87 6Q98 9 98 24L96 82Q94 96 83 94L14 97Q3 94 3 78L4 24Z",trim:["M7 27L24 8","M77 89L93 72","M39 9L48 17"]},
     "msi-suprim-x-4090-24g": {d:"M11 3L88 5L99 24L94 86L82 98Q44 96 11 98L2 79L2 21Z",trim:["M14 12L36 10M65 11L85 13","M8 24L17 13M86 14L94 29","M18 87Q45 91 79 88"]},
@@ -69,16 +73,23 @@ function sourceShapes(input) {
     }
     return out
 }
-function shapeStudy(state,g,c,front) {
+function shapeStudy(state,g,c,front,layout) {
     var custom=cases[state.model_id],m=[g.w/100,0,0,g.h/100,g.x,g.y],seed=identity(state)
     if(custom) {
-        var trims=""
+        var trims="",globalTrims=""
         custom.trim.forEach(function(d,index){
             var loose=Sketch.wobblyPath(d,seed+":trim:"+index,1.05,14)
-            trims+=path(loose,c.ink,1.0)
+            if(custom.feature && index===0 && layout) {
+                // The FE brace sits behind the circular apertures. Bake its
+                // intersections now; Qt's SVG-Tiny cannot clip it at paint.
+                var points=casePolygon({d:loose,m:m})
+                if(points.length)points.push(points[0])
+                var region=[[g.x,g.y],[g.x+g.w,g.y],[g.x+g.w,g.y+g.h],[g.x,g.y+g.h]]
+                globalTrims+=path(clippedStroke(points,region,layout,.18),c.ink,.18)
+            } else trims+=path(loose,c.ink,1.0)
         })
         return {d:Sketch.wobblyPath(custom.d,seed+":case",1.75,15),m:m,
-            trim:group(trims,matrixText(m)),custom:true}
+            trim:custom.feature?'<g class="'+custom.feature+'">'+globalTrims+group(trims,matrixText(m))+'</g>':group(trims,matrixText(m)),custom:true}
     }
     var shapes=sourceShapes(front),passive=state.series_id==="gigabyte_silent_pascal" && state.fan_count===0
     if(state.series_id==="msi_hd5450_passive" && state.fan_count===0) {
@@ -325,7 +336,7 @@ function gpu(state,collector) {
     var c=Board.colors(state,Solid.palette(state));c.ink=ink(state)
     if(state.style==="gpu_integrated")return integrated(state,c)
     var g=geometry(state),layout=fanLayout(state,g),front=cases[state.model_id]?"":Solid.front(state,g,c)
-    var study=shapeStudy(state,g,c,front),scale=Math.sqrt(Math.abs(study.m[0]*study.m[3]-study.m[1]*study.m[2]))||1
+    var study=shapeStudy(state,g,c,front,layout),scale=Math.sqrt(Math.abs(study.m[0]*study.m[3]-study.m[1]*study.m[2]))||1
     var out=pencil(state,g,c,study,layout)
     out+=group(path(study.d,c.ink,.43/scale),matrixText(study.m))+study.trim
     if(study.passive) {

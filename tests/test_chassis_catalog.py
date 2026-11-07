@@ -11,8 +11,8 @@ import chassis_catalog as catalog
 class ChassisCatalogTests(unittest.TestCase):
     def test_coverage_is_explicit_and_identical_for_every_style(self):
         result = catalog.coverage()
-        self.assertEqual(result["cases"], 80)
-        self.assertEqual(result["brands"], 25)
+        self.assertEqual(result["cases"], 96)
+        self.assertEqual(result["brands"], 26)
         self.assertFalse(result["complete_market"])
         self.assertEqual(result["verified_firmware_identities"], 0)
         self.assertEqual(result["geometry_accuracy"], "schematic")
@@ -35,11 +35,11 @@ class ChassisCatalogTests(unittest.TestCase):
     def test_records_are_json_friendly_with_primary_sources_and_sane_dimensions(self):
         hosts = {"lian-li.com", "support.nzxt.com", "nzxt.com", "assets.corsair.com", "www.corsair.com",
                  "www.fractal-design.com", "hyte.com", "www.asus.com", "rog.asus.com",
-                 "www.coolermaster.com", "thermaltakeusa.com", "phanteks.com", "www.bequiet.com",
+                 "www.coolermaster.com", "thermaltakeusa.com", "phanteks.com", "phanteks.com.tw", "www.bequiet.com",
                  "www.jonsbo.com", "www.antec.com", "www.montechpc.com", "uk.msi.com",
                  "download.msi.com", "storage-asset.msi.com", "www.msi.com", "legacy.coolermaster.com",
                  "thermaltake.com", "www.deepcool.com", "deepcool.com", "www.silverstonetek.com",
-                 "device.report", "resources.mini-box.com", "www.in-win.com", "www.gigabyte.com", "download.gigabyte.com", "havn.global", "streacom.com", "www.dan-cases.com", "ncased.com", "ssupd.co", "www.geometricfuture.com", "geometricfuture.com", "cougargaming.com", "fractaldesign.freshdesk.com"}
+                 "device.report", "resources.mini-box.com", "www.in-win.com", "www.gigabyte.com", "download.gigabyte.com", "havn.global", "streacom.com", "www.dan-cases.com", "ncased.com", "ssupd.co", "www.geometricfuture.com", "geometricfuture.com", "cougargaming.com", "fractaldesign.freshdesk.com", "www.sama.cn"}
         forms = {"atx", "micro_atx", "mini_itx", "e_atx", "mini_dtx", "dtx", "ssi_eeb", "ssi_ceb"}
         for choice in catalog.choices():
             row = catalog.get_case(choice["id"])
@@ -57,7 +57,7 @@ class ChassisCatalogTests(unittest.TestCase):
                     self.assertIn(urlparse(source).hostname, hosts)
                 for mount in row["fan_mounts"]:
                     self.assertEqual(set(mount), {"position", "count", "size_mm"})
-                    self.assertTrue(0 < mount["count"] <= 6)
+                    self.assertTrue(0 < mount["count"] <= 8)
                     self.assertTrue(all(80 <= size <= 200 for size in mount["size_mm"]))
                 self.assertNotIn("installed_fans", row)
 

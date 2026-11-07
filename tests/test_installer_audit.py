@@ -1265,9 +1265,11 @@ class LocalServerCleanQuitAuditTests(unittest.TestCase):
         cls.method = ast.Module(body=[method], type_ignores=[])
 
     def setUp(self):
+        from native_runtime import Runtime
         self.callbacks = []
         self.logger = Mock(spec=logging)
         namespace = dict(
+            Runtime=Runtime,
             json=json,
             os=SimpleNamespace(getpid=lambda: 7007),
             logging=self.logger,

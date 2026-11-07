@@ -109,6 +109,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
 
     def test_live_style_command_commits_only_the_style_without_discarding_cached_temperature(self):
         import native_controller as controls
+        from native_runtime import Runtime
         from PySide6.QtWidgets import QApplication
         from tests import test_installer_audit as ipc_fixture
 
@@ -134,7 +135,7 @@ class HardwareIconSchemaTests(unittest.TestCase):
                 timer = SimpleNamespace(singleShot=Mock(side_effect=AssertionError("No queued restart")))
                 logger = Mock(spec=logging)
                 namespace = dict(json=json, os=SimpleNamespace(getpid=lambda: 7007),
-                                 logging=logger, QTimer=timer)
+                                 logging=logger, QTimer=timer, Runtime=Runtime)
                 exec(compile(ipc_fixture.LocalServerCleanQuitAuditTests.method,
                              "<actual LocalServer.read; actual Controller; fake socket>", "exec"), namespace)
                 runtime = SimpleNamespace(

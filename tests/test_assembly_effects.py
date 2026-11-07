@@ -67,6 +67,16 @@ class AssemblyEffectTests(unittest.TestCase):
         self.assertFalse(effect_sample('cartoon',9999)['active'])
         self.assertFalse(effect_sample('cartoon',100,'all')['active'])
 
+    def test_every_effect_eases_brightness_at_both_endpoints_without_extending_its_lifetime(self):
+        for policy in policies():
+            duration=policy['duration_ms'];style=policy['style']
+            first=effect_sample(style,1,'case');last=effect_sample(style,duration-1,'case')
+            self.assertLess(first['amount'],.0001)
+            self.assertLess(last['amount'],.0001)
+            self.assertGreater(effect_sample(style,duration/2,'case')['amount'],.99)
+            self.assertFalse(effect_sample(style,duration,'case')['active'])
+            self.assertEqual(effect_sample(style,duration,'case')['amount'],0.)
+
     def test_selection_fx_clock_runs_without_rpm_and_retires_without_geometry_work(self):
         from assembly_viewer import AssemblyViewport
         node,_state=self.node('inkwash')
@@ -120,7 +130,7 @@ class AssemblyEffectTests(unittest.TestCase):
         from chassis_catalog import CASES
         from hardware_appearance import appearance_for
         vertical=[case for case in CASES if case['layout']=='vertical']
-        self.assertEqual(len(vertical),7)
+        self.assertEqual(len(vertical),8)
         def direction(camera):
             yaw,pitch=math.radians(camera._yaw),math.radians(camera._pitch)
             return math.sin(yaw)*math.cos(pitch),math.sin(pitch),math.cos(yaw)*math.cos(pitch)

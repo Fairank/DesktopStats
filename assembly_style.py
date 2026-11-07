@@ -319,6 +319,11 @@ def edge_batches(meshes,style,styles=None):
         # whole-scene VBO still obeys the same8192-segment limit.
         contour_limit=(MAX_GRILLE_EDGES if mesh.name=='psu-fan-panel' else
                        MAX_GRILLE_EDGES//2 if mesh.name=='psu-rear-vent-panel' else MAX_MESH_EDGES)
+        if mesh.name in ('cooler-top-flow-fin-reference','cooler-c-shaped-heatpipes'):
+            # The complete repeated fin sheets and connected C bends fit the
+            # existing scene cap. Sampling each batch at512 cut away entire
+            # near-side contours, making the bank look like a solid panel.
+            contour_limit=MAX_MESH_EDGES*4
         # A fan's eight front/back corner pads are batched together. Each
         # rounded pad has clipped coplanar partitions, so repair those before
         # sampling rather than silently omitting several complete corners.

@@ -65,6 +65,10 @@ Window {
         try:
             for kind, model in (('psu', 'corsair-rm1000x-2024'),
                                 ('cooler', 'noctua-nh-d15-g2'),
+                                ('cooler', 'noctua-nh-l12s'),
+                                ('cooler', 'noctua-nh-c14s'),
+                                ('cooler', 'bequiet-dark-rock-tf2'),
+                                ('cooler', 'zalman-cnps9900-max'),
                                 ('fan', 'phanteks-d30-120-regular')):
                 for style in ('miniature', 'cartoon', 'notebook_color', 'notebook_line'):
                     with self.subTest(kind=kind, style=style):

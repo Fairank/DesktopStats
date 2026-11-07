@@ -556,6 +556,28 @@ test suite or re-exporting. A new binary distribution still needs its own
 third-party notice and corresponding-source review; a passing source export
 does not certify a future binary package.
 
+## Model widgets (0.40 development candidate)
+
+In the widget gallery choose CPU model or GPU model. The large artwork and
+caption retain the matched hardware identity; the lower readings use the
+existing metric pipeline. Each widget has its own hardware style and frame
+toggle. Original has no face. A GPU selector binds readings and fresh RPM to
+the selected GPU; an unavailable device does not borrow another card's data.
+Unknown, stale or zero RPM leaves fans still. Reduced motion pauses effects.
+
+The assembly page can open a compact desktop model, separately from the full
+inspector. Choose frame on/off there or in the desktop model's context menu.
+Drag to rotate, wheel to zoom, click a part to inspect its available readings,
+and Alt-drag to move the desktop widget. Right-click to return to the full
+inspector or close it. The desktop mode opens without activation and stays
+below ordinary windows. Same-screen fullscreen suppression uses the existing
+foreground monitor guard; unknown/locked sessions never initiate a window.
+No hardware is assumed installed from a reference model selection.
+
+The new modes are candidate source. Windows composition and installed gaming
+acceptance are separate from offscreen tests; do not upgrade an active game
+session merely to view these changes.
+
 ## Licensing
 
 See [the current application license and exceptions](../LICENSING.md). Public availability does not grant commercial permission for new original application code.

@@ -250,7 +250,7 @@ class HardwareCard(QQuickPaintedItem):
         try:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-            if self._surface:
+            if self._surface and prefs.get("skinFrame", True):
                 paint_surface(
                     painter, width, height, colors, radius=min(colors.get("radius", 18), height / 2)
                 )
@@ -288,7 +288,9 @@ class HardwareCard(QQuickPaintedItem):
                 value, unit = formatted(data, metric, prefs)
                 labels = label_options(metric, metric_label(metric), config["language"])
                 box = reading.box
-                if reading.mode == "compact":
+                if reading.mode == "model":
+                    draw.responsive_stack(labels, value, unit, box, reading.size)
+                elif reading.mode == "compact":
                     draw.compact(labels, value, unit, box, reading.size)
                 elif reading.mode == "row":
                     draw.responsive_row(labels, value, unit, box, reading.size)
@@ -399,7 +401,7 @@ class HardwareCard(QQuickPaintedItem):
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
             painter.scale(scale, scale)
-            if self._surface:
+            if self._surface and prefs.get("skinFrame", True):
                 paint_surface(painter, width, 160, colors)
             painter.setClipRect(QRectF(1, 1, width - 2, 158), Qt.ClipOperation.IntersectClip)
             draw = _CardPainter(painter, config, colors, meta["color"], scale)

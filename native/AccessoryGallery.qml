@@ -19,7 +19,7 @@ Popup {
     readonly property var brands:[{id:"",label:ui.t("全部品牌")}].concat([...new Set(entries.map(row=>row.brand).filter(Boolean))].sort().map(value=>({id:value,label:value})))
     readonly property var filtered:entries.filter(row=>(!brand||row.brand===brand)&&(!query||((row.label||"")+" "+(row.brand||"")).toLowerCase().includes(query.toLowerCase())))
     readonly property bool visibleRotors: !!grid.contentItem && grid.contentItem.children.some(item=>item.visible && item.hasRotors===true && item.y+item.height>grid.contentY && item.y<grid.contentY+grid.height)
-    readonly property bool motionActive:visible && ownerActive && demoMotion && demoRpm>0 && visibleRotors
+    readonly property bool motionActive:visible && ownerActive && stats.motionEnabled && demoMotion && demoRpm>0 && visibleRotors
     parent:Overlay.overlay
     anchors.centerIn:parent
     width:Math.min(1020,parent?parent.width-36:980)
@@ -102,6 +102,7 @@ Popup {
                 width:grid.cellWidth;height:grid.cellHeight
                 readonly property var art:stats.accessoryModelArt(root.category,modelData.id,root.selectedStyle)
                 readonly property bool hasRotors:(art.rotors || []).length>0
+                readonly property bool inViewport:visible && y+height>grid.contentY && y<grid.contentY+grid.height
                 Rectangle {
                     anchors.fill:parent;anchors.margins:5;radius:10
                     color:ui.dark?"#1b2a34":"#f7f9fb";border.width:1;border.color:ui.line
@@ -117,7 +118,7 @@ Popup {
                             cache:true;asynchronous:false
                         }
                         AccessoryGlyph {objectName:"accessoryCardGlyph";anchors.fill:parent;anchors.margins:4
-                            art:card.art;phase:root.phase;motion:root.motionActive}
+                            art:card.art;phase:root.phase;motion:root.motionActive && card.inViewport}
                     }
                     ColumnLayout {
                         anchors.left:parent.left;anchors.right:parent.right;anchors.bottom:parent.bottom;anchors.margins:10;spacing:3

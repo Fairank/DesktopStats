@@ -40,8 +40,8 @@ class CoolingExpansion039Tests(unittest.TestCase):
                          '5b242023e84617c860121e866040800ed0cdf3125d3605dc3fdc3dd720c87351')
 
     def test_added_products_are_distinct_and_primary_sourced(self):
-        self.assertEqual(tuple(c['id'] for c in catalog.choices_coolers()[42:]),COOLERS)
-        self.assertEqual(tuple(c['id'] for c in catalog.choices_fans()[38:]),FANS)
+        self.assertEqual(tuple(c['id'] for c in catalog.choices_coolers()[42:54]),COOLERS)
+        self.assertEqual(tuple(c['id'] for c in catalog.choices_fans()[38:54]),FANS)
         for getter,ids in ((catalog.get_cooler,COOLERS),(catalog.get_fan,FANS)):
             for model_id in ids:
                 with self.subTest(model=model_id):

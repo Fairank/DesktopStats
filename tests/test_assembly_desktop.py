@@ -19,12 +19,20 @@ class AssemblyDesktopTests(unittest.TestCase):
     def setUp(self):
         self.enterContext(patch('ctypes.WinDLL',side_effect=AssertionError('No Windows access')))
         self.enterContext(patch('subprocess.Popen',side_effect=AssertionError('No processes')))
+        self.enterContext(patch('native_runtime._desktop_session_ready',return_value=True))
+        # Keep this legacy fixture focused on secondary-screen admission. The
+        # real guard/session lifecycle has independent fake-flow coverage.
+        def target_allowed(runtime,screen):
+            identifier=runtime.top_bar.adapter.screen_identity(screen).native_id
+            runtime.target_checks.append(identifier)
+            return identifier not in runtime.top_bar._foreground_hidden_screens
+        self.enterContext(patch.object(Runtime,'_assembly_target_allowed',new=target_allowed))
 
     def runtime(self,blocked=()):
         first,second=Mock(),Mock();second.availableGeometry.return_value=QRect(2560,-541,1440,2560)
         config=copy.deepcopy(DEFAULT);config['top_bar'].update(monitor_mode='selected',screens=['second'])
         controller=SimpleNamespace(saved=config,_saved=config,set_status=Mock(),openAssemblyView=Mock(),quick=Mock())
-        return SimpleNamespace(headless=False,shutting_down=False,controller=controller,_assembly_window=Mock(),
+        return SimpleNamespace(headless=False,shutting_down=False,controller=controller,_assembly_window=Mock(),target_checks=[],
             app=SimpleNamespace(screens=lambda:[first,second],primaryScreen=lambda:first,quit=Mock()),
             top_bar=SimpleNamespace(focus_details=Mock(),_foreground_hidden_screens=set(blocked),
                 adapter=SimpleNamespace(screen_identity=lambda s:SimpleNamespace(native_id='second' if s is second else 'first'))),
@@ -47,6 +55,16 @@ class AssemblyDesktopTests(unittest.TestCase):
         runtime._assembly_window.showNormal.assert_not_called()
         runtime._assembly_window.synchronize.assert_not_called()
         runtime.controller.set_status.assert_called_once()
+        self.assertEqual(runtime.target_checks,['second'])
+        # Also exercise an unopened view: a blocked target never reaches the
+        # factory, even when no existing window could absorb the request.
+        unopened=self.runtime(blocked={'second'});unopened._assembly_window=None
+        def forbidden_factory(*args,**kwargs):raise AssertionError('Blocked target must not construct a view')
+        with patch('assembly_window.create_assembly_window',new=forbidden_factory):
+            Runtime.open_assembly_view(unopened,{})
+        self.assertIsNone(unopened._assembly_window)
+        self.assertEqual(unopened.target_checks,['second'])
+        unopened.controller.set_status.assert_called_once()
 
     def test_game_on_another_screen_shows_the_requested_view_without_activation(self):
         for fullscreen in (True,None):
@@ -58,6 +76,7 @@ class AssemblyDesktopTests(unittest.TestCase):
             window.setAttribute.assert_called_once_with(Qt.WA_ShowWithoutActivating,True)
             window.activateWindow.assert_not_called();window.raise_.assert_not_called()
             runtime.controller.set_status.assert_not_called()
+            self.assertEqual(runtime.target_checks,['second','second'])
 
     def test_desktop_request_activates_only_the_requested_secondary_window(self):
         runtime=self.runtime()

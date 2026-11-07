@@ -31,6 +31,8 @@ Popup {
     property var pendingMetrics: []
     property string selectionNotice:""
     readonly property int existingCount: {const draft=stats.draft;return mode==="metric" ? stats.widgetContentIds(targetKey).length : 0}
+    readonly property int maximumCount:mode==="metric" && stats.draft.widgets[targetKey]
+        && stats.draft.widgets[targetKey].presentation==="hardware"?3:6
     // Freeze values without closing the popup or resetting a pending selection.
     property var liveRows:[]
     property var previewReadings:({})
@@ -104,8 +106,8 @@ Popup {
         else if(!item.selected) {
             const next=pendingMetrics.slice(), index=next.indexOf(item.id)
             if(index>=0)next.splice(index,1)
-            else if(existingCount+next.length<6)next.push(item.id)
-            else {selectionNotice=ui.t("已选择六项指标");return}
+            else if(existingCount+next.length<maximumCount)next.push(item.id)
+            else {selectionNotice=ui.t(maximumCount===3?"硬件模型最多三项读数":"已选择六项指标");return}
             pendingMetrics=next;selectionNotice=""
         }
     }
@@ -241,9 +243,19 @@ Popup {
                             background:GlassSurface { radius:13; tone:"panel"; focused:entry.activeFocus; highlighted:entry.hovered }
                             contentItem:Item {
                                 HardwareCard {
-                                    visible:root.mode==="widget" && entry.modelData.id!=="status_bar"; x:4; y:12; width:78; height:78
+                                    visible:root.mode==="widget" && !["status_bar","cpu_model","gpu_model"].includes(entry.modelData.id); x:4; y:12; width:78; height:78
                                     moduleKey:"gallery"; config:{const draft=stats.draft;return root.mode==="widget"?stats.templatePreview(entry.modelData.id):draft}
                                     readings:root.previewReadings; history:[]; frosted:stats.coatingAllowed; surface:true
+                                }
+                                Loader {
+                                    active:root.mode==="widget" && ["cpu_model","gpu_model"].includes(entry.modelData.id)
+                                    x:4;y:12;width:78;height:78
+                                    sourceComponent:WidgetPreview {
+                                        moduleKey:"gallery"
+                                        config:{const draft=stats.draft;return stats.templatePreview(entry.modelData.id)}
+                                        previewInfo:({width:entry.modelData.id==="gpu_model"?320:280,height:entry.modelData.id==="gpu_model"?260:280,card_surfaces:false})
+                                        readings:root.previewReadings;history:[];modelMotionAllowed:false
+                                    }
                                 }
                                 Item {
                                     visible:root.mode==="widget" && entry.modelData.id==="status_bar"
@@ -289,7 +301,7 @@ Popup {
         }
         RowLayout {
             visible:root.mode==="metric"; Layout.fillWidth:true; spacing:10
-            Text { Layout.fillWidth:true; text:root.selectionNotice || (root.existingCount+root.pendingMetrics.length)+" / 6 · "+ui.t("可连续选择，完成后一起添加。"); color:ui.muted; font.family:ui.fontFamily; font.pixelSize:11; wrapMode:Text.WordWrap }
+            Text { Layout.fillWidth:true; text:root.selectionNotice || (root.existingCount+root.pendingMetrics.length)+" / "+root.maximumCount+" · "+ui.t("可连续选择，完成后一起添加。"); color:ui.muted; font.family:ui.fontFamily; font.pixelSize:11; wrapMode:Text.WordWrap }
             ActionButton { objectName:"cancelMetricSelection"; quiet:true; text:ui.t("取消"); onClicked:root.close() }
             ActionButton {
                 objectName:"confirmMetricSelection"; accent:true

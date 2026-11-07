@@ -204,16 +204,16 @@ class AssemblyGeometryTests(unittest.TestCase):
         from unittest.mock import Mock
         renderer=Mock()
         widget=SimpleNamespace(_error='',_pending=False,_renderer=renderer,_scene=build_scene({}),
-            _yaw=-80.,_pitch=12.,_zoom=.9,_exploded=True,_phase=35.,_dark=True,_focus='cpu',
+            _yaw=-80.,_pitch=12.,_zoom=.9,_exploded=True,_phase=35.,_dark=True,_focus='cpu',_transparent_background=False,
             devicePixelRatioF=lambda:1.5,width=lambda:800,height=lambda:600)
         AssemblyViewport.paintGL(widget)
         renderer.upload.assert_not_called()
         renderer.draw.assert_called_once_with(1200,900,pixel_scale=1.5,yaw=-80.,pitch=12.,zoom=.9,
             exploded=True,phase=35.,dark=True,focus='cpu')
 
-    def test_all_80_cases_keep_source_dimensions_and_no_installed_fan_guess(self):
+    def test_all_96_cases_keep_source_dimensions_and_no_installed_fan_guess(self):
         from chassis_catalog import CASES
-        self.assertEqual(len(CASES),80)
+        self.assertEqual(len(CASES),96)
         for case in CASES:
             scene=build_scene({'case':case})
             self.assertEqual(scene.dimensions,tuple(case['dimensions_mm'][key] for key in ('width','height','depth')))
