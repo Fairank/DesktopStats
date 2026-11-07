@@ -203,6 +203,9 @@ CATALOG += (
 )
 
 
+from component_storage043 import records as _storage_records043
+CATALOG+=_storage_records043()
+
 _BY_ID={row['id']:row for row in CATALOG}
 
 

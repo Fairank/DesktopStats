@@ -43,7 +43,7 @@ class GpuModelArt042Tests(unittest.TestCase):
             wrong=dict(value,series_id='not_the_same_series')
             self.assertIsNone(self.evaluate('Details.modelProfile('+json.dumps(wrong)+')'))
         self.assertEqual(count,147)
-        self.assertEqual(traced,145)
+        self.assertEqual(traced,147)
 
     def test_every_style_preserves_original_fan_planes_and_reviewed_blade_counts(self):
         for identity in fixture.GPU_ROWS:

@@ -26,7 +26,8 @@ from top_bar_config import HARDWARE_ICON_STYLES
 ROOT=Path(__file__).resolve().parents[1]
 APPEARANCES={a['id']:a for r in CATALOG if r[1]=='gpu'
              for a in [appearance_for('gpu',r[-1][0])] if a['vendor'] in ('amd','intel')}
-UNKNOWN_EXTERIORS={'biostar-radeon-rx7600-va7606rm81','biostar-radeon-rx7600-oc-va76s6rm81'}
+#0.43 reviewed both BIOSTAR official front images independently.
+UNKNOWN_EXTERIORS=set()
 MAIN_STYLES=('miniature','cartoon','notebook_color','notebook_line')
 
 

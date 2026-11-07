@@ -29,8 +29,16 @@ Item {
         && (["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(appearance.icon_set)
             || modelMode && ["classic","outline"].includes(appearance.icon_set))
         && root.width > root.height
+    readonly property bool croppedModelArtwork: modelMode && wideGpu && width>0 && height>0
+    readonly property var rasterViewport: {
+        if(!croppedModelArtwork)return null
+        const size=root.rasterEdge(root.width,false),visible=root.height/root.width*size
+        const top=Math.max(0,Math.floor((size-visible)/2))
+        const bottom=Math.min(size,Math.ceil((size+visible)/2))
+        return {size:size,top:top,height:Math.max(1,bottom-top)}
+    }
     readonly property var fanLayerData: (modelMode || fanMotionEnabled) && fanShapeEligible
-        ? Shapes.layers(geometryKey) : null
+        ? Shapes.layers(geometryKey,rasterViewport) : null
     // A large model keeps the same cached base/rotor textures at zero RPM.
     // Switching between a whole SVG and separately rasterized fractional-size
     // sprites changed antialiasing visibly on notebook ink. Only transforms
@@ -77,7 +85,9 @@ Item {
         source: root.layeredArtwork ? root.fanLayerData.baseSource : root.svgSource
         opacity: root.ink.a
         sourceSize.width: root.rasterEdge(root.wideGpu?Math.max(root.width,root.height):root.width,false)
-        sourceSize.height: root.rasterEdge(root.wideGpu?Math.max(root.width,root.height):root.height,false)
+        sourceSize.height: root.rasterViewport
+            ? root.rasterViewport.height
+            : root.rasterEdge(root.wideGpu?Math.max(root.width,root.height):root.height,false)
         fillMode: root.wideGpu ? Image.PreserveAspectCrop : Image.PreserveAspectFit
         asynchronous: false
         cache: true

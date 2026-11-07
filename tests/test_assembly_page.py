@@ -67,6 +67,15 @@ class AssemblyPageTests(unittest.TestCase):
         self.assertIsNotNone(self.window, [error.toString() for error in self.component.errors()])
         self.window.setProperty("nativeHosted", True)
 
+    def test_static_light_choice_updates_only_assembly_preferences(self):
+        self.show_assembly()
+        selected=self.find('assemblyLightingChoice')
+        self.assertEqual(selected.property('value'),'artwork')
+        for mode in ('off','warm','mint','violet','artwork'):
+            selected.picked.emit(mode);self.app.processEvents()
+            self.assertEqual(self.controller._draft['assembly']['lighting_preview'],mode)
+        self.assertEqual(self.controller.scopeDirty,dict(desktop=False,preferences=False,topbar=False))
+
     def tearDown(self):
         self.window.hide()
         self.window.destroy()

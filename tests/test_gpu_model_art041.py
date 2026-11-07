@@ -144,7 +144,8 @@ QtObject {
         self.assertEqual(result['base'],'base-sentinel');self.assertEqual(result['after'],rotors)
 
     def test_older_unknown_blowers_and_arc_do_not_acquire_invented_blades(self):
-        for identity in ('nvidia-gtx1080-founders','nvidia-gtx780ti-reference','intel-limited-arc-a770-16g'):
+        #0.43 independently reviewed the official A770 LE fifteen-blade photo.
+        for identity in ('nvidia-gtx780ti-reference','acer-bifrost-a770-16g-oc'):
             self.assertFalse(exact(identity)['fan_profile']['render_ready'])
             for style in HARDWARE_ICON_STYLES:
                 text=decode(self.artwork(identity,style)['source'])

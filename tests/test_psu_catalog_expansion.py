@@ -42,7 +42,7 @@ class PsuCatalogExpansionTests(unittest.TestCase):
         raw=json.dumps(original,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()
         self.assertEqual(hashlib.sha256(raw).hexdigest(),ORIGINAL_SHA256)
         self.assertTrue(validate_catalog())
-        self.assertEqual(coverage(),dict(psu=21,storage=5,expansion=3))
+        self.assertEqual(coverage(),dict(psu=21,storage=29,expansion=3))
         self.assertEqual({row['id'] for row in choices('psu')},set(ORIGINAL_IDS)|set(EXPECTED))
 
     def test_new_envelopes_and_unverified_details_are_explicit(self):

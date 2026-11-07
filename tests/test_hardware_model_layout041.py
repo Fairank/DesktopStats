@@ -61,7 +61,7 @@ class HardwareModelLayout041Tests(unittest.TestCase):
         self.app.processEvents()
         image=self.find('hardwareGlyphImage')
         self.assertEqual(image.property('sourceSize').width(),2048)
-        self.assertEqual(image.property('sourceSize').height(),2048)
+        self.assertEqual(image.property('sourceSize').height(),1080)
         pending=[glyph];rotors=[]
         while pending:
             item=pending.pop();pending.extend(item.childItems())

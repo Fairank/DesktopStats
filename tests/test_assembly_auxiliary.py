@@ -43,7 +43,7 @@ class AuxiliaryGeometryTests(unittest.TestCase):
             for n in range(3,len(mesh.vertices),6):self.assertAlmostEqual(sum(value*value for value in mesh.vertices[n:n+3]),1.,places=5,msg=mesh.name)
 
     def test_catalog_is_source_linked_detached_and_complete_by_category(self):
-        self.assertTrue(validate_catalog());self.assertEqual(coverage(),dict(psu=21,storage=5,expansion=3))
+        self.assertTrue(validate_catalog());self.assertEqual(coverage(),dict(psu=21,storage=29,expansion=3))
         for record in CATALOG:
             self.assertTrue(valid_component_id(record['id'],record['category']))
             self.assertTrue(all(url.startswith('https://') for url in record['sources']))

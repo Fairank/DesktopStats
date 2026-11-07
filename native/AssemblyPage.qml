@@ -188,6 +188,12 @@ ScrollView {
                 Choice {objectName:"assemblyDetailChoice";width:Math.min(220,Math.max(150,assemblyDetailSetting.width*.42))
                     model:stats.assemblyDetails;value:root.config.detail_level || "balanced"
                     Accessible.name:ui.t("模型细节");onPicked:selected=>stats.changeAssembly("detail_level",selected)}}
+            SettingRow {id:lightingSetting;Layout.fillWidth:true;label:ui.t("灯区预览");note:ui.t("只调整模型已有灯区，静态显示；不控制设备灯光。")
+                Choice {objectName:"assemblyLightingChoice";width:Math.min(220,Math.max(150,lightingSetting.width*.42))
+                    model:[{id:"artwork",label:ui.t("沿用插画")},{id:"off",label:ui.t("熄灯")},
+                           {id:"warm",label:ui.t("暖白")},{id:"mint",label:ui.t("薄荷")},{id:"violet",label:ui.t("紫色")}]
+                    value:root.config.lighting_preview || "artwork";Accessible.name:ui.t("灯区预览")
+                    onPicked:selected=>stats.changeAssembly("lighting_preview",selected)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("展开组件");note:ui.t("将硬件分开，查看机箱内部布局。")
                 Toggle {checked:root.config.exploded===true;onToggled:stats.changeAssembly("exploded",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风扇随转速转动");note:ui.t("仅在三维视图可见且转速有效时运行。")

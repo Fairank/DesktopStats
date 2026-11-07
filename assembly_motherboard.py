@@ -11,6 +11,12 @@ from dataclasses import replace
 from motherboard_catalog import resolve
 
 
+# Generic interface references only: these do not identify a retail board's
+# connector supplier, exact mating-pin contour or factory plating.
+_POWER_INTERFACE_SOURCE = 'https://www.molex.com/en-us/products/part-detail/39281243'
+_M2_INTERFACE_SOURCE = 'https://www.te.com/en/products/connectors/pcb-connectors/card-edge-connectors/m-2-connectors.html?tab=pgp-story'
+
+
 def layout_anchors(spec,w,h,d,board_x,board_y,board_rear):
     """Canonical component anchors before the case's rigid orientation change."""
     model=resolve(spec.get('board') or {})
@@ -195,24 +201,41 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         add('board-expansion-slot' if row['kind']=='x16' else 'detail-board-pcie-'+row['kind'],_boxes(sides),steel if row['reinforced'] else dark,(x,y,z))
         cube('detail-board-pcie-contact-well',(.25,2.8,length*.91),(x+2,y,z),copper)
         if row['kind']=='x16':cube('detail-board-pcie-latch',(7.,6.5,7.),(x-1,y,z+length/2+2),dark)
-    # Empty M.2 sockets and mounting standoffs. No SSD is assumed installed.
+    # Empty M.2 receiving channels and mounting standoffs. The card approaches
+    # along the reviewed slot axis, including rear-facing and rotated sockets.
+    # Wall/floor thicknesses are reference proportions, not OEM drawings. No
+    # exact key/contact arrangement or already installed SSD is inferred.
     for anchor in anchors['connectors']['m2']:
         p=anchor['position'];along=anchor['along'];rear_side=anchor['side']=='rear'
-        size=(3.2,5.,22.) if abs(along[1])>.5 else (3.2,22.,5.)
-        cube('detail-board-m2-socket',size,p,dark)
+        normal=(1.,0.,0.) if rear_side else (-1.,0.,0.)
+        # Canonical opening is +Z; +X is its insulating floor toward the PCB.
+        # This replaces the former solid box within the same 3.2 x 22 x 5 mm
+        # reference envelope, leaving an actual open card-receiving mouth.
+        housing=_boxes([((3.2,22.,1.),(0.,0.,-2.)),
+            ((3.2,1.,4.),(0.,-10.5,.5)),((3.2,1.,4.),(0.,10.5,.5)),
+            ((.65,20.,4.),(1.275,0.,.5))])
+        add('detail-board-m2-socket',_orient_header(housing,normal,along),dark,p)
         for distance in anchor['allowed_lengths_mm']:
             pos=tuple(p[k]+along[k]*distance for k in range(3))
             add('detail-board-m2-mount-post',rotate_vertices(ring(2.2,.85,1.8,segments=12),'left'),steel,pos)
     # Main and EPS power housings contain the documented count of open cavities.
+    # Each cavity receives its own recessed male contact, not a continuous
+    # conductive-looking floor. Contact contours/plating remain schematic;
+    # the documented 24/8/4/6 positions and original landmarks are unchanged.
+    power_contacts=[];power_contact_count=0
     for key,columns in (('atx24',12),('eps8',4),('eps4',2),('aux6',3)):
         for anchor in anchors['connectors'].get(key,()):
             vertical=key=='atx24';pitch=4.2;cw,ch=(10.4,columns*pitch+1.) if vertical else (columns*pitch+1.,10.4)
-            holes=[]
+            holes=[];contacts=[]
             for col in range(columns):
                 for row in range(2):
                     x=(row-.5)*pitch if vertical else (col-(columns-1)/2)*pitch
                     y=(col-(columns-1)/2)*pitch if vertical else (row-.5)*pitch
                     holes.append(tuple((x+u,y+v) for u,v in chamfer_rect(3.2,3.2,.42)))
+                    # Plane XY becomes local ZY under rotate_vertices('left').
+                    # The post ends below the opening and is isolated from its
+                    # neighbours. Do not invent an electrical pin-number map.
+                    contacts.append(((4.2,.85,.85),(1.0,y,x)))
             shape=perforated_plate(chamfer_rect(cw,ch,.8),holes,7.)
             p=anchor['position'];position=tuple(p[k]-anchor['normal'][k]*3.2 for k in range(3));base_along=(0.,1.,0.) if vertical else (0.,0.,1.)
             normal=anchor['normal'];along=anchor['along']
@@ -221,7 +244,10 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
             latch=translated(box(2.,ch*.30,2.),(-3.3,0,cw/2+.6))
             add('board-'+key+'-latch',orient(latch),color('#3a424b'),position)
             floor=translated(box(.3,ch-.7,cw-.7),(3.4,0,0))
-            add('board-'+key+'-contact-floor',orient(floor),copper,position)
+            add('board-'+key+'-contact-floor',orient(floor),dark,position)
+            power_contacts.extend(translated(orient(_boxes(contacts)),position))
+            power_contact_count+=len(contacts)
+    add('board-power-independent-contacts',tuple(power_contacts),steel,(0.,0.,0.))
     # Peripheral housings and individual pin rows, located at their manual labels.
     for key,rows in anchors['connectors'].items():
         if key in ('atx24','eps8','eps4','aux6','m2','pcie'):continue
@@ -376,6 +402,10 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         m2_heatsinks=sum(c['name'].startswith('m2') for c in model['heatsinks']),installed_ssd_count_inferred=False,
         rear_io_layout_schematic=True,rear_io_source=model['rear_layout_source'],small_package_positions_schematic=True,
         heatsink_recesses_are_open_geometry=True,socket_contact_pattern_is_sampling=True,
+        power_contact_count=power_contact_count,power_contacts_independent=True,
+        connector_contact_shape_reference=True,connector_oem_identified=False,
+        m2_receiving_channel_count=len(anchors['connectors']['m2']),m2_receiving_channel_open=True,
+        m2_contact_map_drawn=False,interface_detail_sources=(_POWER_INTERFACE_SOURCE,_M2_INTERFACE_SOURCE),
         finish_status=model['finish_status'],series=model['series'],
         unplaced_source_features=model.get('unplaced_source_features',()),
         bundled_m2_accessory_slots=model.get('bundled_m2_accessory_slots',0),bundled_m2_accessory_installed=False,

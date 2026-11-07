@@ -125,6 +125,18 @@ REVIEWED_FILES = frozenset(
             "showcase/motion-continuity-light.gif",
             "showcase/motion-continuity-dark.gif",
             "showcase/model-widgets042.png",
+            "showcase/cpu-six043.gif",
+            "showcase/cpu-six043.mp4",
+            "showcase/cpu-six043.png",
+            "showcase/gpu-six043.gif",
+            "showcase/gpu-six043.mp4",
+            "showcase/gpu-six043.png",
+            "showcase/assembly-six043.gif",
+            "showcase/assembly-six043.mp4",
+            "showcase/assembly-six043.png",
+            "showcase/assembly-air-six043.png",
+            "showcase/assembly-aio-six043.png",
+            "showcase/assembly-loop-six043.png",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]

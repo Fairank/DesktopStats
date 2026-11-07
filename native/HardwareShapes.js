@@ -296,12 +296,21 @@ function modelArtwork(state,collector) {
     return result
 }
 
-function source(geometryKey) {
+function svgHeader(viewport) {
+    // A wide model can rasterize only its visible central strip. Physical
+    // coordinates and rotor planes remain in the original24-unit world.
+    const size=viewport && viewport.size, top=viewport && viewport.top, height=viewport && viewport.height
+    if(!Number.isInteger(size) || size<1 || size>2048 || !Number.isInteger(top) || top<0
+            || !Number.isInteger(height) || height<1 || top+height>size)
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 '+(24*top/size)+' 24 '+(24*height/size)+'" width="'+size+'" height="'+height+'">'
+}
+function source(geometryKey,viewport) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
-    if (parts.length !== 11 && parts.length !== 12) return source(key({}, "#69788c"))
+    if (parts.length !== 11 && parts.length !== 12) return source(key({}, "#69788c"),viewport)
     // Validate public input again; no untrusted text is inserted into XML.
     const canonical = key(inputFromParts(parts), parts[7])
-    if (canonical !== geometryKey) return source(canonical)
+    if (canonical !== geometryKey) return source(canonical,viewport)
     const ink = parts[7], accent = parts[6]
     const outlineBody = parts[10] === "outline" && parts[0] !== "memory" ? (parts[0] === "cpu" ? cpu(parts[3], ink, accent)
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
@@ -318,24 +327,24 @@ function source(geometryKey) {
         : parts[10] === "miniature" ? Miniature.body(state)
         : parts[10] === "soft" ? Soft.body(state)
         : outlineBody
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
+    const svg = svgHeader(viewport)
         + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>'
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg)
 }
 
-function layers(geometryKey) {
+function layers(geometryKey,viewport) {
     const parts = typeof geometryKey === "string" ? geometryKey.split("|") : []
-    if (parts.length !== 11 && parts.length !== 12) return {baseSource:source(key({}, "#69788c")),rotors:[]}
+    if (parts.length !== 11 && parts.length !== 12) return {baseSource:source(key({}, "#69788c"),viewport),rotors:[]}
     // This public API accepts only the same canonical, allowlisted fields as
     // source(). No SVG or caller-supplied descriptor body is parsed or trusted.
     const canonical = key(inputFromParts(parts), parts[7])
-    if (canonical !== geometryKey) return layers(canonical)
+    if (canonical !== geometryKey) return layers(canonical,viewport)
     const count = Number(parts[4]),desktopStyle=modelStyle(parts[10])
     if (parts[0] !== "gpu" || ["solid","miniature","soft","cartoon","sketch",
             "notebook_line","notebook_color","notebook_smile","sticker","papercut","inkwash"].indexOf(parts[10]) < 0 && !desktopStyle
             || ["gpu_axial","gpu_blower","gpu_hybrid"].indexOf(parts[3]) < 0
             || [1,2,3].indexOf(count) < 0)
-        return {baseSource:source(canonical),rotors:[]}
+        return {baseSource:source(canonical,viewport),rotors:[]}
 
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:count,shroud:parts[5],accent:parts[6],ink:parts[7],series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
@@ -352,7 +361,7 @@ function layers(geometryKey) {
         : parts[10] === "solid" ? Solid.body(state,collector)
         : parts[10] === "miniature" ? Miniature.body(state,collector)
         : Soft.body(state,collector)
-    const baseSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">'
+    const baseSvg = svgHeader(viewport)
         + '<g stroke-linecap="round" stroke-linejoin="round">' + body + '</g></svg>'
     const rotors = collector.map(function(rotor) {
         // Every small image has a local origin and identical six-unit box.

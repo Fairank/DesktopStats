@@ -18,9 +18,10 @@ class SceneCache:
             base=build_scene(dict(physical,visual_style='miniature',part_styles={}))
             self.base=base;self.key=key
         style=resolve_style(spec.get('visual_style'));overrides=spec.get('part_styles') or {}
-        if style=='miniature' and not overrides:return self.base
+        lighting=spec.get('lighting_preview','artwork')
+        if style=='miniature' and not overrides and lighting=='artwork':return self.base
         case=spec.get('case') or {}
-        meshes,metadata=apply_model_styles(self.base.meshes,style,overrides,self.base.dimensions,case.get('panels') or {})
+        meshes,metadata=apply_model_styles(self.base.meshes,style,overrides,self.base.dimensions,case.get('panels') or {},lighting)
         return Scene(meshes,self.base.dimensions,dict(self.base.metadata,**metadata))
 
     def clear(self):

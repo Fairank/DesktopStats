@@ -127,10 +127,10 @@ CATALOG = (
      ("Yeston Sakura Radeon RX 7800 XT 16G GDDR6 256bit",
       "Yeston Sakura Radeon RX 7800 XT 16G GDDR6 256bit 5nm")),
     # The official indexed spec confirms this SKU. Its direct image endpoint
-    # returned HTTP 403 during review: cooling stays unknown, rather than
-    # turning a search-index image caption into a physical-fan assertion.
+    # The exact official 1920px front image was accessible in the 0.43 review:
+    # two independent nine-blade rotors, distinct from the eleven-blade OC.
     ("biostar-radeon-rx7600-va7606rm81", "gpu", "amd", "biostar",
-     "BIOSTAR Radeon RX 7600 VA7606RM81", "gpu_neutral", None, "box",
+     "BIOSTAR Radeon RX 7600 VA7606RM81", "gpu_axial", 2, "soft",
      "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316",
      ("BIOSTAR Radeon RX 7600 VA7606RM81", "BIOSTAR VA7606RM81", "VA7606RM81")),
     # Official 5090 gallery shows both physical fans on the same side.

@@ -1,0 +1,382 @@
+{
+  "market_exhaustive": false,
+  "policy": "Original schematic artwork only. Manufacturer images are private visual evidence and are not distributed. Unknown leaf counts remain null; no other product inherits telemetry or mechanical facts.",
+  "reviewed": "2026-11-08",
+  "rows": [
+    {
+      "additional_primary_urls": [
+        "https://cz.gigabyte.com/en-us/graphics-cards/nvidia-rtx-40-series"
+      ],
+      "blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "id": "gigabyte-aorus-4090-master",
+      "label": "GIGABYTE AORUS GeForce RTX 4090 MASTER 24G",
+      "original_primary_url": "https://www.gigabyte.com/Graphics-Card/GV-N4090AORUS-M-24GD",
+      "remaining_unknown": "All three leaf counts; exact modeled cap ratios; no transfer from family 13 heat-pipe count.",
+      "source_attempt_result": "Exact product page 403; official RTX40 family page 200 names MASTER4090 and Bionic Shark. Family isolated fan 550x618 shows very broad textured swept leaves, no confirmed count. Actual MASTER highres photos 2000x2000 show moving fans; motion ribs are not blade edges.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [
+        "https://www.leadtek.com/eng/products/graphics_cards%281%29/WinFast_RTX_4090_HURRICANE_24G%2840950%29/detail"
+      ],
+      "blade_counts": [
+        9,
+        null,
+        9
+      ],
+      "id": "leadtek-hurricane-4090-24g",
+      "label": "Leadtek WinFast GeForce RTX 4090 HURRICANE 24GB",
+      "original_primary_url": "https://www.leadtek.com/eng/news/product_news_detail/1693",
+      "remaining_unknown": "Central leaf count and full center outline. Keep existing partial outer counts, do not promote complete model.",
+      "source_attempt_result": "Exact manufacturer launch and product pages 200; exact gallery front 800x480 and perspective 768x512. Both outer fans remain visibly nine swept independent leaves; the central fan is covered by an X brace in every checked front view.",
+      "status": "partially_confirmed"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "id": "inno3d-ichill-x4-3080",
+      "label": "INNO3D GeForce RTX 3080 iCHILL X4",
+      "original_primary_url": "https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4",
+      "remaining_unknown": "All four leaf counts; do not borrow from RTX4070 or 12GB sub-SKU.",
+      "source_attempt_result": "Exact 10GB product page and official card images 200. Three 90mm front Scythe axial rotors plus one 45mm side rotor are explicit. Front images are tilted/shadowed; side feature photo has motion blur.",
+      "status": "partially_confirmed"
+    },
+    {
+      "additional_primary_urls": [
+        "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=316"
+      ],
+      "blade_counts": [
+        9,
+        9
+      ],
+      "id": "biostar-radeon-rx7600-va7606rm81",
+      "label": "BIOSTAR Radeon RX 7600 VA7606RM81",
+      "original_primary_url": "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316",
+      "remaining_unknown": "Absolute direction, RPM, physical fan dimensions and internal PCB.",
+      "source_attempt_result": "Exact S_ID316 front 1920px manufacturer photo genuinely reviewed and manually indexed; soft rounded stepped case differs from OC334. Root independently accepted.",
+      "status": "confirmed_this_round"
+    },
+    {
+      "additional_primary_urls": [
+        "https://download.intel.com/newsroom/archive/2025/en-us-2022-09-28-intel-innovation-2022.pdf",
+        "https://download.intel.com/newsroom/2022/2022innovation/Intel-Arc-A770-gpu.zip"
+      ],
+      "blade_counts": [
+        15,
+        15
+      ],
+      "id": "intel-limited-arc-a770-16g",
+      "label": "Intel Arc A770 Limited Edition 16GB",
+      "original_primary_url": "https://game.intel.com/stories/intel-arc-graphics-overclocking-101/",
+      "remaining_unknown": "Absolute direction, RPM, factory measured hub ratio; do not transfer fan dimensions from reviews.",
+      "source_attempt_result": "Official 2022 Intel newsroom archive PDF links manufacturer 11MB photo ZIP; original 4456x5820 shows both front rotors clearly. Both independently counted15 broad flared mildly curved leaves. Fixed diffused RGB rim is not a rotating tip ring. Root independently accepted.",
+      "status": "confirmed_this_round"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null,
+        7,
+        null
+      ],
+      "id": "gigabyte-gaming-5070oc",
+      "label": "GIGABYTE GeForce RTX 5070 GAMING OC 12G",
+      "original_primary_url": "https://www.gigabyte.com/Graphics-Card/GV-N5070GAMING-OC-12GD",
+      "remaining_unknown": "Outer counts and complete all-fan readiness. No absolute orientation or current RPM inferred from arrows.",
+      "source_attempt_result": "Exact product page web text and exact public feature assets obtained200 with public product Referer. Center rotor clearly seven broad curved/ridged leaves. Whole front alternate-spinning illustration supports same family but arrows cover outer leaf regions. Conservative proposal only center7, full model stays fail-closed.",
+      "status": "partially_confirmed"
+    },
+    {
+      "additional_primary_urls": [
+        "https://www.zotac.com/product/graphics_card/zotac-gaming-geforce-rtx-4080-super-amp-extreme-airo-16gb-gddr6x",
+        "https://www.zotac.com/download/mediadrivers/External/GraphicsCard/4080SUPER/Brochure/ZT-D40820B-10P-brochure.pdf"
+      ],
+      "blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "id": "zotac-airo-4080super",
+      "label": "ZOTAC GAMING GeForce RTX 4080 SUPER AMP Extreme AIRO",
+      "original_primary_url": "https://www.zotac.com/us/news/zotac-gaming-announces-geforce-rtx-40-super-series?l=en",
+      "remaining_unknown": "All three counts; no transfer from non-SUPER4080 or recent BladeLink5080.",
+      "source_attempt_result": "Official exact ZT-D40820B-10P product and brochure discovered and browser-text indexed; direct product/brochure public reads return468. Manufacturer family landing also468. No new full-resolution exact front photo downloaded this round. Previous NVIDIA marketplace500px package+card is inadequate.",
+      "status": "source_unavailable"
+    },
+    {
+      "additional_primary_urls": [
+        "https://www.zotac.com/node/1283424",
+        "https://www.zotac.com/download/mediadrivers/External/GraphicsCard/4080SUPER/Brochure/ZT-D40820D-10P-brochure.pdf"
+      ],
+      "blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "id": "zotac-trinity-4080super",
+      "label": "ZOTAC GAMING GeForce RTX 4080 SUPER Trinity Black Edition",
+      "original_primary_url": "https://www.zotac.com/us/news/zotac-gaming-announces-geforce-rtx-40-super-series?l=en",
+      "remaining_unknown": "All three counts; do not transfer white OC, AMP, or5080SOLID fan.",
+      "source_attempt_result": "Official exact ZT-D40820D-10P brochure and node1283424 discovered and browser-text indexed; direct public product reads468. Prior NVIDIA marketplace200px photo inadequate. No new exact high-resolution front photo.",
+      "status": "source_unavailable"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        9,
+        9,
+        9
+      ],
+      "id": "powercolor-reaper-9070xt",
+      "label": "PowerColor Reaper AMD Radeon RX 9070 XT 16GB GDDR6",
+      "original_primary_url": "https://www.powercolor.com/product-detail212.htm",
+      "remaining_unknown": "Absolute direction, live RPM; page stop thresholds are not current telemetry.",
+      "source_attempt_result": "Exact page212 HTML200 says ring-blade design/up to9; actual complete front gallery900x500 visually confirms each rotor9. Small350px isolated fan also supports swept ringed blades, dark cap. Root independently accepted.",
+      "status": "confirmed_this_round"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        53
+      ],
+      "id": "nvidia-gtx1080-founders",
+      "label": "NVIDIA GeForce GTX 1080 Founders Edition",
+      "original_primary_url": "https://www.nvidia.com/en-us/geforce/news/geforce-gtx-1080-founders-edition/",
+      "remaining_unknown": "Absolute direction, RPM; never transfer53 to780Ti/480/other blowers.",
+      "source_attempt_result": "Exact NVIDIA official2016 article and original shroud-removed thermal1866x955 photo. Full-circle visual count53 narrow curved radial vanes, manually indexed literal-pixel unwrap; dark assembled photo independently has same periodicity. Root independently checked original and indexed strip, accepted exact SKU only.",
+      "status": "confirmed_this_round"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "nvidia-gtx780ti-reference",
+      "label": "NVIDIA GeForce GTX 780 Ti Reference",
+      "original_primary_url": "https://nvidianews.nvidia.com/news/nvidia-unveils-geforce-gtx-780-ti-the-best-gaming-gpu-on-the-planet-6622622",
+      "remaining_unknown": "Vane count; no transfer fromGTX1080.",
+      "source_attempt_result": "Official NVIDIA launch page text retrieved; original CDN asset publicly200 but delivered only tiny product image. Dense radial fan shape and metal/window casing known, exact vane count cannot be read.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "msi-n480gtx-m2d15",
+      "label": "MSI N480GTX-M2D15",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/global/N480GTXM2D15.pdf",
+      "remaining_unknown": "Vane count; do not count exposed heatsink fins as fan vanes.",
+      "source_attempt_result": "Exact manufacturer PDF downloaded200 and original1000x800 embedded photo extracted. Two packaging variants in one image, tilted small dark fan/large black cap. Dense radial vane type visible; reliable full-circle count absent.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null,
+        null
+      ],
+      "id": "gigabyte-gtx460-oc-1g-rev1",
+      "label": "GIGABYTE GV-N460OC-1GI Rev. 1.0",
+      "original_primary_url": "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI",
+      "remaining_unknown": "Both counts and revision equivalence; do not copyrev2/rev3.",
+      "source_attempt_result": "Exact revision1 main page times out/403. Previously recorded exact official StaticFile asset refreshed200,455x427 package+tilted card, both small shiny fans. Insufficient detail for independent full-circle counts.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null,
+        null
+      ],
+      "id": "msi-n260gtx-lightning",
+      "label": "MSI N260GTX Lightning",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/global/N260GTX_Lightning.pdf",
+      "remaining_unknown": "Both exact leaf counts; no unverified generic TwinFrozr replacement.",
+      "source_attempt_result": "Exact MSI PDF200, original500x500 front and perspective extracted and genuinely viewed. Brushed silver two-aperture shroud, black curved axial leaves and dark cap; front fan diameters only about120px with translucent reflections.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "msi-nx8800gts-320-oc",
+      "label": "MSI NX8800GTS-T2D320E-HD-OC",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/global/NX8800GTST2D320EHDOC.pdf",
+      "remaining_unknown": "Vane count; cap artwork/logo not copied into public assets.",
+      "source_attempt_result": "Exact MSI PDF200. Original front product photo only400x208, fan opening roughly120px and dark. Single blower, blue square-label cap and slit cover visible; dense vanes not reliably countable.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "gigabyte-fx5200-n52128d",
+      "label": "GIGABYTE GV-N52128D GeForce FX 5200",
+      "original_primary_url": "https://www.gigabyte.com/Graphics-Card/GV-N52128D",
+      "remaining_unknown": "Blade count; do not count radial heatsink fins as blades.",
+      "source_attempt_result": "Official product page public requests timeout/403. Exact previously documented official StaticFile asset refreshed200 at457x371; package plus tiny card with blue PCB, small round black cooler and visible power lead. Actual rotor detail too small/shadowed to count.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "msi-hd4870-t2d512-oc-reference",
+      "label": "MSI Radeon HD 4870 R4870-T2D512-OC Reference",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/global/R4870T2D512OC.pdf",
+      "remaining_unknown": "Vane count; no transfer from290X/5870.",
+      "source_attempt_result": "Exact MSI PDF200. Original500x500 packaging+tilted card extracted, red radial blower and light cap visible. Effective fan onlyabout90px; no reliable full-circle count.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "msi-hd5870-pm2d1g-reference",
+      "label": "MSI Radeon HD 5870 R5870-PM2D1G Reference",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/ua/R5870PM2D1G.pdf",
+      "remaining_unknown": "Exact complete count; no transfer from290X despite red appearance.",
+      "source_attempt_result": "Exact MSI Ukrainian datasheet200; original1000x800 card photo genuinely viewed. Larger red radial blower/large dark cap, black rectangular cover with red line; oblique view compresses near/far vane roots.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        45
+      ],
+      "id": "msi-r9-290x-4gd5-reference",
+      "label": "MSI Radeon R9 290X 4GD5 Reference",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/global/R9-290X-4GD5.pdf",
+      "remaining_unknown": "Absolute direction, RPM; no extension to other red AMD reference rotors.",
+      "source_attempt_result": "Exact MSI PDF200, original1000x800 frontal embedded photo. Full red radial rotor has45 separately visible curved vanes; literal-pixel angular unwrap visually counted and indexed one vane per number. Root independently accepted exact SKU only.",
+      "status": "confirmed_this_round"
+    },
+    {
+      "additional_primary_urls": [
+        "https://rog.asus.com/articles/hands-on/unboxing-strix-r9-fury/",
+        "https://rog.asus.com/wp-content/uploads/2015/07/3_MG_9467.jpg"
+      ],
+      "blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "id": "asus-strix-r9fury-dc3-4g",
+      "label": "ASUS STRIX Radeon R9 Fury DC3 4G GAMING",
+      "original_primary_url": "https://www.asus.com/it/news/ohcitiw9wqe49eh8/",
+      "remaining_unknown": "All three counts/wingtip geometry; do not transfer later Strix/RTX AxialTech.",
+      "source_attempt_result": "Exact original ASUS Italian announcement timed out. Official ROG exact Fury unboxing article fetched200 and explicitly identifies triple Wing-Blade DirectCU III; migrated galleries are empty placeholders. Only retained original JPEG link3_MG_9467.jpg now404. No usable new manufacturer front photo.",
+      "status": "source_unavailable"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null
+      ],
+      "id": "msi-rx480-8g-reference",
+      "label": "MSI Radeon RX 480 8G Reference",
+      "original_primary_url": "https://storage-asset.msi.com/datasheet/vga/global/AMD-Radeon-RX-480-8G.pdf",
+      "remaining_unknown": "Exact vane count; the red cap border is print, not rotating outer ring.",
+      "source_attempt_result": "Exact MSI PDF200, original1000x800 front product image genuinely viewed. Single dark blower with large dark cap/red printed ring and dimpled case. Full vane roots/edges disappear into shadow in part of circumference.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [
+        "https://store.acer.com/en-us/predator-bifrost-intel-arc-a770-oc-graphics-card",
+        "https://www.acer.com/fr-fr/predator/desktops-and-all-in-ones/components/predator-bifrost-intel-arc-a770-oc/pdp/DP.BKCWW.P02"
+      ],
+      "blade_counts": [
+        null,
+        null
+      ],
+      "id": "acer-bifrost-a770-16g-oc",
+      "label": "Acer Predator BiFrost Intel Arc A770 OC 16GB",
+      "original_primary_url": "https://www.acer.com/us-en/predator/desktops-and-all-in-ones/components/predator-bifrost-intel-arc-a770-oc",
+      "remaining_unknown": "Both counts;89 laptop-family figure not transferred, FrostBlade3/Radeon ring fan not borrowed.",
+      "source_attempt_result": "Exact Acer primary product page textual200, official Scene7 feature images200. Smaller thin all-metal fifth-gen AeroBlade radial fan plus92mm FrostBlade2 axial fan explicit. Genuine viewed1600px feature illustrations have neon overlays/cropping; official store/PDP HTTP reads timeout and yield no full front.",
+      "status": "partially_confirmed"
+    },
+    {
+      "additional_primary_urls": [
+        "https://hub.zotac.co.jp/catalogs/gpu/zt-b50800b/"
+      ],
+      "blade_counts": [
+        9,
+        9,
+        9
+      ],
+      "id": "zotac-infinity-5080-10a",
+      "label": "ZOTAC RTX 5080 AMP Extreme INFINITY (10A)",
+      "original_primary_url": "https://www.zotac.com/download/mediadrivers/External/GraphicsCard/5080/Brochure/ZT-B50800B-10A-brochure.pdf",
+      "remaining_unknown": "Link group and tip-ring mechanics remain unconfirmed. Nine leaves were already known before this round, not counted as new verification.",
+      "source_attempt_result": "Exact10A official brochure text names triple100mm BladeLink; directPDF468. Manufacturer JP10P catalog/gallery200 and1600x1030 front reconfirms previous9/9/9 visual count. BladeLink linkage grouping/continuous rotating ring cannot be separated reliably from static aperture;10A/10P relation retained as limit.",
+      "status": "partially_confirmed"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null,
+        null
+      ],
+      "id": "gigabyte-gtx460-oc-1g-rev2",
+      "label": "GIGABYTE GV-N460OC-1GI Rev.2.0",
+      "original_primary_url": "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI-rev-20",
+      "remaining_unknown": "Both counts; exact revisions remain separate.",
+      "source_attempt_result": "Exact revision2 product page web200, official452x439 product/package image200. Two small tilted rotors, reflection/packaging prevents robust independent counts. Feature1699 is onlyWINDFORCE logo,3073onlyHDMI logo, neither fan evidence.",
+      "status": "insufficient_photo"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        null,
+        null
+      ],
+      "id": "gigabyte-gtx460-oc-1g-rev3",
+      "label": "GIGABYTE GV-N460OC-1GI Rev.3.0",
+      "original_primary_url": "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI-rev-30",
+      "remaining_unknown": "Both counts and exact revision3 mechanical differences.",
+      "source_attempt_result": "Exact rev3 official product URL identified via revision2 manufacturer navigation. Direct public read repeatedly timed out; no exactrev3 front asset obtained. Revision2/1 images deliberately not relabeledrev3.",
+      "status": "source_unavailable"
+    },
+    {
+      "additional_primary_urls": [],
+      "blade_counts": [
+        11,
+        11
+      ],
+      "id": "biostar-radeon-rx7600-oc-va76s6rm81",
+      "label": "BIOSTAR Radeon RX 7600 OC VA76S6RM81",
+      "original_primary_url": "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334",
+      "remaining_unknown": "Absolute direction, RPM, physical fan dimensions and internal PCB.",
+      "source_attempt_result": "Exact S_ID334 OC front 1920px manufacturer photo genuinely reviewed and manually indexed; distinct chamfered/faceted case and11 independent curved leaves on both rotors, not316 nine-leaf rotor. Root independently accepted.",
+      "status": "confirmed_this_round"
+    }
+  ],
+  "summary": {
+    "accepted_this_round": 6,
+    "baseline_gpu_catalog": 147,
+    "initial_pending_skus": 26,
+    "remaining_not_fully_verified": 20,
+    "status_counts": {
+      "confirmed_this_round": 6,
+      "insufficient_photo": 11,
+      "partially_confirmed": 5,
+      "source_unavailable": 4
+    }
+  },
+  "version": "0.43.0-preview.1"
+}

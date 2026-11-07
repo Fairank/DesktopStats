@@ -128,7 +128,7 @@ Window {
         values = {row["id"]: row for row in drawing_fixture.all_appearances()}
         for style in STYLES:
             for identity in ("asus-astral-5090", "asus-dual-4060-oc", "msi-suprim-x-4090-24g", "zotac-solo-4060",
-                             "asus-tuf-rx6800xt-o16g", "asrock-a380-challenger-itx-6g"):
+                             "asus-tuf-rx6800xt-o16g", "asrock-a380-challenger-itx-6g", "intel-limited-arc-a770-16g"):
                 with self.subTest(style=style, model=identity):
                     original = self.drawing(dict(values[identity], icon_set="solid"))["layers"]["rotors"]
                     actual = self.drawing(dict(values[identity], icon_set=style))["layers"]["rotors"]
@@ -145,7 +145,7 @@ Window {
                         before_links = sum("A2.55 2.55" in node.get("d", "") for node in old.iter())
                         after_links = sum("A2.55 2.55" in node.get("d", "") for node in new.iter())
                         self.assertEqual(after_links, before_links)
-            for identity in ("intel-limited-arc-a770-16g", "acer-bifrost-a770-16g-oc"):
+            for identity in ("acer-bifrost-a770-16g-oc",):
                 with self.subTest(style=style, model=identity):
                     data = self.drawing(dict(values[identity], icon_set=style))
                     self.assertEqual(data["layers"]["rotors"], [])

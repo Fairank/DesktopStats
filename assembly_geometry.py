@@ -856,7 +856,7 @@ def build_scene(spec=None):
         hardware_parts.append(dict(id='memory:'+str(index),label=(module.get('label') or 'Memory')+' '+str(index+1),kind='memory',model_id=memory_models[index] if index<len(memory_models) else ''))
     meta['hardware']=dict(parts=hardware_parts)
     from assembly_style import apply_model_styles
-    meshes,style_meta=apply_model_styles(meshes,spec.get('visual_style'),spec.get('part_styles',{}),(w,h,d),panels)
+    meshes,style_meta=apply_model_styles(meshes,spec.get('visual_style'),spec.get('part_styles',{}),(w,h,d),panels,spec.get('lighting_preview','artwork'))
     meta.update(style_meta)
     return Scene(tuple(meshes),(w,h,d),meta)
 

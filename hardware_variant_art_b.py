@@ -68,17 +68,16 @@ ART = {
         power_position='rear', backplate=True,
     ),
     'biostar-radeon-rx7600-oc-va76s6rm81': dict(
-        # The manufacturer export identifies the two-fan footprint, but its
-        # full bitmap is unavailable. This is an explicit technical schematic,
-        # not a claim that a reviewed photograph established this cover shape.
-        recipe='b_biostar7600_oc', shroud_tone='unknown', fan_count=2,
-        illustration_status='schematic_unverified_exterior',
+        # Exact official OC front reviewed independently from VA7606RM81:
+        # chamfered/faceted cover, eleven leaves per rotor, no tip connection.
+        recipe='b_biostar7600_oc', shroud_tone='dark', fan_count=2,
+        illustration_status='simplified',
         dimensions_mm=dict(length=235, height=150, thickness=45),
-        fan_profile=dict(technology='unknown', label='双风扇示意 · 叶片外形待核实',
-            blades=None, shape='neutral', tone='unknown', hub_tone='unknown',
-            outer_ring=None, evidence='manufacturer_export_summary',
-            source_url='https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=334',
-            notes='Cached exact manufacturer export identifies a dual-fan card, but original bitmap endpoints return 403. No blade count, hub ratio, fan paint or detailed shroud contour has been established.'),
+        fan_profile=dict(technology='biostar_rx7600_oc_axial', label='十一叶独立弯叶风扇',
+            blades=11, shape='swept', tone='dark', hub_tone='dark', hub_ratio=.32,
+            outer_ring=False, evidence='official_front_view',
+            source_url='https://www.biostar.com.tw/upload/Egate/bBIOSTAR_RX7600_OC_T_XOJQ.png',
+            notes='Exact official 1920px front reviewed: two eleven-blade fans with dark circular caps and fine light label borders. This OC rotor/cover is not the non-OC nine-blade assembly; proportions are illustration estimates.'),
         ports=({'type': 'DP', 'count': 3}, {'type': 'HDMI', 'count': 1}),
         power_connectors=({'type': '8pin', 'count': 1},),
         power_position='unknown', backplate=None, slot_width=None,

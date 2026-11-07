@@ -228,8 +228,9 @@ function body(state,base,collector) {
         var p=profile(state,physical.indexOf(rotor),rotor.kind)
         // Unknown geometry is never replaced by a sampled generic leaf count.
         // A cap-only descriptor remains cap-only and cannot enable live RPM.
-        var hints={machined_hub:state.model_id==="nvidia-founders-rtx5090-32g",
-            red_label_edge:["msi-gtx980ti-gaming-6g","msi-vega64-8g-reference"].indexOf(state.model_id)>=0}
+        var hints={machined_hub:["nvidia-founders-rtx5090-32g","intel-limited-arc-a770-16g"].indexOf(state.model_id)>=0,
+            red_label_edge:["msi-gtx980ti-gaming-6g","msi-vega64-8g-reference"].indexOf(state.model_id)>=0,
+            light_label_edge:["biostar-radeon-rx7600-va7606rm81","biostar-radeon-rx7600-oc-va76s6rm81"].indexOf(state.model_id)>=0}
         rotor.body=paint(Fans.modelRotor(p,hints),state)
     })
     var line=["outline","sketch","notebook_line","notebook_color","notebook_smile","inkwash"].indexOf(state.icon_set)>=0

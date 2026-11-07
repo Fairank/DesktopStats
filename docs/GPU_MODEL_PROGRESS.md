@@ -1,8 +1,8 @@
 # 显卡模型逐项细化清单
 
-本清单对应 0.42 开发候选的现有目录，不表示覆盖全部市售型号。
-全部 147 项共享 13 个外观保存值、相同设备身份与风扇布局；原六版及后增方案见 [README](../README.md#硬件外观清单六版沿革与现有选项)。
-145 项补入具体前面板、折梁、切面或风道的来源轮廓；两项 BIOSTAR 外壳保留待核。
+本清单对应 0.43 开发候选的现有目录，不表示覆盖全部市售型号。
+全部 147 项共享 13 个外观保存值、相同设备身份与风扇布局；当前编号 1–6 与其余保留方案见 [README](../README.md#硬件外观清单六版沿革与现有选项)。
+147 项均补入具体前面板、折梁、切面或风道的来源轮廓；两项 BIOSTAR 经本轮官方原图复核后分别绘制基础款与 OC 款。
 已有的尺寸、颜色、接口种类和数量继续从各自 Board profile 取得；没有新造内部 PCB、电路、插座次序或隐藏风扇。
 风扇列独立记录叶型状态：资料未完整核实时保持现有静态开孔／轴心，不画猜测叶片，也不因零转速推断风扇数量。
 图形为原创比例示意；OC／非 OC 经来源确认共壳时使用同一结构。面板间距、笔迹、材质效果不当作 CAD 尺寸。
@@ -57,10 +57,10 @@
 | [Maxsun MS-RTX5060Ti TerminatorX3 16G](https://www.maxsun.com/products/ms-rtx5060ti-trbx3-16g) | `maxsun-terminator-5060ti-x3-16g` | 已补轮廓（4 组） | 3／3 | 已核；仅有效 RPM 转动 | `maxsun_terminator` |
 | [Yeston Sakura Atlantis Radeon RX 9070 XT 16G GDDR6 256bit](https://yestonstore.com/products/yeston-sakura-atlantis-radeon-rx-9070-xt-16g-gddr6-256bit-4nm-video-cards-desktop-computer-pc-graphics-card) | `yeston-atlantis-rx9070xt-16g` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `yeston_atlantis` |
 | [Yeston Sakura Radeon RX 7800 XT 16G GDDR6 256bit](https://yestonstore.com/products/yeston-sakura-radeon-rx-7800-xt-16g-gddr6-256bit-desktop-computer-graphics-card) | `yeston-sakura-rx7800xt-16g` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `yeston_sakura` |
-| [BIOSTAR Radeon RX 7600 VA7606RM81](https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316) | `biostar-radeon-rx7600-va7606rm81` | 外壳待核；保留中性示意 | 未知／未知 | 叶型待核；保持静止 | `biostar_radeon` |
+| [BIOSTAR Radeon RX 7600 VA7606RM81](https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=316) | `biostar-radeon-rx7600-va7606rm81` | 已补轮廓（2 组） | 2／2 | 已核；仅有效 RPM 转动 | `b_biostar7600_base` |
 | [NVIDIA GeForce RTX 5090 Founders Edition 32GB](https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/) | `nvidia-founders-rtx5090-32g` | 已补轮廓（3 组） | 2／2 | 已核；仅有效 RPM 转动 | `nvidia_founders` |
 | [AMD Radeon RX 7900 XTX Reference 24GB](https://www.amd.com/en/products/graphics/desktops/radeon/7000-series/amd-radeon-rx-7900xtx.html) | `amd-reference-rx7900xtx-24g` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `amd_reference` |
-| [Intel Arc A770 Limited Edition 16GB](https://game.intel.com/stories/intel-arc-graphics-overclocking-101/) | `intel-limited-arc-a770-16g` | 已补轮廓（3 组） | 2／2 | 叶型待核；保持静止 | `intel_limited` |
+| [Intel Arc A770 Limited Edition 16GB](https://game.intel.com/stories/intel-arc-graphics-overclocking-101/) | `intel-limited-arc-a770-16g` | 已补轮廓（3 组） | 2／2 | 已核；仅有效 RPM 转动 | `intel_limited` |
 | [ASUS ROG Astral GeForce RTX 5080 OC Edition 16GB GDDR7](https://rog.asus.com/graphics-cards/graphics-cards/rog-astral/rog-astral-rtx5080-o16g-gaming/) | `asus-astral-5080-oc` | 已补轮廓（4 组） | 4／3 | 已核；仅有效 RPM 转动 | `asus_astral` |
 | [ASUS Prime GeForce RTX 5080 OC Edition 16GB GDDR7](https://www.asus.com/motherboards-components/graphics-cards/prime/prime-rtx5080-o16g/) | `asus-prime-5080-oc` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `asus_prime` |
 | [ASUS ProArt GeForce RTX 5080 OC Edition 16GB GDDR7](https://press.asus.com/news/press-releases/asus-proart-geforce-rtx-50-series/) | `asus-proart-5080-oc` | 已补轮廓（4 组） | 3／3 | 已核；仅有效 RPM 转动 | `asus_proart` |
@@ -77,8 +77,8 @@
 | [ZOTAC GAMING GeForce RTX 4080 SUPER Trinity Black Edition](https://www.zotac.com/us/news/zotac-gaming-announces-geforce-rtx-40-super-series?l=en) | `zotac-trinity-4080super` | 已补轮廓（3 组） | 3／3 | 叶型待核；保持静止 | `zotac_trinity` |
 | [SAPPHIRE PURE AMD Radeon RX 7800 XT 16G GDDR6](https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6) | `sapphire-pure-7800xt` | 已补轮廓（4 组） | 3／3 | 已核；仅有效 RPM 转动 | `sapphire_pure` |
 | [PowerColor Fighter AMD Radeon RX 7800 XT 16GB GDDR6](https://www.powercolor.com/product-detail33.htm) | `powercolor-fighter-7800xt` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `powercolor_fighter` |
-| [PowerColor Reaper AMD Radeon RX 9070 XT 16GB GDDR6](https://www.powercolor.com/product-detail212.htm) | `powercolor-reaper-9070xt` | 已补轮廓（3 组） | 3／3 | 叶型待核；保持静止 | `powercolor_reaper` |
-| [NVIDIA GeForce GTX 1080 Founders Edition](https://www.nvidia.com/en-us/geforce/news/geforce-gtx-1080-founders-edition/) | `nvidia-gtx1080-founders` | 已补轮廓（5 组） | 1／1 | 叶型待核；保持静止 | `nvidia_founders_pascal` |
+| [PowerColor Reaper AMD Radeon RX 9070 XT 16GB GDDR6](https://www.powercolor.com/product-detail212.htm) | `powercolor-reaper-9070xt` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `powercolor_reaper` |
+| [NVIDIA GeForce GTX 1080 Founders Edition](https://www.nvidia.com/en-us/geforce/news/geforce-gtx-1080-founders-edition/) | `nvidia-gtx1080-founders` | 已补轮廓（5 组） | 1／1 | 已核；仅有效 RPM 转动 | `nvidia_founders_pascal` |
 | [MSI GeForce GTX 1050 AERO ITX 2G OC](https://storage-asset.msi.com/datasheet/vga/global/GeForce-GTX-1050-AERO-ITX-2G-OC.pdf) | `msi-gtx1050-aero-itx-2g-oc` | 已补轮廓（4 组） | 1／1 | 已核；仅有效 RPM 转动 | `msi_aero_itx_pascal` |
 | [MSI GeForce GTX 1050 Ti 4GT LP](https://storage-asset.msi.com/datasheet/vga/global/GeForce-GTX-1050-Ti-4GT-LP.pdf) | `msi-gtx1050ti-4gt-lp` | 已补轮廓（4 组） | 2／2 | 已核；仅有效 RPM 转动 | `msi_low_profile_pascal` |
 | [MSI GeForce GTX 1080 Ti GAMING X 11G](https://storage-asset.msi.com/datasheet/vga/global/GeForce-GTX-1080-Ti-GAMING-X-11G.pdf) | `msi-gtx1080ti-gaming-x-11g` | 已补轮廓（4 组） | 2／2 | 已核；仅有效 RPM 转动 | `msi_gaming_pascal` |
@@ -98,7 +98,7 @@
 | [MSI Radeon HD 5450 R5450-MD1GD3H/LP](https://storage-asset.msi.com/datasheet/vga/my/R5450-MD1GD3HLP.pdf) | `msi-hd5450-md1gd3h-lp` | 已补轮廓（5 组） | 0／0 | 无风扇 | `msi_hd5450_passive` |
 | [MSI Radeon HD 5870 R5870-PM2D1G Reference](https://storage-asset.msi.com/datasheet/vga/ua/R5870PM2D1G.pdf) | `msi-hd5870-pm2d1g-reference` | 已补轮廓（5 组） | 1／1 | 叶型待核；保持静止 | `msi_hd5870_reference` |
 | [MSI Radeon HD 7970 R7970 TF 3GD5/OC BE](https://storage-asset.msi.com/datasheet/vga/global/R7970_TF_3GD5OC_BE.pdf) | `msi-hd7970-tf-3gd5-oc-be` | 已补轮廓（5 组） | 2／2 | 已核；仅有效 RPM 转动 | `msi_twin_frozr_hd7970` |
-| [MSI Radeon R9 290X 4GD5 Reference](https://storage-asset.msi.com/datasheet/vga/global/R9-290X-4GD5.pdf) | `msi-r9-290x-4gd5-reference` | 已补轮廓（3 组） | 1／1 | 叶型待核；保持静止 | `msi_r9_290x_reference` |
+| [MSI Radeon R9 290X 4GD5 Reference](https://storage-asset.msi.com/datasheet/vga/global/R9-290X-4GD5.pdf) | `msi-r9-290x-4gd5-reference` | 已补轮廓（3 组） | 1／1 | 已核；仅有效 RPM 转动 | `msi_r9_290x_reference` |
 | [ASUS STRIX Radeon R9 Fury DC3 4G GAMING](https://www.asus.com/it/news/ohcitiw9wqe49eh8/) | `asus-strix-r9fury-dc3-4g` | 已补轮廓（5 组） | 3／3 | 叶型待核；保持静止 | `asus_strix_fury` |
 | [MSI Radeon RX 480 8G Reference](https://storage-asset.msi.com/datasheet/vga/global/AMD-Radeon-RX-480-8G.pdf) | `msi-rx480-8g-reference` | 已补轮廓（4 组） | 1／1 | 叶型待核；保持静止 | `msi_rx480_reference` |
 | [SAPPHIRE NITRO+ Radeon RX 580 8G G5 11265-01-20G](https://www.sapphiretech.com/en/consumer/nitro-rx-580-8g-g5) | `sapphire-nitro-rx580-8g-01` | 已补轮廓（5 组） | 2／2 | 已核；仅有效 RPM 转动 | `sapphire_nitro_polaris` |
@@ -144,7 +144,7 @@
 | [INNO3D GeForce RTX 4070 GDDR6 TWIN X2](https://www.inno3d.com/product/inno3d-geforce-rtx-4070-gddr6-twin-x2) | `inno3d-twin-x2-4070-gddr6` | 已补轮廓（4 组） | 2／2 | 已核；仅有效 RPM 转动 | `inno3d_twin_x2` |
 | [INNO3D GeForce RTX 4070 TWIN X2 OC WHITE](https://www.inno3d.com/product/inno3d-geforce-rtx-4070-twin-x2-oc-white) | `inno3d-twin-x2-4070-oc-white` | 已补轮廓（3 组） | 2／2 | 已核；仅有效 RPM 转动 | `b_inno4070_white` |
 | [INNO3D GeForce RTX 4070 TWIN X2 OC WHITE STEALTH](https://www.inno3d.com/product/inno3d-geforce-rtx-4070-twin-x2-oc-white-stealth) | `inno3d-twin-x2-4070-oc-white-stealth` | 已补轮廓（3 组） | 2／2 | 已核；仅有效 RPM 转动 | `b_inno4070_white_stealth` |
-| [BIOSTAR Radeon RX 7600 OC VA76S6RM81](https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334) | `biostar-radeon-rx7600-oc-va76s6rm81` | 外壳待核；保留中性示意 | 2／2 | 叶型待核；保持静止 | `b_biostar7600_oc` |
+| [BIOSTAR Radeon RX 7600 OC VA76S6RM81](https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334) | `biostar-radeon-rx7600-oc-va76s6rm81` | 已补轮廓（5 组） | 2／2 | 已核；仅有效 RPM 转动 | `b_biostar7600_oc` |
 | [SAPPHIRE NITRO+ AMD Radeon RX 9070 XT OC PhantomLink Edition GPU](https://www.sapphiretech.com/en/consumer/nitro-radeon-rx-9070-xt-ple-16g-gddr6) | `sapphire-nitro-9070xt-phantomlink` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `c_nitro_phantom` |
 | [SAPPHIRE NITRO+ AMD Radeon RX 9070 XT OC PhantomLink Polar Edition GPU](https://www.sapphiretech.com/en/consumer/nitro-radeon-rx-9070-xt-ple-polar-16g-gddr6) | `sapphire-nitro-9070xt-phantomlink-polar` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `c_nitro_polar` |
 | [SAPPHIRE NITRO+ AMD Radeon RX 9070 XT OC Valor Mortis Edition GPU](https://www.sapphiretech.com/en/consumer/nitro-radeon-rx-9070-xt-vme-16g-gddr6) | `sapphire-nitro-9070xt-valor-mortis` | 已补轮廓（3 组） | 3／3 | 已核；仅有效 RPM 转动 | `c_nitro_valor` |

@@ -207,6 +207,7 @@ class AssemblyWindow(QWidget):
         geometry={key:spec[key] for key in ('case','gpu','cpu','memory','board')}
         geometry.update(cooling=spec.get('cooling',{}),auxiliary=spec.get('auxiliary',{}))
         geometry['part_styles']=spec.get('part_styles',{})
+        geometry['lighting_preview']=spec.get('lighting_preview','artwork')
         resolved=spec.get('visual_style','miniature')
         if resolved not in HARDWARE_ICON_STYLES:resolved='miniature'
         geometry['visual_style']=resolved

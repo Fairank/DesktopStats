@@ -88,6 +88,7 @@ def fit_messages(spec,metadata):
         'expansion_slot_obstructed':'所选扩展卡没有可用插槽。',
         'low_profile_bracket_required':'机箱仅支持半高扩展卡。',
         'no_m2_slot':'所选 M.2 数量超出已核插槽。',
+        'no_supported_m2_length':'所选 M.2 长度没有已核可用安装位。',
     }
     result=[]
     for group in ('cooling','auxiliary'):

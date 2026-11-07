@@ -275,7 +275,7 @@ QtObject {
         missing = ET.fromstring(self.study("unregistered_series")["svg"])
         self.assertEqual(blade_paths(missing), [])
         self.assertEqual(sum(node.tag.endswith("path") for node in missing.iter()), 0)
-        self.assertIsNone(PROFILES["powercolor_reaper"]["blades"])
+        self.assertEqual(PROFILES["powercolor_reaper"]["blades"],9)
         leadtek=PROFILES['leadtek_hurricane']
         self.assertEqual([effective_profile(leadtek,index).get('blades') for index in range(3)],[9,None,9])
         self.assertFalse(profile_for(exact_appearance(leadtek['model_ids'][0]))['render_ready'])

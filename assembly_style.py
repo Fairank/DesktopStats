@@ -116,7 +116,7 @@ def apply_colors(meshes,style):
     return tuple(values)
 
 
-def apply_model_styles(meshes,style,overrides,dimensions,panels):
+def apply_model_styles(meshes,style,overrides,dimensions,panels,lighting_preview="artwork"):
     """Independent per-part treatments share geometry, one bounded draw system."""
     default=resolve_style(style);overrides=overrides if isinstance(overrides,dict) else {}
     values=[];styles=[];part_map={}
@@ -134,7 +134,9 @@ def apply_model_styles(meshes,style,overrides,dimensions,panels):
         from assembly_geometry import Mesh
         values.append(Mesh('style-case-expression',expression_vertices(dimensions),policy['ink']))
         styles.append(case_style)
-    return tuple(values),dict(visual_style=default,canvas_style=case_style,mesh_style_ids=tuple(styles),
+    from assembly_lighting import apply_lighting
+    values,lighting=apply_lighting(values,lighting_preview)
+    return tuple(values),dict(**lighting,visual_style=default,canvas_style=case_style,mesh_style_ids=tuple(styles),
         part_style_map=part_map,decorative_expression=any(mesh.name=='style-case-expression' for mesh in values))
 
 

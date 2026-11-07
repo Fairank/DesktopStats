@@ -194,8 +194,9 @@ PROFILES = {
         blades=9, hub_ratio=0.32, shape='wide', evidence='official_front_view',
         model_ids=('yeston-sakura-rx7800xt-16g',), representative='Yeston Sakura Radeon RX 7800 XT 16G GDDR6 256bit'
     ),
-    'biostar_radeon': _p('unknown', '风扇细节未确认',
-        'https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316',
+    'biostar_radeon': _p('biostar_rx7600_axial', '九叶独立弯叶风扇',
+        'https://www.biostar.com.tw/upload/Egate/bRX7600-TOP_f65T.png',
+        blades=9, hub_ratio=.29, shape='swept', outer_ring=False, evidence='official_front_view',
         model_ids=('biostar-radeon-rx7600-va7606rm81',), representative='BIOSTAR Radeon RX 7600 VA7606RM81'
     ),
     'amd_reference': _p('amd_reference_axial', 'Radeon Reference',
@@ -203,8 +204,9 @@ PROFILES = {
         blades=9, hub_ratio=0.37, shape='swept', evidence='official_front_view', hub_shape='triangle',
         model_ids=('amd-reference-rx7900xtx-24g',), representative='AMD Radeon RX 7900 XTX Reference 24GB'
     ),
-    'intel_limited': _p('intel_axial', 'Arc Limited Edition',
-        'https://game.intel.com/stories/intel-arc-graphics-overclocking-101/',
+    'intel_limited': _p('intel_le_axial_15', 'Arc Limited Edition · 15叶',
+        'https://download.intel.com/newsroom/2022/2022innovation/Intel-Arc-A770-gpu.zip',
+        blades=15, hub_ratio=.36, shape='wide', outer_ring=False, evidence='official_front_view',
         model_ids=('intel-limited-arc-a770-16g',), representative='Intel Arc A770 Limited Edition 16GB'
     ),
     'sapphire_pure': _p('sapphire_angular_velocity', 'Angular Velocity Fan Blade',
@@ -219,7 +221,7 @@ PROFILES = {
     ),
     'powercolor_reaper': _p('powercolor_ring', 'High-Efficiency Ring Blade',
         'https://www.powercolor.com/product-detail212.htm',
-        outer_ring=True,
+        blades=9, hub_ratio=.31, shape='swept', outer_ring=True, evidence='official_front_view',
         model_ids=('powercolor-reaper-9070xt',), representative='PowerColor Reaper AMD Radeon RX 9070 XT 16GB GDDR6'
     ),
     'sapphire_nitro_polaris': _p('sapphire_quick_connect', 'NITRO Quick Connect',

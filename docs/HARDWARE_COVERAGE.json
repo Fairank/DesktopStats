@@ -2464,24 +2464,39 @@
             "status": "unknown",
             "value": null
           },
-          "blades": null,
-          "confirmed_front_indices": [],
-          "front_blade_counts": [],
-          "front_hub_tones": [],
-          "geometry_status": "pending",
+          "blades": 9,
+          "confirmed_front_indices": [
+            0,
+            1
+          ],
+          "front_blade_counts": [
+            9,
+            9
+          ],
+          "front_hub_tones": [
+            {
+              "status": "unknown",
+              "value": null
+            },
+            {
+              "status": "unknown",
+              "value": null
+            }
+          ],
+          "geometry_status": "reviewed",
           "physical_fans": {
-            "status": "unknown",
-            "value": null
+            "status": "known",
+            "value": 2
           },
           "source_urls": [
-            "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316"
+            "https://www.biostar.com.tw/upload/Egate/bRX7600-TOP_f65T.png"
           ],
-          "status": "unknown",
-          "technology": "unknown",
+          "status": "known",
+          "technology": "biostar_rx7600_axial",
           "unknown_front_indices": [],
           "visible_front_fans": {
-            "status": "unknown",
-            "value": null
+            "status": "known",
+            "value": 2
           }
         },
         "host_interface": {
@@ -2536,7 +2551,9 @@
         }
       },
       "exterior_source_urls": [
-        "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316"
+        "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=316",
+        "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316",
+        "https://www.biostar.com.tw/upload/Egate/bRX7600-TOP_f65T.png"
       ],
       "kind": "gpu",
       "label": "BIOSTAR Radeon RX 7600 VA7606RM81",
@@ -2544,7 +2561,9 @@
       "model_id": "biostar-radeon-rx7600-va7606rm81",
       "series_id": "biostar_radeon",
       "source_urls": [
-        "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316"
+        "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=316",
+        "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=316",
+        "https://www.biostar.com.tw/upload/Egate/bRX7600-TOP_f65T.png"
       ]
     },
     {
@@ -5520,11 +5539,14 @@
             "status": "unknown",
             "value": null
           },
-          "blades": null,
-          "confirmed_front_indices": [],
+          "blades": 15,
+          "confirmed_front_indices": [
+            0,
+            1
+          ],
           "front_blade_counts": [
-            null,
-            null
+            15,
+            15
           ],
           "front_hub_tones": [
             {
@@ -5536,20 +5558,17 @@
               "value": null
             }
           ],
-          "geometry_status": "pending",
+          "geometry_status": "reviewed",
           "physical_fans": {
             "status": "known",
             "value": 2
           },
           "source_urls": [
-            "https://game.intel.com/stories/intel-arc-graphics-overclocking-101/"
+            "https://download.intel.com/newsroom/2022/2022innovation/Intel-Arc-A770-gpu.zip"
           ],
-          "status": "unknown",
-          "technology": "intel_axial",
-          "unknown_front_indices": [
-            0,
-            1
-          ],
+          "status": "known",
+          "technology": "intel_le_axial_15",
+          "unknown_front_indices": [],
           "visible_front_fans": {
             "status": "known",
             "value": 2
@@ -5625,7 +5644,8 @@
         "https://game.intel.com/stories/intel-arc-graphics-overclocking-101/",
         "https://www.intel.com/content/www/us/en/support/articles/000092523/graphics.html",
         "https://www.intel.com/content/www/us/en/support/articles/000092554/graphics.html",
-        "https://builders.intel.com/docs/networkbuilders/intel-arc-graphics-empowers-medical-imaging-ai-inference-solution-1722407149.pdf"
+        "https://builders.intel.com/docs/networkbuilders/intel-arc-graphics-empowers-medical-imaging-ai-inference-solution-1722407149.pdf",
+        "https://download.intel.com/newsroom/2022/2022innovation/Intel-Arc-A770-gpu.zip"
       ]
     },
     {
@@ -8287,10 +8307,12 @@
             "status": "unknown",
             "value": null
           },
-          "blades": null,
-          "confirmed_front_indices": [],
+          "blades": 45,
+          "confirmed_front_indices": [
+            0
+          ],
           "front_blade_counts": [
-            null
+            45
           ],
           "front_hub_tones": [
             {
@@ -8298,7 +8320,7 @@
               "value": null
             }
           ],
-          "geometry_status": "pending",
+          "geometry_status": "reviewed",
           "physical_fans": {
             "status": "known",
             "value": 1
@@ -8306,11 +8328,9 @@
           "source_urls": [
             "https://storage-asset.msi.com/datasheet/vga/global/R9-290X-4GD5.pdf"
           ],
-          "status": "unknown",
+          "status": "known",
           "technology": "reference_radial",
-          "unknown_front_indices": [
-            0
-          ],
+          "unknown_front_indices": [],
           "visible_front_fans": {
             "status": "known",
             "value": 1
@@ -9407,10 +9427,12 @@
             "status": "unknown",
             "value": null
           },
-          "blades": null,
-          "confirmed_front_indices": [],
+          "blades": 53,
+          "confirmed_front_indices": [
+            0
+          ],
           "front_blade_counts": [
-            null
+            53
           ],
           "front_hub_tones": [
             {
@@ -9418,7 +9440,7 @@
               "value": null
             }
           ],
-          "geometry_status": "pending",
+          "geometry_status": "reviewed",
           "physical_fans": {
             "status": "known",
             "value": 1
@@ -9426,11 +9448,9 @@
           "source_urls": [
             "https://www.nvidia.com/en-us/geforce/news/geforce-gtx-1080-founders-edition/"
           ],
-          "status": "unknown",
+          "status": "known",
           "technology": "reference_radial",
-          "unknown_front_indices": [
-            0
-          ],
+          "unknown_front_indices": [],
           "visible_front_fans": {
             "status": "known",
             "value": 1
@@ -10569,12 +10589,16 @@
             "status": "unknown",
             "value": null
           },
-          "blades": null,
-          "confirmed_front_indices": [],
+          "blades": 9,
+          "confirmed_front_indices": [
+            0,
+            1,
+            2
+          ],
           "front_blade_counts": [
-            null,
-            null,
-            null
+            9,
+            9,
+            9
           ],
           "front_hub_tones": [
             {
@@ -10590,7 +10614,7 @@
               "value": null
             }
           ],
-          "geometry_status": "pending",
+          "geometry_status": "reviewed",
           "physical_fans": {
             "status": "known",
             "value": 3
@@ -10598,13 +10622,9 @@
           "source_urls": [
             "https://www.powercolor.com/product-detail212.htm"
           ],
-          "status": "unknown",
+          "status": "known",
           "technology": "powercolor_ring",
-          "unknown_front_indices": [
-            0,
-            1,
-            2
-          ],
+          "unknown_front_indices": [],
           "visible_front_fans": {
             "status": "known",
             "value": 3
@@ -15801,10 +15821,10 @@
   "summary": {
     "base_gpu_field_statuses": {
       "fans": {
-        "known": 79,
+        "known": 84,
         "not_applicable": 2,
         "partial": 1,
-        "unknown": 21
+        "unknown": 16
       },
       "pcb_internal_layout": {
         "unverified": 103
@@ -17972,37 +17992,38 @@
             "status": "unknown",
             "value": null
           },
-          "blades": null,
-          "confirmed_front_indices": [],
+          "blades": 11,
+          "confirmed_front_indices": [
+            0,
+            1
+          ],
           "front_blade_counts": [
-            null,
-            null
+            11,
+            11
           ],
           "front_hub_tones": [
             {
-              "status": "unknown",
-              "value": null
+              "status": "known",
+              "value": "dark"
             },
             {
-              "status": "unknown",
-              "value": null
+              "status": "known",
+              "value": "dark"
             }
           ],
-          "geometry_status": "pending",
+          "geometry_status": "reviewed",
           "physical_fans": {
             "status": "known",
             "value": 2
           },
           "source_urls": [
-            "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=334",
-            "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334"
+            "https://www.biostar.com.tw/upload/Egate/bBIOSTAR_RX7600_OC_T_XOJQ.png",
+            "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334",
+            "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=334"
           ],
-          "status": "unknown",
-          "technology": "unknown",
-          "unknown_front_indices": [
-            0,
-            1
-          ],
+          "status": "known",
+          "technology": "biostar_rx7600_oc_axial",
+          "unknown_front_indices": [],
           "visible_front_fans": {
             "status": "known",
             "value": 2
@@ -18022,7 +18043,7 @@
             "value": null
           }
         },
-        "illustration_status": "schematic_unverified_exterior",
+        "illustration_status": "simplified",
         "pcb_internal_layout": {
           "status": "unverified",
           "value": null
@@ -18074,7 +18095,8 @@
       "sharing_scope": "exterior_illustration_only",
       "source_urls": [
         "https://www.biostar.com.tw/app/en/vga/introduction.php?S_ID=334",
-        "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=334"
+        "https://www.biostar.com.tw/app/en/vga/export/spec_export.php?S_ID=334",
+        "https://www.biostar.com.tw/upload/Egate/bBIOSTAR_RX7600_OC_T_XOJQ.png"
       ],
       "status": "supported_independent",
       "visual_relation": "unknown"

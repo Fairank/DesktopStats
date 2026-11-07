@@ -581,7 +581,7 @@ def add_auxiliary(spec,anchors,level='balanced'):
             frameless_fan=bool(psu.get('frameless_fan')))
         if case.get('psu_form_factors') and psu['form_factor'] not in case['psu_form_factors']:issues.append('psu_form_factor_not_supported')
 
-    m2_slots=list(connectors.get('m2') or ());sata_slots=list(connectors.get('sata') or ());m2_index=0;sata_index=0
+    m2_slots=list(connectors.get('m2') or ());sata_slots=list(connectors.get('sata') or ());m2_used=set();sata_index=0
     rear_storage=case.get('layout') in ('dual_chamber','panoramic') or 'dual_chamber' in features
     rear_cursor=-h/2+45.;rear_column=0
     for selection in options.get('storage') or ():
@@ -595,45 +595,99 @@ def add_auxiliary(spec,anchors,level='balanced'):
             occurrence=sum(row['category']=='storage' and row['model_id']==identity for row in devices)
             active_part='storage:'+identity+':'+str(occurrence)
             if record['form_factor']=='m2_nvme':
-                raw=m2_slots[m2_index] if m2_index<len(m2_slots) else None;slot=_endpoint(raw)
-                m2_index+=1
+                nominal_length=int(record.get('m2_size','2280')[2:])
+                available=[(n,row) for n,row in enumerate(m2_slots) if n not in m2_used]
+                compatible=[(n,row) for n,row in available if not row.get('allowed_lengths_mm')
+                    or any(abs(distance-nominal_length)<1 for distance in row['allowed_lengths_mm'])]
+                selected=compatible[0] if compatible else None
+                raw=selected[1] if selected else None;slot=_endpoint(raw)
                 if slot is None and anchors.get('model'):
-                    rejected.append(dict(kind='storage',model_id=identity,reason='no_m2_slot'));continue
+                    rejected.append(dict(kind='storage',model_id=identity,
+                        reason='no_supported_m2_length' if available else 'no_m2_slot'));continue
+                if selected:m2_used.add(selected[0])
+                length_verified=bool(raw and raw.get('allowed_lengths_mm'))
+                if raw and not length_verified and anchors.get('model'):issues.append('m2_length_support_unverified')
                 if slot is None:
                     slot=dict(position=(-w*.16,h*.12-index*30,d*.12),normal=(-1.,0.,0.),along=(0.,0.,1.));issues.append('m2_mount_position_unverified')
                 normal=slot['normal'];along=slot['along'];basis=_basis(normal,along)
                 center=_add(slot['position'],_add(_mul(along,length/2),_mul(normal,height/2+1.)))
-                key=width*.225;r=1.8
-                pcb_outline=[(-width/2,-length/2),(key-.70,-length/2),(key-.70,-length/2+3.),
-                    (key+.70,-length/2+3.),(key+.70,-length/2),(width/2,-length/2),(width/2,length/2),(r,length/2)]
+                heatsink=record.get('factory_heatsink') is True
+                pcb_width=22. if heatsink else width  # Nominal M.2 board; outer shell is separately dimensioned.
+                key=pcb_width*.225;r=1.8
+                keys=(-key,key) if record.get('m2_key')=='b_m' else (key,)
+                pcb_outline=[(-pcb_width/2,-length/2)]
+                for at in keys:
+                    pcb_outline.extend(((at-.70,-length/2),(at-.70,-length/2+3.),
+                        (at+.70,-length/2+3.),(at+.70,-length/2)))
+                pcb_outline.extend(((pcb_width/2,-length/2),(pcb_width/2,length/2),(r,length/2)))
                 pcb_outline.extend((r*math.cos(n*math.pi/12),length/2-r*math.sin(n*math.pi/12)) for n in range(1,13))
-                pcb_outline.append((-width/2,length/2))
+                pcb_outline.append((-pcb_width/2,length/2))
                 pcb=bevel_extrude(tuple(pcb_outline),.8,.10)
                 add(prefix+'-m2-pcb',pcb,(.065,.073,.070,1.) if record.get('pcb_color')=='black' else _PCB,_add(center,_mul(normal,-height/2+.4)),'storage',basis)
-                package_h=max(.3,height-.8);rows=[((width*.70,length*.20,package_h),(0,-length*.23,.4)),
-                                               ((width*.70,length*.20,package_h),(0,length*.06,.4)),
-                                               ((width*.52,length*.12,package_h),(0,length*.32,.4))]
+                package_h=min(1.5,max(.3,height-.8)) if heatsink else max(.3,height-.8)
+                package_z=-height/2+.8+package_h/2
+                rows=[((pcb_width*.70,length*.20,package_h),(0,-length*.23,package_z)),
+                      ((pcb_width*.70,length*.20,package_h),(0,length*.06,package_z)),
+                      ((pcb_width*.52,length*.12,package_h),(0,length*.32,package_z))]
                 add(prefix+'-m2-reference-packages-controller',_boxes(rows),_BLACK,center,'storage',basis)
-                label_style=record.get('label_style');label_tone=(.07,.074,.08,1.) if label_style!='t500_reference' else (.25,.28,.30,1.)
+                if heatsink:
+                    # Envelopes and observed shell families are source-linked;
+                    # groove pitch, screw positions and fin count are sampling.
+                    bottom=-height/2+min(2.4,height*.32);top=height/2
+                    tone=_hex(record.get('body_color','#293039'))
+                    style=record.get('heatsink_style','reference_parallel')
+                    base_h=min(.9,(top-bottom)*.3)
+                    add(prefix+'-m2-factory-heatsink-base',bevel_extrude(chamfer_rect(width,length,1.4),base_h,.15),
+                        tone,_add(center,_mul(normal,bottom+base_h/2)),'storage',basis)
+                    fin_h=max(.3,top-bottom-base_h-.12)
+                    if style in ('smooth_low','reference'):
+                        add(prefix+('-m2-smooth-heatsink-shell' if style=='smooth_low' else '-m2-reference-heatsink-envelope'),bevel_extrude(chamfer_rect(width,length,1.6),fin_h,.35),
+                            tone,_add(center,_mul(normal,bottom+base_h+fin_h/2)),'storage',basis)
+                        for sign in ((-1,1) if style=='smooth_low' else ()):
+                            pos=_add(center,_add(_mul(basis[0],sign*(width/2+.05)),_mul(normal,bottom+fin_h*.55)))
+                            add(prefix+'-m2-reference-side-fastener',ring(.9,.3,.18,segments=12),_METAL,pos,'storage',
+                                (basis[1],basis[2],_mul(basis[0],sign)))
+                    else:
+                        count=5 if level=='eco' else 8 if level=='balanced' else 10
+                        across=record.get('fin_axis','length')=='width'
+                        pitch=(length if across else width)/(count+1)
+                        fins=[]
+                        for n in range(count):
+                            at=(n-(count-1)/2)*pitch
+                            if style.startswith('diagonal'):
+                                # Alternating oblique endings retain this shell
+                                # family without claiming an exact groove map.
+                                run=length*(.78 if n%2 else .92);shift=length*(.045 if n%2 else -.025)
+                                poly=((at-pitch*.21,-run/2+shift),(at+pitch*.21,-run/2+shift+pitch),
+                                      (at+pitch*.21,run/2+shift),(at-pitch*.21,run/2+shift-pitch))
+                                fins.extend(translated(extrude(poly,fin_h),(0,0,bottom+base_h+fin_h/2)))
+                            else:
+                                fin_size=(width*.96,pitch*.42,fin_h) if across else (pitch*.42,length*.96,fin_h)
+                                pos=(0,at,bottom+base_h+fin_h/2) if across else (at,0,bottom+base_h+fin_h/2)
+                                fins.extend(translated(box(*fin_size),pos))
+                        add(prefix+'-m2-heatsink-reference-fins',tuple(fins),tone,center,'storage',basis)
+                label_style=record.get('label_style');label_tone=_hex(record['label_color']) if record.get('label_color') else (.07,.074,.08,1.) if label_style!='t500_reference' else (.25,.28,.30,1.)
                 label_position=_add(center,_mul(normal,height/2+.08))
-                label=bevel_extrude(chamfer_rect(width*.86,length*.83,.9),.10,.015)
+                label=bevel_extrude(chamfer_rect(width*.76 if heatsink else width*.86,length*.26 if heatsink else length*.83,.9),.10,.015)
                 add(prefix+'-m2-label-heatspreader' if record.get('low_profile_heatspreader') else prefix+'-m2-product-label',label,label_tone,label_position,'storage',basis)
                 text_basis=(basis[1],_mul(basis[0],-1),basis[2])
-                mark_position=_add(label_position,_add(_mul(normal,.09),_mul(along,-length*.13)))
-                add(prefix+'-m2-original-model-mark',model_mark(record.get('model_mark','NVME'),.78),(.86,.87,.86,1.),mark_position,'storage',text_basis)
-                if label_style=='samsung_990':
+                mark_position=_add(label_position,_add(_mul(normal,.09),_mul(along,0 if heatsink else -length*.13)))
+                mark_ink=(.09,.12,.14,1.) if sum(c*v for c,v in zip(label_tone,(.2126,.7152,.0722)))>.52 else (.86,.87,.86,1.)
+                add(prefix+'-m2-original-model-mark',model_mark(record.get('model_mark','NVME'),min(.78,length*.70/max(1,len(record.get('model_mark','NVME'))*5))),mark_ink,mark_position,'storage',text_basis)
+                if label_style=='samsung_990' and not heatsink:
                     add(prefix+'-m2-red-model-rule',box(length*.48,.65,.07),(.74,.12,.11,1.),_add(mark_position,_mul(basis[0],3.)),'storage',text_basis)
                     add(prefix+'-m2-capacity-mark',model_mark('2TB',.55),(.8,.82,.82,1.),_add(label_position,_add(_mul(normal,.09),_mul(along,length*.26))),'storage',text_basis)
-                elif label_style=='kc3000':
+                elif label_style=='kc3000' and not heatsink:
                     # Original sparse gold line motif, not a reproduction of
                     # Kingston's printed trace artwork or manufacturer logo.
                     line=tube(((-length*.29,-width*.25,0.),(-length*.05,-width*.25,0.),(length*.05,width*.04,0.),(length*.26,width*.04,0.)),.14,4)
                     add(prefix+'-m2-original-film-lines',line,(.65,.57,.38,1.),_add(label_position,_mul(normal,.10)),'storage',text_basis)
-                pads=[((width*.027,3.,.12),((n-8.5)*width*.045,-length/2+1.6,-height/2+.9)) for n in range(18) if n not in (13,14)]
+                pads=[((pcb_width*.027,3.,.12),((n-8.5)*pcb_width*.045,-length/2+1.6,-height/2+.9)) for n in range(18)
+                      if all(abs((n-8.5)*pcb_width*.045-at)>.95 for at in keys)]
                 add(prefix+'-m2-reference-edge-contacts',_boxes(pads),_GOLD,center,'storage',basis)
                 if not anchors.get('model'):add(prefix+'-m2-socket',box(width+2,4,3),_DARK,slot['position'],'storage',basis)
                 fixing=_add(center,_mul(along,length/2))
-                add(prefix+'-m2-fixing-screw',ring(2.,0,1.,segments=16),_METAL,_add(fixing,_mul(normal,height/2+.4)),'storage',basis)
+                add(prefix+'-m2-fixing-screw',ring(2.,0,1.,segments=16),_METAL,_add(fixing,_mul(normal,-height/2+1.3)),'storage',basis)
                 placement='board_socket' if raw is not None else 'reference_position'
             else:
                 if rear_storage:
@@ -656,9 +710,13 @@ def add_auxiliary(spec,anchors,level='balanced'):
                                    for v in translated(ring(2.5,.85,.65,segments=12),(x,z,0)))
                     add(prefix+'-hdd-cover-fasteners',fasteners,_DARK,_add(top,(0,.40,0)),'storage',top_basis)
                     label_center=_add(top,(0,.53,length*.10))
-                    add(prefix+'-hdd-blue-label',bevel_extrude(chamfer_rect(width*.68,length*.65,2.),.10,.02),(.07,.31,.57,1.),label_center,'storage',top_basis)
-                    add(prefix+'-hdd-label-model',model_mark('WD BLUE',1.35),(.93,.95,.95,1.),_add(label_center,(0,.11,-length*.06)),'storage',top_basis)
-                    add(prefix+'-hdd-label-capacity',model_mark('4TB',.95),(.90,.93,.95,1.),_add(label_center,(0,.11,length*.15)),'storage',top_basis)
+                    label_tone=_hex(record['label_color']) if record.get('label_color') else (.07,.31,.57,1.)
+                    label_ink=(.09,.12,.14,1.) if sum(c*v for c,v in zip(label_tone,(.2126,.7152,.0722)))>.52 else (.93,.95,.95,1.)
+                    add(prefix+'-hdd-blue-label' if record.get('label_style')=='wd_blue' else prefix+'-hdd-product-label',
+                        bevel_extrude(chamfer_rect(width*.68,length*.65,2.),.10,.02),
+                        label_tone,label_center,'storage',top_basis)
+                    add(prefix+'-hdd-label-model',model_mark(record.get('model_mark','HDD'),min(1.35,width*.62/max(1,len(record.get('model_mark','HDD'))*5))),label_ink,_add(label_center,(0,.11,-length*.06)),'storage',top_basis)
+                    add(prefix+'-hdd-label-capacity',model_mark(str(record['capacity_gb']//1000)+'TB' if record['capacity_gb']%1000==0 else str(record['capacity_gb'])+'GB',.95),label_ink,_add(label_center,(0,.11,length*.15)),'storage',top_basis)
                     underside=_add(center,(0,-height/2+.6,0))
                     ribs=[((2.0,1.2,length*.90),(x,0,0)) for x in (-width*.44,width*.44)]
                     ribs.extend(((width*.88,1.2,2.2),(0,0,z)) for z in (-length*.43,-length*.15,length*.43))
@@ -684,7 +742,11 @@ def add_auxiliary(spec,anchors,level='balanced'):
                 if rear_storage:pose_part(active_part,center,((0.,0.,1.),(1.,0.,0.),(0.,1.,0.)),(power,data))
                 storage_endpoints.append((power,data));placement='reference_case_bay'
             devices.append(dict(category='storage',part_id=active_part,model_id=identity,label=record['label'],instance=occurrence,center=center,
-                dimensions_mm=size,source='manual',placement=placement,package_layout_schematic=True,live_activity=None))
+                dimensions_mm=size,source='manual',placement=placement,package_layout_schematic=True,live_activity=None,
+                factory_heatsink=bool(record.get('factory_heatsink')),heatsink_fins_are_sampling=bool(record.get('factory_heatsink')),
+                m2_key=record.get('m2_key','m') if record['form_factor']=='m2_nvme' else None,
+                m2_length_supported=length_verified if record['form_factor']=='m2_nvme' else None,
+                electrical_compatibility_verified=False,heatsink_clearance_verified=False))
 
     pcie_slots=list(connectors.get('pcie') or ());used_slots=set();gpu_anchor=anchors.get('gpu') or {};gpu_bounds=_bounds(gpu_anchor)
     gpu_clearance=None

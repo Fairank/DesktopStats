@@ -33,6 +33,9 @@ function point(angle,radius) {
 }
 
 function contour(p) {
+    // Exact A770 LE official photo: dense broad leaves, gently curved edges.
+    // The outer RGB diffuser is fixed, not a rotating blade-tip connection.
+    if(p.technology==="intel_le_axial_15")return {sweep:16,lead:.48,trail:.40,root:.34}
     if(p.model_detail===true) {
         var detail=modelContour(p)
         if(detail)return detail
@@ -185,5 +188,7 @@ function modelRotor(profile,details) {
     }
     if(details && details.red_label_edge)
         out+='<circle class="hardware-model-label-edge" r="'+(hub*.89)+'" fill="none" stroke="#9b4148" stroke-width=".055"/>'
+    if(details && details.light_label_edge)
+        out+='<circle class="hardware-model-label-edge" r="'+(hub*.91)+'" fill="none" stroke="#d7dce0" stroke-width=".045"/>'
     return out
 }

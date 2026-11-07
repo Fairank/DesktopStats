@@ -237,7 +237,7 @@ class AssemblyRenderer:
         self._pick_inverse=None;self._pick_projection=None;self._pick_camera_key=None
         self._pick_state=None;self.upload_count=0;self.draw_count=0
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
-        self._mesh_policies={};self._frame_effect_samples={};self._frame_shade=None
+        self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
         self._wide_lines=False
 
     def initialize(self):
@@ -274,6 +274,9 @@ class AssemblyRenderer:
         policies={identity:style_for(identity) for identity in dict.fromkeys(styles)}
         self._mesh_policies={id(mesh):policies[identity] for mesh,identity in zip(scene.meshes,styles)}
         self._materials={id(mesh):material_for(mesh,identity) for mesh,identity in zip(scene.meshes,styles)}
+        lighting=scene.metadata.get('lighting_preview') or {}
+        self._preview_light_tones={id(scene.meshes[row['mesh_index']]):scene.meshes[row['mesh_index']].color
+            for row in lighting.get('zones',()) if lighting.get('mode','artwork')!='artwork'}
         self._shadow_key=None
         self.ranges=[];start=0
         for mesh in scene.meshes:
@@ -425,7 +428,7 @@ class AssemblyRenderer:
                     ink=policy['dark_ink' if dark else 'ink']
                     tone=(.28,.74,1.,1.) if dark else (.05,.47,.78,1.)
                     self._draw_part(row,projection,view,exploded,phase,mode=GL_LINES,
-                                    tone=tone if self._matches_selection(row[0],selected) else ink)
+                                    tone=tone if self._matches_selection(row[0],selected) else self._preview_light_tones.get(id(row[0]),ink))
             f.glDepthFunc(GL_LESS)
         self.vao.release();self.program.release();self.draw_count+=1
 
@@ -526,7 +529,7 @@ class AssemblyRenderer:
         self.scene=None;self.ranges=[];self.edge_ranges=[];self.edge_segments=0;self.bounds={};self.pick_bounds={};self._uniforms={}
         self._pick_inverse=self._pick_projection=self._pick_camera_key=self._pick_state=None
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
-        self._mesh_policies={};self._frame_effect_samples={};self._frame_shade=None
+        self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
 
 
 class AssemblyViewport(QOpenGLWidget):

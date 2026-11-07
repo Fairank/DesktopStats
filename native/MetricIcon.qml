@@ -815,12 +815,15 @@ Item {
             readonly property real strength:root.intensity*(.28+.72*activity)
             readonly property bool proportional:root.compositeActive || /(?:_usage|_percent)$/.test(root.metric)
             readonly property real fillExtent:proportional?activity:.55
-            readonly property bool horizontal:["memory","vram","battery","disk"].includes(root.name)
-            width:root.name==="gpu"?10*fillExtent:horizontal?(root.name==="battery"?10:13)*fillExtent:4.4
-            height:root.name==="gpu"?2:horizontal?(root.name==="disk"?3.8:4.5):4.4*fillExtent
-            x:root.name==="gpu"?3:horizontal?2.5:6.8
-            y:root.name==="gpu"?10:root.name==="disk"?10.5:horizontal?6:11.2-height
-            radius:.35;antialiasing:true;clip:true
+            // Small bar glyphs use a central fill; large physical models need
+            // a quiet retained meter so model marks and fan blades stay clear.
+            readonly property bool modelMeter:root.modelMode && root.processorGlyph
+            readonly property bool horizontal:modelMeter || ["memory","vram","battery","disk"].includes(root.name)
+            width:modelMeter?8*fillExtent:root.name==="gpu"?10*fillExtent:horizontal?(root.name==="battery"?10:13)*fillExtent:4.4
+            height:modelMeter?.16:root.name==="gpu"?2:horizontal?(root.name==="disk"?3.8:4.5):4.4*fillExtent
+            x:modelMeter?5:root.name==="gpu"?3:horizontal?2.5:6.8
+            y:modelMeter?15.2:root.name==="gpu"?10:root.name==="disk"?10.5:horizontal?6:11.2-height
+            radius:modelMeter?(root.iconStyle==="papercut"?0:.08):.35;antialiasing:true;clip:true
             color:root.memoryGlyph?root.paletteColor(root.memoryColors,activity):root.compositeActive?root.loadColor:root.accentColor
             opacity:root.channelOpacity(activity)*(["cpu","gpu"].includes(root.name)?.5:.88+.12*localWave)
             Rectangle {
@@ -840,7 +843,7 @@ Item {
             }
             Loader {
                 objectName:"metricIconCapacityActivity"
-                active:pulseCore.visible && pulseCore.horizontal && !root.memoryGlyph
+                active:pulseCore.visible && pulseCore.horizontal && !root.memoryGlyph && !pulseCore.modelMeter
                 sourceComponent:DischargeAtlas {
                     x:-pulseCore.x;y:-pulseCore.y;amount:pulseCore.activity
                     phaseValue:root.compositeActive?root.loadPhase:root.phase

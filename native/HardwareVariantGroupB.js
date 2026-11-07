@@ -17,13 +17,14 @@ function geometry(recipe,state,g) {
     if(Object.prototype.hasOwnProperty.call(memoryTops,recipe)) {
         var m=copy(g);m.top=memoryTops[recipe];return m
     }
-    if(['b_taichi7900_white','b_taichi9070_white_lcd','b_inno4070_white','b_inno4070_white_stealth','b_biostar7600_oc'].indexOf(recipe)<0)return null
+    if(['b_taichi7900_white','b_taichi9070_white_lcd','b_inno4070_white','b_inno4070_white_stealth','b_biostar7600_base','b_biostar7600_oc'].indexOf(recipe)<0)return null
     var out=copy(g),triple=recipe.indexOf('b_taichi')===0
     out.x=triple?1.8:2.8;out.w=triple?20.8:19.0
     out.h=triple?8.3:9.0;out.y=11.65-out.h/2
-    if(recipe==='b_biostar7600_oc'){out.x=3.3;out.w=17.5;out.h=10;out.y=6.65}
+    var biostar=recipe==='b_biostar7600_base'||recipe==='b_biostar7600_oc'
+    if(biostar){out.x=2.6;out.w=19.1;out.h=9.2;out.y=11.65-out.h/2}
     out.centers=triple?[out.x+out.w*.17,out.x+out.w*.50,out.x+out.w*.83]:[out.x+out.w*.25,out.x+out.w*.75]
-    out.radius=triple?3.02:3.55
+    out.radius=triple?3.02:biostar?4.0:3.55
     out.radii=triple?[out.radius,recipe==='b_taichi7900_white'?out.radius*100/110:out.radius,out.radius]:[out.radius,out.radius]
     out.fan_y=out.centers.map(function(){return out.y+out.h*.51});out.blowers=[]
     return out
@@ -128,10 +129,23 @@ function memory(recipe,g,c) {
 function face(recipe,g,c,state) {
     if(recipe==='b_taichi7900_white'||recipe==='b_taichi9070_white_lcd')return taichi(recipe,g,c)
     if(recipe==='b_inno4070_white'||recipe==='b_inno4070_white_stealth')return inno(recipe,g,c)
+    if(recipe==='b_biostar7600_base') {
+        // VA7606RM81: softly rounded ends, small middle shoulder steps and
+        // shallow upper/lower relief. Two open wells, not connected tip rings.
+        var body=p('M5 1H31L34 3H66L69 1H95Q100 1 100 6V94Q100 99 95 99H66L64 97H36L34 99H5Q0 99 0 94V6Q0 1 5 1Z',c.caseShade)
+            +p('M4 9Q26 6 33 10H65Q73 6 96 9M4 91H31L36 87H67L72 91H96','none',c.rim,.65)
+            +p('M7 5H29L33 8H67L71 5H93M7 95H30L35 91H67L73 95H93','none',c.caseBody,.8)
+        return gpuWrap(recipe,g,body+bays(g,c))
+    }
     if(recipe==='b_biostar7600_oc') {
-        // Source-backed dual-fan footprint and dimensions, with an explicitly
-        // neutral cover. Detailed case contour/paint and all leaves are unknown.
-        return gpuWrap(recipe,g,r(1,2,98,96,3,c.caseBody)+bays(g,c))
+        // VA76S6RM81 OC has a separately reviewed angular/faceted front.
+        var body=p('M5 2H96L100 7V94L96 99H5L0 95V8Z',c.caseShade)
+            +p('M0 28L20 2H44L34 14H13L0 39Z',c.caseBody)
+            +p('M59 2H96L100 7V48L86 26H73Z',c.caseBody)
+            +p('M0 58L17 80H36L42 99H5L0 95Z',c.caseBody)
+            +p('M64 85H84L100 70V94L96 99H56Z',c.caseBody)
+            +p('M4 28L17 12H35M66 9H92L96 15M5 72L20 91H36M65 93H88L96 82','none',c.rim,.48)
+        return gpuWrap(recipe,g,body+bays(g,c))
     }
     return memory(recipe,g,c)
 }

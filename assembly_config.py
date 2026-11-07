@@ -7,10 +7,10 @@ DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, fan_animation=False, appe
                         board_model="",cooler_model="",cooler_mount="top",case_fans=[],
                         psu_model="",storage=[],expansion_cards=[],cables_enabled=False,
                         cable_color="black",fan_motion="measured",gpu_waterblock=False,part_styles={},
-                        cpu_model="",gpu_model="",memory_models=[])
+                        cpu_model="",gpu_model="",memory_models=[],lighting_preview="artwork")
 PART_FIELDS = ("board_model","cooler_model","cooler_mount","case_fans","psu_model","storage",
                "expansion_cards","cables_enabled","cable_color","fan_motion","gpu_waterblock","part_styles",
-               "cpu_model","gpu_model","memory_models")
+               "cpu_model","gpu_model","memory_models","lighting_preview")
 FAN_MOUNTS = ("front","top","rear","bottom","side")
 CABLE_COLORS = {"black":"#252d35","white":"#dddfe3","red":"#a63f4b","blue":"#3c6d9b"}
 DETAIL_LEVELS = ("eco","balanced","close")
@@ -93,7 +93,7 @@ def validate_assembly(value=None):
             raise ValueError("配件型号设置不正确")
         result[field]=selected
     for field,allowed in (("cooler_mount",FAN_MOUNTS),("fan_motion",("measured","demo")),
-                          ("cable_color",CABLE_COLORS)):
+                          ("cable_color",CABLE_COLORS),("lighting_preview",("artwork","off","warm","mint","violet"))):
         selected=value.get(field,DEFAULT_ASSEMBLY[field])
         if type(selected) is not str or selected not in allowed:raise ValueError("配件安装设置不正确")
         result[field]=selected

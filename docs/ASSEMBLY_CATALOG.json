@@ -11604,6 +11604,52 @@
       "telemetry": "not_bound_to_installed_sensor"
     },
     {
+      "brand": "ADATA",
+      "dimensions_mm": {
+        "height": 7,
+        "length": 100.45,
+        "width": 69.85
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "ADATA Ultimate SU800 1TB",
+      "model_id": "adata-su800-1tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Ultimate SU800",
+      "source_urls": [
+        "https://webapi3.adata.com/storage/downloadfile/datasheet_su800_25_inch_sata_ssd_en_202410151728964641.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "CORSAIR",
+      "dimensions_mm": {
+        "height": 11,
+        "length": 80,
+        "width": 23
+      },
+      "finish_status": "photo_observed_schematic",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "CORSAIR MP600 PRO LPX 2TB (black heatsink)",
+      "model_id": "corsair-mp600-pro-lpx-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "MP600 PRO LPX",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/data-storage/cssd-f2000gbmp600plp/mp600-pro-lpx-2tb-pcie-gen4-x4-nvme-m-2-ssd-ps5-compatible-cssd-f2000gbmp600plp",
+        "https://www.corsair.com/ww/cs/explorer/diy-builder/storage/how-to-install-the-corsair-mp600-pro-lpx-into-the-ps5/",
+        "https://assets.corsair.com/image/upload/c_pad,q_auto,h_1024,w_1024,f_auto/products/Storage/base-mp600-pro-lpx-config/Gallery/MP600_PRO_LPX_02.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
       "brand": "Crucial",
       "dimensions_mm": {
         "height": 2.286,
@@ -11626,6 +11672,28 @@
       "telemetry": "not_bound_to_installed_sensor"
     },
     {
+      "brand": "Crucial",
+      "dimensions_mm": {
+        "height": 21.082,
+        "length": 80.01,
+        "width": 23.368
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Crucial T705 with Heatsink 2TB",
+      "model_id": "crucial-t705-heatsink-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "T705 with Heatsink",
+      "source_urls": [
+        "https://assets.micron.com/adobe/assets/urn%3Aaaid%3Aaem%3A8b31ab31-5c1c-4dbe-ad26-5bdc076d5ff3/renditions/original/as/crucial-t705-b2c-product-flyer-en.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
       "brand": "Kingston",
       "dimensions_mm": {
         "height": 2.21,
@@ -11642,6 +11710,163 @@
       "series": "KC3000",
       "source_urls": [
         "https://www.kingston.com/datasheets/KC3000_en.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Kingston",
+      "dimensions_mm": {
+        "height": 7,
+        "length": 100.1,
+        "width": 69.85
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Kingston KC600 1024GB",
+      "model_id": "kingston-kc600-1024gb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "KC600",
+      "source_urls": [
+        "https://www.kingston.com/en/ssd/kc600-sata-solid-state-drive",
+        "https://www.kingston.com/unitedkingdom/en/company/press/article/57000"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Kingston",
+      "dimensions_mm": {
+        "height": 2.2,
+        "length": 80,
+        "width": 22
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Kingston NV2 2TB",
+      "model_id": "kingston-nv2-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "NV2",
+      "source_urls": [
+        "https://www.kingston.com/datasheets/snv2s_en.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Kingston",
+      "dimensions_mm": {
+        "height": 2.3,
+        "length": 30,
+        "width": 22
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Kingston NV3 M.2 2230 1TB",
+      "model_id": "kingston-nv3-2230-1tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "NV3 2230",
+      "source_urls": [
+        "https://www.kingston.com/datasheets/SNV3S_en.pdf",
+        "https://www.kingston.com/en/company/press/article/76990"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "KIOXIA",
+      "dimensions_mm": {
+        "height": 2.23,
+        "length": 80.15,
+        "width": 22.15
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "KIOXIA EXCERIA PRO 2TB",
+      "model_id": "kioxia-exceria-pro-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "EXCERIA PRO",
+      "source_urls": [
+        "https://europe.kioxia.com/content/dam/kioxia/shared/personal/support/download/ssd/asset/productbrief/KIOXIA_Exceria_Pro_Product_Brief.pdf",
+        "https://europe.kioxia.com/en-europe/personal/ssd/exceria-pro.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "KIOXIA",
+      "dimensions_mm": {
+        "height": 7.2,
+        "length": 100.45,
+        "width": 70.1
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "KIOXIA EXCERIA SATA 960GB",
+      "model_id": "kioxia-exceria-sata-960gb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "EXCERIA SATA",
+      "source_urls": [
+        "https://apac.kioxia.com/content/dam/kioxia/shared/personal/support/download/ssd/asset/productbrief/KIOXIA-Exceria-SATA-SSD-Product-Brief.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Sabrent",
+      "dimensions_mm": {
+        "height": 2.032,
+        "length": 29.972,
+        "width": 22.098
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Sabrent Rocket 2230 1TB",
+      "model_id": "sabrent-rocket-2230-1tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Rocket 2230",
+      "source_urls": [
+        "https://sabrent.com/products/sb-2130-1tb"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Sabrent",
+      "dimensions_mm": {
+        "height": 2.032,
+        "length": 41.91,
+        "width": 22.098
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Sabrent Rocket nano 2242 Gen4 1TB",
+      "model_id": "sabrent-rocket-nano-2242-1tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Rocket nano 2242 Gen4",
+      "source_urls": [
+        "https://sabrent.com/collections/internal-memory/products/sb-2142-1tb"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -11672,6 +11897,50 @@
     {
       "brand": "Samsung",
       "dimensions_mm": {
+        "height": 3.8,
+        "length": 110.2,
+        "width": 22
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Samsung 983 DCT M.2 960GB",
+      "model_id": "samsung-983-dct-960gb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "983 DCT",
+      "source_urls": [
+        "https://www.samsung.com/au/memory-storage/nvme-ssd/983-dct-nvme-m-2-ssd-mz-1lb960ne/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Samsung",
+      "dimensions_mm": {
+        "height": 2.38,
+        "length": 80.15,
+        "width": 22.15
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Samsung 990 EVO Plus 2TB",
+      "model_id": "samsung-990-evo-plus-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "990 EVO Plus",
+      "source_urls": [
+        "https://download.semiconductor.samsung.com/resources/data-sheet/samsung_nvme_ssd_990_evo_plus_datasheet_rev.1.0_10139908981125.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Samsung",
+      "dimensions_mm": {
         "height": 2.3,
         "length": 80,
         "width": 22
@@ -11686,6 +11955,184 @@
       "series": "990 PRO",
       "source_urls": [
         "https://download.semiconductor.samsung.com/resources/data-sheet/Samsung_NVMe_SSD_990_PRO_Datasheet_Rev.1.0_10119997003518.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Samsung",
+      "dimensions_mm": {
+        "height": 8.2,
+        "length": 80,
+        "width": 24.3
+      },
+      "finish_status": "photo_observed_schematic",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Samsung 990 PRO with Heatsink 2TB",
+      "model_id": "samsung-990-pro-heatsink-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "990 PRO with Heatsink",
+      "source_urls": [
+        "https://download.semiconductor.samsung.com/resources/data-sheet/Samsung_NVMe_SSD_990_PRO_with_Heatsink_Datasheet_Rev.1.0_10129514072625.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Seagate",
+      "dimensions_mm": {
+        "height": 26.11,
+        "length": 146.99,
+        "width": 101.85
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Seagate BarraCuda 8TB ST8000DM004",
+      "model_id": "seagate-barracuda-st8000dm004",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "BarraCuda",
+      "source_urls": [
+        "https://www.seagate.com/files/www-content/datasheets/pdfs/3-5-barracudaDS1900-14-2007GB-en_GB.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Seagate",
+      "dimensions_mm": {
+        "height": 10.39,
+        "length": 80.15,
+        "width": 24.5
+      },
+      "finish_status": "photo_observed_schematic",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Seagate FireCuda 530 with Heatsink 2TB",
+      "model_id": "seagate-firecuda-530-heatsink-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "FireCuda 530 with Heatsink",
+      "source_urls": [
+        "https://www.seagate.com/www-content/support-content/internal-products/ssd/firecuda-530-ssd/_shared/files/firecuda_530_product_manual_200432500_D.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "TEAMGROUP",
+      "dimensions_mm": {
+        "height": 7,
+        "length": 100,
+        "width": 69.9
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "TEAMGROUP CX2 1TB",
+      "model_id": "teamgroup-cx2-1tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "CX2",
+      "source_urls": [
+        "https://images.teamgroupinc.com/products/ssd/internal/cx2/spec-sheet/cx2-en.pdf",
+        "https://www.teamgroupinc.com/en/product-detail/ssd/TEAMGROUP/cx2/cx2-T253X6001T0C101/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Toshiba",
+      "dimensions_mm": {
+        "height": 26.1,
+        "length": 147,
+        "width": 101.85
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Toshiba N300 8TB HDWG480UZSVA",
+      "model_id": "toshiba-n300-hdwg480uzsva",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "N300",
+      "source_urls": [
+        "https://www.toshiba-storage.com/wp-content/uploads/2021/12/toshiba-article-n300-nas-2021-12-en.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Transcend",
+      "dimensions_mm": {
+        "height": 3.58,
+        "length": 42,
+        "width": 22
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Transcend MTE452T 512GB",
+      "model_id": "transcend-mte452t-512gb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "MTE452T industrial",
+      "source_urls": [
+        "https://cdn.transcend-info.com/products/images/modelpic/1048/Embedded_PS_MTE452TnI.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Transcend",
+      "dimensions_mm": {
+        "height": 2.23,
+        "length": 30,
+        "width": 22
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Transcend PCIe SSD 300S 512GB",
+      "model_id": "transcend-mte300s-512gb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "PCIe SSD 300S",
+      "source_urls": [
+        "https://cdn.transcend-info.com/products/images/modelpic/1294/Transcend-MTE300S-1T.pdf",
+        "https://us.transcend-info.com/product/internal-ssd/mte300s"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Transcend",
+      "dimensions_mm": {
+        "height": 2.23,
+        "length": 42,
+        "width": 22
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "Transcend PCIe SSD 400S 512GB",
+      "model_id": "transcend-mte400s-512gb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "PCIe SSD 400S",
+      "source_urls": [
+        "https://cdn.transcend-info.com/products/images/modelpic/1293/Transcend-MTE400S-202311.pdf"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -11712,6 +12159,97 @@
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
       "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Western Digital",
+      "dimensions_mm": {
+        "height": 26.16,
+        "length": 147.07,
+        "width": 101.6
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "WD_BLACK 6TB WD6004FZWX",
+      "model_id": "wd-black-wd6004fzwx",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "WD_BLACK HDD",
+      "source_urls": [
+        "https://www.westerndigital.com/en-ca/products/internal-drives/wd-black-desktop-sata-hdd?sku=WD6004FZWX"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Western Digital",
+      "dimensions_mm": {
+        "height": 2.29,
+        "length": 29.97,
+        "width": 22.1
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "WD_BLACK SN770M 1TB",
+      "model_id": "wd-black-sn770m-1tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "WD_BLACK SN770M",
+      "source_urls": [
+        "https://www.sandisk.com/en-au/products/ssd/internal-ssd/wd-black-sn770m-nvme-ssd"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Western Digital",
+      "dimensions_mm": {
+        "height": 2.38,
+        "length": 80.15,
+        "width": 22.15
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "WD_BLACK SN850X 2TB (without heatsink)",
+      "model_id": "wd-black-sn850x-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "WD_BLACK SN850X",
+      "source_urls": [
+        "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/western-digital/product/internal-drives/wd-black-ssd/data-sheet-wd-black-sn850x-nvme-ssd.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Western Digital",
+      "dimensions_mm": {
+        "height": 9.3,
+        "length": 80.2,
+        "width": 23.8
+      },
+      "finish_status": "photo_observed_schematic",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "storage",
+      "label": "WD_BLACK SN850X with Heatsink 2TB",
+      "model_id": "wd-black-sn850x-heatsink-2tb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "WD_BLACK SN850X with Heatsink",
+      "source_urls": [
+        "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/western-digital/product/internal-drives/wd-black-ssd/data-sheet-wd-black-sn850x-nvme-ssd.pdf",
+        "https://www.sandisk.com/en-au/products/ssd/internal-ssd/wd-black-sn850x-nvme-ssd?sku=WDS200T2XHE-00BCA0",
+        "https://www.sandisk.com/content/dam/sandisk/en-us/assets/products/internal-storage/wd-black-sn850x-nvme-ssd/gallery/wd-black-sn850x-nvme-ssd-heatsink-front.png.wdthumb.1280.1280.webp",
+        "https://www.sandisk.com/content/dam/sandisk/en-us/assets/products/internal-storage/wd-black-sn850x-nvme-ssd/gallery/wd-black-sn850x-nvme-ssd-heatsink-angled.png.wdthumb.1280.1280.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
     }
   ],
   "schema_version": 1,
@@ -11734,7 +12272,7 @@
     "notebook_smile"
   ],
   "summary": {
-    "brands": 72,
+    "brands": 79,
     "by_kind": {
       "board": 16,
       "case": 96,
@@ -11745,10 +12283,10 @@
       "gpu": 147,
       "memory": 28,
       "psu": 21,
-      "storage": 5
+      "storage": 29
     },
-    "products": 454,
-    "records": 455,
+    "products": 478,
+    "records": 479,
     "reference_combinations": 1,
     "series_pending": 96
   }

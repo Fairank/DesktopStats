@@ -1,5 +1,28 @@
 # Changes
 
+## 0.43.0-preview.1 (development candidate)
+
+- Show the six current numbered styles in actual CPU/GPU widget animations
+  and a complete reference assembly, preserving every older style choice.
+- Verify six exact GPU rotor designs from primary photographs: BIOSTAR RX7600
+  base/OC, Intel A770 LE, Reaper9070XT, GTX1080FE and MSI R9 290X reference.
+  Keep20 pending SKUs explicit; both BIOSTAR shells now have distinct traces.
+- Rasterize only the visible GPU model base viewport. Typical300px widgets use
+  39.85% fewer base RGBA pixels; no whole-application memory claim. Keep rotor
+  planes, stable stop/start textures, hardware freshness and existing clocks.
+- Separate mainboard power contacts and open M.2 receptacles without changing
+  attachment anchors; reference assembly adds624 triangles and one mesh.
+- Add24 source-linked storage references across2230/2242/2280/22110 NVMe,
+  factory heatsinks, SATA SSD and sealed HDD. Check documented M.2 mount lengths;
+  preserve source-specific shell families and product/capacity markings.
+- Add static preview colors/off for existing model light zones, including
+  colored ink in line styles. Fixed-white zones remain white. No device control,
+  new lights, background clock, sampler or physical mesh rebuild for color edits.
+- Document the exact catalog count and gaps against PCBS1/2, including cooling,
+  loop and lighting limits. Original art/code retains the noncommercial license.
+- Source/local candidate only; no restart or installation during gaming.
+
+
 ## 0.42.0-preview.1 (development candidate)
 
 - Extend model-only panel studies to every one of the 147 catalog GPUs:
