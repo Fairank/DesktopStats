@@ -182,6 +182,22 @@ def _check(report, output):
         assert scene.triangle_count<=40000
         report['assembly_effects']=13
         report["checks"].append("assembly-finite-effects-no-graphics")
+        from assembly_parts import choices,reference_preset
+        catalog=choices()
+        assert len(catalog['gpus'])>=148 and len(catalog['memory'])>=28
+        assert len(catalog['boards'])>=17 and len(catalog['coolers'])>=27 and len(catalog['fans'])>=27
+        reference=copy.deepcopy(DEFAULT)
+        reference['assembly']=reference_preset(reference['assembly'],'air')
+        reference['assembly']['part_styles']={'case':'notebook_color','gpu':'miniature','fans:front:0':'notebook_line'}
+        reference_spec=build_spec(dict(cpu_name='Intel Core i7-13700KF',gpus={'0':dict(gpu_name='RTX 5090')}),
+                                 reference,dict(state='unavailable'),[])
+        assembled=build_scene(bake_profiles(reference_spec,engine))
+        assert assembled.metadata['canvas_style']=='notebook_color'
+        assert assembled.metadata['part_style_map']['gpu']=='miniature'
+        assert assembled.metadata['part_style_map']['fans:front:0']=='notebook_line'
+        assert assembled.metadata['cooling']['parts'] and assembled.metadata['auxiliary']['parts']
+        report['assembly_catalog_counts']={key:len(value) for key,value in catalog.items() if key in ('gpus','memory','boards','coolers','fans','psus','storage','expansion')}
+        report["checks"].append("assembly-reference-parts-and-mixed-styles-no-graphics")
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

@@ -36,6 +36,7 @@ def style_for(value):
         shading=1. if style=="miniature" else .45 if style in ("soft","inkwash") else 0.,
         line_only=style in _LINE,paper_grid=style in _PAPER,
         wobble=1.1 if style in _PAPER else 1.35 if style=="sketch" else 0.,
+        line_width=1.6 if style in _LINE else 1.2,
         light_background=rgba("#f9f7ed" if style in _PAPER else "#fcf3e2" if style=="sticker"
                               else "#eee5d6" if style=="papercut" else "#edf3f5" if style=="inkwash"
                               else "#eff4f6"),
@@ -55,7 +56,7 @@ def material_for(mesh,style):
                and mesh.color[0]-mesh.color[2]>.15)
     if 'wood' in name or wood_slat:return (0.,.88,0.,2.)
     if 'pcb' in name or 'motherboard' in name:return (.02,.82,0.,0.)
-    if any(value in name for value in ('screw','heatsink','lid','bracket','metal','contact')):
+    if any(value in name for value in ('screw','heatsink','lid','bracket','metal','contact','fin','heatpipe','coldplate','fitting')):
         return (.82,.25,0.,1.)
     if component=='cpu':return (.65,.31,0.,1.)
     if component=='memory':return (.38,.42,0.,0.)
@@ -75,6 +76,7 @@ def paint_color(source,style,component="case"):
     if style=="miniature":return source
     rgb,alpha=source[:3],source[3]
     if style in _LINE:return (1.,1.,1.,alpha)
+    if component=='cables':return _mix(rgb,rgba('#f3e9d7')[:3],.20)+(alpha,)
     if style=="papercut":target=_tone(rgb,"#29485c","#d39978","#f3dfbd")
     elif style=="sticker":target=_tone(rgb,"#789b9b","#bdd4c3","#fff4df")
     elif style=="inkwash":target=_tone(rgb,"#5d879e","#79a8af","#abc5cd")
@@ -85,7 +87,12 @@ def paint_color(source,style,component="case"):
                   "gpu":("#738aa9","#b7c7de","#f0d1bc"),
                   "cpu":("#b08d87","#dfbd9a","#f5e4c0"),
                   "memory":("#6f998f","#abd0ba","#e4edbe"),
-                  "board":("#78998b","#b3c8b1","#e8e6bc")}
+                  "board":("#78998b","#b3c8b1","#e8e6bc"),
+                  "cooler":("#698a9c","#aacbd1","#ebe5ce"),
+                  "fans":("#6d9890","#b2d3c8","#eee2c4"),
+                  "psu":("#6f7f93","#b3bdcf","#e8dfcc"),
+                  "storage":("#7f9185","#bed1b2","#eee5c7"),
+                  "expansion":("#829184","#c7cfad","#f0e3bf")}
         target=_tone(rgb,*palettes.get(component,palettes["case"]))
         if style=="notebook_color":target=_mix(target,rgba("#f5e9d3")[:3],.15)
         elif style=="notebook_smile":target=_mix(target,rgba("#ecc9cb")[:3],.22)
@@ -106,6 +113,28 @@ def apply_colors(meshes,style):
         elif mesh.name=='gpu-fan-hub' and style=='papercut':tone=rgba('#d39978',mesh.color[3])
         values.append(replace(mesh,color=tone))
     return tuple(values)
+
+
+def apply_model_styles(meshes,style,overrides,dimensions,panels):
+    """Independent per-part treatments share geometry, one bounded draw system."""
+    default=resolve_style(style);overrides=overrides if isinstance(overrides,dict) else {}
+    values=[];styles=[];part_map={}
+    case_style=resolve_style(overrides.get('case',default))
+    for mesh in meshes:
+        if mesh.name.startswith('style-'):continue
+        family='case' if mesh.component=='panel' else mesh.component
+        part=getattr(mesh,'part_id','')
+        selected=resolve_style(overrides.get(part,overrides.get(family,default)))
+        values.extend(apply_colors((mesh,),selected));styles.append(selected)
+        part_map.setdefault(family,resolve_style(overrides.get(family,default)))
+        if part:part_map[part]=selected
+    policy=style_for(case_style)
+    if policy['expressions'] and panels.get('front')!='open':
+        from assembly_geometry import Mesh
+        values.append(Mesh('style-case-expression',expression_vertices(dimensions),policy['ink']))
+        styles.append(case_style)
+    return tuple(values),dict(visual_style=default,canvas_style=case_style,mesh_style_ids=tuple(styles),
+        part_style_map=part_map,decorative_expression=any(mesh.name=='style-case-expression' for mesh in values))
 
 
 def expression_vertices(dimensions):
@@ -149,7 +178,13 @@ def crease_edges(vertices,limit=MAX_MESH_EDGES):
         if len(normals)==1 or any(sum(a*b for a,b in zip(normals[0],n))<threshold for n in normals[1:]):
             result.append(edge)
     if len(result)>limit:
-        result=[result[n*len(result)//limit] for n in range(limit)]
+        # A perforated panel must retain its exterior before sampling tiny
+        # holes. Uniform sampling alone can remove the whole PCB/frame outline.
+        prominent=sorted(range(len(result)),key=lambda n:(-math.dist(*result[n]),n))[:max(1,limit//4)]
+        chosen=set(prominent);others=[n for n in range(len(result)) if n not in chosen]
+        count=limit-len(chosen)
+        chosen.update(others[n*len(others)//count] for n in range(count))
+        result=[edge for n,edge in enumerate(result) if n in chosen]
     return tuple(result)
 
 
@@ -160,24 +195,67 @@ def _wobble(point,seed,amount):
                  for axis,v in enumerate(point))
 
 
-def edge_batches(meshes,style):
+def edge_batches(meshes,style,styles=None):
     """Build immutable line vertices once; global cap also bounds hand ink."""
-    policy=style_for(style)
-    if not policy['edges']:return ()
+    default=style_for(style)
+    if styles is None and not default['edges']:return ()
     candidates=[]
     for index,mesh in enumerate(meshes):
+        policy=style_for(styles[index]) if isinstance(styles,(tuple,list)) and index<len(styles) else default
+        if not policy['edges']:continue
         if mesh.name.startswith('style-'):continue
-        if policy['hardware_ink_only'] and mesh.component not in ('gpu','cpu','memory','board'):continue
+        if policy['hardware_ink_only'] and mesh.component in ('case','panel'):continue
         edges=crease_edges(mesh.vertices)
-        if edges:candidates.append((mesh,index,edges))
-    total=sum(1+(bool(policy['wobble']) and math.dist(a,b)>12)
-              for _,_,edges in candidates for a,b in edges)
-    factor=min(1.,MAX_STYLE_EDGES/max(1,total))
+        if edges:candidates.append((mesh,index,edges,policy))
+    fine_words=('spring-head','small-smd','small-package','pins','contacts','silkscreen','model-mark',
+                'label-rule','fastener','screw','water-channel','stator')
+    plans=[]
+    for mesh,index,edges,policy in candidates:
+        name=mesh.name.casefold();micro=any(word in name for word in fine_words)
+        dense=any(word in name for word in ('perforat','grille','vent','mesh','floor-deck','fins','-fin'))
+        span=max(max(mesh.vertices[axis::6])-min(mesh.vertices[axis::6]) for axis in range(3))
+        structural=(not micro and mesh.component!='cables' and not dense and span>=20 and
+                    (mesh.component in ('case','panel','cpu','memory') or any(word in name for word in
+                     ('shroud','backplate','pcb','motherboard','frame','rim','rail','tank','housing','shell','load-plate'))))
+        costs=tuple(1+int(bool(policy['wobble']) and math.dist(a,b)>12) for a,b in edges)
+        ordered=sorted(range(len(edges)),key=lambda n:(-math.dist(*edges[n]),n))
+        cap=(len(edges) if len(edges)<=64 else 256 if name=='gpu-shroud' else 128) if structural else 0
+        if dense and mesh.component in ('case','panel') and span>=80:cap=32
+        desired=set(ordered[:cap])
+        weight=(.035 if micro else .10 if mesh.component=='cables' else .22 if dense else 2.5 if mesh.rotor else 1.)
+        if policy['line_only'] and micro:weight=0.
+        plans.append(dict(mesh=mesh,index=index,edges=edges,policy=policy,costs=costs,ordered=ordered,
+                          desired=desired,selected=set(),weight=weight))
+    reserved=sum(sum(row['costs'][n] for n in row['desired']) for row in plans)
+    remaining=MAX_STYLE_EDGES
+    # Keep one trace for every mesh when possible, then close important frames.
+    for row in plans:
+        n=row['ordered'][0]
+        if row['costs'][n]<=remaining:row['selected'].add(n);remaining-=row['costs'][n]
+    if reserved<=MAX_STYLE_EDGES*.80:
+        for row in plans:
+            for n in sorted(row['desired']):
+                if n not in row['selected'] and row['costs'][n]<=remaining:
+                    row['selected'].add(n);remaining-=row['costs'][n]
+    weighted=sum(sum(cost for n,cost in enumerate(row['costs']) if n not in row['selected'])*row['weight'] for row in plans)
+    allowance=remaining
+    for row in plans:
+        available=[n for n in row['ordered'] if n not in row['selected']]
+        share=int(allowance*sum(row['costs'][n] for n in available)*row['weight']/max(1.,weighted))
+        # Alternate long contours with distributed arcs; fan rims and blades
+        # remain recognizable without tracing every pin or cable strand.
+        head=available[:min(len(available),share//4)];taken=set(head)
+        rest=[n for n in range(len(row['edges'])) if n not in row['selected'] and n not in taken]
+        count=min(len(rest),share)
+        spread=[rest[n*len(rest)//count] for n in range(count)] if count else []
+        for n in (*head,*spread):
+            cost=row['costs'][n]
+            if cost<=share and cost<=remaining:
+                row['selected'].add(n);share-=cost;remaining-=cost
     output=[];remaining=MAX_STYLE_EDGES
-    for mesh,index,edges in candidates:
-        count=min(remaining,max(1,int(len(edges)*factor)))
-        if count<=0:break
-        chosen=edges if count>=len(edges) else tuple(edges[n*len(edges)//count] for n in range(count))
+    for row in plans:
+        mesh,index,edges,policy=(row[key] for key in ('mesh','index','edges','policy'))
+        chosen=[edges[n] for n in sorted(row['selected'])]
         lines=[]
         for a,b in chosen:
             points=(a,b)

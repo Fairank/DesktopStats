@@ -952,3 +952,111 @@ DIMM 插槽|DIMM 插槽|DIMM slots|DIMMスロット|DIMM 슬롯|DIMM-Steckplätz
 M.2 插槽|M.2 插槽|M.2 slots|M.2スロット|M.2 슬롯|M.2-Steckplätze|Emplacements M.2|Ranuras M.2
 原厂前置 USB|原廠前置 USB|Factory front USB|標準フロントUSB|기본 전면 USB|Front-USB ab Werk|USB avant d’origine|USB frontales de fábrica
 原厂音频接口|原廠音訊介面|Factory audio jacks|標準オーディオ端子|기본 오디오 잭|Audioanschlüsse ab Werk|Prises audio d’origine|Conectores de audio de fábrica
+CPU 散热器|CPU 散熱器|CPU cooler|CPUクーラー|CPU 쿨러|CPU-Kühler|Refroidisseur CPU|Refrigerador de CPU
+主板型号|主機板型號|Motherboard model|マザーボードの型番|메인보드 모델|Mainboardmodell|Modèle de carte mère|Modelo de placa base
+电源型号|電源型號|Power supply model|電源の型番|전원 공급 장치 모델|Netzteilmodell|Modèle d’alimentation|Modelo de fuente
+配件与安装|配件與安裝|Parts and mounting|パーツと取り付け|부품 및 장착|Teile und Montage|Pièces et montage|Piezas y montaje
+机箱风扇|機殼風扇|Case fans|ケースファン|케이스 팬|Gehäuselüfter|Ventilateurs du boîtier|Ventiladores de caja
+存储设备|儲存裝置|Storage devices|ストレージ|저장 장치|Speichergeräte|Unités de stockage|Dispositivos de almacenamiento
+存储与扩展|儲存與擴充|Storage and expansion|ストレージと拡張|저장 장치 및 확장|Speicher und Erweiterung|Stockage et extensions|Almacenamiento y expansión
+扩展卡|擴充卡|Expansion cards|拡張カード|확장 카드|Erweiterungskarten|Cartes d’extension|Tarjetas de expansión
+电源|電源|Power supply|電源ユニット|전원 공급 장치|Netzteil|Alimentation|Fuente de alimentación
+线缆|線纜|Cables|ケーブル|케이블|Kabel|Câbles|Cables
+线缆与转动|線纜與轉動|Cables and motion|ケーブルと回転|케이블 및 회전|Kabel und Bewegung|Câbles et mouvement|Cables y movimiento
+线缆颜色|線纜顏色|Cable color|ケーブルの色|케이블 색상|Kabelfarbe|Couleur des câbles|Color de cables
+连接线缆|連接線纜|Connect cables|ケーブルを接続|케이블 연결|Kabel verbinden|Connecter les câbles|Conectar cables
+转动来源|轉動來源|Motion source|回転の情報源|회전 정보 출처|Bewegungsquelle|Source du mouvement|Fuente del movimiento
+使用实测转速|使用實測轉速|Use measured RPM|実測回転数を使用|측정된 RPM 사용|Gemessene Drehzahl|Utiliser les RPM mesurés|Usar RPM medidas
+参考转动（非实测）|參考轉動（非實測）|Illustrative motion (not measured)|参考回転（実測ではありません）|참고 회전 (실측 아님)|Beispielbewegung (nicht gemessen)|Rotation indicative (non mesurée)|Giro ilustrativo (no medido)
+参考连接|參考連接|Reference connection|参考接続|참고 연결|Beispielverbindung|Connexion de référence|Conexión de referencia
+连接状态|連接狀態|Connection state|接続状態|연결 상태|Verbindungsstatus|État de connexion|Estado de conexión
+冷排位置|冷排位置|Radiator position|ラジエーターの位置|라디에이터 위치|Radiatorposition|Position du radiateur|Posición del radiador
+前部|前部|Front|前面|전면|Vorne|Avant|Frontal
+顶部|頂部|Top|上面|상단|Oben|Dessus|Superior
+后部|後部|Rear|背面|후면|Hinten|Arrière|Trasera
+底部|底部|Bottom|底面|하단|Unten|Dessous|Inferior
+侧部|側部|Side|側面|측면|Seitlich|Côté|Lateral
+进风|進風|Intake|吸気|흡기|Einlass|Admission|Entrada
+排风|排風|Exhaust|排気|배기|Auslass|Extraction|Salida
+数量|數量|Quantity|数量|수량|Anzahl|Quantité|Cantidad
+接口|介面|Interface|インターフェース|인터페이스|Schnittstelle|Interface|Interfaz
+容量|容量|Capacity|容量|용량|Kapazität|Capacité|Capacidad
+额定功率|額定功率|Rated power|定格出力|정격 출력|Nennleistung|Puissance nominale|Potencia nominal
+实际功率|實際功率|Measured power|実測電力|실측 전력|Gemessene Leistung|Puissance mesurée|Potencia medida
+实测转速|實測轉速|Measured RPM|実測回転数|측정 RPM|Gemessene Drehzahl|RPM mesurés|RPM medidas
+风扇型号|風扇型號|Fan model|ファンの型番|팬 모델|Lüftermodell|Modèle de ventilateur|Modelo de ventilador
+风扇尺寸|風扇尺寸|Fan size|ファンのサイズ|팬 크기|Lüftergröße|Taille du ventilateur|Tamaño del ventilador
+黑色|黑色|Black|黒|검정|Schwarz|Noir|Negro
+白色|白色|White|白|흰색|Weiß|Blanc|Blanco
+红色|紅色|Red|赤|빨강|Rot|Rouge|Rojo
+蓝色|藍色|Blue|青|파랑|Blau|Bleu|Azul
+不放置|不放置|None|配置しない|배치 안 함|Keine|Aucun|Ninguno
+不放置存储设备|不放置儲存裝置|No storage device|ストレージを配置しない|저장 장치 배치 안 함|Kein Speichergerät|Aucune unité de stockage|Sin dispositivo de almacenamiento
+不放置扩展卡|不放置擴充卡|No expansion card|拡張カードを配置しない|확장 카드 배치 안 함|Keine Erweiterungskarte|Aucune carte d’extension|Sin tarjeta de expansión
+不放置风扇|不放置風扇|No fan|ファンを配置しない|팬 배치 안 함|Kein Lüfter|Aucun ventilateur|Sin ventilador
+未选择散热器|未選擇散熱器|No cooler selected|クーラー未選択|쿨러 미선택|Kein Kühler gewählt|Aucun refroidisseur choisi|Sin refrigerador seleccionado
+未选择电源|未選擇電源|No power supply selected|電源未選択|전원 공급 장치 미선택|Kein Netzteil gewählt|Aucune alimentation choisie|Sin fuente seleccionada
+按系统主板识别|按系統主機板識別|Use detected motherboard|検出したマザーボードを使用|감지된 메인보드 사용|Erkanntes Mainboard verwenden|Utiliser la carte mère détectée|Usar la placa detectada
+载入参考装机|載入參考裝機|Load reference build|参考構成を読み込む|참고 구성 불러오기|Beispiel-PC laden|Charger une configuration type|Cargar equipo de referencia
+风冷参考装机|風冷參考裝機|Air-cooled reference|空冷の参考構成|공랭 참고 구성|Luftgekühltes Beispiel|Exemple à refroidissement par air|Ejemplo de refrigeración por aire
+一体水冷参考装机|一體水冷參考裝機|AIO reference build|一体型水冷の参考構成|일체형 수랭 참고 구성|AIO-Beispiel-PC|Exemple avec AIO|Ejemplo con AIO
+分体水冷参考装机|分體水冷參考裝機|Custom-loop reference|分離型水冷の参考構成|커스텀 수랭 참고 구성|Beispiel mit eigenem Kreislauf|Exemple de boucle personnalisée|Ejemplo de circuito personalizado
+显卡水冷头（参考）|顯示卡水冷頭（參考）|GPU water block (reference)|GPU水冷ブロック（参考）|GPU 워터블록 (참고)|GPU-Wasserblock (Beispiel)|Bloc GPU (référence)|Bloque de agua GPU (referencia)
+混搭外观|混搭外觀|Mix component styles|パーツのスタイルを組み合わせる|부품 스타일 혼합|Teiledesigns kombinieren|Combiner les styles|Combinar estilos
+此部件外观|此部件外觀|This part’s style|このパーツのスタイル|이 부품의 스타일|Design dieses Teils|Style de cette pièce|Estilo de esta pieza
+跟随默认外观|跟隨預設外觀|Follow default style|既定のスタイルに従う|기본 스타일 따르기|Standarddesign übernehmen|Suivre le style par défaut|Seguir el estilo predeterminado
+恢复统一外观|恢復統一外觀|Restore unified style|統一スタイルに戻す|통일된 스타일 복원|Einheitliches Design wiederherstellen|Rétablir un style uniforme|Restaurar estilo uniforme
+代表通道|代表通道|Representative channel|代表チャンネル|대표 채널|Repräsentativer Kanal|Canal représentatif|Canal representativo
+CPU_FAN 通道|CPU_FAN 通道|CPU_FAN channel|CPU_FANチャンネル|CPU_FAN 채널|CPU_FAN-Kanal|Canal CPU_FAN|Canal CPU_FAN
+CPU_FAN 是代表通道，不是每把风扇的独立测速。|CPU_FAN 是代表通道，不是每把風扇的獨立測速。|CPU_FAN is a representative header, not a separate tachometer for every fan.|CPU_FANは代表端子の値で、各ファン個別の測定値ではありません。|CPU_FAN은 대표 헤더 값이며 각 팬의 개별 측정값이 아닙니다.|CPU_FAN ist ein repräsentativer Anschluss, keine Einzelmessung jedes Lüfters.|CPU_FAN représente un connecteur, pas la mesure individuelle de chaque ventilateur.|CPU_FAN representa un conector, no una medición individual de cada ventilador.
+选择参考型号补全装机外观，不会把自选模型当作系统识别结果。|選擇參考型號補全裝機外觀，不會把自選模型當作系統識別結果。|Choose reference parts to complete the build. Manually chosen models are not detected hardware.|参考パーツで構成を補えます。手動選択はシステムの検出結果ではありません。|참고 부품으로 구성을 완성합니다. 수동 선택은 시스템 감지 결과가 아닙니다.|Ergänzen Sie den PC mit Referenzteilen. Manuelle Modelle sind keine Hardwareerkennung.|Complétez le PC avec des références. Les modèles choisis ne sont pas du matériel détecté.|Complete el equipo con referencias. Los modelos elegidos no son hardware detectado.
+参考方案会替换机箱和配件选择；按应用偏好保存。顶部栏布局保持原样。|參考方案會替換機殼和配件選擇；按套用偏好儲存。頂部列配置保持原樣。|A reference replaces case and part choices. Save with Apply preferences; the bar layout is retained.|参考構成はケースとパーツ選択を置き換えます。「設定を適用」で保存します。バーの配置は維持されます。|참고 구성은 케이스와 부품 선택을 바꿉니다. 환경설정 적용으로 저장하며 바 배치는 유지됩니다.|Das Beispiel ersetzt Gehäuse und Teile. Mit Einstellungen anwenden speichern; die Leiste bleibt erhalten.|L’exemple remplace le boîtier et les pièces. Enregistrez via Appliquer les préférences ; la barre reste inchangée.|El ejemplo sustituye caja y piezas. Guarde con Aplicar preferencias; se conserva la barra.
+仅替换三维外观，不代表检测到本机改装。|僅替換三維外觀，不代表偵測到本機改裝。|Changes the 3D illustration only; it does not identify a physical modification.|3D外観のみを変更し、実機の改造を検出した意味ではありません。|3D 외관만 바꾸며 실제 개조가 감지되었다는 뜻이 아닙니다.|Ändert nur die 3D-Darstellung und erkennt keinen tatsächlichen Umbau.|Modifie seulement l’illustration 3D, sans détecter une modification physique.|Solo cambia la ilustración 3D; no detecta una modificación física.
+按安装面选择型号、数量与进排风；转速缺失时实测模式保持静止。|按安裝面選擇型號、數量與進排風；轉速缺失時實測模式保持靜止。|Choose model, count and airflow per mount. Measured mode stays still without RPM.|取り付け面ごとに型番、数量、吸排気を選びます。回転数がない実測モードは静止します。|장착 면별 모델, 수량, 풍향을 선택합니다. RPM이 없으면 실측 모드는 정지합니다.|Modell, Anzahl und Luftstrom je Position wählen. Ohne Drehzahl bleibt der Messmodus still.|Choisissez modèle, nombre et flux par emplacement. Sans RPM, le mode mesuré reste immobile.|Elija modelo, cantidad y flujo por posición. Sin RPM, el modo medido permanece quieto.
+按选定的电源和配件连接供电与数据线。|按選定的電源和配件連接供電與資料線。|Connect power and data cables for the selected parts.|選択したパーツの電源・データケーブルを接続します。|선택한 부품의 전원 및 데이터 케이블을 연결합니다.|Strom- und Datenkabel der gewählten Teile verbinden.|Relier les câbles d’alimentation et de données des pièces choisies.|Conecte cables de alimentación y datos de las piezas elegidas.
+实测模式使用已有转速；参考转动仅演示机械动作，不代表本机转速。|實測模式使用既有轉速；參考轉動僅示範機械動作，不代表本機轉速。|Measured mode uses existing RPM. Illustrative motion is a demonstration, not this PC’s RPM.|実測モードは既存の回転数を使います。参考回転は実機の測定値ではありません。|실측 모드는 기존 RPM을 사용합니다. 참고 회전은 시연이며 실제 PC의 RPM이 아닙니다.|Der Messmodus nutzt vorhandene Drehzahlen. Beispielbewegung ist keine Messung dieses PCs.|Le mode mesuré utilise les RPM existants. La rotation indicative ne mesure pas ce PC.|El modo medido usa RPM existentes. El giro ilustrativo no representa las RPM de este PC.
+每类硬件可以单独选择风格；在三维窗口选中某一件，还能单独切换。|每類硬體可以單獨選擇風格；在三維視窗選取某一件，還能單獨切換。|Choose a style per hardware category, or select an individual part in 3D to override it.|種類ごとにスタイルを選べます。3Dで個別パーツを選択して変更することもできます。|종류별 스타일을 고르거나 3D에서 개별 부품을 선택해 바꿀 수 있습니다.|Design je Kategorie wählen oder ein einzelnes Teil in 3D überschreiben.|Choisissez un style par catégorie ou remplacez celui d’une pièce sélectionnée en 3D.|Elija estilo por categoría o cámbielo para una pieza seleccionada en 3D.
+单件设置优先于同类设置，同类设置优先于整机外观。|單件設定優先於同類設定，同類設定優先於整機外觀。|Individual part settings override category settings, which override the whole-build style.|個別パーツ、種類、全体スタイルの順に優先されます。|개별 부품, 종류, 전체 스타일 순으로 우선합니다.|Einzelteil hat Vorrang vor Kategorie und diese vor dem gesamten PC.|La pièce prime sur la catégorie, qui prime sur le style global.|La pieza tiene prioridad sobre la categoría y esta sobre el estilo global.
+自选配件模型不代表已识别的本机硬件。|自選配件模型不代表已識別的本機硬體。|Manually chosen parts do not represent detected hardware.|手動選択したモデルは実機の検出結果ではありません。|수동 선택한 모델은 실제 하드웨어 감지 결과가 아닙니다.|Manuell gewählte Teile sind keine erkannte Hardware.|Les pièces choisies ne représentent pas du matériel détecté.|Las piezas elegidas no representan hardware detectado.
+自选设备尚未绑定对应的传感器。|自選裝置尚未綁定對應的感測器。|The chosen device has no matching sensor binding.|選択したデバイスに対応するセンサーは未設定です。|선택한 장치에 연결된 센서가 없습니다.|Dem gewählten Gerät ist kein passender Sensor zugeordnet.|Aucun capteur correspondant n’est associé à l’appareil choisi.|El dispositivo elegido no tiene un sensor asociado.
+机箱风扇尚未绑定独立测速，实测模式保持静止。|機殼風扇尚未綁定獨立測速，實測模式保持靜止。|Case fans have no individual tachometer binding and stay still in measured mode.|ケースファンの個別回転数が未設定のため実測モードでは静止します。|케이스 팬의 개별 RPM이 연결되지 않아 실측 모드에서 정지합니다.|Gehäuselüfter bleiben ohne zugeordnete Einzelmessung im Messmodus still.|Sans mesure individuelle associée, les ventilateurs du boîtier restent immobiles.|Sin medición individual asociada, los ventiladores de caja permanecen quietos.
+水泵与风扇测速尚未匹配，实测模式保持静止。|水泵與風扇測速尚未匹配，實測模式保持靜止。|Pump and fan tachometers are not mapped; measured mode stays still.|ポンプとファンの測定先が未確認のため実測モードでは静止します。|펌프와 팬의 RPM 연결이 확인되지 않아 실측 모드에서 정지합니다.|Pumpen- und Lüftermessung sind nicht zugeordnet; der Messmodus bleibt still.|Les mesures de pompe et de ventilateur ne sont pas associées ; le mode mesuré reste immobile.|Las mediciones de bomba y ventilador no están asociadas; el modo medido queda quieto.
+线缆路线为参考排布，不代表检测到实际接线。|線纜路線為參考配置，不代表偵測到實際接線。|Cable paths are illustrative and do not represent detected wiring.|配線ルートは参考であり、実機の配線検出ではありません。|케이블 경로는 참고용이며 실제 배선 감지 결과가 아닙니다.|Kabelwege sind Beispiele und keine erkannte Verkabelung.|Les chemins de câbles sont indicatifs, sans détection du câblage réel.|Las rutas de cables son ilustrativas y no representan cableado detectado.
+部分线缆缺少对应接口或可用路线，未强行连接。|部分線纜缺少對應介面或可用路線，未強行連接。|Some cables lack a matching connector or clear route and were left unconnected.|対応端子や経路がないケーブルは未接続のままです。|맞는 커넥터나 경로가 없는 케이블은 연결하지 않았습니다.|Kabel ohne passenden Anschluss oder freien Weg bleiben unverbunden.|Les câbles sans connecteur adapté ou chemin libre restent déconnectés.|Los cables sin conector adecuado o ruta libre quedan desconectados.
+部分配件超出机箱参考外形，请检查安装位置。|部分配件超出機殼參考外形，請檢查安裝位置。|Some parts extend beyond the reference case envelope. Check their placement.|一部のパーツがケースの参考外形を超えています。位置を確認してください。|일부 부품이 케이스 참고 외형을 벗어납니다. 위치를 확인하세요.|Teile ragen über die Referenzkontur hinaus. Position prüfen.|Des pièces dépassent l’enveloppe de référence. Vérifiez leur position.|Algunas piezas sobresalen de la caja de referencia. Compruebe su posición.
+部分自选型号尚未收录，未放入模型。|部分自選型號尚未收錄，未放入模型。|Some selected models are not in the catalog and were not placed.|未収録の選択モデルは配置されていません。|목록에 없는 선택 모델은 배치하지 않았습니다.|Nicht katalogisierte Modelle wurden nicht platziert.|Les modèles absents du catalogue n’ont pas été placés.|Los modelos fuera del catálogo no se han colocado.
+部分自选配件未能放入当前参考装机。|部分自選配件未能放入目前參考裝機。|Some chosen parts could not be placed in this reference build.|一部の選択パーツはこの参考構成に配置できませんでした。|선택한 일부 부품을 이 참고 구성에 배치할 수 없습니다.|Einige gewählte Teile konnten nicht platziert werden.|Certaines pièces choisies n’ont pas pu être placées.|No se han podido colocar algunas piezas elegidas.
+所选机箱安装位不支持这款冷排。|所選機殼安裝位不支援這款冷排。|This case mount does not support the selected radiator.|このケースの取り付け位置は選択したラジエーターに対応しません。|이 케이스 장착부는 선택한 라디에이터를 지원하지 않습니다.|Diese Position unterstützt den Radiator nicht.|Cet emplacement ne prend pas en charge ce radiateur.|Esta posición no admite el radiador elegido.
+冷排超出所选安装面的参考范围。|冷排超出所選安裝面的參考範圍。|The radiator exceeds the reference mounting area.|ラジエーターが取り付け面の参考範囲を超えています。|라디에이터가 장착 면의 참고 범위를 벗어납니다.|Der Radiator überschreitet die Referenzfläche.|Le radiateur dépasse la zone de montage de référence.|El radiador supera la zona de montaje de referencia.
+冷排已占用该安装面，请移除重复的机箱风扇。|冷排已占用該安裝面，請移除重複的機殼風扇。|The radiator uses this mount. Remove the overlapping case fans.|この位置はラジエーターが使用中です。重複するケースファンを外してください。|라디에이터가 이 장착부를 사용합니다. 중복 케이스 팬을 제거하세요.|Der Radiator belegt diese Position. Doppelte Gehäuselüfter entfernen.|Le radiateur occupe cet emplacement. Retirez les ventilateurs en double.|El radiador ocupa esta posición. Quite los ventiladores duplicados.
+所选风扇尺寸或数量超出机箱已核安装位。|所選風扇尺寸或數量超出機殼已核安裝位。|Fan size or count exceeds the case’s reviewed mounts.|ファンのサイズまたは数量が確認済みの取り付け条件を超えています。|팬 크기 또는 수량이 확인된 장착 조건을 초과합니다.|Lüftergröße oder Anzahl überschreitet die geprüften Positionen.|La taille ou le nombre de ventilateurs dépasse les emplacements vérifiés.|El tamaño o número de ventiladores supera las posiciones verificadas.
+风扇超出所选安装面的参考范围。|風扇超出所選安裝面的參考範圍。|The fans exceed the reference mounting area.|ファンが取り付け面の参考範囲を超えています。|팬이 장착 면의 참고 범위를 벗어납니다.|Die Lüfter überschreiten die Referenzfläche.|Les ventilateurs dépassent la zone de montage de référence.|Los ventiladores superan la zona de montaje de referencia.
+所选电源规格尚不适配此机箱。|所選電源規格尚不適配此機殼。|The selected power supply format does not match this case.|選択した電源規格はこのケースに適合しません。|선택한 전원 공급 장치 규격이 이 케이스와 맞지 않습니다.|Das gewählte Netzteilformat passt nicht zum Gehäuse.|Le format d’alimentation choisi ne correspond pas au boîtier.|El formato de fuente elegido no coincide con esta caja.
+所选扩展卡没有可用插槽。|所選擴充卡沒有可用插槽。|No suitable slot is available for the selected card.|選択した拡張カードに使用できるスロットがありません。|선택한 확장 카드에 맞는 슬롯이 없습니다.|Kein geeigneter Steckplatz für die gewählte Karte verfügbar.|Aucun emplacement adapté à la carte choisie n’est disponible.|No hay una ranura adecuada para la tarjeta elegida.
+所选 M.2 数量超出已核插槽。|所選 M.2 數量超出已核插槽。|The selected M.2 count exceeds reviewed slots.|選択したM.2の数が確認済みスロット数を超えています。|선택한 M.2 수량이 확인된 슬롯 수를 초과합니다.|Die M.2-Anzahl überschreitet die geprüften Steckplätze.|Le nombre de M.2 dépasse les emplacements vérifiés.|El número de M.2 supera las ranuras verificadas.
+主板规格超出机箱参考支持范围。|主機板規格超出機殼參考支援範圍。|The motherboard format exceeds the case’s reference support.|マザーボード規格がケースの参考対応範囲を超えています。|메인보드 규격이 케이스 참고 지원 범위를 벗어납니다.|Das Mainboardformat überschreitet die Gehäuseunterstützung.|Le format de carte mère dépasse la prise en charge du boîtier.|El formato de placa supera el soporte de referencia de la caja.
+CPU 与所选主板插槽不同，仅作为外观参考。|CPU 與所選主機板插槽不同，僅作為外觀參考。|CPU and selected board sockets differ; this is an appearance reference only.|CPUと選択したマザーボードのソケットが異なります。外観参考のみです。|CPU와 선택한 보드 소켓이 다르며 외관 참고용입니다.|CPU und Board haben verschiedene Sockel; nur eine Darstellungsreferenz.|Le CPU et la carte ont des sockets différents ; référence visuelle seulement.|CPU y placa usan sockets distintos; es solo una referencia visual.
+内存代际与所选主板不同，仅作为外观参考。|記憶體世代與所選主機板不同，僅作為外觀參考。|Memory generation differs from the selected board; appearance reference only.|メモリ世代が選択したマザーボードと異なります。外観参考のみです。|메모리 세대가 선택한 보드와 달라 외관 참고용입니다.|Speichergeneration passt nicht zum Board; nur Darstellungsreferenz.|La génération mémoire diffère de la carte ; référence visuelle seulement.|La generación de memoria difiere de la placa; solo referencia visual.
+显卡超出机箱参考安装限制。|顯示卡超出機殼參考安裝限制。|The GPU exceeds the case’s reference mounting limits.|GPUがケースの参考取り付け制限を超えています。|GPU가 케이스 참고 장착 제한을 초과합니다.|Die GPU überschreitet die Referenzgrenzen des Gehäuses.|Le GPU dépasse les limites de montage de référence du boîtier.|La GPU supera los límites de montaje de referencia de la caja.
+配件型号设置不正确|配件型號設定不正確|Invalid part model|パーツ型番の設定が無効です|부품 모델 설정이 잘못되었습니다|Ungültiges Teilemodell|Modèle de pièce invalide|Modelo de pieza no válido
+配件安装设置不正确|配件安裝設定不正確|Invalid part mounting settings|パーツ取り付け設定が無効です|부품 장착 설정이 잘못되었습니다|Ungültige Montageeinstellungen|Réglages de montage invalides|Ajustes de montaje no válidos
+配件列表设置不正确|配件清單設定不正確|Invalid parts list|パーツ一覧が無効です|부품 목록 설정이 잘못되었습니다|Ungültige Teileliste|Liste de pièces invalide|Lista de piezas no válida
+配件数量设置不正确|配件數量設定不正確|Invalid part quantity|パーツ数量が無効です|부품 수량 설정이 잘못되었습니다|Ungültige Teileanzahl|Quantité de pièces invalide|Cantidad de piezas no válida
+部件外观设置不正确|部件外觀設定不正確|Invalid part style settings|パーツの外観設定が無効です|부품 스타일 설정이 잘못되었습니다|Ungültiges Teiledesign|Style de pièce invalide|Estilo de pieza no válido
+未知参考装机方案|未知參考裝機方案|Unknown reference build|不明な参考構成です|알 수 없는 참고 구성|Unbekannter Beispiel-PC|Configuration de référence inconnue|Equipo de referencia desconocido
+按系统硬件识别|按系統硬體識別|Follow detected hardware|検出したハードウェアに合わせる|감지된 하드웨어 사용|Erkannte Hardware verwenden|Suivre le matériel détecté|Seguir el hardware detectado
+更换参考 CPU、显卡或内存后，不将本机实时读数用于该模型。|更換參考 CPU、顯示卡或記憶體後，不將本機即時讀數用於該模型。|Reference CPU, GPU and memory models do not use this PC’s live readings.|参考CPU・GPU・メモリには、このPCの実測値を使用しません。|참고 CPU, GPU 및 메모리 모델에는 이 PC의 실시간 측정값을 사용하지 않습니다.|CPU-, GPU- und RAM-Beispielmodelle verwenden keine Live-Messwerte dieses PCs.|Les modèles CPU, GPU et mémoire de référence n’utilisent pas les mesures de ce PC.|Los modelos de CPU, GPU y memoria de referencia no usan lecturas de este PC.
+内存组合|記憶體組合|Memory configuration|メモリ構成|메모리 구성|RAM-Zusammenstellung|Configuration mémoire|Configuración de memoria
+自选内存组合；每条可以单独选择型号和外观。|自選記憶體組合；每條可以單獨選擇型號和外觀。|Choose the model and style of each reference memory module.|参考メモリは、各モジュールの型番と外観を個別に選べます。|각 참고 메모리 모듈의 모델과 스타일을 선택합니다.|Modell und Stil jedes RAM-Beispielmoduls einzeln wählen.|Choisissez le modèle et le style de chaque barrette de référence.|Elija el modelo y el estilo de cada módulo de referencia.
+当前跟随已识别的内存数量和型号。|目前跟隨已識別的記憶體數量和型號。|Using detected memory models and module count.|検出したメモリの型番と枚数を使用中です。|감지된 메모리 모델과 개수를 사용합니다.|Erkannte RAM-Modelle und Modulanzahl werden verwendet.|Modèles et nombre de barrettes détectés utilisés.|Se usan los modelos y la cantidad de módulos detectados.
+添加参考内存|新增參考記憶體|Add reference memory|参考メモリを追加|참고 메모리 추가|Beispiel-RAM hinzufügen|Ajouter une barrette de référence|Añadir memoria de referencia
+恢复本机内存|恢復本機記憶體|Use detected memory|検出したメモリに戻す|감지된 메모리 복원|Erkannten RAM verwenden|Utiliser la mémoire détectée|Usar la memoria detectada
+参考型号未绑定本机传感器。|參考型號未綁定本機感測器。|This reference model is not linked to this PC’s sensors.|参考モデルは、このPCのセンサーと連携していません。|이 참고 모델은 이 PC의 센서에 연결되지 않았습니다.|Dieses Beispielmodell ist nicht mit den Sensoren dieses PCs verknüpft.|Ce modèle de référence n’est pas lié aux capteurs de ce PC.|Este modelo de referencia no está vinculado a los sensores del PC.
+自选型号尚未收录，继续显示已识别硬件。|自選型號尚未收錄，繼續顯示已識別硬體。|Selected model is not in the catalog; showing detected hardware.|選択した型番が未収録のため、検出したハードウェアを表示します。|선택한 모델이 목록에 없어 감지된 하드웨어를 표시합니다.|Modell noch nicht im Katalog; erkannte Hardware wird angezeigt.|Modèle absent du catalogue ; affichage du matériel détecté.|Modelo no incluido; se muestra el hardware detectado.
+风扇结构或测速尚未匹配，实测模式保持静止。|風扇結構或測速尚未匹配，實測模式保持靜止。|Fan geometry or tachometer is unmatched; measured mode stays still.|ファン形状または回転数が未対応のため、実測モードでは停止します。|팬 구조 또는 회전계가 매칭되지 않아 실측 모드에서 정지합니다.|Lüftergeometrie oder Drehzahlsensor nicht zugeordnet; Messmodus bleibt still.|Géométrie ou tachymètre non associé ; le mode mesuré reste immobile.|Geometría o tacómetro sin asociar; el modo medido permanece inmóvil.
+内存数量超出所选主板的插槽数量。|記憶體數量超出所選主機板的插槽數量。|Memory module count exceeds the selected motherboard’s slots.|メモリ枚数が、選択したマザーボードのスロット数を超えています。|메모리 개수가 선택한 메인보드의 슬롯 수를 초과합니다.|RAM-Modulanzahl übersteigt die Steckplätze des gewählten Mainboards.|Le nombre de barrettes dépasse les emplacements de la carte mère choisie.|La cantidad de módulos supera las ranuras de la placa seleccionada.
+外观待核实|外觀待核實|Exterior pending review|外観未確認|외관 검증 대기|Außendesign noch ungeprüft|Aspect extérieur à vérifier|Exterior pendiente de revisión
+外观细节尚未核实，当前显示参考布局。|外觀細節尚未核實，目前顯示參考佈局。|Exterior details are unverified; showing a reference layout.|外観の詳細は未確認のため、参考レイアウトを表示しています。|외관 세부 사항이 검증되지 않아 참고 배치를 표시합니다.|Außendetails noch ungeprüft; eine Referenzanordnung wird angezeigt.|Les détails extérieurs restent à vérifier ; une disposition de référence est affichée.|Los detalles exteriores no están verificados; se muestra una distribución de referencia.
+全部系列|全部系列|All series|すべてのシリーズ|모든 시리즈|Alle Serien|Toutes les séries|Todas las series
+系列筛选|系列篩選|Filter by series|シリーズで絞り込み|시리즈 필터|Nach Serie filtern|Filtrer par série|Filtrar por serie
+暂未应用本次视图更改，请减少配件或调整模型细节。|暫未套用本次視圖變更，請減少配件或調整模型細節。|View change not applied. Reduce the parts or adjust model detail.|表示の変更を適用できません。パーツを減らすか、モデルの詳細度を調整してください。|보기 변경이 적용되지 않았습니다. 부품을 줄이거나 모델 세부 수준을 조정하세요.|Ansichtsänderung nicht übernommen. Teile reduzieren oder Modelldetails anpassen.|Modification non appliquée. Réduisez les pièces ou ajustez le niveau de détail.|Cambio de vista no aplicado. Reduzca las piezas o ajuste el detalle del modelo.

@@ -23,7 +23,7 @@ from tools import build as BUILD  # noqa: E402 - direct tools/ CLI needs the pro
 
 _NATIVE = """
 ActionButton.qml Appearance.qml Check.qml Choice.qml ContentCanvas.qml
-AssemblyPage.qml AssemblyClock.qml AssemblyProfiles.js
+AssemblyPage.qml AssemblyParts.qml AssemblyClock.qml AssemblyProfiles.js
 ContentLayoutEditor.qml DesktopWidget.qml Details.qml FormField.qml
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
@@ -85,6 +85,8 @@ REVIEWED_FILES = frozenset(
             "showcase/case-styles.png",
             "showcase/assembly-inspector.png",
             "showcase/assembly-quality.png",
+            "showcase/assembly-parts.png",
+            "showcase/assembly-parts-styles.png",
             "showcase/assembly-effects.gif",
             "showcase/assembly-effects.mp4",
             "ICON-NOTES.md",

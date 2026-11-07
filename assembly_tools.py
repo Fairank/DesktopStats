@@ -73,13 +73,88 @@ class AssemblyTools(WorkspaceTools):
     def assemblyDetails(self):
         return detail_choices(self.tr)
 
+    @Property("QVariantMap", notify=assemblyCasesChanged)
+    def assemblyParts(self):
+        from assembly_parts import choices
+        return choices(self.tr)
+
+    @Property("QVariantList", notify=assemblyCasesChanged)
+    def assemblyStyleTargets(self):
+        from assembly_inspection import COMPONENT_LABELS
+        return [dict(id=key,label=self.tr(label)) for key,label in COMPONENT_LABELS.items() if key!='all']
+
+    @Slot(str,str)
+    def changeAssemblyPartStyle(self,target,style):
+        value=copy.deepcopy(self._draft)
+        if style=='follow':value['assembly']['part_styles'].pop(target,None)
+        else:value['assembly']['part_styles'][target]=style
+        self.edit(value,merge_key=('assembly','style',target))
+
+    @Slot()
+    def resetAssemblyPartStyles(self):
+        value=copy.deepcopy(self._draft)
+        value['assembly']['part_styles']={}
+        self.edit(value,merge_key=('assembly','styles'))
+
     @Slot(str, "QVariant")
     def changeAssembly(self, field, selected):
-        if field not in ("case_model", "exploded", "fan_animation", "appearance_style", "detail_level", "selection_effects"):
+        from assembly_config import PART_FIELDS
+        if field not in ("case_model", "exploded", "fan_animation", "appearance_style", "detail_level", "selection_effects",*PART_FIELDS):
             return
         value = copy.deepcopy(self._draft)
         value["assembly"][field] = selected
         self.edit(value, merge_key=("assembly", field))
+
+    @Slot(str)
+    def useAssemblyReference(self,kind):
+        from assembly_parts import reference_preset
+        if kind not in ('air','aio','loop'):return
+        value=copy.deepcopy(self._draft)
+        value['assembly']=reference_preset(value['assembly'],kind)
+        self.edit(value,merge_key=('assembly','reference'))
+
+    @Slot(str,str,int,str)
+    def changeAssemblyFan(self,mount,model,count,direction):
+        # One complete detached group edit, preserving all other mount groups.
+        from assembly_config import FAN_MOUNTS
+        if mount not in FAN_MOUNTS:return
+        value=copy.deepcopy(self._draft)
+        rows=[row for row in value['assembly']['case_fans'] if row['mount']!=mount]
+        if model:rows.append(dict(model=model,mount=mount,count=count,direction=direction))
+        value['assembly']['case_fans']=rows
+        self.edit(value,merge_key=('assembly','fan',mount))
+
+    @Slot(str,int)
+    def changeAssemblyStorage(self,model,count):
+        value=copy.deepcopy(self._draft)
+        rows=[row for row in value['assembly']['storage'] if row['model_id']!=model]
+        if count:rows.append(dict(model_id=model,count=count))
+        value['assembly']['storage']=rows
+        self.edit(value,merge_key=('assembly','storage',model))
+
+    @Slot(str,bool)
+    def changeAssemblyExpansion(self,model,enabled):
+        value=copy.deepcopy(self._draft)
+        rows=[row for row in value['assembly']['expansion_cards'] if row['model_id']!=model]
+        if enabled:rows.append(dict(model_id=model))
+        value['assembly']['expansion_cards']=rows
+        self.edit(value,merge_key=('assembly','expansion',model))
+
+    @Slot(int,str)
+    def changeAssemblyMemory(self,index,model):
+        value=copy.deepcopy(self._draft);models=value['assembly']['memory_models']
+        if index==-1:
+            if len(models)>=8 or not model:return
+            models.append(model)
+        elif 0<=index<len(models):
+            if model:models[index]=model
+            else:models.pop(index)
+        else:return
+        self.edit(value,merge_key=('assembly','memory',index))
+
+    @Slot()
+    def resetAssemblyMemory(self):
+        self.changeAssembly('memory_models',[])
 
     @Slot()
     def openAssemblyView(self):
@@ -97,4 +172,12 @@ class AssemblyTools(WorkspaceTools):
         return copy.deepcopy(self._assembly_spec) if self._assembly_spec else None
 
     def assembly_fan_state(self):
+        if self._assembly_spec and self._assembly_spec.get('gpu',{}).get('telemetry_bound') is False:
+            return dict(available=False,rpm=None)
         return fan_state(self._data, self._draft)
+
+    def assembly_cpu_fan_state(self):
+        if self._assembly_spec and self._assembly_spec.get('cpu',{}).get('telemetry_bound') is False:
+            return dict(available=False,rpm=None)
+        from assembly_feedback import cpu_fan_state
+        return cpu_fan_state(self._data)

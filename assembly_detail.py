@@ -9,7 +9,7 @@ from dataclasses import replace
 import math
 
 LEVELS=('eco','balanced','close')
-TRIANGLE_BUDGETS={'eco':30000,'balanced':40000,'close':80000}
+TRIANGLE_BUDGETS={'eco':80000,'balanced':160000,'close':300000}
 
 
 def detail_level(value):return value if isinstance(value,str) and value in LEVELS else 'balanced'
@@ -289,7 +289,7 @@ def _gpu_detail(meshes,spec,level):
     outer=unit_polygon(gpu.get('shell_polygon'),length,width) or chamfer_rect(length,width,min(7.,width*.07))
     openings=[m for m in meshes if m.name=='gpu-fan-opening' and m.position[1]<gy]
     holes=[(m.position[2]-gz,-(m.position[0]-gx),max(abs(v) for v in m.vertices[0::6])*1.005) for m in openings]
-    segments=32 if level=='close' else 20
+    segments=32 if level=='close' else 12 if level=='eco' else 20
     revised=[];detail=[];dark=color('#202a32');metal=color('#acb8bf');gold=color('#c5a257');pcb=color('#284b48')
     def add(name,vertices,tone,position=(gx,gy,gz)):
         if vertices:detail.append(Mesh(name,vertices,tone,position,'gpu'))
@@ -341,7 +341,7 @@ def _gpu_detail(meshes,spec,level):
     known=known or gpu.get('dimensions_verified') is True and all(type(gpu.get(key)) in (int,float) and gpu[key]>0 for key in ('length_mm','width_mm','thickness_mm'))
     fin_count=0
     if known and appearance.get('style') in ('gpu_axial','gpu_hybrid','gpu_blower') and appearance.get('fan_count')!=0:
-        fin_count=80 if level=='close' else 36
+        fin_count=80 if level=='close' else 12 if level=='eco' else 36
         fins=[((width*.84,thickness*.60,.38),(0,1.,-length*.41+n*length*.82/(fin_count-1))) for n in range(fin_count)]
         add('detail-gpu-heatsink-fins',_boxes(fins),metal)
     # Layer edges are reference geometry; the catalog does not establish PCB
@@ -353,7 +353,7 @@ def _gpu_detail(meshes,spec,level):
     bus=(facts.get('host_interface') or {}).get('bus')
     contact_count=0
     if bus in ('pcie','agp'):
-        contact_count=48 if level=='close' else 28
+        contact_count=48 if level=='close' else 16 if level=='eco' else 28
         span=min(89. if bus=='pcie' else 81.,length*.78);pitch=span/contact_count
         start=-length/2+15.
         pads=[((7.5,.20,pitch*.68),(width*.48-5.2,thickness/2-3.22,start+(n+.5)*pitch)) for n in range(contact_count)]
@@ -626,7 +626,12 @@ def enrich_components(meshes,spec):
     """Refine in canonical component axes, before the case's rigid pose change."""
     from assembly_geometry import rotate_vertices,unit_polygon
     level=detail_level(spec.get('detail_level'));metadata=dict(level=level,layout_schematic=True)
-    if level=='eco':return tuple(meshes),metadata
+    if level=='eco':
+        # Low sampling must preserve the actual cooler envelope and open fan
+        # cavities. The legacy coarse slab protruded into case-floor fans.
+        meshes,gpu_meta=_gpu_detail(meshes,spec,'eco')
+        metadata.update(gpu=gpu_meta,pcb_routing_verified=False,mechanical_details_are_schematic=True)
+        return tuple(meshes),metadata
     cpu=spec.get('cpu') or {};base=next((m for m in meshes if m.name=='cpu-lid'),None)
     if base is not None:
         _,height,width=_extent(base);package='lga_rect' if cpu.get('style')=='lga_rect' else 'am5' if cpu.get('style')=='am5' else 'chip'

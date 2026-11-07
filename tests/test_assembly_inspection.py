@@ -131,5 +131,13 @@ class AssemblyInspectionTests(unittest.TestCase):
         self.assertNotIn('读数已过期',result['notes'])
         self.assertTrue(all(not row['available'] for row in result['rows']))
 
+    def test_pending_primary_photo_is_visible_in_the_picker_and_board_inspector(self):
+        from assembly_parts import choices
+        self.config['assembly']['board_model']='gigabyte-z790-aorus-master'
+        spec=build_spec(self.data,self.config,dict(state='unavailable'),[])
+        result=snapshot(self.data,spec,self.config,'board',now=100.)
+        self.assertIn('外观细节尚未核实，当前显示参考布局。',result['notes'])
+        self.assertIn('外观待核实',next(row['label'] for row in choices()['boards'] if row['id']=='gigabyte-z790-aorus-master'))
+
 
 if __name__=='__main__':unittest.main()

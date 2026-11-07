@@ -1,0 +1,602 @@
+"""Original, bounded cooling reference geometry; explicit choices only.
+
+No detection, clocks, networking, sensor access or rendering dependencies. The
+catalog distinguishes documented envelopes from reference construction. Mount
+locations/tube routes are schematic and never constitute a clearance guarantee.
+All input anchors are already in final case space; no second layout pose occurs.
+Original code/art: PolyForm Noncommercial 1.0.0; product names retain their owners.
+"""
+from collections import defaultdict
+import math
+
+from cooling_catalog import get_cooler, get_fan
+
+
+def _add(a,b):return tuple(a[i]+b[i] for i in range(3))
+def _mul(a,s):return tuple(v*s for v in a)
+def _sub(a,b):return tuple(a[i]-b[i] for i in range(3))
+def _dot(a,b):return sum(a[i]*b[i] for i in range(3))
+def _cross(a,b):return (a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0])
+def _unit(a,default=(0.,0.,1.)):
+    if not isinstance(a,(list,tuple)) or len(a)!=3 or not all(type(v) in (int,float) and math.isfinite(v) for v in a):return default
+    size=math.sqrt(_dot(a,a));return _mul(a,1/size) if size>1e-9 else default
+
+
+def _basis(normal,up=(0.,1.,0.)):
+    n=_unit(normal);u=_sub(up,_mul(n,_dot(up,n)))
+    if _dot(u,u)<1e-6:u=_cross((1.,0.,0.) if abs(n[0])<.8 else (0.,1.,0.),n)
+    u=_unit(u);v=_unit(_cross(n,u));return u,v,n
+
+
+def _transform(vertices,center,basis,translate=True):
+    out=[]
+    for start in range(0,len(vertices),6):
+        for offset in (0,3):
+            p=vertices[start+offset:start+offset+3]
+            q=tuple(sum(p[k]*basis[k][j] for k in range(3)) for j in range(3))
+            out.extend(_add(q,center) if offset==0 and translate else q)
+    return tuple(out)
+
+
+def _tube(points,radius,segments=8):
+    """Open-ended round tube with stable per-segment rings and unit normals."""
+    from assembly_geometry import _quad
+    out=[]
+    for a,b in zip(points,points[1:]):
+        delta=_sub(b,a)
+        if _dot(delta,delta)<1e-8:continue
+        u,v,n=_basis(delta)
+        for i in range(segments):
+            angle=i*math.tau/segments;following=(i+1)*math.tau/segments
+            p=_add(_mul(u,math.cos(angle)*radius),_mul(v,math.sin(angle)*radius))
+            q=_add(_mul(u,math.cos(following)*radius),_mul(v,math.sin(following)*radius))
+            _quad(out,_add(a,p),_add(a,q),_add(b,q),_add(b,p))
+    return tuple(out)
+
+
+def _curve(points,steps=12):
+    a,b,c,d=points
+    return [tuple((1-t)**3*a[n]+3*(1-t)**2*t*b[n]+3*(1-t)*t*t*c[n]+t**3*d[n] for n in range(3)) for t in (i/steps for i in range(steps+1))]
+
+
+def _cambered_leaves(vertices,model,radius):
+    """Bounded original foil camber; qualitative family reference, not CFD CAD."""
+    from assembly_geometry import _tri
+    out=[];amplitude=radius*(.052 if model['family']=='arctic-pressure' else .035)
+    count=model['blades']
+    for i in range(0,len(vertices),18):
+        points=[]
+        for offset in (0,6,12):
+            x,y,z=vertices[i+offset:i+offset+3];fraction=min(1.,math.hypot(x,y)/max(radius,1.))
+            z+=amplitude*fraction*math.sin(count*math.atan2(y,x)+.65)
+            points.append((x,y,z))
+        _tri(out,*points)
+    return tuple(out)
+
+
+def _leaf_geometry(model,radius,depth):
+    from assembly_geometry import fan_rotor
+    profile=dict(model)
+    profile['shape']={'noctua-g2':'claw','noctua-sterrox':'swept','arctic-pressure':'wide',
+        'corsair-airguide':'paired','nzxt-pressure':'claw','fractal-notched':'claw',
+        'lian-li-sl':'wide','lian-li-216':'paired'}.get(model['family'],model.get('shape','swept'))
+    out=list(_cambered_leaves(fan_rotor(profile,radius*1.07,depth),model,radius))
+    if model['family'] in ('noctua-sterrox','noctua-g2') and model.get('blade_geometry_reviewed'):
+        # Three qualitative acceleration channels per leaf, all attached to and
+        # rotating with the foil. Their dimensions are reference construction.
+        sweep=46 if model['family']=='noctua-g2' else 52
+        for i in range(model['blades']):
+            for channel in (-1,0,1):
+                points=[]
+                for t in (0.,.33,.66,1.):
+                    r=radius*(.65+.20*t);a=math.radians(90+sweep-i*360/model['blades']+channel*3.5+4*(t-.5))
+                    x,y=math.cos(a)*r,math.sin(a)*r
+                    z=depth/2+.24+radius*.035*(r/radius)*math.sin(model['blades']*math.atan2(y,x)+.65)
+                    points.append((x,y,z))
+                out.extend(_tube(points,.30,6))
+    return tuple(out)
+
+
+class _Builder:
+    def __init__(self,level):
+        self.level=level if level in ('eco','balanced','close') else 'balanced'
+        self.segments={'eco':16,'balanced':24,'close':32}[self.level]
+        self.static=defaultdict(list);self.rotors=[];self.fans=[];self.parts=[];self.wire_anchors=[]
+
+    def put(self,name,vertices,tint,center=(0.,0.,0.),basis=((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),component='cooler',part='cooler:cpu',alpha=1.):
+        if alpha!=1.:
+            from assembly_geometry import color
+            tint=tuple(tint[:3])+(alpha,) if isinstance(tint,tuple) and len(tint)==4 else color(tint,alpha=alpha)
+        if vertices:self.static[(name,tint,component,part)].extend(_transform(vertices,center,basis))
+
+    def box(self,name,size,tint,center,basis,component='cooler',part='cooler:cpu',bevel=False):
+        from assembly_geometry import box
+        from assembly_case_detail import chamfer_box
+        self.put(name,chamfer_box(*size,bevel=.7) if bevel else box(*size),tint,center,basis,component,part)
+
+    def tube(self,name,points,radius,tint,component='cooler',part='cooler:cpu'):
+        self.put(name,_tube(points,radius,{'eco':6,'balanced':8,'close':10}[self.level]),tint,component=component,part=part)
+
+    def finish(self):
+        from assembly_geometry import Mesh,color
+        return tuple(Mesh(name,tuple(vertices),tint if isinstance(tint,tuple) and len(tint)==4 else color(tint),component=component,part_id=part) for (name,tint,component,part),vertices in self.static.items())+tuple(self.rotors)
+
+
+def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',name='case-fan',role='case',direction='intake'):
+    """A pierced static frame and a separate genuinely moving leaf/hub mesh."""
+    from assembly_geometry import Mesh,color,fan_rotor,ring,box
+    from assembly_detail import perforated_plate,chamfer_rect
+    size=model['size_mm'];width=model.get('width_mm',size);depth=model['depth_mm'];basis=_basis(normal,up)
+    radius=size*.465;corner=size*.095
+    if model.get('frame')=='round':
+        frame=ring(size*.50,radius,depth,builder.segments)
+        builder.put(name+'-frame',frame,model['frame_color'],center,basis,component,part)
+        for x in (-1,1):
+            for y in (-1,1):
+                p=_add(center,_add(_mul(basis[0],x*width*.39),_mul(basis[1],y*size*.39)))
+                builder.put(name+'-frame',box(size*.19,size*.19,depth),model['frame_color'],p,basis,component,part)
+    else:
+        # The large circular aperture is actual missing geometry; no solid slab
+        # or dark painted disk can obscure the blades from either face.
+        holes=[(0.,0.,radius)]+[(x*width*.415,y*size*.415,size*.018) for x in (-1,1) for y in (-1,1)]
+        frame=perforated_plate(chamfer_rect(width,size,corner),holes,depth,segments=builder.segments)
+        builder.put(name+'-frame',frame,model['frame_color'],center,basis,component,part)
+    if model.get('pads'):
+        for x in (-1,1):
+            for y in (-1,1):
+                for side in (-1,1):
+                    p=_add(center,_add(_mul(basis[0],x*width*.414),_add(_mul(basis[1],y*size*.414),_mul(basis[2],side*(depth/2+.35)))))
+                    pad=perforated_plate(chamfer_rect(size*.16,size*.16,2),[(0.,0.,size*.018)],.7,segments=12)
+                    builder.put(name+'-pads',pad,'#74584d' if model['family'].startswith('noctua') else '#141b20',p,basis,component,part)
+    # Rear stator arms terminate at the frame and hub, never rotating with leaves.
+    stator_z=-depth*.35;hub=size*model.get('hub_ratio',.25)*.44
+    stators=model.get('stator_vanes',4)
+    for i in range(stators):
+        angle=i*math.tau/stators+.3
+        a=(math.cos(angle)*hub,math.sin(angle)*hub,stator_z)
+        b=(math.cos(angle+.16)*radius,math.sin(angle+.16)*radius,stator_z)
+        builder.put(name+'-stator',_tube([a,b],size*.012,6),model['frame_color'],center,basis,component,part)
+    leaf_depth=min(depth*.19,4.5)
+    rotor=list(_leaf_geometry(model,radius,leaf_depth))
+    rotor.extend(ring(hub,0,leaf_depth*2,builder.segments))
+    builder.rotors.append(Mesh(name+'-leaves-hub',_transform(rotor,(0.,0.,0.),basis,False),color(model['blade_color']),center,component,True,1,basis[2],part))
+    if model.get('rgb'):
+        glow='#80c9d4'
+        builder.put(name+'-static-rgb-hub',ring(hub*.85,hub*.71,.65,builder.segments),glow,_add(center,_mul(basis[2],leaf_depth+1)),basis,component,part)
+        if model.get('frame_rgb_ring'):
+            builder.put(name+'-static-rgb-rim',ring(size*.496,size*.481,1.,builder.segments),glow,_add(center,_mul(basis[2],depth/2+.55)),basis,component,part)
+        elif model['family'] in ('lian-li-sl','lian-li-infinity'):
+            for sign in (-1,1):
+                builder.put(name+'-side-rgb',box(2,size*.74,depth*.45),glow,_add(center,_mul(basis[0],sign*width*.49)),basis,component,part)
+                builder.put(name+'-side-aluminium',box(2,size*.86,depth*.72),'#a6afb5',_add(center,_mul(basis[0],sign*width*.47)),basis,component,part)
+        if model['family']=='lian-li-infinity':
+            for layer in range(3):builder.put(name+'-infinity-hub-rings',ring(hub*(.94-layer*.18),hub*(.89-layer*.18),.4,builder.segments),glow,_add(center,_mul(basis[2],leaf_depth+1.1+layer*.25)),basis,component,part)
+    if model['family']=='lian-li-p28':
+        for sign in (-1,1):builder.put(name+'-brushed-side-trim',box(2,size*.80,depth*.64),'#a2abb0',_add(center,_mul(basis[0],sign*width*.485)),basis,component,part)
+    builder.fans.append(dict(part_id=part,model_id=model['id'],role=role,position=tuple(center),axis=tuple(basis[2]),
+        diameter_mm=size,direction=direction,rpm=None,rotation_default='static',blade_count_verified=model.get('blade_count_verified',False),
+        rotation_direction_verified=False,blade_geometry_reviewed=model.get('blade_geometry_reviewed',False)))
+    wire_sign=-1 if component=='fans' and part.startswith(('fans:rear:','fans:bottom:')) else 1
+    wire_out=_mul(basis[0],wire_sign)
+    if (role=='case' and model['family']!='lian-li-sl' or role=='cpu_main' and model['id'].startswith('noctua-')):
+        # Standard PWM power only. Proprietary lighting/controller wiring and
+        # AIO internal splitters are deliberately not invented or cross-wired.
+        root=_add(center,_add(_mul(wire_out,width*.48),_mul(basis[1],size*.35)))
+        end=_add(root,_mul(wire_out,11))
+        builder.tube(name+'-power-lead',[root,end],1.4,'#222c33',component,part)
+        builder.put(name+'-power-connector',box(7,5,3),'#273039',end,basis,component,part)
+        builder.wire_anchors.append(dict(id=part+':power:'+str(len(builder.wire_anchors)),position=_add(end,_mul(wire_out,3.5)),normal=wire_out,along=basis[2],
+            kind='fan4',owner=part,header='fan',model_id=model['id'],connector_rendered=True,position_verified=False,placement='schematic_attached_lead',role=role))
+    if role=='case' and model.get('lighting_connector_verified') and model.get('lighting_connector')=='argb3':
+        root=_add(center,_add(_mul(wire_out,width*.48),_mul(basis[1],-size*.35)));end=_add(root,_mul(wire_out,11))
+        builder.tube(name+'-argb-lead',[root,end],1.2,'#222c33',component,part)
+        builder.put(name+'-argb-connector',box(7,5,3),'#273039',end,basis,component,part)
+        builder.wire_anchors.append(dict(id=part+':argb:'+str(len(builder.wire_anchors)),position=_add(end,_mul(wire_out,3.5)),normal=wire_out,along=basis[2],
+            kind='argb3',owner=part,header='argb',model_id=model['id'],connector_rendered=True,position_verified=False,placement='schematic_attached_lead',role=role))
+
+
+def _reference_fan(cooler):
+    fan=get_fan(cooler.get('fan_model'))
+    if fan:return fan
+    size=cooler.get('fan_reference_mm',120)
+    return dict(id=cooler['id']+'-documented-fan-reference',size_mm=size,width_mm=size,depth_mm=25 if size>=100 else 15,
+                family=cooler.get('fan_family','stock-reference'),blades=7,blade_count_verified=False,shape='wide',
+                frame='round' if cooler['kind'] in ('stock_intel','stock_amd') else 'square',frame_color='#242c30',blade_color='#3d474d',hub_ratio=.27,outer_ring=False,
+                rgb=cooler['kind']=='stock_prism',frame_rgb_ring=cooler['kind']=='stock_prism',dimensions_verified=False)
+
+
+def _cpu_frame(anchors):
+    cpu=anchors.get('cpu',{});p=cpu.get('position')
+    if not isinstance(p,(tuple,list)) or len(p)!=3:p=tuple(cpu.get(axis,0.) for axis in ('x','y','z'))
+    if not all(type(v) in (int,float) and math.isfinite(v) for v in p):p=(0.,0.,0.)
+    return tuple(p),_basis(cpu.get('normal',(-1.,0.,0.)),cpu.get('up',cpu.get('u',(0.,1.,0.))))
+
+
+def _local_point(p,basis,a,b,c):return _add(p,_add(_mul(basis[0],a),_add(_mul(basis[1],b),_mul(basis[2],c))))
+
+
+def _air(builder,cooler,p,basis):
+    from assembly_geometry import box,ring
+    w,h,d=(cooler['dimensions_mm'][key] for key in ('width','height','depth'))
+    kind=cooler['kind'];fan=_reference_fan(cooler);u,v,n=basis
+    def point(a,b,c):return _local_point(p,basis,a,b,c)
+    builder.box('cooler-copper-contact',(38,38,4),'#a58264',point(0,0,2),basis,bevel=True)
+    builder.box('cooler-mounting-bridge',(65,13,4),'#9da6ab',point(0,0,6),basis)
+    fin_count={'eco':12,'balanced':24,'close':44}[builder.level]
+    if kind in ('stock_intel','stock_amd','stock_prism'):
+        finheight=max(8,h-fan['depth_mm']-8);r=min(w,d)*.43
+        if kind=='stock_prism':
+            for i in range(fin_count):builder.put('cooler-prism-fins',box(w*.88,d*.88,.65),'#aab4bb',point(0,0,8+i*(finheight-2)/max(1,fin_count-1)),basis)
+        else:
+            # Radial aluminium fins surround a real cylindrical centre.
+            radial=28 if builder.level=='eco' else 48 if builder.level=='balanced' else 72
+            for i in range(radial):
+                angle=i*math.tau/radial;radial_dir=_add(_mul(u,math.cos(angle)),_mul(v,math.sin(angle)))
+                tangent=_cross(n,radial_dir);fb=(radial_dir,tangent,n)
+                center=_add(point(0,0,6+finheight/2),_mul(radial_dir,r*.68))
+                builder.box('cooler-radial-fins',(r*.62,.65,finheight),'#aab4bb',center,fb)
+            builder.put('cooler-core',ring(r*.36,0,finheight,builder.segments),'#a58264' if kind=='stock_intel' else '#8c969d',point(0,0,6+finheight/2),basis)
+        center=point(0,0,h-fan['depth_mm']/2)
+        _fan(builder,fan,center,n,u,component='cooler',part='cooler:cpu',name='cooler-stock-fan',role='cpu_main')
+        if kind=='stock_intel':builder.put('cooler-intel-blue-rim',ring(fan['size_mm']*.50,fan['size_mm']*.474,.7,builder.segments),'#377fa8',point(0,0,h+.35),basis)
+    elif kind=='low_profile':
+        top=h-fan['depth_mm'];bottom=5
+        for i in range(fin_count):
+            z=bottom+(top-bottom-1)*i/max(1,fin_count-1)
+            builder.put('cooler-low-profile-fins',box(w*.96,d*.96,.5),'#aab4bb',point(0,0,z),basis)
+        _fan(builder,fan,point(0,0,h-fan['depth_mm']/2),n,u,component='cooler',part='cooler:cpu',name='cooler-slim-fan',role='cpu_main')
+    else:
+        # Tower width is tangent to the board; outward height is along CPU normal.
+        bank_depth=cooler.get('heatsink_depth_mm',cooler.get('heatsink_dimensions_mm',{}).get('depth',d-25))
+        bank_offset=-fan['depth_mm']/2 if cooler.get('fan_layout')=='center_rear' else 0
+        gap=fan['depth_mm']+4 if kind=='dual_tower' else 0
+        bank_thickness=(bank_depth-gap)/2 if gap else bank_depth
+        banks=(-gap/2-bank_thickness/2,gap/2+bank_thickness/2) if gap else (0.,)
+        finbottom=max(25,h-fan['size_mm']+3);fintop=h-5
+        for bank_index,bank in enumerate(banks):
+            for i in range(fin_count):
+                z=finbottom+(fintop-finbottom)*i/max(1,fin_count-1)
+                width=w*.95
+                if cooler.get('fin_style')=='checker_cut' and i%4 in (0,1):width*=.93
+                if cooler.get('asymmetric') and bank_index==0:width*=.93
+                builder.put('cooler-tower-fins',box(width,bank_thickness,.55),cooler.get('fin_color','#abb5bd'),point(0,bank+bank_offset,z),basis)
+            if cooler.get('top_style') in ('matrix_caps','dark_caps'):
+                builder.box('cooler-tower-top-caps',(w*.96,bank_thickness,3),'#232c32',point(0,bank,h-2),basis,bevel=True)
+                if cooler.get('top_style')=='matrix_caps':
+                    for a in range(6):
+                        for b in range(3):builder.box('cooler-matrix-inlays',(w*.095,bank_thickness*.18,.65),'#425059',point((a-2.5)*w*.135,bank+(b-1)*bank_thickness*.26,h-.12),basis)
+        fan_z=(finbottom+fintop)/2
+        for i in range(cooler['fan_count']):
+            selected_fan=dict(fan)
+            if i<len(cooler.get('fan_sizes',[])):
+                selected_fan['size_mm']=selected_fan['width_mm']=cooler['fan_sizes'][i]
+                selected_fan['id']=cooler['id']+'-documented-'+str(cooler['fan_sizes'][i])+'mm-fan'
+                selected_fan['blade_geometry_reviewed']=False
+            if cooler.get('fan_layout')=='center_rear':y=bank_offset if i==0 else bank_depth/2+fan['depth_mm']/2+bank_offset
+            else:y=-bank_depth/2-fan['depth_mm']/2 if i==0 else (0 if kind=='dual_tower' else bank_depth/2+fan['depth_mm']/2)
+            _fan(builder,selected_fan,point(0,y,fan_z),_mul(v,-1),u,component='cooler',part='cooler:cpu',name='cooler-tower-fan',role='cpu_main')
+            # A pair of bent retaining wires is static, separate from the rotor.
+            for sign in (-1,1):builder.tube('cooler-fan-wire-clips',[point(sign*w*.48,y-8,fan_z-30),point(sign*w*.5,y+7,fan_z-30),point(sign*w*.5,y+7,fan_z+30),point(sign*w*.48,y-8,fan_z+30)],.7,'#9da8b0')
+        if cooler.get('top_style') in ('mesh_bridge','mesh_bridge_rgb','assassin_shell'):
+            from assembly_detail import perforated_plate,chamfer_rect
+            holes=[]
+            for index in range(12):
+                x=(index-5.5)*w*.065
+                holes.append(tuple((x+a,b) for a,b in chamfer_rect(w*.028,bank_depth*.68,1)))
+            builder.put('cooler-mesh-top-cover',perforated_plate(chamfer_rect(w*.98,bank_depth,3),holes,2,segments=12),'#1e292f',point(0,bank_offset,h-1),basis)
+            if cooler.get('top_style')=='mesh_bridge_rgb':
+                for sign in (-1,1):builder.box('cooler-top-accent-bars',(w*.83,2,.8),'#80b8c5',point(0,bank_offset+sign*bank_depth*.43,h+.15),basis)
+            if cooler.get('top_style')=='assassin_shell':
+                for sign in (-1,1):builder.box('cooler-assassin-side-shell',(2,bank_depth,h-finbottom),'#29353c',point(sign*(w/2-1),bank_offset,(h+finbottom)/2),basis,bevel=True)
+                builder.box('cooler-assassin-turquoise-mark',(8,8,.8),'#65aab2',point(w*.32,bank_offset+bank_depth*.25,h+.25),basis)
+    pipes=cooler.get('heatpipes',0)
+    if pipes:
+        for i in range(pipes):
+            a=(i-(pipes-1)/2)*min(11,w/(pipes+2))
+            if kind in ('low_profile','stock_prism'):
+                points=[point(a,-d*.32,h*.48),point(a,-d*.32,5),point(a,d*.32,5),point(a,d*.32,h*.48)]
+            else:points=[point(a,-d*.28,h-1),point(a,-d*.28,12),point(a,0,4),point(a,d*.28,12),point(a,d*.28,h-1)]
+            builder.tube('cooler-heatpipes',points,2.8,'#9fa8ad' if kind.startswith('dual') or kind=='single_tower' else '#af8868')
+            if kind in ('single_tower','dual_tower'):
+                for side in (-1,1):builder.put('cooler-pipe-caps',ring(3.2,0,2,builder.segments),'#89969f',point(a,side*d*.28,h-1),basis)
+    builder.parts.append(dict(id='cooler:cpu',label=cooler['label'],kind='air_cooler',model_id=cooler['id']))
+
+
+_MOUNT_NORMALS={'front':(0.,0.,1.),'rear':(0.,0.,-1.),'top':(0.,1.,0.),'bottom':(0.,-1.,0.),'side':(1.,0.,0.)}
+
+
+def _mount_plane(mount,dimensions,inset,planes=None):
+    w,h,d=dimensions;n=_MOUNT_NORMALS[mount]
+    plane=planes.get(mount) if isinstance(planes,dict) else None
+    if isinstance(plane,dict):
+        p=plane.get('position');normal=plane.get('normal');up=plane.get('up',(0.,1.,0.))
+        if isinstance(p,(tuple,list)) and len(p)==3 and all(type(v) in (int,float) and math.isfinite(v) for v in p):
+            n=_unit(normal,n);long_axis=_unit(up,(0.,0.,1.) if mount in ('top','bottom') else (0.,1.,0.))
+            long_axis=_sub(long_axis,_mul(n,_dot(long_axis,n)))
+            if _dot(long_axis,long_axis)<1e-8:long_axis=(0.,0.,1.) if abs(n[1])>.8 else (0.,1.,0.)
+            long_axis=_mul(_unit(long_axis),-1.)
+            width_axis=_unit(_cross(long_axis,n));long_axis=_unit(_cross(n,width_axis))
+            basis=(width_axis,long_axis,n)
+            default_span=(w-24,d-32) if mount in ('top','bottom') else (w-24,h-40) if mount in ('front','rear') else (max(0,d*.47),h-40)
+            span=plane.get('span_mm',default_span)
+            # A source-qualified plane denotes the OUTWARD hardware face; the
+            # actual fan/radiator thickness extends inward. No legacy10mm gap.
+            return _sub(p,_mul(n,max(0.,inset-10.))),basis,span
+    if mount in ('top','bottom'):
+        p=(0.,n[1]*(h/2-inset),0.);basis=_basis(n,(1.,0.,0.));span=(w-24,d-32)
+    elif mount in ('front','rear'):
+        p=(0.,0.,n[2]*(d/2-inset));basis=_basis(n,(1.,0.,0.));span=(w-24,h-40)
+    else:
+        p=(w/2-inset,0.,d*.23);basis=_basis(n,(0.,0.,1.));span=(max(0,d*.47),h-40)
+    return p,basis,span
+
+
+def _mount_check(case,mount,size,count):
+    mounts=case.get('fan_mounts',[]) if isinstance(case,dict) else []
+    matches=[m for m in mounts if isinstance(m,dict) and m.get('position')==mount]
+    if not matches:return 'unverified'
+    valid=[m for m in matches if size in m.get('size_mm',[]) and type(m.get('count')) is int and count<=m['count']]
+    return 'documented_fan_mount' if valid else 'unsupported'
+
+
+def _radiator(builder,cooler,mount,dimensions,part='cooler:radiator',planes=None):
+    from assembly_geometry import box
+    rad=cooler['radiator_mm'];length,width,thick=(rad[k] for k in ('length','width','thickness'))
+    fan=get_fan(cooler['fan_model']);p,basis,span=_mount_plane(mount,dimensions,thick/2+10,planes)
+    if width>span[0]+1 or length>span[1]+1:return None
+    # Local X spans radiator width; local Y runs its length, Z points outward.
+    for sign in (-1,1):
+        builder.box('cooler-radiator-rails',(6,length,thick),'#222b31',_add(p,_mul(basis[0],sign*(width/2-3))),basis,part=part,bevel=True)
+        builder.box('cooler-radiator-end-tanks',(width-10,17,thick),'#27333a',_add(p,_mul(basis[1],sign*(length/2-8.5))),basis,part=part,bevel=True)
+    fin_count={'eco':28,'balanced':54,'close':92}[builder.level]
+    for i in range(fin_count):
+        y=-(length-40)/2+i*(length-40)/max(1,fin_count-1)
+        builder.put('cooler-radiator-fins',box(width-14,.7,thick*.82),'#45535c',_add(p,_mul(basis[1],y)),basis,part=part)
+    for i in range(7):
+        builder.put('cooler-radiator-water-channels',box(1.6,length-34,thick*.88),'#313d45',_add(p,_mul(basis[0],(i-3)*(width-18)/7)),basis,part=part)
+    for i in range(cooler['fan_count']):
+        offset=(i-(cooler['fan_count']-1)/2)*fan['size_mm']
+        center=_add(p,_add(_mul(basis[1],offset),_mul(basis[2],-(thick+fan['depth_mm'])/2-.8)))
+        _fan(builder,fan,center,_mul(basis[2],-1),basis[0],component='cooler',part=part,name='cooler-radiator-fan',role='radiator',direction='exhaust')
+    barbs=[]
+    for sign in (-1,1):
+        b=_add(p,_add(_mul(basis[0],sign*width*.28),_add(_mul(basis[1],length/2-12),_mul(basis[2],-thick/2-6))))
+        builder.tube('cooler-radiator-fittings',[b,_add(b,_mul(basis[2],-9))],5,'#687882',part=part);barbs.append(_add(b,_mul(basis[2],-9)))
+    builder.parts.append(dict(id=part,label=cooler.get('radiator_model',cooler['label'])+' · '+mount+' 冷排',kind='radiator',model_id=cooler['id']))
+    return barbs
+
+
+def _gpu_block(builder,pcb):
+    """Explicit generic full-cover reference, never a matched retail block."""
+    from assembly_geometry import ring
+    p=pcb.get('position',pcb.get('center'));width=pcb.get('width_mm');length=pcb.get('length_mm')
+    if not isinstance(p,(tuple,list)) or len(p)!=3 or not all(type(v) in (int,float) and math.isfinite(v) for v in p):return None
+    if not all(type(v) in (int,float) and math.isfinite(v) and 45<=v<=500 for v in (width,length)):return None
+    basis=_basis(pcb.get('normal',(0.,-1.,0.)),pcb.get('up',(1.,0.,0.)))
+    w,d=width*.94,length*.90;part='gpu:waterblock';u,v,n=basis
+    def point(a,b,c):return _local_point(p,basis,a,b,c)
+    builder.box('gpu-waterblock-nickel-base',(w,d,4),'#a6b8c5',point(0,0,3.2),basis,'gpu',part,True)
+    builder.box('gpu-waterblock-channel-bed',(w*.80,d*.83,1),'#405d6d',point(0,0,5.8),basis,'gpu',part,True)
+    for i in range(18 if builder.level=='close' else 12 if builder.level=='balanced' else 7):
+        span=18 if builder.level=='close' else 12 if builder.level=='balanced' else 7
+        builder.box('gpu-waterblock-microfins',(w*.005,d*.39,2.5),'#aec1cb',point((i-(span-1)/2)*w*.025,-d*.08,7.6),basis,'gpu',part)
+    for sign in (-1,1):
+        path=[point(sign*w*.32,-d*.33,7),point(sign*w*.32,d*.22,7),point(sign*w*.15,d*.30,7)]
+        builder.tube('gpu-waterblock-channel-runs',path,2.7,'#6b929e','gpu',part)
+    # Clear cover is a separate transparent material over visible internal fins.
+    builder.box('gpu-waterblock-clear-cover',(w*.97,d*.97,2),(.62,.80,.87,.30),point(0,0,12),basis,'gpu',part,True)
+    for a in (-1,1):
+        for b in (-1,1):builder.put('gpu-waterblock-fasteners',ring(2,0,1,builder.segments),'#596e7b',point(a*w*.43,b*d*.43,13.5),basis,'gpu',part)
+    builder.box('gpu-waterblock-terminal',(w*.55,22,17),'#48606d',point(0,d*.41,17),basis,'gpu',part,True)
+    ports=[]
+    for sign in (-1,1):
+        port=point(sign*w*.145,d*.41,31)
+        builder.put('gpu-waterblock-gquarter-fittings',ring(7,4,10,builder.segments),'#9aaeb9',_add(port,_mul(n,-5)),basis,'gpu',part)
+        ports.append(port)
+    builder.parts.append(dict(id=part,label='显卡全覆盖水冷头 · 通用透明镀镍参考',kind='gpu_waterblock',model_id='generic-gpu-waterblock-reference',
+        dimensions_verified=False,fit_verified=False,geometry_accuracy='explicit_generic_reference',notes='Rendered PCB reference envelope only; no retail block compatibility or manufacturing CAD.'))
+    return ports
+
+
+def _lfiii_pump(builder,p,basis,part):
+    """Photo-observed radial crown over an unverified internal60mm rotor.
+
+    The visible vent crown stays static pending motion verification. Its sampled
+    rib count is illustrative, not an asserted internal impeller count or tach.
+    Manufacturer envelope includes the adjacent hose elbows; no logo copied.
+    """
+    from assembly_geometry import Mesh,color,ring,_quad
+    u,v,n=basis
+    def point(a,b,c):return _local_point(p,basis,a,b,c)
+    builder.box('cooler-lfiii-copper-contact',(48,48,3),'#a38b76',point(0,0,1.5),basis,part=part,bevel=True)
+    builder.box('cooler-lfiii-contact-base',(62,68,15),'#39474f',point(0,0,11.5),basis,part=part,bevel=True)
+    builder.put('cooler-lfiii-motor-body',ring(26,0,25,builder.segments),'#25323a',point(0,0,31),basis,part=part)
+    for sign in (-1,1):
+        builder.box('cooler-lfiii-undercut-cheeks',(11,67,32),'#34434b',point(sign*27,0,31),basis,part=part,bevel=True)
+        for offset in (-19,19):
+            # Faceted buttresses beneath the circular cap preserve the open
+            # undercut visible in the manufacturer's three-quarter closeup.
+            a=point(sign*30,offset,17);b=point(sign*36,offset,49)
+            builder.tube('cooler-lfiii-crown-supports',[a,b],3.3,'#45545d',part=part)
+    builder.put('cooler-lfiii-crown-outer-rim',ring(45.5,38,18,builder.segments),'#28363e',point(0,0,59.5),basis,part=part)
+    builder.put('cooler-lfiii-recessed-air-chamber',ring(38,17,3,builder.segments),'#1d2b33',point(0,0,47),basis,part=part)
+    builder.put('cooler-lfiii-crown-inner-rim',ring(20.5,18.5,4,builder.segments),'#34434c',point(0,0,65),basis,part=part)
+    ribs=[]
+    for i in range(30):
+        a=i*math.tau/30
+        poly=((21*math.cos(a-.016),21*math.sin(a-.016)),(38*math.cos(a+.022),38*math.sin(a+.022)),
+              (38*math.cos(a+.075),38*math.sin(a+.075)),(21*math.cos(a+.045),21*math.sin(a+.045)))
+        lower=[(*xy,52 if j in (0,3) else 54) for j,xy in enumerate(poly)]
+        upper=[(*xy,64 if j in (0,3) else 61) for j,xy in enumerate(poly)]
+        _quad(ribs,*upper);_quad(ribs,*tuple(reversed(lower)))
+        for j in range(4):k=(j+1)%4;_quad(ribs,lower[j],lower[k],upper[k],upper[j])
+    builder.put('cooler-lfiii-static-radial-crown',tuple(ribs),'#53616a',p,basis,part=part)
+    builder.put('cooler-lfiii-blank-center-cap',ring(18.5,0,3,builder.segments),'#26343d',point(0,0,66.3),basis,part=part)
+    # ARCTIC documents60mm, not our former40mm reference. Actual internal
+    # blade topology remains unverified; only explicit demo may move this mesh.
+    model=dict(id='arctic-lfiii-internal60-reference',family='arctic-vrm-reference',size_mm=60,width_mm=60,depth_mm=9,
+        blades=7,shape='wide',hub_ratio=.35,blade_count_verified=False,blade_geometry_reviewed=False)
+    rotor=list(_leaf_geometry(model,28,1.5));rotor.extend(ring(9,0,4,builder.segments))
+    center=point(0,0,54)
+    builder.rotors.append(Mesh('cooler-vrm-internal-leaves-hub',_transform(rotor,(0,0,0),basis,False),color('#46565f'),center,'cooler',True,1,n,part))
+    builder.fans.append(dict(part_id=part,model_id=model['id'],role='vrm_independent',position=center,axis=n,diameter_mm=60,
+        rpm=None,rotation_default='static',blade_count_verified=False,blade_geometry_reviewed=False,rotation_direction_verified=False,
+        visibility='behind_photo_observed_radial_vent_crown',crown_rib_count_is_reference=True,crown_motion_verified=False))
+    builder.box('cooler-lfiii-twin-elbow-bridge',(52,23,24),'#283740',point(0,45.5,21),basis,part=part,bevel=True)
+    barb_basis=_basis(v,u);ports=[]
+    for sign in (-1,1):
+        builder.put('cooler-lfiii-twin-hose-elbows',ring(8,5,12,builder.segments),'#4b5c65',point(sign*13,57,21),barb_basis,part=part)
+        ports.append(point(sign*13,63,21))
+    return ports
+
+
+def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount='side',planes=None,floor_deck=None):
+    from assembly_geometry import ring,extrude
+    barbs=_radiator(builder,cooler,mount,dimensions,planes=planes)
+    if barbs is None:return False
+    dims=cooler['pump_reference_mm'];width,height,depth=(dims[k] for k in ('width','height','depth'));u,v,n=basis
+    center=_add(p,_mul(n,height/2+4));style=cooler['pump_style'];part='cooler:cpu' if cooler['kind']=='custom_loop' else 'cooler:pump'
+    if style=='arctic_vrm':
+        ports=_lfiii_pump(builder,p,basis,part)
+    elif style in ('nzxt_lcd','round','lianli_infinity','thermaltake_mirror'):
+        builder.put('cooler-pump-housing',ring(min(width,depth)/2,0,height,builder.segments),'#212c33',center,basis,part=part)
+        if style=='nzxt_lcd':
+            builder.put('cooler-pump-bezel',ring(width*.49,width*.43,2,builder.segments),'#8a969e',_add(p,_mul(n,height+4)),basis,part=part)
+            builder.box('cooler-blank-lcd',(34,34,1),'#10191f',_add(p,_mul(n,height+5.1)),basis,part=part)
+        elif style in ('lianli_infinity','thermaltake_mirror'):
+            for layer in range(3 if style=='lianli_infinity' else 1):builder.put('cooler-pump-mirror-rings',ring(width*(.45-layer*.085),width*(.425-layer*.085),1,builder.segments),'#7dbbc7',_add(p,_mul(n,height+4.5+layer*.4)),basis,part=part)
+    else:
+        builder.box('cooler-pump-housing',(width,depth,height),'#27343c',center,basis,part=part,bevel=True)
+        if style.startswith('corsair'):
+            sides=8 if style=='corsair_octagon' else 4
+            poly=tuple((math.cos(i*math.tau/sides+math.pi/4)*width*.46,math.sin(i*math.tau/sides+math.pi/4)*depth*.46) for i in range(sides))
+            builder.put('cooler-pump-rgb-cap',extrude(poly,1.3),'#79bfc8',_add(p,_mul(n,height+4.5)),basis,part=part)
+        elif style in ('deepcool_lcd','asus_lcd'):
+            builder.box('cooler-lcd-bezel',(width*.91,depth*.91,2),'#7b8e9a',_add(p,_mul(n,height+4.5)),basis,part=part,bevel=True)
+            builder.box('cooler-blank-lcd',(width*.84,depth*.83,1),'#0e1920',_add(p,_mul(n,height+6.1)),basis,part=part,bevel=True)
+        else:builder.box('cooler-cpu-waterblock-window',(width*.73,depth*.67,2),'#68939d',_add(p,_mul(n,height+4.8)),basis,part=part,bevel=True)
+    if style!='arctic_vrm':
+        ports=[_local_point(p,basis,sign*width*.27,depth*.40,height*.55+4) for sign in (-1,1)]
+        for port in ports:builder.tube('cooler-block-fittings',[port,_add(port,_mul(v,12))],5,'#778d98',part=part)
+    gpu_ports=None;second_barbs=None
+    if cooler['kind']=='custom_loop':
+        if gpu_pcb:
+            second_barbs=_radiator(builder,cooler,secondary_mount,dimensions,'cooler:radiator:'+secondary_mount,planes)
+            if second_barbs:gpu_ports=_gpu_block(builder,gpu_pcb)
+        reservoir=cooler['reservoir_mm'];r=reservoir['diameter']/2;rh=reservoir['height'];w,h,d=dimensions
+        reservoir_y=-h/2+rh/2+35
+        if isinstance(floor_deck,dict):
+            floor_position=floor_deck.get('position');thickness=floor_deck.get('thickness_mm',2.)
+            if isinstance(floor_position,(tuple,list)) and len(floor_position)==3 and type(floor_position[1]) in (int,float) and math.isfinite(floor_position[1]) and type(thickness) in (int,float) and math.isfinite(thickness):
+                # The D5 body's lower face is rp.y-height/2+1mm. Preserve the
+                # selected200mm assembly and leave2mm above a known deck top.
+                reservoir_y=max(reservoir_y,floor_position[1]+thickness/2+rh/2+1)
+        rp=(-w*.22,reservoir_y,d*.25);rb=_basis((0.,1.,0.),(1.,0.,0.))
+        builder.put('cooler-reservoir-shell',ring(r,r-2,rh-44,builder.segments),'#79949e',_add(rp,(0.,12.,0.)),rb,part='cooler:reservoir',alpha=.22)
+        builder.put('cooler-reservoir-fluid-core',ring(r-4,0,rh-52,builder.segments),'#497681',_add(rp,(0.,12.,0.)),rb,part='cooler:reservoir',alpha=.55)
+        for sign in (-1,1):builder.put('cooler-reservoir-caps',ring(r+2,0,15,builder.segments),'#26343c',_add(rp,(0.,sign*(rh-32)/2+12,0.)),rb,part='cooler:reservoir')
+        builder.put('cooler-d5-pump',ring(r*.94,0,34,builder.segments),'#1c282f',_add(rp,(0.,-rh/2+18,0.)),rb,part='cooler:reservoir')
+        for sign in (-1,1):builder.box('cooler-reservoir-clamps',(reservoir['diameter']+8,5,8),'#75858e',_add(rp,(0.,sign*rh*.26,-r)),((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),part='cooler:reservoir')
+        targets=[barbs[0],_add(rp,(0.,-rh/2+19,r+8))];extra_start=barbs[1];extra_end=_add(rp,(0.,rh/2+5,0.))
+        builder.parts.append(dict(id='cooler:reservoir',label=cooler['reservoir_model'],kind='pump_reservoir',model_id=cooler['id']))
+    else:targets=barbs;extra_start=extra_end=None
+    for start,end in zip(ports,targets):
+        a=_add(start,_mul(v,15));c1=_add(a,_mul(n,45));c2=_add(end,_mul(n,25))
+        builder.tube('cooler-liquid-tubes',_curve((a,c1,c2,end),{'eco':8,'balanced':12,'close':18}[builder.level]),6.2,'#303e46',part='cooler:cpu')
+    if extra_start:
+        pairs=[(extra_start,extra_end)] if not gpu_ports else [(extra_start,gpu_ports[0]),(gpu_ports[1],second_barbs[0]),(second_barbs[1],extra_end)]
+        for start,end in pairs:
+            builder.tube('cooler-liquid-tubes',_curve((start,_add(start,(0.,-35.,0.)),_add(end,(0.,45.,0.)),end),12),6.2,'#303e46',part='cooler:cpu')
+    builder.parts.append(dict(id=part,label=cooler.get('cpu_block_model',cooler['label'])+' · CPU 冷头',kind='cpu_waterblock' if cooler['kind']=='custom_loop' else 'aio_pump',model_id=cooler['id']))
+    return True
+
+
+def add_cooling(meshes,spec,level='balanced',anchors=None):
+    """Return detached additions/metadata; never infer installed hardware.
+
+    Missing/invalid choices add nothing. Unsupported documented mounts are
+    rejected, never resized or silently truncated. Unknown mount compatibility
+    may be illustrated at full scale and is explicitly labelled unverified.
+    """
+    anchors=anchors if isinstance(anchors,dict) else {};spec=spec if isinstance(spec,dict) else {}
+    selection=spec.get('cooling',{});selection=selection if isinstance(selection,dict) else {}
+    dimensions=anchors.get('case_dimensions',(320.,470.,470.))
+    if not isinstance(dimensions,(tuple,list)) or len(dimensions)!=3 or not all(type(v) in (int,float) and math.isfinite(v) and 60<=v<=2000 for v in dimensions):dimensions=(320.,470.,470.)
+    dimensions=tuple(dimensions);case=anchors.get('case',spec.get('case',{}));case=case if isinstance(case,dict) else {}
+    planes=anchors.get('case_mount_planes',{})
+    builder=_Builder(level);meta=dict(parts=[],fans=[],rejected=[],warnings=[],geometry_accuracy='original_schematic_reference',
+        sources=[],cpu_fan_tach_usable=False,real_cpu_rotor_parts=[],replace_gpu_cooler=False,fan_tach_mapping='No selected air cooler; CPU_FAN tachometer is not assigned.',
+        automatic_detection=False,new_pollers=0,default_fan_motion='static_without_fresh_group_tach',mount_positions_schematic=True)
+    cooler=get_cooler(selection.get('cpu_cooler'));occupied=set()
+    if selection.get('cpu_cooler') not in (None,'','none') and not cooler:meta['rejected'].append(dict(kind='cooler',reason='unknown_model'))
+    if cooler:
+        p,basis=_cpu_frame(anchors);kind=cooler['kind'];mount=selection.get('radiator_mount','top')
+        if kind in ('aio','custom_loop'):
+            fan=get_fan(cooler['fan_model']);check=_mount_check(case,mount,fan['size_mm'],cooler['fan_count']) if mount in _MOUNT_NORMALS else 'unsupported'
+            gpu_pcb=None;secondary_mount='side' if mount!='side' else 'top'
+            if selection.get('gpu_waterblock') is True:
+                pcb=(anchors.get('gpu') or {}).get('pcb',{})
+                valid_position=pcb.get('position',pcb.get('center')) if isinstance(pcb,dict) else None
+                valid_size=all(type(pcb.get(k)) in (int,float) and math.isfinite(pcb[k]) and 45<=pcb[k]<=500 for k in ('width_mm','length_mm')) if isinstance(pcb,dict) else False
+                supported=_mount_check(case,secondary_mount,fan['size_mm'],cooler['fan_count'])!='unsupported'
+                _,_,span=_mount_plane(secondary_mount,dimensions,0,planes)
+                fits=cooler['radiator_mm']['width']<=span[0]+1 and cooler['radiator_mm']['length']<=span[1]+1
+                if kind=='custom_loop' and valid_size and isinstance(valid_position,(tuple,list)) and len(valid_position)==3 and all(type(v) in (int,float) and math.isfinite(v) for v in valid_position) and supported and fits:
+                    gpu_pcb=pcb
+                else:meta['warnings'].append('GPU block omitted: requires custom loop, explicit posed PCB reference and a separate supported full-size radiator mount; original GPU cooler retained.')
+            if check=='unsupported':meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
+            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck')):
+                occupied.add(mount);meta['cooler']=cooler;meta['radiator_mount_compatibility']=check
+                meta['replace_gpu_cooler']=any(part['kind']=='gpu_waterblock' for part in builder.parts)
+                if meta['replace_gpu_cooler']:
+                    occupied.add(secondary_mount);meta['secondary_radiator_mount']=secondary_mount
+                    meta['warnings'].append('GPU waterblock is an explicit generic full-cover reference sized to schematic PCB; no retail compatibility is established.')
+                meta['fan_tach_mapping']='Not assigned: AIO/custom CPU_FAN can report pump RPM; radiator and VRM fans have no verified independent tachometer.'
+                meta['warnings'].append('Radiator fan-mount support does not verify radiator clearance; hose routes, fittings and pump internals are schematic.')
+            else:meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='radiator_exceeds_mount_plane'))
+        else:
+            _air(builder,cooler,p,basis);meta['cooler']=cooler;meta['cpu_fan_tach_usable']=True
+            meta['fan_tach_mapping']='Selected air-cooler main fan(s): fresh CPU_FAN tach is a representative header only; multiple fans do not have independently measured RPM.'
+            if _reference_fan(cooler).get('blade_geometry_reviewed'):
+                meta['real_cpu_rotor_parts']=['cooler:cpu']
+            else:meta['warnings'].append('Air-cooler leaf contours/count are reference geometry pending primary-photo review; real-RPM rotation is gated off, explicit demo remains available.')
+        if 'cooler' in meta:meta['sources'].extend(cooler['sources'])
+    groups=selection.get('case_fans',[]);groups=groups if isinstance(groups,(tuple,list)) else []
+    used_mounts=set()
+    for group in groups[:12]:
+        if not isinstance(group,dict):meta['rejected'].append(dict(kind='case_fan',reason='invalid_group'));continue
+        model=get_fan(group.get('model'));mount=group.get('mount');count=group.get('count');direction=group.get('direction','intake')
+        reason=''
+        if not model:reason='unknown_model'
+        elif mount not in _MOUNT_NORMALS:reason='invalid_mount'
+        elif type(count) is not int or not 1<=count<=4:reason='invalid_count'
+        elif direction not in ('intake','exhaust'):reason='invalid_direction'
+        elif mount in occupied:reason='radiator_occupies_mount'
+        elif mount in used_mounts:reason='duplicate_mount_selection'
+        elif _mount_check(case,mount,model['size_mm'],count)=='unsupported':reason='unsupported_fan_mount'
+        if not reason:
+            center,basis,span=_mount_plane(mount,dimensions,model['depth_mm']/2+10,planes)
+            if model.get('width_mm',model['size_mm'])>span[0]+1 or model['size_mm']*count>span[1]+1:reason='fans_exceed_mount_plane'
+        if reason:meta['rejected'].append(dict(kind='case_fan',model_id=group.get('model'),mount=mount,reason=reason));continue
+        used_mounts.add(mount)
+        for i in range(count):
+            position=_add(center,_mul(basis[1],(i-(count-1)/2)*model['size_mm']))
+            part='fans:'+mount+':'+str(i)
+            _fan(builder,model,position,basis[2] if direction=='intake' else _mul(basis[2],-1),basis[0],component='fans',part=part,role='case',direction=direction)
+            builder.parts.append(dict(id=part,label=model['label']+' · '+mount+' '+str(i+1),kind='case_fan',model_id=model['id'],mount=mount,
+                compatibility=_mount_check(case,mount,model['size_mm'],count)))
+        meta['sources'].extend(model['sources'])
+    if meta.get('cooler',{}).get('vrm_fan') and not any(f['role']=='vrm_independent' for f in builder.fans):
+        meta['known_unplaced_vrm_fans']=1
+        meta['warnings'].append('Manufacturer documents an embedded VRM fan; its unverified internal pose is not invented in this reference model.')
+    if 'cooler' in meta:
+        selected=meta['cooler']
+        meta['documented_cooler_fans']=selected['fan_count']*(2 if meta['replace_gpu_cooler'] else 1)+int(bool(selected.get('vrm_fan')))
+        meta['rendered_cooler_fans']=sum(f['role']!='case' for f in builder.fans)
+        meta['fin_sampling']=dict(documented_per_tower=selected.get('documented_fin_count'),rendered_reference_per_bank={'eco':12,'balanced':24,'close':44}[builder.level],exact_internal_construction=False)
+    additions=builder.finish();meta['parts']=builder.parts;meta['fans']=builder.fans;meta['wire_anchors']=builder.wire_anchors;meta['sources']=list(dict.fromkeys(meta['sources']))
+    meta['triangle_count']=sum(mesh.vertex_count for mesh in additions)//3
+    meta['mesh_count']=len(additions)
+    meta['mount_plane_sources']={key:dict(source=value.get('source'),method=value.get('method'),dimensions_verified=False)
+        for key,value in planes.items() if key in occupied or key in used_mounts} if isinstance(planes,dict) else {}
+    return additions,meta

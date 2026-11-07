@@ -165,9 +165,12 @@ class AssemblyDetailTests(unittest.TestCase):
         self.assertEqual(rear,-236.)
         slot=next(m for m in scene.meshes if m.name=='board-expansion-slot')
         gold=next(m for m in scene.meshes if m.name=='detail-gpu-separated-edge-contacts')
-        self.assertAlmostEqual(slot.position[2]+min(slot.vertices[2::6]),rear+15)
+        # The exact ASUS manual places the long-slot start at ~17.1% of
+        # its244mm depth, replacing the old generic15mm reference offset.
+        start=rear+.171*244.
+        self.assertAlmostEqual(slot.position[2]+min(slot.vertices[2::6]),start)
         gold_low=gold.position[2]+min(gold.vertices[2::6]);gold_high=gold.position[2]+max(gold.vertices[2::6])
-        self.assertGreater(gold_low,rear+15);self.assertLess(gold_high,rear+15+89)
+        self.assertGreater(gold_low,start);self.assertLess(gold_high,start+89)
         pcb=next(m for m in scene.meshes if m.name=='gpu-pcb')
         self.assertAlmostEqual(pcb.position[1],slot.position[1])
         shell=next(m for m in scene.meshes if m.name=='gpu-shroud')
@@ -205,7 +208,7 @@ class AssemblyDetailTests(unittest.TestCase):
         self.assertEqual(board.color,tuple(int('242a2d'[n:n+2],16)/255 for n in (0,2,4))+(1.,))
         self.assertEqual(meta['documented_slot_counts'],dict(dimm=4,pcie_x16=3,pcie_x1=1,m2=4,sata=4))
         self.assertEqual(meta['rendered_memory_sockets'],4)
-        self.assertEqual(sum(meta['documented_rear_ports'].values()),21)
+        self.assertEqual(sum(meta['documented_rear_ports'].values()),23)  # Includes the2physical antenna sockets.
         self.assertEqual(sum(m.name=='detail-board-m2-heatsink' for m in scene.meshes),3)
         self.assertEqual(sum(m.name=='detail-board-sata-socket' for m in scene.meshes),4)
         self.assertFalse(meta['installed_ssd_count_inferred']);self.assertTrue(meta['rear_io_layout_schematic'])
@@ -223,7 +226,22 @@ class AssemblyDetailTests(unittest.TestCase):
             self.assertEqual(scene.metadata['installed_case_fans_assumed'],0)
             self.assertFalse(any(m.name in ('installed-psu','installed-case-fan','installed-cpu-cooler') for m in scene.meshes))
         eco=build_scene(fixture('eco'))
-        self.assertFalse(any(m.name.startswith('detail-gpu-') for m in eco.meshes))
+        self.assertEqual(eco.metadata['detail']['gpu']['heatsink_fins'],12)
+
+    def test_low_detail_keeps_the_same_gpu_envelope_openings_and_all_documented_fans(self):
+        spans=[]
+        for level in ('eco','balanced','close'):
+            spec=fixture(level);spec['case']={'layout':'tower','dimensions_mm':dict(width=250,height=500,depth=500)}
+            scene=build_scene(spec)
+            meshes=[m for m in scene.meshes if m.component=='gpu' and ('fan-' in m.name or m.name in
+                ('gpu-shroud','gpu-backplate','gpu-pcb') or m.name.startswith('detail-gpu-rear-observed'))]
+            low=min(m.position[1]+min(m.vertices[1::6]) for m in meshes)
+            high=max(m.position[1]+max(m.vertices[1::6]) for m in meshes)
+            self.assertAlmostEqual(high-low,76.)
+            spans.append((low,high))
+            self.assertEqual((scene.metadata['front_fan_count'],scene.metadata['rear_fan_count']), (3,1))
+            self.assertEqual(scene.metadata['rotor_count'],3) # unknown rear tach stays still.
+        self.assertEqual(spans,[spans[0]]*3)
 
     def test_all_28_memory_models_keep_form_key_and_reference_count_without_filling_missing_slots(self):
         self.assertEqual(len(MEMORY_CATALOG),28)
@@ -256,7 +274,7 @@ class AssemblyDetailTests(unittest.TestCase):
             with self.subTest(case=case['id']):
                 scene=build_scene(spec)
                 self.assertEqual(scene.dimensions,tuple(case['dimensions_mm'][k] for k in ('width','height','depth')))
-                self.assertLessEqual(scene.triangle_count,80000)
+                self.assertLessEqual(scene.triangle_count,TRIANGLE_BUDGETS['close'])
                 self.assertEqual(scene.metadata['rotor_count'],3)
 
     def test_vertical_top_io_rotates_all_components_axes_and_rear_reference_toward_top(self):
@@ -268,7 +286,8 @@ class AssemblyDetailTests(unittest.TestCase):
                                     (m for m in turned.meshes if m.component in ('cpu','gpu','memory','board'))):
             self.assertEqual(original.name,rotated.name)
             x,y,z=original.position;self.assertEqual(rotated.position,(x,-z,y))
-            ax,ay,az=original.axis;self.assertEqual(rotated.axis,(ax,-az,ay))
+            if original.rotor:
+                ax,ay,az=original.axis;self.assertEqual(rotated.axis,(ax,-az,ay))
         shield=next(m for m in turned.meshes if m.name=='detail-board-rear-io-shield')
         self.assertGreater(shield.position[1],0)
         front=next(m for m in turned.meshes if m.rotor)

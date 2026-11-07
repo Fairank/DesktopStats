@@ -4,7 +4,7 @@ The meshes are scaled illustrations, not manufacturing CAD or a fit guarantee.
 Model dimensions/fan metadata must come from the existing reviewed catalog.
 Original code/art: PolyForm Noncommercial 1.0.0; third-party rights remain intact.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass,replace
 import math
 import struct
 
@@ -19,6 +19,7 @@ class Mesh:
     rotor: bool = False
     direction: int = 1
     axis: tuple = (0., 0., 1.)
+    part_id: str = ""
 
     @property
     def vertex_count(self):
@@ -280,6 +281,15 @@ _GLYPHS={
     'Y':('101','101','010','010','010'),'Z':('111','001','010','100','111'),
     'X':('101','101','010','101','101'),'D':('110','101','101','101','110'),
     'K':('101','101','110','101','101'),'F':('111','100','110','100','100'),
+    'B':('110','101','110','101','110'),
+    'A':('010','101','111','101','101'),'C':('011','100','100','100','011'),
+    'G':('011','100','101','101','011'),'H':('101','101','111','101','101'),
+    'M':('10001','11011','10101','10001','10001'),'O':('010','101','101','101','010'),
+    'P':('110','101','110','100','100'),'S':('011','100','010','001','110'),
+    'U':('101','101','101','101','111'),'V':('101','101','101','101','010'),
+    'W':('10001','10001','10101','11011','10001'),'-':('000','000','111','000','000'),
+    'J':('001','001','001','101','010'),'Q':('010','101','101','111','011'),
+    ' ':('0','0','0','0','0'),
 }
 
 
@@ -498,7 +508,6 @@ def build_scene(spec=None):
         for z in (-d*.34,d*.34):cube('case-foot',(23,12,30),(x,-h/2+6,z),dark)
     layout=case.get('layout','tower');dual=layout=='dual_chamber'
     board_x=0 if winged else -h*.12 if 'nas_split_chamber' in features else w*(.10 if dual else .36)
-    if dual:cube('rear-chamber-divider',(2,h-12,d-12),(w*.19,0,0),steel)
     if dual:
         cube('rear-chamber-shroud',(w*.28,h*.23,d*.44),(w*.34,-h*.32,-d*.25),dark)
     elif 'top_psu_shroud' in features:
@@ -508,12 +517,58 @@ def build_scene(spec=None):
     board=spec.get('board') or {};board_dims=board.get('dimensions_mm') or {}
     board_h=number(board_dims.get('height'),305,70,370);board_d=number(board_dims.get('width'),244,70,370)
     board_rear=-d/2+14.;board_z=board_rear+board_d/2;board_y=h*.02
+    from assembly_motherboard import (layout_anchors,enrich_motherboard,memory_slot_indices,final_anchors,
+                                     augment_attachment_anchors,attachment_bounds)
+    anchors=layout_anchors(spec,w,h,d,board_x,board_y,board_rear)
+    if anchors:
+        board_h=anchors['board']['height'];board_d=anchors['board']['width'];board_z=anchors['board']['z']
+    divider_aperture=None
+    if dual:
+        # A side-fan mounting bay is a physical opening, not a full opaque wall
+        # in front of every optional radiator. Its dimensions remain reference
+        # machining; documented fan support does not establish factory CAD.
+        from assembly_detail import perforated_plate,chamfer_rect
+        holes=[];side_mounts=[row for row in case.get('fan_mounts',()) if isinstance(row,dict) and row.get('position')=='side']
+        sizes=[value for row in side_mounts for value in row.get('size_mm',()) if isinstance(value,(int,float))]
+        if sizes:
+            aperture_w=min(d-36.,max(sizes)+8.);aperture_h=h-64.;center_z=d*.23
+            holes.append(tuple((x+center_z,y) for x,y in chamfer_rect(aperture_w,aperture_h,6.)))
+            divider_aperture=dict(center=(board_x+5.,0.,center_z),width_mm=aperture_w,height_mm=aperture_h,
+                method='documented_mount_reference_aperture',factory_cad_verified=False)
+        if case.get('id')=='hyte-y70' and anchors:
+            # These additional visible openings were observed in the official
+            # empty-case gallery; proportions and machining are simplified.
+            cp=anchors['cpu']['position']
+            holes.append(tuple((x+cp[2],y+cp[1]) for x,y in chamfer_rect(140.,150.,16.)))
+            for zz in (-d*.31,-d*.10):
+                holes.append(tuple((x+zz,y+h*.38) for x,y in chamfer_rect(82.,25.,4.)))
+        shape=perforated_plate(chamfer_rect(d-12,h-12,2.),holes,2.)
+        add('rear-chamber-divider',rotate_vertices(shape,'left'),steel,(board_x+5.,0.,0.))
+        if case.get('id')=='hyte-y70' and divider_aperture:
+            # Manual B17/18 shows the removable side mounting frame stepped
+            # back from the motherboard tray. The observed offset is a
+            # proportion, never an asserted factory dimension or fit guarantee.
+            plane_x=w*.34;az=divider_aperture['center'][2];aw=divider_aperture['width_mm'];ah=divider_aperture['height_mm']
+            for sign in (-1,1):
+                cube('case-side-mount-vertical-rail',(3.,ah+8.,5.),(plane_x,0.,az+sign*(aw/2+2.5)),steel)
+                cube('case-side-mount-horizontal-rail',(3.,5.,aw),(plane_x,sign*(ah/2+2.5),az),steel)
+            # The cold-floor fan bay sits below a raised, genuinely vented
+            # main-chamber deck. External case height includes this bay/base.
+            main_width=board_x+5.+w/2;deck_center=(-w/2+board_x+5.)/2
+            slots=[]
+            for index in range(12):
+                xx=-main_width*.44+index*main_width*.88/11
+                slots.append(tuple((x+xx,y) for x,y in chamfer_rect(main_width*.052,d-56.,1.)))
+            deck=perforated_plate(chamfer_rect(main_width-10.,d-28.,2.),slots,2.)
+            add('case-cold-floor-deck',rotate_vertices(deck,'down'),steel,(deck_center,-h/2+45.,0.))
     primary_pcie_y=board_y-board_h*.10;pcie_length=min(89.,board_d*.78)
     pcie_z=board_rear+15.+pcie_length/2
+    if anchors:primary_pcie_y=anchors['primary_pcie_y'];pcie_z=anchors['pcie_z']
     cube('motherboard-reference',(1.6,board_h,board_d),(board_x,board_y,board_z),green,'board')
     for index in range(3):
         cube('board-expansion-slot',(7,5,pcie_length),(board_x-6,primary_pcie_y-index*40.64,pcie_z),dark,'board')
     cpu=spec.get('cpu') or {};style=cpu.get('style','chip');cpu_y=board_y+board_h*.27;cpu_z=board_z-board_d*.13
+    if anchors:cpu_y=anchors['cpu']['y'];cpu_z=anchors['cpu']['z']
     pw,ph=(37.5,45.) if style=='lga_rect' else (40.,40.)
     cube('cpu-substrate',(2,ph,pw),(board_x-3,cpu_y,cpu_z),green,'cpu')
     lid_polygon=unit_polygon(cpu.get('lid_polygon'),pw,ph)
@@ -554,6 +609,10 @@ def build_scene(spec=None):
         mx=board_x-4 if short else board_x-memory_h/2-2
         my=cpu_y-index*(memory_h+4) if short else cpu_y-8
         mz=cpu_z+57 if short else cpu_z+57+index*10
+        if anchors and not short:
+            slots=anchors['dimm_centers'];slot_index=memory_slot_indices(count,len(slots))[index]
+            if slot_index<len(slots):my,mz=slots[slot_index][1:]
+            else:my,mz=slots[-1][1],slots[-1][2]+(slot_index-len(slots)+1)*9.
         orient=(lambda vertices:rotate_vertices(vertices,'left')) if short else memory_plane
         if pcb:add('ram-pcb',orient(extrude(pcb,1.2)),pcb_color,(mx,my,mz),'memory')
         else:cube('ram-pcb',(1.2,memory_h,memory_w) if short else (memory_h,memory_w,1.2),(mx,my,mz),pcb_color,'memory')
@@ -565,13 +624,14 @@ def build_scene(spec=None):
                 cube('ram-diffuser',(3.8,3,memory_w*.94) if short else (3,memory_w*.94,3.8),
                      (mx,my+memory_h*.55,mz) if short else (mx-memory_h*.55,my,mz),diffuser_color,'memory')
     gpu=spec.get('gpu') or {};appearance=gpu.get('appearance') or {}
-    fan_count=0
+    fan_count=0;gpu_anchor_position=None;gpu_anchor_size=None
     if gpu and gpu.get('present',True) is not False and appearance.get('style')!='gpu_integrated':
         facts=appearance.get('board_details') or {};nominal=facts.get('dimensions_mm') or {}
         length=number(gpu.get('length_mm'),number(nominal.get('length'),min(310,d*.70),80,450),80,450)
         width=number(gpu.get('width_mm'),number(nominal.get('height'),135,50,190),50,190)
         thickness=number(gpu.get('thickness_mm'),number(nominal.get('thickness'),55,8,110),8,110)
         gx=board_x-width*.48;gy=primary_pcie_y-thickness/2+3.3;gz=board_rear+length/2
+        gpu_anchor_position=(gx,gy,gz);gpu_anchor_size=(width,thickness,length)
         tones=gpu.get('colors') or {};body_color=color(tones.get('body'),'#536779')
         pcb_color=color(tones.get('pcb'),'#2f5960');metal_color=color(tones.get('metal'),'#b2c0cb')
         shell=unit_polygon(gpu.get('shell_polygon'),length,width)
@@ -629,33 +689,104 @@ def build_scene(spec=None):
     from assembly_detail import enrich_components,detail_level,component_level,TRIANGLE_BUDGETS
     level=detail_level(spec.get('detail_level'))
     meshes,component_details=enrich_components(meshes,spec)
+    meshes,motherboard_meta=enrich_motherboard(meshes,spec,anchors,component_level(spec,'board'))
+    if motherboard_meta:component_details['board']=motherboard_meta
+    # The same physical component keeps a stable identity across all of its
+    # submeshes, styles and rigid case poses. No extra instance is introduced.
+    memory_pcbs=[m for m in meshes if m.name=='ram-pcb']
+    identified=[]
+    for mesh in meshes:
+        part_id=mesh.part_id
+        if not part_id:
+            if mesh.component in ('cpu','gpu','board'):part_id=mesh.component+':0'
+            elif mesh.component=='memory' and memory_pcbs:
+                part_id='memory:'+str(min(range(len(memory_pcbs)),key=lambda n:sum((memory_pcbs[n].position[k]-mesh.position[k])**2 for k in range(3))))
+        identified.append(replace(mesh,part_id=part_id) if part_id!=mesh.part_id else mesh)
+    meshes=tuple(identified)
+    if anchors is None:
+        anchors=dict(case=case,case_dimensions=(w,h,d),
+            board=dict(x=board_x,y=board_y,z=board_z,position=(board_x,board_y,board_z),height=board_h,width=board_d,
+                rear_z=board_rear,normal=(-1.,0.,0.),up=(0.,1.,0.),along=(0.,0.,1.)),
+            cpu=dict(x=board_x-6.,y=cpu_y,z=cpu_z,position=(board_x-6.,cpu_y,cpu_z),normal=(-1.,0.,0.),
+                up=(0.,1.,0.),u=(0.,1.,0.),v=(0.,0.,-1.)),connectors={})
     # Case layout changes pose, never component dimensions. Known ATX/GPU sizes
     # can protrude from an incompatible compact case instead of shrinking.
-    vertical_gpu='vertical_gpu_mount' in features
+    vertical_gpu='vertical_gpu_mount' in features;gpu_mount_observation={}
+    identity_pose=lambda p:tuple(p)
+    board_pose=identity_pose;gpu_pose=identity_pose;gpu_vector=identity_pose
     if layout in ('vertical','horizontal') or vertical_gpu or winged:
         transformed=[]
         def pose(p):
             x,y,z=p
             return (z,y,-x) if winged else (x,-z,y) if layout=='vertical' else (y,-x,z)
+        board_pose=pose;gpu_pose=pose;gpu_vector=pose
+        if vertical_gpu and layout not in ('vertical','horizontal'):
+            board_pose=identity_pose
+            def gpu_vector(p):x,y,z=p;return (y,-x,z)
+            target=gpu_anchor_position
+            if case.get('id')=='hyte-y70' and gpu_anchor_size:
+                # Source-observed factory riser: PCB plane near 1/3 of case
+                # width from the glass, contact row near the cold-floor mount.
+                # This is a rigid pose, never a card-envelope adjustment.
+                gw,gt,gl=gpu_anchor_size
+                target=(-w*.16-(gt/2-3.3),-h/2+75.+gw*.48-5.2,gpu_anchor_position[2])
+                gpu_mount_observation=dict(method='official_photo_observed_factory_riser_reference',
+                    source='https://hyte.com/store/y70/cs-hyte-y70-ww',pcb_plane_x_mm=-w*.16,
+                    contact_row_y_mm=-h/2+75.,cad_verified=False,position_dimensions_verified=False)
+            def gpu_pose(p):
+                relative=tuple(p[i]-gpu_anchor_position[i] for i in range(3));rotated=gpu_vector(relative)
+                return tuple(rotated[i]+target[i] for i in range(3))
         for mesh in meshes:
             if mesh.component in ('board','cpu','memory','gpu'):
                 if vertical_gpu and layout not in ('vertical','horizontal'):
                     if mesh.component!='gpu':transformed.append(mesh);continue
-                    pivot=(gx,gy,gz)
                     def point_pose(p):
                         x,y,z=p;return (y,-x,z)
                     local=[]
                     for n in range(0,len(mesh.vertices),6):local.extend((*point_pose(mesh.vertices[n:n+3]),*point_pose(mesh.vertices[n+3:n+6])))
-                    relative=tuple(mesh.position[i]-pivot[i] for i in range(3));rotated=point_pose(relative)
-                    mesh=Mesh(mesh.name,tuple(local),mesh.color,tuple(rotated[i]+pivot[i] for i in range(3)),mesh.component,mesh.rotor,mesh.direction,point_pose(mesh.axis))
+                    mesh=Mesh(mesh.name,tuple(local),mesh.color,gpu_pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,point_pose(mesh.axis),mesh.part_id)
                     transformed.append(mesh);continue
                 out=[]
                 for n in range(0,len(mesh.vertices),6):out.extend((*pose(mesh.vertices[n:n+3]),*pose(mesh.vertices[n+3:n+6])))
-                mesh=Mesh(mesh.name,tuple(out),mesh.color,pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,pose(mesh.axis))
+                mesh=Mesh(mesh.name,tuple(out),mesh.color,pose(mesh.position),mesh.component,mesh.rotor,mesh.direction,pose(mesh.axis),mesh.part_id)
             transformed.append(mesh)
         meshes=transformed
+    attachment_anchors=final_anchors(anchors,board_pose,gpu_pose,gpu_anchor_position,gpu_anchor_size,spec,gpu_vector=gpu_vector)
+    cooling_meta={};auxiliary_meta={}
     from assembly_case_detail import enrich_case
     meshes=enrich_case(meshes,(w,h,d),case,component_level(spec,'case'))
+    attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
+    if case.get('id')=='hyte-y70':
+        main_center=(-w/2+board_x+5.)/2;main_span=board_x+5.+w/2-16.
+        attachment_anchors['case_floor_deck']=dict(position=(main_center,-h/2+45.,0.),normal=(0.,1.,0.),
+            thickness_mm=2.,method='official_photo_observed_raised_floor_reference',dimensions_verified=False,
+            source='https://hyte.com/store/y70/cs-hyte-y70-ww')
+        attachment_anchors['case_mount_planes']=dict(side=dict(position=(w*.34,0.,d*.23),
+            normal=(1.,0.,0.),up=(0.,1.,0.),stack_direction=(-1.,0.,0.),
+            method='official_manual_observed_recessed_mount_reference',dimensions_verified=False,
+            source='https://content.ibuypower.com/hyte/product-page-pdfs/y70-touch-15-language.pdf',page=11))
+        for mount,y,normal in (('top',h/2-12.,(0.,1.,0.)),('bottom',-h/2+10.,(0.,-1.,0.))):
+            attachment_anchors['case_mount_planes'][mount]=dict(position=(main_center,y,0.),normal=normal,up=(0.,0.,1.),
+                span_mm=(main_span,d-32.),method='official_manual_observed_main_chamber_mount_reference',
+                dimensions_verified=False,source='https://content.ibuypower.com/hyte/product-page-pdfs/y70-touch-15-language.pdf',page=11 if mount=='top' else 8)
+    from assembly_cooling import add_cooling
+    cooling_meshes,cooling_meta=add_cooling(meshes,spec,level,attachment_anchors)
+    gpu_cooler_replaced=cooling_meta.get('replace_gpu_cooler') is True
+    if gpu_cooler_replaced:
+        kept_gpu={'gpu-pcb','gpu-bracket','gpu-gold-contacts','detail-gpu-separated-edge-contacts',
+                  'detail-gpu-pcb-stack-edge','detail-gpu-port-recesses'}
+        meshes=tuple(m for m in meshes if m.component!='gpu' or m.name in kept_gpu or m.name.startswith('gpu-reference-port-'))
+    meshes=tuple((*meshes,*cooling_meshes));attachment_anchors['cooling']=cooling_meta
+    attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
+    from assembly_auxiliary import add_auxiliary
+    # A transient reference supplies exact hollow GPU geometry for bounded
+    # cable clearance. Never duplicate/upload it or persist Mesh objects in
+    # the JSON metadata returned to the rest of the application.
+    attachment_anchors['_gpu_clearance_meshes']=tuple(m for m in meshes if m.component=='gpu')
+    auxiliary_meshes,auxiliary_meta=add_auxiliary(spec,attachment_anchors,level)
+    attachment_anchors.pop('_gpu_clearance_meshes',None)
+    meshes=tuple((*meshes,*auxiliary_meshes))
+    added_bounds,added_notices=attachment_bounds(meshes,(w,h,d),case)
     budget=TRIANGLE_BUDGETS[level]-64
     triangles=sum(mesh.vertex_count//3 for mesh in meshes);removed=0
     if triangles>budget:
@@ -673,6 +804,8 @@ def build_scene(spec=None):
     fan_count+=observed_rear
     rear_count=sum(row.get('face')=='rear' for row in (gpu.get('fans') or []) if isinstance(row,dict))+observed_rear
     physical_count=appearance.get('fan_count') if type(appearance.get('fan_count')) is int else None
+    original_gpu_air_cooler_fans=physical_count
+    if gpu_cooler_replaced:fan_count=0;rear_count=0;physical_count=0
     meta=dict(case_id=case.get('id',''),schematic=True,geometry_unit='mm',installed_case_fans_assumed=0,
               front_fan_count=fan_count-rear_count,rear_fan_count=rear_count,rotor_count=sum(mesh.rotor for mesh in meshes),memory_count=actual_count,memory_rendered_count=count,
               physical_total_fans=physical_count,unplaced_fans=max(0,physical_count-fan_count) if physical_count is not None else None,
@@ -685,16 +818,23 @@ def build_scene(spec=None):
                 triangle_budget=TRIANGLE_BUDGETS[level],optional_detail_meshes_removed=removed,
                 memory_orientation='standing_dimm_or_flat_sodimm',case_detail_schematic=True,
                 canonical_board_rear_mm=board_rear,canonical_gpu_bracket_mm=board_rear,
-                mechanical_alignment_schematic=True)
-    from assembly_style import apply_colors,expression_vertices,resolve_style,style_for
-    visual_style=resolve_style(spec.get('visual_style'))
-    visual_policy=style_for(visual_style)
-    meshes=apply_colors(meshes,visual_style)
-    if visual_policy['expressions'] and panels.get('front')!='open':
-        meshes=(*meshes,Mesh('style-case-expression',expression_vertices((w,h,d)),
-                            visual_policy['ink']))
-    meta['visual_style']=visual_style
-    meta['decorative_expression']=visual_policy['expressions'] and any(m.name=='style-case-expression' for m in meshes)
+                mechanical_alignment_schematic=True,motherboard=motherboard_meta,
+                attachment_anchors=attachment_anchors,cooling=cooling_meta,auxiliary=auxiliary_meta,
+                attachment_bounds=added_bounds,attachment_notices=added_notices,
+                attachments_outside_reference=added_notices,divider_aperture=divider_aperture,
+                gpu_mount_observation=gpu_mount_observation,
+                gpu_air_cooler_replaced=gpu_cooler_replaced,original_gpu_air_cooler_fans=original_gpu_air_cooler_fans)
+    hardware_parts=[]
+    for component,identity,label in (('cpu','cpu:0',(spec.get('cpu') or {}).get('label','CPU')),
+            ('gpu','gpu:0',gpu.get('label','GPU')),('board','board:0',motherboard_meta.get('model_label',board.get('label','Motherboard')))):
+        if any(m.part_id==identity for m in meshes):hardware_parts.append(dict(id=identity,label=label or component.upper(),kind=component,model_id=motherboard_meta.get('model_id','') if component=='board' else ''))
+    for index in range(len(memory_pcbs)):
+        module=modules[index] if isinstance(modules,list) and index<len(modules) and isinstance(modules[index],dict) else {}
+        hardware_parts.append(dict(id='memory:'+str(index),label=(module.get('label') or 'Memory')+' '+str(index+1),kind='memory',model_id=memory_models[index] if index<len(memory_models) else ''))
+    meta['hardware']=dict(parts=hardware_parts)
+    from assembly_style import apply_model_styles
+    meshes,style_meta=apply_model_styles(meshes,spec.get('visual_style'),spec.get('part_styles',{}),(w,h,d),panels)
+    meta.update(style_meta)
     return Scene(tuple(meshes),(w,h,d),meta)
 
 

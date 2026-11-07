@@ -43,6 +43,8 @@ class AssemblyPageTests(unittest.TestCase):
         qmlRegisterType(MaterialSurface, "DesktopStats", 1, 0, "MaterialSurface")
 
     def setUp(self):
+        if os.environ.get('DESKTOP_STATS_ASSEMBLY_PAGE_PROOF'):
+            Path(os.environ['DESKTOP_STATS_ASSEMBLY_PAGE_PROOF']).mkdir(parents=True,exist_ok=True)
         self.enterContext(patch("ctypes.WinDLL", side_effect=AssertionError("No native API")))
         self.enterContext(patch("subprocess.Popen", side_effect=AssertionError("No process")))
         self.enterContext(patch.object(controls, "save"))
@@ -172,7 +174,7 @@ class AssemblyPageTests(unittest.TestCase):
             found_label = None
             while pending:
                 item = pending.pop()
-                if item.property("text") == self.controller.tr("内存"):
+                if item.property("text") == self.controller.tr("内存") and item.width()>=100:
                     found_label = item
                     break
                 pending.extend(item.childItems())
@@ -183,7 +185,7 @@ class AssemblyPageTests(unittest.TestCase):
 
     def test_new_assembly_copy_has_all_eight_language_entries(self):
         keys = set()
-        for filename in ("native/AssemblyPage.qml", "assembly_window.py"):
+        for filename in ("native/AssemblyPage.qml", "native/AssemblyParts.qml", "assembly_window.py"):
             source = (ROOT/filename).read_text(encoding="utf-8")
             keys.update(re.findall(r'(?:ui\.t|controller\.tr|self\.controller\.tr)\("([^"]+)"\)', source))
         keys.update(("自动识别 / 参考机箱", "参考机箱（未识别）", "处理器未识别", "显卡未识别",
@@ -200,6 +202,52 @@ class AssemblyPageTests(unittest.TestCase):
         for language in set(LANGUAGES)-{"zh-CN"}:
             for key in keys:
                 self.assertTrue(MESSAGES[language].get(key), (language,key))
+
+    def test_reference_hardware_and_mixed_styles_edit_only_preferences_in_the_actual_page(self):
+        self.show_assembly(width=720,height=600)
+        before=copy.deepcopy(self.controller.draft)
+        cpu=self.find('assemblyReference_cpu_model');gpu=self.find('assemblyReference_gpu_model')
+        self.assertGreaterEqual(len(gpu.property('model')),148)
+        cpu.picked.emit('amd-9950x');gpu.picked.emit(gpu.property('model')[-1]['id'])
+        self.app.processEvents()
+        self.assertFalse(self.controller.assembly_specification()['cpu']['telemetry_bound'])
+        self.assertFalse(self.controller.assembly_specification()['gpu']['telemetry_bound'])
+        self.find('assemblyAddMemory').clicked.emit();self.app.processEvents()
+        memory=self.find('assemblyMemory_0');memory.picked.emit(memory.property('model')[-1]['id'])
+        self.app.processEvents()
+        self.assertEqual(self.controller.draft['assembly']['memory_models'],[memory.property('model')[-1]['id']])
+        self.find('assemblyPartStyle_gpu').picked.emit('notebook_line')
+        self.app.processEvents()
+        self.assertEqual(self.controller.draft['assembly']['part_styles'],{'gpu':'notebook_line'})
+        self.find('assemblyResetPartStyles').clicked.emit();self.app.processEvents()
+        self.assertEqual(self.controller.draft['assembly']['part_styles'],{})
+        for language in LANGUAGES:
+            self.controller.change('language',language);QTest.qWait(10)
+            for name in ('assemblyReference_cpu_model','assemblyReference_gpu_model','assemblyMemory_0','assemblyBoardChoice','assemblyPartStyle_gpu'):
+                item=self.find(name)
+                point=item.mapToScene(QPointF(0,0))
+                self.assertGreaterEqual(point.x(),self.window.property('railWidth'))
+                self.assertLessEqual(point.x()+item.width(),720)
+                self.assertGreater(item.width(),200)
+        self.assertEqual(self.controller.draft['top_bar'],before['top_bar'])
+        self.assertEqual(self.controller.draft['widgets'],before['widgets'])
+        self.assertEqual(self.controller.scopeDirty,dict(desktop=False,preferences=True,topbar=False))
+        self.snapshot.assert_called_once();self.modules.assert_called_once()
+
+    def test_gpu_brand_and_series_filters_keep_the_reference_choice_and_do_not_edit_preferences(self):
+        self.show_assembly()
+        self.controller.changeAssembly('gpu_model','asus-astral-5090');self.app.processEvents()
+        before=copy.deepcopy(self.controller.draft)
+        self.find('assemblyGpuBrandFilter').picked.emit('MSI');self.app.processEvents()
+        gpu=self.find('assemblyReference_gpu_model')
+        self.assertTrue(all(not row['id'] or row['brand']=='MSI' for row in gpu.property('model')))
+        self.assertIn('ASTRAL',gpu.property('displayText').upper())
+        series=self.find('assemblyGpuSeriesFilter');rows=series.property('model')
+        self.assertGreater(len(rows),1)
+        selected=rows[-1]['id'];series.picked.emit(selected);self.app.processEvents()
+        gpu=self.find('assemblyReference_gpu_model')
+        self.assertTrue(all(not row['id'] or row['series_id']==selected for row in gpu.property('model')))
+        self.assertEqual(self.controller.draft,before)
 
     def test_brand_filter_changes_only_picker_and_keeps_the_current_model_label(self):
         self.show_assembly()

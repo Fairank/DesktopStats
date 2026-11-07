@@ -77,7 +77,7 @@ ScrollView {
                 model:[{label:ui.t("处理器"),value:root.info.cpu_label || "—"},
                        {label:ui.t("显卡"),value:(root.info.gpu_label || "—")+(root.info.gpu_source==="manual"?" · "+ui.t("手动外观"):"")},
                        {label:ui.t("内存"),value:(root.info.memory_label || "—")+" · "+(root.info.memory_count || 0)+" "+ui.t("条")},
-                       {label:ui.t("主板"),value:root.info.board_label || "—"}]
+                       {label:ui.t("主板"),value:(root.info.board_label || "—")+(root.info.board_source==="manual"?" · "+ui.t("手动外观"):"")}]
                 RowLayout {
                     required property var modelData
                     Layout.fillWidth:true;spacing:18
@@ -86,6 +86,7 @@ ScrollView {
                 }
             }
         }
+        AssemblyParts {Layout.fillWidth:true;config:root.config;caseInfo:root.info}
         SettingsGroup {
             Layout.fillWidth:true;title:ui.t("查看方式")
             SettingRow {id:assemblyDetailSetting;Layout.fillWidth:true;label:ui.t("模型细节");note:ui.t("精细适合日常查看，近看细节用于局部观察。")

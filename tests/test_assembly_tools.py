@@ -15,7 +15,7 @@ from PySide6.QtTest import QTest,QSignalSpy
 from PySide6.QtWidgets import QApplication
 
 import native_controller as controls
-from assembly_config import HARDWARE_ICON_STYLES,STYLE_LABELS,validate_assembly,visual_style
+from assembly_config import DEFAULT_ASSEMBLY,HARDWARE_ICON_STYLES,STYLE_LABELS,validate_assembly,visual_style
 from stats_config import DEFAULT,validate
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -77,9 +77,10 @@ class AssemblyToolsTests(unittest.TestCase):
 
     def test_old_preferences_default_to_static_automatic_assembly_and_invalid_types_fail(self):
         old=copy.deepcopy(DEFAULT);old.pop('assembly')
-        self.assertEqual(validate(old)['assembly'],dict(case_model='',exploded=False,fan_animation=False,appearance_style='follow',detail_level='balanced',selection_effects=True))
+        self.assertEqual(validate(old)['assembly'],DEFAULT_ASSEMBLY)
         prior=dict(case_model='hyte-y60',exploded=True,fan_animation=False)
-        self.assertEqual(validate_assembly(prior),dict(prior,appearance_style='follow',detail_level='balanced',selection_effects=True))
+        expected=copy.deepcopy(DEFAULT_ASSEMBLY);expected.update(prior)
+        self.assertEqual(validate_assembly(prior),expected)
         for value in ([],dict(case_model='../bad'),dict(fan_animation=1),dict(exploded='yes'),
                       dict(appearance_style='unknown'),dict(appearance_style=1),dict(appearance_style=None),
                       dict(detail_level='ultra'),dict(detail_level=None),dict(detail_level=True),
@@ -117,6 +118,26 @@ class AssemblyToolsTests(unittest.TestCase):
         self.assertEqual(self.ui.saved['assembly']['case_model'],'hyte-y60')
         self.assertEqual(self.ui.saved['top_bar'],bar)
 
+    def test_complete_reference_edits_only_preferences_and_reuses_identity_cache(self):
+        self.ui.setAssemblyActive(True)
+        self.ui.changeWidget('cpu','title','Keep draft');self.ui.changeTopBar('height',40)
+        bar=copy.deepcopy(self.ui.draft['top_bar']);widgets=copy.deepcopy(self.ui.draft['widgets'])
+        self.ui.useAssemblyReference('aio')
+        spec=self.ui.assembly_specification()
+        self.assertEqual(spec['cooling']['cpu_cooler'],'arctic-liquid-freezer-iii-360')
+        self.assertEqual(spec['auxiliary']['psu']['model_id'],'corsair-rm1000x-2024')
+        self.assertEqual(self.ui.draft['top_bar'],bar);self.assertEqual(self.ui.draft['widgets'],widgets)
+        self.snapshot.assert_called_once();self.modules.assert_called_once()
+        with patch.object(controls,'save'):self.assertTrue(self.ui.applyPreferences())
+        self.assertEqual(self.ui.saved['assembly']['fan_motion'],'demo')
+        self.assertEqual(self.ui.draft['widgets']['cpu']['title'],'Keep draft')
+        choices=self.ui.assemblyParts
+        for group,baseline,example in (('boards',7,'asus-rog-strix-z790-a-wifi-d4'),
+                ('coolers',27,'noctua-nh-u12a'),('fans',27,'arctic-p12-pwm'),
+                ('psus',7,'corsair-rm1000x-2024')):
+            self.assertGreaterEqual(len(choices[group]),baseline)
+            self.assertIn(example,{row['id'] for row in choices[group]})
+
     def test_follow_reacts_to_bar_style_once_but_explicit_style_ignores_later_bar_changes(self):
         self.ui.setAssemblyActive(True)
         spy=QSignalSpy(self.ui.assemblyChanged)
@@ -133,6 +154,35 @@ class AssemblyToolsTests(unittest.TestCase):
         self.assertEqual(spy.count(),3)
         for bad in (None,[],False,'unknown'):
             self.assertEqual(visual_style(dict(top_bar=dict(hardware_icon_style=bad))),'miniature')
+
+    def test_individual_style_changes_and_reset_stay_in_preferences(self):
+        self.ui.setAssemblyActive(True)
+        before=copy.deepcopy(self.ui.draft)
+        self.ui.changeAssemblyPartStyle('fans:side:0','notebook_line')
+        self.ui.changeAssemblyPartStyle('gpu','miniature')
+        self.assertEqual(self.ui.assembly_specification()['part_styles'],
+                         {'fans:side:0':'notebook_line','gpu':'miniature'})
+        self.ui.changeAssemblyPartStyle('gpu','follow')
+        self.assertEqual(self.ui.draft['assembly']['part_styles'],{'fans:side:0':'notebook_line'})
+        self.assertEqual(self.ui.draft['top_bar'],before['top_bar'])
+        self.assertEqual(self.ui.draft['widgets'],before['widgets'])
+        self.assertEqual(self.ui.scopeDirty,dict(desktop=False,preferences=True,topbar=False))
+        self.ui.resetAssemblyPartStyles()
+        self.assertEqual(self.ui.draft['assembly']['part_styles'],{})
+
+    def test_reference_models_never_drive_another_devices_rotors(self):
+        self.ui._data=dict(time=time.time(),cpu_name='Intel Core i7-13700KF',cpu_fan_rpm=1200,
+            gpus={'0':dict(gpu_name='RTX 5090',gpu_fan_rpm=1500,gpu_fan_rpm_timestamp=time.time(),
+                gpu_fan_rpm_scope='card',gpu_fan_rpm_semantics='driver_current_rpm',gpu_fan_rpm_source='synthetic')})
+        self.ui.setAssemblyActive(True)
+        self.assertTrue(self.ui.assembly_cpu_fan_state()['available'])
+        self.ui.changeAssembly('cpu_model','amd-9950x')
+        from hardware_appearance import CATALOG
+        model=next(row[0] for row in CATALOG if row[1]=='gpu')
+        self.ui.changeAssembly('gpu_model',model)
+        self.assertFalse(self.ui.assembly_cpu_fan_state()['available'])
+        self.assertFalse(self.ui.assembly_fan_state()['available'])
+        self.snapshot.assert_called_once();self.modules.assert_called_once()
 
     def test_shared_clock_only_ticks_while_opted_in_then_retires(self):
         engine=QQmlEngine();warnings=[]

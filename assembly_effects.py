@@ -23,7 +23,11 @@ _POLICIES = {
     "sketch":(12,850,"铅笔交叉排线","Fine crossed pencil hatches reveal in an uneven drawn sweep."),
     "notebook_smile":(13,720,"手账双圈印记","A small double-ring ink stamp settles without changing the model."),
 }
-COMPONENTS = ("case","gpu","cpu","memory","board")
+COMPONENTS = ("case","gpu","cpu","memory","board","cooler","fans","psu","storage","expansion","cables")
+
+
+def component_family(value):
+    return value.split(':',1)[0] if isinstance(value,str) else ''
 
 
 def effect_for(style):
@@ -38,10 +42,11 @@ def effect_sample(style,elapsed_ms,component="gpu"):
     valid=type(elapsed_ms) in (int,float) and math.isfinite(elapsed_ms)
     elapsed=max(0.,float(elapsed_ms)) if valid else float(policy['duration_ms'])
     progress=min(1.,elapsed/policy['duration_ms'])
-    active=component in COMPONENTS and valid and elapsed<policy['duration_ms']
-    return dict(style=policy['style'],component=component if component in COMPONENTS else '',
+    known=component_family(component) in COMPONENTS
+    active=known and valid and elapsed<policy['duration_ms']
+    return dict(style=policy['style'],component=component if known else '',
                 kind=policy['kind'],progress=progress,amount=math.sin(math.pi*progress) if active else 0.,
-                active=active)
+                active=active,elapsed_ms=elapsed)
 
 
 class SelectionEffect:
@@ -50,7 +55,7 @@ class SelectionEffect:
         self.style='miniature';self.component='';self.elapsed_ms=0.;self.active=False
 
     def start(self,style,component):
-        if component not in COMPONENTS:return False
+        if component_family(component) not in COMPONENTS:return False
         self.style=effect_for(style)['style'];self.component=component
         self.elapsed_ms=0.;self.active=True;return True
 

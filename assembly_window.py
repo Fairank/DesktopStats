@@ -5,13 +5,14 @@ import time
 
 from PySide6.QtCore import Qt, Signal, Slot, QUrl
 from PySide6.QtQml import QQmlComponent
-from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QPushButton,QCheckBox,QComboBox,QSizePolicy)
+from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QPushButton,QCheckBox,QComboBox,QSizePolicy,QScrollArea,QFrame)
 
 from assembly_profiles import bake_profiles
 from assembly_config import HARDWARE_ICON_STYLES,detail_choices,style_choices
 from assembly_inspection import COMPONENT_LABELS,snapshot as inspection_snapshot
 from stats_config import ASSETS
 from top_bar_feedback import GPU_FAN_MAX_AGE
+from assembly_effects import component_family
 
 
 class AssemblyWindow(QWidget):
@@ -32,7 +33,8 @@ class AssemblyWindow(QWidget):
         if viewport_factory is None:
             from assembly_viewer import AssemblyViewport
             viewport_factory=AssemblyViewport
-        self._geometry_key=None;self._last_fan={};self._spec=None;self._renderer_error=False
+        self._geometry_key=None;self._last_fan={};self._last_cpu_fan={};self._spec=None;self._renderer_error=False
+        self._profile_key=None;self._profile_shapes=None
         self.selected_component='all';self.inspection_state=None;self._inspection_columns=0
         self.setAttribute(Qt.WA_DeleteOnClose,True)
         self.setWindowTitle(controller.tr("整机视图")+" · Desktop Stats")
@@ -51,12 +53,17 @@ class AssemblyWindow(QWidget):
         self.focus_choice=QComboBox();self.focus_choice.setAccessibleName(controller.tr("查看部件"))
         for label,key in (("整机","all"),("显卡","gpu"),("处理器","cpu"),("内存","memory"),("主板","board"),("机箱","case")):
             self.focus_choice.addItem(controller.tr(label),key)
+        for key in ('cooler','fans','psu','storage','expansion','cables'):
+            self.focus_choice.addItem(controller.tr(COMPONENT_LABELS[key]),key)
         header.addWidget(self.focus_choice)
         reset=QPushButton(controller.tr("重置视角"));header.addWidget(reset)
         layout.addLayout(header)
         self.hint=QLabel(controller.tr("拖动旋转 · 滚轮缩放")+" · "+controller.tr("单击部件查看状态")
                         +" · "+controller.tr("风扇按实际转速的 1/120 展示"))
         self.hint.setWordWrap(True);layout.addWidget(self.hint)
+        self.fit_notice=QLabel();self.fit_notice.setWordWrap(True);self.fit_notice.setTextFormat(Qt.PlainText)
+        self.fit_notice.setStyleSheet('font-size:11px;color:'+('#edc57e' if dark else '#8a5922')+';')
+        self.fit_notice.hide();layout.addWidget(self.fit_notice)
         style_row=QHBoxLayout();style_row.addWidget(QLabel(controller.tr("整机外观")))
         self.style_choice=QComboBox();self.style_choice.setAccessibleName(controller.tr("整机外观"))
         for row in style_choices(controller.tr):self.style_choice.addItem(row['label'],row['id'])
@@ -107,12 +114,26 @@ class AssemblyWindow(QWidget):
         self.detail_choice.setAccessibleName(controller.tr('模型细节'))
         for row in detail_choices(controller.tr):self.detail_choice.addItem(row['label'],row['id'])
         detail_row.addWidget(self.detail_choice);inspector_layout.addLayout(detail_row)
-        scene_row.addWidget(inspector);layout.addLayout(scene_row,1)
+        self.part_style_choice=QComboBox();self.part_style_choice.setObjectName('assemblyPartStyleChoice')
+        for row in style_choices(controller.tr):
+            self.part_style_choice.addItem(controller.tr('跟随默认外观') if row['id']=='follow' else row['label'],row['id'])
+        self.part_style_choice.setAccessibleName(controller.tr('此部件外观'))
+        inspector_layout.addWidget(QLabel(controller.tr('此部件外观')));inspector_layout.addWidget(self.part_style_choice)
+        self.reference_choice=QComboBox();self.reference_choice.setObjectName('assemblyReferenceChoice')
+        for label,key in (("载入参考装机",""),("风冷参考装机","air"),("一体水冷参考装机","aio"),("分体水冷参考装机","loop")):
+            self.reference_choice.addItem(controller.tr(label),key)
+        self.reference_choice.setAccessibleName(controller.tr('载入参考装机'))
+        inspector_layout.addWidget(self.reference_choice)
+        inspector_scroll=QScrollArea();inspector_scroll.setObjectName('assemblyInspectorScroll')
+        inspector_scroll.setWidgetResizable(True);inspector_scroll.setFrameShape(QFrame.NoFrame)
+        inspector_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff);inspector_scroll.setFixedWidth(262)
+        inspector_scroll.setWidget(inspector);scene_row.addWidget(inspector_scroll);layout.addLayout(scene_row,1)
         tools=QHBoxLayout()
         self.exploded=QCheckBox(controller.tr("展开组件"));tools.addWidget(self.exploded)
         self.animate=QCheckBox(controller.tr("风扇随转速转动"));tools.addWidget(self.animate)
         tools.addStretch(1)
         self.status=QLabel(controller.tr("比例示意 · 未知部件保留标记"));tools.addWidget(self.status)
+        self.status.setWordWrap(True);self.status.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
         layout.addLayout(tools)
         self.exploded.toggled.connect(lambda value:controller.changeAssembly("exploded",value))
         self.animate.toggled.connect(lambda value:controller.changeAssembly("fan_animation",value))
@@ -120,6 +141,9 @@ class AssemblyWindow(QWidget):
             lambda _:controller.changeAssembly("appearance_style",self.style_choice.currentData()))
         self.selection_effects.toggled.connect(lambda value:controller.changeAssembly('selection_effects',value))
         self.detail_choice.currentIndexChanged.connect(lambda _:controller.changeAssembly('detail_level',self.detail_choice.currentData()))
+        self.reference_choice.activated.connect(self._load_reference)
+        self.part_style_choice.activated.connect(lambda _:controller.changeAssemblyPartStyle(
+            self.selected_component,self.part_style_choice.currentData()) if self.selected_component!='all' else None)
         self.preview_effect.clicked.connect(lambda:self.viewport.preview_effect(
             self.focus_choice.currentData() if self.focus_choice.currentData()!='all'
             else self.selected_component if self.selected_component!='all' else 'case'))
@@ -147,8 +171,11 @@ class AssemblyWindow(QWidget):
 
     def synchronize(self,spec):
         if self._closing:return
+        previous_spec=self._spec
         self._spec=copy.deepcopy(spec)
         geometry={key:spec[key] for key in ('case','gpu','cpu','memory','board')}
+        geometry.update(cooling=spec.get('cooling',{}),auxiliary=spec.get('auxiliary',{}))
+        geometry['part_styles']=spec.get('part_styles',{})
         resolved=spec.get('visual_style','miniature')
         if resolved not in HARDWARE_ICON_STYLES:resolved='miniature'
         geometry['visual_style']=resolved
@@ -157,10 +184,26 @@ class AssemblyWindow(QWidget):
         geometry['detail_level']=detail
         signature=json.dumps(geometry,sort_keys=True,ensure_ascii=True)
         if signature!=self._geometry_key:
-            baked=bake_profiles(spec,self.engine)
+            profile_key=json.dumps({key:spec[key] for key in ('gpu','cpu','memory')},sort_keys=True,ensure_ascii=True)
+            if profile_key!=self._profile_key:
+                baked=bake_profiles(spec,self.engine)
+                self._profile_shapes={key:baked[key] for key in ('gpu','cpu','memory')}
+                self._profile_key=profile_key
+            else:baked=dict(spec,**copy.deepcopy(self._profile_shapes))
             baked['visual_style']=resolved
             baked['detail_level']=detail
-            self.viewport.set_scene(baked);self._geometry_key=signature
+            try:self.viewport.set_scene(baked)
+            except ValueError:
+                self._spec=previous_spec
+                self.fit_notice.setText(self.controller.tr('暂未应用本次视图更改，请减少配件或调整模型细节。'))
+                self.fit_notice.setVisible(True)
+                return
+            self._geometry_key=signature
+            self._refresh_part_choices()
+            from assembly_parts import fit_messages
+            notes=fit_messages(spec,getattr(getattr(self.viewport,'scene',None),'metadata',{}))
+            self.fit_notice.setText(' · '.join(self.controller.tr(note) for note in notes))
+            self.fit_notice.setVisible(bool(notes))
         options=spec['options']
         self.detail_choice.blockSignals(True);self.detail_choice.setCurrentIndex(self.detail_choice.findData(detail))
         self.detail_choice.blockSignals(False)
@@ -173,6 +216,8 @@ class AssemblyWindow(QWidget):
         self.selection_effects.blockSignals(False)
         self.viewport.set_selection_effects_enabled(options.get('selection_effects',True))
         self.viewport.set_exploded(options['exploded'])
+        self._sync_part_style()
+        if hasattr(self.viewport,'set_fan_motion'):self.viewport.set_fan_motion(options.get('fan_motion','measured'))
         self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled and not self._renderer_error)
         self.title.setText(self.controller.tr(spec['case']['label']))
         self.update_readings()
@@ -180,10 +225,22 @@ class AssemblyWindow(QWidget):
     def update_readings(self):
         if self._closing or not self.isVisible() or self.isMinimized():return
         self._last_fan=self.controller.assembly_fan_state()
+        from assembly_feedback import cpu_fan_state
+        self._last_cpu_fan=(self.controller.assembly_cpu_fan_state() if hasattr(self.controller,'assembly_cpu_fan_state')
+                            else cpu_fan_state(getattr(self.controller,'readings',{})))
+        # A rejected draft may differ from the model still on screen. Gate
+        # against the applied scene as well as the controller's current draft.
+        if self._spec and self._spec.get('gpu',{}).get('telemetry_bound') is False:
+            self._last_fan=dict(available=False,rpm=None)
+        if self._spec and self._spec.get('cpu',{}).get('telemetry_bound') is False:
+            self._last_cpu_fan=dict(available=False,rpm=None)
         motion=self.controller.motionEnabled and not self._renderer_error
         self.viewport.set_motion_enabled(motion)
         self.viewport.set_fan_state(self._last_fan.get('rpm'),self._last_fan.get('available') is True,
                                     self._last_fan.get('timestamp'))
+        if hasattr(self.viewport,'set_cpu_fan_state'):
+            self.viewport.set_cpu_fan_state(self._last_cpu_fan.get('rpm'),self._last_cpu_fan.get('available') is True,
+                                           self._last_cpu_fan.get('timestamp'))
         enabled=bool(self._spec and self._spec['options']['fan_animation'] and self.controller.motionEnabled
                      and not self._renderer_error)
         self.viewport.set_fan_animation_enabled(enabled)
@@ -197,18 +254,28 @@ class AssemblyWindow(QWidget):
 
     def _component_selected(self,name):
         if self._closing:return
-        name=name if name in COMPONENT_LABELS else 'all'
+        name=name if component_family(name) in COMPONENT_LABELS else 'all'
         changed=name!=self.selected_component
         self.selected_component=name
         self.component_choice.blockSignals(True)
         self.component_choice.setCurrentIndex(self.component_choice.findData(name))
         self.component_choice.blockSignals(False)
         if changed or self.inspection_state is None:self._update_inspection()
+        self._sync_part_style()
+
+    def _sync_part_style(self):
+        if not self._spec:return
+        self.part_style_choice.blockSignals(True)
+        selected=self._spec.get('part_styles',{}).get(self.selected_component,'follow')
+        self.part_style_choice.setCurrentIndex(self.part_style_choice.findData(selected))
+        self.part_style_choice.setEnabled(self.selected_component!='all')
+        self.part_style_choice.blockSignals(False)
 
     def _update_inspection(self):
         if self._closing or not self._spec or not self.isVisible() or self.isMinimized():return
         state=inspection_snapshot(getattr(self.controller,'readings',{}),self._spec,
-                                  getattr(self.controller,'draft',{}),self.selected_component)
+                                  getattr(self.controller,'draft',{}),self.selected_component,
+                                  scene_metadata=getattr(getattr(self.viewport,'scene',None),'metadata',{}))
         if state==self.inspection_state:return
         self.inspection_state=state
         self.components.setText(' · '.join(self.controller.tr(part) for part in state['identity_parts']))
@@ -241,6 +308,10 @@ class AssemblyWindow(QWidget):
         elif self._spec and self._spec['options']['fan_animation']:
             if not self.controller.motionEnabled:
                 text=self.controller.tr("动效已关闭")
+            elif self._spec['options'].get('fan_motion')=='demo':
+                text=self.controller.tr('参考转动（非实测）')+' · 1200 RPM / 120'
+            elif component_family(self.selected_component)=='cooler' and self._last_cpu_fan.get('available') is True:
+                text='CPU_FAN '+str(round(self._last_cpu_fan['rpm']))+' RPM · '+self.controller.tr('代表通道')
             elif self._last_fan.get('available') is True:
                 text=self.controller.tr("显卡风扇")+" "+str(round(self._last_fan['rpm']))+" RPM"
             else:
@@ -248,6 +319,25 @@ class AssemblyWindow(QWidget):
         else:
             text=self.controller.tr("比例示意 · 未知部件保留标记")
         if self.status.text()!=text:self.status.setText(text)
+
+    def _load_reference(self,index):
+        kind=self.reference_choice.itemData(index)
+        if kind and hasattr(self.controller,'useAssemblyReference'):self.controller.useAssemblyReference(kind)
+        self.reference_choice.setCurrentIndex(0)
+
+    def _refresh_part_choices(self):
+        metadata=getattr(getattr(self.viewport,'scene',None),'metadata',{})
+        parts=[]
+        for group in ('hardware','cooling','auxiliary'):
+            parts.extend(row for row in metadata.get(group,{}).get('parts',())
+                         if isinstance(row,dict) and row.get('id') and row.get('label'))
+        for choice in (self.component_choice,self.focus_choice):
+            selected=choice.currentData() or 'all';choice.blockSignals(True);choice.clear()
+            for key,label in COMPONENT_LABELS.items():choice.addItem(self.controller.tr(label),key)
+            if parts:choice.insertSeparator(choice.count())
+            for row in parts:choice.addItem(row['label'],row['id'])
+            index=choice.findData(selected);choice.setCurrentIndex(index if index>=0 else 0)
+            choice.blockSignals(False)
 
     def _clock_active(self,active):
         if hasattr(self,'_clock') and self._clock is not None:
@@ -259,7 +349,12 @@ class AssemblyWindow(QWidget):
         timestamp=self._last_fan.get('timestamp')
         if (type(timestamp) not in (int,float) or not 0<=time.time()-timestamp<=GPU_FAN_MAX_AGE) and self._last_fan.get('available') is True:
             self._last_fan=dict(available=False)
-            self.viewport.set_fan_state(None,False);self._update_status()
+            self.viewport.set_fan_state(None,False);self._update_status();self._update_inspection()
+        cpu_stamp=self._last_cpu_fan.get('timestamp')
+        if (type(cpu_stamp) not in (int,float) or not 0<=time.time()-cpu_stamp<=GPU_FAN_MAX_AGE) and self._last_cpu_fan.get('available') is True:
+            self._last_cpu_fan=dict(available=False)
+            if hasattr(self.viewport,'set_cpu_fan_state'):self.viewport.set_cpu_fan_state(None,False)
+            self._update_status();self._update_inspection()
         self.viewport.advance_animations(elapsed)
 
     def showEvent(self,event):
@@ -272,6 +367,7 @@ class AssemblyWindow(QWidget):
     def _dispose(self):
         if self._closing:return
         self._closing=True
+        self._profile_shapes=None;self._profile_key=None
         self._clock_active(False)
         if self._clock is not None:
             self._clock.setProperty('backend',None);self._clock.deleteLater();self._clock=None

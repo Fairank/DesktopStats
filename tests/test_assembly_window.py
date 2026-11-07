@@ -106,6 +106,47 @@ class AssemblyWindowTests(unittest.TestCase):
         self.assertEqual(self.window.viewport.fan[0],1400)
         self.assertIn('1400 RPM',self.window.status.text())
 
+    def test_rejected_complex_scene_preserves_the_last_view_and_can_recover(self):
+        before=copy.deepcopy(self.window._spec);signature=self.window._geometry_key
+        changed=copy.deepcopy(before);changed['part_styles']={'gpu':'notebook_line'}
+        with patch.object(self.window.viewport,'set_scene',side_effect=ValueError('detail budget')):
+            self.window.synchronize(changed)
+        self.assertEqual(self.window._spec,before)
+        self.assertEqual(self.window._geometry_key,signature)
+        self.assertTrue(self.window.fit_notice.isVisible())
+        self.assertIn('暂未应用',self.window.fit_notice.text())
+        self.window.synchronize(changed)
+        self.assertNotEqual(self.window._geometry_key,signature)
+        self.assertEqual(self.window._spec,changed)
+        self.assertFalse(self.window.fit_notice.isVisible())
+
+    def test_style_detail_and_case_changes_reuse_existing_hardware_profiles(self):
+        with patch('assembly_window.bake_profiles',side_effect=AssertionError('Do not rebake unchanged hardware')):
+            self.controller.changeAssembly('appearance_style','notebook_line')
+            self.controller.changeAssembly('detail_level','close')
+            changed=copy.deepcopy(self.controller.spec);changed['case']['id']='another-reference'
+            changed['cooling']={'cpu_cooler':'noctua-nh-u12a'}
+            self.window.synchronize(changed)
+        actual=self.window.viewport.scenes[-1]
+        self.assertEqual(actual['case']['id'],'another-reference')
+        self.assertEqual(actual['cooling']['cpu_cooler'],'noctua-nh-u12a')
+        self.assertEqual(actual['detail_level'],'close')
+
+    def test_failed_draft_cannot_drive_retained_reference_parts_from_actual_tachometers(self):
+        reference=copy.deepcopy(self.window._spec)
+        reference['gpu']['telemetry_bound']=False;reference['cpu']['telemetry_bound']=False
+        self.window.synchronize(reference)
+        self.assertFalse(self.window._last_fan['available'])
+        actual=copy.deepcopy(reference);actual['gpu']['telemetry_bound']=True;actual['cpu']['telemetry_bound']=True
+        self.controller.spec=actual
+        self.controller.readings.update(cpu_fan_rpm=1200,time=time.time())
+        with patch.object(self.window.viewport,'set_scene',side_effect=ValueError('detail budget')):
+            self.window.synchronize(actual)
+        self.window.update_readings()
+        self.assertFalse(self.window._spec['gpu']['telemetry_bound'])
+        self.assertFalse(self.window.viewport.fan[1])
+        self.assertFalse(self.window._last_cpu_fan['available'])
+
     def test_stored_native_screen_identity_is_used_instead_of_friendly_qt_label(self):
         first,second=object(),object();native={first:r'\\.\DISPLAY1',second:r'\\.\DISPLAY37'}
         bar=dict(monitor_mode='selected',screens=[r'\\.\DISPLAY37'])

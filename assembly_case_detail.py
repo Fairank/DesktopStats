@@ -116,7 +116,12 @@ def _port_meshes(io,dimensions,case):
 
 def enrich_case(meshes,dimensions,case,level='balanced'):
     """Replace crude case surfaces and append bounded batched mechanical detail."""
-    if level=='eco':return tuple(meshes)
+    if level=='eco':
+        # A lower detail level may simplify machining, but a source-known
+        # physical connector must remain present if cables attach to it.
+        details=case.get('exterior_details') or {};io=details.get('io') if isinstance(details,dict) else None
+        ports=_port_meshes(io,dimensions,case) if isinstance(io,dict) else ()
+        return tuple((*meshes,*ports))
     from assembly_geometry import Mesh,box,ring,color
     w,h,d=dimensions;close=level=='close';result=[];batches={}
     def batch(name,vertices,tone,position=(0,0,0),component='case'):

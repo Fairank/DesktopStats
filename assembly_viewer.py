@@ -16,7 +16,8 @@ from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from assembly_geometry import build_scene, number, vertex_bytes
 from assembly_style import edge_batches,material_for,style_for
-from assembly_effects import SelectionEffect
+from assembly_effects import SelectionEffect,component_family,effect_for,effect_sample
+from assembly_scene_cache import SceneCache
 from top_bar_feedback import GPU_FAN_MAX_AGE
 
 GL_FLOAT=0x1406
@@ -62,7 +63,16 @@ def ray_triangle(origin,direction,a,b,c):
     return distance if distance>=0 else None
 
 
+def mesh_phase(mesh,phase):
+    value=phase.get(getattr(mesh,'part_id',''),phase.get(mesh.component,0.)) if isinstance(phase,dict) else phase
+    return float(value) if type(value) in (int,float) and math.isfinite(value) else 0.
+
+
+ASSEMBLY_COMPONENTS=('all','gpu','cpu','memory','board','case','cooler','fans','psu','storage','expansion','cables')
+
+
 def posed_point(mesh,point,shift=(0.,0.,0.),phase=0.):
+    phase=mesh_phase(mesh,phase)
     if mesh.rotor and phase:
         x,y,z=point;axis=mesh.axis;length=math.sqrt(sum(v*v for v in axis))
         if length:
@@ -208,11 +218,18 @@ class AssemblyRenderer:
         self._pick_inverse=None;self._pick_projection=None;self._pick_camera_key=None
         self._pick_state=None;self.upload_count=0;self.draw_count=0
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
+        self._mesh_policies={};self._frame_effect_samples={};self._frame_shade=None
+        self._wide_lines=False
 
     def initialize(self):
         self.functions=QOpenGLFunctions_3_3_Core()
         if not self.functions.initializeOpenGLFunctions():
             raise RuntimeError('OpenGL 3.3 is unavailable')
+        # Some strict core contexts only accept unit-width lines. Probe once,
+        # then keep the portable path; no state query is needed per frame.
+        self.functions.glLineWidth(1.6)
+        self._wide_lines=self.functions.glGetError()==0
+        self.functions.glLineWidth(1.)
         self.program=QOpenGLShaderProgram()
         if not self.program.addShaderFromSourceCode(QOpenGLShader.Vertex,VERTEX_SHADER):
             raise RuntimeError('3-D vertex shader could not be compiled')
@@ -230,8 +247,14 @@ class AssemblyRenderer:
 
     def upload(self,scene):
         if self.program is None:raise RuntimeError('3-D context is not ready')
-        self.scene=scene;raw=vertex_bytes(scene);self.policy=style_for(scene.metadata.get('visual_style'))
-        self._materials={id(mesh):material_for(mesh,self.policy['id']) for mesh in scene.meshes}
+        self.scene=scene;raw=vertex_bytes(scene)
+        self.policy=style_for(scene.metadata.get('canvas_style',scene.metadata.get('visual_style')))
+        styles=scene.metadata.get('mesh_style_ids')
+        if not isinstance(styles,(tuple,list)) or len(styles)!=len(scene.meshes):
+            styles=[scene.metadata.get('visual_style','miniature')]*len(scene.meshes)
+        policies={identity:style_for(identity) for identity in dict.fromkeys(styles)}
+        self._mesh_policies={id(mesh):policies[identity] for mesh,identity in zip(scene.meshes,styles)}
+        self._materials={id(mesh):material_for(mesh,identity) for mesh,identity in zip(scene.meshes,styles)}
         self._shadow_key=None
         self.ranges=[];start=0
         for mesh in scene.meshes:
@@ -239,7 +262,7 @@ class AssemblyRenderer:
         # Static crease ink shares the same immutable VBO; no second context,
         # retained raster, draw timer or geometry upload is needed for styles.
         self.edge_ranges=[];chunks=[raw];self.edge_segments=0
-        for mesh,vertices in edge_batches(scene.meshes,self.policy['id']):
+        for mesh,vertices in edge_batches(scene.meshes,self.policy['id'],styles):
             count=len(vertices)//6
             self.edge_ranges.append((mesh,start,count));start+=count;self.edge_segments+=count//2
             chunks.append(struct.pack('<'+str(len(vertices))+'f',*vertices))
@@ -247,7 +270,8 @@ class AssemblyRenderer:
         self.buffer.bind();self.buffer.setUsagePattern(QOpenGLBuffer.StaticDraw)
         self.buffer.allocate(raw,len(raw));self.buffer.release()
         self.bounds={};self.pick_bounds={};self._pick_camera_key=None
-        for focus in ('all','gpu','cpu','memory','board','case'):
+        targets=(*ASSEMBLY_COMPONENTS,*dict.fromkeys(getattr(mesh,'part_id','') for mesh in scene.meshes if getattr(mesh,'part_id','')))
+        for focus in targets:
             rows=[mesh for mesh in scene.meshes if self._selected(mesh,focus)]
             if not rows:continue
             for exploded in (False,True):
@@ -266,13 +290,17 @@ class AssemblyRenderer:
 
     @staticmethod
     def _selected(mesh,focus):
-        return focus=='all' or mesh.component==focus or focus=='case' and mesh.component=='panel'
+        return (focus=='all' or mesh.component==focus or bool(focus) and getattr(mesh,'part_id','')==focus
+                or focus=='case' and mesh.component=='panel')
 
     def _shift(self,mesh,exploded):
         if not exploded:return (0,0,0)
         w,h,d=self.scene.dimensions
         return {'panel':(-w*.43,0,d*.11),'gpu':(-w*.54,-h*.02,d*.32),
-                'cpu':(-w*.58,h*.20,0),'memory':(-w*.32,h*.16,d*.12)}.get(mesh.component,(0,0,0))
+                'cpu':(-w*.58,h*.20,0),'memory':(-w*.32,h*.16,d*.12),
+                'cooler':(-w*.72,h*.30,0),'fans':(w*.45,h*.10,d*.22),
+                'psu':(w*.42,-h*.22,-d*.20),'storage':(w*.45,-h*.15,d*.28),
+                'expansion':(-w*.40,-h*.22,d*.22)}.get(mesh.component,(0,0,0))
 
     def _scalar(self,name,value):
         # Use the explicit GL scalar entry point. PySide's overloaded Qt setter
@@ -298,7 +326,7 @@ class AssemblyRenderer:
         self._shadow_key=key;self._shadow_parameters=(point,inverse)
         return self._shadow_parameters
 
-    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None):
+    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.):
         f=self.functions
         if f is None or self.scene is None:return
         f.glViewport(0,0,max(1,width),max(1,height))
@@ -325,6 +353,7 @@ class AssemblyRenderer:
             self._pick_camera_key=camera_key
         self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus)
         self._frame_effect=effect if isinstance(effect,dict) and effect.get('active') is True else None
+        self._frame_effect_samples={}
         self.program.bind();self.vao.bind()
         self.program.setUniformValue('eyePosition',eye)
         self.program.setUniformValue('paperColor',QVector4D(*background))
@@ -336,6 +365,7 @@ class AssemblyRenderer:
         self.program.setUniformValue('effectScale',QVector3D(*effect_scale))
         self._scalar('backgroundMode',0.)
         self._scalar('shadeMix',self.policy['shading'])
+        self._frame_shade=self.policy['shading']
         if self.policy['paper_grid'] or self.policy['contact_shadow']:
             f.glDisable(GL_DEPTH_TEST);f.glDepthMask(False)
             self._scalar('backgroundMode',1. if self.policy['paper_grid'] else 2.)
@@ -352,21 +382,27 @@ class AssemblyRenderer:
         transparent=[]
         for row in self.ranges:
             if not self._selected(row[0],focus):continue
+            policy=self._mesh_policies.get(id(row[0]),self.policy)
             if row[0].color[3]<1:transparent.append(row)
             else:self._draw_part(row,projection,view,exploded,phase,
-                    tone=background if self.policy['line_only'] else self._highlight_tone(row[0],selected))
+                    tone=background if policy['line_only'] else self._highlight_tone(row[0],selected))
         # Glass is drawn last without writing depth; opaque internal parts remain.
         f.glDepthMask(False)
         for row in transparent:
-            if not self.policy['line_only']:
+            if not self._mesh_policies.get(id(row[0]),self.policy)['line_only']:
                 self._draw_part(row,projection,view,exploded,phase,tone=self._highlight_tone(row[0],selected))
         f.glDepthMask(True)
         if self.edge_ranges:
             f.glDisable(GL_POLYGON_OFFSET_FILL);f.glDepthFunc(GL_LEQUAL);f.glLineWidth(1.)
             self._scalar('shadeMix',0.)
-            ink=self.policy['dark_ink' if dark else 'ink']
+            self._frame_shade=0.
+            line_width=1.
             for row in self.edge_ranges:
                 if self._selected(row[0],focus):
+                    policy=self._mesh_policies.get(id(row[0]),self.policy)
+                    stroke_width=max(1.,min(8.,policy['line_width']*number(pixel_scale,1.,.5,8.))) if self._wide_lines else 1.
+                    if stroke_width!=line_width:f.glLineWidth(stroke_width);line_width=stroke_width
+                    ink=policy['dark_ink' if dark else 'ink']
                     tone=(.28,.74,1.,1.) if dark else (.05,.47,.78,1.)
                     self._draw_part(row,projection,view,exploded,phase,mode=GL_LINES,
                                     tone=tone if self._matches_selection(row[0],selected) else ink)
@@ -375,7 +411,8 @@ class AssemblyRenderer:
 
     @staticmethod
     def _matches_selection(mesh,selected):
-        return bool(selected) and (mesh.component==selected or selected=='case' and mesh.component=='panel')
+        return bool(selected) and (mesh.component==selected or getattr(mesh,'part_id','')==selected
+                                   or selected=='case' and mesh.component=='panel')
 
     def _highlight_tone(self,mesh,selected):
         if not self._matches_selection(mesh,selected):return None
@@ -403,21 +440,22 @@ class AssemblyRenderer:
         direction=tuple(end[n]-origin[n] for n in range(3));length=math.sqrt(sum(v*v for v in direction))
         if not length:return ''
         direction=tuple(v/length for v in direction);focus=state['focus']
-        allowed=('cpu','memory','gpu','board','case') if focus=='all' else (focus,)
+        allowed=ASSEMBLY_COMPONENTS[1:] if focus=='all' else (focus,)
         candidates=[]
         for component in allowed:
             bounds=self.pick_bounds.get((component,state['exploded']))
-            if bounds is not None and ray_box(origin,direction,*bounds) is not None:candidates.append(component)
+            if bounds is not None and ray_box(origin,direction,*bounds) is not None:candidates.append(component_family(component))
         hits={};opaque_case=float('inf')
         for mesh in self.scene.meshes:
             component='case' if mesh.component=='panel' else mesh.component
-            if component not in candidates or mesh.name.startswith('style-'):continue
+            if component not in candidates or mesh.name.startswith('style-') or not self._selected(mesh,focus):continue
+            target=getattr(mesh,'part_id','') or component
             shift=self._shift(mesh,state['exploded']);vertices=mesh.vertices
             points=[posed_point(mesh,vertices[n:n+3],shift,state['phase']) for n in range(0,len(vertices),6)]
             for n in range(0,len(points),3):
                 hit=ray_triangle(origin,direction,*points[n:n+3])
                 if hit is not None:
-                    if hit<hits.get(component,float('inf')):hits[component]=hit
+                    if hit<hits.get(target,float('inf')):hits[target]=hit
                     if component=='case' and mesh.color[3]>=.999:opaque_case=min(opaque_case,hit)
         hardware=[(distance,component) for component,distance in hits.items() if component!='case']
         if hardware:
@@ -427,20 +465,29 @@ class AssemblyRenderer:
 
     def _draw_part(self,row,projection,view,exploded,phase,*,mode=GL_TRIANGLES,tone=None):
         mesh,start,count=row
+        policy=self._mesh_policies.get(id(mesh),self.policy)
         model=QMatrix4x4();x,y,z=mesh.position
         shift=self._shift(mesh,exploded);x+=shift[0];y+=shift[1];z+=shift[2]
         model.translate(x,y,z)
-        if mesh.rotor:model.rotate(phase*mesh.direction,*mesh.axis)
+        if mesh.rotor:model.rotate(mesh_phase(mesh,phase)*mesh.direction,*mesh.axis)
         self.program.setUniformValue('matrix',projection*view*model)
         self.program.setUniformValue('modelMatrix',model)
         self.program.setUniformValue('normalMatrix',model.normalMatrix())
         self.program.setUniformValue('baseColor',QVector4D(*(mesh.color if tone is None else tone)))
+        shade=0. if mode==GL_LINES else policy['shading']
+        if shade!=self._frame_shade:self._scalar('shadeMix',shade);self._frame_shade=shade
         material=self._materials.get(id(mesh),(0.,1.,0.,0.)) if mode!=GL_LINES else (0.,1.,0.,0.)
         self.program.setUniformValue('surfaceMaterial',QVector4D(*material))
         effect=self._frame_effect
         if effect and self._matches_selection(mesh,effect.get('component')):
-            params=(number(effect.get('kind'),0,0,13),number(effect.get('progress'),1,0,1),
-                    number(effect.get('amount'),0,0,1),1. if mode==GL_LINES else 0.)
+            sample=effect
+            if 'elapsed_ms' in effect:
+                identity=policy['id']
+                if identity not in self._frame_effect_samples:
+                    self._frame_effect_samples[identity]=effect_sample(identity,effect['elapsed_ms'],effect['component'])
+                sample=self._frame_effect_samples[identity]
+            params=(number(sample.get('kind'),0,0,13),number(sample.get('progress'),1,0,1),
+                    number(sample.get('amount'),0,0,1),1. if mode==GL_LINES else 0.)
         else:params=(0.,0.,0.,1. if mode==GL_LINES else 0.)
         self.program.setUniformValue('effectParams',QVector4D(*params))
         self.functions.glDrawArrays(mode,start,count)
@@ -453,6 +500,7 @@ class AssemblyRenderer:
         self.scene=None;self.ranges=[];self.edge_ranges=[];self.edge_segments=0;self.bounds={};self.pick_bounds={};self._uniforms={}
         self._pick_inverse=self._pick_projection=self._pick_camera_key=self._pick_state=None
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
+        self._mesh_policies={};self._frame_effect_samples={};self._frame_shade=None
 
 
 class AssemblyViewport(QOpenGLWidget):
@@ -474,8 +522,13 @@ class AssemblyViewport(QOpenGLWidget):
         self.setMinimumSize(320,240);self.setFocusPolicy(Qt.StrongFocus)
         self.setAccessibleName('3D assembly preview')
         self._renderer=AssemblyRenderer();self._scene=build_scene({});self._pending=True
+        self._scene_cache=SceneCache()
         self._yaw=-34.;self._pitch=18.;self._zoom=1.;self._exploded=False;self._dark=False
         self._phase=0.;self._rpm=0.;self._fan_available=False;self._animate=False;self._active=False
+        self._cpu_phase=0.;self._cpu_rpm=0.;self._cpu_available=False;self._cpu_expiry=0.
+        self._cpu_tach_usable=False
+        self._real_cpu_rotor_parts=()
+        self._demo=False;self._demo_phase=0.
         self._fan_expiry=0.
         self._effect=SelectionEffect();self._effect_active=False;self._clock_active_state=False
         self._motion=True;self._selection_effects=True
@@ -491,6 +544,7 @@ class AssemblyViewport(QOpenGLWidget):
         return dict(meshes=len(self._scene.meshes),triangles=self._scene.triangle_count,
                     geometry_uploads=self._renderer.upload_count,draws=self._renderer.draw_count,
                     fan_animation_active=self._active,phase=self._phase,error=self._error,
+                    cpu_phase=self._cpu_phase,demo_motion=self._demo,
                     focus=self._focus,
                     visual_style=self._scene.metadata.get('visual_style','miniature'),
                     static_ink_segments=self._renderer.edge_segments,
@@ -500,10 +554,16 @@ class AssemblyViewport(QOpenGLWidget):
                     framebuffer_cap='host controls widget dimensions; no multisampling or post-processing')
 
     def set_scene(self,spec):
-        scene=build_scene(spec)
+        scene=self._scene_cache.build(spec)
         if scene==self._scene:return
         self._effect.cancel()
-        self._scene=scene;self._pending=True;self.sceneChanged.emit();self._update_animation_state();self.update()
+        self._scene=scene;self._pending=True
+        self._cpu_tach_usable=scene.metadata.get('cooling',{}).get('cpu_fan_tach_usable') is True
+        self._real_cpu_rotor_parts=tuple(scene.metadata.get('cooling',{}).get('real_cpu_rotor_parts') or ())
+        if ':' in self._selected and not any(getattr(mesh,'part_id','')==self._selected for mesh in scene.meshes):
+            self._selected='';self.componentSelected.emit('all')
+        if ':' in self._focus and not any(getattr(mesh,'part_id','')==self._focus for mesh in scene.meshes):self._focus='all'
+        self.sceneChanged.emit();self._update_animation_state();self.update()
 
     def set_fan_state(self,rpm,available=True,timestamp=None):
         valid=available is True and type(rpm) in (int,float) and math.isfinite(rpm) and 0<=rpm<=100000
@@ -518,6 +578,17 @@ class AssemblyViewport(QOpenGLWidget):
 
     def set_fan_animation_enabled(self,enabled):
         self._animate=enabled is True;self._update_animation_state()
+
+    def set_fan_motion(self,mode):
+        self._demo=mode=='demo';self._update_animation_state()
+
+    def set_cpu_fan_state(self,rpm,available=True,timestamp=None):
+        valid=available is True and type(rpm) in (int,float) and math.isfinite(rpm) and 0<=rpm<=12000
+        age=time.time()-timestamp if type(timestamp) in (int,float) and math.isfinite(timestamp) else GPU_FAN_MAX_AGE+1
+        valid=valid and 0<=age<=GPU_FAN_MAX_AGE
+        self._cpu_rpm=float(rpm) if valid else 0.;self._cpu_available=valid
+        self._cpu_expiry=time.monotonic()+max(0.,GPU_FAN_MAX_AGE-age) if valid else 0.
+        self._update_animation_state()
 
     def set_motion_enabled(self,enabled):
         self._motion=enabled is True
@@ -534,18 +605,27 @@ class AssemblyViewport(QOpenGLWidget):
     def preview_effect(self,component='case'):
         if (self._closed or self._error or not self._motion or not self._selection_effects
                 or not self.isVisible() or self.window().isMinimized()):return False
-        if self._focus!='all' and self._focus!=component:return False
+        if self._focus!='all' and self._focus not in (component,component_family(component)):return False
         if not any(AssemblyRenderer._matches_selection(mesh,component) for mesh in self._scene.meshes):return False
-        if not self._effect.start(self._scene.metadata.get('visual_style'),component):return False
+        styles=self._scene.metadata.get('mesh_style_ids') or [self._scene.metadata.get('visual_style','miniature')]*len(self._scene.meshes)
+        policies=[effect_for(style) for mesh,style in zip(self._scene.meshes,styles)
+                  if AssemblyRenderer._matches_selection(mesh,component)]
+        longest=max(policies,key=lambda policy:policy['duration_ms'])
+        if not self._effect.start(longest['style'],component):return False
         self._update_animation_state();self.update();return True
 
     def _step_fans(self,elapsed_ms):
         if self._fan_available and time.monotonic()>self._fan_expiry:
             self._fan_available=False;self._update_animation_state()
+        if getattr(self,'_cpu_available',False) and time.monotonic()>self._cpu_expiry:
+            self._cpu_available=False;self._update_animation_state()
         if not self._active:return False
         elapsed=number(elapsed_ms,0,0,136)
         if elapsed<=0:return False
-        self._phase=(self._phase+elapsed*self._rpm*360/(60000*120))%360
+        if self._fan_available:self._phase=(self._phase+elapsed*self._rpm*360/(60000*120))%360
+        if getattr(self,'_cpu_tach_usable',False) and getattr(self,'_cpu_available',False):
+            self._cpu_phase=(self._cpu_phase+elapsed*self._cpu_rpm*360/(60000*120))%360
+        if getattr(self,'_demo',False):self._demo_phase=(self._demo_phase+elapsed*1200*360/(60000*120))%360
         return True
 
     def advance_fans(self,elapsed_ms):
@@ -570,24 +650,26 @@ class AssemblyViewport(QOpenGLWidget):
     def reset_camera(self):
         layout=self._scene.metadata.get('case_layout')
         self._yaw=-34.;self._pitch=18.;self._zoom=1.
-        if self._focus=='gpu':
+        family=component_family(self._focus)
+        if family=='gpu':
             if layout=='vertical':self._yaw=145.;self._pitch=10.
             elif self._scene.metadata.get('gpu_mount')=='vertical':self._yaw=-76.;self._pitch=12.
             else:self._pitch=-62.
-        elif self._focus=='memory':
+        elif family=='memory':
             self._yaw=-20.;self._pitch=-55. if layout=='vertical' else 60. if layout=='horizontal' else 12.
-        elif self._focus in ('cpu','board'):
+        elif family in ('cpu','board','cooler'):
             self._yaw=-80.;self._pitch=60. if layout=='horizontal' else 12.
+        elif family in ('storage','expansion','psu'):self._yaw=-52.;self._pitch=24.
         self.update()
 
     def focus_component(self,name):
-        if name not in ('all','case','gpu','cpu','memory','board'):return False
+        if component_family(name) not in ASSEMBLY_COMPONENTS:return False
         if name!='all' and not any(AssemblyRenderer._selected(mesh,name) for mesh in self._scene.meshes):return False
         self._focus=name;self._update_animation_state();self.reset_camera();self.focusChanged.emit(name);return True
 
     def select_component(self,name):
         selected='' if name=='all' else name
-        if selected not in ('','case','cpu','memory','gpu','board'):return False
+        if selected and component_family(selected) not in ASSEMBLY_COMPONENTS:return False
         if selected!=self._selected:
             self._selected=selected;self.componentSelected.emit(selected or 'all')
             preview=getattr(self,'preview_effect',None)
@@ -602,15 +684,20 @@ class AssemblyViewport(QOpenGLWidget):
     def _update_animation_state(self):
         visible=bool(not self._closed and not self._error and self.isVisible() and not self.window().isMinimized())
         motion=getattr(self,'_motion',True)
-        active=bool(visible and motion and self._animate and self._fan_available and self._rpm>0
-                    and time.monotonic()<=self._fan_expiry
-                    and self._focus in ('all','gpu')
-                    and any(mesh.rotor for mesh in self._scene.meshes))
+        def eligible(mesh):
+            if not mesh.rotor or not AssemblyRenderer._selected(mesh,self._focus):return False
+            if getattr(self,'_demo',False):return True
+            if mesh.component=='gpu':return self._fan_available and self._rpm>0 and time.monotonic()<=self._fan_expiry
+            if mesh.component=='cooler':return (getattr(mesh,'part_id','') in getattr(self,'_real_cpu_rotor_parts',())
+                                                and getattr(self,'_cpu_tach_usable',False) and getattr(self,'_cpu_available',False) and self._cpu_rpm>0
+                                                and time.monotonic()<=self._cpu_expiry)
+            return False
+        active=bool(visible and motion and self._animate and any(eligible(mesh) for mesh in self._scene.meshes))
         self._active=active
         effect=getattr(self,'_effect',None)
         if effect is not None:
             if (not visible or not motion or not self._selection_effects
-                    or self._focus!='all' and self._focus!=effect.component):effect.cancel()
+                    or self._focus!='all' and self._focus not in (effect.component,component_family(effect.component))):effect.cancel()
             self._effect_active=bool(effect.active and visible and motion and self._selection_effects)
         combined=active or getattr(self,'_effect_active',False)
         if combined!=getattr(self,'_clock_active_state',False):
@@ -628,12 +715,16 @@ class AssemblyViewport(QOpenGLWidget):
         try:
             if self._pending:self._renderer.upload(self._scene);self._pending=False
             ratio=self.devicePixelRatioF()
+            phase=self._phase
+            if hasattr(self,'_cpu_phase'):
+                phase=({key:self._demo_phase for key in ('gpu','cooler','fans','psu')} if self._demo
+                       else dict(gpu=self._phase,**{key:self._cpu_phase for key in self._real_cpu_rotor_parts}))
             options=dict(yaw=self._yaw,pitch=self._pitch,zoom=self._zoom,exploded=self._exploded,
-                         phase=self._phase,dark=self._dark,focus=self._focus)
+                         phase=phase,dark=self._dark,focus=self._focus)
             if getattr(self,'_selected',''):options['selected']=self._selected
             effect=getattr(self,'_effect',None)
             if effect is not None and effect.active:options['effect']=effect.sample()
-            self._renderer.draw(round(self.width()*ratio),round(self.height()*ratio),**options)
+            self._renderer.draw(round(self.width()*ratio),round(self.height()*ratio),pixel_scale=ratio,**options)
         except Exception as error:
             self._error=str(error);self._update_animation_state();self.rendererError.emit('3-D rendering could not be completed')
 
@@ -683,4 +774,4 @@ class AssemblyViewport(QOpenGLWidget):
         self.makeCurrent();self._renderer.close();self.doneCurrent();self._pending=True
 
     def closeEvent(self,event):
-        self._closed=True;self._update_animation_state();self.release_resources();super().closeEvent(event)
+        self._closed=True;self._update_animation_state();self.release_resources();self._scene_cache.clear();super().closeEvent(event)

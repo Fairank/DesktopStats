@@ -135,7 +135,7 @@ class AssemblyGeometryTests(unittest.TestCase):
         self.assertEqual(scene.metadata['rear_fan_count'],1)
         self.assertEqual(scene.metadata['rotor_count'],3)
         self.assertEqual(scene.metadata['detail']['gpu']['rear_rotation_direction'],'unverified')
-        self.assertEqual(build_scene({'gpu':{'appearance':value},'detail_level':'eco'}).metadata['unplaced_fans'],1)
+        self.assertEqual(build_scene({'gpu':{'appearance':value},'detail_level':'eco'}).metadata['unplaced_fans'],0)
 
     def test_same_input_rebuilds_same_buffers_without_render_or_polling_state(self):
         spec={'cpu':{'style':'am5'},'memory':{'count':2}}
@@ -208,7 +208,7 @@ class AssemblyGeometryTests(unittest.TestCase):
             devicePixelRatioF=lambda:1.5,width=lambda:800,height=lambda:600)
         AssemblyViewport.paintGL(widget)
         renderer.upload.assert_not_called()
-        renderer.draw.assert_called_once_with(1200,900,yaw=-80.,pitch=12.,zoom=.9,
+        renderer.draw.assert_called_once_with(1200,900,pixel_scale=1.5,yaw=-80.,pitch=12.,zoom=.9,
             exploded=True,phase=35.,dark=True,focus='cpu')
 
     def test_all_64_cases_keep_source_dimensions_and_no_installed_fan_guess(self):

@@ -1,5 +1,30 @@
 # Changes
 
+## 0.35.0-preview.1
+
+- Add 16 exact motherboard layouts from official manuals, with distinct socket,
+  DIMM, PCIe, M.2, header and rear-I/O positions. Keep photo-unverified exterior
+  finishes visibly marked as reference; do not invent PCB circuits or CAD precision.
+- Add 26 cooling references, 26 fan models, six PSUs, five storage devices and
+  three expansion cards. Preserve product envelopes and distinct grilles,
+  heatsinks, pumps, tubing and connectors. The custom loop is a reference
+  combination rather than a retail product or an installed-hardware claim.
+- Select reference CPUs, GPUs and individual memory modules independently from
+  the top bar. Do not borrow installed temperatures, power or tachometers for
+  replacement reference models. Report unknown selections and basic socket,
+  memory-generation, slot-count and case-support conflicts.
+- Mix all 13 existing styles per component family or individual part; retain
+  physical meshes and one shared finite animation clock. Original remains
+  expression-free. Add GPU brand/series filters without changing saved models.
+- Add explicit air, AIO and CPU/GPU custom-loop reference configurations,
+  recessed PSU and storage connections, and original reference cable routes.
+  Unverified connections remain unconnected and are reported rather than forced.
+- Correct the Y70 vertical GPU reference pose and side-cooling divider opening.
+  Bound static geometry and retained ink; no additional hardware sampler,
+  background service, rendering engine or downloaded model is introduced.
+- Publish a reproducible brand/series/product inventory and preserve the
+  existing noncommercial license and third-party notices.
+
 ## 0.34.0-preview.1
 
 - Replace solid GPU slabs with perforated thin shells, recessed fan openings,
