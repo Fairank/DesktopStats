@@ -1,6 +1,1823 @@
 {
   "machine_inventory": false,
   "market_exhaustive": false,
+  "optional_products": [
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Pentium G4560",
+      "model_id": "intel-g4560",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Pentium",
+      "socket": "LGA1151",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/97143/intel-pentium-processor-g4560-3m-cache-3-50-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Celeron G5905",
+      "model_id": "intel-g5905",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Celeron",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/201899/intel-celeron-processor-g5905-4m-cache-3-50-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-870",
+      "model_id": "intel-870",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1156",
+      "source_urls": [
+        "https://www.intel.com/content/dam/support/us/en/documents/processors/corei7/sb/intelcorei7comparisonchartrev8.pdf",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-2600K",
+      "model_id": "intel-2600k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1155",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/52214/intel-core-i72600k-processor-8m-cache-up-to-3-80-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-3770K",
+      "model_id": "intel-3770k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1155",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/65523/intel-core-i73770k-processor-8m-cache-up-to-3-90-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-4790K",
+      "model_id": "intel-4790k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1150",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/80807/intel-core-i74790k-processor-8m-cache-up-to-4-40-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-6700K",
+      "model_id": "intel-6700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1151",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/88195/intel-core-i76700k-processor-8m-cache-up-to-4-20-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-7700K",
+      "model_id": "intel-7700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1151",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/97129/intel-core-i77700k-processor-8m-cache-up-to-4-50-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-8700K",
+      "model_id": "intel-8700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1151",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/126684/intel-core-i78700k-processor-12m-cache-up-to-4-70-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-9900K",
+      "model_id": "intel-9900k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i9",
+      "socket": "LGA1151",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/186605/intel-core-i99900k-processor-16m-cache-up-to-5-00-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-10900K",
+      "model_id": "intel-10900k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i9",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/199332/intel-core-i910900k-processor-20m-cache-up-to-5-30-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-10700K",
+      "model_id": "intel-10700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/199335/intel-core-i710700k-processor-16m-cache-up-to-5-10-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i5-10600K",
+      "model_id": "intel-10600k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i5",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/199311/intel-core-i510600k-processor-12m-cache-up-to-4-80-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-11900K",
+      "model_id": "intel-11900k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i9",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/212325/intel-core-i911900k-processor-16m-cache-up-to-5-30-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-11700K",
+      "model_id": "intel-11700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i7",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/212047/intel-core-i711700k-processor-16m-cache-up-to-5-00-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 37.5,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i5-11600K",
+      "model_id": "intel-11600k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga115x_1200",
+      "series": "Core i5",
+      "socket": "LGA1200",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/212275/intel-core-i511600k-processor-12m-cache-up-to-4-90-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-12900K",
+      "model_id": "intel-12900k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i9",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/134599/intel-core-i912900k-processor-30m-cache-up-to-5-20-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-12700K",
+      "model_id": "intel-12700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i7",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/134594/intel-core-i712700k-processor-25m-cache-up-to-5-00-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i5-12600K",
+      "model_id": "intel-12600k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i5",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/134589/intel-core-i512600k-processor-20m-cache-up-to-4-90-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i5-12400F",
+      "model_id": "intel-12400f",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i5",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/134587/intel-core-i512400f-processor-18m-cache-up-to-4-40-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i3-12100F",
+      "model_id": "intel-12100f",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i3",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/132223/intel-core-i312100f-processor-12m-cache-up-to-4-30-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-13900K",
+      "model_id": "intel-13900k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i9",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/230496/intel-core-i913900k-processor-36m-cache-up-to-5-80-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-13700K",
+      "model_id": "intel-13700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i7",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/230500/intel-core-i713700k-processor-30m-cache-up-to-5-40-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i5-13600K",
+      "model_id": "intel-13600k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i5",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/230493/intel-core-i513600k-processor-24m-cache-up-to-5-10-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-14900K",
+      "model_id": "intel-14900k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i9",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/236773/intel-core-i9-processor-14900k-36m-cache-up-to-6-00-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-14700K",
+      "model_id": "intel-14700k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i7",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/236783/intel-core-i7-processor-14700k-33m-cache-up-to-5-60-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i5-14600K",
+      "model_id": "intel-14600k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core i5",
+      "socket": "LGA1700",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/236799/intel-core-i5-processor-14600k-24m-cache-up-to-5-30-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core Ultra 9 285K",
+      "model_id": "intel-ultra-285k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core Ultra 200S",
+      "socket": "LGA1851",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/241060/intel-core-ultra-9-processor-285k-36m-cache-up-to-5-70-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core Ultra 7 265K",
+      "model_id": "intel-ultra-265k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core Ultra 200S",
+      "socket": "LGA1851",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/241063/intel-core-ultra-7-processor-265k-30m-cache-up-to-5-50-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 45,
+        "width": 37.5
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core Ultra 5 245K",
+      "model_id": "intel-ultra-245k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga1700_1851",
+      "series": "Core Ultra 200S",
+      "socket": "LGA1851",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/241067/intel-core-ultra-5-processor-245k-24m-cache-up-to-5-20-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 52.5,
+        "width": 45
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-3930K",
+      "model_id": "intel-3930k",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga2011_2066",
+      "series": "Core X-series",
+      "socket": "LGA2011",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/63697/intel-core-i73930k-processor-12m-cache-up-to-3-80-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 52.5,
+        "width": 45
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i7-5960X",
+      "model_id": "intel-5960x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga2011_2066",
+      "series": "Core X-series",
+      "socket": "LGA2011",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/82930/intel-core-i75960x-processor-extreme-edition-20m-cache-up-to-3-50-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "Intel",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "Intel Core i9-10980XE",
+      "model_id": "intel-10980xe",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-intel-desktop",
+      "package_family": "intel_lga2011_2066",
+      "series": "Core X-series",
+      "socket": "LGA2066",
+      "source_urls": [
+        "https://www.intel.com/content/www/us/en/products/sku/198017/intel-core-i910980xe-extreme-edition-processor-24-75m-cache-3-00-ghz/specifications.html",
+        "https://www.intel.com/content/www/us/en/support/articles/000005670/processors.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 3 1200",
+      "model_id": "amd-1200",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 1000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-1000-series/amd-ryzen-3-1200.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 3 3200G",
+      "model_id": "amd-3200g",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 3000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-3000-series/amd-ryzen-3-3200g.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Athlon 3000G",
+      "model_id": "amd-3000g",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Athlon 3000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/athlon/athlon-3000-series/amd-athlon-3000g.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 5 5600",
+      "model_id": "amd-5600",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-5-5600.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 5800X",
+      "model_id": "amd-5800x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-7-5800x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 5 1600",
+      "model_id": "amd-1600",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 1000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-1000-series/amd-ryzen-5-1600.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 1700",
+      "model_id": "amd-1700",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 1000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-1000-series/amd-ryzen-7-1700.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 2700X",
+      "model_id": "amd-2700x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 2000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-2000-series/amd-ryzen-7-2700x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 5 3600",
+      "model_id": "amd-3600",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 3000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-3000-series/amd-ryzen-5-3600.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 3700X",
+      "model_id": "amd-3700x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 3000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-3000-series/amd-ryzen-7-3700x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 3900X",
+      "model_id": "amd-3900x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 3000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-3000-series/amd-ryzen-9-3900x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 3950X",
+      "model_id": "amd-3950x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 3000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-3000-series/amd-ryzen-9-3950x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 5 5600X",
+      "model_id": "amd-5600x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-5-5600x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 5700X",
+      "model_id": "amd-5700x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-7-5700x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 5800X3D",
+      "model_id": "amd-5800x3d",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-7-5800x3d.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 5900X",
+      "model_id": "amd-5900x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-9-5900x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 5950X",
+      "model_id": "amd-5950x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am4",
+      "series": "Ryzen 5000 Series",
+      "socket": "AM4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-5000-series/amd-ryzen-9-5950x.html",
+        "https://community.amd.com/t5/pc-building-how-to-articles/how-to-install-a-cpu/ta-p/590457"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 5 7600X",
+      "model_id": "amd-7600x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 7000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-7000-series/amd-ryzen-5-7600x.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 7700X",
+      "model_id": "amd-7700x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 7000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-7000-series/amd-ryzen-7-7700x.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 7900X",
+      "model_id": "amd-7900x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 7000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-7000-series/amd-ryzen-9-7900x.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 7950X",
+      "model_id": "amd-7950x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 7000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-7000-series/amd-ryzen-9-7950x.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 9 7950X3D",
+      "model_id": "amd-7950x3d",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 7000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-7000-series/amd-ryzen-9-7950x3d.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 5 9600X",
+      "model_id": "amd-9600x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 9000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-9000-series/amd-ryzen-5-9600x.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 9700X",
+      "model_id": "amd-9700x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 9000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-9000-series/amd-ryzen-7-9700x.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": 40.0,
+        "width": 40.0
+      },
+      "dimensions_status": "primary_verified",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen 7 9800X3D",
+      "model_id": "amd-9800x3d",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_am5",
+      "series": "Ryzen 9000 Series",
+      "socket": "AM5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen/ryzen-9000-series/amd-ryzen-7-9800x3d.html",
+        "https://www.amd.com/en/newsroom/press-releases/2023-11-14-amd-expands-ryzen-embedded-processor-family-for-h.html",
+        "https://www.amd.com/content/dam/amd/en/documents/partner-hub/ryzen/amd-socket-am5-quick-reference-guide.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 1950X",
+      "model_id": "amd-threadripper-1950x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper 1000 Series",
+      "socket": "sTR4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-1000-series/amd-ryzen-threadripper-1950x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 2950X",
+      "model_id": "amd-threadripper-2950x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper 2000 Series",
+      "socket": "sTR4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-2000-series/amd-ryzen-threadripper-2950x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 2990WX",
+      "model_id": "amd-threadripper-2990wx",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper 2000 Series",
+      "socket": "sTR4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-2000-series/amd-ryzen-threadripper-2990wx.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 3960X",
+      "model_id": "amd-threadripper-3960x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper 3000 Series",
+      "socket": "sTRX4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-3000-series/amd-ryzen-threadripper-3960x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 3970X",
+      "model_id": "amd-threadripper-3970x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper 3000 Series",
+      "socket": "sTRX4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-3000-series/amd-ryzen-threadripper-3970x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 3990X",
+      "model_id": "amd-threadripper-3990x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper 3000 Series",
+      "socket": "sTRX4",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-3000-series/amd-ryzen-threadripper-3990x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper PRO 3995WX",
+      "model_id": "amd-threadripper-pro-3995wx",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper PRO 3000 WX-Series",
+      "socket": "sWRX8",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper-pro/ryzen-threadripper-pro-3000wx-series/amd-ryzen-threadripper-pro-3995wx.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper PRO 5975WX",
+      "model_id": "amd-threadripper-pro-5975wx",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper PRO 5000 WX-Series",
+      "socket": "sWRX8",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper-pro/ryzen-threadripper-pro-5000wx-series/amd-ryzen-threadripper-pro-5975wx.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper PRO 5995WX",
+      "model_id": "amd-threadripper-pro-5995wx",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_tr4_family",
+      "series": "Ryzen Threadripper PRO 5000 WX-Series",
+      "socket": "sWRX8",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper-pro/ryzen-threadripper-pro-5000wx-series/amd-ryzen-threadripper-pro-5995wx.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 7960X",
+      "model_id": "amd-threadripper-7960x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_str5",
+      "series": "Ryzen Threadripper 7000 Series",
+      "socket": "sTR5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-7000-series/amd-ryzen-threadripper-7960x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 7980X",
+      "model_id": "amd-threadripper-7980x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_str5",
+      "series": "Ryzen Threadripper 7000 Series",
+      "socket": "sTR5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-7000-series/amd-ryzen-threadripper-7980x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper PRO 7995WX",
+      "model_id": "amd-threadripper-pro-7995wx",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_str5",
+      "series": "Ryzen Threadripper PRO 7000 WX-Series",
+      "socket": "sTR5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper-pro/amd-ryzen-threadripper-pro-7000-wx-series/amd-ryzen-threadripper-pro-7995wx.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper 9980X",
+      "model_id": "amd-threadripper-9980x",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_str5",
+      "series": "Ryzen Threadripper 9000 Series",
+      "socket": "sTR5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper/ryzen-threadripper-9000-series/amd-ryzen-threadripper-9980x.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    },
+    {
+      "brand": "AMD",
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "width": null
+      },
+      "dimensions_status": "unverified_reference",
+      "internal_layout_verified": false,
+      "kind": "cpu",
+      "label": "AMD Ryzen Threadripper PRO 9995WX",
+      "model_id": "amd-threadripper-pro-9995wx",
+      "model_status": "original_schematic",
+      "pack_id": "cpu-amd-desktop",
+      "package_family": "amd_str5",
+      "series": "Ryzen Threadripper PRO 9000 WX-Series",
+      "socket": "sTR5",
+      "source_urls": [
+        "https://www.amd.com/en/support/downloads/drivers.html/processors/ryzen-threadripper-pro/ryzen-threadripper-pro-9000-wx-series/amd-ryzen-threadripper-pro-9995wx.html",
+        "https://www.amd.com/en/resources/support-articles/warranty/PIB.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "installed_identity_only"
+    }
+  ],
+  "optional_summary": {
+    "available_cpu_products": 75,
+    "cpu_products": 72,
+    "executable_content": false,
+    "installed_by_default": false,
+    "packs": 2
+  },
   "products": [
     {
       "brand": "ASRock",
@@ -1980,6 +3797,27 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "ASUS",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "ASUS TUF Gaming LC 240 ARGB · 入门240",
+      "model_id": "asus-tuf-lc240-argb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ASUS TUF Gaming LC 240 ARGB",
+      "source_urls": [
+        "https://www.asus.com/in/motherboards-components/cooling/tuf-gaming/tuf-gaming-lc-240-argb/techspec/",
+        "https://www.asus.com/microsite/all-in-one-liquid-cooling/websites/download/AIO_coolers_SPEC_20211125.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "be quiet!",
       "dimensions_mm": {
         "depth": 145,
@@ -2028,6 +3866,74 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "Cooler Master",
+      "dimensions_mm": {
+        "depth": 77,
+        "height": 158.8,
+        "width": 123
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Cooler Master Hyper 212 Black Edition R2 · 经典单塔",
+      "model_id": "coolermaster-hyper212-black-r2",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master Hyper 212 Black Edition R2",
+      "source_urls": [
+        "https://www.coolermaster.com/en-us/products/hyper-212-black-edition-with-lga1700.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Cooler Master",
+      "dimensions_mm": {
+        "depth": 162.2,
+        "height": 165.6,
+        "width": 150.6
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Cooler Master MA824 Stealth · 八热管异径双塔",
+      "model_id": "coolermaster-ma824-stealth",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master MA824 Stealth",
+      "source_urls": [
+        "https://www.coolermaster.com/en-au/products/masterair-ma824-stealth.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Cooler Master",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Cooler Master MasterLiquid ML240L V2 RGB · 240",
+      "model_id": "coolermaster-ml240l-v2-rgb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master MasterLiquid ML240L V2 RGB",
+      "source_urls": [
+        "https://legacy.coolermaster.com/en-global/products/masterliquid-ml240l-v2-rgb/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "CORSAIR",
       "dimensions_mm": null,
       "dimensions_verified": false,
@@ -2061,6 +3967,30 @@
       "series": "Corsair H60x RGB ELITE",
       "source_urls": [
         "https://www.corsair.com/us/en/p/cpu-coolers/cw-9060064-ww2/icue-h60x-rgb-elite-liquid-cpu-cooler-cw-9060064-ww2"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "DeepCool",
+      "dimensions_mm": {
+        "depth": 92,
+        "height": 150,
+        "width": 125
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "DeepCool AG400 · 四热管矩阵单塔",
+      "model_id": "deepcool-ag400",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "DeepCool AG400",
+      "source_urls": [
+        "https://www.deepcool.com/products/Cooling/cpuaircoolers/GAMMAXX-AG400-Single-Tower-CPU-Cooler-1700-AM5/2022/15898.shtml"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -2121,6 +4051,26 @@
       "dimensions_verified": false,
       "geometry_scope": "documented_envelope_and_original_detail",
       "kind": "cooler",
+      "label": "DeepCool LS720 · FC120 镜面360",
+      "model_id": "deepcool-ls720",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "DeepCool LS720",
+      "source_urls": [
+        "https://global.deepcool.com/products/Cooling/cpuliquidcoolers/LS720-High-Performance-360mm-Liquid-CPU-Cooler/2022/15826.shtml"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "DeepCool",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
       "label": "DeepCool MYSTIQUE 360 · 方形 LCD 冷头",
       "model_id": "deepcool-mystique360",
       "model_status": "original_schematic",
@@ -2129,6 +4079,115 @@
       "series": "DeepCool MYSTIQUE 360",
       "source_urls": [
         "https://deepcool.com/products/Cooling/cpuliquidcoolers/MYSTIQUE-360-5th-Gen-Liquid-Cooler-with-LCD-1851-1700-AM5/2024/18059.shtml"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ENERMAX",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "ENERMAX AQUAFUSION ADV 360 · 方形镜面",
+      "model_id": "enermax-aquafusion-adv360",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ENERMAX AQUAFUSION ADV 360",
+      "source_urls": [
+        "https://www.enermax.com/en/products/aquafusion-adv-series-360mm-cpu-liquid-cooler",
+        "https://www.enermax.com/archive/products/item/LiquidCooler/AQUAFUSION_ADV/AQUAFUSION_ADV_360_04.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "GIGABYTE",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "GIGABYTE AORUS WATERFORCE X360 · 圆形 LCD",
+      "model_id": "gigabyte-aorus-waterforce-x360",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "GIGABYTE AORUS WATERFORCE X360",
+      "source_urls": [
+        "https://www.gigabyte.com/eu/CPU-Cooler/AORUS-WATERFORCE-X-360/sp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ID-COOLING",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "ID-COOLING FROSTFLOW X 240 · 白光冷头",
+      "model_id": "idcooling-frostflow-x240",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ID-COOLING FROSTFLOW X 240",
+      "source_urls": [
+        "https://www.idcooling.com/product/detail?id=146&name=FROSTFLOW+X+240"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ID-COOLING",
+      "dimensions_mm": {
+        "depth": 120,
+        "height": 55,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "ID-COOLING IS-55 ARGB · 55mm 下压",
+      "model_id": "idcooling-is55-argb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ID-COOLING IS-55 ARGB",
+      "source_urls": [
+        "https://www.idcooling.com/product/detail?id=307&name=IS-55+ARGB"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ID-COOLING",
+      "dimensions_mm": {
+        "depth": 72,
+        "height": 151,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "ID-COOLING SE-214-XT BLACK · 151mm 单塔",
+      "model_id": "idcooling-se214xt-black",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ID-COOLING SE-214-XT BLACK",
+      "source_urls": [
+        "https://www.idcooling.com/product/detail?id=482"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -2193,6 +4252,48 @@
       "series": "Lian Li GA II Trinity SL-INF 360",
       "source_urls": [
         "https://lian-li.com/product/galahad-ii-trinity/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "MSI",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "MSI MAG CORELIQUID 240R V2 · 冷排内泵",
+      "model_id": "msi-mag-coreliquid240r-v2",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "MSI MAG CORELIQUID 240R V2",
+      "source_urls": [
+        "https://es.msi.com/Liquid-Cooling/MAG-CORELIQUID-240R-V2/Specification",
+        "https://us.msi.com/Liquid-Cooling/MAG-CORELIQUID-240R-V2"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "MSI",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "MSI MEG CORELIQUID S360 · IPS 冷头",
+      "model_id": "msi-meg-coreliquid-s360",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "MSI MEG CORELIQUID S360",
+      "source_urls": [
+        "https://www.msi.com/Liquid-Cooling/MEG-CORELIQUID-S360/Specification",
+        "https://www.msi.com/Liquid-Cooling/MEG-CORELIQUID-S360"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -2317,6 +4418,26 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "Phanteks",
+      "dimensions_mm": null,
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Phanteks Glacier One 360D30 · 30mm 厚扇",
+      "model_id": "phanteks-glacier-one360d30",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Phanteks Glacier One 360D30",
+      "source_urls": [
+        "https://phanteks.com/product/glacier-one-360d30-black/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "Reference combination",
       "dimensions_mm": null,
       "dimensions_verified": false,
@@ -2332,6 +4453,54 @@
         "https://www.ekwb.com/shop/quantum/ek-quantum-kinetic-tbe-200-d5-pwm-d-rgb-acetal",
         "https://www.corsair.com/ww/en/p/custom-liquid-cooling/cx-9030003-ww/hydro-x-series-xr5-360mm-water-cooling-radiator-cx-9030003-ww",
         "https://www.corsair.com/ww/en/p/custom-liquid-cooling/cx-9010021-ww/icue-link-XC7-rgb-elite-water-block-cx-9010021-ww"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Thermalright",
+      "dimensions_mm": {
+        "depth": 94.5,
+        "height": 47,
+        "width": 95
+      },
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Thermalright AXP90-X47 FULL · 47mm 全铜",
+      "model_id": "thermalright-axp90-x47-full",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright AXP90-X47 FULL",
+      "source_urls": [
+        "https://www.thermalright.com/product/axp90-x47-full/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Thermalright",
+      "dimensions_mm": {
+        "depth": 71,
+        "height": 148,
+        "width": 120
+      },
+      "dimensions_verified": false,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "cooler",
+      "label": "Thermalright Assassin X120 Refined SE · 入门单塔",
+      "model_id": "thermalright-assassinx120-refined-se",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright Assassin X120 Refined SE",
+      "source_urls": [
+        "https://www.thermalright.com/product/assassin-x-120-refined-se/"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -2572,6 +4741,26 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "ASUS",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "ASUS ROG Strix XF120 · 磁悬浮",
+      "model_id": "asus-rog-strix-xf120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ASUS ROG Strix XF120",
+      "source_urls": [
+        "https://rog.asus.com/us/cooling/fans/rog-strix-xf-120-model/spec/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "be quiet!",
       "dimensions_mm": null,
       "dimensions_verified": true,
@@ -2605,6 +4794,68 @@
       "series": "be quiet! Silent Wings Pro 4",
       "source_urls": [
         "https://bequiet.com/en/casefans/3705"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "Cooler Master",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Cooler Master Mobius 120 · 叶尖联环",
+      "model_id": "coolermaster-mobius120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master Mobius 120",
+      "source_urls": [
+        "https://www.coolermaster.com/en-us/products/mobius-120.html",
+        "https://www.coolermaster.com/on/demandware.static/-/Sites-cooler-master-main/default/dw31bcba12/Assets/mobius-120/large/mobius-120-01-gallery-01.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "Cooler Master",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Cooler Master SickleFlow 120 RGB · 12V RGB",
+      "model_id": "coolermaster-sickleflow120-rgb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master SickleFlow 120 RGB",
+      "source_urls": [
+        "https://www.coolermaster.com/en-my/products/sickleflow-120-rgb.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "Cooler Master",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Cooler Master Silencio FP 120 PWM",
+      "model_id": "coolermaster-silencio-fp120-pwm",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Cooler Master Silencio FP 120 PWM",
+      "source_urls": [
+        "https://legacy.coolermaster.com/en-global/products/silencio-fp-120-pwm/",
+        "https://a.storyblok.com/f/281110/845a24b4da/sfp120pwm_g1.png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -2673,6 +4924,26 @@
     },
     {
       "blade_geometry_reviewed": false,
+      "brand": "ENERMAX",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "ENERMAX SquA RGB ADV · 26mm 配套扇",
+      "model_id": "enermax-squa-rgb-adv120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ENERMAX SquA RGB ADV",
+      "source_urls": [
+        "https://www.enermax.com/en/products/aquafusion-adv-series-360mm-cpu-liquid-cooler"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
       "brand": "Fractal Design",
       "dimensions_mm": null,
       "dimensions_verified": true,
@@ -2686,6 +4957,46 @@
       "series": "Fractal Dynamic X2 GP-18 PWM",
       "source_urls": [
         "https://www.fractal-design.com/products/fans/dynamic/dynamic-x2-gp-18-pwm/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "GIGABYTE",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "GIGABYTE AORUS 120 ARGB · GP-AR120RFAN",
+      "model_id": "gigabyte-aorus120-argb",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "GIGABYTE AORUS 120 ARGB",
+      "source_urls": [
+        "https://www.gigabyte.com/CPU-Cooler/AORUS-120-ARGB-FAN/sp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": false,
+      "brand": "ID-COOLING",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "ID-COOLING IS-55 ARGB 配套薄扇参考",
+      "model_id": "idcooling-is55-argb-bundled12015",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "ID-COOLING IS-55 ARGB 配套薄扇参考",
+      "source_urls": [
+        "https://www.idcooling.com/product/detail?id=307&name=IS-55+ARGB"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -2786,6 +5097,27 @@
       "series": "Lian Li UNI FAN SL120 V2",
       "source_urls": [
         "https://lian-li.com/product/uni-fan-sl-v2/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "MSI",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "MSI MEG SILENT GALE P12 · 27.5mm",
+      "model_id": "msi-meg-silent-gale-p12",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "MSI MEG SILENT GALE P12",
+      "source_urls": [
+        "https://us.msi.com/PC-Component/MEG-SILENT-GALE-P12/Specification",
+        "https://storage-asset.msi.com/datasheet/pccs/global/MEG-SILENT-GALE-P12.pdf"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -3007,6 +5339,90 @@
       "series": "NZXT F120P (2022)",
       "source_urls": [
         "https://support.nzxt.com/hc/en-us/articles/38273703470363-F120P-Static-Pressure-Fan-2022-Specs"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "Phanteks",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Phanteks D30-120 · 正叶 30mm",
+      "model_id": "phanteks-d30-120-regular",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Phanteks D30-120",
+      "source_urls": [
+        "https://phanteks.com/product/d30-120-black/",
+        "https://phanteks.com/wp-content/uploads/2024/02/02_PH-F120D30_DRGB_PWM_BK01_Regular.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "Phanteks",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Phanteks T30-120 · LCP 30mm",
+      "model_id": "phanteks-t30-120",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Phanteks T30-120",
+      "source_urls": [
+        "https://phanteks.com/product/t30-120/",
+        "https://phanteks.com/wp-content/uploads/2024/02/PH-F120T30_BG-2.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "Thermalright",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Thermalright TL-9015R · 92mm 薄扇",
+      "model_id": "thermalright-tl9015r",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright TL-9015R",
+      "source_urls": [
+        "https://www.thermalright.com/product/axp90-x47-full/",
+        "https://www.thermalright.com/wp-content/uploads/2021/07/AXP90-X47-FULL-1.png"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "explicit_channel_mapping_only"
+    },
+    {
+      "blade_geometry_reviewed": true,
+      "brand": "Thermalright",
+      "dimensions_mm": null,
+      "dimensions_verified": true,
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "fan",
+      "label": "Thermalright TL-C12C · 120mm",
+      "model_id": "thermalright-tlc12c",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "rotation_direction_verified": false,
+      "series": "Thermalright TL-C12C",
+      "source_urls": [
+        "https://www.thermalright.com/product/tl-c12c/",
+        "https://www.thermalright.com/wp-content/uploads/2026/08/tl-c12c.png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -7034,21 +9450,21 @@
     "notebook_smile"
   ],
   "summary": {
-    "brands": 53,
+    "brands": 55,
     "by_kind": {
       "board": 16,
       "case": 64,
-      "cooler": 26,
+      "cooler": 42,
       "cpu": 3,
       "expansion": 3,
-      "fan": 26,
+      "fan": 38,
       "gpu": 147,
       "memory": 28,
       "psu": 6,
       "storage": 5
     },
-    "products": 323,
-    "records": 324,
+    "products": 351,
+    "records": 352,
     "reference_combinations": 1,
     "series_pending": 64
   }

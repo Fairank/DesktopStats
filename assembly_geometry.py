@@ -569,18 +569,24 @@ def build_scene(spec=None):
         cube('board-expansion-slot',(7,5,pcie_length),(board_x-6,primary_pcie_y-index*40.64,pcie_z),dark,'board')
     cpu=spec.get('cpu') or {};style=cpu.get('style','chip');cpu_y=board_y+board_h*.27;cpu_z=board_z-board_d*.13
     if anchors:cpu_y=anchors['cpu']['y'];cpu_z=anchors['cpu']['z']
-    pw,ph=(37.5,45.) if style=='lga_rect' else (40.,40.)
-    cube('cpu-substrate',(2,ph,pw),(board_x-3,cpu_y,cpu_z),green,'cpu')
-    lid_polygon=unit_polygon(cpu.get('lid_polygon'),pw,ph)
-    lid=extrude(lid_polygon,2.4) if lid_polygon else extrude(tuple((x*.84,y*.84) for x,y in AM5_LID),2.4) if style=='am5' else box(pw*.75,ph*.84,2.4)
-    add('cpu-lid',rotate_vertices(lid,'left'),color('#cbd6dd'),(board_x-6,cpu_y,cpu_z),'cpu')
+    from assembly_cpu import build_cpu_meshes
+    cpu_meshes,cpu_package_meta=build_cpu_meshes(cpu,position=(board_x-6,cpu_y,cpu_z),
+        level=spec.get('detail_level','balanced'))
+    pw,ph=(cpu_package_meta['width_mm'],cpu_package_meta['length_mm']) if cpu_package_meta.get('available') else (37.5,45.) if style=='lga_rect' else (40.,40.)
+    if cpu_package_meta.get('available'):
+        meshes.extend(cpu_meshes)
+    else:
+        cube('cpu-substrate',(2,ph,pw),(board_x-3,cpu_y,cpu_z),green,'cpu')
+        lid_polygon=unit_polygon(cpu.get('lid_polygon'),pw,ph)
+        lid=extrude(lid_polygon,2.4) if lid_polygon else extrude(tuple((x*.84,y*.84) for x,y in AM5_LID),2.4) if style=='am5' else box(pw*.75,ph*.84,2.4)
+        add('cpu-lid',rotate_vertices(lid,'left'),color('#cbd6dd'),(board_x-6,cpu_y,cpu_z),'cpu')
     cpu_identity=cpu.get('appearance') or {}
     cpu_id=cpu.get('model_id',cpu_identity.get('id',''))
     if not isinstance(cpu_id,str):cpu_id=''
     marks={'intel-13700kf':('lga_rect','INTEL','13700KF'),'amd-9950x':('am5','RYZEN','9950X'),
            'amd-7800x3d':('am5','RYZEN','7800X3D')}
     mark=marks.get(cpu_id)
-    if mark and mark[0]==style:
+    if not cpu_package_meta.get('available') and mark and mark[0]==style:
         for line,offset in zip(mark[1:],(4.,-.8)):
             add('cpu-model-mark',rotate_vertices(model_mark(line),'left'),color('#5c6b75'),(board_x-7.25,cpu_y+offset,cpu_z),'cpu')
     # These are deliberately reference board assemblies, not claimed PCB ICs or
@@ -688,7 +694,7 @@ def build_scene(spec=None):
             for i in range(20):cube('passive-gpu-fin',(width,thickness*.94,1.2),(gx,gy,gz-length*.44+length*.88*i/19),edge,'gpu')
     from assembly_detail import enrich_components,detail_level,component_level,TRIANGLE_BUDGETS
     level=detail_level(spec.get('detail_level'))
-    meshes,component_details=enrich_components(meshes,spec)
+    meshes,component_details=enrich_components(meshes,dict(spec,_cpu_package_geometry=cpu_package_meta.get('available',False)))
     meshes,motherboard_meta=enrich_motherboard(meshes,spec,anchors,component_level(spec,'board'))
     if motherboard_meta:component_details['board']=motherboard_meta
     # The same physical component keeps a stable identity across all of its
@@ -809,7 +815,7 @@ def build_scene(spec=None):
     meta=dict(case_id=case.get('id',''),schematic=True,geometry_unit='mm',installed_case_fans_assumed=0,
               front_fan_count=fan_count-rear_count,rear_fan_count=rear_count,rotor_count=sum(mesh.rotor for mesh in meshes),memory_count=actual_count,memory_rendered_count=count,
               physical_total_fans=physical_count,unplaced_fans=max(0,physical_count-fan_count) if physical_count is not None else None,
-              memory_models=memory_models,cpu_model_mark=cpu_id if mark and mark[0]==style else '',
+              memory_models=memory_models,cpu_model_mark=cpu_id if cpu_package_meta.get('model_mark_lines') or mark and mark[0]==style else '',
               cpu_style=style,board_is_reference=board.get('schematic',True) is not False,gpu_model=appearance.get('id',''),case_layout=layout,
               gpu_mount='vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
               board_layout_schematic=True,connector_positions_schematic=True,
@@ -819,7 +825,7 @@ def build_scene(spec=None):
                 memory_orientation='standing_dimm_or_flat_sodimm',case_detail_schematic=True,
                 canonical_board_rear_mm=board_rear,canonical_gpu_bracket_mm=board_rear,
                 mechanical_alignment_schematic=True,motherboard=motherboard_meta,
-                attachment_anchors=attachment_anchors,cooling=cooling_meta,auxiliary=auxiliary_meta,
+                attachment_anchors=attachment_anchors,cooling=cooling_meta,auxiliary=auxiliary_meta,cpu_package=cpu_package_meta,
                 attachment_bounds=added_bounds,attachment_notices=added_notices,
                 attachments_outside_reference=added_notices,divider_aperture=divider_aperture,
                 gpu_mount_observation=gpu_mount_observation,

@@ -87,6 +87,7 @@ ScrollView {
             }
         }
         AssemblyParts {Layout.fillWidth:true;config:root.config;caseInfo:root.info}
+        HardwarePacks {Layout.fillWidth:true}
         SettingsGroup {
             Layout.fillWidth:true;title:ui.t("查看方式")
             SettingRow {id:assemblyDetailSetting;Layout.fillWidth:true;label:ui.t("模型细节");note:ui.t("精细适合日常查看，近看细节用于局部观察。")

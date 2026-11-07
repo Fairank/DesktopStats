@@ -23,6 +23,7 @@ def build_report():
     from chassis_catalog import CASES
     from top_bar_config import HARDWARE_ICON_STYLES
     from tools.export_hardware_coverage import sources
+    from cpu_catalog import MODELS as CPU_MODELS
     rows=[]
 
     def add(kind,raw,brand,series='',**status):
@@ -74,6 +75,13 @@ def build_report():
     keys=[(row['kind'],row['model_id']) for row in rows]
     if len(keys)!=len(set(keys)):raise ValueError('Duplicate assembly product identity')
     counts=Counter(row['kind'] for row in rows)
+    base_cpu_ids={row['model_id'] for row in rows if row['kind']=='cpu'}
+    optional_cpus=[dict(kind='cpu',model_id=row['id'],label=row['label'],brand=BRANDS[row['brand']][0],
+        series=row['series'],delivery='optional_pack',pack_id='cpu-'+row['brand']+'-desktop',
+        socket=row['socket'],package_family=row['package_family'],dimensions_mm=row['dimensions_mm'],
+        dimensions_status=row['dimensions_status'],source_urls=list(row['sources']),
+        model_status='original_schematic',styles='all_listed_styles',
+        internal_layout_verified=False,telemetry='installed_identity_only') for row in CPU_MODELS if row['id'] not in base_cpu_ids]
     return dict(schema_version=1,market_exhaustive=False,machine_inventory=False,
         scope='Named selectable products, original schematic models; not manufacturing CAD or a fit guarantee.',
         styles=list(HARDWARE_ICON_STYLES),style_policy='Every product retains identical geometry and identity across all styles.',
@@ -82,7 +90,9 @@ def build_report():
             reference_combinations=sum(row['record_type']=='reference_combination' for row in rows),by_kind=dict(sorted(counts.items())),
             brands=len({row['brand'].casefold() for row in rows if row['brand'] and row['record_type']=='product'}),
             series_pending=sum(row['series'] is None for row in rows)),
-        products=rows)
+        optional_summary=dict(cpu_products=len(optional_cpus),available_cpu_products=len(CPU_MODELS),
+                              packs=2,installed_by_default=False,executable_content=False),
+        optional_products=optional_cpus,products=rows)
 
 
 def main():

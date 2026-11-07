@@ -78,6 +78,28 @@ class AssemblyStyleTests(unittest.TestCase):
         self.assertTrue(all(abs(v)<=6.2 for _,points in batches for n,v in enumerate(points) if n%6<3))
         self.assertEqual(edge_batches(meshes,'miniature'),())
 
+    def test_hand_ink_vertices_stay_on_actual_surface_creases(self):
+        mesh=Mesh('cpu-lid',box(1.4,37.5,45.),(.7,.8,.9,1.),component='cpu')
+        edges=crease_edges(mesh.vertices)
+        def on_edge(point,a,b):
+            axis=max(range(3),key=lambda i:abs(b[i]-a[i]));t=(point[axis]-a[axis])/(b[axis]-a[axis])
+            return -1e-9<=t<=1+1e-9 and all(abs(point[i]-(a[i]+t*(b[i]-a[i])))<1e-9 for i in range(3))
+        for style in ('notebook_line','notebook_color','notebook_smile','sketch'):
+            batches=edge_batches((mesh,),style);self.assertTrue(batches)
+            for _,vertices in batches:
+                for i in range(0,len(vertices),6):
+                    self.assertTrue(any(on_edge(vertices[i:i+3],a,b) for a,b in edges),(style,vertices[i:i+3]))
+
+    def test_ink_depth_bias_is_bounded_below_real_opaque_layer_separation(self):
+        from assembly_viewer import ink_depth_bias
+        for radius in (1.,20.,40.,400.,2000.):
+            for multiplier in (1.98,3.6,9.):
+                distance=radius*multiplier;bias=ink_depth_bias(distance,radius)
+                self.assertGreaterEqual(bias,0.);self.assertLessEqual(bias,.00015)
+                near=max(.1,distance-radius*1.5);far=distance+radius*2.;b=2*far*near/(far-near)
+                farthest=distance+radius;shift=farthest-b/(b/farthest+bias)
+                self.assertGreaterEqual(shift,0.);self.assertLessEqual(shift,.02500001)
+
     def fake_renderer(self,style,scene=None):
         from assembly_viewer import AssemblyRenderer
         renderer=AssemblyRenderer();renderer.program=Mock();renderer.buffer=Mock();renderer.vao=Mock()

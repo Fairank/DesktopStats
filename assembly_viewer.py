@@ -35,6 +35,18 @@ GL_COLOR_BUFFER_BIT=0x4000
 GL_DEPTH_BUFFER_BIT=0x0100
 
 
+def ink_depth_bias(distance,radius):
+    """Conservative NDC lift: at most .025 scene-mm at the farthest surface.
+
+    This covers surface-line raster precision while preserving real opaque
+    layers, including CPU contacts behind the substrate. It is not an x-ray
+    pass: depth testing stays enabled, and all triangle positions stay intact.
+    """
+    near=max(.1,distance-radius*1.5);far=distance+radius*2.
+    derivative=2*far*near/max(1e-9,far-near)/max(1.,distance+radius)**2
+    return max(0.,min(.00015,derivative*.025))
+
+
 def ray_box(origin,direction,low,high):
     """Nearest nonnegative ray/AABB distance; pure click-time broad phase."""
     near,far=0.,float('inf')
@@ -90,6 +102,7 @@ uniform mat4 matrix;
 uniform mat4 modelMatrix;
 uniform mat3 normalMatrix;
 uniform float backgroundMode;
+uniform vec4 inkProjection;
 out vec3 worldNormal;
 out vec3 worldPosition;
 void main() {
@@ -97,7 +110,12 @@ void main() {
   vec2 point=gl_VertexID==0?vec2(-1.0,-1.0):gl_VertexID==1?vec2(3.0,-1.0):vec2(-1.0,3.0);
   worldNormal=vec3(0.0,0.0,1.0);worldPosition=vec3(0.0);gl_Position=vec4(point,0.0,1.0);
  } else {worldNormal=normalMatrix*normal;worldPosition=(modelMatrix*vec4(position,1.0)).xyz;
-  gl_Position=matrix*vec4(position,1.0);}
+  gl_Position=matrix*vec4(position,1.0);
+  if(inkProjection.x>0.0) {
+   float wave=dot(position,vec3(.071,.043,.053))+inkProjection.w*.17;
+   gl_Position.xy+=sin(vec2(wave,wave+2.1))*inkProjection.yz*gl_Position.w;
+   gl_Position.z-=inkProjection.x*gl_Position.w;
+  }}
 }
 '''
 FRAGMENT_SHADER='''#version 330 core
@@ -343,8 +361,9 @@ class AssemblyRenderer:
         distance=radius*3.6*max(.55,min(2.5,zoom))
         yaw,pitch=math.radians(yaw),math.radians(pitch)
         eye=QVector3D(center[0]+distance*math.sin(yaw)*math.cos(pitch),center[1]+distance*math.sin(pitch),center[2]+distance*math.cos(yaw)*math.cos(pitch))
-        projection=QMatrix4x4();projection.perspective(34.,max(.1,width/max(1,height)),
-            max(.1,distance-radius*1.5),distance+radius*2.)
+        near,far=max(.1,distance-radius*1.5),distance+radius*2.
+        projection=QMatrix4x4();projection.perspective(34.,max(.1,width/max(1,height)),near,far)
+        self._ink_projection=(ink_depth_bias(distance,radius),2/max(1,width),2/max(1,height))
         view=QMatrix4x4();view.lookAt(eye,QVector3D(*center),QVector3D(0,1,0))
         camera_key=(width,height,yaw,pitch,zoom,exploded,focus)
         if camera_key!=self._pick_camera_key:
@@ -473,6 +492,12 @@ class AssemblyRenderer:
         self.program.setUniformValue('matrix',projection*view*model)
         self.program.setUniformValue('modelMatrix',model)
         self.program.setUniformValue('normalMatrix',model.normalMatrix())
+        if mode==GL_LINES:
+            bias,sx,sy=self._ink_projection
+            wobble=policy['wobble']*.28
+            seed=mesh.vertex_count%1024
+            self.program.setUniformValue('inkProjection',QVector4D(bias,sx*wobble,sy*wobble,float(seed)))
+        else:self.program.setUniformValue('inkProjection',QVector4D(0.,0.,0.,0.))
         self.program.setUniformValue('baseColor',QVector4D(*(mesh.color if tone is None else tone)))
         shade=0. if mode==GL_LINES else policy['shading']
         if shade!=self._frame_shade:self._scalar('shadeMix',shade);self._frame_shade=shade

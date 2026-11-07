@@ -1,5 +1,21 @@
 # Changes
 
+## 0.36.0-preview.1
+
+- Add optional, data-only Intel and AMD CPU packs: 72 additional named SKUs,
+  plus the three preserved base models. Use seven shared physical package
+  families across all 13 styles, with per-SKU markings and explicit unknowns.
+- Add GitHub download, local import and remove controls. Keep a small identity
+  index and at most eight selected records; no executable plugins, extracted
+  files, periodic scans, extra sensor polling or background workers.
+- Validate archive bounds, generator schemas, checksums, inventory collisions,
+  full noncommercial license, and profile-local installation boundaries.
+- Expand cooling to 42 references and 38 fans, including thin low-profile,
+  mixed-diameter tower and radiator-integrated-pump structures. Preserve real
+  dimensions, distinguish bundled references and keep unmatched tachometers static.
+- Repair hand-drawn surface ink without disabling depth testing; smooth fan
+  foil lighting while retaining vertex positions and all existing geometry caps.
+
 ## 0.35.0-preview.1
 
 - Add 16 exact motherboard layouts from official manuals, with distinct socket,

@@ -90,12 +90,13 @@ Window {
                     fields = result["key"].split("|")
                     self.assertEqual(fields[10], "sketch")
                     if value["kind"] == "cpu":
-                        self.assertEqual(len(fields), 11)
-                        self.assertEqual(fields[3], value["style"])
+                        tree=drawing_fixture.assert_cpu_artwork(self,value,result)
+                        drawing_fixture.assert_cpu_artwork(self,value,dict(result,source=result['layers']['baseSource']))
+                        self.assertTrue(any(n.get('stroke') not in (None,'none','') for n in tree.iter()))
                     else:
                         self.assertEqual(fields[11:], [value["id"]])
-                    self.line_art(result["source"])
-                    self.line_art(result["layers"]["baseSource"])
+                        self.line_art(result["source"])
+                        self.line_art(result["layers"]["baseSource"])
                     for rotor in result["layers"]["rotors"]:
                         self.valid_svg(rotor["source"])
                     if value["kind"] != "gpu" or value.get("fan_count") == 0:

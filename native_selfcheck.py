@@ -3,6 +3,7 @@
 import copy
 import json
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -198,6 +199,16 @@ def _check(report, output):
         assert assembled.metadata['cooling']['parts'] and assembled.metadata['auxiliary']['parts']
         report['assembly_catalog_counts']={key:len(value) for key,value in catalog.items() if key in ('gpus','memory','boards','coolers','fans','psus','storage','expansion')}
         report["checks"].append("assembly-reference-parts-and-mixed-styles-no-graphics")
+        from hardware_packs import PackStore
+        pack_store=PackStore(output.parent/'unused-hardware-packs')
+        report['hardware_pack_state']=pack_store.memory_status()
+        assert report['hardware_pack_state']['packs']==0
+        assert report['hardware_pack_state']['persistent_meshes']==0
+        assert report['hardware_pack_state']['background_workers']==0
+        assert 'cpu_catalog' not in sys.modules,'Optional authoring catalog loaded in base runtime'
+        assert assembly['cpu']['appearance']['cpu_package']['model_id']=='intel-13700kf'
+        assert scene.metadata['cpu_package']['available']
+        report['checks'].append('optional-pack-lazy-runtime-and-base-cpu-no-graphics')
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

@@ -23,7 +23,7 @@ from tools import build as BUILD  # noqa: E402 - direct tools/ CLI needs the pro
 
 _NATIVE = """
 ActionButton.qml Appearance.qml Check.qml Choice.qml ContentCanvas.qml
-AssemblyPage.qml AssemblyParts.qml AssemblyClock.qml AssemblyProfiles.js
+AssemblyPage.qml AssemblyParts.qml AssemblyClock.qml AssemblyProfiles.js HardwarePacks.qml HardwareCpuPackages.js
 ContentLayoutEditor.qml DesktopWidget.qml Details.qml FormField.qml
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
@@ -139,6 +139,7 @@ REVIEWED_FILES = frozenset(
         "hooks/hook-PySide6.QtGui.py",
         "hooks/hook-PySide6.QtQml.py",
         "docs/USER_GUIDE.md",
+        "assets/showcase/cpu-packages.png",
     ]
 )
 EXTRA_FILES = frozenset(

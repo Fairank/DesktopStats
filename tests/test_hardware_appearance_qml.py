@@ -468,12 +468,13 @@ Window {
             self.assertFalse(any("hardware-series-face" in node.get("class", "")
                                  for node in ET.fromstring(self.svg(glyph)).iter()))
 
-    def test_previous_outline_version_keeps_its_exact_svg_drawings(self):
-        # Captured from the previous committed version, before theme routing.
+    def test_outline_keeps_exact_gpu_drawings_and_guarded_cpu_package_drawings(self):
+        # CPU package/SKU drawing is intentional; legacy GPU hashes stay exact.
         from hardware_appearance import appearance_for
+        from tests.test_hardware_cartoon import assert_cpu_artwork
         cases = (
-            ("cpu", "Intel Core i7-13700KF", "d33938b0fe7fe4348270d16d0f4453659c2cf781ab8cc2f2d5e4fd01a39ab987"),
-            ("cpu", "AMD Ryzen 9 9950X", "518fd3f81f7c61acdf24c61eecf29432760fc7c677d1d95761875f6ee007abbd"),
+            ("cpu", "Intel Core i7-13700KF", "a82bae4cf9e8b4a7c5ef6ec66a3414d48c1d577e3d246730e8da994c4014bf41"),
+            ("cpu", "AMD Ryzen 9 9950X", "63190769e5b03ec7cb5a970553c3726e309da3656a9033b45cae66cf204fa183"),
             ("gpu", "DUAL-RTX4060-O8G", "b08a961cb281d10a62d105d9a2e8a306afdeb1195b3805767145549d30f9cfbe"),
             ("gpu", "TUF-RTX4070TIS-O16G-GAMING", "19827c993b8a33978631ac6d2919a07de67e1324b73a05f2ad2631b04cc199d0"),
             ("gpu", "NVIDIA GeForce RTX 4070", "8c9cc5541d145f68bb67bae0d7b1d80cc559dac6c989e95e0dac0df394df6a68"),
@@ -482,7 +483,8 @@ Window {
         glyph = self.find("controlGlyph")
         glyph.setProperty("ink", "#303a48")
         for kind, name, expected in cases:
-            self.assign("appearance", dict(appearance_for(kind, name), icon_set="outline"))
+            value=dict(appearance_for(kind,name),icon_set='outline');self.assign('appearance',value)
+            if kind=='cpu':assert_cpu_artwork(self,value,dict(key=glyph.property('geometryKey'),source=glyph.property('svgSource')))
             self.assertEqual(hashlib.sha256(self.svg(glyph).encode()).hexdigest(), expected)
 
     def test_three_new_versions_render_only_the_confirmed_number_of_physical_fans(self):

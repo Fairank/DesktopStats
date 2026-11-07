@@ -3,6 +3,7 @@ import copy
 import os
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -300,6 +301,29 @@ class AssemblyPageTests(unittest.TestCase):
                 self.assertGreaterEqual(top.y(),34)
                 self.assertLessEqual(top.y()+choice.height(),self.window.height()-72)
                 self.assertTrue(self.window.grabWindow().save(str(Path(proof)/f'assembly-style-choice-{language}.png')))
+
+
+    def test_optional_pack_import_and_remove_preserves_settings_and_handles_bad_archive(self):
+        import hardware_packs
+        from hardware_packs import PackStore,make_pack
+        from tools.export_hardware_packs import pack_models
+        with tempfile.TemporaryDirectory() as tmp:
+            source=Path(tmp)/'amd.dspack';store=PackStore(Path(tmp)/'installed')
+            rows=pack_models()['amd'];source.write_bytes(make_pack('cpu-amd','AMD CPU',rows))
+            with patch.object(hardware_packs,'_store',store):
+                self.show_assembly()
+                before=copy.deepcopy(self.controller.draft)
+                with patch('PySide6.QtWidgets.QFileDialog.getOpenFileName',return_value=(str(source),'')):
+                    self.controller.importHardwarePack();self.app.processEvents()
+                    self.assertEqual(self.controller.draft,before)
+                    self.assertEqual(self.controller.hardwarePacks['installed'][0]['products'],len(rows))
+                    self.assertIn(rows[0]['id'],[row['id'] for row in self.controller.assemblyParts['cpus']])
+                    source.write_bytes(b'invalid');self.controller.importHardwarePack();self.app.processEvents()
+                    self.assertEqual(self.controller.hardwarePacks['installed'][0]['products'],len(rows))
+                    self.assertEqual(self.controller.draft,before)
+                    self.controller.removeHardwarePack('cpu-amd');self.app.processEvents()
+                    self.assertEqual(self.controller.hardwarePacks['installed'],[])
+                    self.assertEqual(self.controller.draft,before)
 
 
 if __name__ == "__main__":

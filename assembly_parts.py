@@ -24,9 +24,10 @@ def choices(translate=lambda text:text):
     from cooling_catalog import choices_coolers,choices_fans
     from component_catalog import choices as components,get_component
     from hardware_appearance import CATALOG,BRANDS
+    from cpu_package_runtime import reference_choices
     from memory_appearance import CATALOG as memory,BRANDS as memory_brands
     empty=lambda label:[dict(id='',label=translate(label))]
-    return dict(cpus=empty('按系统硬件识别')+[dict(id=row[0],label=row[4],brand=BRANDS[row[2]][0]) for row in CATALOG if row[1]=='cpu'],
+    return dict(cpus=empty('按系统硬件识别')+[dict(id=row[0],label=row[4],brand=BRANDS[row[2]][0]) for row in CATALOG if row[1]=='cpu']+reference_choices(),
         gpus=empty('按系统硬件识别')+[dict(zip(('id','label','brand','series_id','series_label'),row)) for row in _gpu_rows()],
         memory=[dict(id=row['id'],label=row['label'],brand=memory_brands[row['brand']][0]) for row in memory],
         boards=empty('按系统主板识别')+[dict(row,label=row['label']+(' · '+translate('外观待核实') if (get_board(row['id']) or {}).get('finish_status')!='photo_reviewed' else '')) for row in boards()],

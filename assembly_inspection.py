@@ -101,6 +101,13 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
         identity=cpu.get('label') or '处理器未识别'
         rows=[_metric(data,metric,cpu_prefs,now,stale)
               for metric in ('cpu_usage','cpu_temp','cpu_power','cpu_frequency')]
+        package=mapping(mapping(cpu.get('appearance')).get('cpu_package'))
+        if package:
+            rows.append(_static('CPU 插槽',package.get('socket'),bool(package.get('socket'))))
+            known=package.get('dimensions_status')=='primary_verified'
+            size=_dimensions(package,('width_mm','length_mm')) if known else None
+            rows.append(_static('封装尺寸',size,size is not None,'尺寸尚未核实，模型采用封装系列参考轮廓。'))
+            notes.append('触点排列与盖板厚度为示意，不代表电气针脚图。')
     elif component=='gpu':
         identity=gpu.get('label') or '显卡未识别'
         rows=[_metric(data,metric,gpu_prefs,now,stale)

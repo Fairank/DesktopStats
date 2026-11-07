@@ -32,8 +32,8 @@ def _hit(vertices,origin,direction):
 
 class CoolingCatalogTests(unittest.TestCase):
     def test_sources_and_dimensions_are_explicit(self):
-        self.assertEqual(len(choices_coolers()),26)
-        self.assertEqual(len(choices_fans()),26)
+        self.assertEqual(len(choices_coolers()),42)
+        self.assertEqual(len(choices_fans()),38)
         self.assertEqual({get_fan(c['id'])['size_mm'] for c in choices_fans()},{80,92,120,140,160,180,200})
         for choice in choices_coolers():
             row=get_cooler(choice['id']);self.assertTrue(row['sources']);self.assertEqual(row['reviewed'],'2026-11-07')
@@ -134,7 +134,8 @@ class CoolingGeometryTests(unittest.TestCase):
             _,meta=add_cooling((),{'cooling':{'cpu_cooler':choice['id']}},anchors=ANCHORS)
             air=choice['kind'] not in ('aio','custom_loop')
             self.assertEqual(meta['cpu_fan_tach_usable'],air)
-            reviewed=get_fan(get_cooler(choice['id']).get('fan_model')).get('blade_geometry_reviewed',False)
+            main=[fan for fan in meta['fans'] if fan['role']=='cpu_main']
+            reviewed=bool(main) and all(fan.get('blade_geometry_reviewed') for fan in main)
             self.assertEqual(meta['real_cpu_rotor_parts'],['cooler:cpu'] if air and reviewed else [])
             self.assertIn('representative' if air else 'pump',meta['fan_tach_mapping'])
 
@@ -231,6 +232,108 @@ class CoolingGeometryTests(unittest.TestCase):
         lower=min(pump[0].vertices[1::6])+pump[0].position[1]
         self.assertAlmostEqual(lower,-187.)
         self.assertEqual(meta['cooler']['reservoir_mm']['height'],200)
+
+    def test_new_family_envelopes_and_unknown_bundled_fans_are_not_substituted(self):
+        from assembly_cooling import _reference_fan
+        self.assertEqual(get_cooler('thermalright-axp90-x47-full')['dimensions_mm'],dict(width=95,height=47,depth=94.5))
+        self.assertFalse(get_cooler('thermalright-assassinx120-refined-se')['dimensions_verified'])
+        self.assertEqual(get_cooler('idcooling-is55-argb')['dimensions_mm']['height'],55)
+        self.assertEqual(get_cooler('coolermaster-ma824-stealth')['fan_sizes'],[120,135])
+        self.assertEqual(get_cooler('enermax-aquafusion-adv360')['pump_reference_mm'],dict(width=69.5,height=54.5,depth=68.5))
+        x360=get_cooler('gigabyte-aorus-waterforce-x360');fan=_reference_fan(x360)
+        self.assertIsNone(x360['fan_model']);self.assertNotEqual(fan['id'],'gigabyte-aorus120-argb')
+        self.assertFalse(fan['dimensions_verified']);self.assertFalse(fan['blade_count_verified'])
+        self.assertFalse(fan.get('blade_geometry_reviewed',False))
+        self.assertGreaterEqual(len({get_cooler(c['id'])['brand'] for c in choices_coolers()}),16)
+
+    def test_new_fan_thickness_is_physical_and_unknown_rpm_is_static(self):
+        expected={'thermalright-tl9015r':15,'idcooling-is55-argb-bundled12015':15,
+                  'msi-meg-silent-gale-p12':27.5,'phanteks-d30-120-regular':30,
+                  'phanteks-t30-120':30,'enermax-squa-rgb-adv120':26}
+        for model,depth in expected.items():
+            meshes,meta=add_cooling((),{'cooling':{'case_fans':[dict(model=model,mount='front',count=1)]}},anchors=ANCHORS)
+            frame=next(m for m in meshes if m.name=='case-fan-frame');axis=meta['fans'][0]['axis']
+            coords=[sum(frame.vertices[i+k]*axis[k] for k in range(3)) for i in range(0,len(frame.vertices),6)]
+            self.assertAlmostEqual(max(coords)-min(coords),depth,places=6, msg=model)
+            self.assertIsNone(meta['fans'][0]['rpm']);self.assertEqual(meta['fans'][0]['rotation_default'],'static')
+            self.assertFalse(meta['fans'][0]['rotation_direction_verified'])
+            self.assertTrue(all(not m.rotor for m in meshes if 'frame' in m.name or 'stator' in m.name or 'interlock' in m.name))
+
+    def test_mobius_joining_ring_stays_planar_and_rotates_with_leaves(self):
+        from assembly_cooling import _leaf_geometry
+        from assembly_geometry import ring
+        fan=get_fan('coolermaster-mobius120');radius=fan['size_mm']*.465;depth=4.5
+        vertices=_leaf_geometry(fan,radius,depth);annulus=ring(radius*.994,radius*.968,depth,40)
+        self.assertEqual(vertices[-len(annulus):],annulus)
+        self.assertEqual(set(round(z,4) for z in annulus[2::6]),{-depth/2,depth/2})
+        meshes,_=add_cooling((),{'cooling':{'case_fans':[dict(model=fan['id'],mount='front',count=1)]}},anchors=ANCHORS)
+        self.assertEqual(sum(m.rotor for m in meshes),1)
+        self.assertFalse(any('joining-ring' in m.name and not m.rotor for m in meshes))
+
+    def test_cambered_foil_caps_have_continuous_normals_and_hard_side_walls(self):
+        from assembly_cooling import _cambered_leaves
+        from assembly_geometry import fan_rotor
+        model=get_fan('thermalright-tlc12c');raw=fan_rotor(model,55,4)
+        foil=_cambered_leaves(raw,model,55);self.assertEqual(len(foil),len(raw))
+        shared={};duplicates=0;hard_sides=0
+        for i in range(0,len(raw),6):
+            self.assertEqual(foil[i:i+2],raw[i:i+2])
+            normal=foil[i+3:i+6];self.assertAlmostEqual(sum(v*v for v in normal),1,places=6)
+            if abs(raw[i+5])>.9:
+                point=foil[i:i+3]
+                if point in shared:
+                    self.assertEqual(normal,shared[point]);duplicates+=1
+                shared[point]=normal
+                self.assertGreater(normal[2]*raw[i+5],0)
+            elif abs(normal[2])<.1:hard_sides+=1
+        self.assertGreater(duplicates,20);self.assertGreater(hard_sides,20)
+
+    def test_mixed_size_tower_preserves_fan_thickness_and_stays_below_documented_height(self):
+        anchors={'cpu':dict(position=(0,0,0),normal=(0,1,0),up=(0,0,1)),'case_dimensions':(600,800,800)}
+        meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':'coolermaster-ma824-stealth'}},anchors=anchors)
+        self.assertEqual([f['diameter_mm'] for f in meta['fans']],[120,135])
+        frames=[m for m in meshes if m.name=='cooler-tower-fan-frame'];self.assertEqual(len(frames),1)
+        # Both batched physical frames, not two artificially resized copies.
+        self.assertLessEqual(max(frames[0].vertices[1::6]),165.6+.001)
+        self.assertEqual(meta['real_cpu_rotor_parts'],[])
+        self.assertTrue(meta['fans'][0]['blade_geometry_reviewed']);self.assertFalse(meta['fans'][1]['blade_count_verified'])
+        self.assertTrue(any('reference geometry' in s for s in meta['warnings']))
+
+    def test_new_pump_architectures_have_observed_caps_and_truthful_internal_fans(self):
+        cases={'gigabyte-aorus-waterforce-x360':'cooler-blank-circular-lcd',
+               'msi-meg-coreliquid-s360':'cooler-blank-ips-lcd',
+               'asus-tuf-lc240-argb':'cooler-faceted-blank-cover',
+               'phanteks-glacier-one360d30':'cooler-bridge-fine-stripes',
+               'idcooling-frostflow-x240':'cooler-pump-white-light-ring',
+               'enermax-aquafusion-adv360':'cooler-square-mirror-outlines'}
+        for model,name in cases.items():
+            meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':model}},anchors=ANCHORS)
+            self.assertTrue(any(m.name==name for m in meshes),model)
+            self.assertFalse(meta['cpu_fan_tach_usable']);self.assertEqual(meta['real_cpu_rotor_parts'],[])
+            if model=='msi-meg-coreliquid-s360':
+                self.assertEqual(meta['known_unplaced_vrm_fans'],1)
+                self.assertEqual(get_cooler(model)['vrm_fan_diameter_mm'],60)
+                self.assertFalse(any(f['role']=='vrm_independent' for f in meta['fans']))
+        meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':'msi-mag-coreliquid240r-v2'}},anchors=ANCHORS)
+        self.assertTrue(any(m.name=='cooler-radiator-integrated-pump' and m.part_id=='cooler:radiator' for m in meshes))
+        self.assertEqual(next(p['kind'] for p in meta['parts'] if p['id']=='cooler:pump'),'aio_cpu_block')
+
+    def test_rgb12v_is_not_wired_to_argb5v_and_square_frame_stays_static(self):
+        meshes,meta=add_cooling((),{'cooling':{'case_fans':[dict(model='coolermaster-sickleflow120-rgb',mount='front',count=1)]}},anchors=ANCHORS)
+        self.assertEqual({a['kind'] for a in meta['wire_anchors']},{'fan4'})
+        self.assertFalse(any('argb' in m.name for m in meshes))
+        meshes,meta=add_cooling((),{'cooling':{'case_fans':[dict(model='phanteks-d30-120-regular',mount='front',count=1)]}},anchors=ANCHORS)
+        self.assertEqual({a['kind'] for a in meta['wire_anchors']},{'fan4','argb3'})
+        self.assertTrue(any(m.name=='case-fan-square-rgb-rim' and not m.rotor for m in meshes))
+        self.assertTrue(any(m.name=='case-fan-interlock-cover' and not m.rotor for m in meshes))
+
+    def test_new_aio_rejects_known_wrong_mount_without_shrinking_or_guessing_fan(self):
+        anchors=copy.deepcopy(ANCHORS);anchors['case']={'fan_mounts':[dict(position='top',size_mm=[140],count=2)]}
+        meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':'gigabyte-aorus-waterforce-x360'}},anchors=anchors)
+        self.assertEqual(meshes,());self.assertEqual(meta['rejected'][0]['reason'],'unsupported_radiator_mount')
+        anchors['case_dimensions']=(200,200,200);anchors['case']={}
+        meshes,meta=add_cooling((),{'cooling':{'cpu_cooler':'phanteks-glacier-one360d30'}},anchors=anchors)
+        self.assertEqual(meshes,());self.assertEqual(meta['rejected'][0]['reason'],'radiator_exceeds_mount_plane')
 
 
 if __name__=='__main__':unittest.main()

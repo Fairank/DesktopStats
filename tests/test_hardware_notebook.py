@@ -155,9 +155,13 @@ Window {
                 for ink in ("#303a48", "#e6eef5"):
                     with self.subTest(style=style, model=value["id"], ink=ink):
                         data = self.drawing(dict(value, icon_set=style), ink)
-                        self.assertEqual(data["key"].split("|")[10:], [style, value["id"]])
-                        tree = self.valid_svg(data["source"])
-                        self.assertTrue(self.nodes(tree, "hardware-notebook"))
+                        if value['kind']=='cpu':
+                            self.assertEqual(data['key'].split('|')[10],style)
+                            tree=drawing_fixture.assert_cpu_artwork(self,value,data)
+                        else:
+                            self.assertEqual(data["key"].split("|")[10:], [style, value["id"]])
+                            tree = self.valid_svg(data["source"])
+                            self.assertTrue(self.nodes(tree, "hardware-notebook"))
                         if style != "notebook_smile":
                             self.assertFalse(self.nodes(tree, "hardware-notebook-expression"))
                         self.valid_svg(data["layers"]["baseSource"])

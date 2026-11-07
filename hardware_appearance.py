@@ -309,6 +309,22 @@ def appearance_for(kind, name, *, model="", board_vendor=""):
     def bounded(value):
         return value[:256] if isinstance(value, str) else ""
     result = dict(zip(_FIELDS, _resolve(kind, bounded(name), bounded(model), bounded(board_vendor))))
+    if kind == 'cpu':
+        from cpu_package_runtime import get_package, match_model
+        if result['confidence'] != 'model':
+            extra = match_model(bounded(name), bounded(model), bounded(board_vendor))
+            if extra:
+                package = extra['cpu_package']
+                family = package['id']
+                result.update(id=extra['id'], vendor=extra['vendor'], board_vendor='unknown',
+                    label=extra['label'], style='am5' if family=='amd_am5' else
+                    'chip' if family in ('intel_lga115x_1200','amd_am4') else 'lga_rect',
+                    source_url=extra['sources'][0], confidence='model',
+                    accent=BRANDS[extra['vendor']][1], series_id=extra['series'], series_label=extra['series'],
+                    extension_pack=True)
+        package = get_package(result['id'])
+        if package:
+            result['cpu_package'] = package
     result["features"] = list(result["features"])
     result["visible_fan_count"] = _VISIBLE_FANS.get(result["id"], result["fan_count"])
     result["legacy"] = bool(_SERIES_METADATA.get(result["series_id"], {}).get("legacy", False))
@@ -320,6 +336,12 @@ def appearance_for(kind, name, *, model="", board_vendor=""):
     if board_details:
         result["board_details"] = board_details
     return result
+
+
+def catalog_rows():
+    """Base inventory plus installed optional CPU identities, shared by styles."""
+    from cpu_package_runtime import reference_rows
+    return CATALOG + reference_rows()
 
 
 def memory_appearance(data):

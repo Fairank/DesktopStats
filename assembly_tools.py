@@ -12,6 +12,7 @@ class AssemblyTools(WorkspaceTools):
     assemblyChanged = Signal()
     assemblyCasesChanged = Signal()
     assemblyViewRequested = Signal(dict)
+    hardwarePacksChanged = Signal()
 
     def __init__(self):
         super().__init__()
@@ -22,11 +23,59 @@ class AssemblyTools(WorkspaceTools):
         self._assembly_fingerprint = None
         self._assembly_spec = None
         self._assembly_summary = dict(initialized=False)
+        self._pack_status = ''
 
     def initialize_assembly_signals(self):
         self.dataChanged.connect(self._refresh_assembly)
         self.draftChanged.connect(self._refresh_assembly)
         self.languageChanged.connect(self.assemblyCasesChanged)
+        self.languageChanged.connect(self.hardwarePacksChanged)
+
+    @Property('QVariantMap', notify=hardwarePacksChanged)
+    def hardwarePacks(self):
+        from hardware_packs import runtime_store
+        store=runtime_store()
+        return dict(installed=store.installed(),status=self.tr(self._pack_status) if self._pack_status else '',
+                    invalid=bool(store.errors),**store.memory_status())
+
+    def _hardware_packs_updated(self):
+        from cpu_package_runtime import _match_identity
+        _match_identity.cache_clear()
+        self._assembly_fingerprint=None
+        self._refresh_assembly()
+        self.hardwarePacksChanged.emit()
+        self.assemblyCasesChanged.emit()
+        self.dataChanged.emit()
+
+    @Slot()
+    def openHardwarePacksDownload(self):
+        from PySide6.QtCore import QUrl
+        from PySide6.QtGui import QDesktopServices
+        from hardware_packs import PACK_RELEASE_URL
+        QDesktopServices.openUrl(QUrl(PACK_RELEASE_URL))
+
+    @Slot()
+    def importHardwarePack(self):
+        from PySide6.QtWidgets import QFileDialog
+        from hardware_packs import runtime_store,PackError
+        path,_=QFileDialog.getOpenFileName(None,self.tr('导入硬件扩展包'),'', 'DesktopStats (*.dspack)')
+        if not path:return
+        try:
+            runtime_store().install(path)
+            self._pack_status='扩展包已安装，新增型号已可选择。'
+        except (OSError,PackError):
+            self._pack_status='扩展包无效或超出限制，原目录保持不变。'
+        self._hardware_packs_updated()
+
+    @Slot(str)
+    def removeHardwarePack(self,pack_id):
+        from hardware_packs import runtime_store,PackError
+        try:
+            removed=runtime_store().remove(pack_id)
+            self._pack_status='扩展包已移除，本机采集保持正常。' if removed else ''
+        except (OSError,PackError):
+            self._pack_status='未能移除扩展包，请重试。'
+        self._hardware_packs_updated()
 
     def _ensure_assembly_identity(self):
         if self._assembly_firmware is None:

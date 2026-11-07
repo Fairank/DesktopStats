@@ -9,6 +9,7 @@
 .import "HardwareSeriesShapes.js" as SeriesCatalog
 .import "HardwareMemoryShapes.js" as Memory
 .import "HardwareBoardDesigns.js" as Board
+.import "HardwareCpuPackages.js" as Cpu
 
 // Original simplified hardware drawings, not manufacturer logos or a claim to
 // reproduce a product photograph. Geometry uses the existing 24-unit icon grid.
@@ -46,6 +47,7 @@ function key(appearance, ink) {
     const input = appearance && typeof appearance === "object" && !Array.isArray(appearance) ? appearance : ({})
     const kind = choice(input.kind, ["cpu", "gpu", "memory"], "cpu")
     const vendor = choice(input.vendor, vendors, "unknown")
+    const cpuPackageKey = kind === "cpu" ? Cpu.key(input) : ""
     const board = choice(input.board_vendor, kind === "memory" ? Memory.brands : boards, "unknown")
     const styles = kind === "cpu" ? ["chip", "lga_rect", "am5"]
         : kind === "memory" ? ["memory_neutral", "dimm", "sodimm"]
@@ -75,20 +77,21 @@ function key(appearance, ink) {
     const parts = [kind, vendor, board, style, count, shroud,
         hex(input.accent, defaults[vendor]), hex(ink, "#69788c"), series, motif,
         choice(input.icon_set, ["outline", "solid", "miniature", "soft", "cartoon", "sketch",
-            "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"], "outline")]
+            "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].concat(cpuPackageKey?["classic"]:[]), "outline")]
     // Original Outline keys and art stay byte-stable. Exact exterior details
     // require an independently guarded model identity, including on old cards.
-    const model=kind==="cpu" && (parts[10].indexOf("notebook_")===0 || Variants.styles.indexOf(parts[10])>=0)
+    const model=cpuPackageKey || (kind==="cpu" && (parts[10].indexOf("notebook_")===0 || Variants.styles.indexOf(parts[10])>=0)
         ? Notebook.cpuModelKey({kind:kind,id:input.id,style:style,vendor:vendor,confidence:input.confidence})
-        : parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):""
+        : parts[10]!=="outline"?Board.modelKey({kind:kind,series_id:series,id:input.id,confidence:input.confidence}):"")
     if(model)parts.push(model)
     return parts.join("|")
 }
 
 function inputFromParts(parts) {
+    const cpuPackage=Cpu.fromKey(parts[11])
     return {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
         fan_count:Number(parts[4]),shroud:parts[5],accent:parts[6],series_id:parts[8],motif:parts[9],icon_set:parts[10],
-        id:parts[11]||"",confidence:parts.length===12?"model":""}
+        id:cpuPackage?cpuPackage.model_id:parts[11]||"",confidence:parts.length===12?"model":"",cpu_package:cpuPackage}
 }
 
 function path(d, ink, width, opacity) {
@@ -238,8 +241,9 @@ function source(geometryKey) {
     const outlineBody = parts[10] === "outline" && parts[0] !== "memory" ? (parts[0] === "cpu" ? cpu(parts[3], ink, accent)
         : gpu(parts[3], Number(parts[4]), parts[5], parts[2], ink, accent, parts[9])) : ""
     const state = {kind:parts[0],vendor:parts[1],board_vendor:parts[2],style:parts[3],
-        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||""}
-    const body = Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state)
+        fan_count:Number(parts[4]),shroud:parts[5],accent:accent,ink:ink,series_id:parts[9],icon_set:parts[10],model_id:parts[11]||"",cpu_package:Cpu.fromKey(parts[11])}
+    const body = state.kind==="cpu" && state.cpu_package ? Cpu.body(state)
+        : Variants.styles.indexOf(parts[10])>=0 ? Variants.body(state)
         : parts[10].indexOf("notebook_")===0 ? Notebook.body(state)
         : parts[10] === "sketch" ? Sketch.body(state)
         : parts[10] === "cartoon" ? Cartoon.body(state)

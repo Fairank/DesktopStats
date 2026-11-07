@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import "HardwareShapes.js" as Shapes
+import "HardwareCpuPackages.js" as Cpu
 
 // Retained artwork. Motion rotates only prebuilt local fan textures; neither
 // a new reading nor an animation tick rebuilds the SVG or discovers hardware.
@@ -12,6 +13,7 @@ Item {
     property real fanRotation: 0
     property bool glyphReady: false
     readonly property bool classic: appearance && appearance.icon_set === "classic"
+        && !(appearance.kind === "cpu" && Cpu.key(appearance))
     readonly property string geometryKey: classic ? "" : Shapes.key(appearance, ink)
     readonly property url svgSource: classic ? "" : Shapes.source(geometryKey)
     readonly property bool fanShapeEligible: !classic && appearance && appearance.kind === "gpu"

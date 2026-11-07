@@ -5,6 +5,7 @@
 .import "HardwareMemoryShapes.js" as Memory
 .import "HardwareBoardDesigns.js" as Board
 .import "HardwareFanDesigns.js" as Fans
+.import "HardwareCpuPackages.js" as Cpu
 
 // Reuse reviewed model-specific 2D construction as the source of the 3D
 // silhouette and fan vanes. No sensor, renderer, animation or remote asset.
@@ -50,6 +51,7 @@ function gpu(input) {
             .map(function(r){return {d:r.d,m:r.m,color:r.a.fill}})}
 }
 function cpu(input) {
+    if(Cpu.key(input))return Cpu.paths(input.cpu_package)
     const style=Object.prototype.hasOwnProperty.call(Parts.cpuPackage,input.style)?input.style:"chip"
     return {package:{d:Parts.cpuPackage[style],m:[1,0,0,1,0,0]},
             lid:{d:Parts.cpuLid[style],m:[1,0,0,1,0,0]},style:style}

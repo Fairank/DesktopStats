@@ -83,8 +83,8 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
                telemetry_bound=appearance.get('selection_source')!='reference',detected_label=text(device.get('gpu_name') or device.get('label')))
     cpu_appearance = appearance_for("cpu", data.get("cpu_name"))
     if options['cpu_model']:
-        from hardware_appearance import CATALOG
-        row=next((row for row in CATALOG if row[0]==options['cpu_model'] and row[1]=='cpu'),None)
+        from hardware_appearance import catalog_rows
+        row=next((row for row in catalog_rows() if row[0]==options['cpu_model'] and row[1]=='cpu'),None)
         if row:
             cpu_appearance=appearance_for('cpu',row[-1][0]);cpu_appearance['selection_source']='reference'
         else:rejected.append(options['cpu_model'])
@@ -143,7 +143,7 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     parts=selected_parts(options)
     checks = [dict(kind='reference_model',state='unsupported',model_id=model) for model in rejected]
     # Exact catalog facts only; a generic CPU drawing cannot identify a socket.
-    cpu_socket={'intel-13700kf':'LGA1700','amd-9950x':'AM5','amd-7800x3d':'AM5'}.get(cpu_appearance.get('id'))
+    cpu_socket=(cpu_appearance.get('cpu_package') or {}).get('socket')
     if profile:
         board_socket=profile.get('socket')
         if cpu_socket and board_socket:

@@ -38,6 +38,38 @@ def all_appearances():
     ]
 
 
+CPU_PACKAGES = {
+    'intel-13700kf':('intel_lga1700_1851','lga_rect','INTEL','13700KF'),
+    'amd-9950x':('amd_am5','am5','AMD','9950X'),
+    'amd-7800x3d':('amd_am5','am5','AMD','7800X3D'),
+}
+
+
+def assert_cpu_artwork(case,value,data):
+    """Pinned seed package/SKU binding; other hardware keeps its old contract."""
+    family,style,brand,mark=CPU_PACKAGES[value['id']]
+    descriptor=value['cpu_package'];fields=data['key'].split('|')
+    case.assertEqual(descriptor['id'],family);case.assertEqual(descriptor['model_id'],value['id'])
+    case.assertEqual(descriptor['vendor'],value['vendor']);case.assertEqual(fields[3],style)
+    case.assertEqual(len(fields),12)
+    case.assertEqual(fields[11],'cpu@'+family+'@'+value['id']+'@'+descriptor['label_ascii'])
+    case.assertEqual(descriptor['label_ascii'].split()[-1],mark)
+    svg=decode(data['source']);tree=ET.fromstring(svg);case.assertTrue(QSvgRenderer(svg.encode()).isValid())
+    def nodes(name):return [n for n in tree.iter() if name in n.get('class','').split()]
+    packages=nodes('hardware-cpu-package');case.assertEqual(len(packages),1);case.assertEqual(packages[0].get('data-package'),family)
+    for name in ('cpu-package-outline','cpu-lid-outline'):case.assertEqual(len(nodes(name)),1)
+    marks=nodes('cpu-model-mark');case.assertEqual(len(marks),1)
+    case.assertEqual([n.text for n in marks[0] if n.tag.endswith('text')],[brand,mark])
+    case.assertEqual(len([n for n in tree.iter() if n.tag.endswith('text')]),2)
+    case.assertFalse(any(n.tag.endswith(('filter','script','image','animate','animateTransform','clipPath')) for n in tree.iter()))
+    expressions=nodes('hardware-cartoon-expression')+nodes('notebook-smile')
+    case.assertEqual(bool(expressions),fields[10] in ('cartoon','notebook_smile'))
+    if 'layers' in data:
+        case.assertEqual(data['layers']['rotors'],[])
+        case.assertEqual(data['layers']['baseSource'],data['source'])
+    return tree
+
+
 class HardwareCartoonTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -137,12 +169,12 @@ Window {
                     fields = data["key"].split("|")
                     self.assertEqual(fields[10], "cartoon")
                     if value["kind"] == "cpu":
-                        self.assertEqual(len(fields), 11)
-                        self.assertEqual(fields[3], value["style"])
+                        assert_cpu_artwork(self,value,data)
+                        assert_cpu_artwork(self,value,dict(data,source=data['layers']['baseSource']))
                     else:
                         self.assertEqual(fields[11:], [value["id"]])
-                    self.valid_svg(data["source"])
-                    self.valid_svg(data["layers"]["baseSource"])
+                        self.valid_svg(data["source"])
+                        self.valid_svg(data["layers"]["baseSource"])
                     for rotor in data["layers"]["rotors"]:
                         self.valid_svg(rotor["source"])
                     if value["kind"] != "gpu" or value.get("fan_count") == 0:

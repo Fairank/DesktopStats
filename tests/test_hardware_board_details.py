@@ -551,18 +551,20 @@ QtObject {
                                   and node.get("transform", "").startswith("rotate(")]
                         self.assertEqual(len(blades), 7)
 
-    def test_original_outline_hashes_ignore_new_exterior_model_key(self):
+    def test_outline_gpu_hashes_stay_exact_and_cpu_packages_bind_the_model(self):
+        from tests.test_hardware_cartoon import assert_cpu_artwork
         cases = (
-            ("cpu", "Intel Core i7-13700KF", "d33938b0fe7fe4348270d16d0f4453659c2cf781ab8cc2f2d5e4fd01a39ab987"),
-            ("cpu", "AMD Ryzen 9 9950X", "518fd3f81f7c61acdf24c61eecf29432760fc7c677d1d95761875f6ee007abbd"),
+            ("cpu", "Intel Core i7-13700KF", "a82bae4cf9e8b4a7c5ef6ec66a3414d48c1d577e3d246730e8da994c4014bf41"),
+            ("cpu", "AMD Ryzen 9 9950X", "63190769e5b03ec7cb5a970553c3726e309da3656a9033b45cae66cf204fa183"),
             ("gpu", "DUAL-RTX4060-O8G", "b08a961cb281d10a62d105d9a2e8a306afdeb1195b3805767145549d30f9cfbe"),
             ("gpu", "TUF-RTX4070TIS-O16G-GAMING", "19827c993b8a33978631ac6d2919a07de67e1324b73a05f2ad2631b04cc199d0"),
             ("gpu", "NVIDIA GeForce RTX 4070", "8c9cc5541d145f68bb67bae0d7b1d80cc559dac6c989e95e0dac0df394df6a68"),
         )
         for kind, alias, expected in cases:
             with self.subTest(alias=alias):
-                result = self.drawing(dict(hardware.appearance_for(kind, alias), icon_set="outline"))
-                self.assertEqual(len(result["key"].split("|")), 11)
+                value=dict(hardware.appearance_for(kind,alias),icon_set='outline');result=self.drawing(value)
+                if kind=='cpu':assert_cpu_artwork(self,value,result)
+                else:self.assertEqual(len(result["key"].split("|")), 11)
                 self.assertEqual(hashlib.sha256(decode(result["source"]).encode()).hexdigest(), expected)
 
     def test_completed_version_inventory_contains_all_fifty_six_exact_versions(self):

@@ -188,13 +188,6 @@ def crease_edges(vertices,limit=MAX_MESH_EDGES):
     return tuple(result)
 
 
-def _wobble(point,seed,amount):
-    if not amount:return point
-    x,y,z=point
-    return tuple(v+amount*math.sin(x*.071+y*.043+z*.053+seed*.17+axis*2.1)
-                 for axis,v in enumerate(point))
-
-
 def edge_batches(meshes,style,styles=None):
     """Build immutable line vertices once; global cap also bounds hand ink."""
     default=style_for(style)
@@ -261,10 +254,13 @@ def edge_batches(meshes,style,styles=None):
             points=(a,b)
             if policy['wobble'] and math.dist(a,b)>12:
                 points=(a,tuple((a[k]+b[k])/2 for k in range(3)),b)
-            jittered=[_wobble(p,index+1,policy['wobble']) for p in points]
+            # Keep physical ink on its actual crease. A millimetre-scale 3-D
+            # pen displacement can sink through a thin lid and disappear in
+            # the depth test. The renderer supplies subpixel view-plane ink
+            # variation without modifying the surface or its occlusion mesh.
             # Each selected edge uses at most two segments; enforce the final
             # cap rather than multiplying draw work for hand-drawn variants.
-            for p,q in zip(jittered,jittered[1:]):
+            for p,q in zip(points,points[1:]):
                 if remaining<=0:break
                 lines.extend((*p,0.,0.,1.,*q,0.,0.,1.));remaining-=1
         if lines:output.append((mesh,tuple(lines)))

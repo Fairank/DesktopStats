@@ -112,9 +112,13 @@ Window {
             for value in values:
                 with self.subTest(style=style, model=value["id"]):
                     data = self.drawing(dict(value, icon_set=style))
-                    self.assertEqual(data["key"].split("|")[10:], [style, value["id"]])
-                    tree = self.valid_svg(data["source"])
-                    self.assertTrue(self.nodes(tree, "hardware-variants"))
+                    if value['kind']=='cpu':
+                        self.assertEqual(data['key'].split('|')[10],style)
+                        tree=drawing_fixture.assert_cpu_artwork(self,value,data)
+                    else:
+                        self.assertEqual(data["key"].split("|")[10:], [style, value["id"]])
+                        tree = self.valid_svg(data["source"])
+                        self.assertTrue(self.nodes(tree, "hardware-variants"))
                     self.valid_svg(data["layers"]["baseSource"])
                     for rotor in data["layers"]["rotors"]:
                         self.valid_svg(rotor["source"])

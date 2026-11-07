@@ -72,11 +72,11 @@ class AssemblyInspectionTests(unittest.TestCase):
         for field,value in (('cpu_usage',True),('cpu_temp',float('nan')),
                             ('cpu_power',float('inf')),('cpu_frequency',False)):
             self.data[field]=value
-        self.assertTrue(all(not row['available'] for row in self.inspect('cpu')['rows']))
+        self.assertTrue(all(not row['available'] for row in self.inspect('cpu')['rows'] if row.get('metric')))
 
     def test_whole_sample_and_cpu_source_timestamps_expire_independently(self):
         self.data['metric_timestamps']['cpu_temp']=90.0
-        rows={row['metric']:row for row in self.inspect('cpu')['rows']}
+        rows={row['metric']:row for row in self.inspect('cpu')['rows'] if row.get('metric')}
         self.assertFalse(rows['cpu_temp']['available']);self.assertTrue(rows['cpu_usage']['available'])
         self.data['time']=101.0
         self.assertTrue(all(not row['available'] for row in self.inspect('all')['rows']))
@@ -121,7 +121,7 @@ class AssemblyInspectionTests(unittest.TestCase):
         self.assertIn('内存读数为整机合计。',result['notes'])
         self.assertEqual(rows['总内存']['value'],'64.0 GB');self.assertEqual(rows['温度']['value'],'—')
         self.config['top_bar']['items'].insert(0,dict(metric='cpu_usage',prefs=dict(temperature_unit='F',precision=1)))
-        rows={row['metric']:row for row in self.inspect('cpu')['rows']}
+        rows={row['metric']:row for row in self.inspect('cpu')['rows'] if row.get('metric')}
         self.assertEqual(rows['cpu_temp']['value'],'142.7 °F')
 
     def test_missing_sample_is_unavailable_without_claiming_hardware_is_unsupported(self):

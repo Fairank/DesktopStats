@@ -103,7 +103,7 @@ class AssemblyPartsTests(unittest.TestCase):
         self.assertIn(dict(kind='memory_type',state='unsupported',component=['ddr4'],reference='ddr5'),spec['checks'])
         for family in ('cpu','gpu','memory'):
             result=snapshot(data,spec,config,family,now=100.)
-            self.assertFalse(any(row['available'] for row in result['rows']))
+            self.assertFalse(any(row['available'] for row in result['rows'] if row.get('metric')))
             self.assertIn('参考型号未绑定本机传感器。',result['notes'])
         self.assertEqual((data,config),original)
         config['assembly']['gpu_model']='unregistered-model'

@@ -633,7 +633,7 @@ def enrich_components(meshes,spec):
         metadata.update(gpu=gpu_meta,pcb_routing_verified=False,mechanical_details_are_schematic=True)
         return tuple(meshes),metadata
     cpu=spec.get('cpu') or {};base=next((m for m in meshes if m.name=='cpu-lid'),None)
-    if base is not None:
+    if base is not None and not spec.get('_cpu_package_geometry'):
         _,height,width=_extent(base);package='lga_rect' if cpu.get('style')=='lga_rect' else 'am5' if cpu.get('style')=='am5' else 'chip'
         pw,ph=(37.5,45.) if package=='lga_rect' else (40.,40.)
         polygon=unit_polygon(cpu.get('lid_polygon'),pw,ph)
