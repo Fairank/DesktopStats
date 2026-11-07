@@ -1,5 +1,31 @@
 # Changes
 
+## 0.38.0-preview.1
+
+- Expand PSUs from six to 21 models across 11 brands using manufacturer
+  specifications. Preserve the six existing records and their original meshes;
+  keep unverified grilles, socket layouts, colors and support details schematic.
+- Model fixed-wire and semi-modular supplies separately from detachable socket
+  banks. Keep factory harness obstacles local, retain the PSU body for routing,
+  and attach generated cables at actual rendered wire ends without source plugs.
+- Add source-linked OLED blank faces, static RGB diffuser colors, joined blade
+  tips, funnel inlets, open motor supports and white cases across all 13 styles.
+  Show PSU cable type, form factor and fan dimensions in the inspector; unknown
+  power/OLED readings stay unavailable and static values follow the UI language.
+- Give notebook artwork continuous pen drift, restrained retracing and a shared
+  paper-grid tile. Keep all 150 existing Original SVGs byte-identical and retain
+  visible-only gallery generation with no animation unless explicitly enabled.
+- Reuse per-call coordinate/normal keys and connected-point visits while
+  preparing crease ink. Retain identical output, the 8,192-edge cap and no
+  persistent cache. Representative first builds take 27–42% less time, with
+  managed preparation peak reduced from 22.575 to 16.587 MiB.
+- Run isolated test children below normal priority on Windows, preserving
+  offscreen private-profile boundaries during background verification.
+- Export a separate offline model atlas for all 165 accessories and 13 styles,
+  using 52 local category/style slices and at most 12 displayed cards. Keep
+  demonstration off by default, pause hidden/offscreen content, and include
+  complete licensing, source references and hashes without a server or install.
+
 ## 0.37.0-preview.1
 
 - Add a lazy searchable 2D model gallery for all 64 cases, 42 cooling references,

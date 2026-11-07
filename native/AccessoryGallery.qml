@@ -109,6 +109,13 @@ Popup {
                         anchors.top:parent.top;anchors.topMargin:7;anchors.horizontalCenter:parent.horizontalCenter
                         width:parent.width-14;height:144;radius:7
                         color:root.selectedStyle.indexOf('notebook_')===0?"#fbf8ed":"#edf2f4"
+                        Image {
+                            anchors.fill:parent;anchors.margins:1
+                            visible:root.selectedStyle.indexOf('notebook_')===0
+                            source:"data:image/svg+xml;charset=utf-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M16 0H0V16" fill="none" stroke="#8ba8b5" stroke-opacity=".22" stroke-width=".7"/></svg>')
+                            fillMode:Image.Tile;sourceSize:Qt.size(16,16)
+                            cache:true;asynchronous:false
+                        }
                         AccessoryGlyph {objectName:"accessoryCardGlyph";anchors.fill:parent;anchors.margins:4
                             art:card.art;phase:root.phase;motion:root.motionActive}
                     }

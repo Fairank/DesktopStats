@@ -10,9 +10,10 @@ Item {
     property real phase: 0
     readonly property var rotors: art.rotors || []
     readonly property bool moving: motion && rotors.length>0
-    readonly property real unit: Math.min(width/120,height/100)
+    readonly property real previewScale:art.kind==="psu"?1.35:1
+    readonly property real unit: Math.min(width/120,height/100)*previewScale
     readonly property real artworkLeft: (width-120*unit)/2
-    readonly property real artworkTop: (height-100*unit)/2
+    readonly property real artworkTop: height/2-(art.kind==="psu"?41:50)*unit
     implicitWidth: 180
     implicitHeight: 150
     function source(svg) {return typeof svg==="string" && svg.length?"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg):""}

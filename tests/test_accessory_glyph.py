@@ -42,6 +42,15 @@ Window {
             QTest.qWait(45)
             image = window.grabWindow().convertToFormat(QImage.Format_RGBA8888)
             self.assertFalse(image.isNull())
+            # The offscreen surface may not have presented its first frame yet
+            # under concurrent low priority QA. Wait for artwork, never accept
+            # a blank capture as evidence that retained layers align.
+            for _ in range(20):
+                if any(bytes(image.constBits())[3::4]):
+                    break
+                window.requestUpdate()
+                QTest.qWait(25)
+                image = window.grabWindow().convertToFormat(QImage.Format_RGBA8888)
             return image, bytes(image.constBits())
 
         def changed(left, right):
@@ -78,7 +87,12 @@ Window {
                                            'An explicit phase must visibly turn the fan')
                         glyph.setProperty('phase', 0)
                         _, restored = capture()
-                        self.assertEqual(zero, restored)
+                        # Fractional thumbnail framing can make the software
+                        # backend round a few antialiased pixels by 1/255 when
+                        # returning to zero. No displacement or color drift is
+                        # allowed beyond that single-channel rounding step.
+                        self.assertLessEqual(max(abs(a-b) for a,b in zip(zero,restored)),1)
+                        self.assertLess(changed(zero,restored),max(20,occupied*.002))
                         self.assertEqual(image.size(), window.size())
         finally:
             window.hide()

@@ -32,6 +32,12 @@ def _n(value):
     return format(float(value), '.8f').rstrip('0').rstrip('.') or '0'
 
 
+def _shade(value, factor):
+    if not isinstance(value,str) or not re.fullmatch('#[0-9a-fA-F]{6}',value):
+        return '#303a42'
+    return '#'+''.join(format(max(0,min(255,round(int(value[n:n+2],16)*factor))),'02x') for n in (1,3,5))
+
+
 def _svg(content, rotor=False):
     bounds = '0 0 100 100' if rotor else '0 0 120 100'
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + bounds +
@@ -93,18 +99,31 @@ class _Pen:
             return
         self.index += 1
         data = 'M' + _n(points[0][0]) + ' ' + _n(points[0][1])
+        perimeter = 0.
         for i, (x, y) in enumerate(points[1:] + ([points[0]] if close else [])):
             last = points[i]
+            length = math.hypot(x-last[0], y-last[1]) if self.hand else 0.
+            perimeter += length
             if self.hand:
-                # A small alternating bow, with precisely shared endpoints.
-                bend = (.32 if self.style != 'sketch' else .55) * (-1 if (self.index+i) % 2 else 1)
-                data += ' Q' + _n((last[0]+x)/2+bend) + ' ' + _n((last[1]+y)/2-bend) + ' ' + _n(x) + ' ' + _n(y)
+                # The pen drifts gently to either side of a long stroke. Exact
+                # shared endpoints keep joints closed; tiny ports stay legible.
+                amount = min(.78 if self.style != 'sketch' else 1.05, length*.035)
+                sign = -1 if (self.index+i) % 2 else 1
+                nx,ny = ((last[1]-y)/length, (x-last[0])/length) if length else (0.,0.)
+                a = amount*sign
+                b = -a*(.42 if (self.index+i)%3 else .64)
+                data += (' C'+_n(last[0]+(x-last[0])/3+nx*a)+' '+_n(last[1]+(y-last[1])/3+ny*a)
+                         +' '+_n(last[0]+(x-last[0])*2/3+nx*b)+' '+_n(last[1]+(y-last[1])*2/3+ny*b)
+                         +' '+_n(x)+' '+_n(y))
             else:
                 data += ' L' + _n(x) + ' ' + _n(y)
         if close:
             data += ' Z'
-        self.path(data, fill, width, opacity)
-        if self.hand and self.style in ('notebook_line', 'sketch') and close:
+        pressure = (.94+(self.index*7%9)*.022) if self.hand else 1.
+        self.path(data, fill, (self.width*pressure if width is None and self.hand else width), opacity)
+        # Retrace a few long outlines, never every tiny grille cell. This reads
+        # as drawn linework while keeping fine openings clean and bounded.
+        if self.hand and self.style in ('notebook_color','notebook_line','notebook_smile','sketch') and close and perimeter>=45:
             self.parts.append('<path d="' + data + '" transform="translate(.32 -.22)"' + self._attrs('none', .28, .45) + '/>')
 
     def rect(self, x, y, w, h, fill='none', radius=0, width=None, opacity=1):
@@ -682,6 +701,10 @@ def _psu(row, style):
     if style in ('miniature','classic','solid'):
         p.body,p.dark,p.light,p.ink='#303a42','#182229','#667781','#9babb5'
         fg.ink='#9babb5'
+        if row.get('housing_color'):
+            p.body=row['housing_color'];p.dark=_shade(p.body,.65);p.light=_shade(p.body,1.25)
+            p.ink='#536471' if sum(int(p.body[n:n+2],16) for n in (1,3,5))>560 else '#afbdc8'
+            fg.ink=p.ink
     dims=row['dimensions_mm']
     # SFX is visibly shorter, SF-L has its documented longer fan face; ATX
     # length differences remain visible rather than using one generic box.
@@ -701,7 +724,20 @@ def _psu(row, style):
         fx=x+(width-fw)/2;fy=y+(height-fh)/2
         cx,cy=fx+fw/2,fy+fh/2
         p.ellipse(cx,cy,fw/2,fh/2,p.dark,.6)
-        rotor=_rotor(dict(blades=7,blade_color='#455660',aperture_color='#182229',hub_ratio=.27),style,fx,fy,fw,fh)
+        if row.get('funnel_inlet'):
+            p.parts.append('<g data-fan-inlet="funnel-reference">')
+            p.ellipse(cx,cy,fw*.51,fh*.51,p.light,1.1)
+            p.ellipse(cx,cy,fw*.47,fh*.47,p.dark,.65)
+            p.parts.append('</g>')
+        if row.get('frameless_fan'):
+            p.parts.append('<g data-fan-support="frameless-reference">')
+            for index in range(3):
+                angle=index*math.tau/3
+                p.line_to(cx+fw*.42*math.cos(angle),cy+fh*.42*math.sin(angle),cx,cy,1.5)
+            p.ellipse(cx,cy,fw*.1,fh*.1,p.dark,.6)
+            p.parts.append('</g>')
+        rotor=_rotor(dict(blades=row.get('fan_blades',7),blade_color='#a8d0d6' if row.get('rgb_fan') else '#455660',
+                          aperture_color='#182229',hub_ratio=.27,outer_ring=row.get('outer_ring') is True),style,fx,fy,fw,fh)
         rotors.append(rotor)
         fg.parts.append('<g data-grille="'+escape(pattern,quote=True)+'">')
         if pattern=='rounded_y':
@@ -754,6 +790,24 @@ def _psu(row, style):
         for i in range(4):
             xx=x+11+i*(width-18)/4
             p.poly([(xx,y-3),(xx+5,y-5),(xx+8,y-5),(xx+3,y-3)],p.dark,.4)
+    if not row['modular'] or row.get('semi_modular'):
+        p.parts.append('<g data-cable-attachment="fixed-harness-reference">')
+        hx=x+width*.3;hy=y-4
+        p.ellipse(hx,hy,3,1.4,p.dark,.5)
+        for i in range(3):
+            p.path('M'+_n(hx+i*.7)+' '+_n(hy)+' C'+_n(hx-6+i)+' '+_n(hy-8)+' '
+                   +_n(hx+3+i)+' '+_n(hy-12)+' '+_n(hx-3+i*2)+' '+_n(hy-17),width=1.2)
+        p.parts.append('</g>')
+    if row.get('oled_display'):
+        p.parts.append('<g data-oled="unread-blank-reference">')
+        sx=x+width*.16
+        p.poly([(sx,y-1),(sx+11,y-7),(sx+29,y-7),(sx+18,y-1)],p.dark,.55)
+        p.poly([(sx+3,y-1.7),(sx+11.5,y-6),(sx+25,y-6),(sx+17,y-1.7)],'#142c36',.35)
+        p.parts.append('</g>')
+    if row.get('accent_color'):
+        accent=row['accent_color'] if style in ('miniature','classic','solid') else p.accent
+        p.line_to(x+width*.22,y-2,x+width*.68,y-2,.9)
+        p.parts.append('<path d="M'+_n(x+width*.22)+' '+_n(y-2)+' L'+_n(x+width*.68)+' '+_n(y-2)+'" stroke="'+escape(accent,quote=True)+'" stroke-width="1.1"/>')
     for xx,yy in ((x+2,y+2),(x+width-2,y+2),(x+2,y+height-2),(x+width-2,y+height-2)):
         fg.ellipse(xx,yy,.7,.55,p.light,.35)
     fg.face(x+width*.5,y+height*.53,7)
@@ -802,7 +856,13 @@ def art(kind, model_id, style='miniature'):
                        top_style=row.get('top_style','reference'),pump_style=row.get('pump_style','none'))
     elif kind=='psu':
         details.update(grille=row.get('grille_pattern','reference'),fan_count=row['fan_count'],
-                       form_factor=row['form_factor'],port_positions_reference=True)
+                       form_factor=row['form_factor'],port_positions_reference=True,
+                       modular=bool(row['modular']),semi_modular=bool(row.get('semi_modular')),
+                       fixed_harness=not row['modular'] or bool(row.get('semi_modular')),
+                       oled_display=bool(row.get('oled_display')),oled_live_reading=None,
+                       rgb_fan=bool(row.get('rgb_fan')),rgb_lighting_live=False,
+                       blade_tip_ring=bool(row.get('outer_ring')),frameless_fan=bool(row.get('frameless_fan')),
+                       fan_inlet_profile='funnel_reference' if row.get('funnel_inlet') else 'reference')
     elif kind=='fan':
         details.update(family=row.get('family','reference'),blade_count=row['blades'],
                        blade_count_verified=bool(row.get('blade_count_verified')),

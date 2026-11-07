@@ -28,7 +28,7 @@ class AccessoryArtTests(unittest.TestCase):
         artwork.clear_cache()
         rows=artwork.choices()
         self.assertEqual({key:len(value) for key,value in rows.items()},
-                         dict(cases=64,coolers=42,psus=6,fans=38))
+                         dict(cases=64,coolers=42,psus=21,fans=38))
         catalog_rows=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                       component_catalog.choices('psu'),cooling_catalog.choices_fans())
         for key,source in zip(KINDS,catalog_rows):
@@ -48,7 +48,7 @@ class AccessoryArtTests(unittest.TestCase):
         else:
             self.fail('Shared hardware style IDs were not found')
 
-    def test_all_1950_artworks_are_safe_detached_svg_and_keep_the_model(self):
+    def test_all_current_artworks_are_safe_detached_svg_and_keep_the_model(self):
         required={'id','kind','label','brand','style','svg','body_svg','foreground_svg',
                   'rotors','reference_details','sources'}
         for key,rows in artwork.choices().items():
@@ -151,7 +151,7 @@ class AccessoryArtTests(unittest.TestCase):
                 original=artwork.art(kind,model)
                 for style in ('notebook_color','notebook_line'):
                     drawing=artwork.art(kind,model,style)
-                    self.assertIn(' Q',drawing['svg'])
+                    self.assertIn(' C',drawing['svg'])
                     self.assertNotEqual(original['svg'],drawing['svg'])
                     self.assertEqual(original['art_details'],drawing['art_details'])
         dual=artwork.art('cooler','noctua-nh-d15-g2')['rotors']

@@ -196,6 +196,16 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
             watts=model.get('capacity_w');size=_dimensions(model.get('dimensions_mm'),('length','width','height'))
             rows=[_static('额定功率',f'{watts:g} W' if numeric(watts) else None,numeric(watts)),
                   _static('尺寸',size,size is not None),_static('实际功率',None,False,'未提供此部件的独立传感器读数。')]
+            attachment=('半模组' if model.get('semi_modular') else '全模组' if model.get('modular') is True
+                        else '固定出线' if model.get('modular') is False else None)
+            form={'atx':'ATX','sfx':'SFX','sfx_l':'SFX-L'}.get(model.get('form_factor'))
+            diameter=model.get('fan_diameter_mm')
+            fan_size=f'{diameter:g} mm' if numeric(diameter) else '无风扇' if model.get('fan_count')==0 else None
+            rows.extend((_static('供电线缆',attachment,attachment is not None),
+                         _static('外形规格',form,form is not None),_static('风扇尺寸',fan_size,fan_size is not None)))
+            if model.get('oled_display'):notes.append('OLED 仅示意外观，尚未绑定功率读数。')
+            if model.get('rgb_fan'):notes.append('灯光颜色为外观示意，不代表当前灯效。')
+            if model.get('appearance_unverified'):notes.append('外观细节尚未核实，当前显示参考布局。')
         elif component in ('storage','expansion'):
             selected=auxiliary.get('storage' if component=='storage' else 'expansion_cards') or []
             if model_id:

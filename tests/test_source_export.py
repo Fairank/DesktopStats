@@ -357,6 +357,15 @@ class SourceExportTests(unittest.TestCase):
             self.run_export()
         self.assertFalse(self.output.exists())
 
+    def test_offline_html_templates_receive_the_source_privacy_checks(self):
+        personal = "C:" + "/" + "Users/" + "private-person/OneDrive/data.json"
+        with self.assertRaisesRegex(export.ExportError, "Personal home-directory literal"):
+            export._scan("tools/templates/accessory-atlas.html", ('<p>'+personal+'</p>').encode('utf8'))
+        secret = "ghp" + "_" + "8Yv0FudqRbNmS74pAz6G1Ci9Xk3D5LwE"
+        with self.assertRaises(export.ExportError) as caught:
+            export._scan("tools/templates/accessory-atlas.html", ('<script>'+secret+'</script>').encode('utf8'))
+        self.assertNotIn(secret,str(caught.exception))
+
     def test_generic_fixture_paths_are_allowed_and_export_is_reproducible(self):
         self.write(
             "tests/test_paths.py",

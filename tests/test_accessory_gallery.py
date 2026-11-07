@@ -90,7 +90,7 @@ class AccessoryGalleryTests(unittest.TestCase):
         self.assertNotIn('assembly_geometry',sys.modules)
         self.assertNotIn('assembly_viewer',sys.modules)
         from top_bar_config import HARDWARE_ICON_STYLES
-        for category,count in (('case',64),('cooler',42),('psu',6),('fan',38)):
+        for category,count in (('case',64),('cooler',42),('psu',21),('fan',38)):
             gallery.setProperty('category',category);QTest.qWait(25)
             self.assertEqual(len(value(gallery,'entries')),count)
             for style in HARDWARE_ICON_STYLES:

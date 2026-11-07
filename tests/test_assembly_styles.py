@@ -76,6 +76,26 @@ class AssemblyStyleTests(unittest.TestCase):
         self.assertEqual(set(edges),{((0,0,0),(0,20,0)),((0,0,0),(20,0,0)),
                                      ((0,20,0),(20,20,0)),((20,0,0),(20,20,0))})
 
+    def test_repeated_triangle_vertices_quantize_once_without_retaining_a_cache(self):
+        import assembly_style
+        vertices=box(10,20,30)
+        distinct=len({vertices[start:start+3] for start in range(0,len(vertices),6)})
+        with patch.object(assembly_style,'_key',wraps=assembly_style._key) as quantize:
+            first=crease_edges(vertices)
+            self.assertEqual(quantize.call_count,distinct)
+            second=crease_edges(vertices)
+            self.assertEqual(quantize.call_count,distinct*2)
+        self.assertEqual(first,second)
+        self.assertEqual(len(first),12)
+
+    def test_shared_contour_nodes_keep_whole_components_and_exact_spans(self):
+        from assembly_style import _edge_groups
+        center=(0.,0.,0.)
+        corners=((-3.,-4.,0.),(3.,-4.,0.),(3.,4.,0.),(-3.,4.,0.))
+        edges=tuple((center,point) for point in corners)+tuple(zip(corners,(*corners[1:],corners[0])))
+        edges+=(((20.,0.,0.),(20.,5.,0.)),((20.,5.,0.),(25.,5.,0.)))
+        self.assertEqual(_edge_groups(edges),[(tuple(range(8)),8.),((8,9),5.)])
+
     def test_main_fan_blades_and_hub_survive_dense_acceleration_grooves_whole(self):
         from assembly_cooling import add_cooling
         from assembly_style import _edge_groups,MAX_MESH_EDGES

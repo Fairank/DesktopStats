@@ -157,7 +157,7 @@ def expression_vertices(dimensions):
     return tuple(out)
 
 
-def _key(point):return tuple(round(v,5) for v in point)
+def _key(point):return (round(point[0],5),round(point[1],5),round(point[2],5))
 
 
 def _edge_groups(edges):
@@ -172,9 +172,11 @@ def _edge_groups(edges):
         while pending:
             index=pending.pop();indices.append(index)
             for point in edges[index]:
+                neighbors=touching.pop(point,None)
+                if neighbors is None:continue
                 for axis,value in enumerate(point):
                     low[axis]=min(low[axis],value);high[axis]=max(high[axis],value)
-                for neighbor in touching[point]:
+                for neighbor in neighbors:
                     if neighbor not in seen:seen.add(neighbor);pending.append(neighbor)
         groups.append((tuple(sorted(indices)),max(b-a for a,b in zip(low,high))))
     return groups
@@ -188,29 +190,31 @@ def _individual_sample(edges,limit):
     return tuple(edge for n,edge in enumerate(edges) if n in chosen)
 
 
-def _stitch_boundaries(candidates,edge_normals,vertices):
+def _stitch_boundaries(candidates,edge_normals,positions):
     """Cancel coplanar T-junctions before spending ink on a clipped plate.
 
     A long triangle edge may meet several shorter ones. Exact endpoint keys
     alone call all of those boundaries; interval coverage restores the actual
     crease. Endpoints remain existing vertices and only collinear runs merge.
     """
-    wanted={point for edge in candidates for point in edge};positions={}
-    for start in range(0,len(vertices),6):
-        point=tuple(vertices[start:start+3]);key=_key(point)
-        if key in wanted and key not in positions:positions[key]=point
     lines={}
     for edge in candidates:
-        p,q=(positions[point] for point in edge);delta=tuple(b-a for a,b in zip(p,q));length=math.sqrt(sum(v*v for v in delta))
+        p,q=positions[edge[0]],positions[edge[1]]
+        delta=(q[0]-p[0],q[1]-p[1],q[2]-p[2])
+        length=math.sqrt(sum((delta[0]*delta[0],delta[1]*delta[1],delta[2]*delta[2])))
         if length<1e-8:continue
         direction=tuple(v/length for v in delta)
         if next(v for v in direction if abs(v)>1e-10)<0:direction=tuple(-v for v in direction)
         distance=sum(a*b for a,b in zip(p,direction));origin=tuple(p[n]-distance*direction[n] for n in range(3))
         key=tuple(round(v,7) for v in direction)+tuple(round(v,5) for v in origin)
-        item=lines.setdefault(key,[direction,{},{}]);axis,events,points=item
-        ends=sorted((round(sum(a*b for a,b in zip(point,axis)),6),original) for point,original in zip((p,q),edge))
-        if ends[0][0]==ends[1][0]:continue
-        for (value,point),sign in zip(ends,(1,-1)):
+        item=lines.get(key)
+        if item is None:item=[direction,{},{}];lines[key]=item
+        axis,events,points=item
+        first=(round(sum((p[0]*axis[0],p[1]*axis[1],p[2]*axis[2])),6),edge[0])
+        last=(round(sum((q[0]*axis[0],q[1]*axis[1],q[2]*axis[2])),6),edge[1])
+        if first[0]==last[0]:continue
+        if first[0]>last[0]:first,last=last,first
+        for (value,point),sign in ((first,1),(last,-1)):
             points.setdefault(value,point)
             for normal in edge_normals[edge]:events.setdefault(value,[]).append((normal,sign))
     threshold=math.cos(math.radians(35.));result=[];seen=set()
@@ -235,8 +239,8 @@ def _stitch_boundaries(candidates,edge_normals,vertices):
     return result
 
 
-def _contour_sample(edges,limit):
-    groups=_edge_groups(edges)
+def _contour_sample(edges,limit,groups=None):
+    if groups is None:groups=_edge_groups(edges)
     # One very complex joined shell retains the established bounded fallback.
     # Separate blades, hub circles and perforations can instead remain whole.
     if max(len(indices) for indices,_ in groups)>limit:return _individual_sample(edges,limit)
@@ -260,28 +264,43 @@ def _contour_sample(edges,limit):
 def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False):
     """Return boundary/crease edges, excluding coplanar triangulation diagonals."""
     if type(limit) is not int or limit<=0:return ()
-    limit=min(limit,MAX_STYLE_EDGES);edges={}
+    limit=min(limit,MAX_STYLE_EDGES);edges={};point_keys={};normal_keys={}
     for start in range(0,len(vertices),18):
         row=vertices[start:start+18]
         if len(row)!=18:continue
         points=[tuple(row[n:n+3]) for n in (0,6,12)]
-        keyed=[_key(point) for point in points]
+        keyed=[]
+        for point in points:
+            key=point_keys.get(point)
+            if key is None:key=_key(point);point_keys[point]=key
+            keyed.append(key)
         normal=tuple(row[3:6])
+        normal=normal_keys.setdefault(normal,normal)
         for a,b in ((0,1),(1,2),(2,0)):
             p,q=keyed[a],keyed[b]
             if p==q:continue
             key=(p,q) if p<q else (q,p)
-            edges.setdefault(key,[]).append(normal)
+            normals=edges.get(key)
+            if normals is None:edges[key]=[normal]
+            else:normals.append(normal)
     threshold=math.cos(math.radians(35.));result=[]
     for edge,normals in edges.items():
         if len(normals)==1 or any(sum(a*b for a,b in zip(normals[0],n))<threshold for n in normals[1:]):
             result.append(edge)
+    normal_keys.clear()
+    groups=None
     if len(result)>limit:
-        groups=_edge_groups(result)
+        if not repair_partitions:groups=_edge_groups(result)
         if repair_partitions or max(len(indices) for indices,_ in groups)>limit:
-            result=_stitch_boundaries(result,edges,vertices)
+            # The first original coordinate for a rounded endpoint determines
+            # its collinear partition axis. Reuse this scan's first occurrences
+            # instead of quantizing every triangle vertex a second time.
+            positions={}
+            for point,key in point_keys.items():positions.setdefault(key,point)
+            point_keys.clear()
+            result=_stitch_boundaries(result,edges,positions);groups=None
     if len(result)>limit:
-        result=_contour_sample(result,limit)
+        result=_contour_sample(result,limit,groups)
     return tuple(result)
 
 

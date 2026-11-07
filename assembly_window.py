@@ -289,7 +289,7 @@ class AssemblyWindow(QWidget):
             active=index<len(state['rows']);cell.setVisible(active)
             if not active:continue
             row=state['rows'][index]
-            label.setText(self.controller.tr(row['label']));value.setText(row['value'])
+            label.setText(self.controller.tr(row['label']));value.setText(self.controller.tr(row['value']))
             tip=' · '.join(part for part in (self.controller.tr(row.get('reason','')),row.get('source','')) if part)
             cell.setToolTip(tip)
         self.inspection_note.setText(' · '.join(self.controller.tr(note) for note in state['notes']))

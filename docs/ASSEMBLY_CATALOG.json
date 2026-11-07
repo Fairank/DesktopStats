@@ -11,7 +11,7 @@
     ],
     "market_exhaustive": false,
     "motion": "explicit_reference_demonstration",
-    "records": 150,
+    "records": 165,
     "sensor_binding": false,
     "styles": [
       "miniature",
@@ -9209,6 +9209,164 @@
       "telemetry": "whole_system_not_per_module"
     },
     {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 63.5,
+        "length": 125,
+        "width": 125
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "ASUS ROG Loki SFX-L 1000W Platinum",
+      "model_id": "asus-rog-loki-1000p-sfx-l",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "ROG Loki",
+      "source_urls": [
+        "https://rog.asus.com/power-supply-units/rog-loki/rog-loki-1000p-sfx-l-gaming-model/",
+        "https://rog.asus.com/power-supply-units/rog-loki/rog-loki-1000p-sfx-l-gaming-model/spec/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 190,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "ASUS ROG Thor 1000W Platinum II",
+      "model_id": "asus-rog-thor-1000p2",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "ROG Thor II",
+      "source_urls": [
+        "https://rog.asus.com/power-supply-units/rog-thor/rog-thor-1000p2-gaming-model/",
+        "https://rog.asus.com/power-supply-units/rog-thor/rog-thor-1000p2-gaming-model/spec/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 150,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "ASUS TUF Gaming 750W Bronze",
+      "model_id": "asus-tuf-gaming-750b",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "TUF Gaming Bronze",
+      "source_urls": [
+        "https://www.asus.com/motherboards-components/power-supply-units/tuf-gaming/tuf-gaming-750b/",
+        "https://www.asus.com/motherboards-components/power-supply-units/tuf-gaming/tuf-gaming-750b/techspec/",
+        "https://dlcdnwebimgs.asus.com/gain/c844fc47-6652-4f8d-bce6-d992a8727b00/w692"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "be quiet!",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 175,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "be quiet! Dark Power 13 1000W",
+      "model_id": "bequiet-dark-power-13-1000",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Dark Power 13",
+      "source_urls": [
+        "https://www.bequiet.com/en/powersupply/4042"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "be quiet!",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 160,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "be quiet! Straight Power 12 1000W",
+      "model_id": "bequiet-straight-power-12-1000",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Straight Power 12",
+      "source_urls": [
+        "https://www.bequiet.com/en/powersupply/4104"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Cooler Master",
+      "dimensions_mm": {
+        "height": 63.5,
+        "length": 100,
+        "width": 125
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "Cooler Master V850 SFX Gold ATX 3.1",
+      "model_id": "coolermaster-v850-sfx-gold-atx31",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "V SFX Gold ATX 3.1",
+      "source_urls": [
+        "https://www.coolermaster.com/en-global/products/v850-sfx-gold.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "CORSAIR",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 140,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "CORSAIR CX650M (CP-9020103)",
+      "model_id": "corsair-cx650m-cp9020103",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "CX-M CP-9020103",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/psu/cp-9020103-na/cx-series-cx650m-650-watt-80-plus-bronze-certified-modular-atx-psu-cp-9020103-na"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
       "brand": "CORSAIR",
       "dimensions_mm": {
         "height": 86,
@@ -9303,6 +9461,140 @@
       "telemetry": "not_bound_to_installed_sensor"
     },
     {
+      "brand": "FSP",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 150,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "FSP Hydro Ti PRO 1000W ATX 3.1",
+      "model_id": "fsp-hydro-ti-pro-1000-atx31",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Hydro Ti PRO",
+      "source_urls": [
+        "https://www.fsplifestyle.com/en/product/HydroTIPRO1000W_12V2X6.html"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Lian Li",
+      "dimensions_mm": {
+        "height": 63.5,
+        "length": 100,
+        "width": 125
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "Lian Li SP V2 Gold 850W White",
+      "model_id": "lian-li-sp-v2-gold-850-white",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "SP V2 Gold",
+      "source_urls": [
+        "https://lian-li.com/product/sp-v2/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 160,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "MSI MEG Ai1300P PCIE5",
+      "model_id": "msi-meg-ai1300p-pcie5",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "MEG Ai PCIE5",
+      "source_urls": [
+        "https://www.msi.com/Power-Supply/MEG-Ai1300P-PCIE5/Specification",
+        "https://www.msi.com/Power-Supply/MEG-Ai1300P-PCIE5"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 150,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "MSI MPG A1000G PCIE5",
+      "model_id": "msi-mpg-a1000g-pcie5",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "MPG A-G PCIE5",
+      "source_urls": [
+        "https://www.msi.com/Power-Supply/MPG-A1000G-PCIE5/Specification",
+        "https://www.msi.com/Power-Supply/MPG-A1000G-PCIE5"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "NZXT",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 160,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "NZXT C1000 Gold ATX 3.1 White",
+      "model_id": "nzxt-c1000-gold-atx31-white",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "C Gold ATX 3.1",
+      "source_urls": [
+        "https://nzxt.com/products/c1000-gold-atx"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "NZXT",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 150,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "NZXT C1000 Gold Core",
+      "model_id": "nzxt-c1000-gold-core",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "C Gold Core",
+      "source_urls": [
+        "https://nzxt.com/products/c1000-gold-core"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
       "brand": "Seasonic",
       "dimensions_mm": {
         "height": 86,
@@ -9344,6 +9636,50 @@
         "https://seasonic.com/prime-fanless-tx/",
         "https://seasonic.com/wp-content/uploads/2024/04/PRIME-Fanless-TX-PX-TL-PL.pdf",
         "https://seasonic.com/wp-content/uploads/2024/04/PRIME-Fanless-TX-700-600-side-panel-1462x1080.webp"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "SilverStone",
+      "dimensions_mm": {
+        "height": 63.5,
+        "length": 130,
+        "width": 125
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "SilverStone SX1000R Platinum",
+      "model_id": "silverstone-sx1000r-platinum",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "SX-R Platinum",
+      "source_urls": [
+        "https://www.silverstonetek.com/en/product/info/power-supplies/sx1000r_pl/"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "brand": "Thermaltake",
+      "dimensions_mm": {
+        "height": 86,
+        "length": 140,
+        "width": 150
+      },
+      "finish_status": "unverified_reference",
+      "geometry_scope": "documented_envelope_and_original_detail",
+      "kind": "psu",
+      "label": "Thermaltake Toughpower GF3 Snow 1000W (2025)",
+      "model_id": "thermaltake-gf3-snow-1000-2025",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "Toughpower GF3 Snow 2025",
+      "source_urls": [
+        "https://thermaltakeusa.com/products/toughpower-gf3-snow-1000w-2025-version-ps-tpd-1000fnfagu-s"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified",
@@ -9480,7 +9816,7 @@
     "notebook_smile"
   ],
   "summary": {
-    "brands": 55,
+    "brands": 56,
     "by_kind": {
       "board": 16,
       "case": 64,
@@ -9490,11 +9826,11 @@
       "fan": 38,
       "gpu": 147,
       "memory": 28,
-      "psu": 6,
+      "psu": 21,
       "storage": 5
     },
-    "products": 351,
-    "records": 352,
+    "products": 366,
+    "records": 367,
     "reference_combinations": 1,
     "series_pending": 64
   }

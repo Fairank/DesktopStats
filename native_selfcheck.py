@@ -215,7 +215,7 @@ def _check(report, output):
         from PySide6.QtSvg import QSvgRenderer
         accessory_catalog=accessory_choices()
         report['accessory_catalog_counts']={key:len(rows) for key,rows in accessory_catalog.items()}
-        assert report['accessory_catalog_counts']==dict(cases=64,coolers=42,psus=6,fans=38)
+        assert report['accessory_catalog_counts']==dict(cases=64,coolers=42,psus=21,fans=38)
         for kind,key in (('case','cases'),('cooler','coolers'),('psu','psus'),('fan','fans')):
             for style in ('miniature','notebook_line'):
                 artwork=accessory_art(kind,accessory_catalog[key][0]['id'],style)

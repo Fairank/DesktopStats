@@ -134,7 +134,7 @@ class AssemblyToolsTests(unittest.TestCase):
         choices=self.ui.assemblyParts
         for group,baseline,example in (('boards',7,'asus-rog-strix-z790-a-wifi-d4'),
                 ('coolers',27,'noctua-nh-u12a'),('fans',27,'arctic-p12-pwm'),
-                ('psus',7,'corsair-rm1000x-2024')):
+                ('psus',22,'corsair-rm1000x-2024')):
             self.assertGreaterEqual(len(choices[group]),baseline)
             self.assertIn(example,{row['id'] for row in choices[group]})
 

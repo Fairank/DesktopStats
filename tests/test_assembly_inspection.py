@@ -139,5 +139,26 @@ class AssemblyInspectionTests(unittest.TestCase):
         self.assertIn('外观细节尚未核实，当前显示参考布局。',result['notes'])
         self.assertIn('外观待核实',next(row['label'] for row in choices()['boards'] if row['id']=='gigabyte-z790-aorus-master'))
 
+    def test_psu_static_details_do_not_borrow_system_power_or_oled_readings(self):
+        for identity,attachment,form in (
+                ('asus-tuf-gaming-750b','固定出线','ATX'),
+                ('corsair-cx650m-cp9020103','半模组','ATX'),
+                ('asus-rog-loki-1000p-sfx-l','全模组','SFX-L'),
+                ('asus-rog-thor-1000p2','全模组','ATX')):
+            spec=copy.deepcopy(self.spec)
+            spec['auxiliary']=dict(psu=dict(model_id=identity))
+            result=snapshot(self.data,spec,self.config,'psu',now=100.)
+            rows={row['label']:row for row in result['rows']}
+            self.assertEqual(len(rows),6)
+            self.assertEqual(rows['供电线缆']['value'],attachment)
+            self.assertEqual(rows['外形规格']['value'],form)
+            self.assertFalse(rows['实际功率']['available'])
+            self.assertEqual(rows['实际功率']['value'],'—')
+            self.assertTrue(rows['风扇尺寸']['available'])
+            if identity=='asus-rog-thor-1000p2':
+                self.assertIn('OLED 仅示意外观，尚未绑定功率读数。',result['notes'])
+            if identity=='asus-rog-loki-1000p-sfx-l':
+                self.assertIn('灯光颜色为外观示意，不代表当前灯效。',result['notes'])
+
 
 if __name__=='__main__':unittest.main()

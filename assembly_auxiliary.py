@@ -145,6 +145,17 @@ def _hex(value):
     return (.09,.11,.14,1.)
 
 
+def _funnel_inlet(radius, segments):
+    """A bounded original taper below the grille, not an aerodynamic CAD claim."""
+    out=[]
+    for index in range(segments):
+        a,b=index*math.tau/segments,(index+1)*math.tau/segments
+        outer=lambda angle:(math.cos(angle)*radius*.98,math.sin(angle)*radius*.98,-.2)
+        inner=lambda angle:(math.cos(angle)*radius*.86,math.sin(angle)*radius*.86,-3.)
+        _quad(out,outer(a),outer(b),inner(b),inner(a))
+    return tuple(out)
+
+
 def _endpoint(value,default_normal=(-1.,0.,0.)):
     if not isinstance(value,dict):return None
     position=_point(value.get('position'),None)
@@ -432,7 +443,7 @@ def add_auxiliary(spec,anchors,level='balanced'):
         return _add(point,_mul(endpoint['normal'],depth))
 
     psu_options=options.get('psu') or {};psu=get_component(psu_options.get('model_id'))
-    psu_bounds=None;psu_sockets=[]
+    psu_bounds=None;psu_sockets=[];psu_harness_bounds=[]
     if psu_options.get('model_id') and (not psu or psu['category']!='psu'):
         rejected.append(dict(kind='psu',model_id=psu_options.get('model_id'),reason='unknown_component_model'))
     if psu and psu['category']=='psu':
@@ -448,24 +459,41 @@ def add_auxiliary(spec,anchors,level='balanced'):
                     -d/2+length/2+10)
         psu_bounds=(_sub(center,(width/2,height/2,length/2)),_add(center,(width/2,height/2,length/2)))
         passive=not psu['fan_count'];pattern=psu.get('grille_pattern','honeycomb')
+        psu_sheet=_hex(psu['housing_color']) if psu.get('housing_color') else _PSU_SHEET
         frame=[((1.4,height,length),(-width/2+.7,0,0)),((1.4,height,length),(width/2-.7,0,0)),
                ((width,1.4,length),(0,height/2-.7,0))] if not passive else [
                ((1.4,height,5.),(x,0,z)) for x in (-width/2+.7,width/2-.7) for z in (-length/2+2.5,length/2-2.5)]
         if passive:frame.extend(((width,5.,1.2),(0,y,z)) for y in (-height/2+2.5,height/2-2.5) for z in (-length/2+.6,length/2-.6))
-        add('psu-shell',_boxes(frame),_PSU_SHEET,center)
+        add('psu-shell',_boxes(frame),psu_sheet,center)
         bottom=_add(center,(0,-height/2+.6,0));fan_basis=((1.,0.,0.),(0.,0.,-1.),(0.,-1.,0.))
         radius=psu['fan_diameter_mm']/2 if psu['fan_count'] else 0.
         sampling=1.8 if level=='eco' else 1.15 if level=='balanced' else 1.
-        add('psu-fan-panel' if radius else 'psu-passive-panel',vent_panel(width,length,pattern,1.2,circle_radius=radius*.98 if radius else None,sampling=sampling),_PSU_SHEET,bottom,'psu',fan_basis)
+        add('psu-fan-panel' if radius else 'psu-passive-panel',vent_panel(width,length,pattern,1.2,circle_radius=radius*.98 if radius else None,sampling=sampling),psu_sheet,bottom,'psu',fan_basis)
         if passive:
-            add('psu-passive-upper-honeycomb',vent_panel(width,length,'honeycomb',1.2,sampling=sampling),_PSU_SHEET,_add(center,(0,height/2-.6,0)),'psu',fan_basis)
-            for side in (-1,1):add('psu-passive-side-honeycomb',vent_panel(length,height,'honeycomb',1.2,sampling=sampling),_PSU_SHEET,_add(center,(side*(width/2-.6),0,0)),'psu',_basis((side,0,0),(0,1,0)))
+            add('psu-passive-upper-honeycomb',vent_panel(width,length,'honeycomb',1.2,sampling=sampling),psu_sheet,_add(center,(0,height/2-.6,0)),'psu',fan_basis)
+            for side in (-1,1):add('psu-passive-side-honeycomb',vent_panel(length,height,'honeycomb',1.2,sampling=sampling),psu_sheet,_add(center,(side*(width/2-.6),0,0)),'psu',_basis((side,0,0),(0,1,0)))
             # Do not invent the manufacturer's hidden transformer/PCB layout.
             cube('psu-passive-internal-reference',(width*.70,height*.53,length*.70),_add(center,(0,0,0)),_DARK)
         if radius:
             rotor_point=_add(bottom,(0,1.7,0))
+            if psu.get('funnel_inlet'):
+                add('psu-fan-inlet-funnel-reference',_funnel_inlet(radius,segments),_BLACK,bottom,'psu',fan_basis)
+            if psu.get('frameless_fan'):
+                # Open motor supports, without an independent square fan cage.
+                # Their routing/count remains an original reference, not CAD.
+                supports=[]
+                for index in range(3):
+                    angle=index*math.tau/3;co,si=math.cos(angle),math.sin(angle)
+                    turn=((co,si,0.),(-si,co,0.),(0.,0.,1.))
+                    supports.extend(translated(_transform(box(radius*.72,3.4,1.5),turn),
+                                               (radius*.53*co,radius*.53*si,-6.)))
+                add('psu-frameless-motor-supports-reference',tuple(supports),_BLACK,bottom,'psu',fan_basis)
+                add('psu-frameless-stationary-motor',ring(radius*.22,0,2.,segments=segments),_BLACK,
+                    _add(bottom,(0,6.,0)),'psu',fan_basis)
             add('psu-fan-dark-recess',ring(radius*.94,0,.6,segments=segments),_DARK,_add(rotor_point,(0,1.2,0)),'psu',fan_basis)
-            add('psu-fan-blades',fan_rotor(dict(blades=7,shape='wide',hub_ratio=.27),radius*.94),(.37,.40,.42,1.),rotor_point,'psu',fan_basis,True,(0.,-1.,0.))
+            profile=dict(blades=psu.get('fan_blades',7),shape='wide',hub_ratio=.27,outer_ring=psu.get('outer_ring') is True)
+            leaf_color=(.59,.75,.78,1.) if psu.get('rgb_fan') else (.37,.40,.42,1.)
+            add('psu-fan-blades',fan_rotor(profile,radius*.94),leaf_color,rotor_point,'psu',fan_basis,True,(0.,-1.,0.))
             add('psu-fan-hub',ring(radius*.25,0,1.2,segments=segments),(.31,.34,.35,1.),_add(rotor_point,(0,-.3,0)),'psu',fan_basis,True,(0.,-1.,0.))
         # Fixed sheet-metal grille, four fasteners; only blades/hub rotate.
         screws=tuple(v for x in (-width/2+7,width/2-7) for y in (-length/2+7,length/2-7)
@@ -473,10 +501,10 @@ def add_auxiliary(spec,anchors,level='balanced'):
         add('psu-fan-panel-fasteners',screws,_METAL,_add(bottom,(0,-.7,0)),'psu',fan_basis)
         rear=_add(center,(0,0,-length/2+.6));iec=(width*.28,-height*.17);switch=(width*.28,height*.25)
         rear_basis=_basis((0,0,-1),(0,1,0));vent_width=width*.60
-        add('psu-rear-vent-panel',vent_panel(vent_width,height,pattern if pattern=='rounded_y' else 'honeycomb',1.2,sampling=sampling),_PSU_SHEET,_add(rear,(-width*.20,0,0)),'psu',rear_basis)
+        add('psu-rear-vent-panel',vent_panel(vent_width,height,pattern if pattern=='rounded_y' else 'honeycomb',1.2,sampling=sampling),psu_sheet,_add(rear,(-width*.20,0,0)),'psu',rear_basis)
         io_center=width*.30;io_width=width*.40
         rear_holes=tuple(tuple((x-(cx-io_center),y+cy) for x,y in chamfer_rect(pw,ph,1.)) for cx,cy,pw,ph in ((*iec,28.,21.),(*switch,13.,16.)))
-        face('psu-rear-io-frame',io_width,height,1.2,_add(rear,(io_center,0,0)),(0,0,-1),_PSU_SHEET,'psu',rear_holes)
+        face('psu-rear-io-frame',io_width,height,1.2,_add(rear,(io_center,0,0)),(0,0,-1),psu_sheet,'psu',rear_holes)
         face('psu-iec-c14-cavity',26,19,1.5,_add(rear,(*iec,2.)),(0,0,-1),_DARK,'psu')
         add('psu-iec-c14-three-pins',_boxes([((2.,4.,3.),(x,y,0)) for x,y in ((-6,-2),(6,-2),(0,4))]),_METAL,_add(rear,(*iec,.5)))
         face('psu-rocker-switch',11,14,2.,_add(rear,(*switch,-.4)),(0,0,-1),_BLACK,'psu')
@@ -490,26 +518,67 @@ def add_auxiliary(spec,anchors,level='balanced'):
                          and type(row.get('count',1)) is int and 1<=row.get('count',1)<=4
                          and (record:=get_component(row.get('model_id'))) and record['form_factor'].startswith('sata'))
         socket_count=max(8,power_count);socket_rows=math.ceil(socket_count/4)
-        for index in range(socket_count):
+        modular=psu.get('modular') is True
+        fixed_harness=not modular or psu.get('semi_modular') is True
+        fixed_endpoints=[]
+        if modular:
+            for index in range(socket_count):
                 row,col=divmod(index,4)
                 cx=(col-1.5)*width*.21;cy=(row-(socket_rows-1)/2)*height*.78/socket_rows
                 socket_h=min(height*.24,height*.65/socket_rows)
+                if fixed_harness:cx=cx*.70+width*.10
                 hole=tuple((x+cx,y+cy) for x,y in chamfer_rect(width*.15,socket_h,.5));dc_holes.append(hole)
                 point=_add(front,(cx,cy,0));psu_sockets.append(endpoint_record(point,(0,0,1),'modular','psu',(1,0,0)))
                 face('psu-modular-dark-socket',width*.14,socket_h*.92,1.,_add(point,(0,0,-1.5)),(0,0,1),_DARK,'psu')
-        face('psu-modular-connector-panel',width,height,1.2,front,(0,0,1),_PSU_SHEET,'psu',tuple(dc_holes))
+        if fixed_harness:
+            # One schematic factory harness exits a grommet. A non-modular
+            # supply must never acquire a bank of detachable modular sockets.
+            exit_x,exit_y=-width*.35,height*.27
+            hole=tuple((x+exit_x,y+exit_y) for x,y in chamfer_rect(18.,12.,3.))
+            dc_holes.append(hole)
+            point=_add(front,(exit_x,exit_y,0))
+            add('psu-fixed-harness-grommet',ring(9.,6.,2.,segments=segments),_BLACK,_add(point,(0,0,.8)))
+            wires=[]
+            for x,y in ((-2.,-1.5),(2.,-1.5),(-2.,1.5),(2.,1.5)):
+                path=tuple(_add(point,(x,y,z)) for z in (1.,7.,14.))
+                wires.extend(tube(path,1.1,6))
+            add('psu-fixed-harness-reference',tuple(wires),_BLACK)
+            for index in range(socket_count):
+                x,y=((-2.,-1.5),(2.,-1.5),(-2.,1.5),(2.,1.5))[index%4]
+                entry=endpoint_record(_add(point,(x,y,14.)),(0,0,1),'fixed_harness','psu',(1,0,0))
+                entry.update(connector_rendered=True,position_schematic=True)
+                fixed_endpoints.append(entry)
+            if not modular:psu_sockets=fixed_endpoints
+        face('psu-modular-connector-panel' if modular else 'psu-fixed-cable-panel',width,height,1.2,front,(0,0,1),psu_sheet,'psu',tuple(dc_holes))
         label_point=_add(center,(-width/2-.11,0,0));label_basis=_basis((-1,0,0),(0,1,0))
         if passive:label_point=_add(label_point,(0,-height*.36,0))
         face('psu-neutral-rating-label',length*.82,height*.16 if passive else height*.60,.2,label_point,(-1,0,0),(.045,.055,.065,1.),'psu')
         add('psu-original-model-mark',model_mark(psu.get('model_mark',''),1.25),(.83,.85,.86,1.),_add(label_point,(-.18,4.,0)),'psu',label_basis)
-        add('psu-label-rule',box(length*.68,.6,.08),(.38,.42,.45,1.),_add(label_point,(-.18,-height*.13,0)),'psu',label_basis)
-        if psu_basis!=_IDENTITY:pose_part(active_part,center,psu_basis,psu_sockets)
-        psu_meshes=[mesh for mesh in meshes if mesh.part_id==active_part]
+        if psu.get('oled_display'):
+            display=_add(label_point,(-.4,-height*.21,length*.15))
+            face('psu-oled-reference-bezel',min(72.,length*.42),height*.24,1.,display,(-1,0,0),_BLACK,'psu')
+            face('psu-oled-unread-blank',min(68.,length*.39),height*.19,.2,_add(display,(-.65,0,0)),(-1,0,0),(.035,.075,.09,1.),'psu')
+        else:add('psu-label-rule',box(length*.68,.6,.08),(.38,.42,.45,1.),_add(label_point,(-.18,-height*.13,0)),'psu',label_basis)
+        if psu.get('accent_color'):
+            add('psu-series-accent-strip',box(.2,1.7,length*.65),_hex(psu['accent_color']),_add(label_point,(-.28,height*.26,0)),'psu')
+        if psu_basis!=_IDENTITY:pose_part(active_part,center,psu_basis,psu_sockets if not modular else (*psu_sockets,*fixed_endpoints))
+        psu_meshes=[mesh for mesh in meshes if mesh.part_id==active_part and mesh.name!='psu-fixed-harness-reference']
         psu_bounds=tuple(tuple((min if side==0 else max)((min if side==0 else max)(mesh.vertices[n::6])+mesh.position[n] for mesh in psu_meshes) for n in range(3)) for side in (0,1))
+        # Fixed wires occupy their narrow real corridor. Expanding the whole
+        # PSU AABB to their ends would incorrectly swallow adjacent modular
+        # plugs on a semi-modular supply and make otherwise clear routes fail.
+        for mesh in meshes:
+            if mesh.part_id==active_part and mesh.name=='psu-fixed-harness-reference':
+                psu_harness_bounds.append(tuple(tuple((min if side==0 else max)(mesh.vertices[n::6])+mesh.position[n] for n in range(3)) for side in (0,1)))
         devices.append(dict(category='psu',part_id=active_part,model_id=psu['id'],label=psu['label'],center=center,dimensions_mm=size,
             source='manual',fan_count=psu['fan_count'],fan_blades_schematic=True,fan_rpm_available=False,
             capacity_w=psu['capacity_w'],live_power_w=None,modular_socket_layout_schematic=True,
             grille_pattern=pattern,grille_hole_count_is_sampling=True,basis=psu_basis))
+        devices[-1].update(modular=modular,semi_modular=bool(psu.get('semi_modular')),fixed_harness=fixed_harness,
+            modular_socket_layout_schematic=modular,fixed_harness_layout_schematic=fixed_harness,
+            oled_display_available=bool(psu.get('oled_display')),oled_live_reading=None,rgb_lighting_live=False,
+            fan_inlet_profile='funnel_reference' if psu.get('funnel_inlet') else 'reference',
+            frameless_fan=bool(psu.get('frameless_fan')))
         if case.get('psu_form_factors') and psu['form_factor'] not in case['psu_form_factors']:issues.append('psu_form_factor_not_supported')
 
     m2_slots=list(connectors.get('m2') or ());sata_slots=list(connectors.get('sata') or ());m2_index=0;sata_index=0
@@ -726,6 +795,7 @@ def add_auxiliary(spec,anchors,level='balanced'):
         targets.extend(power for power,_data in storage_endpoints)
         obstacles=[]
         if psu_bounds:obstacles.append(psu_bounds)
+        obstacles.extend(psu_harness_bounds)
         if gpu_bounds:obstacles.append(gpu_clearance if gpu_clearance is not None else gpu_bounds)
         for raw in anchors.get('obstacles') or ():
             bounds=_bounds(raw)
@@ -736,6 +806,7 @@ def add_auxiliary(spec,anchors,level='balanced'):
             if bounds:graph_groups.setdefault(raw.get('part_id') or raw.get('kind') or raw.get('name'),[]).append(bounds)
         graph_boxes=[tuple(tuple((min if side==0 else max)(bounds[side][n] for bounds in group) for n in range(3)) for side in (0,1)) for group in graph_groups.values()]
         if psu_bounds:graph_boxes.append(psu_bounds)
+        graph_boxes.extend(psu_harness_bounds)
         if gpu_bounds:graph_boxes.append(gpu_bounds)
         # Close detail refines the same loom; it never widens the physical
         # envelope merely because more illustrative samples are available.
@@ -789,9 +860,25 @@ def add_auxiliary(spec,anchors,level='balanced'):
                     bounds=_bounds(raw)
                     if (bounds and raw.get('part_id')==source.get('owner') and 'connector' in raw.get('name','')
                             and all(bounds[0][n]-1.2<=start[n]<=bounds[1][n]+1.2 for n in range(3))):own_connector_bounds.append(bounds)
-            route_obstacles=[bounds for bounds in obstacles if bounds not in own_connector_bounds]
             cable_strands=min(strands,2) if slim else strands
             clearance=1.1+(cable_strands-1)*.85
+            route_obstacles=[]
+            for bounds in obstacles:
+                if bounds in own_connector_bounds:continue
+                if source.get('kind')=='fixed_harness' and bounds in psu_harness_bounds:
+                    # A cable starts on its already-rendered factory wire end.
+                    # Allow padding to touch only that terminal cap; retain the
+                    # PSU body and the rest of the harness for all routes.
+                    axis=max(range(3),key=lambda n:abs(source['normal'][n]))
+                    sign=source['normal'][axis]
+                    side=1 if sign>0 else 0
+                    face=bounds[side][axis]
+                    if abs(sign)>.99999 and abs(start[axis]-face)<1e-5:
+                        low,high=list(bounds[0]),list(bounds[1])
+                        if sign>0:high[axis]=start[axis]-clearance-.2
+                        else:low[axis]=start[axis]+clearance+.2
+                        if all(a<b for a,b in zip(low,high)):bounds=(tuple(low),tuple(high))
+                route_obstacles.append(bounds)
             path,state=route_cable(start,end,source['normal'],target['normal'],route_obstacles,dimensions,width=5. if slim else 10.,radius=4. if slim else 7.,waypoints=preferred,graph_boxes=graph_boxes,tube_clearance=clearance)
             if not path or state['routing_failed']:
                 del meshes[mesh_start:];issues.append('cable_clearance_requires_review')
@@ -824,7 +911,11 @@ def add_auxiliary(spec,anchors,level='balanced'):
                 rendered_strands=cable_strands,strand_count_is_sampling=True,layout_schematic=True,
                 routing_policy='rear_tray_grommet_reference' if state.get('preferred_waypoints_used') else 'clearance_visibility_reference',**state))
         if psu_sockets:
-            for index,target in enumerate(targets):connect(psu_sockets[index],target,target['kind'],len(cables))
+            for index,target in enumerate(targets):
+                source=psu_sockets[index]
+                if modular and fixed_endpoints and target['kind'] in psu.get('fixed_cable_groups',()):
+                    source=fixed_endpoints[index]
+                connect(source,target,target['kind'],len(cables))
         elif targets:
             issues.append('psu_not_selected_power_cables_not_inferred')
             omitted_routes.extend(dict(kind=target['kind'],count=1,reason='psu_not_selected',target_owner=target.get('owner')) for target in targets)
