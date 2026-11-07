@@ -109,7 +109,7 @@ def _leaf_geometry(model,radius,depth):
                 x,y,z,nx,ny,nz=out[start+offset:start+offset+6]
                 mirrored.extend((-x,y,z,-nx,ny,nz))
         out=mirrored
-    if model['family'] in ('noctua-sterrox','noctua-g2') and model.get('blade_geometry_reviewed'):
+    if model['family'] in ('noctua-sterrox','noctua-g2') and model.get('blade_geometry_reviewed') and not model.get('foil_profile'):
         # Three qualitative acceleration channels per leaf, all attached to and
         # rotating with the foil. Their dimensions are reference construction.
         sweep=46 if model['family']=='noctua-g2' else 52
@@ -157,8 +157,10 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
     size=model['size_mm'];width=model.get('width_mm',size);depth=model['depth_mm'];basis=_basis(normal,up)
     radius=size*.465;corner=size*.095
     pitch=model.get('mount_pitch_mm') or {120:105.,140:124.5}.get(size,size*.83)
+    axes=model.get('mount_pitch_axes_mm')
+    pitch_x,pitch_y=axes if model.get('mount_pitch_axes_verified') and isinstance(axes,(list,tuple)) and len(axes)==2 else (pitch,pitch)
     hole_radius=(model.get('mount_hole_diameter_mm') or size*.036)/2
-    corner=min(corner,max(1.,(width+size-2*pitch)/2-hole_radius*math.sqrt(2)-1.))
+    corner=min(corner,max(1.,(width+size-pitch_x-pitch_y)/2-hole_radius*math.sqrt(2)-1.))
     if model.get('frameless'):
         pass  # A fin-supported impeller must not acquire a fictional square frame.
     elif model.get('frame')=='round':
@@ -166,12 +168,12 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
         builder.put(name+'-frame',frame,model['frame_color'],center,basis,component,part)
         for x in (-1,1):
             for y in (-1,1):
-                p=_add(center,_add(_mul(basis[0],x*pitch/2),_mul(basis[1],y*pitch/2)))
+                p=_add(center,_add(_mul(basis[0],x*pitch_x/2),_mul(basis[1],y*pitch_y/2)))
                 builder.put(name+'-frame',perforated_plate(chamfer_rect(size*.19,size*.19,1.2),[(0.,0.,hole_radius)],depth,segments=12),model['frame_color'],p,basis,component,part)
     else:
         # The large circular aperture is actual missing geometry; no solid slab
         # or dark painted disk can obscure the blades from either face.
-        holes=[(0.,0.,radius)]+[(x*pitch/2,y*pitch/2,hole_radius) for x in (-1,1) for y in (-1,1)]
+        holes=[(0.,0.,radius)]+[(x*pitch_x/2,y*pitch_y/2,hole_radius) for x in (-1,1) for y in (-1,1)]
         frame=perforated_plate(chamfer_rect(width,size,corner),holes,depth,segments=builder.segments)
         builder.put(name+'-frame',frame,model['frame_color'],center,basis,component,part)
     if model.get('pads'):
@@ -179,12 +181,12 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
             for y in (-1,1):
                 for side in (-1,1):
                     round_pad=model.get('pad_style')=='round'
-                    px=x*pitch/2 if round_pad else x*min(width*.414,width/2-size*.08)
-                    py=y*pitch/2 if round_pad else y*min(size*.414,size/2-size*.08)
+                    px=x*pitch_x/2 if round_pad else x*min(width*.414,width/2-size*.08)
+                    py=y*pitch_y/2 if round_pad else y*min(size*.414,size/2-size*.08)
                     p=_add(center,_add(_mul(basis[0],px),_add(_mul(basis[1],py),_mul(basis[2],side*(depth/2+.35)))))
-                    pad_radius=min(size*.08,width/2-pitch/2-.25,size/2-pitch/2-.25)
+                    pad_radius=min(size*.08,width/2-pitch_x/2-.25,size/2-pitch_y/2-.25)
                     pad=(ring(pad_radius,hole_radius,.7,12) if round_pad else
-                         perforated_plate(chamfer_rect(size*.16,size*.16,2),[(x*pitch/2-px,y*pitch/2-py,hole_radius)],.7,segments=12))
+                         perforated_plate(chamfer_rect(size*.16,size*.16,2),[(x*pitch_x/2-px,y*pitch_y/2-py,hole_radius)],.7,segments=12))
                     builder.put(name+'-pads',pad,'#74584d' if model['family'].startswith('noctua') else '#141b20',p,basis,component,part)
     # Rear stator arms terminate at the frame and hub, never rotating with leaves.
     stator_z=-depth*.35;hub=size*model.get('hub_ratio',.25)*.44
@@ -214,7 +216,7 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
             sides=model['frame_rgb_polygon'];rad=size*.465
             points=[(rad*math.cos(i*math.tau/sides+math.pi/6),rad*math.sin(i*math.tau/sides+math.pi/6),depth/2+.7) for i in range(sides+1)]
             builder.put(name+'-stationary-polygon-light-ring',_tube(points,size*.009,6),glow,center,basis,component,part)
-        elif model['family'] in ('lian-li-sl','lian-li-infinity'):
+        elif model.get('frame_rgb_sides') or model['family'] in ('lian-li-sl','lian-li-infinity'):
             for sign in (-1,1):
                 builder.put(name+'-side-rgb',box(2,size*.74,depth*.45),glow,_add(center,_mul(basis[0],sign*width*.49)),basis,component,part)
                 builder.put(name+'-side-aluminium',box(2,size*.86,depth*.72),'#a6afb5',_add(center,_mul(basis[0],sign*width*.47)),basis,component,part)
@@ -226,6 +228,16 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
         # Source-observed connector covers stay outside the actual fan opening.
         for sign in (-1,1):
             builder.put(name+'-interlock-cover',box(width*.31,2,depth*.56),'#3f4a50',_add(center,_mul(basis[1],sign*(size/2-1))),basis,component,part)
+    if model.get('fixed_white_hub_window') and model.get('hub_window_face')=='front':
+        # Observed front bearing window; coil count/clearance are sampled.
+        face=_add(center,_mul(basis[2],leaf_depth+.65))
+        builder.put(name+'-bearing-window-bezel',ring(hub*.91,hub*.83,.65,builder.segments),'#aab4b6',face,basis,component,part)
+        builder.put(name+'-fixed-white-bearing-window',ring(hub*.83,hub*.74,.4,builder.segments),'#f4f1dc',_add(face,_mul(basis[2],.3)),basis,component,part)
+        for index in range(8):
+            angle=index*math.tau/8
+            location=_add(face,_add(_mul(basis[0],hub*.54*math.cos(angle)),_mul(basis[1],hub*.54*math.sin(angle))))
+            builder.put(name+'-bearing-coil-sampling',box(hub*.18,hub*.25,.6),'#ad844d',location,basis,component,part)
+        builder.put(name+'-bearing-spindle',ring(hub*.28,0,.7,builder.segments),'#c2b27e',_add(face,_mul(basis[2],.2)),basis,component,part)
     if model.get('hub_display'):
         # A blank, stationary screen; no invented readings or screen animation.
         face=_add(center,_mul(basis[2],depth/2+.7))
@@ -263,6 +275,9 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
 
 
 def _reference_fan(cooler):
+    from cooling_pack_runtime045 import bundled_fan
+    bundled=bundled_fan(cooler)
+    if bundled:return bundled
     fan=get_fan(cooler.get('fan_model'))
     if fan:return fan
     size=cooler.get('fan_reference_mm',120)
@@ -336,12 +351,12 @@ def _air(builder,cooler,p,basis):
     elif kind=='low_profile':
         top=h-fan['depth_mm'];bottom=5
         for i in range(fin_count):
-            z=bottom+(top-bottom-1)*i/max(1,fin_count-1)
-            builder.put('cooler-low-profile-fins',box(w*.96,d*.96,.5),cooler.get('fin_color','#aab4bb'),point(0,0,z),basis)
+            x=-w*.48+w*.96*i/max(1,fin_count-1)
+            builder.put('cooler-low-profile-fins',box(.5,d*.96,max(1,top-bottom-.5)),cooler.get('fin_color','#aab4bb'),point(x,0,(top+bottom)/2),basis)
         _fan(builder,fan,point(0,0,h-fan['depth_mm']/2),n,u,component='cooler',part='cooler:cpu',name='cooler-slim-fan',role='cpu_main')
     else:
         # Tower width is tangent to the board; outward height is along CPU normal.
-        bank_depth=cooler.get('heatsink_depth_mm',cooler.get('heatsink_dimensions_mm',{}).get('depth',d-25))
+        bank_depth=cooler.get('heatsink_depth_mm',cooler.get('heatsink_dimensions_mm',{}).get('depth',d if cooler.get('fan_layout')=='center' else d-25))
         bank_offset=-fan['depth_mm']/2 if cooler.get('fan_layout')=='center_rear' else 0
         gap=fan['depth_mm']+4 if kind=='dual_tower' else 0
         bank_thickness=(bank_depth-gap)/2 if gap else bank_depth
@@ -377,7 +392,8 @@ def _air(builder,cooler,p,basis):
             if i<len(cooler.get('fan_depths',[])):selected_fan['depth_mm']=cooler['fan_depths'][i]
             selected_z=min(fan_z,h-selected_fan['size_mm']/2-.5)
             fd=selected_fan['depth_mm']
-            if cooler.get('fan_layout')=='center_rear':y=bank_offset if i==0 else bank_depth/2+fd/2+bank_offset
+            if cooler.get('fan_layout')=='center':y=0.
+            elif cooler.get('fan_layout')=='center_rear':y=bank_offset if i==0 else bank_depth/2+fd/2+bank_offset
             else:y=-bank_depth/2-fd/2 if i==0 else (0 if kind=='dual_tower' else bank_depth/2+fd/2)
             relative=cooler.get('fan_relative_directions',[]) if cooler.get('relative_rotation_verified') else []
             rotor_direction=relative[i] if i<len(relative) else 1
@@ -444,7 +460,7 @@ def _special_air(builder,cooler,p,basis):
             banks=[(h*.19,h*.36,w*.70,d*.73),(h*.57,h-fan['depth_mm']-2,w*.96,d*.90)]
             placements=[h-fan['depth_mm']/2,(h*.36+h*.57)/2]
         elif cooler.get('fan_placement')=='under':
-            lower=48.;banks=[(lower,h,w*.96,d*.94)]
+            lower=h-22.;banks=[(lower,h,w*.96,d*.94)]
             placements=[lower-fan['depth_mm']/2-2]
         else:
             upper=h-fan['depth_mm']-1;lower=max(22.,upper-min(36.,h*.29))
@@ -682,6 +698,13 @@ def _family_pump(builder,cooler,p,basis,part):
             builder.put('cooler-pump-round-cap-lip',ring(radius*.96,radius*.91,.8,builder.segments),'#46565f',point(0,0,h+5.5),basis,part=part)
             if style=='fractal_lumen':
                 builder.put('cooler-lumen-translucent-reference-cap',ring(radius*.83,0,.8,builder.segments),'#a6c0c6',point(0,0,h+5.9),basis,part=part)
+    elif style=='corsair_lcd':
+        radius=min(w,d)*.48
+        builder.box('cooler-corsair-lcd-rounded-pedestal',(w*.90,d*.90,h*.67),'#27343c',point(0,0,h*.335+4),basis,part=part,bevel=True)
+        builder.put('cooler-corsair-lcd-display-housing',ring(radius,0,h*.34,builder.segments),'#28333b',point(0,0,h*.83+4),basis,part=part)
+        builder.put('cooler-corsair-lcd-rgb-ring',ring(radius*.94,radius*.88,.7,builder.segments),'#8ac4c8',point(0,0,h+4.6),basis,part=part)
+        builder.put('cooler-corsair-lcd-inner-bezel',ring(radius*.88,radius*.83,.7,builder.segments),'#69777f',point(0,0,h+4.7),basis,part=part)
+        builder.put('cooler-corsair-blank-circular-screen',ring(radius*.83,0,.6,builder.segments),'#101e28',point(0,0,h+5.1),basis,part=part)
     elif style in ('xpg_infinity','deepcool_lt_mirror'):
         builder.box('cooler-mirror-pump-base',(w*.90,d*.90,h*.77),'#25353e',point(0,0,h*.385+4),basis,part=part,bevel=True)
         builder.box('cooler-mirror-blank-top',(w*.89,d*.89,h*.20),'#152c36',point(0,0,h*.87+4),basis,part=part,bevel=True)
@@ -758,16 +781,21 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
         ports=_lfiii_pump(builder,p,basis,part)
     elif _family_pump(builder,cooler,p,basis,part):
         pass
-    elif style in ('nzxt_lcd','round','lianli_infinity','thermaltake_mirror'):
+    elif style in ('nzxt_lcd','nzxt_infinity','round','lianli_infinity','thermaltake_mirror'):
         builder.put('cooler-pump-housing',ring(min(width,depth)/2,0,height,builder.segments),'#212c33',center,basis,part=part)
+        if style=='nzxt_infinity':
+            for ratio in (.84,.64,.46):builder.put('cooler-static-infinity-reference-rings',ring(width*ratio/2,width*(ratio-.035)/2,.5,builder.segments),'#8aabb6',_add(center,_mul(n,height/2+1)),basis,part=part)
         if style=='nzxt_lcd':
             builder.put('cooler-pump-bezel',ring(width*.49,width*.43,2,builder.segments),'#8a969e',_add(p,_mul(n,height+4)),basis,part=part)
-            builder.box('cooler-blank-lcd',(34,34,1),'#10191f',_add(p,_mul(n,height+5.1)),basis,part=part)
+            builder.put('cooler-blank-lcd',ring(width*.425,0,1.,builder.segments),'#10191f',_add(p,_mul(n,height+5.1)),basis,part=part)
         elif style in ('lianli_infinity','thermaltake_mirror'):
             for layer in range(3 if style=='lianli_infinity' else 1):builder.put('cooler-pump-mirror-rings',ring(width*(.45-layer*.085),width*(.425-layer*.085),1,builder.segments),'#7dbbc7',_add(p,_mul(n,height+4.5+layer*.4)),basis,part=part)
     else:
         builder.box('cooler-pump-housing',(width,depth,height),'#27343c',center,basis,part=part,bevel=True)
-        if style.startswith('corsair'):
+        if style.startswith('corsair') and cooler.get('pump_fixed_white'):
+            builder.box('cooler-pump-dark-cap',(width*.88,depth*.88,1.3),'#27343c',_add(p,_mul(n,height+4.5)),basis,part=part,bevel=True)
+            builder.box('cooler-pump-fixed-white-mark',(width*.24,depth*.06,.6),'#efeee2',_add(p,_mul(n,height+5.5)),basis,part=part)
+        elif style.startswith('corsair'):
             sides=8 if style=='corsair_octagon' else 4
             poly=tuple((math.cos(i*math.tau/sides+math.pi/4)*width*.46,math.sin(i*math.tau/sides+math.pi/4)*depth*.46) for i in range(sides))
             builder.put('cooler-pump-rgb-cap',extrude(poly,1.3),'#79bfc8',_add(p,_mul(n,height+4.5)),basis,part=part)

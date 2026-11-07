@@ -170,7 +170,7 @@ def build_radiator_detail(builder, radiator_mm, center, basis, part, profile=Non
     Invalid inputs and budget failures occur before the first builder mutation.
     """
     from assembly_geometry import box, ring, _quad
-    from assembly_detail import chamfer_rect
+    from assembly_detail import chamfer_rect, circle, _clip, _point_inside
     dimensions = _dimensions(radiator_mm); length, width, thickness = dimensions
     center = _vector(center); basis = _basis(basis)
     if not isinstance(part, str) or not part or len(part) > 160: raise ValueError('Radiator part ID is invalid')
@@ -194,6 +194,11 @@ def build_radiator_detail(builder, radiator_mm, center, basis, part, profile=Non
     ports, unknown = _ports(source, dimensions) if profile is not None else ([], [])
     if level == 'eco' and (capacity >= 3 or len(ports) >= 4):
         tubes, folds = 5, 16
+    if level == 'eco' and capacity == 4:
+        # Four mounting bays keep all genuine holes. Spend less of the fixed
+        # eco budget on explicitly sampled, unverified internal foil instead.
+        # Existing one/two/three-bay geometry remains byte-for-byte unchanged.
+        tubes, folds = 4, 8
     if profile is None: unknown.append('AIO connections and any radiator-integrated pump remain caller-owned; no thread or removable ports inferred')
     family = source.get('shell_family', 'aio_reference_frame')
     features = source.get('shell_features', ())
@@ -317,34 +322,97 @@ def build_radiator_detail(builder, radiator_mm, center, basis, part, profile=Non
                     block('rail-lips', (sheet, low-cursor, min(2.6, thickness*.13)),
                           (lip_x, (cursor+low)/2, face*(half_t-sheet-min(2.6, thickness*.13)/2)))
                 cursor = max(cursor, high)
-    corner = 3.2 if round_shoulders else 2.4 if thick_caps else 1.3
+    angular_shoulders = 'angular_tank_shoulders' in features
+    notched_header = 'central_header_notch' in features
+    corner = 5.5 if angular_shoulders else 3.2 if round_shoulders else 2.4 if thick_caps else 1.3
     # The terminal is a shoulder between the two separate mounting rails, not
     # a second full-width solid plate hidden across every screw hole. A wider
     # observed edge socket (airplex/TX/RX) reserves its own surrounding sheet.
     tank_half_width = max(half_w-flange-.6,
                           max((abs(p['local_position'][0])+8. for p in ports), default=0.))
     tank_half_width = min(half_w-sheet, tank_half_width)
+    terminal_mount_clearance = False
     for sign in (-1, 1):
         depth = tank_depth[sign]; cy = sign*(half_l-depth/2)
         poly = chamfer_rect(tank_half_width*2, depth, corner)
+        if notched_header and sign > 0:
+            # Dabel mechanical drawings show two terminal blocks separated by
+            # a real V recess at the connection end. Its sampled width/depth
+            # are reference geometry; two photographed mouths remain open.
+            notch_half = min(7., tank_half_width*.13)
+            notch_depth = min(6., depth*.24)
+            poly = (*poly[:5], (notch_half, depth/2),
+                    (0., depth/2-notch_depth), (-notch_half, depth/2), *poly[5:])
         for face in (-1, 1):
             matching = [p for p in ports if p['face'] == ('front' if face > 0 else 'rear') and p['local_position'][1]*sign > 0]
             cutouts = [(p['local_position'][0], p['local_position'][1]-cy, 5.9) for p in matching]
+            # A long radiator's photo-qualified, wide terminal can overlap an
+            # end mounting bay. The flange hole must continue through every
+            # real sheet on that screw axis, including this separate cap.
+            # Do not move the source pitch, mouths or envelope to hide a block.
+            for y, bay in holes:
+                for x in (-pitch/2, pitch/2):
+                    point = (x, y-cy)
+                    distances = []
+                    for a, b in zip(poly, (*poly[1:], poly[0])):
+                        dx, dy = b[0]-a[0], b[1]-a[1]
+                        t = max(0., min(1., ((point[0]-a[0])*dx+(point[1]-a[1])*dy)/(dx*dx+dy*dy)))
+                        distances.append(math.hypot(point[0]-a[0]-t*dx, point[1]-a[1]-t*dy))
+                    if _point_inside(point, poly) or min(distances) < (1.65 if pitch_verified else 2.6):
+                        terminal_mount_clearance = True
+                        cutouts.append((x, y-cy, 1.65) if pitch_verified else
+                                       _capsule(x, y-cy, 1.65, .9, hole_segments))
             put('end-tanks', _plate(poly, cutouts, sheet, (0., cy, face*(half_t-sheet/2)), _IDENTITY, segments))
         for a, b in zip(poly, (*poly[1:], poly[0])):
             dx, dy = b[0]-a[0], b[1]-a[1]; span = math.hypot(dx, dy)
             u = (dx/span, dy/span, 0.); n = (dy/span, -dx/span, 0.)
             middle = ((a[0]+b[0])/2, cy+(a[1]+b[1])/2, 0.)
-            axes = (u, (0., 0., 1.), n); cutouts = []
+            axes = (u, (0., 0., 1.), n); cutouts = []; mount_gaps = []
             for port in ports:
                 if _dot(n, port['normal']) > .999:
                     delta = _sub(port['local_position'], middle)
                     if abs(_dot(delta, n)) < sheet+1e-5 and abs(_dot(delta, u)) < span/2-6.:
                         cutouts.append((_dot(delta, u), delta[2], 5.9))
+            # A screw axis parallel to this folded side wall needs an edge
+            # notch, not a painted front-face hole over a hidden solid slab.
+            # Bound the wall's full sheet gauge against the existing bore.
+            for y, bay in holes:
+                for x in (-pitch/2, pitch/2):
+                    opening = circle(x, y, 1.65, hole_segments) if pitch_verified else _capsule(x, y, 1.65, .9, hole_segments)
+                    projected = []
+                    for px, py in opening:
+                        delta = _sub((px, py, 0.), middle)
+                        projected.append((_dot(delta, u), _dot(delta, n)))
+                    # Project the exact sampled bore polygon into this wall's
+                    # own U/normal frame, then clip by its finite sheet gauge.
+                    # This retains capsule orientation; no oversized circular
+                    # approximation erases unrelated metal around the opening.
+                    projected = _clip(tuple(projected), (0., -sheet), (1., -sheet), True)
+                    projected = _clip(projected, (1., 0.), (0., 0.), True)
+                    if projected:
+                        low = max(-span/2, min(p[0] for p in projected))
+                        high = min(span/2, max(p[0] for p in projected))
+                        if low < high:
+                            mount_gaps.append((low, high)); terminal_mount_clearance = True
             rectangle = ((-span/2, -half_t+sheet), (span/2, -half_t+sheet),
                          (span/2, half_t-sheet), (-span/2, half_t-sheet))
             batch = 'rail-lips' if (brushed or contrasting) and n[1]*sign > .999 else 'end-tanks'
-            put(batch, _plate(rectangle, cutouts, sheet, _sub(middle, _mul(n, sheet/2)), axes, segments))
+            if not mount_gaps:
+                put(batch, _plate(rectangle, cutouts, sheet, _sub(middle, _mul(n, sheet/2)), axes, segments))
+            else:
+                # Separate bounded wall strips leave the notch genuinely open
+                # at both ends of Z. A closed-hole primitive would reintroduce
+                # a horizontal end cap across the screw's vertical axis.
+                cursor = -span/2
+                for low, high in sorted(mount_gaps)+[(span/2, span/2)]:
+                    if low > cursor:
+                        offset = (cursor+low)/2
+                        strip = ((-(low-cursor)/2, -half_t+sheet), ((low-cursor)/2, -half_t+sheet),
+                                 ((low-cursor)/2, half_t-sheet), (-(low-cursor)/2, half_t-sheet))
+                        shifted = [(a-offset, b, r) for a,b,r in cutouts]
+                        origin = _sub(_add(middle, _mul(u, offset)), _mul(n, sheet/2))
+                        put(batch, _plate(strip, shifted, sheet, origin, axes, segments))
+                    cursor = max(cursor, high)
         # Narrow shoulder/seam bands sit at the core join. They cannot cover the
         # source port faces and are not invented logos or brand text.
         join = sign*(half_l-depth)
@@ -364,6 +432,11 @@ def build_radiator_detail(builder, radiator_mm, center, basis, part, profile=Non
         # Sample counts and tube radii stay explicitly unverified. Each sampled
         # fin has actual clearance holes around the sampled round copper tubes.
         plate_rows = {'eco': 8, 'balanced': 32, 'close': 52}[level]
+        if level == 'eco' and terminal_mount_clearance:
+            # Pay for actual terminal bores with one fewer explicitly sampled
+            # foil plate, retaining the fixed eco budget and source tube/port
+            # envelope. This is not an asserted real-world fin-count change.
+            plate_rows = 7
         radius = 2.; axes = ((1., 0., 0.), (0., 0., -1.), (0., 1., 0.))
         for x in positions:
             put('flat-tube-samples', ring(radius, 0., core_length, segments), (x, core_y, 0.), axes)

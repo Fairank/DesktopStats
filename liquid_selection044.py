@@ -24,6 +24,10 @@ def _one(cooler,selection,secondary=False):
                 _radiator_profile=profile)
             # An independently bought radiator does not include the old cooler's
             # branded fans. An empty fan choice is an explicit neutral reference.
+            for key in ('bundled_fan_reference','fan_models','fan_sizes','fan_depths','fan_relative_directions','fan_placements','relative_rotation_verified'):
+                result.pop(key,None)
+            result.update(fan_family='stock-reference',fan_outer_ring=False,frameless_fan=False,
+                fan_dimensions_verified=False,fan_power_connector_verified=False)
             result.update(fan_model='',fan_reference_mm=profile['fan_size_mm'],
                 fan_reference_depth_mm=25,fan_reference_rgb=False,fan_reference_blades=7,
                 fan_blade_count_verified=False,_neutral_radiator_fan=True)

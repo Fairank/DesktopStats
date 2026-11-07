@@ -1,10 +1,10 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.44.0-preview.1",
-  "archive_root": "DesktopStats-0.44.0-preview.1-source/",
+  "version": "0.45.0-preview.1",
+  "archive_root": "DesktopStats-0.45.0-preview.1-source/",
   "binaries_included": false,
-  "binary_policy": "No executable/object/install binaries; reviewed original image/video assets retained.",
+  "binary_policy": "No executable/object/install binaries; reviewed original image/video and validated data-only model packs retained.",
   "dependency_preparation_required": true,
   "files": [
     {
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 65389,
-      "sha256": "158cba38a2d6265a8ded7a0e7c3d569de0814560f55bff33a4c9f4f1c40fd25f"
+      "bytes": 67375,
+      "sha256": "2d4b9897fce2b8cf6e4e72dc67b2ac7762c68725c4fbcb3821cdefd9ef637b74"
     },
     {
       "path": "HARDWARE-APPEARANCE.md",
@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 48475,
-      "sha256": "40f93c077b57b1de744b911c48af11ea4427fc0b62ebe675547edc7aac51343c"
+      "bytes": 59795,
+      "sha256": "0cb51dc6a678fd60b51f0f13816d44fdec83e76b1138047e45b8020a5ac1849d"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -64,8 +64,8 @@
     },
     {
       "path": "accessory_art.py",
-      "bytes": 59315,
-      "sha256": "802dbc81af832d3dfc432933129e7cf21307e608b82def1b9b24b7f099cb002b"
+      "bytes": 62727,
+      "sha256": "73729dc1c6cb74544669d9fdbfd41324944714a3501ca246af8c9fe78fa3464a"
     },
     {
       "path": "accessory_case_details040.py",
@@ -74,8 +74,18 @@
     },
     {
       "path": "accessory_cooling_details040.py",
-      "bytes": 10277,
-      "sha256": "b28f83e73e4b863867495ee5b053457c763db5447ff57148fe90b23c69518da1"
+      "bytes": 10604,
+      "sha256": "a5f9ce2c5ca852c5ec29ce2533d6c0ef117b613d8d934c2d145366066c753b75"
+    },
+    {
+      "path": "accessory_cooling_details045.py",
+      "bytes": 5467,
+      "sha256": "699379f84d92ff062ee174558316743c92472990009cd23efe802718a5d68979"
+    },
+    {
+      "path": "accessory_fan_frame045.py",
+      "bytes": 2636,
+      "sha256": "e019838c30261b78170f2474456b7d9f594988a632c27f78c8e9a92e610c23c2"
     },
     {
       "path": "activity_sensors.py",
@@ -124,8 +134,8 @@
     },
     {
       "path": "assembly_cooling.py",
-      "bytes": 69203,
-      "sha256": "9dd30191ece63e710a3ab37f5535fd94505a013015394b94d81a1ff97ad9c61b"
+      "bytes": 72083,
+      "sha256": "f12397d39ae828911b1853d162d09ca2be528c0af09e30015ea24c1664bbbffd"
     },
     {
       "path": "assembly_cpu.py",
@@ -154,8 +164,8 @@
     },
     {
       "path": "assembly_geometry.py",
-      "bytes": 54440,
-      "sha256": "a3472e7876f1e31a332b959da1b8732166b48f233da701cd5fd3f96e741af822"
+      "bytes": 54826,
+      "sha256": "e6b592dd062a818d0b5839171b05a90957276bbd70152959880337c9be2b83c3"
     },
     {
       "path": "assembly_inspection.py",
@@ -164,18 +174,18 @@
     },
     {
       "path": "assembly_lighting.py",
-      "bytes": 2058,
-      "sha256": "9dbd3468103e8130c88c1476da35973ab189528259a06e29ebd4288b7a1d4690"
+      "bytes": 2212,
+      "sha256": "fec5ba93eb0fc3d8826ae5a1fc29a138b3d322f073ebf17c92f2d2c2b784f7c1"
     },
     {
       "path": "assembly_motherboard.py",
-      "bytes": 37765,
-      "sha256": "a3f56bceee196ff1c52804d040bc44753c7dbe15023dc5b8fb57016e01ebdb8e"
+      "bytes": 41885,
+      "sha256": "9772cd7cca9b4440aa5792ba22b755653df97a6fcd4fe64074c3398241cdb558"
     },
     {
       "path": "assembly_parts.py",
-      "bytes": 9498,
-      "sha256": "c4a876e15f3e5cb2ee2f59d972be7684c8d2ed2e528f12102d770ba6c72dff5a"
+      "bytes": 9574,
+      "sha256": "6299fb5f5f4550d2916a8871af2257193fccfa466a018d0cd32a3f62ef9c3d47"
     },
     {
       "path": "assembly_profiles.py",
@@ -184,18 +194,18 @@
     },
     {
       "path": "assembly_radiator044.py",
-      "bytes": 28721,
-      "sha256": "49d6b471bd8777fcc7c770f4c880cd61bb43a2e93c6892b96aecb9d958a1cd86"
+      "bytes": 33574,
+      "sha256": "5dd84c189ec7a9481cba58b1694a58e0106575f0b2fef5b2955d0cb6f01a4bf6"
     },
     {
       "path": "assembly_scene_cache.py",
-      "bytes": 1263,
-      "sha256": "3857e4ba7fe0e19cbf7bf2f8af7d5b1cbbf4d711f1ffea7f046cd1d3876f2b48"
+      "bytes": 1290,
+      "sha256": "cbeeb655aaca588b77f9cb211ea5c81c141119872657b96a78e83c2d4e06ac14"
     },
     {
       "path": "assembly_spec.py",
-      "bytes": 13127,
-      "sha256": "ef34b0b80373a584a7f510cdb627544260bba69eba407b6b45ecdc2830d48ee1"
+      "bytes": 13294,
+      "sha256": "ff5d22d874e7634beef4e32aa78db0987fc876cbe83f276d8b62c600f3608713"
     },
     {
       "path": "assembly_style.py",
@@ -204,8 +214,8 @@
     },
     {
       "path": "assembly_tools.py",
-      "bytes": 10994,
-      "sha256": "73c5b05414308bd2dccc5de768cf084858b02b1449e8b1ab91ec2f2d015f4ac0"
+      "bytes": 11115,
+      "sha256": "7bf56a55733c0659abdffe1d7d357de38882cda44a0f9753cd1108ea25476f38"
     },
     {
       "path": "assembly_viewer.py",
@@ -214,8 +224,8 @@
     },
     {
       "path": "assembly_window.py",
-      "bytes": 26869,
-      "sha256": "6ed2e0543452e26cc19524582680117d9da2fa1c45901f5b5aeaeed5fc2d1d08"
+      "bytes": 26953,
+      "sha256": "1083703d3b52ed4133c423e792e2432a63174bc523e400a990b5ec99308544a3"
     },
     {
       "path": "assets/ICON-NOTES.md",
@@ -648,6 +658,11 @@
       "sha256": "b384cf0a7f59fec01af5d2d4ccf85c7c572a276e82a4c99cedc54e08ee129bbe"
     },
     {
+      "path": "assets/showcase/board-socket-io045.png",
+      "bytes": 107296,
+      "sha256": "efc97fe8f7f9033ebddf8bd74adad1f6fc49512f4f27d7b8120b82aa84e90e6f"
+    },
+    {
       "path": "assets/showcase/case-expansion.png",
       "bytes": 161780,
       "sha256": "e9fa045b751c578c9764bf89135390aab03531402bfebde1e2e57cedba4aac74"
@@ -656,6 +671,61 @@
       "path": "assets/showcase/case-styles.png",
       "bytes": 181632,
       "sha256": "1dd5ea715686efba0ab4a7152b30358f8ee77eda74af4451493fded4c72ddf71"
+    },
+    {
+      "path": "assets/showcase/cooler-atlas045-01.png",
+      "bytes": 545047,
+      "sha256": "802984dc09dd4fb387b7f7c727bfbfd6f91cd52bc30833f341c8082c44ca7f05"
+    },
+    {
+      "path": "assets/showcase/cooler-atlas045-02.png",
+      "bytes": 205441,
+      "sha256": "133ec84c3b0c3f403917c21bd1d72947dc3fb5f88900500b12fb75f11a5641f5"
+    },
+    {
+      "path": "assets/showcase/cooling-geometry-six045-01.png",
+      "bytes": 632023,
+      "sha256": "3c5981bb75cbb5ad0e4c47a54f647619de72164da91ce29d62b6c76c6fbd2e53"
+    },
+    {
+      "path": "assets/showcase/cooling-geometry-six045-02.png",
+      "bytes": 759966,
+      "sha256": "2dda15d5270046110f39caa8361e8f848771a5075f968fdf8d2d5c01b99f91b5"
+    },
+    {
+      "path": "assets/showcase/cooling-geometry-six045-03.png",
+      "bytes": 815995,
+      "sha256": "e7a475311944a9ec4eff0aeafd1c40671e98179f1e4c7261b3c9e32cce7fc76a"
+    },
+    {
+      "path": "assets/showcase/cooling-geometry-six045-04.png",
+      "bytes": 535350,
+      "sha256": "aff5dd03fe20d794fd6dd7a6f2e497092bee81d129440f94801bfedb7430c8d1"
+    },
+    {
+      "path": "assets/showcase/cooling-geometry-six045-05.png",
+      "bytes": 447505,
+      "sha256": "f49dd6e3ee5048979da1fc767ae4c3f8ced9092b2d7aa12e9aa672f8864fcfcf"
+    },
+    {
+      "path": "assets/showcase/cooling-motion-six045.gif",
+      "bytes": 1456535,
+      "sha256": "7794c879a2b1223ea7fa75620f3f381d57338c7881e31c5a20f348e525039223"
+    },
+    {
+      "path": "assets/showcase/cooling-six045-01.png",
+      "bytes": 595147,
+      "sha256": "1a5a1a327a99d6c14ab1919962d0f50956643bfc1d15a276bc354edb22f1273a"
+    },
+    {
+      "path": "assets/showcase/cooling-six045-02.png",
+      "bytes": 857026,
+      "sha256": "b2efd085557c141cb44379fe24c1a183e71ba3db4c00cd8cdfdd0ce436b5e1d4"
+    },
+    {
+      "path": "assets/showcase/cooling-six045-03.png",
+      "bytes": 503848,
+      "sha256": "f8d742f9b307d3fbb852e386beedb5774f4322c2924eb4885bd8a64ce8015187"
     },
     {
       "path": "assets/showcase/cpu-details.png",
@@ -681,6 +751,21 @@
       "path": "assets/showcase/cpu-six043.png",
       "bytes": 153022,
       "sha256": "a2fe198175717fba57200da89003ad47970f01e95c3410ec155e50c43108f37c"
+    },
+    {
+      "path": "assets/showcase/fan-atlas045-01.png",
+      "bytes": 344249,
+      "sha256": "0dae10dc12f4d6a4ee9396b7df9f5bcb1d7ef31bad31d48432692f7343f1fea3"
+    },
+    {
+      "path": "assets/showcase/fan-atlas045-02.png",
+      "bytes": 358617,
+      "sha256": "48dcab1527a16cbadbaaad0a7abc97887ecdfecbc092846c85b46d11a75a8db5"
+    },
+    {
+      "path": "assets/showcase/fan-atlas045-03.png",
+      "bytes": 182900,
+      "sha256": "324953749c7b067327be4cd5f6d6a7e7b473d55884cb3d60427d338dd30ba088"
     },
     {
       "path": "assets/showcase/gpu-six043.gif",
@@ -758,6 +843,16 @@
       "sha256": "630987cef782933ec716e3d3011f635b1cd3a75e3a00dd45fcdbea4202016638"
     },
     {
+      "path": "assets/showcase/motherboards-original045.png",
+      "bytes": 409315,
+      "sha256": "ae6cac855c6300249e5c68604f22016b639ab735eb4086ee268cb023e964e18b"
+    },
+    {
+      "path": "assets/showcase/motherboards-six045.png",
+      "bytes": 507247,
+      "sha256": "6a96a0ba02914878424e929edef2a5c0719477b8c7e04433ab72d050a551b472"
+    },
+    {
       "path": "assets/showcase/motion-continuity-dark.gif",
       "bytes": 2156521,
       "sha256": "f140f6aef1a64109b817cc572b8b17bf629b912191c6acb7a587473bd03ef3db"
@@ -776,6 +871,41 @@
       "path": "assets/showcase/radiators-atlas044.png",
       "bytes": 859353,
       "sha256": "071027716503c484fb5f47f9ccec77339602366714afb16ad7840f5e8ca35223"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-01.png",
+      "bytes": 588845,
+      "sha256": "4247f08b6d391c2996d6fa6c1494dc883e9be751ff1ff3de29c8e63cc6ab170a"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-02.png",
+      "bytes": 563731,
+      "sha256": "934956f6e5a34276e765d105e9f25cf23245f36980ffa1f6629ff99846fb6fd1"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-03.png",
+      "bytes": 625220,
+      "sha256": "89d581d1c3746e7fcdc6e2d3478eb9f330d0fc1b1c46b3b5a0a5c342135207ee"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-04.png",
+      "bytes": 641953,
+      "sha256": "61b7c590f004ca35cea32ad5e2b9f8ef8f48f63f2d49881f5617b504bdbe5bab"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-05.png",
+      "bytes": 568845,
+      "sha256": "871d53c97d88c96b194a8933b09f9a25c9c091cbddcad3d311ea0dcb6c00ff00"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-06.png",
+      "bytes": 579312,
+      "sha256": "cf3d74c2824b7bdfcfecf2094036c4c0da00f435b190a1118aa1b7fe04155e33"
+    },
+    {
+      "path": "assets/showcase/radiators-atlas045-07.png",
+      "bytes": 265431,
+      "sha256": "4278e1526223b24c555096f4d901c32e1e9620973593f5c80f8ec59e3623ebbd"
     },
     {
       "path": "assets/showcase/scene-preview.png",
@@ -919,8 +1049,28 @@
     },
     {
       "path": "cooling_catalog.py",
-      "bytes": 68172,
-      "sha256": "1688da882cdb468a166aa5e4ce4b6d243062a6999f8b725194e7167969281a29"
+      "bytes": 69078,
+      "sha256": "c8f766a2e3d30edc30269e61fa35e152d85310e535136fbdf7edf0fd01cb13a3"
+    },
+    {
+      "path": "cooling_expansion045.py",
+      "bytes": 134029,
+      "sha256": "669d135b19e5931a181fa0307d4d8ad66bc49203c6a8fd27b53c1a333b80befb"
+    },
+    {
+      "path": "cooling_pack_baseids045.py",
+      "bytes": 4386,
+      "sha256": "fddb11a87bad75ece40de0123506cba2423840f113c4f82ee9c415756ba3ab79"
+    },
+    {
+      "path": "cooling_pack_runtime045.py",
+      "bytes": 842,
+      "sha256": "e713277fe5edccef359a6f116568e1e765bf7c9c1c478f47c4f40d3c6deed714"
+    },
+    {
+      "path": "cooling_pack_schema045.py",
+      "bytes": 22376,
+      "sha256": "19738f69e028ff1d832f1de43f75d836d393ed3f1584961334fcea2f4ee4b9d7"
     },
     {
       "path": "cooling_sensor.py",
@@ -959,13 +1109,18 @@
     },
     {
       "path": "docs/ASSEMBLY_CATALOG.json",
-      "bytes": 461787,
-      "sha256": "4672daa758ab7ec260f414e560e04a7f4a5ba6d93dd48b125bd3f1b21f607335"
+      "bytes": 616991,
+      "sha256": "c755a4d3bfc392efcdf91c01cc870a1f6b1c498877b865b762e8bd86dd66d0c9"
     },
     {
       "path": "docs/ASSEMBLY_QUALITY.md",
-      "bytes": 12903,
-      "sha256": "9e48ecc3b08efeb754153e086cfa05b975db78919948c7f92d4b66763a7860ff"
+      "bytes": 15177,
+      "sha256": "84febecb0ed4d432eadb843da9d7245ce13f7bbbe14942c58cff57b38f8bc373"
+    },
+    {
+      "path": "docs/COOLING_PACKS_INDEX.json",
+      "bytes": 37423,
+      "sha256": "7a060f673160c8c0aa8fa0a8935b4af8f41825175474fcb9ef7b39a05f9dd1e4"
     },
     {
       "path": "docs/GPU_MODEL_PROGRESS.md",
@@ -984,13 +1139,13 @@
     },
     {
       "path": "docs/HARDWARE_COVERAGE.md",
-      "bytes": 3681,
-      "sha256": "59727b88e7de544968838779b1d1d8a8d2ca4ec883adc692d3a24dc9ae8296a1"
+      "bytes": 3802,
+      "sha256": "c634bb446ec47d22a4239927fce500b0c4ecdf114a10c798ed2412db571fa6d4"
     },
     {
       "path": "docs/HARDWARE_PACKS.md",
-      "bytes": 3366,
-      "sha256": "13e4e7a4a205b62feec5b65730c0e18d7308e860b4cd81d557ba5525545ab67e"
+      "bytes": 10732,
+      "sha256": "54a30ee19195b7c723e9128b6f2c0ae66bf21f996e4a34f3ee08ae071357a498"
     },
     {
       "path": "docs/HARDWARE_PACKS_INDEX.json",
@@ -998,9 +1153,34 @@
       "sha256": "34f1ba62676ed8a1cd2ab1b03f7fe294630f82ea107186c99f153dbc1a736398"
     },
     {
+      "path": "docs/LIQUID_COMPONENT_GAPS.md",
+      "bytes": 9187,
+      "sha256": "0d9f8931c97a4714aa2028c240a963aba7589aca05d621bfa041d9e762d7fd49"
+    },
+    {
+      "path": "docs/PCBS_COMPARISON.json",
+      "bytes": 4151,
+      "sha256": "4bb045b0e3b09817628c564d8296381a85aa9f8089a439ab5dda8a8f6829f319"
+    },
+    {
+      "path": "docs/PCBS_GAP_ANALYSIS.md",
+      "bytes": 25107,
+      "sha256": "6265ba451d7b7103a5cb2e354cb7b22d19853371d4572e991251e95396a4865d"
+    },
+    {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 36108,
-      "sha256": "c91d3cbadc0578e5c6cf3e51c180e8ae3f620559e773db88ad82aeec1ecbbf59"
+      "bytes": 44527,
+      "sha256": "654d1397ebb7f01f0318c463cbee939466f00085680de45adf9c9696031feb74"
+    },
+    {
+      "path": "docs/SCOPED_PERFORMANCE045.json",
+      "bytes": 1564,
+      "sha256": "bb20fde30fe9c18f2dfe0b9eb0dbbb8538337562135b9d35944fbf31def75334"
+    },
+    {
+      "path": "docs/SIZE_COVERAGE.json",
+      "bytes": 117487,
+      "sha256": "5ebdf9f46ec0e8fa06e7a9c81b95a81abdb037a6474431a6b059f55fa2b1afc5"
     },
     {
       "path": "docs/USER_GUIDE.md",
@@ -1119,8 +1299,8 @@
     },
     {
       "path": "hardware_packs.py",
-      "bytes": 20921,
-      "sha256": "4d38769974c493a3d76a90180298735a99944fa5d1af0b7482ecbf6e10f6a754"
+      "bytes": 22703,
+      "sha256": "079a3d357c78d78f7c1de92acedaf418cac135785338db88bb9296e4d8ff7627"
     },
     {
       "path": "hardware_series.py",
@@ -1509,18 +1689,23 @@
     },
     {
       "path": "liquid_cooling_catalog044.py",
-      "bytes": 21607,
-      "sha256": "18823c51379a009aba91b09f06de899ac89e6a7d3716a64dc2a8a30a45682b7a"
+      "bytes": 21879,
+      "sha256": "3fb4853f31a0610897c9c0c060b1fc326b25165063f77df0ececc029a17d3844"
+    },
+    {
+      "path": "liquid_radiator_expansion045.py",
+      "bytes": 212431,
+      "sha256": "c2bbda6c5eb201e31be576c8db45f415220978835a7cafc9fb80e9d1dc9b035c"
     },
     {
       "path": "liquid_selection044.py",
-      "bytes": 4002,
-      "sha256": "344cc0f8f92f374a87380d6c18c38bc6e56d51f4152a73e6093ccffe753b9ed2"
+      "bytes": 4378,
+      "sha256": "ed821f052564289773bb68831a4d4ad41df97d71f2ed5a4787b73bf4e74466f7"
     },
     {
       "path": "locales.txt",
-      "bytes": 276726,
-      "sha256": "14f71f8008ad2e4aa99a15b37fa5e5f777b474eb0f8b30553dab5657fa70a61f"
+      "bytes": 279252,
+      "sha256": "24ddb1f41254a83bf351950c4d4d1f2efca7b4af5c01b25f6e1d6a3253a8ab50"
     },
     {
       "path": "localization.py",
@@ -1553,14 +1738,179 @@
       "sha256": "e05c9ac81bc9eb79af26f4f93eefb2ddc9dec3c6c253f168e2d29f0885a16c33"
     },
     {
+      "path": "model-packs/v045/DesktopStats-cooler-be-quiet-045-1.0.0.dspack",
+      "bytes": 3294,
+      "sha256": "d657e455b221916c328fca9ae58a2ebe54978cb1566902377fbe5a052d8cea1c"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-collection-045-1.0.0.dspack",
+      "bytes": 9678,
+      "sha256": "c29bcf445136319bd3ee4a3aca9be0e8dd175b51bebd1372b6860ea6fdbb6f79"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-cooler-master-045-1.0.0.dspack",
+      "bytes": 2913,
+      "sha256": "d4d83b3784d47d24d73e9f1dde74152e5afa34677035057df52a9a85a395efd0"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-corsair-045-1.0.0.dspack",
+      "bytes": 4358,
+      "sha256": "d79cf250ae9b577a10a1e91db528239d261bf75570a259e1c17509f3dcfd4c98"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-deepcool-045-1.0.0.dspack",
+      "bytes": 3879,
+      "sha256": "d679b79631111b1e911184f7d95266552c762a19d87783d1fc27b314b6c8acfa"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-noctua-045-1.0.0.dspack",
+      "bytes": 4565,
+      "sha256": "25f08c8a6cc344ebaea5080aef248ea6b096392ae79083b20803ca2f0a52f364"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-nzxt-045-1.0.0.dspack",
+      "bytes": 3936,
+      "sha256": "84f72a647a4ffefd667193edea52352d5f9914e1161c2daeed8e9514f74d3cd4"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-cooler-thermalright-045-1.0.0.dspack",
+      "bytes": 3119,
+      "sha256": "f1ad7f0ab101091b3df0505105a04f595959473e549a6fe03e4500426ce27495"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-antec-045-1.0.0.dspack",
+      "bytes": 2971,
+      "sha256": "a5ed18cfcf7e44175e644a9ae6c15aa22edac0c32488bb1c9bd33371103cb7ed"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-apnx-045-1.0.0.dspack",
+      "bytes": 3145,
+      "sha256": "6c036bd9f27313498d66596f3cce39ae323e19bf1176b90eecf1ce1da7d8675e"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-arctic-045-1.0.0.dspack",
+      "bytes": 4010,
+      "sha256": "26d97aa9f9d52637aacd1d54b1876989c49523ca4cff99c0870b355e8cec6f43"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-be-quiet-045-1.0.0.dspack",
+      "bytes": 3421,
+      "sha256": "5cc42c529e75425b28a210e627d7912c0cdf3cf00b2aa48fa9391a5deb3a58f6"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-collection-045-1.0.0.dspack",
+      "bytes": 10360,
+      "sha256": "15eb8bef84cd13a6c6e3ae50fb60a290eb04c424ac1a823ac03ea3ca65366d5d"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-cooler-master-045-1.0.0.dspack",
+      "bytes": 3342,
+      "sha256": "932d2c1807dce3a8219b84944b8ab82ffeb600d21369c67197a7e17bec0577f5"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-corsair-045-1.0.0.dspack",
+      "bytes": 3018,
+      "sha256": "8fd3d918c14e2fa4404369e879e4101f64485edb8ddef3e213c6b64038daf905"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-deepcool-045-1.0.0.dspack",
+      "bytes": 3700,
+      "sha256": "94370f6b95ff6b8735bf0665c05b32bfcb41199a9010624d9565e9756f55ced2"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-fractal-design-045-1.0.0.dspack",
+      "bytes": 3300,
+      "sha256": "5b620d660690e50c5c0ccc463900c2cac5a6b0849dd30e7a6c55123729576e05"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-lian-li-045-1.0.0.dspack",
+      "bytes": 3224,
+      "sha256": "b63e390253577a220d4bf58b710e4364307bc537308e0da73742fe8b407fa9c8"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-montech-045-1.0.0.dspack",
+      "bytes": 2906,
+      "sha256": "4d11dc6730288e04837b5bd124b5ff710cb73e26b643be281e1e7181e04e79af"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-noctua-045-1.0.0.dspack",
+      "bytes": 4094,
+      "sha256": "1da97979b911d457f6015b5e81a4e69e3761082ea2b122d93796bcb4f344ae9f"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-nzxt-045-1.0.0.dspack",
+      "bytes": 2971,
+      "sha256": "cca8f770c39b1007fb814a50ef45dda18351649d545e2affb2132b2fd71cdf37"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-phanteks-045-1.0.0.dspack",
+      "bytes": 3402,
+      "sha256": "2c47bd6f85aa4bded82a7beb46102978dd56c540e96ab010024f08dd06d562ae"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-fan-thermaltake-045-1.0.0.dspack",
+      "bytes": 3390,
+      "sha256": "ceec460ae6951153402c2fc84a370619c3aa7122d6c5a4bfa05a39cb7e17f38c"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-alphacool-045-1.0.0.dspack",
+      "bytes": 8342,
+      "sha256": "c8fff596cc49ed710396eb40b96884711864d82a39415ac06a0c2ef2b40bdd04"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-barrow-045-1.0.0.dspack",
+      "bytes": 4125,
+      "sha256": "afc07555a840404c9fedb7518fea940deb19b7d170cd6625afbcf0eb0ecea495"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-bitspower-045-1.0.0.dspack",
+      "bytes": 4912,
+      "sha256": "d5d88a4b25e0acc82c83b91393ce827ca21569f7c4caf3e8cbc86c3384f3739e"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-bykski-045-1.0.0.dspack",
+      "bytes": 5521,
+      "sha256": "4c836d8137e74157152e7384283ada0c8113004d1da71b529cf22aa2c6e4a7c0"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-collection-045-1.0.0.dspack",
+      "bytes": 17354,
+      "sha256": "5f74df11394a09cb32d051710761347a262f3bbd3bcef928a8d9d29ab8e353ef"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-corsair-045-1.0.0.dspack",
+      "bytes": 4010,
+      "sha256": "a9323dd4ed2f09bea22f59c5d06869f5931eabee41b0e4192742049e6df36d5d"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-ek-045-1.0.0.dspack",
+      "bytes": 3890,
+      "sha256": "78b5561c6de63eeabf5eba80b4b1774e629c076bc2f21aa3304fb4564b7588c3"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-watercool-045-1.0.0.dspack",
+      "bytes": 4055,
+      "sha256": "259334390c80f9239be8b542e4d1043a1bbc1249134107c8bbcf9e2bebeedbef"
+    },
+    {
+      "path": "model-packs/v045/DesktopStats-radiator-xspc-045-1.0.0.dspack",
+      "bytes": 4621,
+      "sha256": "1a7527540350baa293d818d9708f67768006e0c4c09a846659925279bc14eb94"
+    },
+    {
       "path": "modern_menu.py",
       "bytes": 17853,
       "sha256": "1df3857975da2cce4cd04d992d7723053b6c7dad234e697fdf1c6196739859f1"
     },
     {
       "path": "motherboard_catalog.py",
-      "bytes": 36469,
-      "sha256": "509273b029f222731d4dd7384639e6f4434f0cfc962bb1ca0fa137fd864585d2"
+      "bytes": 36610,
+      "sha256": "cf2b7050b5218dc1ff64605c190419c1d9205617b61ffe3559d344e5f6ef979d"
+    },
+    {
+      "path": "motherboard_expansion045.py",
+      "bytes": 31335,
+      "sha256": "c3e5d149194115b6038ef3e6d905d301e801aba0f347e56d2235aae9de34c03f"
     },
     {
       "path": "motherboard_expansion_b.py",
@@ -1754,8 +2104,8 @@
     },
     {
       "path": "native/HardwarePacks.qml",
-      "bytes": 2398,
-      "sha256": "ffa9a478d9cd06ad248fd3e95a0e99965ec957dce452cf54b515312790ab91df"
+      "bytes": 2424,
+      "sha256": "c4d23bfe1d444bd2528ffa9718d491551386aca53bda86059f0b8ca5e66ce72f"
     },
     {
       "path": "native/HardwareSeriesCoreExpansion.js",
@@ -1884,8 +2234,8 @@
     },
     {
       "path": "native/ProcessUsageCard.qml",
-      "bytes": 9463,
-      "sha256": "5ce0a51810a1c4c344b0548fee362f877e3b2382e3f35ecf1008e0e44380eab3"
+      "bytes": 10163,
+      "sha256": "e63f30bcc45f22fa73ff5bfb37540a901e91920f838a4dc8145c7850384aa06f"
     },
     {
       "path": "native/SamplingControl.qml",
@@ -2014,8 +2364,8 @@
     },
     {
       "path": "native_controller.py",
-      "bytes": 132625,
-      "sha256": "7a409754fe68a9965c7f0007bf2e6a80b5d7587f37cea9e0be9cca8a3c194f32"
+      "bytes": 133398,
+      "sha256": "74809ed5f1b12d70580cb25ebeb79d9c35e32dc4c07fcec7880ef3d65e0989b5"
     },
     {
       "path": "native_glass.py",
@@ -2044,8 +2394,8 @@
     },
     {
       "path": "native_selfcheck.py",
-      "bytes": 12377,
-      "sha256": "a9fd3568a70db888b95c22708aede923c18a9e69cecce2967330e7cb3349e065"
+      "bytes": 15740,
+      "sha256": "cef0b094a098e6b4f53960c85eb774b4eaba3ae5d4f3626a5ecbbc883d1f3a3f"
     },
     {
       "path": "native_surface.py",
@@ -2074,18 +2424,18 @@
     },
     {
       "path": "process_snapshot.py",
-      "bytes": 5438,
-      "sha256": "f2ade644e04ffc7bd31f3f5addfb3af7dd7253348262f646e772ce01779b32fe"
+      "bytes": 6168,
+      "sha256": "e4a1bc69e41f36b89f5ac3688d04c43091388a9bf4e322a2b464d914ba338350"
     },
     {
       "path": "process_usage.py",
-      "bytes": 17001,
-      "sha256": "bb14fddb31e1abd33a1358a050c7f42f10843f1cd9999568d32527aa07d33d20"
+      "bytes": 21407,
+      "sha256": "a3fa855964f7d73d532fc676e2fee4b37080f970078edf83f6789796dfab3c9a"
     },
     {
       "path": "product_version.py",
       "bytes": 29,
-      "sha256": "03631122a7ae601e96aa94c9810e406e3679619645405a169c99812ffc98fef7"
+      "sha256": "0784a37b041e53ed0fa8c53faac20ffca8f668fedf21721a1f865f9af3654591"
     },
     {
       "path": "profile_paths.py",
@@ -2250,7 +2600,7 @@
     {
       "path": "tests/test_assembly_board_detail043.py",
       "bytes": 11172,
-      "sha256": "fee690a6eb295547e62a494d47262c388edfe83e453757d96aec624ebbe77b25"
+      "sha256": "82b0c24b8fdbb369bd3062420ac00ed518925365b0feb3919b6ab5d552dec5dc"
     },
     {
       "path": "tests/test_assembly_case_detail.py",
@@ -2319,8 +2669,8 @@
     },
     {
       "path": "tests/test_assembly_motherboard.py",
-      "bytes": 18893,
-      "sha256": "8b5eeafcaec6c8111575bb33a6366f0730854dab8314da59f7f641c9ff86b847"
+      "bytes": 19888,
+      "sha256": "19f1c4c116738716be93bfe3beff61931ba0f55a427ea26b597954ac494d5248"
     },
     {
       "path": "tests/test_assembly_page.py",
@@ -2418,6 +2768,11 @@
       "sha256": "ae35944a1db465627fb314caba98ffc26b4a1e4a146b26e3e8108577a11d3f05"
     },
     {
+      "path": "tests/test_controller_io045.py",
+      "bytes": 6806,
+      "sha256": "acc709950f5bc2c1a7f668b0880c37ca82fffee3a7b0f2ac1de2df16ae99ff87"
+    },
+    {
       "path": "tests/test_cooling_expansion039.py",
       "bytes": 7260,
       "sha256": "439aa2aac0a86d15c39164edce5e550eec531179fedc63bbfb218d7d846ebe81"
@@ -2428,9 +2783,39 @@
       "sha256": "319be669a89fa46e316fc9e78bb169784bcdcad107cb7373367c4709a30b33d6"
     },
     {
+      "path": "tests/test_cooling_expansion045.py",
+      "bytes": 11042,
+      "sha256": "0101728874289887ca1107fe6e3f2b2e0187300aff970a6f92587c35bc29984a"
+    },
+    {
+      "path": "tests/test_cooling_foil045.py",
+      "bytes": 4400,
+      "sha256": "511b5bf036c32fbfb2ee09cee625e97d7aadb658f21c702c0454c892b9df8776"
+    },
+    {
       "path": "tests/test_cooling_geometry040.py",
       "bytes": 11425,
       "sha256": "bc8ebc0bac28e2effd831dd6271d09a7b5b63b6da73cc6f7f6960b47045a1475"
+    },
+    {
+      "path": "tests/test_cooling_pack_export045.py",
+      "bytes": 11737,
+      "sha256": "83f0df7ec974a21be83580c74efee3ebb4d6533ca0182c00d0c6a99ee1e65f7a"
+    },
+    {
+      "path": "tests/test_cooling_pack_runtime045.py",
+      "bytes": 11803,
+      "sha256": "c747111bfb25abd3c9cd443be1e599a0450c9ac8ce86e93d8daf50216768c969"
+    },
+    {
+      "path": "tests/test_cooling_pack_schema045.py",
+      "bytes": 14295,
+      "sha256": "3fe4fd460ff40f486e7e2a47db7c2d5fee4cfc5bd8b34d3889f0042739296595"
+    },
+    {
+      "path": "tests/test_cooling_render_integration045.py",
+      "bytes": 10782,
+      "sha256": "379a01d1c3a24d2548e9295794186a3391c8ca477eed6a25c9cb5af4526e666a"
     },
     {
       "path": "tests/test_cooling_sensor.py",
@@ -2734,8 +3119,13 @@
     },
     {
       "path": "tests/test_liquid_cooling_catalog044.py",
-      "bytes": 7797,
-      "sha256": "11292f0ae3f5988b84dfd65ae3e0b8177a4b1db33bdc445498d7b4cb3e734573"
+      "bytes": 8035,
+      "sha256": "92d334e279cdb7dab506605c0d4078e449c07218557be4ff296076ac3d58efd2"
+    },
+    {
+      "path": "tests/test_liquid_radiator_expansion045.py",
+      "bytes": 12575,
+      "sha256": "d2b7fe9a5ab3900af147cef38c6e6bc39c496c14475f8dd77e0a002f6fed159b"
     },
     {
       "path": "tests/test_lucide_icons.py",
@@ -2803,6 +3193,11 @@
       "sha256": "c9820697c444242fef9ecc8b78b928c66bf7d84c428d10d7c42c5214f81914f5"
     },
     {
+      "path": "tests/test_motherboard_expansion045.py",
+      "bytes": 17398,
+      "sha256": "11669ea1f143beb0ef599da146ca1c7366cae8e5c44773f3699b458c280266e4"
+    },
+    {
       "path": "tests/test_motion_continuity_qml.py",
       "bytes": 15700,
       "sha256": "aa60abe1637e497a8d67484a4ac8664d897f5ec9957dd7654295fa1586fa380a"
@@ -2828,6 +3223,11 @@
       "sha256": "1b1cd26db7f906f3ea426d802527c9eebc1b70b5b796cd7c024097909651ebba"
     },
     {
+      "path": "tests/test_pcbs_comparison045.py",
+      "bytes": 4614,
+      "sha256": "3220fdb84f60e46b11184211b7867ab2dc2d00cf6ff2207216218c6bc67bbb55"
+    },
+    {
       "path": "tests/test_performance_contracts.py",
       "bytes": 31963,
       "sha256": "aabb674267dcf133611a9507d93e9f1a751eacabd4636da6d7c707114e1ea553"
@@ -2841,6 +3241,11 @@
       "path": "tests/test_process_gpu.py",
       "bytes": 11773,
       "sha256": "d742ac6c9a1ccffaaf889e3b0b844c23d127a5c34cabeb4ad0746fb9a97e849e"
+    },
+    {
+      "path": "tests/test_process_io045.py",
+      "bytes": 13259,
+      "sha256": "8257ac29c0b61e3c4528099a7e38194b6880e2a2c8a3b79e0a00f4190801424a"
     },
     {
       "path": "tests/test_process_snapshot.py",
@@ -2949,8 +3354,8 @@
     },
     {
       "path": "tests/test_selfcheck.py",
-      "bytes": 5150,
-      "sha256": "3d5b74d99d6fed42f877b265b9c8564fdab09deaa6c8008aee19da75f89edd11"
+      "bytes": 5248,
+      "sha256": "4b92d7dd5ae2da0395b983d6074aa39c54653ba6d947898f8761a2c38773f697"
     },
     {
       "path": "tests/test_sensor_source_isolation.py",
@@ -3269,8 +3674,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 24807,
-      "sha256": "b925fc1ad596c4f8613b3d306e535a512724f80125370e428340ed528fcdc0d4"
+      "bytes": 28084,
+      "sha256": "e4b9b5c1c158231801476a228e4ae4e6321b9c787fc23a23ba39e4a214bdf4f0"
     },
     {
       "path": "tools/build_collector.py",
@@ -3281,6 +3686,11 @@
       "path": "tools/build_cpu_temperature_bridge.py",
       "bytes": 4994,
       "sha256": "9714ce8e7e2da01e419f6ccd0d8e85b069c7b97b6a3bb30fbe7799468c651080"
+    },
+    {
+      "path": "tools/compare_pcbs045.py",
+      "bytes": 6315,
+      "sha256": "b23b67b292d8a499dd3a534c1ec24fbc8c7896342a6ba0053e785947e33b1cee"
     },
     {
       "path": "tools/export_accessory_art.py",
@@ -3294,8 +3704,13 @@
     },
     {
       "path": "tools/export_assembly_catalog.py",
-      "bytes": 7884,
-      "sha256": "95f01b34571a29ac6c4a5965c6d1009b2c78f14e6bdfad3acbc6042479e7bfb9"
+      "bytes": 9083,
+      "sha256": "42038549a5f6914379980d62631d1c8ee1f0965fe74a16e34ce65b2a7e77b0dc"
+    },
+    {
+      "path": "tools/export_cooling_packs045.py",
+      "bytes": 5345,
+      "sha256": "9e9699d59ff3dc5280ee1b95b504e9da2d88e809c8c7bd7c0c374244b572478d"
     },
     {
       "path": "tools/export_hardware_coverage.py",
@@ -3314,13 +3729,18 @@
     },
     {
       "path": "tools/export_requirements.py",
-      "bytes": 3851,
-      "sha256": "414112eaf02040604ecdc8688a725b2e4c908f79cf10b2e56e82f33f76081afd"
+      "bytes": 11854,
+      "sha256": "e0ece474b2b80dc31fe171cb6014b49090259ac66b0a12626ae864bd672bf0b3"
+    },
+    {
+      "path": "tools/export_size_coverage045.py",
+      "bytes": 3462,
+      "sha256": "43301a5ca279f197b264316be10ae70f06910ccc2f8ccf47b193f84da503d074"
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 23222,
-      "sha256": "44724aa8779483e3cf0b0072b22e204d377816a5f70ce1658979b6b954c39893"
+      "bytes": 25012,
+      "sha256": "d94e6dd28b7df7d4efa1a39ee56141d8886c8194c2a3f44640fba9dfa78e5bc4"
     },
     {
       "path": "tools/fetch_qt_licenses.py",

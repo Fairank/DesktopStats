@@ -406,6 +406,8 @@ for _model in MODELS:
 
 from motherboard_expansion_b import records as _additional_records
 MODELS+=_additional_records(_record,_slot,_m2,_connector,_cover,_rect,_rear_observation)
+from motherboard_expansion045 import records as _records045
+MODELS+=_records045(_record,_slot,_m2,_connector,_cover,_rect,_rear_observation)
 
 
 def normalize(value):return re.sub(r'[^a-z0-9]+','',value.casefold()) if isinstance(value,str) else ''

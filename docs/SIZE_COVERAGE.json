@@ -1,0 +1,3775 @@
+{
+  "aio": [
+    {
+      "brand": "Corsair",
+      "delivery": "base",
+      "fan_count": 1,
+      "label": "Corsair H60x RGB ELITE · 120 AIO",
+      "model_id": "corsair-h60x-rgb-elite",
+      "nominal_size_mm": 120,
+      "radiator_dimensions_verified": false,
+      "radiator_mm": {
+        "length": 156,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/us/en/p/cpu-coolers/cw-9060064-ww2/icue-h60x-rgb-elite-liquid-cpu-cooler-cw-9060064-ww2"
+      ]
+    },
+    {
+      "brand": "ARCTIC",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "ARCTIC Liquid Freezer III · 240 AIO",
+      "model_id": "arctic-liquid-freezer-iii-240",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 277,
+        "thickness": 38,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.arctic.de/media/1c/af/b3/1708429821/Spec_Sheet_Liquid_Freezer_III_240_Black_EN.pdf",
+        "https://www.arctic.de/Liquid-Freezer-III-360/ACFRE00136A",
+        "https://www.arctic.de/media/1f/c8/23/1710936380/Liquid_Freezer_III_360_Dimensions_2000x2000.jpg",
+        "https://www.arctic.de/media/12/55/3d/1707469623/Liquid_Freezer_III_360_Black_G04_2.jpg"
+      ]
+    },
+    {
+      "brand": "ARCTIC",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "ARCTIC Liquid Freezer III · 280 AIO",
+      "model_id": "arctic-liquid-freezer-iii-280",
+      "nominal_size_mm": 280,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 317,
+        "thickness": 38,
+        "width": 138
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.arctic.de/Liquid-Freezer-III-280/ACFRE00135A",
+        "https://www.arctic.de/Liquid-Freezer-III-360/ACFRE00136A",
+        "https://www.arctic.de/media/1f/c8/23/1710936380/Liquid_Freezer_III_360_Dimensions_2000x2000.jpg",
+        "https://www.arctic.de/media/12/55/3d/1707469623/Liquid_Freezer_III_360_Black_G04_2.jpg"
+      ]
+    },
+    {
+      "brand": "ARCTIC",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "ARCTIC Liquid Freezer III · 360 AIO",
+      "model_id": "arctic-liquid-freezer-iii-360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 398,
+        "thickness": 38,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.arctic.de/media/16/63/19/1708429821/Spec_Sheet_Liquid_Freezer_III_360_Black_EN.pdf",
+        "https://www.arctic.de/Liquid-Freezer-III-360/ACFRE00136A",
+        "https://www.arctic.de/media/1f/c8/23/1710936380/Liquid_Freezer_III_360_Dimensions_2000x2000.jpg",
+        "https://www.arctic.de/media/12/55/3d/1707469623/Liquid_Freezer_III_360_Black_G04_2.jpg"
+      ]
+    },
+    {
+      "brand": "ARCTIC",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "ARCTIC Liquid Freezer III · 420 AIO",
+      "model_id": "arctic-liquid-freezer-iii-420",
+      "nominal_size_mm": 420,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 458,
+        "thickness": 38,
+        "width": 138
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.arctic.de/en/Liquid-Freezer-III-420",
+        "https://www.arctic.de/Liquid-Freezer-III-360/ACFRE00136A",
+        "https://www.arctic.de/media/1f/c8/23/1710936380/Liquid_Freezer_III_360_Dimensions_2000x2000.jpg",
+        "https://www.arctic.de/media/12/55/3d/1707469623/Liquid_Freezer_III_360_Black_G04_2.jpg"
+      ]
+    },
+    {
+      "brand": "Corsair",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "Corsair H150i ELITE CAPELLIX XT · 360 AIO",
+      "model_id": "corsair-h150i-elite-capellix-xt",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 397,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/ww/en/p/cpu-coolers/cw-9060070-ww/icue-h150i-elite-capellix-xt-liquid-cpu-cooler"
+      ]
+    },
+    {
+      "brand": "NZXT",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "NZXT Kraken 360 (2023) · 360 AIO",
+      "model_id": "nzxt-kraken-360-2023",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 394,
+        "thickness": 30,
+        "width": 121
+      },
+      "sealed": true,
+      "sources": [
+        "https://support.nzxt.com/hc/en-us/articles/47207322896923-Kraken-2023-Specs"
+      ]
+    },
+    {
+      "brand": "DeepCool",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "DeepCool MYSTIQUE 360 · 方形 LCD 冷头",
+      "model_id": "deepcool-mystique360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 402,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://deepcool.com/products/Cooling/cpuliquidcoolers/MYSTIQUE-360-5th-Gen-Liquid-Cooler-with-LCD-1851-1700-AM5/2024/18059.shtml"
+      ]
+    },
+    {
+      "brand": "Lian Li",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "Lian Li GA II Trinity SL-INF 360",
+      "model_id": "lian-li-galahad-ii-trinity360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 397.5,
+        "thickness": 27,
+        "width": 119.2
+      },
+      "sealed": true,
+      "sources": [
+        "https://lian-li.com/product/galahad-ii-trinity/"
+      ]
+    },
+    {
+      "brand": "Lian Li",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "Lian Li GA II Trinity Performance 360",
+      "model_id": "lian-li-galahad-ii-performance360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 396,
+        "thickness": 32,
+        "width": 130
+      },
+      "sealed": true,
+      "sources": [
+        "https://lian-li.com/product/galahad-ii-trinity-performance/"
+      ]
+    },
+    {
+      "brand": "Thermaltake",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "Thermaltake TOUGHLIQUID 360 ARGB Sync",
+      "model_id": "thermaltake-toughliquid360-argb",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 395,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://thermaltake.com/products/toughliquid-360-argb-sync-all-in-one-liquid-cooler"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "ASUS ROG RYUJIN III 360 · 3.5英寸 LCD",
+      "model_id": "asus-rog-ryujin-iii360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 399.5,
+        "thickness": 30,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://rog.asus.com/fr/cooling/cpu-liquid-coolers/rog-ryujin/rog-ryujin-iii-360/spec/"
+      ]
+    },
+    {
+      "brand": "Cooler Master",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "Cooler Master MasterLiquid ML240L V2 RGB · 240",
+      "model_id": "coolermaster-ml240l-v2-rgb",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 277,
+        "thickness": 27.2,
+        "width": 119.6
+      },
+      "sealed": true,
+      "sources": [
+        "https://legacy.coolermaster.com/en-global/products/masterliquid-ml240l-v2-rgb/"
+      ]
+    },
+    {
+      "brand": "ID-COOLING",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "ID-COOLING FROSTFLOW X 240 · 白光冷头",
+      "model_id": "idcooling-frostflow-x240",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 276,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.idcooling.com/product/detail?id=146&name=FROSTFLOW+X+240"
+      ]
+    },
+    {
+      "brand": "ENERMAX",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "ENERMAX AQUAFUSION ADV 360 · 方形镜面",
+      "model_id": "enermax-aquafusion-adv360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 394,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.enermax.com/en/products/aquafusion-adv-series-360mm-cpu-liquid-cooler",
+        "https://www.enermax.com/archive/products/item/LiquidCooler/AQUAFUSION_ADV/AQUAFUSION_ADV_360_04.png"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "MSI MAG CORELIQUID 240R V2 · 冷排内泵",
+      "model_id": "msi-mag-coreliquid240r-v2",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 274,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://es.msi.com/Liquid-Cooling/MAG-CORELIQUID-240R-V2/Specification",
+        "https://us.msi.com/Liquid-Cooling/MAG-CORELIQUID-240R-V2"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "MSI MEG CORELIQUID S360 · IPS 冷头",
+      "model_id": "msi-meg-coreliquid-s360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 394,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.msi.com/Liquid-Cooling/MEG-CORELIQUID-S360/Specification",
+        "https://www.msi.com/Liquid-Cooling/MEG-CORELIQUID-S360"
+      ]
+    },
+    {
+      "brand": "GIGABYTE",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "GIGABYTE AORUS WATERFORCE X360 · 圆形 LCD",
+      "model_id": "gigabyte-aorus-waterforce-x360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 394,
+        "thickness": 27,
+        "width": 119
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.gigabyte.com/eu/CPU-Cooler/AORUS-WATERFORCE-X-360/sp"
+      ]
+    },
+    {
+      "brand": "Phanteks",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "Phanteks Glacier One 360D30 · 30mm 厚扇",
+      "model_id": "phanteks-glacier-one360d30",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 397,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://phanteks.com/product/glacier-one-360d30-black/"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "ASUS TUF Gaming LC 240 ARGB · 入门240",
+      "model_id": "asus-tuf-lc240-argb",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 272,
+        "thickness": 27,
+        "width": 121
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.asus.com/in/motherboards-components/cooling/tuf-gaming/tuf-gaming-lc-240-argb/techspec/",
+        "https://www.asus.com/microsite/all-in-one-liquid-cooling/websites/download/AIO_coolers_SPEC_20211125.pdf"
+      ]
+    },
+    {
+      "brand": "DeepCool",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "DeepCool LS720 · FC120 镜面360",
+      "model_id": "deepcool-ls720",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 402,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://global.deepcool.com/products/Cooling/cpuliquidcoolers/LS720-High-Performance-360mm-Liquid-CPU-Cooler/2022/15826.shtml"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "Alphacool Core Ocean T38 360 · 38mm 厚排",
+      "model_id": "alphacool-core-ocean-t38-360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 397,
+        "thickness": 38,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.alphacool.com/download/datasheet/ENG_13052_Alphacool_Core_Ocean_T38_AIO_360mm_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "EK Water Blocks",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "EK Nucleus CR360 Lux D-RGB · 分区旋转顶盖",
+      "model_id": "ek-nucleus-cr360-lux-drgb",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 400,
+        "thickness": 27,
+        "width": 124
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.ekwb.com/solutions/all-in-one/",
+        "https://www.ekwb.com/shop/EK-IM/EK-IM-3831109851661.pdf"
+      ]
+    },
+    {
+      "brand": "TRYX",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "TRYX PANORAMA SE 360 ARGB · 曲面屏冷头",
+      "model_id": "tryx-panorama-se360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 394,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.tryxzone.com/api/product-models/1"
+      ]
+    },
+    {
+      "brand": "Fractal Design",
+      "delivery": "base",
+      "fan_count": 2,
+      "label": "Fractal Design Lumen S28 v2 · 冷排内泵280",
+      "model_id": "fractal-lumen-s28-v2",
+      "nominal_size_mm": 280,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 313,
+        "thickness": 27,
+        "width": 140
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.fractal-design.com/products/water-cooling/lumen-series/lumen-s28/lumen-s28-v2/"
+      ]
+    },
+    {
+      "brand": "XPG",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "XPG LEVANTE X 360 · 方形无限镜冷头",
+      "model_id": "xpg-levante-x360",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 394,
+        "thickness": 27,
+        "width": 121
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.xpg.com/zw/xpg/pc-component-levante-x-360?tab=spec"
+      ]
+    },
+    {
+      "brand": "DeepCool",
+      "delivery": "base",
+      "fan_count": 3,
+      "label": "DeepCool LT720 · 多维无限镜冷头",
+      "model_id": "deepcool-lt720",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 402,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.deepcool.com/products/Cooling/cpuliquidcoolers/LT720-360mm-Liquid-CPU-Cooler-1700-AM5/2022/16286.shtml"
+      ]
+    },
+    {
+      "brand": "Corsair",
+      "delivery": "optional",
+      "fan_count": 3,
+      "label": "Corsair iCUE H170i ELITE LCD XT · CW-9060076-WW",
+      "model_id": "corsair-h170i-elite-lcd-xt",
+      "nominal_size_mm": 420,
+      "radiator_dimensions_verified": false,
+      "radiator_mm": {
+        "length": 457,
+        "thickness": 27,
+        "width": 140
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/us/en/p/cpu-coolers/cw-9060076-ww/icue-h170i-elite-lcd-xt-display-liquid-cpu-cooler"
+      ]
+    },
+    {
+      "brand": "Corsair",
+      "delivery": "optional",
+      "fan_count": 2,
+      "label": "Corsair iCUE H115i ELITE CAPELLIX XT · CW-9060069-WW",
+      "model_id": "corsair-h115i-elite-capellix-xt",
+      "nominal_size_mm": 280,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 322,
+        "thickness": 27,
+        "width": 137
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/ww/en/p/cpu-coolers/cw-9060069-ww/icue-h115i-elite-capellix-xt-liquid-cpu-cooler"
+      ]
+    },
+    {
+      "brand": "NZXT",
+      "delivery": "optional",
+      "fan_count": 2,
+      "label": "NZXT Kraken Elite 240 RGB (2023) · RL-KR24E-B1",
+      "model_id": "nzxt-kraken-elite240-rgb-2023",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 275,
+        "thickness": 30,
+        "width": 123
+      },
+      "sealed": true,
+      "sources": [
+        "https://support.nzxt.com/hc/en-us/articles/47357851031579-Kraken-Elite-2023-Specs"
+      ]
+    },
+    {
+      "brand": "NZXT",
+      "delivery": "optional",
+      "fan_count": 2,
+      "label": "NZXT Kraken Z63 Black · RL-KRZ63-01",
+      "model_id": "nzxt-kraken-z63",
+      "nominal_size_mm": 280,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 315,
+        "thickness": 30,
+        "width": 143
+      },
+      "sealed": true,
+      "sources": [
+        "https://support.nzxt.com/hc/en-us/articles/37914228751899-Kraken-Z3-Series-Specs"
+      ]
+    },
+    {
+      "brand": "Corsair",
+      "delivery": "optional",
+      "fan_count": 2,
+      "label": "Corsair iCUE H100i ELITE LCD XT · CW-9060074-WW",
+      "model_id": "corsair-h100i-elite-lcd-xt",
+      "nominal_size_mm": 240,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 277,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/us/en/p/cpu-coolers/cw-9060074-ww/icue-h100i-elite-lcd-xt-display-liquid-cpu-cooler"
+      ]
+    },
+    {
+      "brand": "Corsair",
+      "delivery": "optional",
+      "fan_count": 1,
+      "label": "Corsair Hydro H60 (2018) · CW-9060036-WW",
+      "model_id": "corsair-h60-2018",
+      "nominal_size_mm": 120,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 157,
+        "thickness": 27,
+        "width": 120
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/ww/en/p/120mm-aio-radiator/cw-9060036-ww/hydro-series-h60-2018-120mm-liquid-cpu-cooler"
+      ]
+    },
+    {
+      "brand": "NZXT",
+      "delivery": "optional",
+      "fan_count": 1,
+      "label": "NZXT Kraken X42 · RL-KRX42-01",
+      "model_id": "nzxt-kraken-x42",
+      "nominal_size_mm": 140,
+      "radiator_dimensions_verified": true,
+      "radiator_mm": {
+        "length": 175,
+        "thickness": 30,
+        "width": 143
+      },
+      "sealed": true,
+      "sources": [
+        "https://assets.cdn.nzxt.com/uploads/download/attachment/70/Kraken-Series-Compatibility-Guide-4.18.2017.pdf",
+        "https://assets.cdn.nzxt.com/uploads/download/attachment/676/Kraken_X42X52X62X72-manual-092818-web.pdf"
+      ]
+    },
+    {
+      "brand": "Corsair",
+      "delivery": "optional",
+      "fan_count": 3,
+      "label": "Corsair iCUE H150i ELITE LCD XT · CW-9060075-WW",
+      "model_id": "corsair-h150i-elite-lcd-xt",
+      "nominal_size_mm": 360,
+      "radiator_dimensions_verified": false,
+      "radiator_mm": {
+        "length": 397,
+        "thickness": 27,
+        "width": 119.6
+      },
+      "sealed": true,
+      "sources": [
+        "https://www.corsair.com/us/en/p/cpu-coolers/cw-9060075-ww/icue-h150i-elite-lcd-xt-display-liquid-cpu-cooler"
+      ]
+    }
+  ],
+  "aio_nominal_counts": {
+    "120": 2,
+    "140": 1,
+    "240": 7,
+    "280": 4,
+    "360": 19,
+    "420": 2
+  },
+  "board_form_counts": {
+    "atx": 10,
+    "eatx": 3,
+    "itx": 6,
+    "matx": 9
+  },
+  "board_socket_counts": {
+    "AM4": 4,
+    "AM5": 14,
+    "LGA1700": 10
+  },
+  "boards": [
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "ASUS ROG STRIX Z790-A GAMING WIFI D4",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "asus-rog-strix-z790-a-wifi-d4",
+      "socket": "LGA1700",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/LGA1700/ROG_STRIX_Z790-A_GAMING_WIFI_D4/E20739_ROG_STRIX_Z790-A_GAMING_WIFI_D4_UM_WEB.pdf",
+        "https://rog.asus.com/motherboards/rog-strix/rog-strix-z790-a-gaming-wifi-d4-model/spec/",
+        "https://dlcdnwebimgs.asus.com/files/media/BE216201-D173-4850-A7D3-60B0F2319E27/v1/img/kv/ROG-Strix-Z790-A-Gaming.png",
+        "https://dlcdnwebimgs.asus.com/files/media/BE216201-D173-4850-A7D3-60B0F2319E27/v1/img/spec/connectivity.png"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "MSI MAG B760M MORTAR WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "msi-mag-b760m-mortar-wifi",
+      "socket": "LGA1700",
+      "sources": [
+        "https://download-2.msi.com/archive/mnu_exe/mb/B760MMORTAR_WIFI_MAXWIFI.pdf",
+        "https://www.msi.com/Motherboard/MAG-B760M-MORTAR-WIFI/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/us/MAG-B760M-MORTAR-WIFI.pdf"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 170.0,
+        "width": 170.0
+      },
+      "finish_status": "unverified_reference",
+      "form_factor": "itx",
+      "label": "ASRock Z790 PG-ITX/TB4",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-z790-pg-itx-tb4",
+      "socket": "LGA1700",
+      "sources": [
+        "https://download.asrock.com/Manual/Z790%20PG-ITXTB4.pdf",
+        "https://pg.asrock.com/mb/Intel/Z790%20PG-ITXTB4/index.asp"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "ASUS ROG STRIX X670E-E GAMING WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asus-rog-strix-x670e-e-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/Socket%20AM5/ROG_STRIX_X670E-E_GAMING_WIFI/E21210_ROG_STRIX_X670E-E_GAMING_WIFI_UM_V3_WEB.pdf",
+        "https://rog.asus.com/us/motherboards/rog-strix/rog-strix-x670e-e-gaming-wifi-model/spec/",
+        "https://dlcdnwebimgs.asus.com/files/media/B51D103D-2941-412E-8479-AF994957093B/v1/img/kv/ROG-Strix-X670E-E-Gaming.png",
+        "https://dlcdnwebimgs.asus.com/files/media/B51D103D-2941-412E-8479-AF994957093B/v1/img/spec/connectivity.png"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "MSI MAG B650M MORTAR WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "msi-mag-b650m-mortar-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.msi.com/archive/mnu_exe/mb/MAGB650MMORTARWIFI.pdf",
+        "https://www.msi.com/Motherboard/MAG-B650M-MORTAR-WIFI/Specification",
+        "https://storage-asset.msi.com/global/picture/image/feature/mb/B650M/MAG-B650M-MORTAR-WIFI/mag-b650m-mortar-wifi.png"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 170.0,
+        "width": 170.0
+      },
+      "finish_status": "unverified_reference",
+      "form_factor": "itx",
+      "label": "ASRock B650I Lightning WiFi",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-b650i-lightning-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.asrock.com/Manual/B650I%20Lightning%20WiFi.pdf",
+        "https://pg.asrock.com/mb/AMD/B650I%20Lightning%20WiFi/index.asp"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "ASUS TUF GAMING Z790-PLUS WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asus-tuf-z790-plus-wifi",
+      "socket": "LGA1700",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/LGA1700/TUF_GAMING_Z790-PLUS_WIFI/E21279_TUF_GAMING_Z790-PLUS_WIFI_UM_WEB.pdf",
+        "https://www.asus.com/motherboards-components/motherboards/tuf-gaming/tuf-gaming-z790-plus-wifi/techspec/",
+        "https://dlcdnwebimgs.asus.com/files/media/848c744e-84df-40b3-8f01-f9c66ed99227/V1/img/kv-main.png"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "ASUS PRIME B650M-A WIFI II",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asus-prime-b650m-a-wifi-ii",
+      "socket": "AM5",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/SocketAM5/PRIME_B650M-A_WIFI_II/E21432_PRIME_B650M-A_WIFI_II_UM_WEB.pdf",
+        "https://www.asus.com/motherboards-components/motherboards/prime/prime-b650m-a-wifi-ii/techspec/",
+        "https://dlcdnwebimgs.asus.com/files/media/b9eed304-2d06-4485-9507-da139b9937a1/img/kv/kv_pd_light.png"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "ASUS ROG MAXIMUS Z790 HERO",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asus-rog-maximus-z790-hero",
+      "socket": "LGA1700",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/LGA1700/ROG_MAXIMUS_Z790_HERO/E21512_ROG_MAXIMUS_Z790_HERO_UM_V3_WEB.pdf",
+        "https://rog.asus.com/uk/motherboards/rog-maximus/rog-maximus-z790-hero-model/spec/",
+        "https://dlcdnwebimgs.asus.com/files/media/29C004F7-7B1F-4EBF-9099-7168B520A0EE/v1/img/spec/cooling.jpg",
+        "https://dlcdnwebimgs.asus.com/files/media/29C004F7-7B1F-4EBF-9099-7168B520A0EE/v1/img/spec/connectivity.jpg"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 267.0
+      },
+      "finish_status": "unverified_reference",
+      "form_factor": "eatx",
+      "label": "ASRock X670E Taichi",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-x670e-taichi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.asrock.com/Manual/X670E%20Taichi_English.pdf",
+        "https://www.asrock.com/mb/AMD/X670E%20Taichi/index.asp"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "unverified_reference",
+      "form_factor": "atx",
+      "label": "ASRock B650E Steel Legend WiFi",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-b650e-steel-legend-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.asrock.com/Manual/B650E%20Steel%20Legend%20WiFi.pdf",
+        "https://www.asrock.com/mb/AMD/B650E%20Steel%20Legend%20WiFi/index.asp"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "unverified_reference",
+      "form_factor": "matx",
+      "label": "ASRock B650M PG Riptide WiFi",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-b650m-pg-riptide-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.asrock.com/Manual/B650M%20PG%20Riptide%20WiFi.pdf",
+        "https://pg.asrock.com/mb/AMD/B650M%20PG%20Riptide%20WiFi/index.asp"
+      ]
+    },
+    {
+      "brand": "GIGABYTE",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 260.0
+      },
+      "finish_status": "pending_primary_photo",
+      "form_factor": "eatx",
+      "label": "GIGABYTE Z790 AORUS MASTER (rev.1.0)",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "gigabyte-z790-aorus-master",
+      "socket": "LGA1700",
+      "sources": [
+        "https://download.gigabyte.com/FileList/Manual/mb_manual_z790-aorus-master_1003_e.pdf?v=1f20e5dc0c9024d7deb15884b210f135",
+        "https://www.gigabyte.com/Motherboard/Z790-AORUS-MASTER-rev-10/sp"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 304.8,
+        "width": 243.84
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "MSI MAG X670E TOMAHAWK WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "msi-mag-x670e-tomahawk-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.msi.com/archive/mnu_exe/mb/MAGX670ETOMAHAWKWIFI.pdf",
+        "https://www.msi.com/Motherboard/MAG-X670E-TOMAHAWK-WIFI/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/global/MAG-X670E-TOMAHAWK-WIFI.pdf"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 243.84,
+        "width": 243.84
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "MSI PRO B760M-A WIFI (DDR5)",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "msi-pro-b760m-a-wifi",
+      "socket": "LGA1700",
+      "sources": [
+        "https://download-2.msi.com/archive/mnu_exe/mb/PROB760M-AWIFI.pdf",
+        "https://www.msi.com/Motherboard/PRO-B760M-A-WIFI/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/global/PRO-B760M-A-WIFI.pdf"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 304.8,
+        "width": 288.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "eatx",
+      "label": "MSI MEG X670E GODLIKE",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "msi-meg-x670e-godlike",
+      "socket": "AM5",
+      "sources": [
+        "https://download-2.msi.com/archive/mnu_exe/mb/MEGX670EGODLIKE.pdf",
+        "https://www.msi.com/Motherboard/MEG-X670E-GODLIKE/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/global/MEG-X670E-GODLIKE.pdf",
+        "https://www.msi.com/faq/8834"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 170.0,
+        "width": 170.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "itx",
+      "label": "ASUS ROG STRIX B650E-I GAMING WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asus-rog-strix-b650e-i-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/Socket%20AM5/ROG_STRIX_B650E-I_GAMING_WIFI/E20253_ROG_STRIX_B650E-I_GAMING_WIFI_UM_WEB.pdf",
+        "https://rog.asus.com/motherboards/rog-strix/rog-strix-b650e-i-gaming-wifi-model/",
+        "https://dlcdnwebimgs.asus.com/files/media/B21F5C75-0BAA-4FEB-8CFF-0116FE56039F/v1/img/spec/performance.png"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 170.0,
+        "width": 170.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "itx",
+      "label": "MSI MPG B650I EDGE WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "msi-mpg-b650i-edge-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://download.msi.com/archive/mnu_exe/mb/MPGB650IEDGEWIFI.pdf",
+        "https://www.msi.com/Motherboard/MPG-B650I-EDGE-WIFI/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/us/MPG-B650I-EDGE-WIFI.pdf"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 170.0,
+        "width": 170.0
+      },
+      "finish_status": "pending_primary_photo",
+      "form_factor": "itx",
+      "label": "ASRock B550M-ITX/ac",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "asrock-b550m-itx-ac",
+      "socket": "AM4",
+      "sources": [
+        "https://download.asrock.com/Manual/B550M-ITXac.pdf",
+        "https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 170.0,
+        "width": 170.0
+      },
+      "finish_status": "pending_primary_photo",
+      "form_factor": "itx",
+      "label": "ASRock H670M-ITX/ax",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "asrock-h670m-itx-ax",
+      "socket": "LGA1700",
+      "sources": [
+        "https://download.asrock.com/Manual/H670M-ITXax.pdf",
+        "https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "ASUS TUF GAMING B650M-PLUS WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asus-tuf-b650m-plus-wifi",
+      "socket": "AM5",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/Socket%20AM5/TUF_GAMING_B650M-PLUS_WIFI/E20197_TUF_GAMING_B650M-PLUS_WIFI_UM_WEB.pdf",
+        "https://www.asus.com/motherboards-components/motherboards/tuf-gaming/tuf-gaming-b650m-plus-wifi/",
+        "https://dlcdnwebimgs.asus.com/files/media/887b3ca1-93e0-4a35-9771-c4c8153e55cc/V1/img/spec-performance.png"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "ASUS PRIME B760M-A WIFI D4",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "asus-prime-b760m-a-wifi-d4",
+      "socket": "LGA1700",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/LGA1700/PRIME_B760M-A_WIFI_D4/E20870_PRIME_B760M-A_WIFI_D4_UM_WEB.pdf",
+        "https://www.asus.com/motherboards-components/motherboards/prime/prime-b760m-a-wifi-d4/",
+        "https://dlcdnwebimgs.asus.com/files/media/a42e7284-3844-4cb9-b48d-9a2e8d9763d2/img/new_product_imgs/00_spec/spec_pc.png"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "matx",
+      "label": "MSI B550M PRO-VDH WIFI",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "msi-b550m-pro-vdh-wifi",
+      "socket": "AM4",
+      "sources": [
+        "https://download-2.msi.com/archive/mnu_exe/mb/B550MPRO-VDHWIFI_B550MPRO-VDHWIFI6.pdf",
+        "https://www.msi.com/Motherboard/B550M-PRO-VDH-WIFI/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/us/B550M-PRO-VDH-WIFI.pdf"
+      ]
+    },
+    {
+      "brand": "GIGABYTE",
+      "dimensions_mm": {
+        "height": 244.0,
+        "width": 244.0
+      },
+      "finish_status": "pending_primary_photo",
+      "form_factor": "matx",
+      "label": "GIGABYTE B550M DS3H (rev. 1.5)",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "gigabyte-b550m-ds3h-rev15",
+      "socket": "AM4",
+      "sources": [
+        "https://download.gigabyte.com/FileList/Manual/mb_manual_b550m-ds3h_e_1503.pdf?v=f48dcfee919cb5657d13fb0b7ff08940",
+        "https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp"
+      ]
+    },
+    {
+      "brand": "MSI",
+      "dimensions_mm": {
+        "height": 304.8,
+        "width": 243.84
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "MSI MAG B550 TOMAHAWK",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "msi-mag-b550-tomahawk",
+      "socket": "AM4",
+      "sources": [
+        "https://download.msi.com/archive/mnu_exe/mb/MAGB550TOMAHAWK.pdf",
+        "https://www.msi.com/Motherboard/MAG-B550-TOMAHAWK/Specification",
+        "https://storage-asset.msi.com/datasheet/mb/us/MAG-B550-TOMAHAWK.pdf"
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "photo_reviewed",
+      "form_factor": "atx",
+      "label": "ASUS TUF GAMING Z690-PLUS WIFI D4",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR4",
+      "model_id": "asus-tuf-z690-plus-wifi-d4",
+      "socket": "LGA1700",
+      "sources": [
+        "https://dlcdnets.asus.com/pub/ASUS/mb/LGA1700/TUF_GAMING_Z690-PLUS_WIFI_D4/E19393_TUF_GAMING_Z690-PLUS_WIFI_D4_UM_V3_WEB.pdf",
+        "https://www.asus.com/motherboards-components/motherboards/tuf-gaming/tuf-gaming-z690-plus-wifi-d4/",
+        "https://dlcdnwebimgs.asus.com/files/media/f80add71-70c2-46cc-9722-1ddd47ae64ea/img/component_product.png"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "pending_primary_photo",
+      "form_factor": "atx",
+      "label": "ASRock B650 PG Lightning",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-b650-pg-lightning",
+      "socket": "AM5",
+      "sources": [
+        "https://download.asrock.com/Manual/B650%20PG%20Lightning.pdf",
+        "https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp"
+      ]
+    },
+    {
+      "brand": "ASRock",
+      "dimensions_mm": {
+        "height": 305.0,
+        "width": 244.0
+      },
+      "finish_status": "pending_primary_photo",
+      "form_factor": "atx",
+      "label": "ASRock X870 Pro RS",
+      "layout_status": "manual_reviewed",
+      "memory_type": "DDR5",
+      "model_id": "asrock-x870-pro-rs",
+      "socket": "AM5",
+      "sources": [
+        "https://download.asrock.com/Manual/X870%20Pro%20RS.pdf",
+        "https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp"
+      ]
+    }
+  ],
+  "market_exhaustive": false,
+  "new_styles_enabled": false,
+  "radiator_brand_size_matrix": {
+    "Alphacool": {
+      "120": 7,
+      "140": 6,
+      "240": 7,
+      "280": 7,
+      "360": 7,
+      "420": 5,
+      "480": 6,
+      "560": 4
+    },
+    "Aqua Computer": {
+      "240": 1,
+      "360": 1,
+      "420": 1
+    },
+    "Barrow": {
+      "240": 1,
+      "360": 3,
+      "480": 2
+    },
+    "Bitspower": {
+      "120": 3,
+      "140": 2,
+      "240": 2,
+      "280": 2,
+      "360": 2,
+      "420": 2
+    },
+    "Bykski": {
+      "120": 3,
+      "140": 1,
+      "240": 3,
+      "280": 1,
+      "360": 3,
+      "420": 1,
+      "480": 3
+    },
+    "CORSAIR": {
+      "240": 3,
+      "280": 1,
+      "360": 4,
+      "480": 1
+    },
+    "EK": {
+      "120": 1,
+      "240": 2,
+      "280": 1,
+      "360": 1,
+      "420": 1,
+      "480": 1,
+      "560": 1
+    },
+    "Hardware Labs": {
+      "240": 1,
+      "360": 1,
+      "420": 1
+    },
+    "Thermaltake": {
+      "240": 1,
+      "360": 1,
+      "420": 1
+    },
+    "Watercool": {
+      "120": 2,
+      "240": 2,
+      "280": 1,
+      "360": 2,
+      "420": 1,
+      "480": 2
+    },
+    "XSPC": {
+      "120": 2,
+      "240": 2,
+      "280": 1,
+      "360": 3,
+      "480": 1
+    }
+  },
+  "radiator_nominal_counts": {
+    "120": 18,
+    "140": 9,
+    "240": 25,
+    "280": 14,
+    "360": 28,
+    "420": 13,
+    "480": 16,
+    "560": 5
+  },
+  "radiators": [
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 280,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR5 240",
+      "model_id": "corsair-xr5-240",
+      "nominal_size_mm": 240,
+      "series": "Hydro X XR5",
+      "sources": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9030002-ww/hydro-x-series-xr5-240mm-water-cooling-radiator-cx-9030002-ww"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 396,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR5 360",
+      "model_id": "corsair-xr5-360",
+      "nominal_size_mm": 360,
+      "series": "Hydro X XR5",
+      "sources": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9030003-ww/hydro-x-series-xr5-360mm-water-cooling-radiator-cx-9030003-ww",
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9070018-ww/hydro-x-series-icue-link-xh505i-rx-360-rgb-custom-cooling-kit-cx-9070018-ww"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 395,
+        "thickness": 55,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR7 360",
+      "model_id": "corsair-xr7-360",
+      "nominal_size_mm": 360,
+      "series": "Hydro X XR7",
+      "sources": [
+        "https://www.corsair.com/ww/en/p/custom-liquid-cooling/cx-9030005-ww/hydro-x-series-xr7-360mm-water-cooling-radiator-cx-9030005-ww"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 285,
+        "thickness": 30,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "EK-Quantum Surface S240 · Black",
+      "model_id": "ek-quantum-surface-s240",
+      "nominal_size_mm": 240,
+      "series": "Quantum Surface S",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-s240-black"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 405,
+        "thickness": 44,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "EK-Quantum Surface P360M · Black",
+      "model_id": "ek-quantum-surface-p360m",
+      "nominal_size_mm": 360,
+      "series": "Quantum Surface P Multiport",
+      "sources": [
+        "https://www.ekwb.com/shop/quantum/pc-water-cooling-radiators/p-series-radiators/ek-quantum-surface-p360m-black"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 465,
+        "thickness": 58,
+        "width": 145
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "EK-Quantum Surface X420M · Black",
+      "model_id": "ek-quantum-surface-x420m",
+      "nominal_size_mm": 420,
+      "series": "Quantum Surface X Multiport",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-x420m-black"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 394.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS ST30 V.2 360",
+      "model_id": "alphacool-st30-v2-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://www.alphacool.com/download/ENG_1015507_NexXxoS_V2_ST30_360.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 316.5,
+        "thickness": 45.5,
+        "width": 143
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS XT45 V.2 280",
+      "model_id": "alphacool-xt45-v2-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS XT45 V.2",
+      "sources": [
+        "https://www.alphacool.com/download/ENG_1015516_NexXxoS_V2_XT45_280.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 397,
+        "thickness": 60,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS UT60 360 · Full Copper",
+      "model_id": "alphacool-ut60-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14174_Alphacool_NexXxoS_UT60_Full_Copper_360mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 20.5,
+        "width": 125
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC TX240 Ultrathin · Black",
+      "model_id": "xspc-tx240",
+      "nominal_size_mm": 240,
+      "series": "TX Ultrathin",
+      "sources": [
+        "https://www.xs-pc.com/radiators-tx-series/tx240-ultrathin-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1532587788803-W7S3VGZVBV6WUW5JLWRG/tx240-drawing.jpg"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 320.5,
+        "thickness": 36,
+        "width": 143
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "XSPC EX280 Dual Fan · Black",
+      "model_id": "xspc-ex280",
+      "nominal_size_mm": 280,
+      "series": "EX",
+      "sources": [
+        "https://www.xs-pc.com/discontinued3/ex280-dual-fan-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1370302365903-ODEFIJ6E43LUVLQ29A6F/ex280-schematic.png"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 398.5,
+        "thickness": 56,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC RX360 Triple Fan V3 · Black",
+      "model_id": "xspc-rx360-v3",
+      "nominal_size_mm": 360,
+      "series": "RX V3",
+      "sources": [
+        "https://www.xs-pc.com/radiators-rx-series/rx360-triple-fan-radiator-v2",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1390523796244-KYNKJWCTYZVEX604O4MB/V3-360.jpg"
+      ]
+    },
+    {
+      "brand": "Hardware Labs",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 31.3,
+        "width": 133
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Hardware Labs Black Ice Nemesis 240GTS",
+      "model_id": "hardwarelabs-nemesis-240gts",
+      "nominal_size_mm": 240,
+      "series": "Black Ice Nemesis",
+      "sources": [
+        "https://hardwarelabs.com/2016/wp-content/uploads/2016/10/N240GTS_MountingDiagram.pdf"
+      ]
+    },
+    {
+      "brand": "Hardware Labs",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 55.7,
+        "width": 133
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Hardware Labs Black Ice Nemesis 360GTX",
+      "model_id": "hardwarelabs-nemesis-360gtx",
+      "nominal_size_mm": 360,
+      "series": "Black Ice Nemesis",
+      "sources": [
+        "https://hardwarelabs.com/2016/wp-content/uploads/2016/10/N360GTX_MountingDiagram.pdf"
+      ]
+    },
+    {
+      "brand": "Hardware Labs",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 452,
+        "thickness": 31.3,
+        "width": 153
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Hardware Labs Black Ice Nemesis 420GTS",
+      "model_id": "hardwarelabs-nemesis-420gts",
+      "nominal_size_mm": 420,
+      "series": "Black Ice Nemesis",
+      "sources": [
+        "https://hardwarelabs.com/2016/wp-content/uploads/2016/10/N420GTS_MountingDiagram.pdf"
+      ]
+    },
+    {
+      "brand": "Thermaltake",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 285.4,
+        "thickness": 40,
+        "width": 119
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Thermaltake Pacific CLD240",
+      "model_id": "thermaltake-pacific-cld240",
+      "nominal_size_mm": 240,
+      "series": "Pacific CLD",
+      "sources": [
+        "https://thermaltake.com/products/pacific-cld-240-radiator"
+      ]
+    },
+    {
+      "brand": "Thermaltake",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 405,
+        "thickness": 64,
+        "width": 132
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Thermaltake Pacific CL360",
+      "model_id": "thermaltake-pacific-cl360",
+      "nominal_size_mm": 360,
+      "series": "Pacific CL",
+      "sources": [
+        "https://thermaltake.com/products/pacific-cl360-radiator"
+      ]
+    },
+    {
+      "brand": "Thermaltake",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 467.5,
+        "thickness": 64,
+        "width": 147.8
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Thermaltake Pacific CL420",
+      "model_id": "thermaltake-pacific-cl420",
+      "nominal_size_mm": 420,
+      "series": "Pacific CL",
+      "sources": [
+        "https://thermaltake.com/products/pacific-cl420-radiator"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 240-S · Black",
+      "model_id": "watercool-heatkiller-rad-240-s",
+      "nominal_size_mm": 240,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-240-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 48,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 360-L · Black",
+      "model_id": "watercool-heatkiller-rad-360-l",
+      "nominal_size_mm": 360,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-360-L-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 460,
+        "thickness": 30,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Watercool HEATKILLER RAD 420-S · Black",
+      "model_id": "watercool-heatkiller-rad-420-s",
+      "nominal_size_mm": 420,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-420-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Aqua Computer",
+      "capacity_per_face": 2,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 280,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Aqua Computer airplex radical 2/240 · aluminium fins",
+      "model_id": "aquacomputer-airplex-radical2-240",
+      "nominal_size_mm": 240,
+      "series": "airplex radical 2",
+      "sources": [
+        "https://shop.aquacomputer.de/Wasserkuehlung/Radiatoren-Zub/airplex-radical/airplex-radical-2-240-Alu-Lamellen%3A%3A3332.html"
+      ]
+    },
+    {
+      "brand": "Aqua Computer",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 400,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Aqua Computer airplex radical 2/360 · aluminium fins",
+      "model_id": "aquacomputer-airplex-radical2-360",
+      "nominal_size_mm": 360,
+      "series": "airplex radical 2",
+      "sources": [
+        "https://shop.aquacomputer.de/Wasserkuehlung/Radiatoren-Zub/airplex-radical/airplex-radical-2-360-Alu-Lamellen%3A%3A3219.html"
+      ]
+    },
+    {
+      "brand": "Aqua Computer",
+      "capacity_per_face": 3,
+      "delivery": "base",
+      "dimensions_mm": {
+        "length": 460,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Aqua Computer airplex radical 2/420 · aluminium fins",
+      "model_id": "aquacomputer-airplex-radical2-420",
+      "nominal_size_mm": 420,
+      "series": "airplex radical 2",
+      "sources": [
+        "https://shop.aquacomputer.de/Wasserkuehlung/Radiatoren-Zub/airplex-radical/airplex-radical-2-420-Alu-Lamellen%3A%3A3337.html"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 154.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS ST30 V.2 120",
+      "model_id": "alphacool-st30-v2-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14299_Alphacool_NexXxoS_ST30_Full_Copper_120mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 177,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS ST30 V.2 140",
+      "model_id": "alphacool-st30-v2-140",
+      "nominal_size_mm": 140,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14555_Alphacool_NexXxoS_ST30_Full_Copper_140mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 275,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS ST30 V.2 240",
+      "model_id": "alphacool-st30-v2-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14344_Alphacool_NexXxoS_ST30_Full_Copper_240mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 316,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS ST30 V.2 280",
+      "model_id": "alphacool-st30-v2-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14280_Alphacool_NexXxoS_ST30_Full_Copper_280mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 460,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS ST30 V.2 420",
+      "model_id": "alphacool-st30-v2-420",
+      "nominal_size_mm": 420,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14281_Alphacool_NexXxoS_ST30_Full_Copper_420mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 514.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS ST30 V.2 480",
+      "model_id": "alphacool-st30-v2-480",
+      "nominal_size_mm": 480,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14346_Alphacool_NexXxoS_ST30_Full_Copper_480mm_Radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 596.5,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS ST30 V.2 560",
+      "model_id": "alphacool-st30-v2-560",
+      "nominal_size_mm": 560,
+      "series": "NexXxoS ST30 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14347_Alphacool_NexXxoS_ST30_Full_Copper_560mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 154.5,
+        "thickness": 45.5,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS XT45 V.2 120",
+      "model_id": "alphacool-xt45-v2-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS XT45 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14288_Alphacool_NexXxoS_XT45_Full_Copper_120mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 177,
+        "thickness": 45.5,
+        "width": 143
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS XT45 V.2 140",
+      "model_id": "alphacool-xt45-v2-140",
+      "nominal_size_mm": 140,
+      "series": "NexXxoS XT45 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14285_Alphacool_NexXxoS_XT45_Full_Copper_140mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 275,
+        "thickness": 45.5,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS XT45 V.2 240",
+      "model_id": "alphacool-xt45-v2-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS XT45 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14282_Alphacool_NexXxoS_XT45_Full_Copper_240mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 394.5,
+        "thickness": 45.5,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS XT45 V.2 360",
+      "model_id": "alphacool-xt45-v2-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS XT45 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14283_Alphacool_NexXxoS_XT45_Full_Copper_360mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 514,
+        "thickness": 45.5,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS XT45 V.2 480",
+      "model_id": "alphacool-xt45-v2-480",
+      "nominal_size_mm": 480,
+      "series": "NexXxoS XT45 V.2",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14284_Alphacool_NexXxoS_XT45_Full_Copper_480mm_radiator_V.2_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 277,
+        "thickness": 60,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS UT60 240",
+      "model_id": "alphacool-ut60-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14173_Alphacool_NexXxoS_UT60_Full_Copper_240mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 466,
+        "thickness": 60,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS UT60 420",
+      "model_id": "alphacool-ut60-420",
+      "nominal_size_mm": 420,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14179_Alphacool_NexXxoS_UT60_Full_Copper_420mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 606,
+        "thickness": 60,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS UT60 560",
+      "model_id": "alphacool-ut60-560",
+      "nominal_size_mm": 560,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14184_Alphacool_NexXxoS_UT60_Full_Copper_560mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 160,
+        "thickness": 86,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS Monsta 120",
+      "model_id": "alphacool-monsta-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14180_Alphacool_NexXxoS_Monsta_120mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 400,
+        "thickness": 86,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS Monsta 360",
+      "model_id": "alphacool-monsta-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14182_Alphacool_NexXxoS_Monsta_360mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 522,
+        "thickness": 86,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS Monsta 480",
+      "model_id": "alphacool-monsta-480",
+      "nominal_size_mm": 480,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14183_Alphacool_NexXxoS_Monsta_480mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 607,
+        "thickness": 86,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS Monsta 560",
+      "model_id": "alphacool-monsta-560",
+      "nominal_size_mm": 560,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14192_Alphacool_NexXxoS_Monsta_560mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 270,
+        "thickness": 20,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-20 240",
+      "model_id": "alphacool-hpe-20-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS HPE-20",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14436_Alphacool_NexXxoS_HPE-20_Full_Copper_240mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 390,
+        "thickness": 20,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-20 360",
+      "model_id": "alphacool-hpe-20-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS HPE-20",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14437_Alphacool_NexXxoS_HPE-20_Full_Copper_360mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 271.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-30 240",
+      "model_id": "alphacool-hpe-30-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14376_Alphacool_NexXxoS_HPE-30_Full_Copper_240mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 391.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-30 360",
+      "model_id": "alphacool-hpe-30-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14377_Alphacool_NexXxoS_HPE-30_Full_Copper_360mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 455.5,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-30 420",
+      "model_id": "alphacool-hpe-30-420",
+      "nominal_size_mm": 420,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14379_Alphacool_NexXxoS_HPE-30_Full_Copper_420mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 271.5,
+        "thickness": 45,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-45 240",
+      "model_id": "alphacool-hpe-45-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14439_Alphacool_NexXxoS_HPE-45_Full_Copper_240mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 391.5,
+        "thickness": 45,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-45 360",
+      "model_id": "alphacool-hpe-45-360",
+      "nominal_size_mm": 360,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14440_Alphacool_NexXxoS_HPE-45_Full_Copper_360mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 455.5,
+        "thickness": 45,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-45 420",
+      "model_id": "alphacool-hpe-45-420",
+      "nominal_size_mm": 420,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14442_Alphacool_NexXxoS_HPE-45_Full_Copper_420mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 157,
+        "thickness": 60,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS UT60 120",
+      "model_id": "alphacool-ut60-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14172_Alphacool_NexXxoS_UT60_Full_Copper_120mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 186,
+        "thickness": 60,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS UT60 140",
+      "model_id": "alphacool-ut60-140",
+      "nominal_size_mm": 140,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14176_Alphacool_NexXxoS_UT60_Full_Copper_140mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 326,
+        "thickness": 60,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS UT60 280",
+      "model_id": "alphacool-ut60-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14177_Alphacool_NexXxoS_UT60_Full_Copper_280mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 517,
+        "thickness": 60,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS UT60 480",
+      "model_id": "alphacool-ut60-480",
+      "nominal_size_mm": 480,
+      "series": "NexXxoS UT60",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14175_Alphacool_NexXxoS_UT60_Full_Copper_480mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 280,
+        "thickness": 86,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS Monsta 240",
+      "model_id": "alphacool-monsta-240",
+      "nominal_size_mm": 240,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14181_Alphacool_NexXxoS_Monsta_240mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 324,
+        "thickness": 86,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS Monsta 280",
+      "model_id": "alphacool-monsta-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14190_Alphacool_NexXxoS_Monsta_280mm_radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 468,
+        "thickness": 86,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS Monsta 420",
+      "model_id": "alphacool-monsta-420",
+      "nominal_size_mm": 420,
+      "series": "NexXxoS Monsta",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14191_Alphacool_NexXxoS_Monsta_420mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 151.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-30 120",
+      "model_id": "alphacool-hpe-30-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14468_Alphacool_NexXxoS_HPE-30_Full_Copper_120mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 173.5,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-30 140",
+      "model_id": "alphacool-hpe-30-140",
+      "nominal_size_mm": 140,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14470_Alphacool_NexXxoS_HPE-30_Full_Copper_140mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 314.5,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-30 280",
+      "model_id": "alphacool-hpe-30-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14378_Alphacool_NexXxoS_HPE-30_Full_Copper_280mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 511.5,
+        "thickness": 30,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-30 480",
+      "model_id": "alphacool-hpe-30-480",
+      "nominal_size_mm": 480,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14469_Alphacool_NexXxoS_HPE-30_Full_Copper_480mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 596.5,
+        "thickness": 30,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-30 560",
+      "model_id": "alphacool-hpe-30-560",
+      "nominal_size_mm": 560,
+      "series": "NexXxoS HPE-30",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14471_Alphacool_NexXxoS_HPE-30_Full_Copper_560mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 151.5,
+        "thickness": 45,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-45 120",
+      "model_id": "alphacool-hpe-45-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14472_Alphacool_NexXxoS_HPE-45_Full_Copper_120mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 173.5,
+        "thickness": 45,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-45 140",
+      "model_id": "alphacool-hpe-45-140",
+      "nominal_size_mm": 140,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14474_Alphacool_NexXxoS_HPE-45_Full_Copper_140mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 314.5,
+        "thickness": 45,
+        "width": 144
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-45 280",
+      "model_id": "alphacool-hpe-45-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14441_Alphacool_NexXxoS_HPE-45_Full_Copper_280mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 511.5,
+        "thickness": 45,
+        "width": 124
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-45 480",
+      "model_id": "alphacool-hpe-45-480",
+      "nominal_size_mm": 480,
+      "series": "NexXxoS HPE-45",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14473_Alphacool_NexXxoS_HPE-45_Full_Copper_480mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 150,
+        "thickness": 20,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Alphacool NexXxoS HPE-20 120",
+      "model_id": "alphacool-hpe-20-120",
+      "nominal_size_mm": 120,
+      "series": "NexXxoS HPE-20",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14435_Alphacool_NexXxoS_HPE-20_Full_Copper_120mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 171,
+        "thickness": 20,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-20 140",
+      "model_id": "alphacool-hpe-20-140",
+      "nominal_size_mm": 140,
+      "series": "NexXxoS HPE-20",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14443_Alphacool_NexXxoS_HPE-20_Full_Copper_140mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Alphacool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 311,
+        "thickness": 20,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Alphacool NexXxoS HPE-20 280",
+      "model_id": "alphacool-hpe-20-280",
+      "nominal_size_mm": 280,
+      "series": "NexXxoS HPE-20",
+      "sources": [
+        "https://download.alphacool.com/datasheet/ENG_14444_Alphacool_NexXxoS_HPE-20_Full_Copper_280mm_Radiator_datasheet.pdf"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 158,
+        "thickness": 54,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan XF 120 / 54mm",
+      "model_id": "bitspower-leviathan-xf-120-54",
+      "nominal_size_mm": 120,
+      "series": "Leviathan XF",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=6809"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 54,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan XF 360 / 54mm",
+      "model_id": "bitspower-leviathan-xf-360-54",
+      "nominal_size_mm": 360,
+      "series": "Leviathan XF",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=6811"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 153.5,
+        "thickness": 27,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan II 120 / 27mm",
+      "model_id": "bitspower-leviathan-ii-120-27",
+      "nominal_size_mm": 120,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7924"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 273.5,
+        "thickness": 27,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan II 240 / 27mm",
+      "model_id": "bitspower-leviathan-ii-240-27",
+      "nominal_size_mm": 240,
+      "series": "Leviathan II",
+      "sources": [
+        "https://usa.bitspower.com/shop/index.php?route=product/product&product_id=7925"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 313.5,
+        "thickness": 27,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bitspower Leviathan II 280 / 27mm",
+      "model_id": "bitspower-leviathan-ii-280-27",
+      "nominal_size_mm": 280,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7773"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 173.5,
+        "thickness": 27,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bitspower Leviathan II 140 / 27mm",
+      "model_id": "bitspower-leviathan-ii-140-27",
+      "nominal_size_mm": 140,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7926"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 453.5,
+        "thickness": 27,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bitspower Leviathan II 420 / 27mm",
+      "model_id": "bitspower-leviathan-ii-420-27",
+      "nominal_size_mm": 420,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7927"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 153.5,
+        "thickness": 40,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan II 120 / 40mm",
+      "model_id": "bitspower-leviathan-ii-120-40",
+      "nominal_size_mm": 120,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7928"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 273.5,
+        "thickness": 40,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan II 240 / 40mm",
+      "model_id": "bitspower-leviathan-ii-240-40",
+      "nominal_size_mm": 240,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7929"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 393.5,
+        "thickness": 40,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bitspower Leviathan II 360 / 40mm",
+      "model_id": "bitspower-leviathan-ii-360-40",
+      "nominal_size_mm": 360,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7930"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 173.5,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bitspower Leviathan II 140 / 40mm",
+      "model_id": "bitspower-leviathan-ii-140-40",
+      "nominal_size_mm": 140,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7931"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 313.5,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bitspower Leviathan II 280 / 40mm",
+      "model_id": "bitspower-leviathan-ii-280-40",
+      "nominal_size_mm": 280,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7932"
+      ]
+    },
+    {
+      "brand": "Bitspower",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 453.5,
+        "thickness": 40,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bitspower Leviathan II 420 / 40mm",
+      "model_id": "bitspower-leviathan-ii-420-40",
+      "nominal_size_mm": 420,
+      "series": "Leviathan II",
+      "sources": [
+        "https://shop.bitspower.com/index.php?route=product/product&product_id=7933"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 158,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 120-S",
+      "model_id": "watercool-heatkiller-rad-120-s",
+      "nominal_size_mm": 120,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-120-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 158,
+        "thickness": 48,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 120-L",
+      "model_id": "watercool-heatkiller-rad-120-l",
+      "nominal_size_mm": 120,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-120-L-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 48,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 240-L",
+      "model_id": "watercool-heatkiller-rad-240-l",
+      "nominal_size_mm": 240,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-240-L-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 320,
+        "thickness": 30,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Watercool HEATKILLER RAD 280-S",
+      "model_id": "watercool-heatkiller-rad-280-s",
+      "nominal_size_mm": 280,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-280-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 360-S",
+      "model_id": "watercool-heatkiller-rad-360-s",
+      "nominal_size_mm": 360,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-360-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 518,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 480-S",
+      "model_id": "watercool-heatkiller-rad-480-s",
+      "nominal_size_mm": 480,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-480-S-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "Watercool",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 518,
+        "thickness": 48,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Watercool HEATKILLER RAD 480-L",
+      "model_id": "watercool-heatkiller-rad-480-l",
+      "nominal_size_mm": 480,
+      "series": "HEATKILLER RAD",
+      "sources": [
+        "https://shop.watercool.de/HEATKILLER-RAD-480-L-Black",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HEATKILLER_RAD.pdf"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 158,
+        "thickness": 20.5,
+        "width": 125
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC TX120",
+      "model_id": "xspc-tx120",
+      "nominal_size_mm": 120,
+      "series": "TX Ultrathin",
+      "sources": [
+        "https://www.xs-pc.com/radiators-tx-series/tx120-ultrathin-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1532587727663-VG6WHABI0X2YDMM377LC/tx120-drawing.jpg"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 20.5,
+        "width": 125
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC TX360",
+      "model_id": "xspc-tx360",
+      "nominal_size_mm": 360,
+      "series": "TX Ultrathin",
+      "sources": [
+        "https://www.xs-pc.com/radiators-tx-series/tx360-ultrathin-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1532587846824-HAOPI2ZY1ELIUSU5NF36/tx360-drawing.jpg"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 518,
+        "thickness": 20.5,
+        "width": 125
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC TX480",
+      "model_id": "xspc-tx480",
+      "nominal_size_mm": 480,
+      "series": "TX Ultrathin",
+      "sources": [
+        "https://www.xs-pc.com/radiators-tx-series/tx480-ultrathin-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1532587906978-KWPODLZF0YDMD2MEJHIV/tx480-drawing.jpg"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 155,
+        "thickness": 35.5,
+        "width": 121
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC EX120",
+      "model_id": "xspc-ex120",
+      "nominal_size_mm": 120,
+      "series": "EX",
+      "sources": [
+        "https://www.xs-pc.com/discontinued3/ex120-single-fan-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1370300768953-0G2PVI3Z906YHBCUDLK1/ex120-schematic.png"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 275,
+        "thickness": 35.5,
+        "width": 121
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC EX240",
+      "model_id": "xspc-ex240",
+      "nominal_size_mm": 240,
+      "series": "EX",
+      "sources": [
+        "https://www.xs-pc.com/discontinued3/ex240-dual-fan-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1370300981285-9DVPETCOFX8LFPXFPWNW/ex240-schematic.png"
+      ]
+    },
+    {
+      "brand": "XSPC",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 395,
+        "thickness": 35.5,
+        "width": 121
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "XSPC EX360",
+      "model_id": "xspc-ex360",
+      "nominal_size_mm": 360,
+      "series": "EX",
+      "sources": [
+        "https://www.xs-pc.com/discontinued3/ex360-triple-fan-radiator",
+        "https://images.squarespace-cdn.com/content/v1/51998404e4b0ef02d1bd9c2c/1370301207306-TSZO9CSFK1UCW2VG8CVN/ex360-schematic.png"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 165,
+        "thickness": 30,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "EK-Quantum Surface S120",
+      "model_id": "ek-quantum-surface-s120",
+      "nominal_size_mm": 120,
+      "series": "Quantum Surface S",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-s120-black"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 325,
+        "thickness": 30,
+        "width": 145
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "EK-Quantum Surface S280",
+      "model_id": "ek-quantum-surface-s280",
+      "nominal_size_mm": 280,
+      "series": "Quantum Surface S",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-s280-black"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 525,
+        "thickness": 30,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "EK-Quantum Surface S480",
+      "model_id": "ek-quantum-surface-s480",
+      "nominal_size_mm": 480,
+      "series": "Quantum Surface S",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-s480-black"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 605,
+        "thickness": 30,
+        "width": 145
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "EK-Quantum Surface S560",
+      "model_id": "ek-quantum-surface-s560",
+      "nominal_size_mm": 560,
+      "series": "Quantum Surface S",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-s560-black"
+      ]
+    },
+    {
+      "brand": "EK",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 285,
+        "thickness": 48,
+        "width": 130
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "EK-Quantum Surface P240M",
+      "model_id": "ek-quantum-surface-p240m",
+      "nominal_size_mm": 240,
+      "series": "Quantum Surface P Multiport",
+      "sources": [
+        "https://www.ekwb.com/shop/ek-quantum-surface-p240m-black"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR5 240 V2",
+      "model_id": "corsair-xr5-v2-240",
+      "nominal_size_mm": 240,
+      "series": "Hydro X XR5 V2",
+      "sources": [
+        "https://www.corsair.com/us/en/explorer/diy-builder/custom-cooling/hydro-x-series-xr-v2-radiators-everything-you-need-to-know/"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 312,
+        "thickness": 30,
+        "width": 140
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "CORSAIR Hydro X XR5 280 V2",
+      "model_id": "corsair-xr5-v2-280",
+      "nominal_size_mm": 280,
+      "series": "Hydro X XR5 V2",
+      "sources": [
+        "https://www.corsair.com/us/en/explorer/diy-builder/custom-cooling/hydro-x-series-xr-v2-radiators-everything-you-need-to-know/"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 30,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR5 360 V2",
+      "model_id": "corsair-xr5-v2-360",
+      "nominal_size_mm": 360,
+      "series": "Hydro X XR5 V2",
+      "sources": [
+        "https://www.corsair.com/us/en/explorer/diy-builder/custom-cooling/hydro-x-series-xr-v2-radiators-everything-you-need-to-know/"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 278,
+        "thickness": 55,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR7 240 V2",
+      "model_id": "corsair-xr7-v2-240",
+      "nominal_size_mm": 240,
+      "series": "Hydro X XR7 V2",
+      "sources": [
+        "https://www.corsair.com/us/en/explorer/diy-builder/custom-cooling/hydro-x-series-xr-v2-radiators-everything-you-need-to-know/"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 398,
+        "thickness": 55,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR7 360 V2",
+      "model_id": "corsair-xr7-v2-360",
+      "nominal_size_mm": 360,
+      "series": "Hydro X XR7 V2",
+      "sources": [
+        "https://www.corsair.com/us/en/explorer/diy-builder/custom-cooling/hydro-x-series-xr-v2-radiators-everything-you-need-to-know/"
+      ]
+    },
+    {
+      "brand": "CORSAIR",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 518,
+        "thickness": 55,
+        "width": 120
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "CORSAIR Hydro X XR7 480 V2",
+      "model_id": "corsair-xr7-v2-480",
+      "nominal_size_mm": 480,
+      "series": "Hydro X XR7 V2",
+      "sources": [
+        "https://www.corsair.com/us/en/explorer/diy-builder/custom-cooling/hydro-x-series-xr-v2-radiators-everything-you-need-to-know/"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 154.0,
+        "thickness": 30.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD120RC-TN-V2",
+      "model_id": "bykski-cr-rd120rc-tn-v2",
+      "nominal_size_mm": 120,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-120mm-x-30mm-rc-series-radiator-cr-rd120rc-tn-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 154.0,
+        "thickness": 60.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD120RC-TK60-V2",
+      "model_id": "bykski-cr-rd120rc-tk60-v2",
+      "nominal_size_mm": 120,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-120mm-x-60mm-rc-series-radiator-cr-rd120rc-tk60-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 169.0,
+        "thickness": 30.0,
+        "width": 140.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bykski CR-RD140RC-TN-V3",
+      "model_id": "bykski-cr-rd140rc-tn-v3",
+      "nominal_size_mm": 140,
+      "series": "RC V3",
+      "sources": [
+        "https://www.bykski.us/products/bykski-140mm-x-30mm-rc-series-radiator-140mm-x-1-single-fan-cr-rd140rc-tn-v3",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 1,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 155.5,
+        "thickness": 40.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD120RC-TK-V2",
+      "model_id": "bykski-cr-rd120rc-tk-v2",
+      "nominal_size_mm": 120,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-120mm-x-40mm-rc-series-radiator-cr-rd120rc-tk-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 275.5,
+        "thickness": 30.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD240RC-TN-V2",
+      "model_id": "bykski-cr-rd240rc-tn-v2",
+      "nominal_size_mm": 240,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-240mm-x-30mm-rc-series-radiator-cr-rd240rc-tn-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 309.0,
+        "thickness": 30.0,
+        "width": 140.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bykski CR-RD280RC-TN-V3",
+      "model_id": "bykski-cr-rd280rc-tn-v3",
+      "nominal_size_mm": 280,
+      "series": "RC V3",
+      "sources": [
+        "https://www.bykski.us/products/bykski-280mm-x-30mm-rc-series-radiator-140mm-x-2-dual-fan-cr-rd280rc-tn-v3",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 275.5,
+        "thickness": 60.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD240RC-TK60-V2",
+      "model_id": "bykski-cr-rd240rc-tk60-v2",
+      "nominal_size_mm": 240,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-240mm-x-60mm-rc-series-radiator-cr-rd240rc-tk60-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 275.5,
+        "thickness": 40.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD240RC-TK-V2",
+      "model_id": "bykski-cr-rd240rc-tk-v2",
+      "nominal_size_mm": 240,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-240mm-x-40mm-rc-series-radiator-cr-rd240rc-tk-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 395.5,
+        "thickness": 30.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD360RC-TN-V2",
+      "model_id": "bykski-cr-rd360rc-tn-v2",
+      "nominal_size_mm": 360,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-360mm-x-30mm-rc-series-radiator-cr-rd360rc-tn-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 395.5,
+        "thickness": 60.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD360RC-TK60-V2",
+      "model_id": "bykski-cr-rd360rc-tk60-v2",
+      "nominal_size_mm": 360,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-360mm-x-60mm-rc-series-radiator-cr-rd360rc-tk60-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 395.5,
+        "thickness": 40.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD360RC-TK-V2",
+      "model_id": "bykski-cr-rd360rc-tk-v2",
+      "nominal_size_mm": 360,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-360mm-x-40mm-rc-series-radiator-cr-rd360rc-tk-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 449.0,
+        "thickness": 30.0,
+        "width": 140.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 140,
+      "label": "Bykski CR-RD420RC-TN-V3",
+      "model_id": "bykski-cr-rd420rc-tn-v3",
+      "nominal_size_mm": 420,
+      "series": "RC V3",
+      "sources": [
+        "https://www.bykski.us/products/bykski-420mm-x-30mm-rc-series-radiator-140mm-x-3-triple-fan-cr-rd420rc-tn-v3",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 515.5,
+        "thickness": 60.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD480RC-TK60-V2",
+      "model_id": "bykski-cr-rd480rc-tk60-v2",
+      "nominal_size_mm": 480,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-480mm-x-60mm-rc-series-radiator-cr-rd480rc-tk60-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 515.5,
+        "thickness": 40.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD480RC-TK-V2",
+      "model_id": "bykski-cr-rd480rc-tk-v2",
+      "nominal_size_mm": 480,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-480mm-x-40mm-rc-series-radiator-cr-rd480rc-tk-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Bykski",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 515.5,
+        "thickness": 30.0,
+        "width": 122.0
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Bykski CR-RD480RC-TN-V2",
+      "model_id": "bykski-cr-rd480rc-tn-v2",
+      "nominal_size_mm": 480,
+      "series": "RC V2",
+      "sources": [
+        "https://www.bykski.us/products/bykski-480mm-x-30mm-rc-series-radiator-cr-rd480rc-tn-v2",
+        "https://www.bykski.us/pages/about-us"
+      ]
+    },
+    {
+      "brand": "Barrow",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 394.9,
+        "thickness": 28,
+        "width": 121.4
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Barrow Dabel-28b 360",
+      "model_id": "barrow-dabel28b-360",
+      "nominal_size_mm": 360,
+      "series": "Dabel-28b",
+      "sources": [
+        "http://www.barrowint.com/product/lengpai/BARROWlingpai/1732.html",
+        "http://www.barrowint.com/ueditor/php/upload/image/20210923/1632363493462333.jpg"
+      ]
+    },
+    {
+      "brand": "Barrow",
+      "capacity_per_face": 2,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 277,
+        "thickness": 40.1,
+        "width": 125.4
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Barrow Dabel-40a 240",
+      "model_id": "barrow-dabel40a-240",
+      "nominal_size_mm": 240,
+      "series": "Dabel-40a",
+      "sources": [
+        "http://www.barrowint.com/product/lengpai/BARROWlingpai/1581.html",
+        "http://www.barrowint.com/ueditor/php/upload/image/20210114/1610615928139005.jpg"
+      ]
+    },
+    {
+      "brand": "Barrow",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 397,
+        "thickness": 40.1,
+        "width": 125.4
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Barrow Dabel-40a 360",
+      "model_id": "barrow-dabel40a-360",
+      "nominal_size_mm": 360,
+      "series": "Dabel-40a",
+      "sources": [
+        "http://www.barrowint.com/product/lengpai/BARROWlingpai/1581.html",
+        "http://www.barrowint.com/ueditor/php/upload/image/20210114/1610615942118040.jpg"
+      ]
+    },
+    {
+      "brand": "Barrow",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 517,
+        "thickness": 40.1,
+        "width": 125.4
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Barrow Dabel-40a 480",
+      "model_id": "barrow-dabel40a-480",
+      "nominal_size_mm": 480,
+      "series": "Dabel-40a",
+      "sources": [
+        "http://www.barrowint.com/product/lengpai/BARROWlingpai/1581.html",
+        "http://www.barrowint.com/ueditor/php/upload/image/20210114/1610615953788858.jpg"
+      ]
+    },
+    {
+      "brand": "Barrow",
+      "capacity_per_face": 3,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 395,
+        "thickness": 60.5,
+        "width": 121.5
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Barrow Dabel-60d 360",
+      "model_id": "barrow-dabel60d-360",
+      "nominal_size_mm": 360,
+      "series": "Dabel-60d",
+      "sources": [
+        "http://www.barrowint.com/product/lengpai/BARROWlingpai/1606.html",
+        "http://www.barrowint.com/ueditor/php/upload/image/20210114/1610615636767730.jpg"
+      ]
+    },
+    {
+      "brand": "Barrow",
+      "capacity_per_face": 4,
+      "delivery": "optional",
+      "dimensions_mm": {
+        "length": 514,
+        "thickness": 60.5,
+        "width": 121.5
+      },
+      "dimensions_verified": true,
+      "fan_size_mm": 120,
+      "label": "Barrow Dabel-60d 480",
+      "model_id": "barrow-dabel60d-480",
+      "nominal_size_mm": 480,
+      "series": "Dabel-60d",
+      "sources": [
+        "http://www.barrowint.com/product/lengpai/BARROWlingpai/1606.html",
+        "http://www.barrowint.com/ueditor/php/upload/image/20210114/1610615693448176.jpg"
+      ]
+    }
+  ],
+  "reference_not_manufacturing_cad": true,
+  "schema": 1,
+  "styles": [
+    "miniature",
+    "cartoon",
+    "notebook_color",
+    "notebook_line",
+    "sticker",
+    "papercut"
+  ],
+  "unresolved": "A size class being present does not prove every brand/series/SKU is covered. Absent cells are not invented products."
+}

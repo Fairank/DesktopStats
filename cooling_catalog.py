@@ -676,20 +676,34 @@ _COOLER_BY_ID={row['id']:row for row in _COOLERS}
 
 def get_fan(model_id):
     from fan_mounting044 import apply_mounting_facts
-    return apply_mounting_facts(deepcopy(_FAN_BY_ID.get(model_id,{}))) if isinstance(model_id,str) else {}
+    if not isinstance(model_id,str):return {}
+    if model_id in _FAN_BY_ID:return apply_mounting_facts(deepcopy(_FAN_BY_ID[model_id]))
+    from hardware_packs import runtime_store
+    row=runtime_store().get_model('fan',model_id)
+    return deepcopy(row['reference']) if row else {}
 
 
 def get_cooler(model_id):
-    return deepcopy(_COOLER_BY_ID.get(model_id,{})) if isinstance(model_id,str) else {}
+    if not isinstance(model_id,str):return {}
+    if model_id in _COOLER_BY_ID:return deepcopy(_COOLER_BY_ID[model_id])
+    from hardware_packs import runtime_store
+    row=runtime_store().get_model('cooler',model_id)
+    return deepcopy(row['reference']) if row else {}
 
 
 def choices_coolers():
+    from hardware_packs import runtime_store
+    extra=tuple(dict(id=row['id'],label=row['label'],brand=row['vendor'],series=row['series'],pack_id=row['pack_id'],
+        **row['selector']) for row in runtime_store().choices('cooler') if row['id'] not in _COOLER_BY_ID)
     return tuple(dict(id=row['id'],label=row['label'],kind=row['kind'],brand=row['brand'],series=row['series'],
-        fan_size_mm=row.get('fan_reference_mm') or _FAN_BY_ID.get(row.get('fan_model'),{}).get('size_mm')) for row in _COOLERS)
+        fan_size_mm=row.get('fan_reference_mm') or _FAN_BY_ID.get(row.get('fan_model'),{}).get('size_mm')) for row in _COOLERS)+extra
 
 
 def choices_fans():
+    from hardware_packs import runtime_store
+    extra=tuple(dict(id=row['id'],label=row['label'],brand=row['vendor'],series=row['series'],pack_id=row['pack_id'],
+        **row['selector']) for row in runtime_store().choices('fan') if row['id'] not in _FAN_BY_ID)
     return tuple(dict(id=row['id'],label=row['label'],size_mm=row['size_mm'],brand=row['brand'],series=row['series'],
         frame=row.get('frame'),frameless=bool(row.get('frameless')),
         mount_pitch_mm=row.get('mount_pitch_mm'),mount_pitch_verified=row.get('mount_pitch_verified',False))
-        for row in (get_fan(item['id']) for item in _FANS))
+        for row in (get_fan(item['id']) for item in _FANS))+extra

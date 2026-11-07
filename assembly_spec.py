@@ -35,6 +35,7 @@ def gpu_preferences(config):
 
 
 def component_fingerprint(data, config, firmware, modules):
+    from hardware_packs import library_generation
     prefs = gpu_preferences(config)
     selected = str(prefs.get("gpu_target") or "0")
     gpus = data.get("gpus")
@@ -45,7 +46,7 @@ def component_fingerprint(data, config, firmware, modules):
             str(prefs.get("hardware_model", "")),
             tuple((r.get("manufacturer", ""), r.get("part_number", ""), r.get("form_factor", ""))
                   for r in modules if isinstance(r, dict)),
-            repr(firmware), repr(config.get("assembly", {})),visual_style(config))
+            repr(firmware), repr(config.get("assembly", {})),visual_style(config),library_generation())
 
 
 def build_spec(data, config, firmware, modules, *, identify_case=None):
@@ -172,7 +173,8 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     forms = case.get("form_factors") or ()
     if known_case and board["form_factor"] != "unknown" and forms:
         checks.append(dict(kind="board_form", state="within_limit" if board["form_factor"] in forms else "exceeds_limit"))
-    return dict(case=case, case_identity=identity, gpu=gpu, cpu=cpu, memory=memory, board=board,
+    from hardware_packs import library_generation
+    return dict(case=case, case_identity=identity, gpu=gpu, cpu=cpu, memory=memory, board=board,model_library_generation=library_generation(),
                 **parts,
                 options=options, checks=checks, schematic=True,visual_style=visual_style(config),
                 detail_level=options['detail_level'],

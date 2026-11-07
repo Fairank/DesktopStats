@@ -4,7 +4,7 @@ import json
 from assembly_geometry import Scene,build_scene
 from assembly_style import apply_model_styles,resolve_style
 
-PHYSICAL_FIELDS=('case','gpu','cpu','memory','board','cooling','auxiliary','detail_level','detail_focus')
+PHYSICAL_FIELDS=('case','gpu','cpu','memory','board','cooling','auxiliary','detail_level','detail_focus','model_library_generation')
 
 
 class SceneCache:

@@ -14,7 +14,7 @@ SettingsGroup {
         ActionButton { objectName:"hardwarePacksImport";text:ui.t("导入扩展包");onClicked:stats.importHardwarePack() }
     }
     Text {
-        Layout.fillWidth:true;text:ui.t("首批提供 Intel、AMD CPU 型号包。已有硬件保留在基础程序，所有外观共用同一目录。")
+        Layout.fillWidth:true;text:ui.t("提供 CPU、风扇、散热器和冷排型号包，可按品牌或类别选择。已有硬件保留，所有外观共用同一目录。")
         color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap
     }
     Text {

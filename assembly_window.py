@@ -208,6 +208,7 @@ class AssemblyWindow(QWidget):
         geometry.update(cooling=spec.get('cooling',{}),auxiliary=spec.get('auxiliary',{}))
         geometry['part_styles']=spec.get('part_styles',{})
         geometry['lighting_preview']=spec.get('lighting_preview','artwork')
+        geometry['model_library_generation']=spec.get('model_library_generation',0)
         resolved=spec.get('visual_style','miniature')
         if resolved not in HARDWARE_ICON_STYLES:resolved='miniature'
         geometry['visual_style']=resolved

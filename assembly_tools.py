@@ -42,6 +42,9 @@ class AssemblyTools(WorkspaceTools):
     def _hardware_packs_updated(self):
         from cpu_package_runtime import _match_identity
         _match_identity.cache_clear()
+        import sys
+        gallery=sys.modules.get('accessory_art')
+        if gallery is not None:gallery.clear_cache()
         self._assembly_fingerprint=None
         self._refresh_assembly()
         self.hardwarePacksChanged.emit()

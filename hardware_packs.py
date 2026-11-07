@@ -1,6 +1,6 @@
 """Bounded data-only hardware packs. No Qt, network, watcher, or import-time IO.
 
-Version 1 accepts CPU packages rendered by the app's shared generators. Archives
+Version 1 accepts CPU, fan, cooler and radiator data rendered by shared generators. Archives
 are never extracted or executed. Only small picker/identity indexes remain in
 memory; at most eight selected model records are retained. Future model kinds
 need an explicit schema and renderer contract, not executable plugins.
@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import re
 import stat
+import sys
 import zipfile
 import zlib
 from urllib.parse import urlsplit
@@ -27,7 +28,7 @@ MAX_ARCHIVE_BYTES = 1536 * 1024
 MAX_MANIFEST_BYTES = 256 * 1024
 MAX_MODELS_BYTES = 1024 * 1024
 SELECTED_CACHE_LIMIT = 8
-PACK_RELEASE_URL = 'https://github.com/Fairank/DesktopStats/releases'
+PACK_RELEASE_URL = 'https://github.com/Fairank/DesktopStats/blob/codex/cooling-library-v045/docs/HARDWARE_PACKS.md'
 LICENSE = 'PolyForm-Noncommercial-1.0.0'
 LICENSE_SHA256 = 'ffcca38841adb694b6f380647e15f17c446a4d1656fed51a1e2041d064c94cc8'
 _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
@@ -171,6 +172,27 @@ def validate_cpu(row):
     return result
 
 
+def _pack_summary(kind,row):
+    if kind=='cpu':return _summary(row)
+    from cooling_pack_schema045 import validate_summary
+    from cooling_pack_baseids045 import BASE_IDS
+    result=validate_summary(kind,row)
+    if result['id'] in BASE_IDS[kind] or result['id'] in _BASE_IDS:raise PackError('Optional model shadows a built-in identity')
+    return result
+
+
+def _pack_model(kind,row):
+    if kind=='cpu':return validate_cpu(row)
+    from cooling_pack_schema045 import validate_model
+    return validate_model(kind,row)
+
+
+def _model_summary(kind,row):
+    if kind=='cpu':return {key:row[key] for key in ('id','label','vendor','series','aliases')}
+    from cooling_pack_schema045 import summary_for
+    return summary_for(kind,row)
+
+
 def _archive(raw):
     if not isinstance(raw, bytes) or not 0 < len(raw) <= MAX_ARCHIVE_BYTES:
         raise PackError('Pack size exceeds limit')
@@ -191,7 +213,7 @@ def _archive(raw):
         raise PackError('Unreadable pack') from error
     manifest = _json(manifest_raw)
     _keys(manifest, ('format', 'id', 'version', 'kind', 'label', 'license', 'license_text', 'notice', 'models_sha256', 'models_bytes', 'products'))
-    if type(manifest['format']) is not int or manifest['format'] != FORMAT or manifest['kind'] != 'cpu':
+    if type(manifest['format']) is not int or manifest['format'] != FORMAT or manifest['kind'] not in ('cpu','fan','cooler','radiator'):
         raise PackError('Unsupported pack format or hardware kind')
     _identifier(manifest['id']); _string(manifest['label'], 120)
     if not isinstance(manifest['version'], str) or len(manifest['version'])>32 or not _VERSION.fullmatch(manifest['version']):
@@ -209,26 +231,27 @@ def _archive(raw):
     products = manifest['products']
     if not isinstance(products, list) or not 1 <= len(products) <= MAX_PRODUCTS:
         raise PackError('Product count exceeds limit')
-    products = [_summary(row) for row in products]
+    products = [_pack_summary(manifest['kind'],row) for row in products]
     if len({row['id'] for row in products}) != len(products):
         raise PackError('Duplicate CPU identity')
     models = _json(model_raw)
     if not isinstance(models, list) or len(models) != len(products):
         raise PackError('Pack inventory does not match manifest')
-    models = [validate_cpu(row) for row in models]
-    if [{key: row[key] for key in ('id', 'label', 'vendor', 'series', 'aliases')} for row in models] != products:
+    models = [_pack_model(manifest['kind'],row) for row in models]
+    if [_model_summary(manifest['kind'],row) for row in models] != products:
         raise PackError('Pack identity index does not match models')
     return manifest, models
 
 
-def make_pack(pack_id, label, models, version='1.0.0'):
+def make_pack(pack_id, label, models, version='1.0.0', *, kind='cpu'):
     """Authoring helper; deterministic archive, validated by the runtime reader."""
     encoded = (json.dumps(models, ensure_ascii=False, sort_keys=True, separators=(',', ':')) + '\n').encode('utf-8')
-    manifest = dict(format=FORMAT, id=pack_id, version=version, kind='cpu', label=label,
-                    license=LICENSE, license_text=Path(__file__).with_name('LICENSE').read_bytes().decode('utf-8'),
+    license_path=Path(sys.executable if getattr(sys,'frozen',False) else __file__).with_name('LICENSE')
+    manifest = dict(format=FORMAT, id=pack_id, version=version, kind=kind, label=label,
+                    license=LICENSE, license_text=license_path.read_bytes().decode('utf-8'),
                     notice='Original procedural model data: DesktopStats contributors. Product names and trademarks belong to their respective owners.',
                     models_sha256=hashlib.sha256(encoded).hexdigest(), models_bytes=len(encoded),
-                    products=[{key: row[key] for key in ('id', 'label', 'vendor', 'series', 'aliases')} for row in models])
+                    products=[_model_summary(kind,row) for row in models])
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for name, content in (('manifest.json', (json.dumps(manifest, ensure_ascii=False, sort_keys=True, separators=(',', ':')) + '\n').encode('utf-8')),
@@ -260,6 +283,14 @@ def _read_regular(path, limit=MAX_ARCHIVE_BYTES):
         return raw
     except OSError as error:
         raise PackError('Cannot read pack') from error
+
+
+def _retained_index(manifest):
+    # The full license/notice is checked on every archive read, then released.
+    # Keep an exact digest so an altered manifest cannot pass selected lookup.
+    fields=('id','label','version','kind','models_sha256','models_bytes','products')
+    digest=hashlib.sha256(json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf8')).hexdigest()
+    return {**{key:manifest[key] for key in fields},'manifest_sha256':digest}
 
 
 class PackStore:
@@ -308,7 +339,7 @@ class PackStore:
                     ids = {row['id'] for row in manifest['products']}
                     if path.name != manifest['id'] + '.dspack' or ids & used or total + len(ids) > MAX_TOTAL_PRODUCTS:
                         raise PackError('Pack inventory conflicts with installed models')
-                    self._indexes[manifest['id']] = manifest
+                    self._indexes[manifest['id']] = _retained_index(manifest)
                     used.update(ids); total += len(ids)
                 except PackError:
                     errors.append(path.name[:80])
@@ -322,10 +353,10 @@ class PackStore:
         if not self._loaded:
             self.reload()
 
-    def choices(self):
+    def choices(self,kind='cpu'):
         self._ensure()
         return [dict(row, pack_id=pack_id) for pack_id, manifest in self._indexes.items()
-                for row in deepcopy(manifest['products'])]
+                if manifest['kind']==kind for row in deepcopy(manifest['products'])]
 
     def installed(self):
         self._ensure()
@@ -341,14 +372,17 @@ class PackStore:
         return result
 
     def get_cpu(self, model_id):
+        return self.get_model('cpu',model_id)
+
+    def get_model(self,kind,model_id):
         self._ensure()
-        if not isinstance(model_id, str):
-            return None
-        if model_id in self._selected:
-            self._selected.move_to_end(model_id)
-            return deepcopy(self._selected[model_id])
+        if kind not in ('cpu','fan','cooler','radiator') or not isinstance(model_id,str):return None
+        cache_key=(kind,model_id)
+        if cache_key in self._selected:
+            self._selected.move_to_end(cache_key)
+            return deepcopy(self._selected[cache_key])
         match = next(((key, manifest) for key, manifest in self._indexes.items()
-                      if any(row['id'] == model_id for row in manifest['products'])), None)
+                      if manifest['kind']==kind and any(row['id'] == model_id for row in manifest['products'])), None)
         if match is None:
             return None
         key, index = match
@@ -358,11 +392,11 @@ class PackStore:
             self._assert_directory()
         except PackError:
             return None
-        if manifest != index:
+        if _retained_index(manifest) != index:
             return None
         result = next((row for row in models if row['id'] == model_id), None)
         if result:
-            self._selected[model_id] = result
+            self._selected[cache_key] = result
             while len(self._selected) > SELECTED_CACHE_LIMIT:
                 self._selected.popitem(last=False)
         return deepcopy(result)
@@ -428,6 +462,11 @@ class PackStore:
 
 
 _store = None
+
+
+def library_generation():
+    # Pure integer query: no store initialization, profile IO or scans.
+    return _store.generation if _store is not None else 0
 
 
 def runtime_store():

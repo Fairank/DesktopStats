@@ -230,6 +230,53 @@ def _check(report, output):
                 assert any(sample.pixelColor(x,50).alpha()>0 for x in range(120)),(kind,style)
         clear_cache();assert cache_info()['entries']==0
         report['checks'].append('accessory-svg-catalog-render-and-release-no-graphics')
+        # Exercise each bounded data schema in the frozen runtime. These are
+        # isolated synthetic fixtures derived from existing references, never
+        # imported into the user's library or counted as product coverage.
+        import hardware_packs
+        from cooling_catalog import get_fan,get_cooler
+        from liquid_cooling_catalog044 import get_radiator
+        previous_store=hardware_packs._store
+        fixture_store=PackStore(output.parent/'self-check-only-model-packs')
+        try:
+            hardware_packs._store=fixture_store
+            getters={'fan':get_fan,'cooler':get_cooler,'radiator':get_radiator}
+            base_ids={'fan':'noctua-nf-a12x25-pwm','cooler':'noctua-nh-u12a','radiator':'corsair-xr5-240'}
+            for kind,getter in getters.items():
+                identity='self-check-'+kind
+                reference=getter(base_ids[kind]);reference.update(id=identity,label='Isolated '+kind+' fixture')
+                if kind=='fan':
+                    selector={key:reference.get(key) for key in ('size_mm','depth_mm','frame','mount_pitch_mm','mount_pitch_verified')}
+                    selector['frameless']=reference.get('frameless',False)
+                elif kind=='cooler':
+                    reference['fan_reference_mm']=120
+                    selector=dict(kind=reference['kind'],fan_size_mm=120)
+                else:
+                    selector={key:reference[key] for key in ('fan_size_mm','fan_count','fan_mount_pitch_mm','fan_mount_pitch_verified')}
+                row=dict(id=identity,label=reference['label'],vendor=reference['brand'],series=reference['series'],
+                         aliases=[identity],sources=reference['sources'],reference=reference,selector=selector)
+                source=output.parent/(identity+'.dspack')
+                source.write_bytes(hardware_packs.make_pack(identity,reference['label'],[row],kind=kind))
+                fixture_store.install(source)
+                assert getter(identity)['id']==identity
+                assert len(fixture_store.choices(kind))==1
+            assert fixture_store.choices()==[], 'Cooling identities cannot enter CPU matching'
+            for kind in ('fan','cooler'):
+                artwork=accessory_art(kind,'self-check-'+kind,'notebook_line')
+                assert QSvgRenderer(QByteArray(artwork['svg'].encode('utf8'))).isValid()
+            from assembly_cooling import add_cooling
+            meshes,metadata=add_cooling((),dict(cooling=dict(cpu_cooler='custom-loop-360-reference',
+                radiator_model='self-check-radiator',radiator_fan_layout='none',case_fans=[])),
+                'eco',dict(cpu=dict(position=(0.,0.,0.),normal=(0.,0.,1.),up=(0.,1.,0.)),case_dimensions=(800.,900.,900.)))
+            assert meshes and not metadata['rejected']
+            assert any(part.get('model_id')=='self-check-radiator' for part in metadata['parts'])
+            for kind in getters:fixture_store.remove('self-check-'+kind)
+            assert fixture_store.memory_status()['selected_records']==0
+            assert not any(name in sys.modules for name in ('cpu_catalog','cooling_expansion045','liquid_radiator_expansion045'))
+            report['checks'].append('optional-cooling-pack-install-render-remove-no-graphics')
+        finally:
+            hardware_packs._store=previous_store
+            clear_cache()
         QCoreApplication.processEvents()
     finally:
         for item in [*objects, *components, engine]:

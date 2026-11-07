@@ -10,15 +10,15 @@ MODES = ('artwork', 'off', 'warm', 'mint', 'violet')
 COLORS = {'off': (.13, .15, .16, 1.), 'warm': (1., .79, .53, 1.),
           'mint': (.49, .87, .78, 1.), 'violet': (.73, .62, .94, 1.)}
 _EXACT_RGB = frozenset(('ram-diffuser', 'front-light-strip', 'horizontal-light-strip',
-    'cooler-top-accent-bars', 'cooler-nucleus-static-light-ring',
+    'cooler-top-accent-bars', 'cooler-corsair-lcd-rgb-ring', 'cooler-nucleus-static-light-ring',
     'cooler-bridge-rgb-outline', 'cooler-pump-rgb-cap'))
 _FAN_RGB = ('-static-rgb-hub', '-static-rgb-rim', '-square-rgb-rim',
             '-stationary-polygon-light-ring', '-side-rgb', '-infinity-hub-rings')
-_FIXED_WHITE = frozenset(('cooler-pump-white-light-ring',))
+_FIXED_WHITE = frozenset(('cooler-pump-white-light-ring','cooler-pump-fixed-white-mark'))
 
 
 def light_kind(mesh):
-    if mesh.name in _FIXED_WHITE:return 'fixed_white'
+    if mesh.name in _FIXED_WHITE or mesh.component in ('cooler','fans') and mesh.name.endswith('-fixed-white-bearing-window'):return 'fixed_white'
     if mesh.name in _EXACT_RGB:return 'rgb_reference'
     if mesh.component in ('cooler', 'fans') and mesh.name.endswith(_FAN_RGB):return 'rgb_reference'
     return ''

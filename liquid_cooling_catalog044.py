@@ -155,12 +155,12 @@ def _build():
              appearance_sources=[axt],materials=dict(fins='copper',tubes='copper',tanks='copper',housing='steel'),
              notes='45.5mm published envelope, not rounded series name45. Front pair observed; remaining three sockets not located.'),
         _row(IDS[8], 'Alphacool NexXxoS UT60 360 · Full Copper', 'Alphacool', 'NexXxoS UT60', '14174',
-             (397,124,60),120,3,6,'alphacool_split_tanks',(aut,),
+             (397,124,60),120,3,7,'alphacool_split_tanks',(aut,),
              fpi=10,fpi_verified=True,port_layout='multiport_end',port_layout_verified=True,
              ports=_pair(aut,.27,.455)+_end_pair(aut,.27),
              shell_features=['split_shoulder_tanks','scalloped_mount_rails'],shell_features_basis='observed_reference',
              appearance_sources=[aut],materials=dict(fins='copper',tubes='copper',housing='steel'),
-             notes='Exact14174 standard UT60, not X-Flow/Dual-Flow/V2. Current official PDF six G1/4 ports; four visible socket locations only. Other sockets remain unlocated.'),
+             documented_connection_threads=6,notes='Exact14174 standard UT60, not X-Flow/Dual-Flow/V2. Its own official PDF specifies six connection threads plus a separate fill/de-aeration plug, seven openings in total. Four observed reference positions only; remaining three are not invented.'),
         _row(IDS[9], 'XSPC TX240 Ultrathin · Black', 'XSPC', 'TX Ultrathin', '5060596650015',
              (278,125,20.5),120,2,2,'xspc_tx_slim',(tx,txdraw),
              fpi=22,fpi_verified=True,port_layout='same_end_face_pair',port_layout_verified=True,
@@ -262,8 +262,11 @@ def records():
 
 def get_radiator(identity):
     """Detached manual reference; invalid identities never allocate the directory."""
-    if not isinstance(identity,str) or identity not in IDS:
-        return None
+    if not isinstance(identity,str):return None
+    if identity not in IDS:
+        from hardware_packs import runtime_store
+        row=runtime_store().get_model('radiator',identity)
+        return row['reference'] if row else None
     from copy import deepcopy
     return deepcopy(next(row for row in records() if row['id']==identity))
 

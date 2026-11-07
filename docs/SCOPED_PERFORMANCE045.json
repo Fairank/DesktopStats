@@ -1,0 +1,36 @@
+{
+  "authoring_catalogs_loaded": false,
+  "cached_reads": 40,
+  "cached_reads_directory_scans": 0,
+  "cached_reads_disk_opens": 0,
+  "collection_download_bytes": 37392,
+  "final_data_sha256": {
+    "model-packs/v045/DesktopStats-cooler-collection-045-1.0.0.dspack": "c29bcf445136319bd3ee4a3aca9be0e8dd175b51bebd1372b6860ea6fdbb6f79",
+    "model-packs/v045/DesktopStats-fan-collection-045-1.0.0.dspack": "15eb8bef84cd13a6c6e3ae50fb60a290eb04c424ac1a823ac03ea3ca65366d5d",
+    "model-packs/v045/DesktopStats-radiator-collection-045-1.0.0.dspack": "5f74df11394a09cb32d051710761347a262f3bbd3bcef928a8d9d29ab8e353ef"
+  },
+  "index_object_graph_bytes": 155401,
+  "index_plus_eight_largest_selected_object_graph_bytes": 244906,
+  "native_app_started": false,
+  "native_temperature_glass_game_acceptance": false,
+  "new_background_samplers": 0,
+  "new_runtime_animation_clocks": 0,
+  "packs": 3,
+  "products": 167,
+  "retained_graph_saved_bytes": 15936,
+  "retained_graph_saved_percent": 6.109,
+  "same_records_with_full_manifests_object_graph_bytes": 260842,
+  "schema": 1,
+  "scope": "Python retained pack-index and selected-record object graph only; excludes Python/Qt process, imports, GPU, meshes and live app. Tracemalloc includes temporary validation and the hypothetical comparison manifests.",
+  "status": {
+    "background_workers": 0,
+    "packs": 3,
+    "periodic_scans": 0,
+    "persistent_meshes": 0,
+    "products": 167,
+    "selected_record_limit": 8,
+    "selected_records": 8
+  },
+  "version": "0.45.0-preview.1",
+  "whole_application_measured": false
+}

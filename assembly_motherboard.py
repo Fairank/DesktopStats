@@ -152,36 +152,66 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     if model.get('io_clear_inset',model['id'].startswith('asus-rog-')):
         plate('board-io-clear-inset',((.018,.079),(.100,.068),(.147,.125),(.143,.355),(.026,.420)),.5,
             color('#a6c9d1',alpha=.54),model['heatsinks'][1]['depth_mm']+1.3)
-    # Socket clamp with a genuinely open center, hinge, captive bolts and curved lever.
     cp=anchors['cpu']['position'];cy,cz=cp[1],cp[2];am5=model['socket']=='AM5'
-    sw,sh=(54.,58.) if am5 else (54.,65.);opening=chamfer_rect(40.5 if am5 else 39.5,42. if am5 else 47.,2.3)
-    cube('board-socket-carrier',(2.,sh-4.,sw-4.),(bx-1.9,cy,cz),dark)
-    # Dense visible spring heads are sampled, not a claim to reproduce every
-    # electrical contact or its exact row map from a proprietary socket CAD.
-    from assembly_detail import _quad
-    pins=[];columns,rows=(16,18) if level=='eco' else (24,28) if level=='balanced' else (32,36)
-    for row in range(rows):
-        for col in range(columns):
-            yy=cy+(row-(rows-1)/2)*((37. if am5 else 42.)/rows)
-            zz=cz+(col-(columns-1)/2)*(34./columns);r=.19
-            _quad(pins,(bx-3.05,yy-r,zz-r),(bx-3.15,yy+r,zz-r),(bx-3.28,yy+r,zz+r),(bx-3.18,yy-r,zz+r))
-    add('board-socket-spring-heads',tuple(pins),copper,(0,0,0))
-    frame=perforated_plate(chamfer_rect(sw,sh,3.),(opening,),2.2)
-    add('detail-board-retention-frame',rotate_vertices(frame,'left'),steel,(bx-4.4,cy,cz))
-    cube('detail-board-retention-hinge',(4.,3.,sw-5),(bx-4.5,cy+sh/2-1.0,cz),dark)
-    bolts=[]
-    for uu in (-1,1):
-        for vv in (-1,1):
-            p=(bx-5.6,cy+vv*(sh/2-3.6),cz+uu*(sw/2-3.4))
-            bolts.extend(translated(rotate_vertices(ring(2.1,.7,.6,segments=12),'left'),p))
-    add('board-socket-captive-bolts',tuple(bolts),steel,(0,0,0))
-    lever_points=((bx-6.,cy+sh*.42,cz+sw*.53),(bx-6.,cy-sh*.35,cz+sw*.53),
-        (bx-6.,cy-sh*.51,cz+sw*.68),(bx-6.,cy-sh*.58,cz+sw*.63),(bx-6.,cy-sh*.50,cz+sw*.48))
-    add('detail-board-retention-lever',tuple(v for a,b in zip(lever_points,lever_points[1:]) for v in _segment(a,b,.85)),steel,(0,0,0))
-    if am5:
+    if model['socket']=='AM4':
+        # Official AM4 board drawings show a plastic PGA ZIF socket, not an
+        # LGA metal load plate/spring bed. The bounded receiving-well sample
+        # conveys this topology, never the exact1331-contact electrical map.
+        cube('board-am4-zif-carrier',(2.,54.,54.),(bx-1.9,cy,cz),dark)
+        sample=9 if level=='eco' else 17 if level=='balanced' else 21
+        pitch=34./max(1,sample-1)
+        # The shared plate helper deliberately handles at most24 holes. Reuse
+        # one truly perforated cell, keeping that safety limit unchanged.
+        # Four unique rectangle corners avoid zero-length clipping edges.
+        square=lambda size:((-size/2,-size/2),(size/2,-size/2),(size/2,size/2),(-size/2,size/2))
+        cell=perforated_plate(square(pitch),(circle(0.,0.,.42,8),),2.)
+        socket=list(perforated_plate(chamfer_rect(50.,50.,1.2),
+                                    (square(sample*pitch),),2.))
+        for line in range(sample):
+            for col in range(sample):
+                socket.extend(translated(cell,((col-(sample-1)/2)*pitch,(line-(sample-1)/2)*pitch,0.)))
+        add('board-am4-pga-receiving-wells',rotate_vertices(socket,'left'),color('#555961'),(bx-4.4,cy,cz))
+        cube('board-am4-dark-recess-floor',(.3,39.,39.),(bx-3.05,cy,cz),color('#14191e'))
+        lever_points=((bx-5.8,cy+23.,cz+27.),(bx-5.8,cy-21.,cz+27.),
+                      (bx-5.8,cy-27.,cz+30.),(bx-5.8,cy-25.,cz+33.))
+        add('board-am4-zif-locking-lever',tuple(v for a,b in zip(lever_points,lever_points[1:]) for v in _segment(a,b,.65)),steel,(0,0,0))
+        # Two black factory-style clip rails are visible in the reviewed MSI
+        # manuals/photos. Their depth/bolt contours remain interface reference.
         for sign in (-1,1):
-            cube('board-am5-cooler-retention',(7.,6.,67.),(bx-5.5,cy+sign*38.,cz),dark)
-            for side in (-1,1):add('board-am5-retention-screw',rotate_vertices(ring(2.8,.9,1.,segments=12),'left'),steel,(bx-9.4,cy+sign*38.,cz+side*27.))
+            cube('board-am4-cooler-retention',(7.,6.,61.),(bx-5.5,cy+sign*44.5,cz),dark)
+            cube('board-am4-retention-clip',(9.,4.,9.),(bx-6.5,cy+sign*42.,cz),dark)
+            for side in (-1,1):
+                add('board-am4-retention-screw',rotate_vertices(ring(2.8,.9,1.,segments=12),'left'),steel,(bx-9.4,cy+sign*44.5,cz+side*27.))
+    else:
+        # LGA clamp with a genuinely open center, hinge and captive bolts.
+        sw,sh=(54.,58.) if am5 else (54.,65.);opening=chamfer_rect(40.5 if am5 else 39.5,42. if am5 else 47.,2.3)
+        cube('board-socket-carrier',(2.,sh-4.,sw-4.),(bx-1.9,cy,cz),dark)
+        # Dense visible spring heads are sampled, not a claim to reproduce every
+        # electrical contact or its exact row map from a proprietary socket CAD.
+        from assembly_detail import _quad
+        pins=[];columns,rows=(16,18) if level=='eco' else (24,28) if level=='balanced' else (32,36)
+        for row in range(rows):
+            for col in range(columns):
+                yy=cy+(row-(rows-1)/2)*((37. if am5 else 42.)/rows)
+                zz=cz+(col-(columns-1)/2)*(34./columns);r=.19
+                _quad(pins,(bx-3.05,yy-r,zz-r),(bx-3.15,yy+r,zz-r),(bx-3.28,yy+r,zz+r),(bx-3.18,yy-r,zz+r))
+        add('board-socket-spring-heads',tuple(pins),copper,(0,0,0))
+        frame=perforated_plate(chamfer_rect(sw,sh,3.),(opening,),2.2)
+        add('detail-board-retention-frame',rotate_vertices(frame,'left'),steel,(bx-4.4,cy,cz))
+        cube('detail-board-retention-hinge',(4.,3.,sw-5),(bx-4.5,cy+sh/2-1.0,cz),dark)
+        bolts=[]
+        for uu in (-1,1):
+            for vv in (-1,1):
+                p=(bx-5.6,cy+vv*(sh/2-3.6),cz+uu*(sw/2-3.4))
+                bolts.extend(translated(rotate_vertices(ring(2.1,.7,.6,segments=12),'left'),p))
+        add('board-socket-captive-bolts',tuple(bolts),steel,(0,0,0))
+        lever_points=((bx-6.,cy+sh*.42,cz+sw*.53),(bx-6.,cy-sh*.35,cz+sw*.53),
+            (bx-6.,cy-sh*.51,cz+sw*.68),(bx-6.,cy-sh*.58,cz+sw*.63),(bx-6.,cy-sh*.50,cz+sw*.48))
+        add('detail-board-retention-lever',tuple(v for a,b in zip(lever_points,lever_points[1:]) for v in _segment(a,b,.85)),steel,(0,0,0))
+        if am5:
+            for sign in (-1,1):
+                cube('board-am5-cooler-retention',(7.,6.,67.),(bx-5.5,cy+sign*38.,cz),dark)
+                for side in (-1,1):add('board-am5-retention-screw',rotate_vertices(ring(2.8,.9,1.,segments=12),'left'),steel,(bx-9.4,cy+sign*38.,cz+side*27.))
     # DIMM sockets have two long walls, independent contact wells, key bridges
     # and end latches; populated modules were positioned at these exact slots.
     dimm_parts=[];dimm_contacts=[];dimm_latches=[]
@@ -255,7 +285,13 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
             p=anchor['position'];edge=anchor['normal']==(0.,0.,1.)
             if key=='sata':
                 hole=_port_shape('sata',9.,4.6);shape=perforated_plate(chamfer_rect(13.,8.,.7),(hole,),4.)
-                add('detail-board-sata-socket',shape if edge else rotate_vertices(shape,'left'),dark,p)
+                face=shape if edge else rotate_vertices(shape,'left')
+                # Keep the original default payload verbatim. Reviewed front
+                # pairs can instead run longitudinally down the PCB, allowing
+                # their neighbouring receiving mouths to remain clear.
+                if not edge and anchor['along']!=(0.,0.,1.):
+                    face=_orient_header(face,anchor['normal'],anchor['along'])
+                add('detail-board-sata-socket',face,dark,p)
             elif key=='usb_c':
                 # The front-panel Type-E socket is a compact keyed 20-contact
                 # cavity, not a full-size 2.54mm two-row peripheral header.
@@ -359,7 +395,7 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     # Exact jack center dimensions are observed layout rather than certified CAD.
     ports=model['rear_ports'];io_pos=(bx-20.5,by+bh/2-80.,rear-.85);port_shapes=[];recesses=[];frames={};inserts=[]
     port_size=dict(usb_a=(12.4,5.6),usb_c=(8.5,3.6),hdmi=(14.,5.8),displayport=(14.5,6.3),lan=(13.,12.),
-        audio_3_5=(5.7,5.7),spdif=(8.,8.),antenna=(5.,5.),buttons=(4.,4.),ps2=(12.5,12.5),vga=(18.,9.))
+        audio_3_5=(5.7,5.7),spdif=(8.,8.),antenna=(5.,5.),buttons=(4.,4.),ps2=(12.5,12.5),vga=(18.,9.),dvi=(24.5,8.5))
     for row in model['rear_layout']:
         kind=row['kind'];cx,cy=row['x_mm'],row['y_mm'];pw,ph=port_size[kind]
         shape=circle(0,0,pw/2,16) if kind in ('audio_3_5','antenna','buttons','ps2') else _port_shape(kind,pw,ph)
@@ -377,6 +413,24 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         elif kind=='vga':
             wells=[circle((col-2)*2.6+(.6 if row==1 else 0.),(row-1)*2.,.42,8) for row in range(3) for col in range(5)]
             inserts.extend(translated(perforated_plate(_port_shape('vga',16.8,7.8),wells,.5),(cx,cy,.8)))
+        elif kind=='dvi':
+            # DVI-D's separate24 digital contact wells and flat key: no four
+            # analog DVI-I contacts. Pitch/depth are interface reference, not
+            # a claim about the exact retail connector supplier's CAD.
+            wells=[circle(-7.+col*1.8,(line-1)*1.8,.40,8) for line in range(3) for col in range(8)]
+            # Keep the shared24-hole cap: the flat key occupies a separate
+            # adjacent region instead of silently becoming an uncut25th hole.
+            contact_side=((-11.55*.86,-3.65),(7.2,-3.65),(7.2,3.65),(-11.55,3.65))
+            key_side=((7.2,-3.65),(11.55*.86,-3.65),(11.55,3.65),(7.2,3.65))
+            key_hole=tuple((x+9.,y) for x,y in chamfer_rect(2.6,.75,.1))
+            for inner,holes in ((contact_side,wells),(key_side,(key_hole,))):
+                if row['rotated']:
+                    # Horizontal manual is observed from outside: local right
+                    # runs toward decreasing caseY. Preserve the documented
+                    # right-hand flat key, not its mirrored internal view.
+                    inner=tuple((-y,-x) for x,y in inner)
+                    holes=[tuple((-y,-x) for x,y in hole) for hole in holes]
+                inserts.extend(translated(perforated_plate(inner,holes,.5),(cx,cy,.8)))
     add('detail-board-rear-io-shield',perforated_plate(chamfer_rect(45.,158.,1.5),port_shapes,1.),steel,io_pos)
     add('detail-board-rear-io-recesses',_boxes(recesses),dark,io_pos)
     for kind,vertices in frames.items():add('detail-board-rear-'+kind,vertices,steel,io_pos)
@@ -402,6 +456,8 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         m2_heatsinks=sum(c['name'].startswith('m2') for c in model['heatsinks']),installed_ssd_count_inferred=False,
         rear_io_layout_schematic=True,rear_io_source=model['rear_layout_source'],small_package_positions_schematic=True,
         heatsink_recesses_are_open_geometry=True,socket_contact_pattern_is_sampling=True,
+        socket_contact_topology='pga_receiving_wells' if model['socket']=='AM4' else 'sampled_lga_springs',
+        socket_contact_dimensions_verified=False,
         power_contact_count=power_contact_count,power_contacts_independent=True,
         connector_contact_shape_reference=True,connector_oem_identified=False,
         m2_receiving_channel_count=len(anchors['connectors']['m2']),m2_receiving_channel_open=True,

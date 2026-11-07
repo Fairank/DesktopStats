@@ -1,5 +1,34 @@
 # Changes
 
+## 0.45.0-preview.1 (development candidate)
+
+- Preserve the six numbered concepts and all thirteen saved choices. Complete
+  existing categories and unresolved model details before introducing new art.
+- Add 104 sourced radiator, 40 fan and 23 cooler references as optional data-only
+  class/brand packs. Three class collections total 37,392 bytes; 32 downloads
+  are overlapping alternatives, never 32 disjoint inventories. Add no sampler,
+  background downloader, directory poll, persistent mesh or animation clock.
+- Add 12 distinct ITX/mATX/ATX boards. Correct AM4 PGA sockets, keyed DVI wells
+  and paired SATA orientation. Preserve all 16 earlier boards' geometry.
+- Share qualified foil contours between SVG and 3D; distinguish center-fan
+  towers, low-profile downflow fins, factory C-shape placement, fixed-white
+  bearing windows, Corsair circular LCD pedestals and NZXT infinity mirrors.
+  Keep visible papercut leaf edges so rotation cannot merge into a plain disc.
+- Correct obstructed mounting-hole rims on two earlier radiators and verified
+  XSPC openings without shifting product envelopes or attachment anchors.
+- Add on-demand process read/write I/O Top 5 to the existing snapshot worker.
+  Label cached/device/all-process scope explicitly; do not attribute it to one
+  physical disk or issue extra process/device queries outside demand.
+- Bound shared selected records to eight and retain compact authenticated
+  manifest indexes. Reuse a selected cooler's validated bundled fan description
+  without another optional archive read; invalidate model caches after changes.
+- Publish reproducible category, size/form-factor, PCBS partial-list comparison
+  and complete requirement ledgers with explicit unknowns. 753 named products
+  are not full-market or PCBS-level completion. No game assets are copied.
+- Source/local candidate only. No installation, restart, UAC or visible window
+  while gaming; native temperature/glass/fullscreen/performance acceptance open.
+
+
 ## 0.44.0-preview.1 (development candidate)
 
 - Separate standalone custom-loop radiators and each radiator fan, with primary

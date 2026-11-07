@@ -18,7 +18,10 @@ def build_report():
     from hardware_appearance import CATALOG,BRANDS,appearance_for
     from memory_appearance import CATALOG as MEMORY,BRANDS as MEMORY_BRANDS,appearance_for_memory
     from motherboard_catalog import MODELS
-    from cooling_catalog import choices_coolers,choices_fans,get_cooler,get_fan
+    from cooling_catalog import _COOLERS,_FANS
+    from fan_mounting044 import apply_mounting_facts
+    from copy import deepcopy
+    from tools.export_cooling_packs045 import pack_models
     from component_catalog import CATALOG as AUXILIARY
     from chassis_catalog import CASES
     from top_bar_config import HARDWARE_ICON_STYLES
@@ -58,9 +61,9 @@ def build_report():
             layout_status=raw.get('layout_status','manual_reviewed'),
             finish_status=raw.get('finish_status','unverified_reference'),
             internal_pcb_routing='unverified',small_package_placement='schematic')
-    for kind,choices,getter in (('cooler',choices_coolers,get_cooler),('fan',choices_fans,get_fan)):
-        for choice in choices():
-            raw=getter(choice['id'])
+    for kind,base in (('cooler',_COOLERS),('fan',_FANS)):
+        for original in base:
+            raw=apply_mounting_facts(deepcopy(original)) if kind=='fan' else original
             add(kind,raw,raw['brand'],raw.get('series',''),
                 geometry_scope='documented_envelope_and_original_detail',
                 dimensions_verified=raw.get('dimensions_verified',False),
@@ -89,6 +92,15 @@ def build_report():
         dimensions_status=row['dimensions_status'],source_urls=list(row['sources']),
         model_status='original_schematic',styles='all_listed_styles',
         internal_layout_verified=False,telemetry='installed_identity_only') for row in CPU_MODELS if row['id'] not in base_cpu_ids]
+    optional_cooling=[]
+    for kind,models in pack_models().items():
+        for row in models:
+            raw=row['reference']
+            optional_cooling.append(dict(kind=kind,model_id=row['id'],label=row['label'],brand=row['vendor'],series=row['series'],delivery='optional_pack',
+                pack_collection_id=kind+'-collection-045',dimensions_mm=raw.get('dimensions_mm') or raw.get('radiator_mm'),source_urls=list(row['sources']),
+                model_status='original_schematic',styles='all_listed_styles',dimensions_verified=raw.get('dimensions_verified',raw.get('radiator_dimensions_verified',False)),
+                blade_count_verified=raw.get('blade_count_verified',False),blade_geometry_reviewed=raw.get('blade_geometry_reviewed',False),
+                geometry_scope='shared_generator_and_source_observed_reference',telemetry='not_bound_to_installed_sensor'))
     return dict(schema_version=1,market_exhaustive=False,machine_inventory=False,
         scope='Named selectable products, original schematic models; not manufacturing CAD or a fit guarantee.',
         styles=list(HARDWARE_ICON_STYLES),style_policy='Every product retains identical geometry and identity across all styles.',
@@ -98,13 +110,14 @@ def build_report():
             brands=len({row['brand'].casefold() for row in rows if row['brand'] and row['record_type']=='product'}),
             series_pending=sum(row['series'] is None for row in rows)),
         optional_summary=dict(cpu_products=len(optional_cpus),available_cpu_products=len(CPU_MODELS),
-                              packs=2,installed_by_default=False,executable_content=False),
+                              packs=2,cooling_products=len(optional_cooling),cooling_by_kind=dict(Counter(r['kind'] for r in optional_cooling)),
+                              cooling_pack_index='docs/COOLING_PACKS_INDEX.json',installed_by_default=False,executable_content=False),
         artwork_2d=dict(kinds=['case','cooler','psu','fan'],
             records=sum(counts[kind] for kind in ('case','cooler','psu','fan')),
             styles=list(HARDWARE_ICON_STYLES),generator='on_demand_svg',cache_max_entries=16,
             motion='explicit_reference_demonstration',sensor_binding=False,
             download_format='standalone_svg_collections',market_exhaustive=False),
-        optional_products=optional_cpus,products=rows)
+        optional_products=optional_cpus+optional_cooling,products=rows)
 
 
 def main():

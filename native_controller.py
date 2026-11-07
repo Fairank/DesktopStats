@@ -890,7 +890,7 @@ class Controller(AssemblyTools):
         raw = self._process_results.get(token, process_usage.empty_report(kind))
         state, rows = raw['state'], raw.get('rows', [])
         reason_code, reason = raw.get('reason_code', ''), ''
-        captions = {'cpu': 'CPU 使用率', 'memory': '内存工作集', 'gpu': 'GPU 使用率', 'vram': '专用显存'}
+        captions = {'cpu': 'CPU 使用率', 'memory': '内存工作集', 'gpu': 'GPU 使用率', 'vram': '专用显存','io':'进程读写 I/O'}
         if not kind:
             state, reason_code, rows = 'unavailable', 'not_attributable', []
             reason = ('当前未启用按软件统计网速的网络事件跟踪。' if metric.startswith('net_') else
@@ -904,6 +904,8 @@ class Controller(AssemblyTools):
         reason = reason or reasons.get(state, '')
         if reason_code == 'adapter_identity':
             reason = '无法将所选显卡与 Windows 适配器唯一对应，不会使用另一块显卡的数据。'
+        elif reason_code=='io_counters_unavailable':
+            reason='进程读写 I/O 计数不可用。'
         elif reason_code == 'query_failed':
             reason = 'Windows 未返回可用的软件占用读数。'
         denied = raw.get('denied_count', 0)
@@ -916,9 +918,14 @@ class Controller(AssemblyTools):
         note = ('按整机 CPU 使用率排序；不代表软件的温度或功耗占比。' if kind == 'cpu' else
                 '工作集包含共享内存，同名进程合并后可能重复计入共享页。' if kind == 'memory' else
                 '同一软件按最忙的 GPU 引擎排序；不同引擎的占比不相加。' if kind == 'gpu' else
-                '专用显存包含进程间共享分配，不能将各软件数值相加作为显卡总量。' if kind == 'vram' else '')
+                '专用显存包含进程间共享分配，不能将各软件数值相加作为显卡总量。' if kind == 'vram' else
+                '所有进程读写 I/O，含缓存与设备，非当前磁盘统计。' if kind=='io' else '')
         language = self._saved['language']
         projected = []
+        def io_text(value):
+            if not numeric(value) or value<0:return '—'
+            scale,unit=(2**20,'MiB/s') if value>=2**20 else (2**10,'KiB/s') if value>=2**10 else (1,'B/s')
+            return f'{value/scale:.1f}'.rstrip('0').rstrip('.')+' '+unit
         for row in rows[:5]:
             value = row.get('value')
             if not numeric(value) or value <= 0:
@@ -926,14 +933,16 @@ class Controller(AssemblyTools):
             if kind in ('memory', 'vram'):
                 size, unit = (value/2**30, 'GiB') if value >= 2**30 else (value/2**20, 'MiB')
                 value_text = (f'{size:.1f}'.rstrip('0').rstrip('.'))+' '+unit
+            elif kind=='io':value_text=io_text(value)
             else:
                 value_text = f'{value:.1f}'.rstrip('0').rstrip('.')+' %'
-            projected.append(dict(row, value_text=value_text))
+            extra=dict(read_text=io_text(row.get('read_bytes_per_second')),write_text=io_text(row.get('write_bytes_per_second'))) if kind=='io' else {}
+            projected.append(dict(row,value_text=value_text,**extra))
         error = raw.get('error', {})
         technical = ' · '.join(str(error[field]) for field in ('api', 'code', 'winerror', 'errno')
                                 if error.get(field) is not None)
         return dict(raw, state=state, reason_code=reason_code, rows=projected,
-                    title=translate('占用最多的软件', language),
+                    title=translate('软件读写 I/O Top 5' if kind=='io' else '占用最多的软件',language),
                     caption=translate(captions.get(kind, '软件占用'), language),
                     reason=translate(reason, language), note=translate(note, language),
                     technical=technical,

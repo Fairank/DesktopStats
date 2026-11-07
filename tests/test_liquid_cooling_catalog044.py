@@ -20,7 +20,9 @@ class RadiatorCatalogTests(unittest.TestCase):
         rows=isolated['records']()
         self.assertIs(rows,isolated['records']())
         imports=[n for n in ast.walk(ast.parse(source)) if isinstance(n,(ast.Import,ast.ImportFrom))]
-        self.assertEqual([(n.module,tuple(a.name for a in n.names)) for n in imports],[('copy',('deepcopy',))])
+        self.assertEqual({(n.module,tuple(a.name for a in n.names)) for n in imports},
+                         {('copy',('deepcopy',)),('hardware_packs',('runtime_store',))})
+        self.assertFalse(any(isinstance(n,(ast.Import,ast.ImportFrom)) for n in ast.parse(source).body))
 
     def test_twenty_four_exact_products_eight_brands_not_twenty_four_independent_shells(self):
         rows=catalog.records()
@@ -96,7 +98,8 @@ class RadiatorCatalogTests(unittest.TestCase):
         self.assertEqual(catalog.get_radiator('ek-quantum-surface-p360m')['ports_count'],5)
         self.assertEqual(catalog.get_radiator('ek-quantum-surface-p360m')['ports'],[])
         partial=catalog.get_radiator('alphacool-ut60-360')
-        self.assertEqual(partial['ports_count'],6);self.assertEqual(len(partial['ports']),4)
+        self.assertEqual(partial['ports_count'],7);self.assertEqual(partial['documented_connection_threads'],6)
+        self.assertEqual(len(partial['ports']),4)
         self.assertFalse(partial['ports_geometry_complete'])
         rx=catalog.get_radiator('xspc-rx360-v3')
         self.assertEqual(rx['ports_count'],4)

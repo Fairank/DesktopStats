@@ -65,7 +65,10 @@ def _circle(v,center,u,axis,r,steps=48):
     return [v.at(tuple(center[j]+r*(u[j]*math.cos(i*math.tau/steps)+axis[j]*math.sin(i*math.tau/steps)) for j in range(3))) for i in range(steps)]
 
 def _fan(p,fg,v,fan,style,make_rotor,center,normal='up',frame=True):
-    size=fan.get('size_mm',120);depth=fan.get('depth_mm',25)
+    size=fan.get('size_mm',120);depth=fan.get('depth_mm',25);width=fan.get('width_mm',size)
+    axes=fan.get('mount_pitch_axes_mm') if fan.get('mount_pitch_axes_verified') else None
+    scalar=fan.get('mount_pitch_mm') if fan.get('mount_pitch_verified') else None
+    pitch_x,pitch_y=axes if axes else (scalar,scalar) if scalar else (width*.83,size*.83)
     u=(1.,0.,0.)
     axis=(0.,-1.,0.) if normal=='up' else (0.,1.,0.) if normal=='down' else (0.,0.,-1.)
     n=(0.,0.,1.) if normal=='up' else (0.,0.,-1.) if normal=='down' else (0.,-1.,0.)
@@ -74,26 +77,27 @@ def _fan(p,fg,v,fan,style,make_rotor,center,normal='up',frame=True):
     if frame:
         for first,second in (((-1,1),(1,1)),((1,1),(1,-1))):
             a,b=first,second
-            v.poly(p,[point(a[0]*size/2,a[1]*size/2,-depth),point(b[0]*size/2,b[1]*size/2,-depth),
-                      point(b[0]*size/2,b[1]*size/2),point(a[0]*size/2,a[1]*size/2)],_shade(tone,.78),.5)
+            v.poly(p,[point(a[0]*width/2,a[1]*size/2,-depth),point(b[0]*width/2,b[1]*size/2,-depth),
+                      point(b[0]*width/2,b[1]*size/2),point(a[0]*width/2,a[1]*size/2)],_shade(tone,.78),.5)
         cut=size*.065
         square=[(-size/2+cut,-size/2),(size/2-cut,-size/2),(size/2,-size/2+cut),(size/2,size/2-cut),
                 (size/2-cut,size/2),(-size/2+cut,size/2),(-size/2,size/2-cut),(-size/2,-size/2+cut)]
-        outer=[v.at(point(a,b)) for a,b in square]
+        outer=[v.at(point(a*width/size,b)) for a,b in square]
         rounded=fan.get('frame')=='round'
         if rounded:outer=_circle(v,center,u,axis,size*.497)
         hole=_circle(v,center,u,axis,size*.463)
         fg.parts.append('<path d="'+_path(outer)+_path(hole)+'" fill-rule="evenodd"'+fg._attrs(tone,.55)+'/>')
-        for a,b in ((-.415,-.415),(.415,-.415),(-.415,.415),(.415,.415)):
-            pc=point(a*size,b*size)
-            if rounded:
-                sa=1 if a>0 else -1;sb=1 if b>0 else -1
-                v.poly(fg,[point(sa*size*.28,sb*size*.40),point(sa*size*.46,sb*size*.46),
-                           point(sa*size*.46,sb*size*.31)],tone,.4)
-            if fan.get('pads'):
-                corners=[tuple(pc[j]+u[j]*aa+axis[j]*bb for j in range(3)) for aa,bb in ((-5,-5),(5,-5),(5,5),(-5,5))]
-                v.poly(fg,corners,'#806a51' if style in _ORIGINAL else p.accent,.28)
-            fg.poly(_circle(v,pc,u,axis,size*.014,12),p.light,.27)
+        for sa in (-1,1):
+            for sb in (-1,1):
+                a,b=sa*pitch_x/2,sb*pitch_y/2
+                pc=point(a,b)
+                if rounded:
+                    half=size*.075
+                    v.poly(fg,[point(a-half,b-half),point(a+half,b-half),point(a+half,b+half),point(a-half,b+half)],tone,.4)
+                if fan.get('pads'):
+                    corners=[tuple(pc[j]+u[j]*aa+axis[j]*bb for j in range(3)) for aa,bb in ((-5,-5),(5,-5),(5,5),(-5,5))]
+                    v.poly(fg,corners,'#806a51' if style in _ORIGINAL else p.accent,.28)
+                fg.poly(_circle(v,pc,u,axis,size*.014,12),p.light,.27)
     # Rotate in a circular local plane, then project; never rotate a flattened fan.
     diameter=size*1.04;c0=v.at(center)
     pu=v.at(tuple(center[j]+u[j]*diameter for j in range(3)))
@@ -157,7 +161,7 @@ def _radial(p,fg,v,row,style,fan_for,make_rotor):
     return [rotor]
 
 def draw_air(p,fg,row,style,fan_for,make_rotor):
-    if row.get('id') not in _SUPPORTED:return None
+    if row.get('id') not in _SUPPORTED and not row.get('c_shape'):return None
     dims=row['dimensions_mm'];w,h,d=(dims[k] for k in ('width','height','depth'))
     under=row.get('fan_placement')=='under'
     # The low-profile factory installation is deliberately viewed from below:
@@ -177,12 +181,12 @@ def draw_air(p,fg,row,style,fan_for,make_rotor):
         upper=_fan(mid,fg,v,fan,style,make_rotor,(0,0,h))
         low_rotor['after_svg']=_svg(mid.finish())
         return [low_rotor,upper]
-    bottom,top=(48.,70.) if under else (h-60.,h-26.)
+    bottom,top=(h-22.,h) if under else (h-60.,h-26.)
     _pipes(p,v,row,(bottom+top)/2,style)
     # With an underside view the fin bank lies behind the installed fan.
     _fins(p,v,w*.96,d*.94,bottom,top,metal)
-    rotor=_fan(p,fg,v,fan,style,make_rotor,(0,-12 if under else 0,31. if under else h),
+    rotor=_fan(p,fg,v,fan,style,make_rotor,(0,-12 if under else 0,h-39. if under else h),
                normal='down' if under else 'up')
-    _wire_clips(fg,v,w*.96,d*.83,31 if under else top,h if not under else top)
+    _wire_clips(fg,v,w*.96,d*.83,h-39 if under else top,h if not under else top)
     return [rotor]
 

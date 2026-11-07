@@ -32,8 +32,8 @@ class AssemblyMotherboardTests(unittest.TestCase):
         for target in ('ctypes.WinDLL','subprocess.Popen','threading.Thread.start'):
             self.enterContext(patch(target,side_effect=AssertionError('Pure motherboard geometry must not query or launch work')))
 
-    def test_sixteen_real_models_cover_vendor_platform_and_form_with_source_counted_rear_layouts(self):
-        self.assertEqual(len(MODELS),16);self.assertEqual(len({row['id'] for row in MODELS}),16)
+    def test_catalog_models_cover_vendor_platform_and_form_with_source_counted_rear_layouts(self):
+        self.assertEqual(len(MODELS),28);self.assertEqual(len({row['id'] for row in MODELS}),28)
         self.assertTrue({(socket,form) for socket in ('LGA1700','AM5') for form in ('atx','matx','itx')}.issubset(
             {(row['socket'],row['form_factor']) for row in MODELS}))
         self.assertEqual({row['brand'] for row in MODELS},{'ASUS','MSI','ASRock','GIGABYTE'})
@@ -44,7 +44,8 @@ class AssemblyMotherboardTests(unittest.TestCase):
             self.assertTrue(row['manual'].startswith(('https://download','https://dlcdnets')))
             self.assertTrue(all(u.startswith('https://') for u in row['sources']))
             expected=sizes.get(row['id'],(305.,244.) if row['form_factor']=='atx' else (244.,244.) if row['form_factor']=='matx' else (170.,170.))
-            self.assertEqual(tuple(row['dimensions_mm'][k] for k in ('height','width')),expected)
+            for value,nominal in zip((row['dimensions_mm'][k] for k in ('height','width')),expected):
+                self.assertAlmostEqual(value,nominal,delta=.5)  # Preserve published inch/mm rounding.
             self.assertFalse(row['cad_verified']);self.assertFalse(row['pcb_routing_verified'])
             self.assertTrue(row['series']);self.assertEqual(row['market_coverage'],'named_model_only')
 
@@ -57,7 +58,7 @@ class AssemblyMotherboardTests(unittest.TestCase):
         self.assertIsNone(identify('ASUS','ROG STRIX Z790-A GAMING WIFI D4','unknown')['model'])
         known['model']['dimensions_mm']['height']=1
         self.assertEqual(get_model('asus-rog-strix-z790-a-wifi-d4')['dimensions_mm']['height'],305.)
-        self.assertEqual(len(choices()),16)
+        self.assertEqual(len(choices()),28)
         self.assertIsNone(resolve({'label':'ROG STRIX Z790-A GAMING WIFI D4'}))
 
     def test_asus_socket_dimm_and_primary_pcie_landmarks_match_official_manual_regions(self):
@@ -106,7 +107,7 @@ class AssemblyMotherboardTests(unittest.TestCase):
                 self.assertFalse(any('expression' in m.name for m in scene.meshes))
             signatures.append((model['cpu_uv'],model['dimm_uv'],tuple((r['kind'],r['uv']) for r in model['pcie']),
                 tuple(c['polygon'] for c in model['heatsinks'])))
-        self.assertEqual(len(set(signatures)),16)
+        self.assertEqual(len(set(signatures)),28)
 
     def test_product_specific_headers_native_storage_and_unknown_finish_are_honest(self):
         hero=build_scene(spec_for('asus-rog-maximus-z790-hero'))
@@ -163,6 +164,19 @@ class AssemblyMotherboardTests(unittest.TestCase):
     def test_all_named_socket_beds_are_reachable_through_retention_opening(self):
         for model in MODELS:
             scene=build_scene(spec_for(model['id'],0));cp=scene.metadata['attachment_anchors']['cpu']['position']
+            if model['socket']=='AM4':
+                # PGA receiving wells expose a dark recess, not gold LGA springs.
+                self.assertFalse(any(m.name=='board-socket-spring-heads' for m in scene.meshes))
+                expected='board-am4-dark-recess-floor'
+                origin=(cp[0]-100.,cp[1],cp[2]);nearest=[]
+                for mesh in scene.meshes:
+                    if mesh.component!='board':continue
+                    for n in range(0,len(mesh.vertices),18):
+                        points=[tuple(mesh.vertices[n+j+k]+mesh.position[k] for k in range(3)) for j in (0,6,12)]
+                        distance=ray_triangle(origin,(1,0,0),*points)
+                        if distance is not None:nearest.append((distance,mesh.name))
+                self.assertTrue(nearest,model['id']);self.assertEqual(min(nearest)[1],expected,model['id'])
+                continue
             bed=next(m for m in scene.meshes if m.name=='board-socket-spring-heads')
             samples=[]
             for n in range(0,len(bed.vertices),18):

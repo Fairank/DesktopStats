@@ -168,6 +168,11 @@ def _bezier(a,b,c,d=None,steps=7):
 
 
 def blade_contour(profile):
+    custom=profile.get('foil_profile')
+    keys=('sweep_deg','leading','trailing','root')
+    bounds=((-35,55),(.05,.5),(.05,.5),(.15,.5))
+    if isinstance(custom,dict) and set(custom)==set(keys) and all(type(custom[key]) in (int,float) and math.isfinite(custom[key]) and lo<=custom[key]<=hi for key,(lo,hi) in zip(keys,bounds)):
+        return tuple(custom[key] for key in keys)
     variants={'straight':(4,.36,.33,.32),'wide':(48,.46,.35,.28),'paired':(58,.37,.34,.23),'claw':(46,.43,.32,.27)}
     if profile.get('blade_variant')=='dispersion':return (44,.46,.33,.30)
     if profile.get('blade_variant')=='traditional':return (48,.27,.25,.20)

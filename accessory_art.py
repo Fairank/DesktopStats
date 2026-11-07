@@ -26,6 +26,7 @@ _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
 _MAX_ENTRIES = 16
 _CACHE = OrderedDict()
 _CHOICES = None
+_CHOICES_GENERATION = -1
 
 
 def _n(value):
@@ -195,6 +196,11 @@ def _rotor(row, style, x, y, width, height):
     else:
         contour = ('M48 '+_n(50-hub)+' C'+_n(27+bend)+' 30 28 '+_n(11-bend)+' 42 7 '
                    'C59 3 74 12 78 23 C63 24 62 40 54 '+_n(50-hub+3)+' Z')
+    if row.get('foil_profile'):
+        # Reuse the exact same sampled outline as the 3D leaf; style only paints.
+        from assembly_geometry import blade_polygon
+        points=blade_polygon(row)
+        contour=('M'+' L'.join(_n(50+px*45*1.07/3)+' '+_n(50+py*45*1.07/3) for px,py in points)+' Z') if points else ''
     if pen.hand:
         contour = contour.replace(' 7 C',' 7.35 C').replace(' 23 C',' 22.65 C')
     pen.parts.append('<g data-blade-count="'+str(blades)+'" data-contour="original-reference">')
@@ -202,8 +208,16 @@ def _rotor(row, style, x, y, width, height):
         pen.parts.append('<g data-foil="reverse-pitch" transform="translate(100 0) scale(-1 1)">')
     for i in range(blades):
         pen.parts.append('<g data-leaf="'+str(i+1)+'" transform="rotate('+_n(i*360/blades)+' 50 50)">')
-        pen.path(contour,leaf,.65)
-        if family=='noctua-a':
+        if style=='papercut':
+            # Cut edges keep overlapping paper leaves legible and rotation
+            # visible. Do not let equal fill/stroke merge the rotor into a disc.
+            attrs=pen._attrs(leaf,.65).replace('stroke="'+leaf+'"','stroke="'+pen.ink+'"',1)
+            pen.parts.append('<path d="'+contour+'"'+attrs+' data-cut-edge="visible"/>')
+        else:
+            pen.path(contour,leaf,.65)
+        if row.get('foil_profile'):
+            pass # Legacy decorative strokes are not reused at unrelated coordinates.
+        elif family=='noctua-a':
             for offset in (0,3,6):
                 pen.path('M'+_n(54+offset)+' 11 Q'+_n(51+offset)+' 15 '+_n(51+offset)+' 20',width=.35,opacity=.6)
         elif family in ('noctua-sterrox','noctua-g2'):
@@ -231,10 +245,22 @@ def _rotor(row, style, x, y, width, height):
     return dict(x=x,y=y,width=width,height=height,svg=_svg(pen.finish(),True),direction=1)
 
 
+def _fan_holes(row):
+    axes=row.get('mount_pitch_axes_mm')
+    if row.get('mount_pitch_axes_verified') and isinstance(axes,(list,tuple)) and len(axes)==2:
+        return tuple((.5+sx*axes[0]/row.get('width_mm',row['size_mm'])/2,.5+sy*axes[1]/row['size_mm']/2) for sx in (-1,1) for sy in (-1,1))
+    pitch=row.get('mount_pitch_mm')
+    if row.get('mount_pitch_verified') and type(pitch) in (int,float) and math.isfinite(pitch):
+        return tuple((.5+sx*pitch/row.get('width_mm',row['size_mm'])/2,.5+sy*pitch/row['size_mm']/2) for sx in (-1,1) for sy in (-1,1))
+    return ((.085,.085),(.915,.085),(.085,.915),(.915,.915))
+
+
 def _fan_frame(pen, x, y, size, row):
     if row.get('open_back'):
         _fan_foreground(pen,x,y,size,row)
         return
+    from accessory_fan_frame045 import draw_frame
+    if draw_frame(pen,x,y,size,row):return
     frame_color=row.get('frame_color',pen.body) if pen.style in ('miniature','classic','solid') else pen.body
     pad_color=('#725549' if row.get('family','').startswith('noctua') else '#35434c') if pen.style in ('miniature','classic','solid') else pen.accent
     if row.get('frame') == 'round':
@@ -253,12 +279,12 @@ def _fan_frame(pen, x, y, size, row):
         pen.ellipse(x+size/2,y+size/2,size*.418,size*.418,'none',size*.022,.8)
     if row.get('frame_rgb_ring'):
         pen.ellipse(x+size/2,y+size/2,size*.473,size*.473,'none',size*.025)
-    if row.get('family') in ('lian-li-sl','lian-li-infinity','phanteks-d30'):
+    if row.get('frame_rgb_sides') or row.get('family') in ('lian-li-sl','lian-li-infinity','phanteks-d30'):
         for yy in (y+size*.04,y+size*.96):
             pen.line_to(x+size*.19,yy,x+size*.81,yy,size*.022)
         # Interlocking side connectors, kept on the stationary frame.
         pen.rect(x+size*.99,y+size*.39,size*.025,size*.19,pen.accent,.3,.4)
-    for dx, dy in ((.085,.085),(.915,.085),(.085,.915),(.915,.915)):
+    for dx, dy in _fan_holes(row):
         if row.get('pads'):
             if row.get('pad_style')=='round':pen.ellipse(x+dx*size,y+dy*size,size*.052,size*.052,pad_color,.5)
             else:pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
@@ -271,18 +297,31 @@ def _fan_foreground(pen, x, y, size, row):
     radius=size*.437
     color=row.get('frame_color',pen.body) if pen.style in ('miniature','classic','solid') else pen.body
     pad_color=('#725549' if row.get('family','').startswith('noctua') else '#35434c') if pen.style in ('miniature','classic','solid') else pen.accent
-    if row.get('frame')=='round':
-        outer='M'+_n(cx+size*.49)+' '+_n(cy)+' A'+_n(size*.49)+' '+_n(size*.49)+' 0 1 0 '+_n(cx-size*.49)+' '+_n(cy)+' A'+_n(size*.49)+' '+_n(size*.49)+' 0 1 0 '+_n(cx+size*.49)+' '+_n(cy)+' Z'
-    else:
-        cut=size*.1 if row.get('family') in ('corsair-airguide','phanteks-d30','lian-li-sl','lian-li-infinity') else size*.025
-        outer='M'+_n(x+cut)+' '+_n(y)+' L'+_n(x+size-cut)+' '+_n(y)+' L'+_n(x+size)+' '+_n(y+cut)+' L'+_n(x+size)+' '+_n(y+size-cut)+' L'+_n(x+size-cut)+' '+_n(y+size)+' L'+_n(x+cut)+' '+_n(y+size)+' L'+_n(x)+' '+_n(y+size-cut)+' L'+_n(x)+' '+_n(y+cut)+' Z'
-    hole=' M'+_n(cx+radius)+' '+_n(cy)+' A'+_n(radius)+' '+_n(radius)+' 0 1 0 '+_n(cx-radius)+' '+_n(cy)+' A'+_n(radius)+' '+_n(radius)+' 0 1 0 '+_n(cx+radius)+' '+_n(cy)+' Z'
-    pen.parts.append('<path d="'+outer+hole+'" fill-rule="evenodd"'+pen._attrs(color,.6)+'/>')
-    for dx,dy in ((.085,.085),(.915,.085),(.085,.915),(.915,.915)):
-        if row.get('pads'):
-            if row.get('pad_style')=='round':pen.ellipse(x+dx*size,y+dy*size,size*.052,size*.052,pad_color,.5)
-            else:pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
-        pen.ellipse(x+dx*size,y+dy*size,size*.018,size*.018,pen.light,.45)
+    from accessory_fan_frame045 import draw_frame
+    if not draw_frame(pen,x,y,size,row):
+        if row.get('frame')=='round':
+            outer='M'+_n(cx+size*.49)+' '+_n(cy)+' A'+_n(size*.49)+' '+_n(size*.49)+' 0 1 0 '+_n(cx-size*.49)+' '+_n(cy)+' A'+_n(size*.49)+' '+_n(size*.49)+' 0 1 0 '+_n(cx+size*.49)+' '+_n(cy)+' Z'
+        else:
+            cut=size*.1 if row.get('family') in ('corsair-airguide','phanteks-d30','lian-li-sl','lian-li-infinity') else size*.025
+            outer='M'+_n(x+cut)+' '+_n(y)+' L'+_n(x+size-cut)+' '+_n(y)+' L'+_n(x+size)+' '+_n(y+cut)+' L'+_n(x+size)+' '+_n(y+size-cut)+' L'+_n(x+size-cut)+' '+_n(y+size)+' L'+_n(x+cut)+' '+_n(y+size)+' L'+_n(x)+' '+_n(y+size-cut)+' L'+_n(x)+' '+_n(y+cut)+' Z'
+        hole=' M'+_n(cx+radius)+' '+_n(cy)+' A'+_n(radius)+' '+_n(radius)+' 0 1 0 '+_n(cx-radius)+' '+_n(cy)+' A'+_n(radius)+' '+_n(radius)+' 0 1 0 '+_n(cx+radius)+' '+_n(cy)+' Z'
+        pen.parts.append('<path d="'+outer+hole+'" fill-rule="evenodd"'+pen._attrs(color,.6)+'/>')
+        for dx,dy in _fan_holes(row):
+            if row.get('pads'):
+                if row.get('pad_style')=='round':pen.ellipse(x+dx*size,y+dy*size,size*.052,size*.052,pad_color,.5)
+                else:pen.rect(x+dx*size-size*.045,y+dy*size-size*.045,size*.09,size*.09,pad_color,1,.5)
+            pen.ellipse(x+dx*size,y+dy*size,size*.018,size*.018,pen.light,.45)
+    if row.get('fixed_white_hub_window') and row.get('hub_window_face')=='front':
+        pen.parts.append('<g data-window="stationary-front-bearing-reference" data-light="fixed-white">')
+        pen.ellipse(cx,cy,size*.104,size*.104,pen.dark,.4)
+        ink=pen.ink;pen.ink='#f4f1dc'
+        pen.ellipse(cx,cy,size*.096,size*.096,'none',size*.012)
+        pen.ink=ink
+        for index in range(8):
+            angle=index*math.tau/8
+            pen.ellipse(cx+size*.06*math.cos(angle),cy+size*.06*math.sin(angle),size*.013,size*.018,'#ad844d' if pen.style in ('miniature','classic','solid') else pen.accent,.2)
+        pen.ellipse(cx,cy,size*.03,size*.03,pen.light,.3)
+        pen.parts.append('</g>')
     if row.get('hub_display'):
         pen.parts.append('<g data-display="stationary-blank-lcd">')
         pen.ellipse(cx,cy,size*.182,size*.182,pen.light,.7)
@@ -632,10 +671,13 @@ def _fan(row, style):
 
 
 def _cooler_fan(row):
-    fan=cooling_catalog.get_fan(row.get('fan_model'))
+    from cooling_pack_runtime045 import bundled_fan
+    fan=bundled_fan(row) or cooling_catalog.get_fan(row.get('fan_model'))
     if not fan:
         # Explicit bundled/reference leaf layout, not an invented retail identity.
-        fan=dict(family=row.get('fan_family','bundled-reference'),blades=row.get('fan_reference_blades',7),
+        size=row.get('fan_reference_mm',120)
+        fan=dict(size_mm=size,width_mm=size,depth_mm=row.get('fan_reference_depth_mm',25 if size>=100 else 15),
+                 family=row.get('fan_family','bundled-reference'),blades=row.get('fan_reference_blades',7),
                  hub_ratio=.25,blade_count_verified=row.get('fan_blade_count_verified',False),frame='square',outer_ring=row.get('fan_outer_ring',False),
                  frame_color='#35434d',blade_color='#60727d',
                  rgb=bool(row.get('fan_reference_rgb')),reference_details=True)
@@ -665,7 +707,7 @@ def _pump(p, fg, row, cx, cy, scale=1):
         for ratio in (.36,.25,.14):p.rect(cx-w*ratio,cy-h*ratio,w*ratio*2,h*ratio*2,'none',1,.65)
         if family=='deepcool_lt_mirror':
             p.poly([(cx+w*.51,cy-h*.36),(cx+w*.61,cy-h*.41),(cx+w*.61,cy+h*.24),(cx+w*.51,cy+h*.38)],p.glass,.5)
-    elif family in ('nzxt_lcd','aorus_round_lcd','lianli_infinity','thermaltake_mirror','id_white_ring','arctic_vrm','cm_dual_chamber','fractal_lumen'):
+    elif family in ('nzxt_lcd','nzxt_infinity','aorus_round_lcd','lianli_infinity','thermaltake_mirror','id_white_ring','arctic_vrm','cm_dual_chamber','fractal_lumen'):
         p.ellipse(cx,cy+3*scale,w*.51,h*.5,p.dark)
         p.ellipse(cx,cy,w*.51,h*.5,p.body)
         if family=='arctic_vrm':
@@ -679,12 +721,16 @@ def _pump(p, fg, row, cx, cy, scale=1):
             for xx in (cx-w*.22,cx+w*.22):
                 p.path('M'+_n(xx)+' '+_n(cy-h*.4)+' Q'+_n(xx-5*scale)+' '+_n(cy-h*.77)+' '+_n(xx-9*scale)+' '+_n(cy-h*.67),width=2.2)
         else:
-            p.ellipse(cx,cy,w*.36,h*.36,p.glass,.7)
-            if family in ('nzxt_lcd','aorus_round_lcd'):
-                p.path('M'+_n(cx-w*.22)+' '+_n(cy+2*scale)+' Q'+_n(cx)+' '+_n(cy-7*scale)+' '+_n(cx+w*.22)+' '+_n(cy-2*scale),width=.75)
-            elif family=='lianli_infinity':
+            p.ellipse(cx,cy,w*.36,h*.36,p.dark if family in ('nzxt_lcd','aorus_round_lcd') else p.glass,.7)
+            if family in ('lianli_infinity','nzxt_infinity'):
                 for ratio in (.28,.2):
                     p.ellipse(cx,cy,w*ratio,h*ratio,'none',.55)
+    elif family=='corsair_lcd':
+        p.rect(cx-w*.49,cy-h*.33,w*.98,h*.78,p.dark,3,.7)
+        p.rect(cx-w*.49,cy-h*.43,w*.98,h*.73,p.body,3,.7)
+        p.ellipse(cx,cy-h*.08,w*.47,h*.50,p.dark,.7)
+        p.ellipse(cx,cy-h*.08,w*.43,h*.46,p.accent,.5)
+        p.ellipse(cx,cy-h*.08,w*.39,h*.42,p.dark,.6)
     elif family in ('corsair_octagon','asus_tuf_hex'):
         cut=w*(.18 if family=='corsair_octagon' else .25)
         p.poly([(cx-w/2+cut,cy-h/2),(cx+w/2-cut,cy-h/2),(cx+w/2,cy-h/2+cut*.7),
@@ -710,6 +756,10 @@ def _pump(p, fg, row, cx, cy, scale=1):
         if family=='alphacool_square':
             for dx in (-.36,.36):
                 for dy in (-.34,.34):p.ellipse(cx+w*dx,cy+h*dy,.8,.8,p.light,.4)
+    if row.get('pump_fixed_white'):
+        ink=p.ink;p.ink='#f4f1dc'
+        p.line_to(cx-w*.12,cy,cx+w*.12,cy,.9)
+        p.ink=ink
     if family=='msi_radiator_pump':
         # Here the remote piece is a CPU block; the pump is in the radiator.
         p.rect(cx-7*scale,cy-5*scale,14*scale,10*scale,p.dark,1,.5)
@@ -724,7 +774,10 @@ def _cooler(row, style):
     fg=_Pen(style)
     rotors=[]
     from accessory_cooling_details040 import draw_air
-    custom=draw_air(p,fg,row,style,_cooler_fan,_rotor)
+    from accessory_cooling_details045 import draw_center,draw_low_profile
+    custom=draw_center(p,fg,row,style,_cooler_fan,_rotor)
+    if custom is None:custom=draw_low_profile(p,fg,row,style,_cooler_fan,_rotor)
+    if custom is None:custom=draw_air(p,fg,row,style,_cooler_fan,_rotor)
     if custom is not None:return p.finish(),custom,fg.finish()
     fan=_cooler_fan(row)
     count=row.get('fan_count',1)
@@ -998,12 +1051,15 @@ def _psu(row, style):
 
 def choices():
     """Return detached picker records without rendering any SVGs."""
-    global _CHOICES
-    if _CHOICES is None:
+    global _CHOICES,_CHOICES_GENERATION
+    from hardware_packs import library_generation
+    generation=library_generation()
+    if _CHOICES is None or _CHOICES_GENERATION!=generation:
         catalogs=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                   component_catalog.choices('psu'),cooling_catalog.choices_fans())
         _CHOICES={key:[dict(id=r['id'],label=r['label'],brand=r['brand'],fidelity='schematic_reference')
                        for r in rows] for key,rows in zip(('cases','coolers','psus','fans'),catalogs)}
+        _CHOICES_GENERATION=library_generation()
     return deepcopy(_CHOICES)
 
 
@@ -1013,7 +1069,8 @@ def art(kind, model_id, style='miniature'):
             or len(model_id)>64 or not _ID.fullmatch(model_id)
             or not isinstance(style,str) or style not in STYLES):
         return {}
-    key=(kind,model_id,style)
+    from hardware_packs import library_generation
+    key=(kind,model_id,style,library_generation())
     if key in _CACHE:
         _CACHE.move_to_end(key)
         return deepcopy(_CACHE[key])
@@ -1033,7 +1090,7 @@ def art(kind, model_id, style='miniature'):
         if rotor.get('after_svg'):
             combined+=rotor['after_svg'].split('>',1)[1].rsplit('</svg>',1)[0]
     combined+=foreground
-    fan_source=cooling_catalog.get_fan(row.get('fan_model')) if kind=='cooler' else {}
+    fan_source=_cooler_fan(row) if kind=='cooler' else {}
     sources=list(dict.fromkeys([*row.get('sources',[]),*row.get('appearance_sources',[]),
                                *fan_source.get('sources',[])]))
     details=dict(silhouette=row.get('layout',row.get('kind',row.get('form_factor',row.get('frame','reference')))),

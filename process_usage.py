@@ -3,6 +3,10 @@
 CPU is a percentage of the whole machine; memory is working-set bytes (including
 shared pages). GPU engines are aggregated per software/engine, then the busiest
 engine is selected, on the one explicitly identified DXGI adapter.
+Process read/write I/O is a separate machine-wide software reference: it may
+include cached, file, network and device operations, and is never bound to the
+selected physical disk. Only the existing demand worker collects its counters.
+Scope reference: https://learn.microsoft.com/en-us/previous-versions/aa394323(v=vs.85)
 """
 
 import math
@@ -13,11 +17,15 @@ from collections import defaultdict
 
 import psutil
 
-KINDS = frozenset(("cpu", "memory", "gpu", "vram"))
+KINDS = frozenset(("cpu", "memory", "gpu", "vram", "io"))
 INTERVAL = 1.0
 
 
 def resource_kind(metric):
+    if type(metric) is not str:
+        return ''
+    if metric in ('disk_read', 'disk_write'):
+        return 'io'
     if metric.startswith("cpu_") and "fan" not in metric:
         return "cpu"
     if metric.startswith("vram_") or metric == "vram_gb":
@@ -31,6 +39,11 @@ def resource_kind(metric):
 
 def valid(value):
     return type(value) in (int, float) and math.isfinite(value) and value >= 0
+
+
+def io_counter(value):
+    """OS byte counters are whole nonnegative signed-64 values, never rates."""
+    return type(value) is int and 0 <= value <= 0x7fffffffffffffff
 
 
 def safe_error(error, api):
@@ -47,16 +60,20 @@ def safe_error(error, api):
 
 
 def empty_report(kind, state="warming_up", reason_code="", **extra):
-    return dict(
+    result = dict(
         kind=kind,
         state=state,
         reason_code=reason_code,
         rows=[],
-        unit="bytes" if kind in ("memory", "vram") else "%",
+        unit="bytes/s" if kind == 'io' else "bytes" if kind in ("memory", "vram") else "%",
         denied_count=0,
         timestamp=None,
-        **extra,
     )
+    if kind == 'io':
+        result.update(attribution_scope='all_processes', physical_disk_attribution=False,
+                      fraction_scope='largest_observed_software')
+    result.update(extra)
+    return result
 
 
 class ProcessSource:
@@ -68,7 +85,7 @@ class ProcessSource:
 
             if getattr(self, '_native', None) is None:
                 self._native = WindowsProcessSnapshot()
-            snapshot = self._native.read()
+            snapshot = self._native.read(include_io=True) if 'io' in kinds else self._native.read()
             skipped = snapshot['skipped']
             return dict(rows=snapshot['rows'], denied={}, unidentified_count=skipped,
                         logical_cpus=psutil.cpu_count() if 'cpu' in kinds else None,
@@ -78,6 +95,9 @@ class ProcessSource:
             attrs.append("cpu_times")
         if "memory" in kinds:
             attrs.append("memory_info")
+        io_supported = 'io' in kinds and hasattr(psutil.Process, 'io_counters')
+        if io_supported:
+            attrs.append('io_counters')
         rows, denied = [], defaultdict(int)
         # Process(pid) is deliberately fresh. process_iter's cached create_time
         # can otherwise associate a recycled PID with the old software.
@@ -110,6 +130,14 @@ class ProcessSource:
                     row["memory_bytes"] = memory.rss
                 else:
                     denied["memory"] += 1
+            if 'io' in kinds:
+                counters = info.get('io_counters') if io_supported else None
+                read_bytes = getattr(counters, 'read_bytes', None)
+                write_bytes = getattr(counters, 'write_bytes', None)
+                if io_counter(read_bytes) and io_counter(write_bytes):
+                    row.update(io_read_bytes=read_bytes, io_write_bytes=write_bytes)
+                # Missing fields are counted once by _rank, while denied
+                # processes absent from rows are counted above.
             rows.append(row)
         return dict(
             rows=rows,
@@ -127,6 +155,7 @@ class ProcessUsageSampler:
         self.gpu = gpu
         self.clock, self.wall_clock = clock or time.monotonic, wall_clock or time.time
         self.previous, self.previous_at = {}, None
+        self.previous_kinds = frozenset()
         self.closed = False
 
     def _gpu_read(self, kinds):
@@ -160,6 +189,7 @@ class ProcessUsageSampler:
             snapshot = self.source.snapshot(kinds)
         except (OSError, psutil.Error, ValueError) as error:
             self.previous, self.previous_at = {}, None
+            self.previous_kinds = frozenset()
             return {
                 key: empty_report(
                     target["kind"],
@@ -185,6 +215,7 @@ class ProcessUsageSampler:
             for key, target in targets.items()
         }
         self.previous, self.previous_at = processes, now
+        self.previous_kinds = frozenset(kinds)
         return reports
 
     def _rank(self, target, processes, snapshot, gpu, elapsed, timestamp):
@@ -194,6 +225,8 @@ class ProcessUsageSampler:
         denominator = 100
         denied = snapshot.get("denied", {}).get(kind, 0)
         totals, members, names = defaultdict(float), defaultdict(set), {}
+        io_reads, io_writes = defaultdict(float), defaultdict(float)
+        warming = 0
 
         def add(process, value, engine=None):
             if not valid(value) or value <= 0:
@@ -224,6 +257,41 @@ class ProcessUsageSampler:
             denominator = snapshot.get("total_memory")
             for row in processes.values():
                 add(row, row.get("memory_bytes"))
+        elif kind == 'io':
+            current = []
+            for row in processes.values():
+                if (row['started'] > 0 and io_counter(row.get('io_read_bytes'))
+                        and io_counter(row.get('io_write_bytes'))):
+                    current.append(row)
+                else:
+                    denied += 1
+            if not current and (denied or snapshot.get('unidentified_count')):
+                return empty_report(kind, 'unavailable', 'io_counters_unavailable', denied_count=denied,
+                    unidentified_count=snapshot.get('unidentified_count', 0), timestamp=timestamp)
+            if ('io' not in self.previous_kinds or elapsed is None or not .05 <= elapsed <= 30):
+                return empty_report(kind, reason_code='rate_baseline', denied_count=denied,
+                    unidentified_count=snapshot.get('unidentified_count', 0))
+            baselines = 0
+            for row in current:
+                old = same_process(row)
+                before_read = old.get('io_read_bytes') if old else None
+                before_write = old.get('io_write_bytes') if old else None
+                if (not io_counter(before_read) or not io_counter(before_write)
+                        or row['io_read_bytes'] < before_read or row['io_write_bytes'] < before_write):
+                    warming += 1
+                    continue
+                baselines += 1
+                read_rate = (row['io_read_bytes'] - before_read) / elapsed
+                write_rate = (row['io_write_bytes'] - before_write) / elapsed
+                add(row, read_rate + write_rate)
+                key = row['name'].strip()[:180].casefold()
+                io_reads[key] += read_rate
+                io_writes[key] += write_rate
+            if current and not baselines:
+                return empty_report(kind, reason_code='rate_baseline', denied_count=denied,
+                    unidentified_count=snapshot.get('unidentified_count', 0), warming_up_count=warming)
+            # These bars compare software rates, never disk occupancy/capacity.
+            denominator = max(totals.values(), default=0.)
         else:
             if gpu.get("errors", {}).get(kind):
                 return empty_report(kind, "unavailable", "query_failed", error=gpu["errors"][kind])
@@ -278,30 +346,36 @@ class ProcessUsageSampler:
             fraction = (
                 min(1.0, value / denominator) if valid(denominator) and denominator > 0 else 0.0
             )
-            rows.append(
-                dict(
+            result_row = dict(
                     name=names[key], value=value, fraction=fraction, process_count=len(members[key])
                 )
-            )
+            if kind == 'io':
+                result_row.update(read_bytes_per_second=io_reads[key], write_bytes_per_second=io_writes[key])
+            rows.append(result_row)
         rows.sort(key=lambda row: (-row["value"], row["name"].casefold(), row["name"]))
         unidentified = snapshot.get("unidentified_count", 0)
-        state = "partial" if denied or unidentified else "ready" if rows else "idle"
-        return dict(
+        state = "partial" if denied or unidentified or warming else "ready" if rows else "idle"
+        result = dict(
             kind=kind,
             state=state,
             reason_code="",
             rows=rows[:5],
             denied_count=denied,
             unidentified_count=unidentified,
-            unit="bytes" if kind in ("memory", "vram") else "%",
+            unit="bytes/s" if kind == 'io' else "bytes" if kind in ("memory", "vram") else "%",
             timestamp=timestamp,
         )
+        if kind == 'io':
+            result.update(attribution_scope='all_processes', physical_disk_attribution=False,
+                fraction_scope='largest_observed_software', warming_up_count=warming)
+        return result
 
     def close(self):
         if self.closed:
             return
         self.closed = True
         self.previous, self.previous_at = {}, None
+        self.previous_kinds = frozenset()
         if self.gpu is not None:
             self.gpu.close()
             self.gpu = None

@@ -24,6 +24,7 @@ ColumnLayout {
     }
     readonly property int displayedCount: softwareRows.count
     readonly property bool unsupported: context.reason_code === "not_attributable"
+    readonly property bool processIo: context.kind === "io"
     readonly property bool dark: ink.r > .5
     readonly property color accent: dark ? "#79b2ff" : "#2279d5"
     visible: Object.keys(context).length > 0
@@ -64,13 +65,15 @@ ColumnLayout {
     }
     function syncRows() {
         const rows = (context.rows || []).slice(0, 5)
+        const largestIo = root.processIo ? Math.max(0,...rows.map(row=>Number.isFinite(row.value)?row.value:0)) : 0
         for (let index = 0; index < rows.length; index++) {
             const row = rows[index]
             const record = {
                 softwareName: String(row.name || ""),
                 softwareValue: String(row.value_text || "—"),
                 softwareCount: Math.max(1, Number(row.process_count) || 1),
-                softwareFraction: Number.isFinite(row.fraction) ? Math.max(0, Math.min(1, row.fraction)) : 0
+                softwareFraction: root.processIo ? (largestIo>0 && Number.isFinite(row.value)?Math.max(0,Math.min(1,row.value/largestIo)):0)
+                    : Number.isFinite(row.fraction) ? Math.max(0, Math.min(1, row.fraction)) : 0
             }
             if (index >= softwareRows.count) softwareRows.append(record)
             else {
@@ -95,6 +98,13 @@ ColumnLayout {
             text: root.context.caption || ""; textFormat: Text.PlainText
             color: root.muted; font.family: root.fontFamily; font.pixelSize: 11
         }
+    }
+    Text {
+        objectName: "processIoScope"
+        visible: root.processIo; Layout.fillWidth: true
+        text: root.tr("所有进程读写 I/O，含缓存与设备，非当前磁盘统计。")
+        textFormat: Text.PlainText; wrapMode: Text.Wrap
+        color: root.muted; font.family: root.fontFamily; font.pixelSize: 11; lineHeight: 1.2
     }
     ColumnLayout {
         Layout.fillWidth: true; spacing: 2
@@ -166,7 +176,7 @@ ColumnLayout {
     Button {
         id: limitationsToggle
         objectName: "processUsageLimitationsToggle"
-        visible: !!root.context.note || !!root.context.technical
+        visible: (!root.processIo && !!root.context.note) || !!root.context.technical
         Layout.fillWidth: true; implicitHeight: 28; padding: 0
         checkable: true; checked: root.showLimitations
         onClicked: root.showLimitations = checked
@@ -181,7 +191,7 @@ ColumnLayout {
     ColumnLayout {
         visible: root.showLimitations; Layout.fillWidth: true; spacing: 6
         Text {
-            visible: !!text; Layout.fillWidth: true
+            visible: !root.processIo && !!text; Layout.fillWidth: true
             text: root.context.note || ""; textFormat: Text.PlainText; wrapMode: Text.Wrap
             color: root.muted; font.family: root.fontFamily; font.pixelSize: 11
         }

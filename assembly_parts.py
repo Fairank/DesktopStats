@@ -23,6 +23,7 @@ def choices(translate=lambda text:text):
     from motherboard_catalog import choices as boards,get_model as get_board
     from cooling_catalog import choices_coolers,choices_fans
     from liquid_cooling_catalog044 import records as radiator_records
+    from cooling_pack_runtime045 import radiator_choices
     from component_catalog import choices as components,get_component
     from hardware_appearance import CATALOG,BRANDS
     from cpu_package_runtime import reference_choices
@@ -35,7 +36,7 @@ def choices(translate=lambda text:text):
         coolers=empty('未选择散热器')+list(choices_coolers()),
         fans=empty('不放置风扇')+list(choices_fans()),
         radiators=empty('沿用参考冷排')+[dict(id=row['id'],label=row['label'],brand=row['brand'],fan_size_mm=row['fan_size_mm'],fan_count=row['fan_count'],fan_mount_pitch_mm=row.get('fan_mount_pitch_mm'),
-            fan_mount_pitch_verified=row.get('fan_mount_pitch_verified',False)) for row in radiator_records()],
+            fan_mount_pitch_verified=row.get('fan_mount_pitch_verified',False)) for row in radiator_records()]+radiator_choices(),
         radiator_fans=empty('沿用原配／参考风扇')+list(choices_fans()),
         radiator_layouts=[dict(id=key,label=translate(label)) for key,label in
             (('single','单面风扇'),('push_pull','双面夹心'),('none','不装风扇（结构检视）'))],

@@ -141,6 +141,30 @@ REVIEWED_FILES = frozenset(
             "showcase/liquid-six044.png",
             "showcase/liquid-six044.gif",
             "showcase/liquid-six044.mp4",
+            "showcase/motherboards-original045.png",
+            "showcase/motherboards-six045.png",
+            "showcase/board-socket-io045.png",
+            "showcase/radiators-atlas045-01.png",
+            "showcase/radiators-atlas045-02.png",
+            "showcase/radiators-atlas045-03.png",
+            "showcase/radiators-atlas045-04.png",
+            "showcase/radiators-atlas045-05.png",
+            "showcase/radiators-atlas045-06.png",
+            "showcase/radiators-atlas045-07.png",
+            "showcase/fan-atlas045-01.png",
+            "showcase/fan-atlas045-02.png",
+            "showcase/fan-atlas045-03.png",
+            "showcase/cooler-atlas045-01.png",
+            "showcase/cooler-atlas045-02.png",
+            "showcase/cooling-six045-01.png",
+            "showcase/cooling-six045-02.png",
+            "showcase/cooling-six045-03.png",
+            "showcase/cooling-motion-six045.gif",
+            "showcase/cooling-geometry-six045-01.png",
+            "showcase/cooling-geometry-six045-02.png",
+            "showcase/cooling-geometry-six045-03.png",
+            "showcase/cooling-geometry-six045-04.png",
+            "showcase/cooling-geometry-six045-05.png",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]
@@ -364,6 +388,15 @@ def _read(root, name):
 
 
 def _scan(name, data):
+    if PurePosixPath(name).suffix.casefold()=='.dspack':
+        if not name.startswith('model-packs/'):
+            raise ExportError('Model data archive outside reviewed folder: '+name)
+        from hardware_packs import _archive,PackError
+        try:manifest,models=_archive(data)
+        except PackError as error:raise ExportError('Invalid data-only model archive: '+name) from error
+        for leaf,content in (('manifest.json',manifest),('models.json',models)):
+            _scan(name+'!/'+leaf,json.dumps(content,ensure_ascii=False).encode('utf8'))
+        return
     if _binary_path(name) or _binary_magic(data):
         raise ExportError(
             "Executable/object binary is not permitted in this source export: " + name
@@ -555,7 +588,7 @@ def export_source(output=None, *, root=ROOT, contract=BUILD):
         "version": version,
         "archive_root": prefix,
         "binaries_included": False,
-        "binary_policy": "No executable/object/install binaries; reviewed original image/video assets retained.",
+        "binary_policy": "No executable/object/install binaries; reviewed original image/video and validated data-only model packs retained.",
         "dependency_preparation_required": True,
         "files": rows,
         "manifest_note": "This manifest describes every other archive member; no self-hash.",

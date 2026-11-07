@@ -52,8 +52,8 @@ class AssemblyBoardDetail043Tests(unittest.TestCase):
         meshes,metadata=enrich_motherboard((),value,anchors,level)
         return meshes,metadata,anchors
 
-    def test_all_sixteen_boards_three_lods_keep_counts_open_socket_envelopes_and_finite_normals(self):
-        self.assertEqual(len(MODELS),16)
+    def test_all_catalog_boards_three_lods_keep_counts_open_socket_envelopes_and_finite_normals(self):
+        self.assertEqual(len(MODELS),28)
         for model in MODELS:
             for level in ('eco','balanced','close'):
                 with self.subTest(board=model['id'],level=level):
