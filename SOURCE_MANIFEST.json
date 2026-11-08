@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 95952,
-      "sha256": "29d2e1e4004764b3355944a1a6c3109fdd370a8babedecd9402bd681e559e7bd"
+      "bytes": 99950,
+      "sha256": "7c1be0071e9b679cd95722d705ea3366c80cddd2c0ad6d1381dc3e1cfdf9cd90"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1389,8 +1389,8 @@
     },
     {
       "path": "docs/ARTWORK051_INDEX.json",
-      "bytes": 452,
-      "sha256": "ece52be51fe9d2e1d587e64ec4c00ed39303af20226ca7f8cfd0edea2da4b9eb"
+      "bytes": 8839,
+      "sha256": "9d12b243ca656a82a786acbc36a76e1b28c95b31a93cf988cfd2bc6392e79401"
     },
     {
       "path": "docs/ASSEMBLY_CATALOG.json",
@@ -1509,13 +1509,13 @@
     },
     {
       "path": "docs/QUALITY051.md",
-      "bytes": 21257,
-      "sha256": "76fe1e53933e04917f089327ecfd56bcf691b16befb93d77d5fe6c381fd4d34f"
+      "bytes": 26546,
+      "sha256": "12329dc53e345ac849feb2e1a59905c31098aaf675401a2d049de6f3384d3637"
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 103446,
-      "sha256": "b181d0e46f11bca208124d2d745c5e6f64723b490c2c94b8c736bbb9c4c19b51"
+      "bytes": 111496,
+      "sha256": "d08fe21af2b375e67b9fdbcc9f1e5bfb08b284b1434a4c3c8144fa5cff555645"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",

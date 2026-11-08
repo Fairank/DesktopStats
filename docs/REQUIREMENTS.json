@@ -780,7 +780,7 @@
         "0.51数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
       ],
       "id": "github_optional_packs",
-      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。",
+      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。",
       "native_acceptance_pending": false,
       "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
       "source_files": [
@@ -794,7 +794,8 @@
         "docs/COOLING_PACKS_INDEX.json",
         "tools/export_loop_packs046.py",
         "docs/LOOP_PACKS_INDEX.json",
-        "liquid_gpu_schema047.py"
+        "liquid_gpu_schema047.py",
+        "docs/ARTWORK051_INDEX.json"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -812,13 +813,13 @@
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
         "不能撤销MIT/ISC/LGPL等已有许可，也不能靠水印阻止复制；厂商商标、照片等权利未因此授予。",
-        "0.50来源标记只覆盖指定参考GLB和五项PNG/GIF；最终上传/安装结果以候选最终提交说明为准。GLB原版四CPU视图已有对照，但不是零像素差异或六版原生验收。SVG/JSON扩展包与实时生成全库暂未覆盖。",
+        "0.50仅指定6件，0.51仅新增指定10件候选，不覆盖SVG／JSON扩展包、实时生成全库或每个小Mesh。051的21源父组中20支持，透明外盖有效容量0未标；无钥CQA不拥有提取能力。GLB软件四视图有真实像素差，不是原生或零差验收。",
         "JPEG、有损重编码、调色板重新量化、几何重建/量化/单位重写或烘焙等不保证保留标记；21源父组支持（18非空part_id和3组件回退组）不等于每个小Mesh或任意片段都可独立提取。",
         "正式权利人密钥尚未备份或做恢复演练；已有备份验证仅用合成测试密钥。",
         "标记与签名仅辅助来源核对；本地哈希或时间不能自动证明创作归属、侵权、司法采纳或胜诉。第三方provenance不得标成自己的水印。"
       ],
       "id": "copyright_noncommercial",
-      "implementation": "原PolyForm非商用全文与第三方/既有授权例外保留；转载Required Notice含作者和仓库来源。0.50正式密钥已签发1GLB/3PNG/2GIF，六件验签、精确SHA和提取匹配且0误码；未标记原件与错误秘密均阴性。受测元数据改动仍可识别，但修改件不冒称原签名文件。050签发候选、固定数据入口及最终r2相关验证已完成，最终发布结果见候选最终提交说明；049原件未追称有本次水印。",
+      "implementation": "原PolyForm非商用全文与第三方/既有授权例外保留；转载Required Notice含作者和仓库来源。0.50正式密钥已签发1GLB/3PNG/2GIF，六件验签、精确SHA和提取匹配且0误码；未标记原件与错误秘密均阴性。受测元数据改动仍可识别，但修改件不冒称原签名文件。050签发候选、固定数据入口及最终r2相关验证已完成，最终发布结果见候选最终提交说明；049原件未追称有本次水印。 0.51另签发1GLB／8PNG／1GIF候选（10件），owner标记提取0误码；独立无钥CQA验签、核字节及几何／颜色／四视图，不冒称独立提取。早期r1虽标记通过却有私有GLB配色错，未发布；r4仅修真实原版palette后重签GLB，九图片签名字节不变。当前固定数据候选已本地核验，仍待原子上传；不改变原非商用与第三方例外。",
       "native_acceptance_pending": false,
       "requirement": "上传GitHub并标版权，原创作品禁止商业使用盈利，保留应有第三方例外。转载保留作者、项目来源与许可；为原创作品加入肉眼难察且可提取的隐形来源水印，以辅助维权。",
       "source_files": [
@@ -834,7 +835,8 @@
         "geometry_watermark050.py",
         "image_watermark050.py",
         "docs/WATERMARK050_PUBLIC_KEY.json",
-        "docs/WATERMARK050_INDEX.json"
+        "docs/WATERMARK050_INDEX.json",
+        "docs/ARTWORK051_INDEX.json"
       ],
       "status": "partial",
       "status_label": "非商用／转载保留；限定资产本地已核",
@@ -849,16 +851,17 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.51受影响软件回归已通过；候选包隔离检查、独立资产真实签发／CQA和有效远端入口仍待实际记录。未安装，CPU温度、磨砂、游戏隐藏和整款资源原生验收仍未完成。"
+        "0.51软件回归、10资产／独立CQA、候选包18项及文档同步后的同18项复检、离线签名数据审计均已通过；源码与数据作为候选资料提供，固定提交的远端读回结果另存发行核对记录。未安装，CPU温度、磨砂、游戏、屏幕二与整款占用原生验收均未完成。"
       ],
       "id": "github_publish_merge_install",
-      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。",
+      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。 0.51数据候选已生成固定提交与索引、真实owner签发及独立CQA；源码与数据按固定索引作为候选分支提供；候选包18项隔离检查及文档同步后同18项复检通过，安装／原生仍未做。",
       "native_acceptance_pending": true,
       "requirement": "合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。",
       "source_files": [
         "product_version.py",
         "tools/export_source.py",
-        "README.md"
+        "README.md",
+        "docs/ARTWORK051_INDEX.json"
       ],
       "status": "prior_publication_evidence_current_candidate_pending",
       "status_label": "源码候选；安装／原生待验",
@@ -902,7 +905,7 @@
         "核对完成不代表全部产品功能交付；任何未完成类别、型号、实时来源与实测项继续保留。"
       ],
       "id": "readme_full_requirements_ledger",
-      "implementation": "保留29组原ID及历史记录，显卡插拔和真实3D体积仍在对应组；0.50将转载来源、非商用与真正隐形标记要求加入原版权组，并列明未覆盖资产和待核结果。不用文档、签名或测试通过代替观感、全部硬件细节或新版原生验收。 0.51继续在同一29组逐项更新既有缺陷、性能范围与未完成项；首轮99模块1253项、1原有跳过，1旧整行哈希夹具失败已保留；另在读审后实修查询失败消费端，源码返修及PSU墨线切焦补测后，最终r2实际100模块1261项、1原有权限跳过，其余通过，无失败／超时；583代码文件前后SHA稳定，1116.109秒。专项124项不与主回归累计；数据签发、候选包及原生分别验收。",
+      "implementation": "保留29组原ID及历史记录，显卡插拔和真实3D体积仍在对应组；0.50将转载来源、非商用与真正隐形标记要求加入原版权组，并列明未覆盖资产和待核结果。不用文档、签名或测试通过代替观感、全部硬件细节或新版原生验收。 0.51继续在同一29组逐项更新既有缺陷、性能范围与未完成项；首轮99模块1253项、1原有跳过，1旧整行哈希夹具失败已保留；另在读审后实修查询失败消费端，源码返修及PSU墨线切焦补测后，最终r2实际100模块1261项、1原有权限跳过，其余通过，无失败／超时；583代码文件前后SHA稳定，1116.109秒。专项124项不与主回归累计；数据签发、候选包及原生分别验收。 Phase2补固定数据候选入口及r1配色返修历史，区分583本地围栏与582固定Git代码，未把签名或本地数据核验当成已发布／原生通过。 Phase3归档首build与18项隔离检查、独立离线数据11签名／32Git blob／ZIP10成员精确一致；文档同步后的同18项复检已通过，固定提交远端读回另存独立发行记录；不把初包哈希作最终值。",
       "native_acceptance_pending": false,
       "requirement": "全文所有重点写入README；全部完成后逐一核对并汇报问题和缺项。",
       "source_files": [
@@ -1823,6 +1826,28 @@
       "failure_scope": "Old whole-row hash fixture, exact bridge in progress; first report retained",
       "post_run_real_production_correction": "Current query failure must hide all targets even after last safe desktop",
       "counts_are_not_final_r2": true
+    },
+    "initial_candidate_package": {
+      "passed": true,
+      "checks": 18,
+      "qml_warnings": [],
+      "node_on_child_path": false,
+      "node_bundled": false,
+      "qt3d_bundled": false,
+      "runtime_assets_verified": 70,
+      "duplicate_runtime_showcase": false,
+      "native_desktop_opened": false,
+      "installed": false,
+      "final_document_sync_and_r2_recheck_pending": true
+    },
+    "initial_build": {
+      "exit_code": 0,
+      "elapsed_seconds": 33.9469162,
+      "source_unchanged": true,
+      "retained_stats_process_unchanged": true,
+      "installed": false,
+      "native_desktop_started": false,
+      "gl_context": false
     }
   },
   "scoped_performance_051": {
@@ -1982,15 +2007,56 @@
   },
   "artwork_distribution_051": {
     "index_file": "docs/ARTWORK051_INDEX.json",
-    "stage": "placeholder_awaiting_signed_optional_data_publication",
+    "stage": "signed_optional_candidate_local_verified_awaiting_atomic_push",
     "published": false,
     "loaded_at_app_startup": false,
-    "asset_count": 0,
+    "asset_count": 10,
     "native_acceptance": false,
-    "phase": "phase1_regression_frozen_awaiting_real_signing_and_independent_CQA",
+    "phase": "phase2_local_data_and_independent_CQA_passed",
     "planned_asset_count": 10,
-    "actual_signed_assets": 0,
-    "independent_CQA_completed": false
+    "actual_signed_assets": 10,
+    "independent_CQA_completed": true,
+    "data_commit": "c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc",
+    "data_tree": "eac6d3db77f9f4b1e758edaf174e92de8f74e501",
+    "source_producer_commit": "b48f178155010845fbf79c3e37a07a944d5f9b37",
+    "gallery_url": "https://github.com/Fairank/DesktopStats/tree/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc",
+    "archive": {
+      "file": "DesktopStats-protected-reference051.zip",
+      "bytes": 1275838,
+      "sha256": "540d799051992eea3d3cc5646487a13c8c9d2493bbc213d99325b8ed5bc96cc8",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/DesktopStats-protected-reference051.zip"
+    },
+    "public_quality_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/public-model-quality051.json",
+    "public_quality_sha256": "9ca80a9612ae231e06a9a8f9838d8eb0eb41095014dc460ade53c18456b8abd2",
+    "signed_release_index_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/RELEASE_INDEX.json",
+    "signed_release_index_sha256": "6c8704156b4fcd89933fcae79de0962ccc7bc870da07693c8428729a7284ca27",
+    "formats": {
+      "glb": 1,
+      "png": 8,
+      "gif": 1
+    },
+    "atomic_push_pending": true,
+    "local_code_fence_files": 583,
+    "pinned_git_code_blobs": 582,
+    "excluded_local_generated_spec": "DesktopStats.spec",
+    "producer_source_export_files": 950,
+    "producer_source_export_including_manifest_blobs": 951,
+    "producer_source_zip_bytes": 79670305,
+    "producer_source_zip_sha256": "5343e346be33cbb6880157ca35b35430b276701f913aad0a83ff4e203fe5f37a",
+    "data_payload_files_before_release_index": 31,
+    "data_payload_bytes_before_release_index": 20455662,
+    "signed_data_files_including_release_index": 32,
+    "package_checks_passed": null,
+    "initial_package_checks_passed": true,
+    "initial_package_checks": 18,
+    "final_document_synced_package_checks_pending": true,
+    "independent_offline_audit": {
+      "passed": true,
+      "signatures": 11,
+      "git_blobs": 32,
+      "zip_members_exact": 10,
+      "remote_byte_verification": false
+    }
   },
   "ink_focus_051": {
     "stage": "Targeted tests and six-style PSU software static readability accepted; final100 regression/native pending",
@@ -2045,5 +2111,119 @@
     "benchmark_report_module_sha_is_previous_stage": true,
     "benchmark_is_current_whole_module_measurement": false,
     "close_weakref_scope_is_process_memory_measurement": false
+  },
+  "watermark_051": {
+    "stage": "official_owner_r2_signed_candidate_independent_no_key_CQA_passed_not_pushed",
+    "all_catalog_protected": false,
+    "runtime_embedding": false,
+    "private_keys_included": false,
+    "assets": {
+      "glb": 1,
+      "png": 8,
+      "gif": 1,
+      "total": 10
+    },
+    "owner_embedding_bit_errors": 0,
+    "owner_signature_and_exact_hash_verified": true,
+    "independent_CQA_extracted_marker": false,
+    "independent_CQA_read_owner_keys": false,
+    "reference_groups": 21,
+    "supported_reference_groups": 20,
+    "unsupported_transparent_panel_capacity": 0,
+    "every_mesh_marked": false,
+    "model_scope": {
+      "meshes": 398,
+      "triangles": 112850,
+      "nodes": 432,
+      "original_part_groups": 18,
+      "component_fallback_groups": 3,
+      "derived_cable_groups": 12,
+      "all_mechanical_interactions_complete": false
+    },
+    "max_world_position_delta_mm": 0.00010235906881509414,
+    "bbox_delta_mm": 0,
+    "max_face_normal_angle_deg": 0.010094891655009128,
+    "orientation_flips": 0,
+    "new_degenerate": 0,
+    "other_BIN_normals_nodes_materials_animation_equal": true,
+    "four_view_pixel_comparison": {
+      "all": {
+        "changed_RGB_pixels": 1837,
+        "changed_bbox": [
+          216,
+          155,
+          741,
+          848
+        ],
+        "delta_ge2": 1043,
+        "delta_ge32": 9,
+        "max_RGB_difference": 36,
+        "max_actual_worker_projected_delta_pixels": 0.00018310546875,
+        "max_alpha_difference": 0,
+        "mean_abs_RGB_difference": 0.00931604938271605,
+        "pixels": 810000
+      },
+      "cpu": {
+        "changed_RGB_pixels": 0,
+        "changed_bbox": null,
+        "delta_ge2": 0,
+        "delta_ge32": 0,
+        "max_RGB_difference": 0,
+        "max_actual_worker_projected_delta_pixels": 0.0001856311807341986,
+        "max_alpha_difference": 0,
+        "mean_abs_RGB_difference": 0.0,
+        "pixels": 518400
+      },
+      "gpu": {
+        "changed_RGB_pixels": 286,
+        "changed_bbox": [
+          297,
+          187,
+          738,
+          379
+        ],
+        "delta_ge2": 96,
+        "delta_ge32": 0,
+        "max_RGB_difference": 28,
+        "max_actual_worker_projected_delta_pixels": 9.1552734375e-05,
+        "max_alpha_difference": 0,
+        "mean_abs_RGB_difference": 0.0008083900226757369,
+        "pixels": 588000
+      },
+      "ram": {
+        "changed_RGB_pixels": 0,
+        "changed_bbox": null,
+        "delta_ge2": 0,
+        "delta_ge32": 0,
+        "max_RGB_difference": 0,
+        "max_actual_worker_projected_delta_pixels": 0.00018310546875,
+        "max_alpha_difference": 0,
+        "mean_abs_RGB_difference": 0.0,
+        "pixels": 518400
+      }
+    },
+    "pixel_identical": false,
+    "native_acceptance": false,
+    "legal_conclusion": false,
+    "owner_key_backup_completed": false,
+    "history_r1": {
+      "ten_asset_codec_checks_passed": true,
+      "visual_glb_palette_accepted": false,
+      "private_exporter_error": "classic snapshot colors mislabeled miniature; caught by independent no-key color bridge before publication",
+      "production_source_changed": false,
+      "old_evidence_preserved": true
+    },
+    "palette_r4_correction": {
+      "unsigned_sha256": "105f1a47bd3be43b3fad2d5af570cc2542d31dc83a9b5a6f2dc7bafbb6d4ae40",
+      "corrected_mesh_material_colors": 396,
+      "meshes": 398,
+      "material_count": 111,
+      "new_or_split_materials": 0,
+      "all_BIN_nodes_animation_other_JSON_equal": true,
+      "only_glb_reissued": true,
+      "nine_image_assets_and_sidecars_byte_equal": true
+    },
+    "official_glb_sha256": "6397c892a9a8ed69e5437e1726a3278f1c28902c936a19d41e3fad52e218bd0c",
+    "official_glb_bytes": 8604288
   }
 }
