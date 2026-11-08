@@ -59,6 +59,36 @@ def _curve(points,steps=12):
     return [tuple((1-t)**3*a[n]+3*(1-t)**2*t*b[n]+3*(1-t)*t*t*c[n]+t**3*d[n] for n in range(3)) for t in (i/steps for i in range(steps+1))]
 
 
+def _aio_hose(builder,start,end,start_axis,end_axis,start_radius=5.,end_radius=6.):
+    """Join existing AIO outlet mouths without inventing a new fitting or tach.
+
+    End rings and short leads follow each already-modelled connector axis.
+    Only the middle route is illustrative; no clearance or bend-radius claim.
+    Small annular end walls close the old outer-surface gap where the existing
+    connector is narrower than the unchanged12.4mm reference hose envelope.
+    """
+    from assembly_geometry import _quad
+    start_axis=_unit(start_axis);end_axis=_unit(end_axis)
+    distance=math.sqrt(_dot(_sub(end,start),_sub(end,start)))
+    lead=min(15.,distance*.08);handle=min(45.,distance*.20)
+    a=_add(start,_mul(start_axis,lead));b=_add(end,_mul(end_axis,lead))
+    steps={'eco':8,'balanced':12,'close':18}[builder.level]
+    points=[start,*_curve((a,_add(a,_mul(start_axis,handle)),
+                           _add(b,_mul(end_axis,handle)),b),steps),end]
+    segments={'eco':6,'balanced':8,'close':10}[builder.level];radius=6.2
+    vertices=list(_tube(points,radius,segments))
+    for center,axis,connector_radius in ((start,start_axis,start_radius),(end,end_axis,end_radius)):
+        if connector_radius>=radius:continue
+        wall=[]
+        for index in range(segments):
+            angles=(index*math.tau/segments,(index+1)*math.tau/segments)
+            inner=[(connector_radius*math.cos(angle),connector_radius*math.sin(angle),0.) for angle in angles]
+            outer=[(radius*math.cos(angle),radius*math.sin(angle),0.) for angle in angles]
+            _quad(wall,inner[0],outer[0],outer[1],inner[1])
+        vertices.extend(_transform(wall,center,_basis(_mul(axis,-1))))
+    builder.put('cooler-liquid-tubes',vertices,'#303e46',part='cooler:cpu')
+
+
 def _cambered_leaves(vertices,model,radius):
     """Bounded original foil camber; qualitative family reference, not CFD CAD."""
     from assembly_geometry import _tri
@@ -150,7 +180,7 @@ class _Builder:
         return tuple(Mesh(name,tuple(vertices),tint if isinstance(tint,tuple) and len(tint)==4 else color(tint),component=component,part_id=part) for (name,tint,component,part),vertices in self.static.items())+tuple(self.rotors)
 
 
-def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',name='case-fan',role='case',direction='intake',rotor_direction=1):
+def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',name='case-fan',role='case',direction='intake',rotor_direction=1,wire_sign_override=None):
     """A pierced static frame and a separate genuinely moving leaf/hub mesh."""
     from assembly_geometry import Mesh,color,fan_rotor,ring,box
     from assembly_detail import perforated_plate,chamfer_rect
@@ -256,6 +286,7 @@ def _fan(builder,model,center,normal,up,*,component='fans',part='fans:front:0',n
         diameter_mm=size,direction=direction,rpm=None,rotation_default='static',blade_count_verified=model.get('blade_count_verified',False),
         rotation_direction_verified=False,blade_geometry_reviewed=model.get('blade_geometry_reviewed',False)))
     wire_sign=-1 if component=='fans' and part.startswith(('fans:rear:','fans:bottom:')) else 1
+    if type(wire_sign_override) is int and wire_sign_override in (-1,1):wire_sign=wire_sign_override
     wire_out=_mul(basis[0],wire_sign)
     if (role=='case' and model['family'] not in ('lian-li-sl','corsair-lx') and not model.get('hub_display') or role=='cpu_main' and (model['id'].startswith('noctua-') or model.get('power_connector_verified'))):
         # Standard PWM power only. Proprietary lighting/controller wiring and
@@ -837,8 +868,15 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
         builder.parts.append(dict(id='cooler:reservoir',label=cooler['reservoir_model'],kind='pump_reservoir',model_id=cooler['id']))
     else:targets=barbs;extra_start=extra_end=None
     for start,end in zip(ports,targets):
-        a=_add(start,_mul(v,15));c1=_add(a,_mul(n,45));c2=_add(end,_mul(n,25))
-        builder.tube('cooler-liquid-tubes',_curve((a,c1,c2,end),{'eco':8,'balanced':12,'close':18}[builder.level]),6.2,'#303e46',part='cooler:cpu')
+        if cooler['kind']=='aio':
+            # LFIII returns the end of its hollow elbow. The generic pump
+            # connector above starts at port and extends12mm along v.
+            pump_end=start if style=='arctic_vrm' else _add(start,_mul(v,12))
+            radiator_axis=_mul(_mount_plane(mount,dimensions,0.,planes)[1][2],-1.)
+            _aio_hose(builder,pump_end,end,v,radiator_axis,8. if style=='arctic_vrm' else 5.)
+        else:
+            a=_add(start,_mul(v,15));c1=_add(a,_mul(n,45));c2=_add(end,_mul(n,25))
+            builder.tube('cooler-liquid-tubes',_curve((a,c1,c2,end),{'eco':8,'balanced':12,'close':18}[builder.level]),6.2,'#303e46',part='cooler:cpu')
     if extra_start:
         pairs=[(extra_start,extra_end)] if not gpu_ports else [(extra_start,gpu_ports[0]),(gpu_ports[1],second_barbs[0]),(second_barbs[1],extra_end)]
         for start,end in pairs:
@@ -968,7 +1006,15 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
         used_mounts.add(mount)
         for i,position in enumerate(positions):
             part='fans:'+mount+':'+str(i)
-            _fan(builder,model,position,basis[2] if direction=='intake' else _mul(basis[2],-1),basis[0],component='fans',part=part,role='case',direction=direction)
+            fan_normal=basis[2] if direction=='intake' else _mul(basis[2],-1)
+            wire_basis=_basis(fan_normal,basis[0]);default_sign=-1 if mount in ('rear','bottom') else 1
+            def reference_tail(sign):
+                outward=_mul(wire_basis[0],sign)
+                return _add(position,_add(_mul(outward,model.get('width_mm',model['size_mm'])*.48+14.5),_mul(wire_basis[1],model['size_mm']*.35)))
+            old_tail=reference_tail(default_sign);new_tail=reference_tail(-default_sign)
+            inside=lambda point:all(abs(point[k])<=dimensions[k]/2 for k in range(3))
+            wire_sign_override=-default_sign if not inside(old_tail) and inside(new_tail) else None
+            _fan(builder,model,position,fan_normal,basis[0],component='fans',part=part,role='case',direction=direction,wire_sign_override=wire_sign_override)
             builder.parts.append(dict(id=part,label=model['label']+' · '+mount+' '+str(i+1),kind='case_fan',model_id=model['id'],mount=mount,
                 compatibility=_mount_check(case,mount,model['size_mm'],count),
                 placement_method='authored_mount_plane' if planes.get(mount) else 'official_manual_rear_below_psu_reference' if placement_source else 'upper_rear_reference' if mount=='rear' else 'centered_mount_reference',

@@ -81,6 +81,9 @@ REVIEWED_FILES = frozenset(
         for name in (
             "icon-manifest.json",
             "showcase/hardware-schemes.png",
+            "showcase/assembly-complete-six048.png",
+            "showcase/aio-connections048.png",
+            "showcase/assembly-complete-six048.gif",
             "showcase/case-fan-before-after047.png",
             "showcase/case-fan-six047.png",
             "showcase/gpu-blocks047-style-1-twelve-r4.png",

@@ -2,7 +2,7 @@
 import re
 from top_bar_config import HARDWARE_ICON_STYLES
 
-DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, fan_animation=False, appearance_style="follow",
+DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, inspection_cutaway=False, fan_animation=False, appearance_style="follow",
                         detail_level="balanced",selection_effects=True,window_mode="inspect",desktop_frame=True,
                         board_model="",cooler_model="",cooler_mount="top",case_fans=[],
                         psu_model="",storage=[],expansion_cards=[],cables_enabled=False,
@@ -15,7 +15,7 @@ DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, fan_animation=False, appe
                         loop_tubes_visible=True,loop_fittings={})
 PART_FIELDS = ("board_model","cooler_model","cooler_mount","case_fans","psu_model","storage",
                "expansion_cards","cables_enabled","cable_color","fan_motion","gpu_waterblock","part_styles",
-               "cpu_model","gpu_model","memory_models","lighting_preview",
+               "cpu_model","gpu_model","memory_models","lighting_preview","inspection_cutaway",
                "radiator_model","radiator_fan_model","radiator_fan_layout",
                "secondary_radiator_model","secondary_radiator_fan_model","secondary_radiator_fan_layout",
                "loop_components_mode","cpu_block_model","pump_model","pump_top_model","reservoir_model",
@@ -91,7 +91,7 @@ def validate_assembly(value=None):
     if type(mode) is not str or mode not in WINDOW_MODES:
         raise ValueError("整机显示方式设置不正确")
     result['window_mode']=mode
-    for field in ("exploded", "fan_animation", "selection_effects", "cables_enabled", "gpu_waterblock", "desktop_frame", "loop_tubes_visible"):
+    for field in ("exploded", "inspection_cutaway", "fan_animation", "selection_effects", "cables_enabled", "gpu_waterblock", "desktop_frame", "loop_tubes_visible"):
         if field in value:
             if type(value[field]) is not bool:
                 raise ValueError("整机视图开关设置不正确")

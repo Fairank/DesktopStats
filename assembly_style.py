@@ -426,25 +426,46 @@ def edge_batches(meshes,style,styles=None):
             # Core coverage belongs to each physical part, not whichever class
             # happened to consume the budget first. A complete frame alone is
             # insufficient when its water tubes and tank have disappeared.
-            case_groups=[];parts={};deferred=[]
+            case_groups=[];parts={};deferred=[];power_routes={}
             minor=('grip','knurl','seam','fastener','screw','rgb','led','window',
                    'rubber','decoupling','feet','foot','return-drop','crossed','fan-pads')
             rotor_reserve=min(MAX_STYLE_EDGES*.55,sum(sum(row['costs'][n] for n in row['desired'])
-                               for row in plans if row['mesh'].rotor))
+                               for row in plans if row['mesh'].rotor and row['mesh'].name!='cooler-vrm-internal-leaves-hub'))
             for row in plans:
                 mesh=row['mesh'];name=mesh.name.casefold()
                 if mesh.rotor:continue
                 loop=name.startswith('loop-')
-                tube=loop and 'routed-tube' in name
+                tube=(loop and 'routed-tube' in name) or name=='cooler-liquid-tubes'
+                # First preserve the actual selected part's outer body; a
+                # diffuser or rotating fan alone cannot explain a missing shell.
+                memory_shell=(mesh.component=='memory' and name in ('ram-pcb','ram-spreader','ram-diffuser'))
+                device_shell=(name=='psu-shell' or mesh.component in ('storage','expansion') and
+                              (name.endswith('-pcb') or name.endswith('-drive-body')))
+                aio_shell=((mesh.part_id=='cooler:pump' and name.endswith((
+                    '-housing','-base','-pedestal','-display-housing','-top-cap',
+                    '-blank-center-cap','-outer-rim','-hose-elbows'))) or
+                    mesh.part_id=='cooler:radiator' and name in (
+                        'cooler-radiator044-folded-rails','cooler-radiator044-rail-lips',
+                        'cooler-radiator044-end-tanks','cooler-radiator-fittings'))
+                power_route=(mesh.component=='cables' and any(token in name for token in
+                             ('-atx24-','-eps8-','-pcie8-','-pcie6-','-gpu16-','-gpu12-')))
+                power_loom=power_route and name.endswith('-rounded-loom')
+                power_plug=power_route and name.endswith('-plug-shell')
+                essential=memory_shell or device_shell or aio_shell or tube or power_loom or power_plug
                 fixed_fan=(name in ('gpu-fan-opening','gpu-fan-hub') or name.endswith('-fan-frame'))
                 gpu_shell=name in ('gpu-shroud','gpu-backplate','gpu-pcb')
                 case_display=mesh.component in ('case','panel') and name.startswith('front-display')
                 board_cover=(mesh.component=='board' and not row['dense'] and row['span']>=20 and
                              any(word in name for word in ('heatsink','retention-frame','memory-sockets','expansion-slot')))
                 if row['micro'] or row['dense'] or (loop and any(word in name for word in minor)):continue
-                if not(row['structural'] or board_cover or loop or fixed_fan or case_display):continue
+                if not(row['structural'] or board_cover or loop or fixed_fan or case_display or essential):continue
                 part=mesh.part_id or mesh.component or 'part:'+str(row['index'])
-                primary=(name=='motherboard-reference' or fixed_fan or gpu_shell or board_cover or loop and any(word in name for word in
+                if power_route:part+=':'+ '-'.join(name.split('-')[:3])
+                # Recessed sampled crowns/slots are secondary to real cover
+                # perimeters and each populated module's complete silhouette.
+                board_shell=board_cover and (name.endswith('-heatsink') or name=='detail-board-m2-heatsink')
+                primary=(board_shell or name=='motherboard-reference' or fixed_fan or gpu_shell or
+                         essential and not(power_loom or power_plug) or loop and any(word in name for word in
                          ('clear-tank','source-reservoir-tube','clear-reservoir-body',
                           'cpu-source-shell','cpu-clear-chamber','source-hydraulic-reservoir-base',
                           'source-reservoir-lid','included-pump-motor')))
@@ -465,6 +486,14 @@ def edge_batches(meshes,style,styles=None):
                                           0 if primary else 1))
                     for group,area in row['smooth_groups']:
                         units.append((group,math.sqrt(area),0 if primary else 1))
+                if power_route:
+                    # A complete real sampled strand and both connector shells
+                    # are one optional ink bundle. Never draw dangling plugs or
+                    # steal a GPU aperture/tank rim to show all parallel wires.
+                    for group,_,_ in units:row['atomic'].update(group)
+                    if power_loom:units=sorted(units,key=lambda item:(-item[1],item[0][0]))[:1]
+                    power_routes.setdefault(part,[]).extend((group,row) for group,_,_ in units)
+                    continue
                 for group,score,rank in units:
                     row['atomic'].update(group)
                     unit=(rank,-score,row['index'],group,row)
@@ -480,6 +509,13 @@ def edge_batches(meshes,style,styles=None):
             for units in parts.values():units.sort(key=lambda item:(item[0],item[1],item[2],item[3][0]))
             spent={part:0 for part in parts}
             for phase in (0,1):
+                if phase==1:
+                    for part,bundle in sorted(power_routes.items(),key=lambda item:(
+                            0 if '-gpu' in item[0] else 1 if '-atx24' in item[0] else 2,item[0])):
+                        charge=sum(sum(row['costs'][n] for n in group if n not in row['selected']) for group,row in bundle)
+                        if charge<=remaining-rotor_reserve:
+                            for group,row in bundle:row['selected'].update(group)
+                            remaining-=charge
                 phase_parts={part:[unit for unit in units if unit[0]==phase] for part,units in parts.items()}
                 for turn in range(max((len(units) for units in phase_parts.values()),default=0)):
                     for part,units in phase_parts.items():
@@ -502,6 +538,11 @@ def edge_batches(meshes,style,styles=None):
             for row in plans:
                 if not row['mesh'].rotor:continue
                 group=row['desired'];row['atomic'].update(group)
+                # This unknown reference impeller is behind the source crown;
+                # keep its whole group after visible enclosures, never fragments.
+                if row['mesh'].name=='cooler-vrm-internal-leaves-hub':
+                    deferred.append((2,-row['span'],row['index'],tuple(sorted(group)),row))
+                    continue
                 charge=sum(row['costs'][n] for n in group if n not in row['selected'])
                 if charge<=remaining:
                     row['selected'].update(group);remaining-=charge

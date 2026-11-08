@@ -242,6 +242,7 @@ class AssemblyWindow(QWidget):
     def _apply_motion_options(self,options):
         self.viewport.set_selection_effects_enabled(options.get('selection_effects',True))
         self.viewport.set_exploded(options['exploded'])
+        if hasattr(self.viewport,'set_inspection_cutaway'):self.viewport.set_inspection_cutaway(options.get('inspection_cutaway',False))
         if hasattr(self.viewport,'set_fan_motion'):self.viewport.set_fan_motion(options.get('fan_motion','measured'))
         self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled
             and self.property('modelMotionAllowed') is not False and not self._renderer_error)

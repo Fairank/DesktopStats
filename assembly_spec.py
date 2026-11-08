@@ -177,7 +177,7 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     return dict(case=case, case_identity=identity, gpu=gpu, cpu=cpu, memory=memory, board=board,model_library_generation=library_generation(),
                 **parts,
                 options=options, checks=checks, schematic=True,visual_style=visual_style(config),
-                detail_level=options['detail_level'],
+                detail_level=options['detail_level'],inspection_cutaway=options['inspection_cutaway'],
                 part_styles=copy.deepcopy(options['part_styles']),lighting_preview=options['lighting_preview'],
                 limitations=["比例与安装位置为三维示意，不能代替实物安装检查。",
                              "自选配件模型不代表已识别的本机硬件。"])

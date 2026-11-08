@@ -15,7 +15,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "尚未在本机安装0.47验证真实交互；现有测试文件不等于本轮全部通过。"
+        "尚未在本机安装0.48验证真实交互；现有测试文件不等于本轮全部通过。"
       ],
       "id": "topbar_history",
       "implementation": "顶部栏、悬停详情、点击固定与历史存储路径均保留，并有专门测试。",
@@ -39,7 +39,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.47尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。"
+        "0.48尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。"
       ],
       "id": "screen_two",
       "implementation": "存在按稳定显示器身份选择、保存和路由窗口的实现，本次不读取实际显示器或用户配置。",
@@ -62,7 +62,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.47真实游戏前台、跨屏、锁屏及桌面恢复尚未验收；继续遵守当前不重启要求。"
+        "0.48真实游戏前台、跨屏、锁屏及桌面恢复尚未验收；继续遵守当前不重启要求。"
       ],
       "id": "game_hide",
       "implementation": "顶部栏、详情、模型小组件和整机窗口已有按屏幕全屏与安全桌面状态的关闭式门禁。",
@@ -109,7 +109,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "未对0.47重启或提权，未取得新版真实温度；0.36温度不作为0.47验收。",
+        "未对0.48重启或提权，未取得新版真实温度；0.36温度不作为0.48验收。",
         "自动恢复默认需用户开启且依赖支持来源；无法保证所有电脑都有CPU温度。"
       ],
       "id": "cpu_temperature_restart",
@@ -133,7 +133,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "顶部栏、设置、详情三个真实Windows窗口仍待0.47桌面验收；不能以离屏底色冒充真实磨砂。"
+        "顶部栏、设置、详情三个真实Windows窗口仍待0.48桌面验收；不能以离屏底色冒充真实磨砂。"
       ],
       "id": "glass_three_surfaces",
       "implementation": "三类窗口有原生材质、宿主桥接和生命周期实现，离屏测试只能验证契约。",
@@ -159,8 +159,8 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "没有0.47安装版静置或游戏状态的整款程序CPU／RAM／GPU实测，也未完成关闭后资源回收验收。",
-        "历史隔离设置首用约65MiB差值、0.43典型GPU基础图层39.85%像素预算减少均有限定范围；不是0.47常驻内存或显存降幅。",
+        "没有0.48安装版静置或游戏状态的整款程序CPU／RAM／GPU实测，也未完成关闭后资源回收验收。",
+        "历史隔离设置首用约65MiB差值、0.43典型GPU基础图层39.85%像素预算减少均有限定范围；不是0.48常驻内存或显存降幅。",
         "打开3D、浏览图鉴与仅顶部栏的负担不同；离屏生成耗时、单模块内存和包体积不能作为通用占用上限。",
         "新SVG最坏构建时延仍在优化，未标记性能全部完成；本机游戏状态与静置的整款程序CPU／RAM／GPU占用仍待安装后原生验收。"
       ],
@@ -207,7 +207,7 @@
       "gaps": [
         "I/O范围为所有进程读写，含缓存与设备；Windows计数还可能包含文件、网络等I/O，不能与当前选中物理磁盘绑定，不能叫单盘Top5。",
         "网络逐进程Top5仍未实现；温度／转速等物理读数不能直接按进程归因。",
-        "预热、权限缺失、PID复用和计数倒退必须保留未知／重建基线；当前没有本机0.47原生交互验收。"
+        "预热、权限缺失、PID复用和计数倒退必须保留未知／重建基线；当前没有本机0.48原生交互验收。"
       ],
       "id": "top_five_processes",
       "implementation": "已有CPU、内存、GPU、专用显存与进程总读写I/O按需Top5；I/O复用同一份Windows进程快照，显示读/写/合计bytes/s，按软件聚合，隐藏后停止租约采集。",
@@ -269,7 +269,7 @@
         "更多未收录水路产品、GPU冷头、线材与外围设备在六版中同样仍缺；本轮12个GPU冷头仅独立外观检视，不代表整卡安装或全部型号完成。"
       ],
       "id": "same_model_all_styles",
-      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。",
+      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。",
       "native_acceptance_pending": false,
       "requirement": "每套硬件数量、型号与结构跟原版一致，不能不同风格换壳/减配。",
       "source_files": [
@@ -299,7 +299,8 @@
         "tests/test_gpu_evenodd046.py",
         "tests/test_liquid_gpu_blocks047.py",
         "tests/test_motherboard_finish047.py",
-        "tests/test_case_fan_clearance047.py"
+        "tests/test_case_fan_clearance047.py",
+        "tests/test_assembly_ink_visibility048.py"
       ]
     },
     {
@@ -413,7 +414,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "原生透明命中、屏2缩放和实际尺寸仍待0.47验收；布局测试不能单独证明美术细节达到用户审美要求。"
+        "原生透明命中、屏2缩放和实际尺寸仍待0.48验收；布局测试不能单独证明美术细节达到用户审美要求。"
       ],
       "id": "model_widget_layout",
       "implementation": "已有大图CPU/GPU模板、共享响应式布局、真正QML动态图层、读数和每组件框架开关。",
@@ -441,7 +442,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.47真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。"
+        "0.48真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。"
       ],
       "id": "model_widget_animation",
       "implementation": "MetricIcon/HardwareGlyph沿用已有时钟与数据时效，Runtime控制modelMotionAllowed。",
@@ -470,7 +471,7 @@
         "关闭事件返回时viewport._scene等引用可能保留至QObject实际销毁；不能声称瞬间全部释放。"
       ],
       "id": "desktop_3d_inspection",
-      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。",
+      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。 0.48增加内部检视：只调整外盖与电源罩的绘制及拾取可见性，保留原始物理场景和正常完整外壳。",
       "native_acceptance_pending": true,
       "requirement": "桌面可旋转缩放3D机箱加硬件；点选配件查看状态，有框或无框。",
       "source_files": [
@@ -478,7 +479,8 @@
         "assembly_window.py",
         "assembly_viewer.py",
         "assembly_inspection.py",
-        "native/AssemblyPage.qml"
+        "native/AssemblyPage.qml",
+        "assembly_visibility048.py"
       ],
       "status": "implemented_source_native_pending",
       "status_label": "已实现；新版原生待验",
@@ -487,7 +489,8 @@
         "tests/test_assembly_desktop_controls.py",
         "tests/test_assembly_inspection.py",
         "tests/test_assembly_desktop.py",
-        "tests/test_case_fan_clearance047.py"
+        "tests/test_case_fan_clearance047.py",
+        "tests/test_assembly_visibility048.py"
       ]
     },
     {
@@ -522,7 +525,7 @@
         "28款已有正面照片核看不等于精确CAD、全部电路、暗藏风扇或实物安装验收。Taichi内部风扇位置、两款叶片/方向/RPM等未知项保留。"
       ],
       "id": "motherboard_detail",
-      "implementation": "28个主板保留原手册布局；本轮6款旧记录补官方照片装甲/PCB/静态材质，两ITX和ATX/mATX/E-ATX各自轮廓保留。仅本轮6板在四个彩色风格保PCB/金属层次，其余22数据、物理网格及六版颜色不变。",
+      "implementation": "28个主板保留原手册布局；0.47对6款旧记录补官方照片装甲/PCB/静态材质，两ITX和ATX/mATX/E-ATX各自轮廓保留。仅上述6板在四个彩色风格保PCB/金属层次，其余22数据、物理网格及六版颜色不变。",
       "native_acceptance_pending": false,
       "requirement": "主板应像真实型号；ITX/mATX/ATX/E-ATX、插槽、PCB、接口、CPU位置与安装孔分别核对。",
       "source_files": [
@@ -550,7 +553,7 @@
         "尚未覆盖所有品牌系列；不同冷排尺寸不自动证明共用同一泵头、风扇、软管或安装位置，LCD保持参考画面。"
       ],
       "id": "cooler_fan_brand_library",
-      "implementation": "本体66套散热方案（含1套非零售参考）／70个风扇条目；可选包新增23款散热器、40款风扇，区分下压／单塔／双塔／被动／AIO、异厚扇、LCD与特殊双轴孔距。",
+      "implementation": "本体66套散热方案（含1套非零售参考）／70个风扇条目；可选包保留23款散热器、40款风扇，区分下压／单塔／双塔／被动／AIO、异厚扇、LCD与特殊双轴孔距。",
       "native_acceptance_pending": false,
       "requirement": "散热器/风扇按品牌系列真实细化，风冷、水冷、机箱风扇全部风格都有。",
       "source_files": [
@@ -581,7 +584,7 @@
         "12个GPU冷头已有具体兼容来源，但完整市场覆盖、实际安装姿态／整卡替换和连管仍缺；更多接头／管材、线材、外设与输入输出设备继续待补。"
       ],
       "id": "all_other_parts",
-      "implementation": "本体21电源、29存储、3扩展；原63可选水路继续保留，新增12个严格来源GPU冷头独立模型（8 Alphacool/2 Watercool/2 Corsair）。具体显卡/修订与端子变体分开；缺安装pose不接整卡替换或连管。",
+      "implementation": "本体21电源、29存储、3扩展；原63可选水路继续保留，0.47增加的12个严格来源GPU冷头独立模型（8 Alphacool/2 Watercool/2 Corsair）。具体显卡/修订与端子变体分开；缺安装pose不接整卡替换或连管。",
       "native_acceptance_pending": false,
       "requirement": "电源、存储、扩展卡等装机模拟器有的品类都要有，型号/外形也需逐类完善。",
       "source_files": [
@@ -610,10 +613,11 @@
       "gaps": [
         "只允许已支持型号／结构；端口位置仍参考，未实现任意连接图、inline硬管转角或全实物干涉／公差求解。",
         "HAF700EVO与5000D的指定参考配置可生成3条路线；O11／Y70空间不足仍review，不代表各机箱／全硬件组合都通过。",
-        "风扇采用保守参考包络；没有完整制造孔位、公差或任意管线净空保证。GPU冷头仅独立检视，不能当成完整装机水路。"
+        "风扇采用保守参考包络；没有完整制造孔位、公差或任意管线净空保证。GPU冷头仅独立检视，不能当成完整装机水路。",
+        "明确参考装机与全部现实组合不同；当前预设、安装孔位、遮挡和逐条线缆仍按各自证据核对，不能只看一张整机图就判全完成。"
       ],
       "id": "free_mixed_assembly",
-      "implementation": "保留型号选择与逐件风格；新独立水路区分冷头／泵／泵盖／水箱／泵箱、逐口接头与管材。当前固定3／4节点循环，有限静态避障与未知／不支持提示，不强缩硬件。 后排参考姿态和已选实体空间检查补强；空气/一体水冷也先生成一次电源/存储/扩展实体供风扇避让，冲突整组提示，不裁部件或静默少装。",
+      "implementation": "保留型号选择与逐件风格；新独立水路区分冷头／泵／泵盖／水箱／泵箱、逐口接头与管材。当前固定3／4节点循环，有限静态避障与未知／不支持提示，不强缩硬件。 后排参考姿态和已选实体空间检查补强；空气/一体水冷也先生成一次电源/存储/扩展实体供风扇避让，冲突整组提示，不裁部件或静默少装。 0.48显式参考按钮补齐CPU、GPU、主板、两条匹配RAM、电源、SSD、线缆与冷却；未知本机内存仍不自动伪装有条。水冷软管端部连接按实际生成网格修正。",
       "native_acceptance_pending": false,
       "requirement": "全部配件可自由换型号并混搭所有风格装入同机箱。",
       "source_files": [
@@ -625,7 +629,9 @@
         "assembly_loop046.py",
         "liquid_selection046.py",
         "liquid_path046.py",
-        "case_fan_clearance047.py"
+        "case_fan_clearance047.py",
+        "assembly_visibility048.py",
+        "assembly_auxiliary.py"
       ],
       "status": "implemented_source_with_compatibility_limits",
       "status_label": "已实现；兼容检查不完整",
@@ -642,7 +648,9 @@
         "tests/test_loop_auxiliary_clearance046.py",
         "tests/test_loop_profiled046.py",
         "tests/test_case_fan_clearance047.py",
-        "tests/test_case_fan_envelope047.py"
+        "tests/test_case_fan_envelope047.py",
+        "tests/test_aio_connections048.py",
+        "tests/test_case_fan_cable_routing048.py"
       ]
     },
     {
@@ -650,10 +658,11 @@
       "gaps": [
         "名义120／140／240／280／360／420／480／560不等于每品牌全尺寸或实际长度、孔距、间隙均核。",
         "孔径／螺钉／公差、内部鳍片／水道、精确口位和机械安装仍未齐；未知口不造接头或假管。",
-        "固定3／4节点不是任意连接图，inline硬管弯头未接；0.47尚未安装，不关闭原生装配交互验收。"
+        "固定3／4节点不是任意连接图，inline硬管弯头未接；0.48尚未安装，不关闭原生装配交互验收。",
+        "LFIII参考的8条已知线路仅含4条主要供电和4条机箱扇线，未包含冷头一体PWM控制线；品牌专用灯控／集线器线路也未逐型号齐备。不能把水管连续当成电气接线完整。"
       ],
       "id": "liquid_radiator_fan_split",
-      "implementation": "本体24＋可选104独立冷排保留120至560尺寸等级；主／第二排、独立前后扇、无扇／单面／夹心与AIO原厂封闭保护保留。0.47再补63条手选水路部件和静态参考连接。",
+      "implementation": "本体24＋可选104独立冷排保留120至560尺寸等级；主／第二排、独立前后扇、无扇／单面／夹心与AIO原厂封闭保护保留。保留既有63条手选水路部件和静态参考连接。 LFIII的VRM风扇、泵和冷排风扇按真实角色分开，AIO软管修正泵端缺段与冷排端切向；未核RPM不借用CPU_FAN。",
       "native_acceptance_pending": true,
       "requirement": "每品牌水冷；冷排与风扇可独立选择，支持无扇/单面/夹心并保持AIO原厂边界。",
       "source_files": [
@@ -680,17 +689,20 @@
         "tests/test_liquid_radiator_expansion045.py",
         "tests/test_cooling_pack_runtime045.py",
         "tests/test_liquid_geometry046.py",
-        "tests/test_loop_controls046.py"
+        "tests/test_loop_controls046.py",
+        "tests/test_aio_connections048.py"
       ]
     },
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
         "不是真实灯控、RGB时间轴或全局泛光；只处理已有模型灯区。沿用插画模式保留原画法，指定配色时固定白灯不变彩灯。",
-        "目前是已有灯区的静态预览和风格短时效果；尚无逐设备灯控／RGB时序仿真。"
+        "目前是已有灯区的静态预览和风格短时效果；尚无逐设备灯控／RGB时序仿真。",
+        "静态灯区配色不同于实物灯控、全局泛光或连续RGB时间轴；离屏软件图也不代表原生GPU灯效验收。",
+        "显卡本体、板载装饰灯区与LOKI电源的RGB链未贯通；主板RGB插针不是发光灯。GPU冷头图库已有静态配色也不等于已接入逐型号熄灯或灯控。"
       ],
       "id": "lighting",
-      "implementation": "已有灯区静态配色／熄灯与有限时特效；固定白灯与未知灯区分开处理，换色复用物理网格，不新增时钟。",
+      "implementation": "已有灯区静态配色／熄灯与有限时特效；固定白灯与未知灯区分开处理，换色复用物理网格，不新增时钟。 0.48参考装机明确选择已核RGB内存以展示已有灯区；此前North示例灯区为零，不能作为灯光展示。非ARGB的LFIII和P12不补造彩灯。",
       "native_acceptance_pending": false,
       "requirement": "不同风格提供特效/灯区，固定白灯不变彩灯，不新增未知RGB。",
       "source_files": [
@@ -699,8 +711,8 @@
         "assembly_viewer.py",
         "native/AssemblyPage.qml"
       ],
-      "status": "implemented_source_offscreen_evidence",
-      "status_label": "已实现；保留离屏证据",
+      "status": "partial",
+      "status_label": "部分完成；多类灯区仍缺",
       "test_files": [
         "tests/test_assembly_lighting043.py",
         "tests/test_assembly_effects.py"
@@ -711,10 +723,10 @@
       "gaps": [
         "集合、类别、品牌文件可能含同型号，不能重复安装或把分组文件数计作产品数。",
         "机箱／GPU／内存／主板／电源／存储等运行时可选包仍缺；HTML／SVG图鉴不是可导入数据包。",
-        "0.47数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
+        "0.48数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
       ],
       "id": "github_optional_packs",
-      "implementation": "可选302产品＝72 CPU＋167冷却＋63独立水路；冷却32文件与水路15文件按集合／类别／品牌重叠替代分组，不重复计产品。未装目录默认不导入，选中记录共享8条LRU，无新增硬件轮询。 0.47 GPU冷头为4个纯数据替代包（集合1/品牌3，12unique）；原15水路包、32冷却包和2CPU包不覆盖、不重复计型号。",
+      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。",
       "native_acceptance_pending": false,
       "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
       "source_files": [
@@ -767,10 +779,10 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.47尚未通过本机安装与原生验收；源码/候选包上传状态按本轮实际记录更新，不能拿旧版结果替代。"
+        "0.48源码／候选包按本轮实际记录校验；未安装，也未做CPU温度、磨砂、游戏隐藏或整款资源的原生验收，不能拿旧结果替代。"
       ],
       "id": "github_publish_merge_install",
-      "implementation": "PR#1已合并（历史记录）；0.46源码856文件和15真实水路下载逐项校验一致。0.47使用独立源码候选分支与4个GPU冷头数据包，逐文件范围见SOURCE_MANIFEST；未安装、未做新正式二进制发布，本轮游戏期间不重启、不提权。",
+      "implementation": "PR#1已合并（历史记录）；0.46源码和15真实水路下载已核。0.47修复候选保留独立源码分支与893文件清单，0.48继续核对整机完整性，安装与原生验收仍未完成；游戏期间不重启、不提权。",
       "native_acceptance_pending": true,
       "requirement": "合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。",
       "source_files": [
@@ -779,7 +791,7 @@
         "README.md"
       ],
       "status": "prior_publication_evidence_current_candidate_pending",
-      "status_label": "PR#1已合并；新版发布／安装待验",
+      "status_label": "源码候选；安装／原生待验",
       "test_files": [
         "tests/test_source_export.py",
         "tests/test_selfcheck.py"
@@ -793,7 +805,7 @@
         "更多GPU冷头、实际板上安装、更多水路／线材／外设和真实硬件细节、任意装配与本机原生资源仍有缺口。"
       ],
       "id": "pcbs_benchmark",
-      "implementation": "本体514产品＋1参考，可选302（72CPU／167冷却／63水路），合计816个具名产品。重跑原局部官方HTML为261条（10合并变体）、15严格名称命中／246未匹配待核；不是完整游戏数据库。",
+      "implementation": "本体、可选产品与参考组合数统一采用上方当前结构化统计，避免叙述重复后漏更。局部官方公告仍为261条（10合并变体）、15严格名称命中／246未匹配待核；不是完整游戏数据库，也未达到或超过PCBS1／2全覆盖。",
       "native_acceptance_pending": false,
       "requirement": "品类、覆盖与真实细节达到并超过Steam装机模拟器1/2；高标准慢慢打磨全部细节。",
       "source_files": [
@@ -820,7 +832,7 @@
         "核对完成不代表全部产品功能交付；任何未完成类别、型号、实时来源与实测项继续保留。"
       ],
       "id": "readme_full_requirements_ledger",
-      "implementation": "README由结构化总账生成并检查一致性；保留29组原ID，逐条分开记录源码、历史测量、离屏证据与0.47尚未完成的原生验收。",
+      "implementation": "README由结构化总账生成并检查一致性；保留29组原ID，逐条分开记录源码、历史测量、离屏证据与0.48尚未完成的原生验收。",
       "native_acceptance_pending": false,
       "requirement": "全文所有重点写入README；全部完成后逐一核对并汇报问题和缺项。",
       "source_files": [
@@ -841,7 +853,7 @@
   ],
   "reviewed": "2026-11-08",
   "schema_version": 1,
-  "target_version": "0.47.0-preview.1",
+  "target_version": "0.48.0-preview.1",
   "native_045_accepted": false,
   "style_policy": {
     "showcase": [
@@ -1142,5 +1154,148 @@
     "12GPU冷头独立模型/严格兼容事实/4可选包，不伪造安装孔位、完整显卡替换、连管、泵、风扇或LCD读数。",
     "CPU/GPU小组件最小化时暂停快照，恢复读取最新状态，不增加轮询。",
     "内置离线SVG/图集导出不导入用户扩展包与配置目录；六个主风格和旧选项标签保持与程序一致。"
-  ]
+  ],
+  "native_048_accepted": false,
+  "coverage_048": {
+    "base_products": 514,
+    "reference_combinations": 1,
+    "optional_cpu_products": 72,
+    "optional_cooling_products": 167,
+    "optional_products": 314,
+    "total_products": 828,
+    "optional_cooling_by_kind": {
+      "radiator": 104,
+      "fan": 40,
+      "cooler": 23
+    },
+    "new_motherboards": 0,
+    "motherboard_products": 28,
+    "cooling_package_artifacts": 32,
+    "cooling_collection_packages": 3,
+    "cooling_brand_category_packages": 29,
+    "package_grouping": "三类集合包与29个按品牌、类别划分的小包是可重叠的替代分组；重叠型号不可同时安装，不重复计产品。",
+    "installed_by_default": false,
+    "market_exhaustive": false,
+    "optional_loop_products": 75,
+    "optional_loop_by_kind": {
+      "cpu_block": 10,
+      "fitting": 20,
+      "pump": 8,
+      "pump_reservoir": 10,
+      "reservoir": 4,
+      "tubing": 11,
+      "gpu_block": 12
+    },
+    "loop_package_artifacts": 19,
+    "loop_collection_packages": 2,
+    "loop_category_packages": 6,
+    "loop_brand_packages": 11,
+    "optional_gpu_block_products": 12,
+    "gpu_block_package_artifacts": 4,
+    "new_motherboard_finishes": 0,
+    "gpu_block_stage": "standalone_reference_only",
+    "gpu_block_installation_supported": false,
+    "gpu_block_loop_connection_supported": false
+  },
+  "size_coverage_048": {
+    "radiator_nominal_counts": {
+      "120": 18,
+      "140": 9,
+      "240": 25,
+      "280": 14,
+      "360": 28,
+      "420": 13,
+      "480": 16,
+      "560": 5
+    },
+    "aio_nominal_counts": {
+      "120": 2,
+      "140": 1,
+      "240": 7,
+      "280": 4,
+      "360": 19,
+      "420": 2
+    },
+    "board_form_counts": {
+      "atx": 10,
+      "eatx": 3,
+      "itx": 6,
+      "matx": 9
+    }
+  },
+  "open_detail_counts_048": {
+    "new_fan_leaf_evidence_pending": 11,
+    "gpu_leaf_profiles_pending": 20,
+    "motherboard_finish_pending": 0,
+    "unplaced_onboard_heatsink_fans": 1,
+    "note": "048无新主板或型号数量；旧6板finish已在047补核，仍非CAD/全部细节完成。GPU20/新增风扇11叶型资料缺口和板载小扇未知项保留。",
+    "new_motherboard_finishes_completed": 0,
+    "onboard_heatsink_reference_wells_or_grilles": 2,
+    "onboard_heatsink_blade_direction_rpm_unknown": 2,
+    "gpu_new_fully_verified_leaf_profiles": 0
+  },
+  "review_findings_048": [
+    {
+      "issue": "reference_missing_memory",
+      "observed": "North047以空inventory和memory_models=[]构建，实际0DIMM。",
+      "scope": "预览遗漏，不说明运行时应伪造未知内存。",
+      "resolution_048": "显式参考配置选择两条匹配DDR4内存；不伪造未知本机内存。"
+    },
+    {
+      "issue": "psu_occluded",
+      "observed": "RM1000x实际存在，但底部不透明电源罩遮挡。",
+      "scope": "需要可切换内部检视，正常外形保留。",
+      "resolution_048": "内部检视可隐藏外盖和电源罩，保留完整物理场景。"
+    },
+    {
+      "issue": "lighting_example_empty",
+      "observed": "North047所选非ARGB冷却／风扇且无RAM，lighting.zones=[]。",
+      "scope": "不是灯光示例；已有灯区静态配色与真实灯控分开。",
+      "resolution_048": "新参考含两条已知RGB内存静态灯区；其他灯光覆盖仍缺，未判完成。"
+    },
+    {
+      "issue": "aio_hose_gap",
+      "observed": "LFIII泵接头与软管起点曾相隔15mm，冷排末端切向也需修正。",
+      "scope": "真实生成几何问题，保留正确的VRM风扇与冷排风扇角色。",
+      "resolution_048": "修正实际泵口、冷排口与管路连续性，27款AIO三档网格检查。"
+    },
+    {
+      "issue": "stale_narrative_totals",
+      "observed": "047账本两行仍留302/816历史叙述，顶部已314/828。",
+      "scope": "当前规模统一由结构化统计生成，历史046字段原样保留。",
+      "resolution_048": "当前规模统一结构化生成；旧版本历史统计保留。"
+    },
+    {
+      "issue": "crowded_line_art_missing_outline",
+      "observed": "完整AIO参考的纯线条总8192边预算下，第二条RAM轮廓为0，PSU外壳轮廓未完整保留。",
+      "scope": "不能仅凭部件存在或各版数量相同判断已完整展示；必须修正主外轮廓分配并实际逐图查看。",
+      "resolution_048": "主部件轮廓优先分配，8192总边预算不增加；实际六版静图已查看。"
+    },
+    {
+      "issue": "fan_cable_crosses_cavity",
+      "observed": "NorthXL实际风扇线路未进入机箱来源的布线分支，出现跨空腔对角线；后扇未核参考尾线朝外，部分路径external但未显示对应提示。",
+      "scope": "实际布线与柔性尾线姿态应核对；不能隐藏线缆或把没有提示当成全部在机箱内。",
+      "resolution_048": "修正机箱风扇来源识别、尾线参考方向和避让路径；已知线路保留，真实出界仍提示。"
+    }
+  ],
+  "reference_assembly_048": {
+    "native_acceptance": false,
+    "machine_inventory_inferred": false,
+    "current_reference_complete_claim": false,
+    "note": "根代理已逐图查看048最终六版静图、水冷关系图和GIF首中末帧。两条内存、电源、SSD及已知线缆可见；GIF使用合成转速慢放。North/HAF前置I/O未收录，灯光链不完整，不代表本机识别或原生验收。",
+    "known_routes": {
+      "air": 14,
+      "aio": 8,
+      "loop": 8
+    },
+    "case_front_io": {
+      "air": "source_profiled",
+      "aio": "not_profiled",
+      "loop": "not_profiled"
+    },
+    "aio_control_wiring": "not_in_eight_known_routes",
+    "major_components_selected": true,
+    "six_style_static_reviewed": true,
+    "animation_reviewed": true
+  }
 }

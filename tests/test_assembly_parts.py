@@ -49,14 +49,15 @@ class AssemblyPartsTests(unittest.TestCase):
         original=validate_assembly();before=copy.deepcopy(original)
         for kind in ('air','aio','loop'):
             actual=reference_preset(original,kind)
-            self.assertEqual(actual['case_model'],'corsair-5000d-airflow' if kind=='air' else 'hyte-y70')
+            self.assertEqual(actual['case_model'],{'air':'corsair-5000d-airflow',
+                'aio':'fractal-north-xl-mesh','loop':'cooler-master-haf-700-evo'}[kind])
             self.assertEqual(actual['psu_model'],'corsair-rm1000x-2024')
             self.assertEqual(actual['fan_motion'],'demo');self.assertTrue(actual['fan_animation'])
             self.assertEqual(actual['storage'],[dict(model_id='samsung-990-pro-2tb',count=1)])
             self.assertTrue(actual['cables_enabled'])
             mounts={row['mount']:row['count'] for row in actual['case_fans']}
-            self.assertEqual('front' in mounts,kind=='air') # Y70 front is glass.
-            self.assertEqual('side' in mounts,kind=='aio') # loop second radiator owns side.
+            self.assertIn('front',mounts)
+            self.assertNotIn('side',mounts) # loop second radiator owns side.
             self.assertEqual(mounts['rear'],1)
             self.assertNotIn('top',mounts) # radiator owns its fans; air uses front/rear.
             self.assertEqual(sum(mounts.values()),4)
@@ -76,7 +77,8 @@ class AssemblyPartsTests(unittest.TestCase):
             dict(expansion_cards=[dict(model_id='same')]*2)]
         for options in invalid:
             with self.subTest(options=options),self.assertRaises(ValueError):validate_assembly(options)
-        self.assertEqual(len(PART_FIELDS),32)
+        self.assertEqual(len(PART_FIELDS),33)
+        self.assertIn('inspection_cutaway',PART_FIELDS)
 
     def test_reference_hardware_is_explicit_and_cannot_borrow_installed_temperature_or_rpm(self):
         from stats_config import DEFAULT

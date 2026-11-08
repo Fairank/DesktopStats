@@ -349,8 +349,9 @@ class AssemblyPageTests(unittest.TestCase):
     def test_first_screen_examples_click_open_a_populated_draft_without_saving_or_changing_the_bar(self):
         self.show_assembly(width=720,height=600)
         saved=copy.deepcopy(self.controller.saved);bar=copy.deepcopy(self.controller.draft['top_bar'])
-        core={key:copy.deepcopy(self.controller.draft['assembly'][key])
-              for key in ('cpu_model','gpu_model','memory_models','board_model')}
+        core=dict(cpu_model='intel-13700kf',gpu_model='asus-astral-5090',
+                  memory_models=['gskill-f4-3200c16d-16gtzr']*2,
+                  board_model='asus-rog-strix-z790-a-wifi-d4')
         opened=QSignalSpy(self.controller.assemblyViewRequested)
         expected={'air':'noctua-nh-u12a','aio':'arctic-liquid-freezer-iii-360','loop':'custom-loop-360-reference'}
         for index,(kind,cooler) in enumerate(expected.items()):
@@ -363,6 +364,9 @@ class AssemblyPageTests(unittest.TestCase):
             self.assertEqual(sum(row['count'] for row in spec['cooling']['case_fans']),4)
             self.assertEqual(spec['options']['fan_motion'],'demo');self.assertTrue(spec['options']['fan_animation'])
             self.assertEqual({key:spec['options'][key] for key in core},core)
+            self.assertEqual(spec['memory']['count'],2)
+            self.assertTrue(spec['options']['inspection_cutaway'])
+            self.assertFalse(any(spec[family]['telemetry_bound'] for family in ('cpu','gpu','memory')))
             self.assertEqual(self.controller.saved,saved)
             self.assertEqual(self.controller.draft['top_bar'],bar)
             self.assertEqual(self.controller.scopeDirty,dict(desktop=False,preferences=True,topbar=False))

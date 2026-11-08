@@ -20,10 +20,17 @@ GROUP_IDS=('topbar_history','screen_two','game_hide','crash_recovery','cpu_tempe
 SHOWCASE_IDS=('miniature','cartoon','notebook_color','notebook_line','sticker','papercut')
 
 
+def latest_coverage(data):
+    keys=[key for key in data if key.startswith('coverage_') and key[9:].isdigit()]
+    return max(keys,key=lambda key:int(key[9:]))
+
+
 def validate(data,root):
     """Check the ledger against small offline manifests, never live catalogs."""
     if tuple(row['id'] for row in data['items'])!=GROUP_IDS:
         raise ValueError('Full requirement ledger must retain the29 original ordered group IDs')
+    if data.get('native_'+latest_coverage(data)[9:]+'_accepted') is not False:
+        raise ValueError('The current candidate has no installed native acceptance')
     if (data['all_requirements_complete'] is not False or data.get('native_045_accepted') is not False or
             data.get('native_046_accepted') is not False or
             'coverage_047' in data and data.get('native_047_accepted') is not False):
@@ -72,7 +79,7 @@ def validate(data,root):
             current['base_products']+current['optional_products']!=current['total_products'] or current['installed_by_default'] is not False):
         raise ValueError('Current counts must de-duplicate overlapping package groups and exclude the reference assembly')
     inventory=json.loads((root/'docs/ASSEMBLY_CATALOG.json').read_text(encoding='utf8'))
-    latest=data.get('coverage_047',current)
+    latest=data[latest_coverage(data)]
     if (inventory['optional_summary']['loop_products']!=latest['optional_loop_products'] or
             inventory['optional_summary']['total_named_products']!=latest['total_products']):
         raise ValueError('Current requirement scope differs from the assembly product inventory')
@@ -133,7 +140,7 @@ def validate(data,root):
 
 def render(root=ROOT):
     data=json.loads((root/'docs/REQUIREMENTS.json').read_text(encoding='utf8'))
-    validate(data,root);items=data['items'];coverage=data.get('coverage_047',data['coverage_046']);style=data['style_policy']
+    validate(data,root);items=data['items'];coverage=data[latest_coverage(data)];style=data['style_policy']
     short_version='.'.join(data['target_version'].split('.')[:2])
     rows=[BEGIN,'## 全文需求逐项核对与未完成清单','',
         f"核对日期：{data['reviewed']}；当前 {data['target_version']} 源码候选。重复要求合并为 29 项，原有组 ID、核心约束和后续补充全部保留。",
@@ -164,7 +171,7 @@ def render(root=ROOT):
     rows+=['','| 主板板型 | 具名记录 |','| --- | ---: |']
     for key,label in (('itx','ITX'),('matx','mATX'),('atx','ATX'),('eatx','E-ATX')):
         rows.append(f"| {label} | {sizes['board_form_counts'][key]} |")
-    pcbs=data['pcbs_comparison_scope'];pending=data.get('open_detail_counts_047',data['open_detail_counts_046'])
+    pcbs=data['pcbs_comparison_scope'];pending=data.get('open_detail_counts_'+latest_coverage(data)[9:],data['open_detail_counts_046'])
     rows+=['','120／140 等名义等级不等于实际长度、孔距或安装间隙；每个品牌／系列的尺寸空档、原始来源和未核项见 [尺寸覆盖表](docs/SIZE_COVERAGE.json)。',
         f"**PCBS 对照范围：** 当前只比较局部官方公告的 {pcbs['entries']} 个列表出现条目（含 {pcbs['grouped_variant_entries']} 个合并变体），{pcbs['strict_name_matches']} 项严格名称匹配、{pcbs['unmatched_or_pending']} 项未匹配／待核。不是完整游戏数据库，也不是确认缺少 {pcbs['unmatched_or_pending']} 个 SKU；不据此算完成百分比。见 [PCBS 差距与来源](docs/PCBS_GAP_ANALYSIS.md)。",'',
         f"**硬件覆盖与质量未完成项：** 原账仍有 {pending['gpu_leaf_profiles_pending']} 个 GPU 叶型待核，本轮没有新增完整叶型核实；新增风扇中 {pending['new_fan_leaf_evidence_pending']} 款叶片证据未完整；{pending['motherboard_finish_pending']} 款主板 finish 仍待官方来源。两款板载小风扇仅有 MSI 无叶片风扇槽与 ASUS 网罩参考，另 {pending['unplaced_onboard_heatsink_fans']} 款内部位置未知；两款叶片、方向和 RPM 都未知。",

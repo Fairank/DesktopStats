@@ -79,18 +79,22 @@ def reference_preset(options,kind):
             'loop':'custom-loop-360-reference'}[kind]
     result.update(loop_components_mode='reference',loop_fittings={},radiator_model='',radiator_fan_model='',radiator_fan_layout='single',
         secondary_radiator_model='',secondary_radiator_fan_model='',secondary_radiator_fan_layout='single',
-        case_model='corsair-5000d-airflow' if kind=='air' else 'hyte-y70',
+        # These are explicit example identities, never invented detections.
+        # These cases retain the same357.6mm card without rescaling. NorthXL
+        # is the compact AIO view; the larger HAF leaves room for the GPU loop.
+        # Missing case-I/O profiles remain unknown, not implicitly connected.
+        case_model={'air':'corsair-5000d-airflow','aio':'fractal-north-xl-mesh',
+                    'loop':'cooler-master-haf-700-evo'}[kind],
+        cpu_model='intel-13700kf',gpu_model='asus-astral-5090',
+        board_model='asus-rog-strix-z790-a-wifi-d4',
+        memory_models=['gskill-f4-3200c16d-16gtzr']*2,
         cooler_model=cooler,cooler_mount='top',gpu_waterblock=kind=='loop',
         psu_model='corsair-rm1000x-2024',
         storage=[dict(model_id='samsung-990-pro-2tb',count=1)],
         expansion_cards=[],cables_enabled=True,fan_motion='demo',fan_animation=True,
+        lighting_preview='mint',inspection_cutaway=True,
         case_fans=[dict(model='arctic-p12-pwm',mount=mount,count=count,direction=direction)
-                   for mount,count,direction in (('side',3,'intake'),('rear',1,'exhaust'))])
-    if kind=='air':
-        result['case_fans']=[dict(model='arctic-p12-pwm',mount=mount,count=count,direction=direction)
-            for mount,count,direction in (('front',3,'intake'),('rear',1,'exhaust'))]
-    elif kind=='loop':result['case_fans']=[dict(model='arctic-p12-pwm',mount=mount,count=count,direction=direction)
-            for mount,count,direction in (('bottom',3,'intake'),('rear',1,'exhaust'))]
+                   for mount,count,direction in (('front',3,'intake'),('rear',1,'exhaust'))])
     return validate_assembly(result)
 
 
@@ -126,6 +130,8 @@ def fit_messages(spec,metadata):
             result.extend(messages(details))
         if 'psu_form_factor_not_supported' in details.get('warnings',()):
             result.append('所选电源规格尚不适配此机箱。')
+        if 'cable_reference_route_exceeds_case' in details.get('warnings',()):
+            result.append('部分参考线缆超出机箱范围，请检查走线。')
         if details.get('outside_reference'):result.append('部分配件超出机箱参考外形，请检查安装位置。')
         for row in details.get('rejected',()):
             if group=='cooling' and row.get('kind')=='loop_component':

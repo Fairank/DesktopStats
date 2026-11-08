@@ -902,6 +902,8 @@ def auxiliary_stages(spec,anchors,level='balanced'):
         cable_tone=_hex(options.get('cable_color'));strands=2 if level=='eco' else 3
         board=anchors.get('board') or {};board_point=_point(board.get('position'),None)
         trunk_supported=bool(board_point and _point(board.get('normal'))==(-1.,0.,0.) and _point(board.get('up'))==(0.,1.,0.))
+        case_fan_owners={row.get('owner') for row in ((anchors.get('cooling') or {}).get('wire_anchors') or ())
+                         if isinstance(row,dict) and row.get('role')=='case' and isinstance(row.get('owner'),str)}
         def tray_waypoints(source,target,start,end):
             if not trunk_supported:return ()
             bx,by,bz=board_point;board_h=board.get('height',305.);board_w=board.get('width',244.)
@@ -909,7 +911,23 @@ def auxiliary_stages(spec,anchors,level='balanced'):
             rear_x=min(w/2-12.,bx+18.);front_x=bx-(22. if dual else 36.);aperture_z=bz+board_w/2+31.
             source_y=start[1];target_y=end[1]
             points=[]
-            if source.get('owner')=='case':
+            owner=source.get('owner','')
+            case_fan=isinstance(owner,str) and owner in case_fan_owners
+            if case_fan and owner.startswith('fans:rear:'):
+                # A short reference lane behind the rear fan plane, then the
+                # actual tray side. No factory grommet location is claimed.
+                rear_lane_z=-d/2+6.
+                points.extend(((start[0],source_y,rear_lane_z),(rear_x,source_y,rear_lane_z)))
+                # Stay near the rear mounting frame instead of traversing to
+                # the front-case aperture. All sections use the same solver.
+                edge_y=by+board_h/2+8.
+                points.extend(((rear_x,edge_y,rear_lane_z),(front_x,edge_y,rear_lane_z)))
+                if target_y>by+board_h/2-24.:
+                    points.append((front_x,edge_y,end[2]))
+                else:
+                    points.extend(((front_x,target_y,rear_lane_z),(front_x,target_y,end[2])))
+                return tuple(points)
+            elif source.get('owner')=='case' or case_fan and owner.startswith('fans:front:'):
                 # Traverse the actual front-side opening beyond the GPU,
                 # then stay behind the tray. Avoid crossing the divider at
                 # its solid bottom or routing diagonally across the card.
@@ -919,16 +937,22 @@ def auxiliary_stages(spec,anchors,level='balanced'):
             points.append((rear_x,source_y,aperture_z))
             if target.get('owner') in ('board','gpu'):
                 if target_y>by+board_h/2-24.:
-                    edge_y=by+board_h/2+22.
+                    edge_y=by+board_h/2+(8. if case_fan else 22.)
                     points.extend(((rear_x,edge_y,aperture_z),(front_x,edge_y,aperture_z),(front_x,edge_y,end[2])))
                 elif target_y<by-board_h/2+20.:
                     edge_y=by-board_h/2-20.
                     points.extend(((rear_x,edge_y,aperture_z),(front_x,edge_y,aperture_z),(front_x,edge_y,end[2])))
                 elif target.get('owner')=='board' and end[2]<bz+board_w/2-30.:
-                    # A connector behind the DIMM row is approached via the
-                    # top wiring lane, never straight through standing RAM.
-                    edge_y=by+board_h/2+22.
-                    points.extend(((rear_x,edge_y,aperture_z),(front_x,edge_y,aperture_z),(front_x,edge_y,end[2])))
+                    # The lower case-fan header is reached around the observed
+                    # pump-elbow envelope, not through a diagonal detour.
+                    edge_y=by+board_h/2+(8. if case_fan else 22.)
+                    if case_fan:
+                        approach_z=end[2]-24.
+                        points.extend(((rear_x,edge_y,aperture_z),(front_x,edge_y,aperture_z),
+                                       (front_x,edge_y,approach_z),(front_x,target_y,approach_z),
+                                       (front_x,target_y,end[2])))
+                    else:
+                        points.extend(((rear_x,edge_y,aperture_z),(front_x,edge_y,aperture_z),(front_x,edge_y,end[2])))
                 else:points.extend(((rear_x,target_y+18. if target.get('owner')=='gpu' else target_y,aperture_z),
                                    (front_x,target_y+18. if target.get('owner')=='gpu' else target_y,aperture_z)))
             else:points.append((rear_x,target_y,aperture_z))

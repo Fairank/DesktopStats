@@ -18,6 +18,7 @@ from assembly_geometry import build_scene, number, vertex_bytes
 from assembly_style import edge_batches,material_for,style_for
 from assembly_effects import SelectionEffect,component_family,effect_for,effect_sample
 from assembly_scene_cache import SceneCache
+from assembly_visibility048 import hidden_mesh_ids
 from top_bar_feedback import GPU_FAN_MAX_AGE
 
 GL_FLOAT=0x1406
@@ -259,6 +260,7 @@ class AssemblyRenderer:
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
         self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
         self._wide_lines=False
+        self._cutaway_hidden=frozenset()
 
     def initialize(self):
         self.functions=QOpenGLFunctions_3_3_Core()
@@ -287,6 +289,7 @@ class AssemblyRenderer:
     def upload(self,scene):
         if self.program is None:raise RuntimeError('3-D context is not ready')
         self.scene=scene;raw=vertex_bytes(scene)
+        self._cutaway_hidden=hidden_mesh_ids(scene.meshes)
         self.policy=style_for(scene.metadata.get('canvas_style',scene.metadata.get('visual_style')))
         styles=scene.metadata.get('mesh_style_ids')
         if not isinstance(styles,(tuple,list)) or len(styles)!=len(scene.meshes):
@@ -335,6 +338,9 @@ class AssemblyRenderer:
         return (focus=='all' or mesh.component==focus or bool(focus) and getattr(mesh,'part_id','')==focus
                 or focus=='case' and mesh.component=='panel')
 
+    def _visible(self,mesh,focus,inspection_cutaway=False):
+        return self._selected(mesh,focus) and (inspection_cutaway is not True or id(mesh) not in self._cutaway_hidden)
+
     def _shift(self,mesh,exploded):
         if not exploded:return (0,0,0)
         w,h,d=self.scene.dimensions
@@ -368,7 +374,7 @@ class AssemblyRenderer:
         self._shadow_key=key;self._shadow_parameters=(point,inverse)
         return self._shadow_parameters
 
-    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False):
+    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False,inspection_cutaway=False):
         f=self.functions
         if f is None or self.scene is None:return
         f.glViewport(0,0,max(1,width),max(1,height))
@@ -394,7 +400,7 @@ class AssemblyRenderer:
             combined=projection*view;inverse,valid=combined.inverted()
             self._pick_inverse=inverse if valid else None;self._pick_projection=combined
             self._pick_camera_key=camera_key
-        self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus)
+        self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus,inspection_cutaway=inspection_cutaway)
         self._frame_effect=effect if isinstance(effect,dict) and effect.get('active') is True else None
         self._frame_effect_samples={}
         self.program.bind();self.vao.bind()
@@ -424,7 +430,7 @@ class AssemblyRenderer:
             f.glEnable(GL_POLYGON_OFFSET_FILL);f.glPolygonOffset(1.,1.)
         transparent=[]
         for row in self.ranges:
-            if not self._selected(row[0],focus):continue
+            if not self._visible(row[0],focus,inspection_cutaway):continue
             policy=self._mesh_policies.get(id(row[0]),self.policy)
             if row[0].color[3]<1:transparent.append(row)
             else:self._draw_part(row,projection,view,exploded,phase,
@@ -441,7 +447,7 @@ class AssemblyRenderer:
             self._frame_shade=0.
             line_width=1.
             for row in self.edge_ranges:
-                if self._selected(row[0],focus):
+                if self._visible(row[0],focus,inspection_cutaway):
                     policy=self._mesh_policies.get(id(row[0]),self.policy)
                     stroke_width=max(1.,min(8.,policy['line_width']*number(pixel_scale,1.,.5,8.))) if self._wide_lines else 1.
                     if stroke_width!=line_width:f.glLineWidth(stroke_width);line_width=stroke_width
@@ -491,7 +497,7 @@ class AssemblyRenderer:
         hits={};opaque_case=float('inf')
         for mesh in self.scene.meshes:
             component='case' if mesh.component=='panel' else mesh.component
-            if component not in candidates or mesh.name.startswith('style-') or not self._selected(mesh,focus):continue
+            if component not in candidates or mesh.name.startswith('style-') or not self._visible(mesh,focus,state.get('inspection_cutaway',False)):continue
             target=getattr(mesh,'part_id','') or component
             shift=self._shift(mesh,state['exploded']);vertices=mesh.vertices
             points=[posed_point(mesh,vertices[n:n+3],shift,state['phase']) for n in range(0,len(vertices),6)]
@@ -550,6 +556,7 @@ class AssemblyRenderer:
         self._pick_inverse=self._pick_projection=self._pick_camera_key=self._pick_state=None
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
         self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
+        self._cutaway_hidden=frozenset()
 
 
 class AssemblyViewport(QOpenGLWidget):
@@ -585,6 +592,7 @@ class AssemblyViewport(QOpenGLWidget):
         self._selected='';self._press_position=None;self._dragging=False
         self._pointer=None;self._error='';self._closed=False
         self._transparent_background=False
+        self._inspection_cutaway=False
 
     @property
     def scene(self):return self._scene
@@ -605,6 +613,7 @@ class AssemblyViewport(QOpenGLWidget):
 
     def set_scene(self,spec):
         scene=self._scene_cache.build(spec)
+        self.set_inspection_cutaway(spec.get('inspection_cutaway',False))
         if scene==self._scene:return
         self._effect.cancel()
         self._scene=scene;self._pending=True
@@ -702,6 +711,16 @@ class AssemblyViewport(QOpenGLWidget):
     def set_exploded(self,enabled):
         if self._exploded!=(enabled is True):self._exploded=enabled is True;self.update()
 
+    def set_inspection_cutaway(self,enabled):
+        """Change only draw/pick visibility; keep the uploaded physical scene."""
+        enabled=enabled is True
+        if self._inspection_cutaway==enabled:return
+        self._inspection_cutaway=enabled
+        # Never let a click between this toggle and the next paint use the old
+        # cover visibility. The next regular draw restores the same camera ray.
+        self._renderer._pick_state=None
+        self.update()
+
     def set_dark(self,enabled):
         if self._dark!=(enabled is True):self._dark=enabled is True;self.update()
 
@@ -779,6 +798,7 @@ class AssemblyViewport(QOpenGLWidget):
                        else dict(gpu=self._phase,**{key:self._cpu_phase for key in self._real_cpu_rotor_parts}))
             options=dict(yaw=self._yaw,pitch=self._pitch,zoom=self._zoom,exploded=self._exploded,
                          phase=phase,dark=self._dark,focus=self._focus)
+            if getattr(self,'_inspection_cutaway',False):options['inspection_cutaway']=True
             if self._transparent_background:options['transparent_background']=True
             if getattr(self,'_selected',''):options['selected']=self._selected
             effect=getattr(self,'_effect',None)

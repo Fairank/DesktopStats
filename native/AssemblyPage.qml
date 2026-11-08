@@ -99,7 +99,7 @@ ScrollView {
             Text {
                 objectName:"assemblyExamplesNote"
                 Layout.fillWidth:true
-                text:ui.t("示例替换未保存的机箱与配件选择，沿用当前 CPU、显卡和内存。转动仅为演示；按应用偏好保存。")
+                text:ui.t("载入主要配件齐全的参考方案，不代表已识别的本机硬件。")
                 font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap;lineHeight:1.2
             }
         }
@@ -196,6 +196,9 @@ ScrollView {
                     onPicked:selected=>stats.changeAssembly("lighting_preview",selected)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("展开组件");note:ui.t("将硬件分开，查看机箱内部布局。")
                 Toggle {checked:root.config.exploded===true;onToggled:stats.changeAssembly("exploded",checked)}}
+            SettingRow {Layout.fillWidth:true;label:ui.t("内部检视");note:ui.t("隐藏外盖与电源罩以查看内部，保留完整硬件与安装检查。")
+                Toggle {objectName:"assemblyInspectionCutawayToggle";checked:root.config.inspection_cutaway===true
+                    onToggled:stats.changeAssembly("inspection_cutaway",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风扇随转速转动");note:ui.t("仅在三维视图可见且转速有效时运行。")
                 Toggle {checked:root.config.fan_animation===true;onToggled:stats.changeAssembly("fan_animation",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风格特效");note:ui.t("选择部件时短暂播放，结束后停止。")
