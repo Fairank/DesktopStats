@@ -28,6 +28,26 @@
 下载、复制或违规使用，也不保证侵权行为不会发生。需要商业授权时，请联系仓库
 所有者 Fairank；仓库公开、下载免费或提交 issue 均不构成商业授权。
 
+## 转载与来源保留
+
+本节说明既有许可的履行方式，不替换或增加 [LICENSE](LICENSE) 的使用限制。
+按 PolyForm Noncommercial 1.0.0 的 Notices 条款，接收软件任一部分副本的人应同时
+得到许可条款副本或其中的官方许可 URL，以及随软件提供的全部 `Required Notice:` 纯文本行。
+[NOTICE](NOTICE) 的作者行现包含项目来源 `https://github.com/Fairank/DesktopStats`，
+转载时完整保留该行；随分发保留 LICENSE、NOTICE 及适用的第三方许可文件，是直接的履行方式。
+
+转载页面建议同时注明 Desktop Stats、作者 Fairank 与贡献者、版本、原仓库链接和所作修改，
+便于读者区分原作与修改版。这些发布建议不应被误称为原许可证中不存在的额外条款。
+不能把第三方许可、厂商来源照片或旧版 MIT 内容改标为本项目独占的非商用作品。
+许可列明的非商业机构等允许用途，以及法定合理使用权，继续按英文原文适用；
+不能仅因有资金支持就擅自收紧这些许可已允许的用途。
+
+指定原创发行资产可按随附签发清单包含隐形来源标记，具体覆盖、验证结果与文件位置以对应版本的签发清单及
+[水印说明](https://github.com/Fairank/DesktopStats/blob/codex/invisible-watermark-v050/docs/WATERMARK050.md) 为准。
+未列入某次签发清单的历史原件不会因此被追认为已有标记。
+它是离线来源核对与取证辅助，不改变权利范围，不保证无法移除、版权成立、证据采纳或胜诉。
+本项目没有借此新增“不得移除水印”的许可条件，也不限制 LGPL 组件的修改调试等已有权利。
+
 ## Scope and exceptions
 
 The original application code and original contributions in this version are

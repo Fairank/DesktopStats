@@ -216,6 +216,9 @@ class SourceExportTests(unittest.TestCase):
             "assets/../../outside.py",
             "C:/outside.py",
             "assets/private.key",
+            "assets/owner-key.dpapi",
+            "DesktopStatsPublisher/publisher-public.json",
+            ".watermark-keys/owner.json",
         ):
             contract = copy.copy(self.contract)
             contract.SOURCES = (*self.contract.SOURCES, name)
@@ -365,6 +368,21 @@ class SourceExportTests(unittest.TestCase):
         with self.assertRaises(export.ExportError) as caught:
             export._scan("tools/templates/accessory-atlas.html", ('<script>'+secret+'</script>').encode('utf8'))
         self.assertNotIn(secret,str(caught.exception))
+
+    def test_offline_mjs_and_renamed_publisher_secrets_are_not_exportable(self):
+        secret = "ghp" + "_" + "8Yv0FudqRbNmS74pAz6G1Ci9Xk3D5LwE"
+        with self.assertRaises(export.ExportError) as caught:
+            export._scan('tools/publisher-fixture.mjs', ('const value="'+secret+'";').encode())
+        self.assertNotIn(secret,str(caught.exception))
+        sealed = ({'schema':1,'protection':'Windows-DPAPI-CurrentUser','ciphertext_base64':'synthetic-fixture'},
+                  {'schema':1,'scheme':'scrypt-32768-8-1/aes-256-gcm','ciphertext':'synthetic-fixture'},
+                  {'schema':1,'signing_der':'synthetic-fixture','carrier_master':'synthetic-fixture'})
+        for value in sealed:
+            with self.subTest(scheme=value),self.assertRaises(export.ExportError):
+                export._scan('docs/innocent-name.json',json.dumps(value).encode())
+        encrypted_header = '-----BEGIN ' + 'ENCRYPTED PRIVATE KEY-----'
+        with self.assertRaises(export.ExportError):export._scan('docs/key-as-note.txt',encrypted_header.encode())
+        export._scan('docs/publisher-public.json',json.dumps({'algorithm':'Ed25519','public_key_spki_der_base64':'public-fixture'}).encode())
 
     def test_generic_fixture_paths_are_allowed_and_export_is_reproducible(self):
         self.write(

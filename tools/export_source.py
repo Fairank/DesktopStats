@@ -279,9 +279,12 @@ _PRIVATE_PARTS = frozenset(
         "root-qml-isolated-profile",
         ".qa-profile",
         ".test-profile",
+        "desktopstatspublisher",
+        ".publisher-private",
+        ".watermark-keys",
     }
 )
-_PRIVATE_SUFFIXES = {".pfx", ".p12", ".pem", ".key", ".token", ".pid", ".log", ".dmp"}
+_PRIVATE_SUFFIXES = {".pfx", ".p12", ".pem", ".key", ".token", ".pid", ".log", ".dmp", ".dpapi"}
 _BINARY_SUFFIXES = frozenset(
     {
         ".exe",
@@ -318,6 +321,7 @@ _TEXT_SUFFIXES = {
     ".py",
     ".qml",
     ".js",
+    ".mjs",
     ".html",
     ".json",
     ".md",
@@ -334,7 +338,7 @@ _TOKEN = re.compile(
     r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|"
     r"sk-(?:proj-)?[A-Za-z0-9_-]{20,}|AKIA[A-Z0-9]{16})\b"
 )
-_PRIVATE_KEY = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")
+_PRIVATE_KEY = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----")
 _HOME = re.compile(r"(?i)(?:[A-Z]:[/\\]+Users[/\\]+|/home/|/Users/)([\w.@-]+)(?=[/\\])")
 _FIXTURE_USERS = {
     "user",
@@ -452,6 +456,15 @@ def _scan(name, data):
         content = data.decode("utf-8-sig")
     except UnicodeDecodeError as error:
         raise ExportError("Expected UTF-8 source text: " + name) from error
+    if PurePosixPath(name).suffix.casefold() == '.json':
+        try:
+            value = json.loads(content)
+        except (ValueError, RecursionError):
+            value = None
+        if isinstance(value, dict) and ('signing_der' in value or 'carrier_master' in value
+                or value.get('protection') == 'Windows-DPAPI-CurrentUser'
+                or value.get('scheme') == 'scrypt-32768-8-1/aes-256-gcm'):
+            raise ExportError('Publisher secret stores and encrypted backups are not public source: ' + name)
     for number, line in enumerate(content.splitlines(), 1):
         if _TOKEN.search(line) or _PRIVATE_KEY.search(line):
             # Never echo the possible secret into a log or exception.

@@ -1,16 +1,16 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.49.0-preview.1",
-  "archive_root": "DesktopStats-0.49.0-preview.1-source/",
+  "version": "0.50.0-preview.1",
+  "archive_root": "DesktopStats-0.50.0-preview.1-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed original image/video and validated data-only model packs retained.",
   "dependency_preparation_required": true,
   "files": [
     {
       "path": ".gitignore",
-      "bytes": 520,
-      "sha256": "a6169c568e4e8ec452f7014831a5b27164a3a0bb420b2d7f12eca293a5212d45"
+      "bytes": 588,
+      "sha256": "54ca8d140028e46d48c2643affa8704123f1900f63f6af4c6520ce29b7856da5"
     },
     {
       "path": "CHANGELOG.md",
@@ -34,18 +34,18 @@
     },
     {
       "path": "LICENSING.md",
-      "bytes": 6334,
-      "sha256": "6e73522895680be50efff01295ec042d7358edbd18d5c6b6ce8f76a6b7c1cadf"
+      "bytes": 8053,
+      "sha256": "4dc5a024f40bce162a6f3c362d935bd4d74bd9e0c2985607c71a4bd3bb7cb1bf"
     },
     {
       "path": "NOTICE",
-      "bytes": 906,
-      "sha256": "f1fcf72d39991d2e144e87c1682bac6f8dbcdcbc996f4f15630dff921c43ac91"
+      "bytes": 948,
+      "sha256": "4555c6cc1b50172d287bde9bc365875eff578581a9730c1d51763ac0255f73d1"
     },
     {
       "path": "README.md",
-      "bytes": 75847,
-      "sha256": "4a085796862efaac5ecf990e88e48fda98d9374f5892ec4378fbd9dc7e5d982f"
+      "bytes": 80049,
+      "sha256": "28168442567932c99360c70565e528966a3c8bf98397bfc81d18db579a034997"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1489,8 +1489,8 @@
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 70433,
-      "sha256": "5b760cba46337a8599009bd3b8751c783bc7dd69d38f0569ab67525b81f0a133"
+      "bytes": 78494,
+      "sha256": "ef704edd50de0f8ec9f2a4cb3cf0627bef8def2c48329c771de0f95e87db3a7d"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",
@@ -1518,6 +1518,21 @@
       "sha256": "2a9d5537a0a825de305d2b190020e1c94a23a9b6e06fa40c149d8c90f190d53a"
     },
     {
+      "path": "docs/WATERMARK050.md",
+      "bytes": 16881,
+      "sha256": "c32ea6fb8eee7f5c42b74e223fe55e998aecf6391c35ac1189c414ff29e6225e"
+    },
+    {
+      "path": "docs/WATERMARK050_INDEX.json",
+      "bytes": 4659,
+      "sha256": "d7f593970e5fad2d70ffd7ba39cda0f8ae01812ac714996c465f78238b91b7db"
+    },
+    {
+      "path": "docs/WATERMARK050_PUBLIC_KEY.json",
+      "bytes": 412,
+      "sha256": "440e8f917933c691cef09c8eaeebc04ba9d5efa7111a9e7a75c03f9a3a8cdad3"
+    },
+    {
       "path": "energy_sensor.py",
       "bytes": 6897,
       "sha256": "b2ea76ede40783e28cd3c64853e866b2ae5311ddd4ee34589af88958584dde08"
@@ -1541,6 +1556,11 @@
       "path": "fullscreen_guard.py",
       "bytes": 18878,
       "sha256": "e9f809edbe5fbd20822038c369ba443f5eb73859dc9a7821ac6391f2bc0c6e7e"
+    },
+    {
+      "path": "geometry_watermark050.py",
+      "bytes": 27501,
+      "sha256": "fe88154ec9f28822dacd7eefef5d1467ac38285baefde3346140902450519277"
     },
     {
       "path": "gpu_fan_sensor.py",
@@ -1681,6 +1701,11 @@
       "path": "hooks/hook-PySide6.QtQml.py",
       "bytes": 1358,
       "sha256": "034652dc72fb644b8371c502f6d48a53f62625d64e64f5e4b27da989055606d2"
+    },
+    {
+      "path": "image_watermark050.py",
+      "bytes": 19586,
+      "sha256": "7981ba19386d0f4d77b8617b43cfc6c9ce3ed46beff2c3b0f5fdaa6583f12740"
     },
     {
       "path": "installer.py",
@@ -2970,12 +2995,17 @@
     {
       "path": "product_version.py",
       "bytes": 29,
-      "sha256": "0c2a80a69fde8d9c49c2ff4ed5fb51181f23ee345ef2eef2160ec012f9ac958f"
+      "sha256": "5b9a8d7c5026ed8c48a12e7a5125b12f6462fe031998bdc97398217647271b32"
     },
     {
       "path": "profile_paths.py",
       "bytes": 8402,
       "sha256": "73dc925c627cf24df9dd63583835da5338d57d074441db5caf29f53d94948c95"
+    },
+    {
+      "path": "publisher_signing050.py",
+      "bytes": 15214,
+      "sha256": "5c29d18460df95c9febb6af57da83b97a35df53a04eb5cbcea228c72aeae7e93"
     },
     {
       "path": "pyproject.toml",
@@ -3513,6 +3543,11 @@
       "sha256": "bed3ebfe9dd709c6fbedbafb04371b17f02092d754293d307433fc74846a3801"
     },
     {
+      "path": "tests/test_geometry_watermark050.py",
+      "bytes": 15943,
+      "sha256": "ce4f869994a651a5016a02b1da375b91b4ff1cca73a640c3e43b33a0a41a692d"
+    },
+    {
       "path": "tests/test_glass_preferences.py",
       "bytes": 18687,
       "sha256": "022ec0137a9e6420e4288a5bbab11f55dc265b3c8868dc188516338df9351e91"
@@ -3706,6 +3741,11 @@
       "path": "tests/test_hwinfo_cache.py",
       "bytes": 4639,
       "sha256": "818b2bb89487c0ca359e6eed151413e28df6a904357f9d4345f5d4829cf3d22b"
+    },
+    {
+      "path": "tests/test_image_watermark050.py",
+      "bytes": 21829,
+      "sha256": "cb1b98f3d3b3511c19e45794dedae7090b4563679eb69b81aa616b431b509849"
     },
     {
       "path": "tests/test_installer_audit.py",
@@ -4013,6 +4053,11 @@
       "sha256": "1c782abca04a5dbb3bf5447f361d80e37422468d0859538071adfcdaf2a7def5"
     },
     {
+      "path": "tests/test_publisher_signing050.py",
+      "bytes": 7651,
+      "sha256": "cca436ce3d818d1e54069905e9b3817f6eb25801cdcabd19892b6adf28049343"
+    },
+    {
       "path": "tests/test_raster_blur_material.py",
       "bytes": 26411,
       "sha256": "b9206585bfc5a17be880bee0a1ffafb6810679df064623ce1bb33f3d0b3aa97d"
@@ -4134,8 +4179,8 @@
     },
     {
       "path": "tests/test_source_export.py",
-      "bytes": 18595,
-      "sha256": "6a2f3aedce4ef69aa27fb1f0d361a4d66a7664adbe4f6b0046c55b069b5ce9c4"
+      "bytes": 19939,
+      "sha256": "c1fc1eab6feb5bfa1c357b9baee0fd555cfbed0004d42ce4188a6fc6a8f39d9d"
     },
     {
       "path": "tests/test_stale_readings.py",
@@ -4313,6 +4358,11 @@
       "sha256": "30b5b0041125922b4fa281db02fd044e2d36e1b7deae89b5667ea3dd74fd7ddb"
     },
     {
+      "path": "tests/test_watermark_publisher050.py",
+      "bytes": 6365,
+      "sha256": "0a2ddb24921e3444d5d7ec1b6c2db23507055d7d2012dd46fd7557a34a4ba16f"
+    },
+    {
       "path": "tests/test_widget_blur.py",
       "bytes": 19194,
       "sha256": "7b7d661c58e87886d8a151ffe0eb30fd7c8e82a57063ebe5c76c9db78205adc6"
@@ -4404,8 +4454,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 32513,
-      "sha256": "7b680eca31e7370de7290936b3d14c4b44fdd53a42b0a617552c906f2d73a0b0"
+      "bytes": 32952,
+      "sha256": "605ffa5de4047aae1b48c3052d2c9f2d70588fb0b1f119069ce8bbc7968cf2b2"
     },
     {
       "path": "tools/build_collector.py",
@@ -4479,8 +4529,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 27506,
-      "sha256": "023e720b076d1f54a9bf13be175b369e2e871aa9c0120fa7ada48726c23eea41"
+      "bytes": 28160,
+      "sha256": "dca8c272a3688842aaf6199cb2fbb6322c6657c8ed8c9c1ddf3768ac10b2af0c"
     },
     {
       "path": "tools/fetch_qt_licenses.py",
@@ -4561,6 +4611,16 @@
       "path": "tools/verify_upgrade.py",
       "bytes": 8450,
       "sha256": "2a14b75098e8bc643eabe966dea2083ed75eed049d1cf6db61523ce62bda3750"
+    },
+    {
+      "path": "tools/watermark_assets050.py",
+      "bytes": 15738,
+      "sha256": "11418e21cefbb232a8c73c128e0616a6cf9a9fa03ced2b0155effa0ac8157a36"
+    },
+    {
+      "path": "tools/watermark_crypto050.mjs",
+      "bytes": 3938,
+      "sha256": "04578f127fcaf45b051e9102feb6d066c4079ecb9631af7d1ba1c1518da8d0f0"
     },
     {
       "path": "top_bar_backdrop_host.py",
