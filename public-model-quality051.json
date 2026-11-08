@@ -1,0 +1,118 @@
+{
+  "Stats_all_mechanical_interactions_complete": false,
+  "all_catalog_protected": false,
+  "all_individual_meshes_protected": false,
+  "asset": {
+    "bytes": 8604288,
+    "file": "helios-independent-protected051.glb",
+    "sha256": "6397c892a9a8ed69e5437e1726a3278f1c28902c936a19d41e3fad52e218bd0c"
+  },
+  "component_fallback_parents": 3,
+  "exact_shared_vertex_copies_preserved": true,
+  "four_view_pixel_comparison": {
+    "all": {
+      "changed_RGB_pixels": 1837,
+      "changed_bbox": [
+        216,
+        155,
+        741,
+        848
+      ],
+      "delta_ge2": 1043,
+      "delta_ge32": 9,
+      "max_RGB_difference": 36,
+      "max_actual_worker_projected_delta_pixels": 0.00018310546875,
+      "max_alpha_difference": 0,
+      "mean_abs_RGB_difference": 0.00931604938271605,
+      "pixels": 810000
+    },
+    "cpu": {
+      "changed_RGB_pixels": 0,
+      "changed_bbox": null,
+      "delta_ge2": 0,
+      "delta_ge32": 0,
+      "max_RGB_difference": 0,
+      "max_actual_worker_projected_delta_pixels": 0.0001856311807341986,
+      "max_alpha_difference": 0,
+      "mean_abs_RGB_difference": 0.0,
+      "pixels": 518400
+    },
+    "gpu": {
+      "changed_RGB_pixels": 286,
+      "changed_bbox": [
+        297,
+        187,
+        738,
+        379
+      ],
+      "delta_ge2": 96,
+      "delta_ge32": 0,
+      "max_RGB_difference": 28,
+      "max_actual_worker_projected_delta_pixels": 9.1552734375e-05,
+      "max_alpha_difference": 0,
+      "mean_abs_RGB_difference": 0.0008083900226757369,
+      "pixels": 588000
+    },
+    "ram": {
+      "changed_RGB_pixels": 0,
+      "changed_bbox": null,
+      "delta_ge2": 0,
+      "delta_ge32": 0,
+      "max_RGB_difference": 0,
+      "max_actual_worker_projected_delta_pixels": 0.00018310546875,
+      "max_alpha_difference": 0,
+      "mean_abs_RGB_difference": 0.0,
+      "pixels": 518400
+    }
+  },
+  "hidden_mark_extraction_performed": false,
+  "human_visual_review_performed_by_script": false,
+  "legal_conclusion": false,
+  "limits": [
+    "Whole-model detectability does not imply every small part is marked.",
+    "Low-bit marks may be removed by quantization, transform baking or re-export.",
+    "Subpixel shifts can change raster-edge pixels; reported differences are unfiltered.",
+    "No CAD, installation clearance, whole-app RAM or legal ownership conclusion."
+  ],
+  "max_face_normal_angle_deg": 0.010094891655009128,
+  "max_mesh_bbox_mm_delta": 0.0,
+  "max_whole_world_bbox_mm_delta": 0.0,
+  "max_world_mm_delta": 0.00010235906881509414,
+  "meshes": 398,
+  "metadata_derived_cable_parents": 12,
+  "native_acceptance": false,
+  "new_degenerate": 0,
+  "nodes": 432,
+  "nodes_materials_animation_equal": true,
+  "official": true,
+  "orientation_flips": 0,
+  "original_part_id_parents": 18,
+  "original_sha256": "105f1a47bd3be43b3fad2d5af570cc2542d31dc83a9b5a6f2dc7bafbb6d4ae40",
+  "original_vs_official_actual_FLOAT32": true,
+  "other_BIN_bytes_equal": true,
+  "owner_keys_read": false,
+  "owner_store_read": false,
+  "p99_face_normal_angle_deg": 0.002962654710038405,
+  "passed": true,
+  "position_low2_only": true,
+  "reference_group_coverage_attestation": {
+    "reference_groups": 21,
+    "source": "Verified signed publisher receipt; not independently decoded by this no-key QA",
+    "supported_reference_groups": 20,
+    "unsupported_transparent_panel_capacity": 0
+  },
+  "removed_degenerate": 0,
+  "renderer": "Existing CPU software perspective rasterizer,2x supersampling; not nativeGL",
+  "schema": 1,
+  "signature_verified": true,
+  "signed_receipt_sha256": "1eee9a6fa81a5200e15af1d48afe17d7e8eaa8065fc2eeae2d32f22f6f3b2de4",
+  "source_commit": "b48f178155010845fbf79c3e37a07a944d5f9b37",
+  "status": "passed",
+  "stored_normal_bytes_equal": true,
+  "synthetic": false,
+  "synthetic_quality_reused": false,
+  "triangles": 112850,
+  "trusted_public_key_sha256": "440e8f917933c691cef09c8eaeebc04ba9d5efa7111a9e7a75c03f9a3a8cdad3",
+  "version": "0.51.0-preview.1",
+  "views_compared": 4
+}
