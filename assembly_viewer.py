@@ -14,7 +14,7 @@ from PySide6.QtOpenGL import (QOpenGLBuffer, QOpenGLFunctions_3_3_Core, QOpenGLS
                              QOpenGLShaderProgram, QOpenGLVertexArrayObject)
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
-from assembly_geometry import build_scene, number, vertex_bytes
+from assembly_geometry import Scene,build_scene, number, vertex_bytes
 from assembly_style import edge_batches,material_for,style_for
 from assembly_effects import SelectionEffect,component_family,effect_for,effect_sample
 from assembly_scene_cache import SceneCache
@@ -83,6 +83,40 @@ def mesh_phase(mesh,phase):
 
 
 ASSEMBLY_COMPONENTS=('all','gpu','cpu','memory','board','case','cooler','fans','psu','storage','expansion','cables')
+
+
+def scene_bounds(scene,selected,shift):
+    """Build the same focus/part bounds with one local scan per mesh.
+
+    Styles share physical arrays. Compute their local extrema once for this
+    upload, then translate the small bounds for normal/exploded poses. No
+    vertex copies or cache survive the call; rotors keep their existing
+    conservative, unposed bounds and picking still tests real triangles.
+    """
+    local=[]
+    for mesh in scene.meshes:
+        low=[];high=[]
+        for axis in range(3):
+            values=mesh.vertices[axis::6]
+            low.append(min(values));high.append(max(values))
+        local.append((mesh,low,high))
+    bounds={};pick_bounds={}
+    targets=(*ASSEMBLY_COMPONENTS,*dict.fromkeys(getattr(mesh,'part_id','') for mesh in scene.meshes if getattr(mesh,'part_id','')))
+    for focus in targets:
+        rows=[row for row in local if selected(row[0],focus)]
+        if not rows:continue
+        for exploded in (False,True):
+            low=[float('inf')]*3;high=[float('-inf')]*3
+            for mesh,local_low,local_high in rows:
+                offset=shift(mesh,exploded)
+                for axis in range(3):
+                    low[axis]=min(low[axis],local_low[axis]+mesh.position[axis]+offset[axis])
+                    high[axis]=max(high[axis],local_high[axis]+mesh.position[axis]+offset[axis])
+            center=tuple((low[i]+high[i])/2 for i in range(3))
+            radius=math.sqrt(sum((high[i]-low[i])**2 for i in range(3)))/2
+            bounds[(focus,exploded)]=(center,max(1.,radius))
+            pick_bounds[(focus,exploded)]=(tuple(low),tuple(high))
+    return bounds,pick_bounds
 
 
 def posed_point(mesh,point,shift=(0.,0.,0.),phase=0.):
@@ -289,7 +323,7 @@ class AssemblyRenderer:
         self.program.setAttributeBuffer(1,GL_FLOAT,12,3,24)
         self.buffer.release();self.vao.release();self.program.release()
 
-    def upload(self,scene):
+    def upload(self,scene,*,ink_focus='all'):
         if self.program is None:raise RuntimeError('3-D context is not ready')
         self.scene=scene;raw=vertex_bytes(scene)
         self._cutaway_hidden=hidden_mesh_ids(scene.meshes)
@@ -315,30 +349,17 @@ class AssemblyRenderer:
         # Static crease ink shares the same immutable VBO; no second context,
         # retained raster, draw timer or geometry upload is needed for styles.
         self.edge_ranges=[];chunks=[raw];self.edge_segments=0
-        for mesh,vertices in edge_batches(scene.meshes,self.policy['id'],styles):
+        for mesh,vertices in edge_batches(scene.meshes,self.policy['id'],styles,focus=ink_focus):
             count=len(vertices)//6
             self.edge_ranges.append((mesh,start,count));start+=count;self.edge_segments+=count//2
             chunks.append(struct.pack('<'+str(len(vertices))+'f',*vertices))
         raw=b''.join(chunks)
+        chunks.clear()
         self.buffer.bind();self.buffer.setUsagePattern(QOpenGLBuffer.StaticDraw)
         self.buffer.allocate(raw,len(raw));self.buffer.release()
-        self.bounds={};self.pick_bounds={};self._pick_camera_key=None
-        targets=(*ASSEMBLY_COMPONENTS,*dict.fromkeys(getattr(mesh,'part_id','') for mesh in scene.meshes if getattr(mesh,'part_id','')))
-        for focus in targets:
-            rows=[mesh for mesh in scene.meshes if self._selected(mesh,focus)]
-            if not rows:continue
-            for exploded in (False,True):
-                low=[float('inf')]*3;high=[float('-inf')]*3
-                for mesh in rows:
-                    shift=self._shift(mesh,exploded)
-                    for axis in range(3):
-                        values=mesh.vertices[axis::6]
-                        low[axis]=min(low[axis],min(values)+mesh.position[axis]+shift[axis])
-                        high[axis]=max(high[axis],max(values)+mesh.position[axis]+shift[axis])
-                center=tuple((low[i]+high[i])/2 for i in range(3))
-                radius=math.sqrt(sum((high[i]-low[i])**2 for i in range(3)))/2
-                self.bounds[(focus,exploded)]=(center,max(1.,radius))
-                self.pick_bounds[(focus,exploded)]=(tuple(low),tuple(high))
+        del raw
+        self.bounds,self.pick_bounds=scene_bounds(scene,self._selected,self._shift)
+        self._pick_camera_key=None
         self.upload_count+=1
 
     @staticmethod
@@ -577,7 +598,11 @@ class AssemblyRenderer:
         if self.buffer is not None:self.buffer.destroy()
         if self.program is not None:self.program.removeAllShaders()
         self.vao=self.buffer=self.program=self.functions=None
-        self.scene=None;self.ranges=[];self.edge_ranges=[];self.edge_segments=0;self.bounds={};self.pick_bounds={};self._uniforms={}
+        self._uniforms={};self.forget_scene()
+
+    def forget_scene(self):
+        """Drop CPU mesh ownership even if a lost context cannot be made current."""
+        self.scene=None;self.ranges=[];self.edge_ranges=[];self.edge_segments=0;self.bounds={};self.pick_bounds={}
         self._pick_inverse=self._pick_projection=self._pick_camera_key=self._pick_state=None
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
         self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
@@ -812,6 +837,13 @@ class AssemblyViewport(QOpenGLWidget):
     def focus_component(self,name):
         if component_family(name) not in ASSEMBLY_COMPONENTS:return False
         if name!='all' and not any(AssemblyRenderer._selected(mesh,name) for mesh in self._scene.meshes):return False
+        if name!=self._focus:
+            styles=self._scene.metadata.get('mesh_style_ids')
+            if not isinstance(styles,(tuple,list)) or len(styles)!=len(self._scene.meshes):
+                styles=(self._scene.metadata.get('visual_style','miniature'),)
+            # One static reallocation on an explicit inspection change. Fan,
+            # effect, camera and insertion frames continue using the same VBO.
+            if any(style_for(identity)['edges'] for identity in styles):self._pending=True
         self._focus=name;self._update_animation_state();self.reset_camera();self.focusChanged.emit(name);return True
 
     def select_component(self,name):
@@ -866,7 +898,7 @@ class AssemblyViewport(QOpenGLWidget):
     def paintGL(self):
         if self._error:return
         try:
-            if self._pending:self._renderer.upload(self._scene);self._pending=False
+            if self._pending:self._renderer.upload(self._scene,ink_focus=self._focus);self._pending=False
             ratio=self.devicePixelRatioF()
             phase=self._phase
             if hasattr(self,'_cpu_phase'):
@@ -937,4 +969,12 @@ class AssemblyViewport(QOpenGLWidget):
         self.makeCurrent();self._renderer.close();self.doneCurrent();self._pending=True
 
     def closeEvent(self,event):
-        self._closed=True;self._update_animation_state();self.release_resources();self._scene_cache.clear();super().closeEvent(event)
+        self._closed=True;self._update_animation_state();self.release_resources();self._retire_cpu_scene();super().closeEvent(event)
+
+    def _retire_cpu_scene(self):
+        # Qt's deferred deletion or an external Python reference can outlive
+        # the closed window. Neither should keep the full physical arrays or
+        # renderer's picking/draw lists alive until the wrapper is collected.
+        self._scene_cache.clear();self._renderer.forget_scene()
+        self._scene=Scene((),self._scene.dimensions,{})
+        self._gpu_plan={}

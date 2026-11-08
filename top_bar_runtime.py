@@ -1327,7 +1327,11 @@ class TopBarManager(QObject):
             if not host.closing and host.binding is not None
         }
         try:
-            self._foreground_hidden_screens = guard.blocked(monitors)
+            blocked = guard.blocked(monitors)
+            # A last-known safe desktop cannot authorize showing a bar after
+            # the current query failed. Keep the guard's tracked state intact,
+            # but hide every current target until a healthy read clears it.
+            self._foreground_hidden_screens = frozenset(monitors) if getattr(guard, "failure", None) else blocked
             self._fullscreen_guard_error = None
         except Exception as error:
             # A failed fact read must never reveal a bar over an unknown game.
@@ -1722,6 +1726,12 @@ class TopBarManager(QObject):
 
     @Slot()
     def queue_rows(self):
+        if not self.closed:
+            retry = getattr(self._fullscreen_guard, "retry_failed_query", None)
+            if callable(retry) and retry():
+                # The guard only marks a failed observation dirty. Reuse its
+                # existing GUI turn; sampling never performs a native query.
+                self._queue_foreground_visibility()
         if self.hosts and not self.closed and not self._rows_timer.isActive():
             self._rows_timer.start()
 

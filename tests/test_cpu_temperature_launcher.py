@@ -541,11 +541,12 @@ class RuntimeSignalTests(unittest.TestCase):
     def test_signal_defer_resume_cancel_no_repeat_shutdown(self):
         api = FakeApi()
         api.result = dict(launched=False, error=1223)
+        now = [10.0]
         local = Path(tempfile.gettempdir()) / "synthetic-runtime-startup"
         self.runtime.cpu_temperature_launcher = startup.CpuTemperatureLauncher(
             platform="win32", frozen=True, executable=local / "Programs/DesktopStats/DesktopStats.exe",
             environ={"LOCALAPPDATA": str(local)}, app_pid=731, api_factory=lambda: api,
-            wall_clock=lambda: WALL,
+            wall_clock=lambda: WALL, clock=lambda: now[0],
         )
         guard = self.enterContext(patch.object(self.runtime_module, "foreground_fullscreen", return_value=True))
         self.runtime.controller._data = dict(time=WALL)
@@ -553,11 +554,12 @@ class RuntimeSignalTests(unittest.TestCase):
         self.assertEqual(self.runtime.cpu_temperature_launcher.status()["state"], "deferred")
         self.assertFalse(api.calls)
         guard.return_value = False
+        now[0] += startup.FOREGROUND_RETRY_SECONDS
         self.runtime.controller.dataChanged.emit()
         self.assertEqual(self.runtime.cpu_temperature_launcher.status()["state"], "cancelled")
         for _ in range(4):
             self.runtime.controller.dataChanged.emit()
-        self.assertEqual(guard.call_count, 2)
+        self.assertEqual(guard.call_count, 3)  # Defer, resume, final pre-consent fact.
         self.assertEqual(sum(row[0] == "launch" for row in api.calls), 1)
         self.runtime.shutdown()
         self.runtime.controller.dataChanged.emit()

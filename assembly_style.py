@@ -14,6 +14,8 @@ MAX_GRILLE_EDGES = 4096
 _PAPER = ("notebook_color", "notebook_line", "notebook_smile")
 _LINE = ("outline", "notebook_line", "sketch")
 _EXPRESSIVE = ("cartoon", "notebook_smile")
+_GPU_FAN_INKS={"cartoon":(69/255,90/255,100/255),"notebook_color":(73/255,101/255,112/255),
+               "notebook_smile":(93/255,101/255,118/255),"sticker":(65/255,93/255,96/255)}
 _SOURCE_FINISH_BOARDS = frozenset(('asrock-z790-pg-itx-tb4','asrock-b650i-lightning-wifi',
     'asrock-x670e-taichi','asrock-b650e-steel-legend-wifi','asrock-b650m-pg-riptide-wifi',
     'gigabyte-z790-aorus-master'))
@@ -124,6 +126,27 @@ def _board_finish_color(source,style,role):
     return paint_color(source,style,'board')
 
 
+def _gpu_fan_color(mesh,style):
+    """Keep source-defined blade/recess/hub layers in the existing palette.
+
+    Several real dark cards put all three materials below the same three-tone
+    threshold. Flattening them to one pastel hides the physical fan shape.
+    This is illustration contrast, not factory paint or a new light source.
+    Original/line styles and every physical array remain unchanged.
+    """
+    if mesh.component!='gpu' or style not in _GPU_FAN_INKS:return None
+    name=mesh.name;alpha=mesh.color[3]
+    if mesh.rotor and name=='gpu-fan-rotor':
+        light=sum(c*w for c,w in zip(mesh.color[:3],(.2126,.7152,.0722)))
+        source=mesh.color
+        if light<.54:source=_mix(source[:3],(1.,1.,1.),(.54-light)/(1.-light))+(alpha,)
+        return paint_color(source,style,'gpu')
+    if name in ('gpu-fan-recess','gpu-fan-hub'):
+        base=paint_color(mesh.color,style,'gpu')
+        return _mix(base[:3],_GPU_FAN_INKS[style],.72 if name=='gpu-fan-recess' else .35)+(alpha,)
+    return None
+
+
 def apply_colors(meshes,style,material_roles=None):
     style=resolve_style(style)
     if style=="miniature":return tuple(meshes)
@@ -131,6 +154,8 @@ def apply_colors(meshes,style,material_roles=None):
     for mesh in meshes:
         role=material_roles.get(mesh.name) if material_roles and mesh.component=='board' else None
         tone=_board_finish_color(mesh.color,style,role) if role in ('pcb','armor','inlay') else paint_color(mesh.color,style,mesh.component)
+        fan_tone=_gpu_fan_color(mesh,style)
+        if fan_tone is not None:tone=fan_tone
         if style=='papercut' and mesh.name.startswith('loop-'):
             # Only the new loop artwork separates dark paper materials. Keep
             # original paint, all older hardware and physical vertices intact.
@@ -340,12 +365,19 @@ def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False,repair_
     return tuple(result)
 
 
-def edge_batches(meshes,style,styles=None):
-    """Build immutable line vertices once; global cap also bounds hand ink."""
+def edge_batches(meshes,style,styles=None,*,focus='all'):
+    """Build bounded ink for the current inspection, never hidden hardware.
+
+    Whole-scene allocation stays identical. An explicit component/part focus
+    uses the same total and per-mesh limits, but unrelated meshes cannot spend
+    its contour budget. Physical triangles, poses and picking are untouched.
+    """
     default=style_for(style)
     if styles is None and not default['edges']:return ()
     candidates=[]
     for index,mesh in enumerate(meshes):
+        if not (focus=='all' or mesh.component==focus or bool(focus) and getattr(mesh,'part_id','')==focus
+                or focus=='case' and mesh.component=='panel'):continue
         policy=style_for(styles[index]) if isinstance(styles,(tuple,list)) and index<len(styles) else default
         if not policy['edges']:continue
         if mesh.name.startswith('style-'):continue
@@ -365,7 +397,8 @@ def edge_batches(meshes,style,styles=None):
         # sampling rather than silently omitting several complete corners.
         edges=crease_edges(mesh.vertices,contour_limit,
                            repair_partitions=mesh.name.endswith('fan-pads'),
-                           repair_under_cap=mesh.name.startswith('loop-'))
+                           repair_under_cap=(mesh.name.startswith('loop-')
+                               or mesh.component=='gpu' and mesh.name=='gpu-cover-panel'))
         tags=();smooth_groups=()
         if mesh.name.startswith('loop-') and policy['line_only']:
             # Retain complete real smooth-surface groups once at upload. Their

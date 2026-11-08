@@ -46,7 +46,7 @@ def layout_anchors(spec,w,h,d,board_x,board_y,board_rear):
             if kind=='sata' and row['orientation']=='edge':along=(1.,0.,0.)
             connectors.setdefault(kind,[]).append(dict(position=p,normal=normal,
                 along=along,kind=kind,position_method='official_manual_proportions',
-                **{key:row[key] for key in ('label','role') if key in row}))
+                **{key:row[key] for key in ('label','role','role_verified','role_source','role_source_page') if key in row}))
     for row in model['pcie']:
         p=point(row['uv'],4.5);p=(p[0],p[1],p[2]+row['length_mm']/2)
         connectors['pcie'].append(dict(position=p,normal=(-1.,0.,0.),along=(0.,0.,1.),kind=row['kind'],

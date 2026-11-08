@@ -336,6 +336,12 @@ for _model in MODELS:
         _model['mount_uv']=((.137,.022),(.676,.022),(.972,.022),(.043,.538),(.676,.538),(.972,.538),(.043,.946),(.676,.946),(.972,.946))
         _model['mount_method']='official_manual_installation_diagram_observed'
         _model['mount_page']=50
+        # E20739 layout p1-2 (PDF14): CPU_OPT and CPU_FAN are distinct;
+        # the adjacent middle pair is CHA_FAN2 / AIO_PUMP, not two case fans.
+        _fan_labels=('CPU_OPT','CPU_FAN','CHA_FAN2','AIO_PUMP','CHA_FAN1','CHA_FAN3','CHA_FAN4','CHA_FAN5')
+        for _header,_label in zip((_row for _row in _model['connectors'] if _row['kind']=='fan'),_fan_labels):
+            _header.update(label=_label,role='cpu_fan' if _label=='CPU_FAN' else 'cpu_opt' if _label=='CPU_OPT' else 'aio_pump' if _label=='AIO_PUMP' else 'case_fan',
+                role_verified=True,role_source=ASUS_Z790_MANUAL,role_source_page=14)
     else:
         _model['mount_uv']=tuple((u,v) for u in (.045,.955) for v in (.035,.965))
         _model['mount_method']='reference_unverified_hole_centers'

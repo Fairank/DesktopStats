@@ -316,8 +316,9 @@ Window {
         self.window.setProperty("directMotion", True)
         glyph = self.find("directGlyph")
         for style in STYLES:
-            # Unreviewed BiFrost leaves are intentionally static in notebook
-            # art; the confirmed Dual rotor tests texture retention there.
+            # Unreviewed BiFrost retained caps remain stationary even when a
+            # direct transform is requested. The confirmed Dual leaves rotate
+            # in notebook art; both paths must retain their texture objects.
             value = appearance(DUAL if style.startswith("notebook_") else "APBF-IA770-16G-OC", style)
             self.assign("appearance", value)
             rotors = self.rotors(glyph)
@@ -341,7 +342,8 @@ Window {
                 for image, original in zip(self.rotor_images(glyph), sources):
                     self.assertEqual(image.property("source"), original)
                 for rotor in self.rotors(glyph):
-                    self.assertAlmostEqual(rotor.property("rotation"), rotation)
+                    self.assertAlmostEqual(rotor.property("rotation"),
+                                           rotation if value["fan_profile"]["render_ready"] else 0)
             self.assertEqual(glyph_changed.count(), 0)
             self.assertEqual(base_changed.count(), 0)
             self.assertTrue(all(spy.count() == 0 for spy in changes))

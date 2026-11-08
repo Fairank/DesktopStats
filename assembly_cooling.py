@@ -130,7 +130,7 @@ _LFIII_FACTORY_IDS=frozenset('arctic-liquid-freezer-iii-'+size for size in ('240
 _LFIII_PORT_SOURCE='https://www.arctic.de/media/1f/c8/23/1710936380/Liquid_Freezer_III_360_Dimensions_2000x2000.jpg'
 
 
-def _lfiii_hose_paths(starts,ends,start_axis,end_axis,normal,level,length_mm):
+def _lfiii_hose_paths(starts,ends,start_axis,end_axis,normal,level,length_mm,*,spread_bias=0.):
     """A paired broad guide, not two independent loops around the VRM.
 
     Length is a1% nominal reference. Transporting the separation frame keeps
@@ -159,7 +159,13 @@ def _lfiii_hose_paths(starts,ends,start_axis,end_axis,normal,level,length_mm):
             t=index/steps;a=angle*t*t*(3.-2.*t)+roll*math.sin(math.pi*t)**2
             direction=_add(_mul(radial,math.cos(a)),_mul(_cross(tangent,radial),math.sin(a)))
             radius=math.dist(starts[0],start)*(1.-t)+math.dist(ends[0],end)*t
-            for j,sign in enumerate((1.,-1.)):paths[j].append(_add(center,_mul(direction,sign*radius)))
+            for j,sign in enumerate((1.,-1.)):
+                # Optional finite front-mount compensation has zero endpoint
+                # displacement and zero endpoint derivative. Original/default
+                # guides retain their exact previous arithmetic and geometry.
+                point=_add(center,_mul(direction,sign*radius))
+                if spread_bias:point=_add(point,_mul(normal,sign*spread_bias*math.sin(math.pi*t)**2))
+                paths[j].append(point)
         for j in (0,1):paths[j].append(ends[j])
         return paths
     measure=lambda path:sum(math.dist(a,b) for a,b in zip(path,path[1:]))
@@ -174,6 +180,75 @@ def _lfiii_hose_paths(starts,ends,start_axis,end_axis,normal,level,length_mm):
                 and not route_pair_overlap(paths[0],6.2,paths[1],6.2)):
             return paths
     return None
+
+
+def _lfiii_front_reference_paths(starts,ends,start_axis,end_axis,normal,level,dimensions,obstacles):
+    """Bounded length compensation for Helios's long front-mount reference.
+
+    Mouths/axes and the450mm catalog length stay fixed. A single paired guide
+    can otherwise reject both reachable hoses just because one takes an inner
+    bend. Every candidate still passes the original solid/case/curvature tests.
+    """
+    length=450.;best=None;best_error=float('inf');samples=[];attempts=0
+    measure=lambda p:sum(math.dist(a,b) for a,b in zip(p,p[1:]))
+    def evaluate(bias):
+        nonlocal best,best_error,attempts
+        attempts+=1
+        # The physical route is shared by all LODs; only tube cross-section
+        # tessellation changes. Coarse samples must not choose another twist.
+        paths=_lfiii_hose_paths(starts,ends,start_axis,end_axis,normal,'balanced',length,spread_bias=bias)
+        if not paths:return None
+        lengths=tuple(map(measure,paths));error=max(abs(value-length) for value in lengths)
+        # An unsafe numerical bracket is never an accepted path. Retaining
+        # its length sign lets bisection find a safe intermediate candidate
+        # instead of stopping at a coarse5mm bias sample.
+        if error<best_error and not _aio_route_issues(paths,dimensions,obstacles):
+            best_error=error;best=(paths,bias,lengths)
+        return lengths[0]-lengths[1]
+    for bias in (5.,10.,15.,20.,25.,30.,-5.,-10.,-15.,-20.,-25.,-30.):
+        difference=evaluate(bias)
+        if difference is not None:samples.append((bias,difference))
+    samples.sort()
+    for (a,da),(b,db) in zip(samples,samples[1:]):
+        if da*db>=0:continue
+        for _ in range(8):
+            middle=(a+b)/2;difference=evaluate(middle)
+            if difference is None:break
+            if da*difference<=0:b,db=middle,difference
+            else:a,da=middle,difference
+            if best_error<.02:break
+        break
+    if best is None:return None,None
+    paths,bias,lengths=best
+    def exact_length(path,axis):
+        def candidate(amplitude):
+            return [point if i<=1 or i>=len(path)-2 else
+                _add(point,_mul(axis,amplitude*math.sin(math.pi*(i-1)/(len(path)-3))**2))
+                for i,point in enumerate(path)]
+        a,b=-6.,6.;fa=measure(candidate(a))-length;fb=measure(candidate(b))-length
+        if fa*fb>0:return None
+        for _ in range(18):
+            middle=(a+b)/2;value=measure(candidate(middle))-length
+            if fa*value<=0:b,fb=middle,value
+            else:a,fa=middle,value
+        return candidate((a+b)/2)
+    # Tiny routing corrections preserve each mouth AND its adjacent straight
+    # lead. They are not hose/part scaling. Reject any corrected pair that no
+    # longer passes the same solid-envelope, bend and mutual-clearance rules.
+    refined=False;refinements=0
+    for first_axis in (normal,(0.,1.,0.),(0.,0.,1.)):
+        for second_axis in (normal,(0.,1.,0.),(0.,0.,1.)):
+            refinements+=1
+            corrected=(exact_length(paths[0],first_axis),exact_length(paths[1],second_axis))
+            if all(corrected) and not _aio_route_issues(corrected,dimensions,obstacles):
+                paths=corrected;lengths=tuple(map(measure,paths));refined=True;break
+        if refined:break
+    return paths,dict(method='paired_front_mount_length_compensation_reference',spread_bias_mm=bias,
+        candidates_checked=attempts,centerline_lengths_mm=lengths,nominal_length_mm=length,
+        source_length_preserved=True,route_verified_as_factory=False,
+        guide_samples_shared_by_lod=True,length_refinement_trials=refinements,length_refined=refined,
+        length_refinement_max_offset_mm=6.,
+        clearance_method='existing_case_solid_capsules_curvature_pair_and_self_checks')
 
 
 def _aio_route_issues(paths,dimensions,obstacles):
@@ -278,7 +353,7 @@ class _Builder:
     def __init__(self,level):
         self.level=level if level in ('eco','balanced','close') else 'balanced'
         self.segments={'eco':16,'balanced':24,'close':32}[self.level]
-        self.static=defaultdict(list);self.rotors=[];self.fans=[];self.parts=[];self.wire_anchors=[];self.connection_issues=[];self.aio_hoses=[]
+        self.static=defaultdict(list);self.rotors=[];self.fans=[];self.parts=[];self.wire_anchors=[];self.connection_issues=[];self.aio_hoses=[];self.control_wiring_reference=[]
 
     def put(self,name,vertices,tint,center=(0.,0.,0.),basis=((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),component='cooler',part='cooler:cpu',alpha=1.):
         if alpha!=1.:
@@ -857,6 +932,37 @@ def _lfiii_pump(builder,p,basis,part):
     return ports
 
 
+def _lfiii_control_reference(builder,p,basis,part):
+    """Documented7-to4pin All-in-One example, never detected control mode.
+
+    The source establishes connector counts/topology. Its unmeasured placement
+    is an original attached reference near the observed base-PCB edge. The
+    continuing loom and its single4pin motherboard plug are built by auxiliary.
+    """
+    from assembly_detail import perforated_plate,chamfer_rect
+    source='https://support.arctic.de/liquid-freezer-iii-360/'
+    photo='https://support.arctic.de/products/liquid-freezer-iii-360/AMD/PWM_Controller/c03.gif'
+    diagram='https://support.arctic.de/products/liquid-freezer-iii-360/AMD/PWM_Controller/C01.jpg'
+    u,v,n=basis
+    point=lambda a,b,c:_local_point(p,basis,a,b,c)
+    builder.box('cooler-lfiii-control-pcb-edge',(20.,8.,1.),'#33443d',point(0.,-34.,19.5),basis,part=part)
+    holes=tuple(tuple((a+(i-3)*2.,b) for a,b in chamfer_rect(1.2,1.8,.15)) for i in range(7))
+    shape=perforated_plate(chamfer_rect(18.,7.,.6),holes,3.)
+    builder.put('cooler-lfiii-control-seven-pin-socket',shape,'#263139',point(0.,-34.,21.5),basis,part=part)
+    builder.box('cooler-lfiii-control-seven-pin-plug',(18.,7.,5.),'#344047',point(0.,-34.,25.5),basis,part=part,bevel=True)
+    path=(point(0.,-34.,28.),point(0.,-38.,32.),point(0.,-48.,35.))
+    builder.tube('cooler-lfiii-control-reference-lead',path,1.25,'#202a31',part=part)
+    builder.wire_anchors.append(dict(id=part+':all-in-one-reference',position=path[-1],normal=_mul(v,-1.),along=u,
+        kind='fan4',owner=part,header='fan',model_id='arctic-lfiii-all-in-one-reference',lead_rendered=True,
+        position_verified=False,placement='attached_factory_lead_reference',role='aio_control_reference',
+        target_header_role='cpu_fan',reference_only=True,installed_control_mode_verified=False,
+        telemetry_bound=False,source=source,connector_source=diagram,placement_source=photo))
+    return dict(topology='documented_single_pwm_all_in_one_reference',source=source,connector_source=diagram,
+        placement_source=photo,cooler_connector_contacts=7,motherboard_connector_contacts=4,
+        target_header_role='cpu_fan',installed_control_mode_verified=False,telemetry_bound=False,
+        connector_positions_verified=False,electrical_pinout_verified=False)
+
+
 def _family_pump(builder,cooler,p,basis,part):
     """Photo-observed outer silhouettes, blank original caps and no logo art.
 
@@ -958,7 +1064,7 @@ def _family_pump(builder,cooler,p,basis,part):
     return True
 
 
-def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount='side',planes=None,floor_deck=None,secondary_cooler=None,occupied_meshes=()):
+def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount='side',planes=None,floor_deck=None,secondary_cooler=None,occupied_meshes=(),case_id=''):
     from assembly_geometry import ring,extrude
     barbs=_radiator(builder,cooler,mount,dimensions,planes=planes)
     if barbs is None:return False
@@ -969,6 +1075,8 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
         # Intel1700 manual faces the paired elbows toward the PCIe-slot side.
         # Apply one proper rigid rotation to the complete head, not just hoses.
         pump_basis=(v,_mul(u,-1.),n);ports=_lfiii_pump(builder,p,pump_basis,part);aio_start_axis=n
+        if cooler.get('id') in _LFIII_FACTORY_IDS and cooler['kind']=='aio':
+            builder.control_wiring_reference.append(_lfiii_control_reference(builder,p,pump_basis,part))
     elif _family_pump(builder,cooler,p,basis,part):
         pass
     elif style in ('nzxt_lcd','nzxt_infinity','round','lianli_infinity','thermaltake_mirror'):
@@ -1018,13 +1126,17 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
         targets=[barbs[0],_add(rp,(0.,-rh/2+19,r+8))] if barbs else [];extra_start=barbs[1] if barbs else None;extra_end=_add(rp,(0.,rh/2+5,0.))
         builder.parts.append(dict(id='cooler:reservoir',label=cooler['reservoir_model'],kind='pump_reservoir',model_id=cooler['id']))
     else:targets=barbs;extra_start=extra_end=None
-    lfiii_paths=None;lfiii_route_issue=None
+    lfiii_paths=None;lfiii_route_issue=None;guide_reference=None
     if cooler.get('id') in _LFIII_FACTORY_IDS and cooler['kind']=='aio' and len(ports)==len(targets)==2:
         from case_fan_clearance047 import blockers
         radiator_axis=_mul(_mount_plane(mount,dimensions,0.,planes)[1][2],-1.)
         lfiii_paths=_lfiii_hose_paths(ports,targets,aio_start_axis,radiator_axis,n,builder.level,450.)
+        obstacles=blockers(occupied_meshes,builder.static,builder.rotors)
         lfiii_route_issue=(['source_length_cannot_fit_reference_guide'] if lfiii_paths is None else
-            _aio_route_issues(lfiii_paths,dimensions,blockers(occupied_meshes,builder.static,builder.rotors)))
+            _aio_route_issues(lfiii_paths,dimensions,obstacles))
+        if lfiii_route_issue and case_id=='asus-rog-strix-helios-gx601' and mount=='front':
+            candidate,guide_reference=_lfiii_front_reference_paths(ports,targets,aio_start_axis,radiator_axis,n,builder.level,dimensions,obstacles)
+            if candidate is not None:lfiii_paths=candidate;lfiii_route_issue=[]
         if lfiii_route_issue:
             builder.connection_issues.append(dict(part_id='cooler:cpu',model_id=cooler['id'],reason='aio_hose_route_unverified',
                 nominal_length_mm=450.,details=lfiii_route_issue,hoses_omitted=True))
@@ -1038,6 +1150,7 @@ def _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb=None,secondary_mount
                 _aio_hose(builder,pump_end,end,aio_start_axis,radiator_axis,8. if style=='arctic_vrm' else 5.,
                     points=lfiii_paths[index] if lfiii_paths is not None else None,model_id=cooler['id'],
                     nominal_length=450. if lfiii_paths is not None else None)
+                if guide_reference:builder.aio_hoses[-1]['guide_reference']=dict(guide_reference)
         else:
             a=_add(start,_mul(v,15));c1=_add(a,_mul(n,45));c2=_add(end,_mul(n,25))
             builder.tube('cooler-liquid-tubes',_curve((a,c1,c2,end),{'eco':8,'balanced':12,'close':18}[builder.level]),6.2,'#303e46',part='cooler:cpu')
@@ -1086,6 +1199,12 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
             else:cooler=selected
             fan=_reference_fan(cooler) if cooler else None
             check=_mount_check(case,mount,fan['size_mm'],cooler['fan_count']) if cooler and mount in _MOUNT_NORMALS else 'unsupported'
+            stack_check=None
+            if cooler and fan:
+                from assembly_case_layout051 import radiator_stack_check
+                stack_check=radiator_stack_check(case,cooler,mount,fan)
+                if stack_check:
+                    meta.setdefault('radiator_clearance_checks',[]).append(stack_check)
             gpu_pcb=None;secondary_mount='side' if mount!='side' else 'top'
             if cooler and secondary_cooler and selection.get('gpu_waterblock') is True:
                 pcb=(anchors.get('gpu') or {}).get('pcb',{})
@@ -1099,7 +1218,11 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
                     gpu_pcb=pcb
                 else:meta['warnings'].append('GPU block omitted: requires custom loop, explicit posed PCB reference and a separate supported full-size radiator mount; original GPU cooler retained.')
             manual_loop=kind=='custom_loop' and selection.get('loop_components_mode')=='selected'
-            if cooler is not None and manual_loop and check!='unsupported':
+            if stack_check and not stack_check['within_limit']:
+                meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],mount=mount,
+                    reason='radiator_fan_stack_exceeds_case_clearance',required_mm=stack_check['required_mm'],
+                    limit_mm=stack_check['limit_mm'],source=stack_check['source']))
+            elif cooler is not None and manual_loop and check!='unsupported':
                 from assembly_loop046 import add_selected_loop
                 loop=add_selected_loop(builder,cooler,selection,spec,anchors,dimensions,planes,p,basis,mount,meshes)
                 meta['selected_loop']=loop;meta['cooler']=cooler
@@ -1109,7 +1232,7 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
                 meta['fan_tach_mapping']='Independent loop components have no bound water temperature, flow or pump/fan tach.'
             elif cooler is None:pass
             elif check=='unsupported' :meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
-            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck'),secondary_cooler,meshes):
+            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck'),secondary_cooler,meshes,case.get('id','')):
                 occupied.add(mount);meta['cooler']=cooler;meta['radiator_mount_compatibility']=check
                 occupied.update(row['mount'] for row in builder.parts if row['kind']=='radiator')
                 meta['replace_gpu_cooler']=any(part['kind']=='gpu_waterblock' for part in builder.parts)
@@ -1209,6 +1332,7 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
     if any(row.get('reason')!='aio_hose_route_unverified' for row in builder.connection_issues):
         meta['warnings'].append('Some standalone radiator port positions are unverified; associated hoses and GPU-block replacement are omitted, never assigned invented connections.')
     additions=builder.finish();meta['parts']=builder.parts;meta['fans']=builder.fans;meta['wire_anchors']=builder.wire_anchors;meta['sources']=list(dict.fromkeys(meta['sources']))
+    if builder.control_wiring_reference:meta['control_wiring_reference']=builder.control_wiring_reference
     meta['triangle_count']=sum(mesh.vertex_count for mesh in additions)//3
     meta['mesh_count']=len(additions)
     meta['mount_plane_sources']={key:dict(source=value.get('source'),method=value.get('method'),dimensions_verified=False)

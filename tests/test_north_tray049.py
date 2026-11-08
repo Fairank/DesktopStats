@@ -115,7 +115,7 @@ class NorthTrayActualReference049Tests(unittest.TestCase):
         self.assertEqual(self.app.topLevelWindows(),[])
         self.assertIsNone(QOpenGLContext.currentContext())
 
-    def test_actual_baked_north_keeps_eight_fixed_connections_clear_of_tray_and_new_hoses(self):
+    def test_actual_baked_north_keeps_known_connections_and_control_clear_of_tray_and_new_hoses(self):
         engine=QQmlEngine();calls=[];original=auxiliary.route_cable
         def observe(*args,**kwargs):
             path,state=original(*args,**kwargs)
@@ -128,8 +128,8 @@ class NorthTrayActualReference049Tests(unittest.TestCase):
             meta=scene.metadata;actual=meta['auxiliary'];cables=actual['cables']
             self.assertEqual(actual['omitted_routes'],[]);self.assertEqual(actual['rejected'],[])
             self.assertEqual(meta['cooling']['rejected'],[])
-            self.assertEqual(len(cables),8)
-            self.assertTrue(all(c['preferred_waypoints_used'] and not c['external_route'] for c in cables))
+            self.assertEqual(len(cables),9)
+            self.assertTrue(all((c['preferred_waypoints_used'] or c.get('role')=='aio_control_reference') and not c['external_route'] for c in cables))
             self.assertEqual(len(meta['cooling']['aio_hoses']),2)
             rows=[]
             def normalized(value):
@@ -152,7 +152,16 @@ class NorthTrayActualReference049Tests(unittest.TestCase):
                 self.assertTrue(all(cell in obstacles for cell in tray_boxes))
                 for a,b in zip(path,path[1:]):
                     self.assertFalse(any(auxiliary.segment_hits_box(a,b,obstacle,1.1) for obstacle in obstacles))
-            self.assertEqual(hashlib.sha256(json.dumps(rows,separators=(',',':')).encode()).hexdigest(),
+            # Header identities were corrected from generic indices in051;
+            # preserve the historical digest for every other socket/source.
+            from test_case_fan_cable_routing048 import port_digest
+            for cable in (c for c in cables if c['kind']=='fan4'):
+                if cable.get('role')=='aio_control_reference':self.assertEqual(cable['target_header_label'],'CPU_FAN')
+                if cable.get('role')=='case':self.assertTrue(cable['target_header_label'].startswith('CHA_FAN'))
+                self.assertTrue(cable['target_header_role_verified'])
+                header=next(r for r in meta['attachment_anchors']['connectors']['fan'] if r['label']==cable['target_header_label'])
+                self.assertEqual(cable['target_socket'],header['position'])
+            self.assertEqual(port_digest(cables,gpu_depth_correction=meta['attachment_anchors']['gpu']['thickness_mm']*.40,fan_headers=meta['attachment_anchors']['connectors']['fan']),
                              'b9dd2aeed32c6ab5c46d5caba4e90f6e82d7235aade3a20f00f33329907ce600')
             # Long EPS lifts and fore/aft runs must stay behind the PCB/tray;
             # their short final approach still meets the real fixed header.

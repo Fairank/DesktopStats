@@ -53,7 +53,23 @@ def normalized(value):
     return value
 
 
-def port_digest(cables,*,gpu_depth_correction=0.):
+def historical_ports(cables,headers):
+    """Reverse only051's documented header assignment, retaining old SHA.
+
+    The previous fixture indexed CPU_OPT/PUMP as generic case headers. Current
+    routes must instead pass the independent verified-role assertions below.
+    Added All-in-One wiring has no pre051 row and is excluded from this bridge.
+    """
+    fans=sorted((copy.deepcopy(c) for c in cables if c['kind']=='fan4' and c.get('role')!='aio_control_reference'),
+                key=lambda c:str(c['source_owner']))
+    for row,header in zip(fans,headers):
+        row['target_socket']=header['position']
+        row['end']=tuple(header['position'][n]+header['normal'][n]*9. for n in range(3))
+    return [c for c in cables if c['kind']!='fan4']+fans
+
+
+def port_digest(cables,*,gpu_depth_correction=0.,fan_headers=()):
+    if fan_headers:cables=historical_ports(cables,fan_headers)
     rows=[]
     for cable in cables:
         row=[cable['kind'],cable['source_owner'],cable['target_owner'],normalized(cable['target_socket']),normalized(cable['end'])]
@@ -138,7 +154,7 @@ class CaseFanCableRouting048Tests(unittest.TestCase):
                         self.assertEqual(meta['cooling']['rejected'],[])
                         self.assertEqual(meta['auxiliary']['rejected'],[])
                         self.assertEqual(meta['auxiliary']['omitted_routes'],[])
-                        self.assertEqual(len(cables),14 if kind=='air' else 8)
+                        self.assertEqual(len(cables),14 if kind=='air' else 9 if kind=='aio' else 8)
                         gpu=anchors['gpu'];observation=gpu['power_depth_observation']
                         self.assertEqual(spec['gpu']['appearance']['id'],'asus-astral-5090')
                         self.assertEqual(observation['method'],'official_photo_observed_reference')
@@ -151,7 +167,14 @@ class CaseFanCableRouting048Tests(unittest.TestCase):
                         self.assertEqual(gpu['power'][0]['normal'],(-1.,0.,0.))
                         self.assertEqual(gpu['power'][0]['position_source'],'official_photo_observed_depth_reference')
                         self.assertFalse(gpu['power'][0]['position_verified'])
-                        self.assertEqual(port_digest(cables,gpu_depth_correction=gpu['thickness_mm']*.40),FIXED_PORTS_SHA[kind])
+                        self.assertEqual(port_digest(cables,gpu_depth_correction=gpu['thickness_mm']*.40,fan_headers=anchors['connectors']['fan']),FIXED_PORTS_SHA[kind])
+                        for cable in (c for c in cables if c['kind']=='fan4'):
+                            expected=('CPU_FAN',) if cable.get('role')=='aio_control_reference' else ('CPU_FAN','CPU_OPT') if cable.get('role')=='cpu_main' else tuple('CHA_FAN'+str(i) for i in range(1,6))
+                            self.assertIn(cable['target_header_label'],expected)
+                            self.assertTrue(cable['target_header_role_verified'])
+                            header=next(r for r in anchors['connectors']['fan'] if r['label']==cable['target_header_label'])
+                            self.assertEqual(cable['target_socket'],header['position'])
+                            self.assertEqual(cable['end'],tuple(header['position'][n]+header['normal'][n]*9. for n in range(3)))
                         self.assertFalse(any(cable['external_route'] for cable in cables))
                         self.assertEqual(fit_messages(spec,meta),[])
                         fans=[row for row in cables if str(row['source_owner']).startswith('fans:')]

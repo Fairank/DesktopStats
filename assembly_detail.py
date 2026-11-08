@@ -344,8 +344,24 @@ def _gpu_detail(meshes,spec,level):
     revised=[];detail=[];dark=color('#202a32');metal=color('#acb8bf');gold=color('#c5a257');pcb=color('#284b48')
     def add(name,vertices,tone,position=(gx,gy,gz)):
         if vertices:detail.append(Mesh(name,vertices,tone,position,'gpu'))
-    backplate=facts.get('backplate');cover_index=0
+    backplate=facts.get('backplate');cover_index=0;curved_rotors=[]
+    fan_openings=[m for m in meshes if m.name=='gpu-fan-opening']
+    # Reuse each already reviewed source planform. This static depth pass
+    # cannot turn an unknown rotor into invented leaves or affect Astral's
+    # separate exact-photo construction.
+    fan_rows=gpu.get('fans')
+    if not isinstance(fan_rows,list):
+        from assembly_geometry import known_fan_profiles
+        fan_rows=[dict(profile=p) for p in known_fan_profiles(appearance)]
     observed_rear=(appearance.get('id')=='asus-astral-5090' and appearance.get('fan_count')==4 and backplate is True)
+    paint_metadata={};paint_vertices=()
+    if not observed_rear:
+        from assembly_gpu_panels051 import partition
+        polygons=[]
+        for row in (gpu.get('detail_polygons') or ())[:6]:
+            points=row.get('points') if isinstance(row,dict) else row
+            polygons.append(unit_polygon(points,length,width,margin=.3))
+        paint_vertices,paint_metadata=partition(tuple(polygons),holes,.3,segments=segments)
     rear_u=(589.-45.)/659.;rear_v=(370.-238.)/256.
     rear_radius=min(105./659.*length,105./256.*width)
     rear_hole=((rear_u-.5)*length,(.5-rear_v)*width,rear_radius*1.005)
@@ -356,7 +372,8 @@ def _gpu_detail(meshes,spec,level):
             points=row.get('points') if isinstance(row,dict) else row
             polygon=unit_polygon(points,length,width,margin=.3)
             if polygon:
-                plate=perforated_plate(polygon,holes,.3,segments=segments,clip_walls=True)
+                plate=(perforated_plate(polygon,holes,.3,segments=segments,clip_walls=True) if observed_rear
+                       else paint_vertices[cover_index-1] if cover_index<=len(paint_vertices) else ())
                 if not plate:continue
                 mesh=replace(mesh,vertices=gpu_plane(plate),
                              position=(gx,gy-thickness/2+.2,gz))
@@ -376,6 +393,21 @@ def _gpu_detail(meshes,spec,level):
             if mesh.name=='gpu-fan-recess':
                 radius=max(abs(v) for v in mesh.vertices[0::6])
                 mesh=replace(mesh,vertices=gpu_plane(ring(radius,radius*.82,.5,segments=24),rear))
+            elif mesh.name=='gpu-fan-rotor':
+                candidates=[m for m in fan_openings if (m.position[1]>gy)==rear]
+                opening=min(candidates,key=lambda m:math.hypot(m.position[0]-mesh.position[0],m.position[2]-mesh.position[2]),default=None)
+                rotor_index=fan_openings.index(opening) if opening else -1
+                row=fan_rows[rotor_index] if 0<=rotor_index<len(fan_rows) else {}
+                profile=dict(row.get('profile') or {})
+                for key in ('blades','shape','direction','hub_ratio','kind'):
+                    if key in row:profile[key]=row[key]
+                if not observed_rear and appearance.get('confidence')=='model' and appearance.get('style')!='gpu_blower':
+                    from assembly_gpu_rotor051 import curve_rotor
+                    radius=max((math.hypot(opening.vertices[n],opening.vertices[n+2]) for n in range(0,len(opening.vertices),6)),default=0.) if opening else 0.
+                    vertices,info=curve_rotor(mesh.vertices,radius,profile,level,
+                        axial_room_mm=max(0.,thickness*.2-2.1),axis_sign=-1 if rear else 1)
+                    if info['applied']:
+                        mesh=replace(mesh,vertices=vertices);curved_rotors.append(dict(index=rotor_index,**info))
         revised.append(mesh)
     if observed_rear:
         from assembly_geometry import fan_rotor
@@ -494,6 +526,8 @@ def _gpu_detail(meshes,spec,level):
         port_clearance_tunnel_mm=6.5 if port_holes else 0.,observed_side_fin_window=observed_rear,
         side_window_geometry='official_photo_observed_schematic' if observed_rear else None,
         side_window_source='https://dlcdnwebimgs.asus.com/gain/B625A69F-626B-4451-B08B-DE635451FA0E/w1000/h732' if observed_rear else None,
+        axial_blade_depth_reference=tuple(curved_rotors),
+        front_paint_partition=paint_metadata,
         side_window_ratios=dict(edge_fraction_min=.015,edge_fraction_max=.985,
             depth_min=-.385,depth_max=.33) if observed_rear else None,**radius_observation,**exterior)
 

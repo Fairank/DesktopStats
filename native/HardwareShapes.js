@@ -372,6 +372,7 @@ function layers(geometryKey,viewport) {
             + '<g stroke-linecap="round" stroke-linejoin="round">' + scaled + '</g></svg>'
         return {cx:rotor.cx,cy:rotor.cy,radius:rotor.radius,kind:rotor.kind,
             direction:rotor.direction===-1?-1:1,
+            known:rotor.known===true,source_index:rotor.source_index,
             source:"data:image/svg+xml;utf8," + encodeURIComponent(svg)}
     })
     return {baseSource:"data:image/svg+xml;utf8," + encodeURIComponent(baseSvg),rotors:rotors}

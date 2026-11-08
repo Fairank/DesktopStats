@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "version": "0.51.0-preview.1",
+  "stage": "awaiting_producer_source_freeze_and_signed_data_publication",
+  "native_acceptance": false,
+  "installed": false,
+  "all_requirements_complete": false,
+  "distribution": "Optional original models and software previews; not loaded into the app at startup.",
+  "public_key_file": "WATERMARK050_PUBLIC_KEY.json",
+  "private_keys_included": false,
+  "legal_conclusion": false,
+  "assets": []
+}

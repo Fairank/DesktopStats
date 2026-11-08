@@ -3,6 +3,7 @@ import QtQuick.Window
 import "IconData.js" as IconData
 import "MetricEffectClock.js" as EffectClock
 import "HardwareShapes.js" as HardwareShapes
+import "HardwareCpuPackages.js" as CpuPackages
 
 // Optional feedback. Fill follows normalized readings; motion is decorative, never an alarm.
 Item {
@@ -103,6 +104,8 @@ Item {
     // A local decorative stress response: temperature and utilisation remain
     // independent real channels. Missing temperature never invents a hot reading.
     readonly property real processorLoadPressure:processorGlyph && compositeActive && loadActive?displayedLoad:0
+    readonly property var processorModelPackage: modelMode && name==="cpu" && hardwareAppearance && hardwareAppearance.cpu_package
+        ? CpuPackages.profile(hardwareAppearance.cpu_package.id) : null
     readonly property real processorWarmth:animationRunning && processorGlyph
         ?Math.max(thermalContext?thermalArcStrength:0,Math.max(0,(processorLoadPressure-.5)*2)):0
     readonly property var processorWarmColors:darkSurface
@@ -185,7 +188,9 @@ Item {
         && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
         && gpuVisibleFans>0 && (["solid","miniature","soft","cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(hardwareAppearance.icon_set)
             || modelMode && ["classic","outline"].includes(hardwareAppearance.icon_set))
-        && hardwareAppearance.fan_profile && hardwareAppearance.fan_profile.render_ready===true
+        && hardwareAppearance.fan_profile && (hardwareAppearance.fan_profile.render_ready===true
+            || Array.isArray(hardwareAppearance.fan_profile.blade_counts)
+                && hardwareAppearance.fan_profile.blade_counts.some(count => Number.isInteger(count) && count>=2 && count<=64))
         && resolvedEffect==="hardware"
     readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning
     readonly property real activityStrength: 0.28 + 0.72 * displayedLevel
@@ -435,16 +440,30 @@ Item {
         sourceComponent:Item {
             visible:root.processorWarmth>0
             Item {
-                width:18;height:18;anchors.centerIn:parent
-                scale:Math.min(root.width,root.height)/18
+                id:processorGlow
+                readonly property bool packageModel:root.modelMode && root.name==="cpu"
+                readonly property real packageWidth:root.processorModelPackage?18*root.processorModelPackage.reference_size[0]
+                    /Math.max(root.processorModelPackage.reference_size[0],root.processorModelPackage.reference_size[1]):18
+                readonly property real packageHeight:root.processorModelPackage?18*root.processorModelPackage.reference_size[1]
+                    /Math.max(root.processorModelPackage.reference_size[0],root.processorModelPackage.reference_size[1]):18
+                width:packageModel?24:18;height:width;anchors.centerIn:parent
+                scale:Math.min(root.width,root.height)/width
                 Item {
-                    x:-2.5;y:-root.paintBleed.top;width:23;height:18+root.paintBleed.top+root.paintBleed.bottom;clip:true
+                    // Large CPU models use the same24-unit package viewport.
+                    // The old18-unit bar halo grew beyond the artwork clip and
+                    // left a hard rectangular heat patch on frameless widgets.
+                    x:processorGlow.packageModel?0:-2.5;y:processorGlow.packageModel?0:-root.paintBleed.top
+                    width:processorGlow.packageModel?24:23
+                    height:processorGlow.packageModel?24:18+root.paintBleed.top+root.paintBleed.bottom;clip:true
                     Item {
-                        x:2.5;y:root.paintBleed.top;width:18;height:18
+                        x:processorGlow.packageModel?0:2.5;y:processorGlow.packageModel?0:root.paintBleed.top
+                        width:processorGlow.width;height:processorGlow.height
                         Rectangle {
                             id:processorBody;objectName:"metricIconProcessorBodyWarmth"
-                            x:root.name==="gpu"?1.5:3;y:root.name==="gpu"?3.75:3
-                            width:root.name==="gpu"?15:12;height:root.name==="gpu"?9:12
+                            x:processorGlow.packageModel?(24-width)/2:root.name==="gpu"?1.5:3
+                            y:processorGlow.packageModel?(24-height)/2:root.name==="gpu"?3.75:3
+                            width:processorGlow.packageModel?processorGlow.packageWidth:root.name==="gpu"?15:12
+                            height:processorGlow.packageModel?processorGlow.packageHeight:root.name==="gpu"?9:12
                             radius:1.6;antialiasing:true;color:root.processorWarmColor
                             opacity:root.channelOpacity(root.processorWarmth)*root.processorWarmth*.22
                         }
@@ -453,7 +472,7 @@ Item {
                             Rectangle {
                                 required property int index
                                 objectName:"metricIconProcessorHalo_"+index
-                                readonly property real spread:4.8-index*1.6
+                                readonly property real spread:processorGlow.packageModel?.85-index*.25:4.8-index*1.6
                                 width:processorBody.width+spread*2;height:processorBody.height+spread*2
                                 x:processorBody.x-spread;y:processorBody.y-spread;radius:processorBody.radius+spread
                                 antialiasing:true;color:root.processorWarmColor

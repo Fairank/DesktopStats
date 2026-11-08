@@ -164,7 +164,9 @@ def _endpoint(value,default_normal=(-1.,0.,0.)):
                 along=_unit(value.get('along'),(0.,0.,1.)),
                 kind=value.get('kind') or value.get('type') or '',
                 connector_rendered=value.get('connector_rendered') is True,
-                position_schematic=value.get('position_schematic',True),source=value.get('source',''))
+                position_schematic=value.get('position_schematic',True),source=value.get('source',''),
+                **{key:value[key] for key in ('label','role','role_verified','role_source','role_source_page','lead_rendered',
+                    'target_header_role','reference_only','installed_control_mode_verified','telemetry_bound') if key in value})
 
 
 def _bounds(value):
@@ -937,6 +939,10 @@ def auxiliary_stages(spec,anchors,level='balanced'):
         case_fan_owners={row.get('owner') for row in ((anchors.get('cooling') or {}).get('wire_anchors') or ())
                          if isinstance(row,dict) and row.get('role')=='case' and isinstance(row.get('owner'),str)}
         def tray_waypoints(source,target,start,end):
+            # This short factory-reference loom joins the pump to CPU_FAN in
+            # the main chamber. Sending it through a rear PSU trunk invents
+            # unnecessary length; the same collision solver still validates it.
+            if source.get('role')=='aio_control_reference':return ()
             if not trunk_supported:return ()
             bx,by,bz=board_point;board_h=board.get('height',305.);board_w=board.get('width',244.)
             dual=case.get('layout') in ('dual_chamber','panoramic') or 'dual_chamber' in features
@@ -1018,10 +1024,10 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                                    (front_x,target_y+18. if target.get('owner')=='gpu' else target_y,aperture_z)))
             else:points.append((rear_x,target_y,aperture_z))
             return tuple(points)
-        def connect(source,target,kind,index):
+        def connect(source,target,kind,index,*,record_failure=True):
             mesh_start=len(meshes)
             prefix='cable-'+str(index)+'-'+kind
-            start=source['position'] if source.get('connector_rendered') else plug(source,'modular' if source.get('owner')=='psu' else source['kind'],prefix+'-source')
+            start=source['position'] if source.get('connector_rendered') or source.get('lead_rendered') else plug(source,'modular' if source.get('owner')=='psu' else source['kind'],prefix+'-source')
             end=plug(target,kind,prefix+'-target')
             slim=kind in ('sata_data','front_io','fan4','argb3')
             preferred=tray_waypoints(source,target,start,end)
@@ -1055,9 +1061,11 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                 route_obstacles.append(bounds)
             path,state=route_cable(start,end,source['normal'],target['normal'],route_obstacles,dimensions,width=5. if slim else 10.,radius=4. if slim else 7.,waypoints=preferred,graph_boxes=graph_boxes,tube_clearance=clearance)
             if not path or state['routing_failed']:
-                del meshes[mesh_start:];issues.append('cable_clearance_requires_review')
-                omitted_routes.append(dict(kind=kind,count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner=target.get('owner')))
-                return
+                del meshes[mesh_start:]
+                if record_failure:
+                    issues.append('cable_clearance_requires_review')
+                    omitted_routes.append(dict(kind=kind,count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner=target.get('owner')))
+                return False
             if state['external_route']:issues.append('cable_reference_route_exceeds_case')
             vertices=[]
             source_u=_connector_basis(source['normal'],source.get('along'))[0];target_u=_connector_basis(target['normal'],target.get('along'))[0]
@@ -1077,14 +1085,22 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                 shifted=tuple(_add(point,_mul(strand_axis(cumulative[n]/max(cumulative[-1],1.)),offset)) for n,point in enumerate(path))
                 shifted_paths.append(shifted);vertices.extend(tube(shifted,1.,6 if level!='close' else 8))
             if any(segment_hits_box(a,b,bounds,1.1) for shifted in shifted_paths for a,b in zip(shifted,shifted[1:]) for bounds in route_obstacles):
-                del meshes[mesh_start:];omitted_routes.append(dict(kind=kind,count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner=target.get('owner')))
-                issues.append('cable_clearance_requires_review');return
+                del meshes[mesh_start:]
+                if record_failure:
+                    omitted_routes.append(dict(kind=kind,count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner=target.get('owner')))
+                    issues.append('cable_clearance_requires_review')
+                return False
             add(prefix+'-rounded-loom',tuple(vertices),cable_tone,component='cables')
             cables.append(dict(kind=kind,source_owner=source.get('owner'),target_owner=target.get('owner'),
                 mesh_prefix=prefix,
+                **{key:source[key] for key in ('role','reference_only','installed_control_mode_verified','telemetry_bound') if key in source},
+                **({'target_header_label':target.get('label',''),'target_header_role':target.get('role',''),
+                    'target_header_role_verified':target.get('role_verified') is True,
+                    'target_header_role_source':target.get('role_source','')} if kind=='fan4' else {}),
                 source_socket=source['position'],target_socket=target['position'],start=start,end=end,path=path,
                 rendered_strands=cable_strands,strand_count_is_sampling=True,layout_schematic=True,
                 routing_policy='rear_tray_grommet_reference' if state.get('preferred_waypoints_used') else 'clearance_visibility_reference',**state))
+            return True
         if psu_sockets:
             for index,target in enumerate(targets):
                 source=psu_sockets[index]
@@ -1112,16 +1128,46 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                 connect(source,target,'front_io',len(cables))
             if len(groups)>len(targets):
                 issues.append('front_io_header_capacity_unverified');omitted_routes.append(dict(kind='front_io',count=len(groups)-len(targets),reason='header_capacity_unverified'))
-        cooling=anchors.get('cooling') or {};header_indices={'fan':0,'argb':0}
-        for raw in cooling.get('wire_anchors') or ():
+        cooling=anchors.get('cooling') or {};used_headers={'fan':set(),'argb':set()}
+        header_rows={key:[endpoint for item in connectors.get(key) or () if (endpoint:=_endpoint(item)) is not None] for key in used_headers}
+        # Reserve the documented CPU_FAN endpoint before assigning case fans.
+        # Neither CPU_OPT nor a pump/system header proves a CPU_FAN connection.
+        wires=[raw for raw in cooling.get('wire_anchors') or () if isinstance(raw,dict)]
+        roles_verified=any(row.get('role_verified') is True for row in header_rows['fan'])
+        wires.sort(key=lambda row:(0 if row.get('role')=='aio_control_reference' else
+            1 if roles_verified and row.get('role')=='cpu_main' else
+            2 if roles_verified and row.get('role')=='case' and str(row.get('owner','')).startswith('fans:rear:') else 3))
+        for raw in wires:
             source=_endpoint(raw)
             if source is None or raw.get('kind') not in ('fan4','argb3'):continue
-            key='argb' if raw['kind']=='argb3' else 'fan';headers=[endpoint for item in connectors.get(key) or () if (endpoint:=_endpoint(item)) is not None]
-            if header_indices[key]>=len(headers):
+            key='argb' if raw['kind']=='argb3' else 'fan';headers=header_rows[key]
+            eligible=[i for i in range(len(headers)) if i not in used_headers[key]]
+            if key=='fan':
+                role=raw.get('role')
+                if role=='aio_control_reference':
+                    eligible=[i for i in eligible if headers[i].get('role_verified') is True and headers[i].get('role')=='cpu_fan']
+                    if not eligible:
+                        issues.append('cpu_fan_header_unverified')
+                        omitted_routes.append(dict(kind=raw['kind'],count=1,reason='cpu_fan_header_unverified',source_owner=raw.get('owner')));continue
+                elif roles_verified:
+                    allowed=('cpu_fan','cpu_opt') if role=='cpu_main' else ('case_fan',) if role=='case' else ()
+                    eligible=[i for i in eligible if headers[i].get('role_verified') is True and headers[i].get('role') in allowed]
+                    if role=='cpu_main':eligible.sort(key=lambda i:headers[i].get('role')!='cpu_fan')
+                    elif role=='case':eligible.sort(key=lambda i:math.dist(source['position'],headers[i]['position']))
+            if not eligible:
                 omitted_routes.append(dict(kind=raw['kind'],count=1,reason='header_capacity_unverified',source_owner=raw.get('owner')));continue
-            target=headers[header_indices[key]];header_indices[key]+=1
-            source.update(kind=raw['kind'],owner=raw.get('owner','cooling'));target.update(kind=raw['kind'],owner='board')
-            connect(source,target,raw['kind'],len(cables))
+            if not roles_verified or key!='fan':eligible=eligible[:1]
+            source.update(kind=raw['kind'],owner=raw.get('owner','cooling'))
+            # At most the board's existing header count is tried. Every trial
+            # uses the unchanged solver and actual endpoint; failed trials do
+            # not consume a header or leave a plug/half loom in the scene.
+            for index in eligible:
+                target=headers[index];target.update(kind=raw['kind'],owner='board')
+                if connect(source,target,raw['kind'],len(cables),record_failure=False):
+                    used_headers[key].add(index);break
+            else:
+                issues.append('cable_clearance_requires_review')
+                omitted_routes.append(dict(kind=raw['kind'],count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner='board'))
     outside=[]
     for device in devices:
         part_meshes=[mesh for mesh in meshes if mesh.part_id==device['part_id']]

@@ -194,7 +194,8 @@ function fanInk(state,c,layout,index,collector) {
     // Unknown blades have a static opening/cap, never an invented vane count
     // or a spinning placeholder. Known directions use the shared RPM clock.
     if(Array.isArray(collector) && p.blades!==null && p.shape!=="neutral")
-        collector.push({cx:layout.cx,cy:layout.cy,radius:layout.radius,kind:layout.kind,basis:3,body:moving,direction:p.direction})
+        collector.push({cx:layout.cx,cy:layout.cy,radius:layout.radius,kind:layout.kind,basis:3,body:moving,direction:p.direction,
+            known:true,source_index:index})
     else out+=group(moving,transform)
     return out
 }

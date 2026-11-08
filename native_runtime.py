@@ -116,7 +116,9 @@ class _DesktopAwareTopBarManager(TopBarManager):
                   if not host.closing and host.binding is not None}
         monitors.update(self._model_monitors())
         try:
-            self._foreground_hidden_screens=self._fullscreen_guard.blocked(monitors)
+            guard=self._fullscreen_guard
+            blocked=guard.blocked(monitors)
+            self._foreground_hidden_screens=frozenset(monitors) if getattr(guard,'failure',None) else blocked
             self._fullscreen_guard_error=None
         except Exception as error:
             self._fullscreen_guard_error=type(error).__name__
@@ -456,7 +458,8 @@ class Runtime(QObject):
             bar = getattr(self, "top_bar", None)
             result = launcher.update(
                 self.controller._saved, self.controller._data,
-                fullscreen=lambda: foreground_fullscreen(getattr(self, "top_bar", None)),
+                fullscreen=lambda: foreground_fullscreen(getattr(self, "top_bar", None),
+                                                        desktop_ready=_desktop_session_ready),
             )
             if (not attempted and result.get("attempted") is True and not self.shutting_down
                     and getattr(self, "cpu_temperature_launcher", None) is launcher

@@ -800,6 +800,10 @@ def build_scene(spec=None):
     if case.get('id')=='fractal-north-xl-mesh':
         from assembly_north_tray049 import add_tray,add_obstacles
         meshes,tray_meta=add_tray(meshes,case,(w,h,d))
+    elif case.get('id')=='asus-rog-strix-helios-gx601':
+        from assembly_case_layout051 import add_helios_tray
+        from assembly_north_tray049 import add_obstacles
+        meshes,tray_meta=add_helios_tray(meshes,case,(w,h,d))
     attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
     if tray_meta:attachment_anchors=add_obstacles(attachment_anchors,tray_meta)
     if case.get('id')=='hyte-y70':
@@ -907,5 +911,7 @@ def build_scene(spec=None):
 
 
 def vertex_bytes(scene):
-    vertices=tuple(value for mesh in scene.meshes for value in mesh.vertices)
-    return struct.pack('<'+str(len(vertices))+'f',*vertices)
+    # Keep exact little-endian f32 packing without flattening the whole scene
+    # into a second tuple of Python references and one giant argument vector.
+    return b''.join(struct.pack('<'+str(len(mesh.vertices))+'f',*mesh.vertices)
+                    for mesh in scene.meshes)

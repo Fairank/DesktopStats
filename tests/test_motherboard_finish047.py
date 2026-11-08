@@ -12,7 +12,7 @@ import struct
 import unittest
 from unittest.mock import patch
 
-from motherboard_catalog import MODELS,get_model
+from motherboard_catalog import MODELS,get_model,ASUS_Z790_MANUAL
 from assembly_motherboard import _io_clear_cover,layout_anchors,enrich_motherboard
 from assembly_geometry import build_scene,color
 from assembly_detail import TRIANGLE_BUDGETS
@@ -130,6 +130,33 @@ ASUS_INSETS={'asus-rog-strix-z790-a-wifi-d4','asus-rog-strix-x670e-e-wifi','asus
 def canonical(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
 
+def legacy_header_metadata051(testcase,row):
+    """Reverse only the eight source-qualified051 header annotations.
+
+    These five keys were absent on these exact eight old fan connectors. All
+    original connector coordinates/fields and the rest of the complete row
+    still pass the unchanged0.46 digest; no model is exempted from that check.
+    The current annotations must independently match the primary manual.
+    """
+    testcase.assertEqual(row['id'],'asus-rog-strix-z790-a-wifi-d4')
+    restored=copy.deepcopy(row)
+    current=[value for value in row['connectors'] if value['kind']=='fan']
+    previous=[value for value in restored['connectors'] if value['kind']=='fan']
+    expected=(('CPU_OPT','cpu_opt',(.355,.014)),('CPU_FAN','cpu_fan',(.625,.014)),
+        ('CHA_FAN2','case_fan',(.372,.466)),('AIO_PUMP','aio_pump',(.404,.466)),
+        ('CHA_FAN1','case_fan',(.274,.985)),('CHA_FAN3','case_fan',(.724,.985)),
+        ('CHA_FAN4','case_fan',(.819,.985)),('CHA_FAN5','case_fan',(.862,.985)))
+    testcase.assertEqual(len(current),8)
+    keys=('label','role','role_verified','role_source','role_source_page')
+    for value,old,(label,role,uv) in zip(current,previous,expected):
+        testcase.assertEqual(value['uv'],uv)
+        testcase.assertEqual({key:value[key] for key in keys},dict(label=label,role=role,
+            role_verified=True,role_source=ASUS_Z790_MANUAL,role_source_page=14))
+        testcase.assertIs(value['role_verified'],True)
+        for key in keys:del old[key]
+    return restored
+
+
 def payload_sha(meshes):
     result=hashlib.sha256()
     for mesh in meshes:
@@ -158,7 +185,9 @@ class MotherboardFinish047Tests(unittest.TestCase):
         for identity,old_hash in LEGACY_ROWS.items():
             with self.subTest(model=identity):
                 row=rows[identity]
-                if identity not in TARGET_IMMUTABLE:self.assertEqual(canonical(row),old_hash)
+                if identity not in TARGET_IMMUTABLE:
+                    comparison=legacy_header_metadata051(self,row) if identity=='asus-rog-strix-z790-a-wifi-d4' else row
+                    self.assertEqual(canonical(comparison),old_hash)
                 else:
                     self.assertEqual(canonical({key:row.get(key) for key in PRESERVED_FIELDS}),TARGET_IMMUTABLE[identity])
                     self.assertEqual(row['finish_status'],'photo_reviewed')

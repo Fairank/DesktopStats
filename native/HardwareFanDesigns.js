@@ -157,7 +157,8 @@ function fan(cx,cy,radius,c,kind) {
     var base='<g class="'+(kind==="blower"?'hardware-blower':'hardware-fan')+'" transform="translate('+cx+' '+cy+') scale('+(radius/3)+')">'
         +'<circle r="3" fill="'+colors.rim+'"/><circle r="2.90" fill="'+colors.disk+'"/>'
     if(c.rotorCollector) {
-        c.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:kind,basis:3,body:moving,direction:p.direction})
+        c.rotorCollector.push({cx:cx,cy:cy,radius:radius,kind:kind,basis:3,body:moving,direction:p.direction,
+            known:p.blades!==null && p.shape!=="neutral",source_index:index})
         return base+'</g>'
     }
     return base+moving+'</g>'
@@ -175,6 +176,10 @@ function modelContour(p) {
     if(p.technology==="torx_5")return {sweep:57,lead:.36,trail:.31,root:.25}
     if(p.technology==="torx_original")return {sweep:46,lead:.34,trail:.25,root:.24}
     if(p.technology==="icestorm_2_twin_edge")return {sweep:48,lead:.37,trail:.29,root:.26}
+    // Exact GAMING5070 centre and reviewed EAGLE front: broad swept Hawk
+    // wings. This qualitative contour does not establish the unknown outer
+    // GAMING counts, manufacturer pitch, or a measured physical diameter.
+    if(p.technology==="hawk_blackwell")return {sweep:43,lead:.49,trail:.38,root:.32}
     return null
 }
 

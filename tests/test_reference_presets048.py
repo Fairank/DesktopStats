@@ -124,7 +124,7 @@ class ReferencePresets048Tests(unittest.TestCase):
                         known_io=meta['attachment_anchors'].get('case_front_io') or []
                         io_profile=(spec['case'].get('exterior_details') or {}).get('io')
                         cable_kinds=Counter(row['kind'] for row in meta['auxiliary']['cables'])
-                        self.assertEqual(meta['auxiliary']['cable_count'],14 if kind=='air' else 8)
+                        self.assertEqual(meta['auxiliary']['cable_count'],14 if kind=='air' else 9 if kind=='aio' else 8)
                         if kind=='air':
                             self.assertIsInstance(io_profile,dict)
                             self.assertEqual(len(known_io),6)
@@ -133,7 +133,11 @@ class ReferencePresets048Tests(unittest.TestCase):
                             self.assertIsNone(io_profile)
                             self.assertEqual(known_io,[])
                             self.assertEqual(cable_kinds['front_io'],0)
-                            self.assertEqual(cable_kinds,dict(atx24=1,eps8=2,gpu16=1,fan4=4))
+                            self.assertEqual(cable_kinds,dict(atx24=1,eps8=2,gpu16=1,fan4=5 if kind=='aio' else 4))
+                            if kind=='aio':
+                                control=[r for r in meta['auxiliary']['cables'] if r.get('role')=='aio_control_reference']
+                                self.assertEqual(len(control),1);self.assertEqual(control[0]['target_header_label'],'CPU_FAN')
+                                self.assertFalse(control[0]['telemetry_bound']);self.assertFalse(control[0]['installed_control_mode_verified'])
                         self.assertEqual(meta.get('attachment_notices'),[])
                         self.assertEqual(fit_messages(spec,meta),[])
                         devices=meta['auxiliary']['parts']

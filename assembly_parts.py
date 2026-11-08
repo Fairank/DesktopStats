@@ -105,6 +105,7 @@ def fit_messages(spec,metadata):
         'unknown_component_model':'部分自选型号尚未收录，未放入模型。',
         'unsupported_radiator_mount':'所选机箱安装位不支持这款冷排。',
         'radiator_exceeds_mount_plane':'冷排超出所选安装面的参考范围。',
+        'radiator_fan_stack_exceeds_case_clearance':'冷排与风扇的总厚度超出机箱该安装位的官方上限，请选择其它安装位或更薄的组合。',
         'radiator_occupies_mount':'冷排已占用该安装面，请移除重复的机箱风扇。',
         'unsupported_fan_mount':'所选风扇尺寸或数量超出机箱已核安装位。',
         'fans_exceed_mount_plane':'风扇超出所选安装面的参考范围。',
@@ -132,6 +133,8 @@ def fit_messages(spec,metadata):
             result.append('所选电源规格尚不适配此机箱。')
         if 'cable_reference_route_exceeds_case' in details.get('warnings',()):
             result.append('部分参考线缆超出机箱范围，请检查走线。')
+        if 'cpu_fan_header_unverified' in details.get('warnings',()):
+            result.append('尚未核实 CPU_FAN 接口，水冷单 PWM 参考控制线未连接。')
         if details.get('outside_reference'):result.append('部分配件超出机箱参考外形，请检查安装位置。')
         for row in details.get('rejected',()):
             if group=='cooling' and row.get('kind')=='loop_component':

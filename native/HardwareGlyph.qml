@@ -112,7 +112,7 @@ Item {
                     width: modelData.radius*2*root.artworkUnit
                     height: width
                     transformOrigin: Item.Center
-                    rotation: root.fanMotionActive && Number.isFinite(root.fanRotation)
+                    rotation: root.fanMotionActive && modelData.known===true && Number.isFinite(root.fanRotation)
                         ? (((root.fanRotation*(modelData.direction===-1?-1:1))%360)+360)%360 : 0
                     Image {
                         objectName: "hardwareFanRotorImage_"+rotor.index

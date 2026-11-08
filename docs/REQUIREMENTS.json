@@ -15,7 +15,7 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "尚未在本机安装0.50验证真实交互；现有测试文件不等于本轮全部通过。"
+        "尚未在本机安装0.51验证真实交互；现有测试文件不等于本轮全部通过。"
       ],
       "id": "topbar_history",
       "implementation": "顶部栏、悬停详情、点击固定与历史存储路径均保留，并有专门测试。",
@@ -33,13 +33,14 @@
         "tests/test_top_bar_workflow.py",
         "tests/test_top_bar_history_identity.py",
         "tests/test_history_store.py",
-        "tests/test_history_sampling.py"
+        "tests/test_history_sampling.py",
+        "tests/test_fullscreen_recovery051.py"
       ]
     },
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.50尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。"
+        "0.51尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。"
       ],
       "id": "screen_two",
       "implementation": "存在按稳定显示器身份选择、保存和路由窗口的实现，本次不读取实际显示器或用户配置。",
@@ -62,10 +63,11 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.50真实游戏前台、跨屏、锁屏及桌面恢复尚未验收；继续遵守当前不重启要求。"
+        "0.51真实游戏前台、跨屏、锁屏及桌面恢复尚未验收；继续遵守当前不重启要求。",
+        "暂态查询恢复依赖原有读数更新或真实窗口事件，不新增心跳；持续失败最高30秒间隔。健康游戏缓存仍依赖窗口通知，hook安装失败保持关闭式门禁且不自动重装。真实游戏／锁屏恢复仍待原生验收。"
       ],
       "id": "game_hide",
-      "implementation": "顶部栏、详情、模型小组件和整机窗口已有按屏幕全屏与安全桌面状态的关闭式门禁。",
+      "implementation": "顶部栏、详情、模型小组件和整机窗口已有按屏幕全屏与安全桌面状态的关闭式门禁。 0.51另修不依赖CPU温度授权的顶部栏恢复：真实前台／窗口查询暂态失败后，原缓存会在无新WinEvent时永久隐藏；现在由已有dataChanged入口按2／4／8／16／30秒封顶退避，仅标dirty后复用原GUI队列重查，健康缓存不轮询、不清跨屏游戏、不重装hook。后续再修消费端：上次安全桌面不能授权本次查询失败时继续显示，guard.failure非空则当前目标屏幕全部隐藏，健康回读后才按真实blocked恢复；tracked保留。当前7相关模块256项合成／离屏检查通过（12项新增）。",
       "native_acceptance_pending": true,
       "requirement": "游戏不能覆盖；同屏前台全屏、锁屏和未知桌面状态须隐藏并停动效，安全后恢复。",
       "source_files": [
@@ -80,7 +82,8 @@
         "tests/test_fullscreen_guard.py",
         "tests/test_top_bar_interaction_policy.py",
         "tests/test_hardware_model_motion041.py",
-        "tests/test_assembly_desktop.py"
+        "tests/test_assembly_desktop.py",
+        "tests/test_fullscreen_recovery051.py"
       ]
     },
     {
@@ -109,34 +112,36 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "未对0.50重启或提权，未取得新版真实温度；0.36温度不作为0.50验收。",
+        "未对0.51重启或提权，未取得新版真实温度；0.36温度不作为0.51验收。",
         "自动恢复默认需用户开启且依赖支持来源；无法保证所有电脑都有CPU温度。"
       ],
       "id": "cpu_temperature_restart",
-      "implementation": "有启动恢复开关、一次会话只授权一次、游戏延后、桥接文件校验与跟随父进程退出。",
+      "implementation": "有启动恢复开关、一次会话只授权一次、游戏延后、桥接文件校验与跟随父进程退出。 0.51修正残留Shell全屏通知及缓存查询失败导致长期等待的问题；安全桌面正面确认，延期检查每两秒至多一次，授权前再复核。启动偏好、固定桥接校验与每会话一次授权保留，4相关模块111项合成测试通过。",
       "native_acceptance_pending": true,
       "requirement": "CPU温度在每次启动Stats时通过一次授权恢复；只读会话桥接随Stats退出，不开机启动。",
       "source_files": [
         "cpu_temperature.py",
         "cpu_temperature_launcher.py",
         "collector/AsusCpuTemperatureBridge.cs",
-        "tools/build_cpu_temperature_bridge.py"
+        "tools/build_cpu_temperature_bridge.py",
+        "native_runtime.py"
       ],
       "status": "implemented_source_native_pending",
       "status_label": "已实现；新版原生待验",
       "test_files": [
         "tests/test_cpu_temperature.py",
         "tests/test_cpu_temperature_launcher.py",
-        "tests/test_sensor_source_isolation.py"
+        "tests/test_sensor_source_isolation.py",
+        "tests/test_cpu_temperature_recovery051.py"
       ]
     },
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "顶部栏、设置、详情三个真实Windows窗口仍待0.50桌面验收；不能以离屏底色冒充真实磨砂。"
+        "顶部栏、设置、详情三个真实Windows窗口仍待0.51桌面验收；不能以离屏底色冒充真实磨砂。"
       ],
       "id": "glass_three_surfaces",
-      "implementation": "三类窗口有原生材质、宿主桥接和生命周期实现，离屏测试只能验证契约。",
+      "implementation": "三类窗口保留原生材质、宿主桥接和有限生命周期。0.51修复准备结果跨DPI、最小化／曝光丢失后错误复用，以及非首帧客户端在同步DPI回调中丢失恢复；真实恢复原因等当前首帧后传递，重复重绘不重施。9相关模块234项合成／离屏测试通过，不代表实际磨砂已验收。",
       "native_acceptance_pending": true,
       "requirement": "顶部栏、设置、详情都应恢复真实磨砂，并保留颜色底色与连续透明度。",
       "source_files": [
@@ -153,19 +158,21 @@
         "tests/test_settings_material_integration.py",
         "tests/test_settings_material_lifecycle.py",
         "tests/test_top_bar_backdrop_host.py",
-        "tests/test_alpha_material.py"
+        "tests/test_alpha_material.py",
+        "tests/test_material_recovery051.py",
+        "tests/test_settings_hidden_preparation.py"
       ]
     },
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "没有0.50安装版静置或游戏状态的整款程序CPU／RAM／GPU实测，也未完成关闭后资源回收验收。",
-        "历史隔离设置首用约65MiB差值、0.43典型GPU基础图层39.85%像素预算减少均有限定范围；不是0.50常驻内存或显存降幅。",
+        "没有0.51安装版静置或游戏状态的整款程序CPU／RAM／GPU实测，也未完成关闭后进程／原生资源回收验收。",
+        "历史隔离设置首用约65MiB差值、0.43典型GPU基础图层39.85%像素预算减少均有限定范围；不是0.51常驻内存或显存降幅。",
         "打开3D、浏览图鉴与仅顶部栏的负担不同；离屏生成耗时、单模块内存和包体积不能作为通用占用上限。",
         "新SVG最坏构建时延仍在优化，未标记性能全部完成；本机游戏状态与静置的整款程序CPU／RAM／GPU占用仍待安装后原生验收。"
       ],
       "id": "low_overhead",
-      "implementation": "保留共享时钟、按需采集与模型缓存；独立水路6次索引扫描合为1次。隔离热选择器微基准CPU中位约减少81%；63产品索引对象63170B、至多8记录79963B只属递归Python对象图，不含模块／Qt／mesh／GL或进程RAM。 图库只为可见项串行准备复杂图形，关闭取消旧结果；小组件最小化暂停快照，恢复读取最新状态。局部响应测量不当作CPU用时下降或整款内存。 内置离线图集只读内置目录，不导入用户扩展包或配置目录；程序内图库照常保留可选配件。",
+      "implementation": "保留共享时钟、按需采集与模型缓存；独立水路6次索引扫描合为1次。隔离热选择器微基准CPU中位约减少81%；63产品索引对象63170B、至多8记录79963B只属递归Python对象图，不含模块／Qt／mesh／GL或进程RAM。 图库只为可见项串行准备复杂图形，关闭取消旧结果；小组件最小化暂停快照，恢复读取最新状态。局部响应测量不当作CPU用时下降或整款内存。 内置离线图集只读内置目录，不导入用户扩展包或配置目录；程序内图库照常保留可选配件。 0.51按旧363网格同一输入优化打包与检视边界；打包临时Python分配46,510,210→15,570,620B、CPU中位减少73.42%，边界CPU中位减少78.05%但临时分配增加32,288B。只属离线内核，不是整款RSS／显存／原生上传／FPS；结果与范围见QUALITY051。 后续关闭路径增加显式CPU Scene／拾取／绘制引用清理，4相关模块36项阶段检查通过；weakref只证明所测对象不再被owner保留，未测进程RSS或驱动显存。最终583源下另以同一旧363mesh输入重测r3，字节／bounds精确相等，报告模块SHA与最终代码围栏一致；此前r2的79.27%独立保留，不冒充本次78.05%。",
       "native_acceptance_pending": true,
       "requirement": "持续优化CPU/内存/GPU负担，并最终报告实际控制到多少。",
       "source_files": [
@@ -182,7 +189,10 @@
         "accessory_jobs047.py",
         "case_fan_clearance047.py",
         "tools/export_accessory_art.py",
-        "tools/export_accessory_atlas.py"
+        "tools/export_accessory_atlas.py",
+        "assembly_geometry.py",
+        "assembly_viewer.py",
+        "docs/QUALITY051.md"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -199,7 +209,8 @@
         "tests/test_case_fan_clearance047.py",
         "tests/test_desktop_hardware_models040.py",
         "tests/test_accessory_art_export.py",
-        "tests/test_accessory_atlas.py"
+        "tests/test_accessory_atlas.py",
+        "tests/test_assembly_upload051.py"
       ]
     },
     {
@@ -207,7 +218,7 @@
       "gaps": [
         "I/O范围为所有进程读写，含缓存与设备；Windows计数还可能包含文件、网络等I/O，不能与当前选中物理磁盘绑定，不能叫单盘Top5。",
         "网络逐进程Top5仍未实现；温度／转速等物理读数不能直接按进程归因。",
-        "预热、权限缺失、PID复用和计数倒退必须保留未知／重建基线；当前没有本机0.50原生交互验收。"
+        "预热、权限缺失、PID复用和计数倒退必须保留未知／重建基线；当前没有本机0.51原生交互验收。"
       ],
       "id": "top_five_processes",
       "implementation": "已有CPU、内存、GPU、专用显存与进程总读写I/O按需Top5；I/O复用同一份Windows进程快照，显示读/写/合计bytes/s，按软件聚合，隐藏后停止租约采集。",
@@ -266,10 +277,10 @@
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
         "相同数量和可生成13种画法不代表每个型号六版都已逐张视觉验收；未知叶型、隐藏PCB、小IC和安装细节仍是参考。",
-        "更多未收录水路产品、GPU冷头、线材与外围设备在六版中同样仍缺；本轮12个GPU冷头仅独立外观检视，不代表整卡安装或全部型号完成。"
+        "更多未收录水路产品、GPU冷头、线材与外围设备在六版中同样仍缺；0.47的12个GPU冷头仅独立外观检视，不代表整卡安装或全部型号完成。"
       ],
       "id": "same_model_all_styles",
-      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。 0.49专款模型增加真实厚度/曲叶与孔口，六版共享物理形体；四套彩色主风格启用现有哑光明暗，纯线保透视/轮廓/遮挡，原版无笑脸。",
+      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。 0.49专款模型增加真实厚度/曲叶与孔口，六版共享物理形体；四套彩色主风格启用现有哑光明暗，纯线保透视/轮廓/遮挡，原版无笑脸。 0.51在不增加网格或风格的条件下继续做已支持GPU前叶轮体积；源阶段的121款／314前叶轮不是314新产品，盖板共面分区已做全147款×3精度专项，最终逐图结果仍待归档。 0.51进一步修正已知GPU转子在可爱／彩色手绘／奶油贴纸中与盖板同色而近乎消失的问题：只调整既有配色层级，暗凹腔、轮毂及叶片区分；原版、纯线条和物理几何不变。旧低对比图不作为最终验收；r4中ASUS Dual六版实图已目视确认，不再有放射状假划痕，其他最终媒体范围／数据入口待归档。 后续清除盖板帽面三角分区的共面伪线，真孔rim、凹腔外缘和厚度边保留，未靠删硬件细节掩盖问题。GPU最终定向45项、0跳过通过，13个自有代码文件冻结；材料／帽面边与混搭／Renderer另有18项阶段检查，覆盖有重叠不累加。",
       "native_acceptance_pending": true,
       "requirement": "每套硬件数量、型号与结构跟原版一致，不能不同风格换壳/减配。 各版均应保留真实三维厚度、曲面与遮挡关系，不能只把图案贴在平面上。",
       "source_files": [
@@ -281,7 +292,9 @@
         "liquid_cooling_catalog044.py",
         "motherboard_expansion045.py",
         "liquid_gpu_geometry047.py",
-        "assembly_gpu_exterior049.py"
+        "assembly_gpu_exterior049.py",
+        "assembly_gpu_rotor051.py",
+        "assembly_detail.py"
       ],
       "status": "implemented_source_with_reference_limits",
       "status_label": "六版保留；外观与原生仍待验",
@@ -303,7 +316,9 @@
         "tests/test_case_fan_clearance047.py",
         "tests/test_assembly_ink_visibility048.py",
         "tests/test_gpu_exterior049.py",
-        "tests/test_gpu_insertion_renderer049.py"
+        "tests/test_gpu_insertion_renderer049.py",
+        "tests/test_gpu_panels051.py",
+        "tests/test_gpu_material_layers051.py"
       ]
     },
     {
@@ -314,7 +329,7 @@
         "两款主板仅绘制MSI无叶片风扇槽与ASUS网罩参考；其中ASUS内部风扇位置未核，两款叶片、旋向和RPM都未知。"
       ],
       "id": "fan_motion",
-      "implementation": "已有GPU叶型／RPM型号和时效门禁；机箱／冷排选扇身份独立，演示转动与真实测速分开，沿用既有共享时钟，未知／零速／过期保持静止。",
+      "implementation": "已有GPU叶型／RPM型号和时效门禁；机箱／冷排选扇身份独立，演示转动与真实测速分开，沿用既有共享时钟，未知／零速／过期保持静止。 0.51仅给新核5070中扇建立partial旋转资格，未知两侧扇仍静止，不解除整卡待核或臆造RPM。",
       "native_acceptance_pending": false,
       "requirement": "风扇每版能转；必须按真实对应RPM调整，过期/未知/零速停止；风扇设计须符合型号。",
       "source_files": [
@@ -344,7 +359,7 @@
         "旧代／入门／旗舰非公、工作站与新代际仍缺，内部PCB、电路与部分精确接口位置不是制造CAD。"
       ],
       "id": "all_gpu_brands_series",
-      "implementation": "当前147款显卡含92款NVIDIA、46款AMD、9款Intel，涵盖一部分旧卡、公版和非公型号。 0.49按exact Astral5090来源修正黑银分层、背板真窗/压架、两侧鳍阵、前扇比例和曲面叶片，保真实包络。专款造型不外推其它146型号，未新增完整叶型核实数量。",
+      "implementation": "当前147款显卡含92款NVIDIA、46款AMD、9款Intel，涵盖一部分旧卡、公版和非公型号。 0.49按exact Astral5090来源修正黑银分层、背板真窗/压架、两侧鳍阵、前扇比例和曲面叶片，保真实包络。专款造型不外推其它146型号，未新增完整叶型核实数量。 0.51阶段为121款／314个前叶轮共享原二维轮廓增加轴向曲面，保持数量、转轴及直径；未知叶型不补造。盖板共面分区专项已修：147款×3精度共441场景，185,220个盖板内严格点抽样无重叠、无省片、无warning；这是抽样检查，不是全空间或实物保证。最终媒体仍待验。 0.51进一步修正已知GPU转子在可爱／彩色手绘／奶油贴纸中与盖板同色而近乎消失的问题：只调整既有配色层级，暗凹腔、轮毂及叶片区分；原版、纯线条和物理几何不变。旧低对比图不作为最终验收；r4中ASUS Dual六版实图已目视确认，不再有放射状假划痕，其他最终媒体范围／数据入口待归档。 后续清除盖板帽面三角分区的共面伪线，真孔rim、凹腔外缘和厚度边保留，未靠删硬件细节掩盖问题。GPU最终定向45项、0跳过通过，13个自有代码文件冻结；材料／帽面边与混搭／Renderer另有18项阶段检查，覆盖有重叠不累加。",
       "native_acceptance_pending": false,
       "requirement": "全部显卡品牌/系列/年代、丐版及旗舰非公、10系列及更早、AMD和Intel都要覆盖并保真。",
       "source_files": [
@@ -353,7 +368,10 @@
         "native/HardwareModelNvidia042.js",
         "native/HardwareModelRadeonArc042.js",
         "docs/GPU_MODEL_PROGRESS.md",
-        "assembly_gpu_exterior049.py"
+        "assembly_gpu_exterior049.py",
+        "assembly_gpu_rotor051.py",
+        "assembly_detail.py",
+        "assembly_style.py"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -362,7 +380,9 @@
         "tests/test_gpu_nvidia042.py",
         "tests/test_gpu_radeon_arc042.py",
         "tests/test_gpu_model_art042.py",
-        "tests/test_gpu_exterior049.py"
+        "tests/test_gpu_exterior049.py",
+        "tests/test_gpu_panels051.py",
+        "tests/test_gpu_material_layers051.py"
       ]
     },
     {
@@ -419,10 +439,10 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "原生透明命中、屏2缩放和实际尺寸仍待0.50验收；布局测试不能单独证明美术细节达到用户审美要求。"
+        "原生透明命中、屏2缩放和实际尺寸仍待0.51验收；布局测试不能单独证明美术细节达到用户审美要求。"
       ],
       "id": "model_widget_layout",
-      "implementation": "已有大图CPU/GPU模板、共享响应式布局、真正QML动态图层、读数和每组件框架开关。",
+      "implementation": "已有大图CPU/GPU模板、共享响应式布局、真正QML动态图层、读数和每组件框架开关。 0.51 CPU模型热晕改为24单位封装视口，长宽跟随现有CPU封装，不再把18单位顶部栏热晕放大成方形底；原顶部栏与GPU分支保留。热晕最终阶段2项测试通过，不与早期夹具口径失败相混。",
       "native_acceptance_pending": true,
       "requirement": "CPU/GPU图标要够大，布局清晰可爱，去掉角落可见缩放边角，支持有框/无框。",
       "source_files": [
@@ -431,7 +451,8 @@
         "native_card.py",
         "native/DesktopHardwareModel.qml",
         "native/DesktopWidget.qml",
-        "native/WidgetInspector.qml"
+        "native/WidgetInspector.qml",
+        "native/MetricIcon.qml"
       ],
       "status": "implemented_source_offscreen_evidence_native_pending",
       "status_label": "已实现；新版原生待验",
@@ -441,13 +462,14 @@
         "tests/test_widget_refinement.py",
         "tests/test_widget_material_geometry.py",
         "tests/test_liquid_gallery046.py",
-        "tests/test_notebook_color046.py"
+        "tests/test_notebook_color046.py",
+        "tests/test_model_warmth051.py"
       ]
     },
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.50真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。"
+        "0.51真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。"
       ],
       "id": "model_widget_animation",
       "implementation": "MetricIcon/HardwareGlyph沿用已有时钟与数据时效，Runtime控制modelMotionAllowed。",
@@ -473,13 +495,14 @@
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
         "参考配件不能借其他硬件的实时读数；机箱/电源/存储等不都有独立实时状态。",
-        "关闭事件返回时viewport._scene等引用可能保留至QObject实际销毁；不能声称瞬间全部释放。",
+        "0.51已补关闭后的显式CPU引用清理并有保留wrapper的weakref测试；关闭后整进程RSS、Qt对象、OpenGL驱动与显存释放仍未做原生实测，不能由Scene／Mesh引用释放推导整款内存回落。",
         "插拔目前仅为16–52mm范围内脱离插槽的模型方向演示，不是完整出箱拆卸；螺丝、卡扣、供电线拔插及水冷／转接安装仍不完整。",
         "Helios真实电源罩展示开口及Thor OLED读数绑定仍未完成；选项移罩检视不冒充实物窗孔或实时功耗。",
-        "GPU以外的CPU、每条RAM、主板、电源、散热器／冷排／各风扇当前有独立几何与部分part_id点选／分组展开，但尚未全部实现各自槽位、连线和约束下的逐件交互拆装。"
+        "GPU以外的CPU、每条RAM、主板、电源、散热器／冷排／各风扇当前有独立几何与部分part_id点选／分组展开，但尚未全部实现各自槽位、连线和约束下的逐件交互拆装。",
+        "显式切焦的静态墨线准备仍会重传现有完整单VBO，不是仅ink字节上传或所有检视零上传。PSU新六版软件静图已目视确认，最终100模块软件回归已过，原生仍待验；静图不能代替动效或原生验收。"
       ],
       "id": "desktop_3d_inspection",
-      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。 0.48增加内部检视：只调整外盖与电源罩的绘制及拾取可见性，保留原始物理场景和正常完整外壳。 0.49有限插槽方向演示接入检视按钮及桌面菜单，三角/线稿/点选/特效共用位移；仅动作期间借用既有共享时钟，真实监控不改变。 0.49新增独立show_psu偏好：默认保电源罩，真实PSU与线束始终保留；可选移罩展示或单独focus，三角/线稿/点选一致且不重建。额定功率沿用产品属性，实际功率无独立传感器时未知。 原生Scene保存独立Mesh及部件身份，实际渲染三角形／法线；预览PNG／GIF由这些实体导出，不将整机合并成一张图。完整逐件机械拆装仍是明确待做项。",
+      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。 0.48增加内部检视：只调整外盖与电源罩的绘制及拾取可见性，保留原始物理场景和正常完整外壳。 0.49有限插槽方向演示接入检视按钮及桌面菜单，三角/线稿/点选/特效共用位移；仅动作期间借用既有共享时钟，真实监控不改变。 0.49新增独立show_psu偏好：默认保电源罩，真实PSU与线束始终保留；可选移罩展示或单独focus，三角/线稿/点选一致且不重建。额定功率沿用产品属性，实际功率无独立传感器时未知。 原生Scene保存独立Mesh及部件身份，实际渲染三角形／法线；预览PNG／GIF由这些实体导出，不将整机合并成一张图。完整逐件机械拆装仍是明确待做项。 0.51关闭时拆出纯CPU forget_scene与viewport退场清理，不再等待Qt wrapper实际销毁才清_scene、绘制／拾取列表和base cache；无currentContext也能清CPU引用。保留owner wrapper的真实weakref专项证明所测旧Scene／Mesh已释放，关闭幂等。 0.51 PSU单独检视被整机墨线预算挤空的问题已作焦点优先修复：新4项与原upload5项阶段通过，默认all与现有边线cap不变。仅墨线重分配，但显式有效changed focus会一次重打包并重传完整单VBO（physical prefix字节相等，并未免除传输）；samefocus、原版无ink、相机和动画tick不重传。PSU新六版软件静图已目视确认轮廓可读，整机all六版边线与原版PNG逐字节不变；这不证明动效或原生显示。",
       "native_acceptance_pending": true,
       "requirement": "桌面可旋转缩放3D机箱加硬件；点选配件查看状态，有框或无框。 支持显卡沿实际插槽方向的有限拔出、停留查看和插回演示。 电源默认收在电源仓，可单独选择展示；如展示额定功率须区别实际功耗。 整机必须由独立三维零件组成，保留可分别选择、移动和拆装的身份；图片只用于预览。",
       "source_files": [
@@ -505,7 +528,9 @@
         "tests/test_gpu_insertion049.py",
         "tests/test_gpu_insertion_renderer049.py",
         "tests/test_gpu_insertion_ui049.py",
-        "tests/test_assembly_psu_display049.py"
+        "tests/test_assembly_psu_display049.py",
+        "tests/test_assembly_upload051.py",
+        "tests/test_assembly_ink_focus051.py"
       ]
     },
     {
@@ -513,10 +538,10 @@
       "gaps": [
         "96款／26品牌仍远非市场所有机箱；尚无已核零售机箱固件映射，未知须手选参考。",
         "门铰、支架、托架、背线空间、同壳变体与大量内部安装间隙仍需逐款核实；机箱尚未迁移为运行时可选数据包。",
-        "仅North XL本轮补固定托盘；其他普通塔式机箱的托盘、开口及背线间隙仍需逐型号核实。"
+        "North XL保留0.49托盘，Helios在0.51有独立托盘专项；其他普通塔式机箱的托盘、开口及背线间隙仍需逐型号核实。"
       ],
       "id": "case_library",
-      "implementation": "已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。 0.49只为North XL补固定主板托盘和原厂可见开口参考，分段实体进入走线避让，不随主板或线缆动态挖孔。",
+      "implementation": "已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。 0.49只为North XL补固定主板托盘和原厂可见开口参考，分段实体进入走线避让，不随主板或线缆动态挖孔。 0.51 Helios阶段修正60／90度stack参考与独立固定托盘（早期180三角形，最终524三角形／37,728B／17个碰撞分段），现有9项专项通过。Helios前置LFIII导向的过度对称问题已阶段修正，原嘴／轴／lead不移，最终来源围栏、媒体和实物装配仍待验。",
       "native_acceptance_pending": false,
       "requirement": "机箱要多、各品牌系列结构像实物，支持风格切换并自动匹配。",
       "source_files": [
@@ -524,7 +549,8 @@
         "assembly_case_exteriors.py",
         "assembly_geometry.py",
         "assembly_config.py",
-        "assembly_north_tray049.py"
+        "assembly_north_tray049.py",
+        "assembly_case_layout051.py"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -532,7 +558,8 @@
         "tests/test_chassis_catalog.py",
         "tests/test_assembly_case_detail.py",
         "tests/test_assembly_geometry.py",
-        "tests/test_north_tray049.py"
+        "tests/test_north_tray049.py",
+        "tests/test_assembly_layout051.py"
       ]
     },
     {
@@ -632,10 +659,12 @@
         "只允许已支持型号／结构；端口位置仍参考，未实现任意连接图、inline硬管转角或全实物干涉／公差求解。",
         "HAF700EVO与5000D的指定参考配置可生成3条路线；O11／Y70空间不足仍review，不代表各机箱／全硬件组合都通过。",
         "风扇采用保守参考包络；没有完整制造孔位、公差或任意管线净空保证。GPU冷头仅独立检视，不能当成完整装机水路。",
-        "明确参考装机与全部现实组合不同；当前预设、安装孔位、遮挡和逐条线缆仍按各自证据核对，不能只看一张整机图就判全完成。"
+        "明确参考装机与全部现实组合不同；当前预设、安装孔位、遮挡和逐条线缆仍按各自证据核对，不能只看一张整机图就判全完成。",
+        "0.51 Helios前置360＋顶部2扇／后部1扇参考已有阶段检查：12条已知线路无route_failed，仍保留2项header_capacity_unverified；顶部3扇有实际I/O干涉，不隐瞒或算作通过。最终场景／实物验收仍待完成。",
+        "North最终参考的0省略只对应已收录9条线，前置I/O锚点为0、尚未收录，不是全部I/O已接齐；Helios保留2项原前置I/O容量未知。两套实际场景分别核对，不相互替代。"
       ],
       "id": "free_mixed_assembly",
-      "implementation": "保留型号选择与逐件风格；新独立水路区分冷头／泵／泵盖／水箱／泵箱、逐口接头与管材。当前固定3／4节点循环，有限静态避障与未知／不支持提示，不强缩硬件。 后排参考姿态和已选实体空间检查补强；空气/一体水冷也先生成一次电源/存储/扩展实体供风扇避让，冲突整组提示，不裁部件或静默少装。 0.48显式参考按钮补齐CPU、GPU、主板、两条匹配RAM、电源、SSD、线缆与冷却；未知本机内存仍不自动伪装有条。水冷软管端部连接按实际生成网格修正。 0.49修正North托盘与有界供电参考路径，将真实软管中心线/半径加入线束避让；Astral未核电源口按侧照纠正到PCB附近，数值仍是照片参考。",
+      "implementation": "保留型号选择与逐件风格；新独立水路区分冷头／泵／泵盖／水箱／泵箱、逐口接头与管材。当前固定3／4节点循环，有限静态避障与未知／不支持提示，不强缩硬件。 后排参考姿态和已选实体空间检查补强；空气/一体水冷也先生成一次电源/存储/扩展实体供风扇避让，冲突整组提示，不裁部件或静默少装。 0.48显式参考按钮补齐CPU、GPU、主板、两条匹配RAM、电源、SSD、线缆与冷却；未知本机内存仍不自动伪装有条。水冷软管端部连接按实际生成网格修正。 0.49修正North托盘与有界供电参考路径，将真实软管中心线/半径加入线束避让；Astral未核电源口按侧照纠正到PCB附近，数值仍是照片参考。 0.51 LFIII新增原厂单PWM参考控制束：冷头7接点连接器至4pin CPU_FAN，插针角色／来源已核才连接，缺失不替换成CPU_OPT／AIO_PUMP／SYS_FAN；机箱扇只选CHA角色，Noctua散热器保CPU_FAN＋CPU_OPT。安装模式和测速绑定仍未知，不新增硬件调速或采样。布局／布线最终定向12模块124项、0跳过通过，North9条已收录参考线无省略（前置I/O锚点0、尚未收录）；Helios前置12线仅余2条原有前置I/O容量未知。",
       "native_acceptance_pending": false,
       "requirement": "全部配件可自由换型号并混搭所有风格装入同机箱。",
       "source_files": [
@@ -670,7 +699,8 @@
         "tests/test_case_fan_envelope047.py",
         "tests/test_aio_connections048.py",
         "tests/test_case_fan_cable_routing048.py",
-        "tests/test_north_tray049.py"
+        "tests/test_north_tray049.py",
+        "tests/test_aio_control_wiring051.py"
       ]
     },
     {
@@ -678,11 +708,13 @@
       "gaps": [
         "名义120／140／240／280／360／420／480／560不等于每品牌全尺寸或实际长度、孔距、间隙均核。",
         "孔径／螺钉／公差、内部鳍片／水道、精确口位和机械安装仍未齐；未知口不造接头或假管。",
-        "固定3／4节点不是任意连接图，inline硬管弯头未接；0.50尚未安装，不关闭原生装配交互验收。",
-        "LFIII参考的8条已知线路仅含4条主要供电和4条机箱扇线，未包含冷头一体PWM控制线；品牌专用灯控／集线器线路也未逐型号齐备。不能把水管连续当成电气接线完整。"
+        "固定3／4节点不是任意连接图，inline硬管弯头未接；0.51尚未安装，不关闭原生装配交互验收。",
+        "0.49 North旧8线记录不含LFIII控制束，属于历史；0.51已补单PWM参考控制束后North为9线、Helios为12线。当前已核8个风扇插针角色只针对ASUS ROG STRIX Z790-A GAMING WIFI D4及其手册第14页，不外推其余27板；实际安装控制模式与测速绑定仍为False。品牌专用集线器等线路仍需逐型号补核。",
+        "Helios前置LFIII旧失败候选保留；新导向已阶段通过，不代表实物安装、公差或所有姿态验收。前置360＋顶部2扇／后部1扇有12条已知线路，仍有2项header_capacity_unverified；顶部3扇有实际I/O干涉。",
+        "North最终参考的0省略只对应已收录9条线，前置I/O锚点为0、尚未收录，不是全部I/O已接齐；Helios保留2项原前置I/O容量未知。两套实际场景分别核对，不相互替代。"
       ],
       "id": "liquid_radiator_fan_split",
-      "implementation": "本体24＋可选104独立冷排保留120至560尺寸等级；主／第二排、独立前后扇、无扇／单面／夹心与AIO原厂封闭保护保留。保留既有63条手选水路部件和静态参考连接。 LFIII的VRM风扇、泵和冷排风扇按真实角色分开，AIO软管修正泵端缺段与冷排端切向；未核RPM不借用CPU_FAN。 0.49按Intel安装图纠正整泵朝向与90度肘末轴，并将整顶排刚体朝前端出管，LFIII双管按标称450mm附近共同宽弧绘制；未标的精确口位/曲率仍参考。",
+      "implementation": "本体24＋可选104独立冷排保留120至560尺寸等级；主／第二排、独立前后扇、无扇／单面／夹心与AIO原厂封闭保护保留。保留既有63条手选水路部件和静态参考连接。 LFIII的VRM风扇、泵和冷排风扇按真实角色分开，AIO软管修正泵端缺段与冷排端切向；未核RPM不借用CPU_FAN。 0.49按Intel安装图纠正整泵朝向与90度肘末轴，并将整顶排刚体朝前端出管，LFIII双管按标称450mm附近共同宽弧绘制；未标的精确口位/曲率仍参考。 0.51仅对Helios前置参考补有限非对称成对导向及微小平滑长度校正；3精度共用路线、双管各450±0.02mm，最小弯曲半径保留24mm约束，互避及最终机箱扇实体复核通过。原端点、出口轴和lead不移，North旧路径不变；不称原厂给定路线或全机箱可安装。 0.51 LFIII新增原厂单PWM参考控制束：冷头7接点连接器至4pin CPU_FAN，插针角色／来源已核才连接，缺失不替换成CPU_OPT／AIO_PUMP／SYS_FAN；机箱扇只选CHA角色，Noctua散热器保CPU_FAN＋CPU_OPT。安装模式和测速绑定仍未知，不新增硬件调速或采样。布局／布线最终定向12模块124项、0跳过通过，North9条已收录参考线无省略（前置I/O锚点0、尚未收录）；Helios前置12线仅余2条原有前置I/O容量未知。",
       "native_acceptance_pending": true,
       "requirement": "每品牌水冷；冷排与风扇可独立选择，支持无扇/单面/夹心并保持AIO原厂边界。",
       "source_files": [
@@ -711,7 +743,8 @@
         "tests/test_liquid_geometry046.py",
         "tests/test_loop_controls046.py",
         "tests/test_aio_connections048.py",
-        "tests/test_aio_hose_geometry049.py"
+        "tests/test_aio_hose_geometry049.py",
+        "tests/test_aio_control_wiring051.py"
       ]
     },
     {
@@ -744,7 +777,7 @@
       "gaps": [
         "集合、类别、品牌文件可能含同型号，不能重复安装或把分组文件数计作产品数。",
         "机箱／GPU／内存／主板／电源／存储等运行时可选包仍缺；HTML／SVG图鉴不是可导入数据包。",
-        "0.50数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
+        "0.51数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
       ],
       "id": "github_optional_packs",
       "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。",
@@ -779,13 +812,13 @@
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
         "不能撤销MIT/ISC/LGPL等已有许可，也不能靠水印阻止复制；厂商商标、照片等权利未因此授予。",
-        "本轮只覆盖指定参考GLB和五项PNG/GIF；最终上传/安装结果以候选最终提交说明为准。GLB原版四CPU视图已有对照，但不是零像素差异或六版原生验收。SVG/JSON扩展包与实时生成全库暂未覆盖。",
+        "0.50来源标记只覆盖指定参考GLB和五项PNG/GIF；最终上传/安装结果以候选最终提交说明为准。GLB原版四CPU视图已有对照，但不是零像素差异或六版原生验收。SVG/JSON扩展包与实时生成全库暂未覆盖。",
         "JPEG、有损重编码、调色板重新量化、几何重建/量化/单位重写或烘焙等不保证保留标记；21源父组支持（18非空part_id和3组件回退组）不等于每个小Mesh或任意片段都可独立提取。",
         "正式权利人密钥尚未备份或做恢复演练；已有备份验证仅用合成测试密钥。",
         "标记与签名仅辅助来源核对；本地哈希或时间不能自动证明创作归属、侵权、司法采纳或胜诉。第三方provenance不得标成自己的水印。"
       ],
       "id": "copyright_noncommercial",
-      "implementation": "原PolyForm非商用全文与第三方/既有授权例外保留；转载Required Notice含作者和仓库来源。本地正式密钥已签发1GLB/3PNG/2GIF，六件验签、精确SHA和提取匹配且0误码；未标记原件与错误秘密均阴性。受测元数据改动仍可识别，但修改件不冒称原签名文件。050签发候选、固定数据入口及最终r2相关验证已完成，最终发布结果见候选最终提交说明；049原件未追称有本次水印。",
+      "implementation": "原PolyForm非商用全文与第三方/既有授权例外保留；转载Required Notice含作者和仓库来源。0.50正式密钥已签发1GLB/3PNG/2GIF，六件验签、精确SHA和提取匹配且0误码；未标记原件与错误秘密均阴性。受测元数据改动仍可识别，但修改件不冒称原签名文件。050签发候选、固定数据入口及最终r2相关验证已完成，最终发布结果见候选最终提交说明；049原件未追称有本次水印。",
       "native_acceptance_pending": false,
       "requirement": "上传GitHub并标版权，原创作品禁止商业使用盈利，保留应有第三方例外。转载保留作者、项目来源与许可；为原创作品加入肉眼难察且可提取的隐形来源水印，以辅助维权。",
       "source_files": [
@@ -816,10 +849,10 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.50标记发行与候选包状态仍待实际记录；未安装，也未做CPU温度、磨砂、游戏隐藏或整款资源的原生验收，不能拿旧结果替代。"
+        "0.51受影响软件回归已通过；候选包隔离检查、独立资产真实签发／CQA和有效远端入口仍待实际记录。未安装，CPU温度、磨砂、游戏隐藏和整款资源原生验收仍未完成。"
       ],
       "id": "github_publish_merge_install",
-      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。",
+      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。",
       "native_acceptance_pending": true,
       "requirement": "合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。",
       "source_files": [
@@ -869,7 +902,7 @@
         "核对完成不代表全部产品功能交付；任何未完成类别、型号、实时来源与实测项继续保留。"
       ],
       "id": "readme_full_requirements_ledger",
-      "implementation": "保留29组原ID及历史记录，显卡插拔和真实3D体积仍在对应组；0.50将转载来源、非商用与真正隐形标记要求加入原版权组，并列明未覆盖资产和待核结果。不用文档、签名或测试通过代替观感、全部硬件细节或新版原生验收。",
+      "implementation": "保留29组原ID及历史记录，显卡插拔和真实3D体积仍在对应组；0.50将转载来源、非商用与真正隐形标记要求加入原版权组，并列明未覆盖资产和待核结果。不用文档、签名或测试通过代替观感、全部硬件细节或新版原生验收。 0.51继续在同一29组逐项更新既有缺陷、性能范围与未完成项；首轮99模块1253项、1原有跳过，1旧整行哈希夹具失败已保留；另在读审后实修查询失败消费端，源码返修及PSU墨线切焦补测后，最终r2实际100模块1261项、1原有权限跳过，其余通过，无失败／超时；583代码文件前后SHA稳定，1116.109秒。专项124项不与主回归累计；数据签发、候选包及原生分别验收。",
       "native_acceptance_pending": false,
       "requirement": "全文所有重点写入README；全部完成后逐一核对并汇报问题和缺项。",
       "source_files": [
@@ -888,9 +921,9 @@
     "Keep current Stats session running while user is gaming",
     "No visible windows, native GL, UAC, installation or restart during gaming"
   ],
-  "reviewed": "2026-11-08",
+  "reviewed": "2026-11-09",
   "schema_version": 1,
-  "target_version": "0.50.0-preview.1",
+  "target_version": "0.51.0-preview.1",
   "native_045_accepted": false,
   "style_policy": {
     "showcase": [
@@ -1613,5 +1646,404 @@
       "scope": "final r2 related modules, not two rounds summed or installed/native acceptance"
     },
     "runtime_new_offline_direct_imports": 0
+  },
+  "native_051_accepted": false,
+  "coverage_051": {
+    "base_products": 514,
+    "reference_combinations": 1,
+    "optional_cpu_products": 72,
+    "optional_cooling_products": 167,
+    "optional_products": 314,
+    "total_products": 828,
+    "optional_cooling_by_kind": {
+      "radiator": 104,
+      "fan": 40,
+      "cooler": 23
+    },
+    "new_motherboards": 0,
+    "motherboard_products": 28,
+    "cooling_package_artifacts": 32,
+    "cooling_collection_packages": 3,
+    "cooling_brand_category_packages": 29,
+    "package_grouping": "三类集合包与29个按品牌、类别划分的小包是可重叠的替代分组；重叠型号不可同时安装，不重复计产品。",
+    "installed_by_default": false,
+    "market_exhaustive": false,
+    "optional_loop_products": 75,
+    "optional_loop_by_kind": {
+      "cpu_block": 10,
+      "fitting": 20,
+      "pump": 8,
+      "pump_reservoir": 10,
+      "reservoir": 4,
+      "tubing": 11,
+      "gpu_block": 12
+    },
+    "loop_package_artifacts": 19,
+    "loop_collection_packages": 2,
+    "loop_category_packages": 6,
+    "loop_brand_packages": 11,
+    "optional_gpu_block_products": 12,
+    "gpu_block_package_artifacts": 4,
+    "new_motherboard_finishes": 0,
+    "gpu_block_stage": "standalone_reference_only",
+    "gpu_block_installation_supported": false,
+    "gpu_block_loop_connection_supported": false,
+    "new_products": 0
+  },
+  "size_coverage_051": {
+    "radiator_nominal_counts": {
+      "120": 18,
+      "140": 9,
+      "240": 25,
+      "280": 14,
+      "360": 28,
+      "420": 13,
+      "480": 16,
+      "560": 5
+    },
+    "aio_nominal_counts": {
+      "120": 2,
+      "140": 1,
+      "240": 7,
+      "280": 4,
+      "360": 19,
+      "420": 2
+    },
+    "board_form_counts": {
+      "atx": 10,
+      "eatx": 3,
+      "itx": 6,
+      "matx": 9
+    }
+  },
+  "open_detail_counts_051": {
+    "new_fan_leaf_evidence_pending": 11,
+    "gpu_leaf_profiles_pending": 20,
+    "motherboard_finish_pending": 0,
+    "unplaced_onboard_heatsink_fans": 1,
+    "note": "0.51修复既有模型、布局、CPU温度与材料恢复，0新增型号；GPU20整卡叶型待核仍保留，新核5070仅中扇partial，不计为完整整卡叶型补核。六版不增不改；0.47六板finish仍不是CAD。",
+    "new_motherboard_finishes_completed": 0,
+    "onboard_heatsink_reference_wells_or_grilles": 2,
+    "onboard_heatsink_blade_direction_rpm_unknown": 2,
+    "gpu_new_fully_verified_leaf_profiles": 0
+  },
+  "recovery_validation_051": {
+    "cpu_temperature": {
+      "modules": 4,
+      "tests": 111,
+      "skipped": 0,
+      "passed": true,
+      "native": false
+    },
+    "material": {
+      "modules": 9,
+      "tests": 234,
+      "skipped": 0,
+      "passed": true,
+      "native": false,
+      "includes_synchronous_non_frame_dpi": true
+    },
+    "cpu_model_warmth": {
+      "tests": 2,
+      "stage_passed": true,
+      "initial_fixture_failures_preserved": true,
+      "native": false
+    },
+    "final_affected_regression": {
+      "planned_modules": 100,
+      "started": true,
+      "passed": true,
+      "tests": 1261,
+      "count_provisional": false,
+      "phase": "phase1_software_regression_passed_data_publication_pending",
+      "planned_code_files": 583,
+      "completed": true,
+      "modules": 100,
+      "skipped": 1,
+      "skip_reason": "Existing Windows symlink creation permission",
+      "failures": 0,
+      "timeouts": 0,
+      "elapsed_seconds": 1116.109,
+      "code_files": 583,
+      "source_stable": true,
+      "changed_code_paths": [],
+      "report_sha256": "e07d6771d9019bb97c63cd2572adec63ba06add49c2508614f055b72f021929b",
+      "native_acceptance": false,
+      "all_repository_modules_rerun": false,
+      "raw_legacy049_limits_are_current_acceptance": false
+    },
+    "installed": false,
+    "visibility_query": {
+      "modules": 7,
+      "tests": 256,
+      "skipped": 0,
+      "passed": true,
+      "native": false,
+      "new_tests": 12,
+      "depends_on_cpu_temperature_launcher": false,
+      "retry_delays_seconds": [
+        2,
+        4,
+        8,
+        16,
+        30
+      ],
+      "uses_existing_data_changed": true,
+      "new_timer": false,
+      "healthy_periodic_native_queries": false,
+      "hook_installation_retried": false,
+      "tracked_games_cleared": false,
+      "current_query_failure_hides_all_current_targets": true,
+      "healthy_read_required_for_visibility_restore": true,
+      "prior_retry_only_stage": {
+        "modules": 6,
+        "tests": 233,
+        "new_tests": 8
+      }
+    },
+    "cpu_scene_retirement": {
+      "stage_passed": true,
+      "modules": 4,
+      "tests": 36,
+      "upload_test_module_tests": 5,
+      "owner_wrapper_retained": true,
+      "old_scene_and_mesh_weakrefs_released": true,
+      "idempotent": true,
+      "without_current_gl_context": true,
+      "native_gl_release_measured": false,
+      "whole_process_rss_measured": false,
+      "driver_gpu_memory_measured": false
+    },
+    "first_affected_regression": {
+      "modules": 99,
+      "tests": 1253,
+      "skipped": 1,
+      "failures": 1,
+      "passed": false,
+      "failure_scope": "Old whole-row hash fixture, exact bridge in progress; first report retained",
+      "post_run_real_production_correction": "Current query failure must hide all targets even after last safe desktop",
+      "counts_are_not_final_r2": true
+    }
+  },
+  "scoped_performance_051": {
+    "scope": "Old049 immutable363mesh/107662tri f32 input, offline pack/bounds kernels; excludes shared input and is not current051 geometry, native upload, total drawcalls, FPS, whole-process RSS or GPU memory",
+    "old_pack_peak_python_bytes": 46510210,
+    "new_pack_peak_python_bytes": 15570620,
+    "pack_median_cpu_reduction_percent": 73.41772151898735,
+    "old_bounds_peak_python_bytes": 807016,
+    "new_bounds_peak_python_bytes": 839304,
+    "bounds_peak_delta_bytes": 32288,
+    "bounds_median_cpu_reduction_percent": 78.04878048780488,
+    "whole_application_memory_measured": false,
+    "native_application_acceptance": false,
+    "benchmark_function_bodies_unchanged_after_lifecycle_fix": true,
+    "benchmark_report_module_sha_is_previous_stage": false,
+    "benchmark_is_current_whole_module_measurement": false,
+    "close_weakref_scope_is_process_memory_measurement": false,
+    "old_pack_median_cpu_seconds": 0.0771484375,
+    "new_pack_median_cpu_seconds": 0.0205078125,
+    "old_bounds_median_cpu_seconds": 0.080078125,
+    "new_bounds_median_cpu_seconds": 0.017578125,
+    "report_phase": "final-r3 on final583-source fence, old363mesh immutable input",
+    "report_sha256": "e09b5b703eb3a5c4afcaa44c5120f9170a9f229cf2d737ac5d440c529d3e1248",
+    "source_sha256": {
+      "assembly_viewer.py": "106d281d07b857dcedb9f200732b5cffada018403db21f1c596a3b66f0a20e0c",
+      "assembly_geometry.py": "314fda04fb608788a38f44f62e6d50ed665824d7d8ad0b54abf8217cc4e72219",
+      "tests/test_assembly_upload051.py": "328e4cb297e94f673371a1b2daf6382a5100d62c7a9f0592bc9d4a30bcd8402f"
+    },
+    "source_matches_final583_code_fence": true,
+    "history_r2_bounds_cpu_reduction_percent": 79.26829268292683
+  },
+  "gpu_geometry_051": {
+    "stage": "Final targeted45 passed; r4 media partial review/data entry pending",
+    "sku_count": 121,
+    "front_rotors": 314,
+    "new_products": 0,
+    "new_physical_meshes": 0,
+    "eco_triangle_delta": 0,
+    "balanced_max_triangle_delta_per_sku": 1890,
+    "balanced_max_vertex_byte_delta_per_sku": 136080,
+    "close_max_triangle_delta_per_sku": 2520,
+    "close_max_vertex_byte_delta_per_sku": 181440,
+    "whole_card_leaf_profiles_pending": 20,
+    "new_middle_fan_partial_only": true,
+    "all_market_complete": false,
+    "panel_lod_scenes": 441,
+    "panel_interior_point_samples": 185220,
+    "sampled_overlaps": 0,
+    "omitted_pieces": 0,
+    "scene_warnings": 0,
+    "sample_is_full_space_guarantee": false,
+    "panel_audit_source_stable": true,
+    "targeted_tests": 45,
+    "targeted_skipped": 0,
+    "targeted_passed": true,
+    "owned_source_files_frozen": 13,
+    "fan_normal_bridge": {
+      "actual_fan_lod_rows": 942,
+      "xyz_f32_equal": true,
+      "triangle_counts_equal": true,
+      "change": "normal orientation only",
+      "old_stage_evidence_is_current_full_source_rerun": false
+    }
+  },
+  "reference_layout_051": {
+    "stage": "B final targeted124 passed; final99 regression running, fresh media/GLB/data publication/native pending",
+    "targeted_tests": 124,
+    "targeted_wall_seconds": 234.799,
+    "lods": 3,
+    "front_radiator_nominal_mm": 360,
+    "top_case_fans": 2,
+    "rear_case_fans": 1,
+    "known_cable_routes": 12,
+    "route_failed": 0,
+    "header_capacity_unverified": 2,
+    "top3_has_actual_io_interference": true,
+    "nominal_hose_length_mm": 450,
+    "hose_length_tolerance_mm": 0.02,
+    "minimum_bend_radius_mm": 24,
+    "mouth_axes_leads_unchanged": true,
+    "north_path_unchanged": true,
+    "factory_route_verified": false,
+    "native_acceptance": false,
+    "known_cable_roles": {
+      "atx24": 1,
+      "eps8": 2,
+      "gpu16": 1,
+      "casefan4": 3,
+      "front_io": 4,
+      "aio_control_reference": 1
+    },
+    "lfiii_control_harness_built": true,
+    "lfiii_cpu_fan_reference_connection_built": true,
+    "north_known_routes": 9,
+    "north_omitted_routes": 0,
+    "installed_control_mode_verified": false,
+    "telemetry_bound": false,
+    "header_source_scope": {
+      "board": "asus-rog-strix-z790-a-wifi-d4",
+      "fan_headers": 8,
+      "manual_page": 14,
+      "other_boards_covered": 0
+    },
+    "final_targeted_modules": 12,
+    "final_targeted_tests": 124,
+    "final_targeted_skipped": 0,
+    "final_targeted_wall_seconds": 234.799,
+    "helios_final_tray_triangles": 524,
+    "helios_final_tray_vertex_bytes": 37728,
+    "helios_final_tray_obstacle_cells": 17,
+    "lfiii_control_attachment_batches": 4,
+    "lfiii_control_attachment_triangles": 492,
+    "lfiii_control_attachment_vertex_bytes": 35424,
+    "north_front_io_anchors": 0,
+    "north_front_io_complete": false,
+    "reference_snapshots": {
+      "north_asus_dual4060": {
+        "meshes": 355,
+        "triangles": 104705,
+        "known_routes": 9,
+        "omitted": 0,
+        "front_io_anchors": 0
+      },
+      "helios_front360_astral": {
+        "meshes": 398,
+        "triangles": 112850,
+        "known_routes": 12,
+        "header_capacity_unverified": 2,
+        "route_failed": 0,
+        "external_route": 0
+      }
+    },
+    "snapshot_difference_is_attributed_same_input_delta": false,
+    "early_hose_guide_stage": {
+      "tests": 9,
+      "wall_seconds": 9.175,
+      "scope": "early9-test hose-guide stage; retained separately from final124"
+    },
+    "targeted_modules": 12,
+    "targeted_skipped": 0,
+    "known_reference_lfiii_single_pwm_connected": true,
+    "real_device_cooling_control_complete": false
+  },
+  "gpu_material_layers_051": {
+    "stage": "Final color/cap edge targeted stage passed; r4 media limited review/data entry pending",
+    "targeted_tests": 18,
+    "new_tests": 4,
+    "existing_mixed_style_tests": 8,
+    "source_style_sha256": "96b3e0e6ae95aa43ea311a4fb4641d2bf36d21762d557da9cb7c1d388ecaa83d",
+    "affected": "Known GPU rotor palette contrast plus exact coplanar cap-partition ink cleanup; preserve real aperture rims/recess perimeter/thickness edges; no physical geometry/timer/shading change",
+    "old_low_contrast_media_accepted": false,
+    "final_media_accepted": false,
+    "native_acceptance": false,
+    "renderer_tests": 6,
+    "r4_asus_dual_visual_reviewed": true,
+    "source_style_sha_scope": "GPU material/cap stage before independent focused-ink API; not the current whole assembly_style module SHA"
+  },
+  "artwork_distribution_051": {
+    "index_file": "docs/ARTWORK051_INDEX.json",
+    "stage": "placeholder_awaiting_signed_optional_data_publication",
+    "published": false,
+    "loaded_at_app_startup": false,
+    "asset_count": 0,
+    "native_acceptance": false,
+    "phase": "phase1_regression_frozen_awaiting_real_signing_and_independent_CQA",
+    "planned_asset_count": 10,
+    "actual_signed_assets": 0,
+    "independent_CQA_completed": false
+  },
+  "ink_focus_051": {
+    "stage": "Targeted tests and six-style PSU software static readability accepted; final100 regression/native pending",
+    "source_apis": [
+      "edge_batches focus optional default all",
+      "Renderer upload ink_focus",
+      "Viewport explicit-focus ink upload"
+    ],
+    "default_all_unchanged": true,
+    "scene_edge_cap": 8192,
+    "mesh_edge_caps_raised": false,
+    "per_frame_rebuild_added": false,
+    "all_focus_changes_claimed_zero_upload": false,
+    "native_acceptance": false,
+    "new_targeted_tests": 4,
+    "existing_upload_tests": 5,
+    "skipped": 0,
+    "combined_vbo": true,
+    "physical_prefix_byte_equal": true,
+    "physical_prefix_resubmitted_on_focus_change": true,
+    "ink_bytes_only_upload": false,
+    "same_focus_reuploads": false,
+    "original_without_ink_reuploads": false,
+    "camera_or_animation_tick_reuploads": false,
+    "new_cache_or_separate_buffer": false,
+    "software_visual_accepted": true,
+    "software_visual_asset_sha256": "93c9dffe655d688a60dd0a89cad373540c39f168127e0cb1c1061e8fc8f815f3",
+    "same_f64_physical_prefix_colors_pose_rotor_camera": true,
+    "whole_scene_all_six_ink_bytes_equal": true,
+    "original_png_bytes_equal": true,
+    "max_psu_focused_segments": 6906,
+    "grille_segments": 3014,
+    "rear_segments": 1394,
+    "max_ordinary_segments": 504,
+    "focused_static_line_bytes_before": 20064,
+    "focused_static_line_bytes_after": 331488,
+    "static_images_prove_motion": false,
+    "whole_app_memory_measured": false
+  },
+  "scoped_performance_051_r2_history": {
+    "scope": "Old049 immutable363mesh/107662tri f32 input, offline pack/bounds kernels; excludes shared input and is not current051 geometry, native upload, total drawcalls, FPS, whole-process RSS or GPU memory",
+    "old_pack_peak_python_bytes": 46510210,
+    "new_pack_peak_python_bytes": 15570620,
+    "pack_median_cpu_reduction_percent": 73.41772151898735,
+    "old_bounds_peak_python_bytes": 807016,
+    "new_bounds_peak_python_bytes": 839304,
+    "bounds_peak_delta_bytes": 32288,
+    "bounds_median_cpu_reduction_percent": 79.26829268292683,
+    "whole_application_memory_measured": false,
+    "native_application_acceptance": false,
+    "benchmark_function_bodies_unchanged_after_lifecycle_fix": true,
+    "benchmark_report_module_sha_is_previous_stage": true,
+    "benchmark_is_current_whole_module_measurement": false,
+    "close_weakref_scope_is_process_memory_measurement": false
   }
 }
