@@ -1,8 +1,8 @@
 {
   "format": 1,
   "kind": "reviewed-current-source",
-  "version": "0.45.0-preview.1",
-  "archive_root": "DesktopStats-0.45.0-preview.1-source/",
+  "version": "0.46.0-preview.1",
+  "archive_root": "DesktopStats-0.46.0-preview.1-source/",
   "binaries_included": false,
   "binary_policy": "No executable/object/install binaries; reviewed original image/video and validated data-only model packs retained.",
   "dependency_preparation_required": true,
@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 67375,
-      "sha256": "2d4b9897fce2b8cf6e4e72dc67b2ac7762c68725c4fbcb3821cdefd9ef637b74"
+      "bytes": 70162,
+      "sha256": "5e6c13ba692da175a564aef34096338c07d0dc964ee6f1d91a3d90fc4c691b99"
     },
     {
       "path": "HARDWARE-APPEARANCE.md",
@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 59795,
-      "sha256": "0cb51dc6a678fd60b51f0f13816d44fdec83e76b1138047e45b8020a5ac1849d"
+      "bytes": 64113,
+      "sha256": "9db01df691829d73cde30ff7df8ef93683b741697348abe06ce0c78e74645912"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -64,8 +64,8 @@
     },
     {
       "path": "accessory_art.py",
-      "bytes": 62727,
-      "sha256": "73729dc1c6cb74544669d9fdbfd41324944714a3501ca246af8c9fe78fa3464a"
+      "bytes": 63463,
+      "sha256": "5d28b9c4848b5e6724f8e5ceb66fea3c1092eaed303407550e382fcd99cdee11"
     },
     {
       "path": "accessory_case_details040.py",
@@ -109,8 +109,8 @@
     },
     {
       "path": "assembly_auxiliary.py",
-      "bytes": 77323,
-      "sha256": "5fcbfd4303195bbbaa0369c6276ef61e1ac45aaec03229e519fcd431a3d3e3b0"
+      "bytes": 78515,
+      "sha256": "54926901a1c0be08095c08c7ae1a4f2ce0ade7dd29e0b2a8cb0fdc428c5c0768"
     },
     {
       "path": "assembly_case_detail.py",
@@ -129,13 +129,13 @@
     },
     {
       "path": "assembly_config.py",
-      "bytes": 8354,
-      "sha256": "28146d2cdd6a0cbe1d8a290817bc84ed9f82a293b81fea6ce7d4e327b20cad09"
+      "bytes": 9590,
+      "sha256": "15e6051ea78c3da6b9c68ee64f4d23a31323a6450c6a82ea8573cc690fb95753"
     },
     {
       "path": "assembly_cooling.py",
-      "bytes": 72083,
-      "sha256": "f12397d39ae828911b1853d162d09ca2be528c0af09e30015ea24c1664bbbffd"
+      "bytes": 73572,
+      "sha256": "f49c4b9c851e3cc7fb745dfb8f5dfedf026af99cde94fdee2d610a2125a591ad"
     },
     {
       "path": "assembly_cpu.py",
@@ -149,8 +149,8 @@
     },
     {
       "path": "assembly_detail.py",
-      "bytes": 39277,
-      "sha256": "3a51c619e51bf32e01ba9e5f06493ac9232771ed5303aa65a2b60e6ab1b52920"
+      "bytes": 42004,
+      "sha256": "623eebfd536ae675580c6df11b44a3ba070aaf9535926d33715237d5f0d4cc8f"
     },
     {
       "path": "assembly_effects.py",
@@ -164,33 +164,38 @@
     },
     {
       "path": "assembly_geometry.py",
-      "bytes": 54826,
-      "sha256": "e6b592dd062a818d0b5839171b05a90957276bbd70152959880337c9be2b83c3"
+      "bytes": 55910,
+      "sha256": "d50d9f887b5b885c91198d0e774057be7b4229c0a6cccea6109bd764d71b2303"
     },
     {
       "path": "assembly_inspection.py",
-      "bytes": 18961,
-      "sha256": "f59cc08e58cf7a3149c8b8026678ef2fc67f985721c839d251ca76abf243d045"
+      "bytes": 19628,
+      "sha256": "49cbb3e44edda9892bf9c50bd794a969a4e72d3667b0701be1fd3cebf73a72ee"
     },
     {
       "path": "assembly_lighting.py",
-      "bytes": 2212,
-      "sha256": "fec5ba93eb0fc3d8826ae5a1fc29a138b3d322f073ebf17c92f2d2c2b784f7c1"
+      "bytes": 2660,
+      "sha256": "357b8a8fb4d5ab519af1f73d12b3313babe9df6f726d881170f51314e5fcece4"
+    },
+    {
+      "path": "assembly_loop046.py",
+      "bytes": 14703,
+      "sha256": "353d9cf2d55d2540ccf56f61566d20e6daad24fc7153021bf9a46cbf8386bc58"
     },
     {
       "path": "assembly_motherboard.py",
-      "bytes": 41885,
-      "sha256": "9772cd7cca9b4440aa5792ba22b755653df97a6fcd4fe64074c3398241cdb558"
+      "bytes": 44929,
+      "sha256": "f32b4cc1a000ae9148a8035879361915e1c9980e6c5a2fa89e47e8ac38666575"
     },
     {
       "path": "assembly_parts.py",
-      "bytes": 9574,
-      "sha256": "6299fb5f5f4550d2916a8871af2257193fccfa466a018d0cd32a3f62ef9c3d47"
+      "bytes": 10860,
+      "sha256": "5f2a34f5be0e67c1886d426a9b939a162c76df5e928ab32ecce781296c7ca9b6"
     },
     {
       "path": "assembly_profiles.py",
-      "bytes": 7242,
-      "sha256": "c9438b86ed5baa5fa9472800739ad4ea52da4c1d38cb995f1dab33481fb1d414"
+      "bytes": 10144,
+      "sha256": "28dca97a13eb9c2385818f5d0b4bfb6741be8063dad57e1fff4edfe22ad11a81"
     },
     {
       "path": "assembly_radiator044.py",
@@ -209,18 +214,18 @@
     },
     {
       "path": "assembly_style.py",
-      "bytes": 22142,
-      "sha256": "b87157ba5fe59e0d63884a0dcc235ec569b360a5a2252048ddcb3cab53a62903"
+      "bytes": 32448,
+      "sha256": "e16dd7712ecfdef0475fe5c1e0df3f9538ceb9adfb86d51c36b112126ec2172c"
     },
     {
       "path": "assembly_tools.py",
-      "bytes": 11115,
-      "sha256": "7bf56a55733c0659abdffe1d7d357de38882cda44a0f9753cd1108ea25476f38"
+      "bytes": 12817,
+      "sha256": "ece4894d1f1dc3998649255855287811ec0ae2ede7aef40e7390720862bb35ed"
     },
     {
       "path": "assembly_viewer.py",
-      "bytes": 45034,
-      "sha256": "e7000f77fa1efcfa88bbe8718b8810ddca9b7055b7347a9b76715c008a06da6f"
+      "bytes": 45750,
+      "sha256": "3cb35852829908a26f553359dadf09f62dfebdadbd6d08938c6e6ff619787832"
     },
     {
       "path": "assembly_window.py",
@@ -628,6 +633,21 @@
       "sha256": "3947bf4f1d12f496bd8946260c0ada48630f5492a72f8f5f277d2139a05a06a2"
     },
     {
+      "path": "assets/showcase/assembly-loop-six046.gif",
+      "bytes": 1063785,
+      "sha256": "6fd2f4c95e6994093e69afbead2cac71fb9ed26c3b2f7842e5ef728dc1f0e9cd"
+    },
+    {
+      "path": "assets/showcase/assembly-loop-six046.mp4",
+      "bytes": 340091,
+      "sha256": "08b6ce98f36c188cde4fd01a3b02e35755c76488c30b6f9e1efd864411b1d13c"
+    },
+    {
+      "path": "assets/showcase/assembly-loop-six046.png",
+      "bytes": 934555,
+      "sha256": "71dff01eba52b2609d14ab8a598a5826ff470ca5024454cd3a00724af893eed0"
+    },
+    {
       "path": "assets/showcase/assembly-parts-styles.png",
       "bytes": 387390,
       "sha256": "59d5be679924cf187fd9222512cc199a41168f7df1b57227596606b74af0aa0c"
@@ -731,6 +751,11 @@
       "path": "assets/showcase/cpu-details.png",
       "bytes": 47876,
       "sha256": "a204ca3a42a12a1aa2cb7cec25c81bee2dbb1b1685464526da34f960fe27e960"
+    },
+    {
+      "path": "assets/showcase/cpu-gpu-six046-static.png",
+      "bytes": 344255,
+      "sha256": "3b7c0594073d65c56e2921540e815e2c442dc0950b686df69b6573fa1f523be0"
     },
     {
       "path": "assets/showcase/cpu-packages.png",
@@ -838,9 +863,89 @@
       "sha256": "7108144899cfb6f1396d6ff41d3746edc4be3c0cd9c594a3341816dd37a881b3"
     },
     {
+      "path": "assets/showcase/loop-block-six046-1.png",
+      "bytes": 708942,
+      "sha256": "19380bc85c83c195c31f7a5e0dca9a8a641877a754173a79e759097b81c5fc2d"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-2.png",
+      "bytes": 698238,
+      "sha256": "7913c84f07d74a246a17b961a0e473368baacbda537ed98040994eabd4a87387"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-3.png",
+      "bytes": 565343,
+      "sha256": "491771a5b2a171a535f814b6996ca52b5ba321fb10424a3c797947561ba604c8"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-4.png",
+      "bytes": 532369,
+      "sha256": "0bcdb1c68de8c827890014bb93e491807ff496c14f3aedb741c5b170c7da0e33"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-5.png",
+      "bytes": 696218,
+      "sha256": "e87a69db57694fb663193035c36289abfa52377d60edb5804c54d018eda270be"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-6.png",
+      "bytes": 564146,
+      "sha256": "37bb2da5031be1b7f3a7c669d6de653749ee5589bb90f8cb206a56c004aa649b"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-7.png",
+      "bytes": 756622,
+      "sha256": "2e29172fa97231286e933f49965573b2888a4c04f02fb423a44796e44a7b83e0"
+    },
+    {
+      "path": "assets/showcase/loop-block-six046-8.png",
+      "bytes": 741254,
+      "sha256": "862b79751863ec88c8cd923018a9e991f5de7f042cc2e325b9343eade9b8e072"
+    },
+    {
+      "path": "assets/showcase/loop-blocks-atlas046-1.png",
+      "bytes": 267886,
+      "sha256": "23674bb0f0c88b503842825ff96e4a04e13617e7af53ed56c7be076aacef594c"
+    },
+    {
+      "path": "assets/showcase/loop-blocks-atlas046-2.png",
+      "bytes": 227178,
+      "sha256": "abd7180bfc77f6539306038f68bde38210d76853b2769333f7ac50abff546760"
+    },
+    {
+      "path": "assets/showcase/loop-blocks-atlas046-3.png",
+      "bytes": 227041,
+      "sha256": "a3beb5cdc9fe38efd833c873798f7198eb0f707a957b69c6c33a7921bfa39bd9"
+    },
+    {
+      "path": "assets/showcase/loop-blocks-atlas046-4.png",
+      "bytes": 292595,
+      "sha256": "5b57a196d0404c46b8438cbb612cb69500c01bae6ffebf0e2f1c977fef109f20"
+    },
+    {
+      "path": "assets/showcase/loop-fitting-six046.png",
+      "bytes": 727547,
+      "sha256": "0b51f30dbb0e190d0a92299e3387237f882805a3a003dc732668a9eb6e046328"
+    },
+    {
+      "path": "assets/showcase/loop-fittings-atlas046-1.png",
+      "bytes": 446149,
+      "sha256": "cbc03677027c3eaa0786addfffe2ae832c68a9f7c87e0c5110f2f087c8c355b6"
+    },
+    {
+      "path": "assets/showcase/loop-fittings-atlas046-2.png",
+      "bytes": 424760,
+      "sha256": "9781d846b5b131ff50b5c1a0335e06509e2c34c2379d88250c807f731c778adf"
+    },
+    {
       "path": "assets/showcase/model-widgets042.png",
       "bytes": 363208,
       "sha256": "630987cef782933ec716e3d3011f635b1cd3a75e3a00dd45fcdbea4202016638"
+    },
+    {
+      "path": "assets/showcase/motherboard-details046.png",
+      "bytes": 355343,
+      "sha256": "e6821a52c536c2ff8e9e4d2270c4b8f61d3b00d523346259ccbcc439a8dde0db"
     },
     {
       "path": "assets/showcase/motherboards-original045.png",
@@ -916,6 +1021,11 @@
       "path": "assets/showcase/source-diagnostics.png",
       "bytes": 295984,
       "sha256": "91477b0ff45a3957658f94ae50bc95470260af1ba5284b719ec4a178b757e570"
+    },
+    {
+      "path": "assets/showcase/three-gpus-notebook-color046.png",
+      "bytes": 294215,
+      "sha256": "1fdae8ce61f3625c36164447cd0e02ab2e23d253bc8d621558f9e51ac4e1f9cb"
     },
     {
       "path": "assets/showcase/top-bar-actions.png",
@@ -1109,13 +1219,13 @@
     },
     {
       "path": "docs/ASSEMBLY_CATALOG.json",
-      "bytes": 616991,
-      "sha256": "c755a4d3bfc392efcdf91c01cc870a1f6b1c498877b865b762e8bd86dd66d0c9"
+      "bytes": 702589,
+      "sha256": "5463cd6ac04494b7bfa09897349fc430d3206d71a659ef987c71210fd9f2f916"
     },
     {
       "path": "docs/ASSEMBLY_QUALITY.md",
-      "bytes": 15177,
-      "sha256": "84febecb0ed4d432eadb843da9d7245ce13f7bbbe14942c58cff57b38f8bc373"
+      "bytes": 17413,
+      "sha256": "25d83ff8a51ed6cfc5a56d7de412dc4f1ba2207ca38b147ffdc49c4e7a2bd197"
     },
     {
       "path": "docs/COOLING_PACKS_INDEX.json",
@@ -1139,13 +1249,13 @@
     },
     {
       "path": "docs/HARDWARE_COVERAGE.md",
-      "bytes": 3802,
-      "sha256": "c634bb446ec47d22a4239927fce500b0c4ecdf114a10c798ed2412db571fa6d4"
+      "bytes": 4433,
+      "sha256": "461adcf1688c8c972faae263d8593c6ea42d14f886b47672e1aaadc6b6f0a255"
     },
     {
       "path": "docs/HARDWARE_PACKS.md",
-      "bytes": 10732,
-      "sha256": "54a30ee19195b7c723e9128b6f2c0ae66bf21f996e4a34f3ee08ae071357a498"
+      "bytes": 11290,
+      "sha256": "c5e0c25f429ba4bc692a8323343f44adfa9027be96660d186c114d2cce68917a"
     },
     {
       "path": "docs/HARDWARE_PACKS_INDEX.json",
@@ -1154,8 +1264,18 @@
     },
     {
       "path": "docs/LIQUID_COMPONENT_GAPS.md",
-      "bytes": 9187,
-      "sha256": "0d9f8931c97a4714aa2028c240a963aba7589aca05d621bfa041d9e762d7fd49"
+      "bytes": 6011,
+      "sha256": "7ffa64cbb037a4ba981f4c133c43ad6377e67d2de30950c9e8ef7d4c97205c90"
+    },
+    {
+      "path": "docs/LOOP_COMPONENTS046.md",
+      "bytes": 7039,
+      "sha256": "be49b5d953c8a56a3472b76fd48f1d4326ba51a2eb2990fc1062c6f3afae36bf"
+    },
+    {
+      "path": "docs/LOOP_PACKS_INDEX.json",
+      "bytes": 17695,
+      "sha256": "827b9261e5cd6e8c1b87f3d7420d49a61278a7cecddafbdc2f1681c82bdef534"
     },
     {
       "path": "docs/PCBS_COMPARISON.json",
@@ -1164,13 +1284,13 @@
     },
     {
       "path": "docs/PCBS_GAP_ANALYSIS.md",
-      "bytes": 25107,
-      "sha256": "6265ba451d7b7103a5cb2e354cb7b22d19853371d4572e991251e95396a4865d"
+      "bytes": 25264,
+      "sha256": "8077c2c537f9c9b79962ddde695e9f6e3d846439f2f32f6c9aa36f43a5211229"
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 44527,
-      "sha256": "654d1397ebb7f01f0318c463cbee939466f00085680de45adf9c9696031feb74"
+      "bytes": 49962,
+      "sha256": "b29e543db18f13b1059032255f512b91ab15a7f139cbdee1e1e7adb33a1c81bd"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",
@@ -1178,9 +1298,14 @@
       "sha256": "bb20fde30fe9c18f2dfe0b9eb0dbbb8538337562135b9d35944fbf31def75334"
     },
     {
+      "path": "docs/SCOPED_PERFORMANCE046.json",
+      "bytes": 2121,
+      "sha256": "b2efd773925a883e7079d22ac223227345ee30af290cd21e3bdfa84ff5d24430"
+    },
+    {
       "path": "docs/SIZE_COVERAGE.json",
-      "bytes": 117487,
-      "sha256": "5ebdf9f46ec0e8fa06e7a9c81b95a81abdb037a6474431a6b059f55fa2b1afc5"
+      "bytes": 118057,
+      "sha256": "bec627c2dfca8d17a5d12807a7c021251ec488e52efc7ec4e657faa733c938a9"
     },
     {
       "path": "docs/USER_GUIDE.md",
@@ -1216,6 +1341,11 @@
       "path": "gpu_fan_sensor.py",
       "bytes": 13303,
       "sha256": "001abaad14fe830de8eee00adf399f72606216cf4479b47fa41e8a7bac4bc0c7"
+    },
+    {
+      "path": "gpu_verified046.py",
+      "bytes": 34485,
+      "sha256": "d4de970c748f0c18f0607493f335a8412a82b46f19df157d3b6e390265a43e4a"
     },
     {
       "path": "hardware_appearance.py",
@@ -1299,8 +1429,8 @@
     },
     {
       "path": "hardware_packs.py",
-      "bytes": 22703,
-      "sha256": "079a3d357c78d78f7c1de92acedaf418cac135785338db88bb9296e4d8ff7627"
+      "bytes": 23314,
+      "sha256": "f04369de99ac5d075804de34d014bb180f2beee1ea2fafd0fba06d13130c82ba"
     },
     {
       "path": "hardware_series.py",
@@ -1688,9 +1818,74 @@
       "sha256": "2d8f157f8e483f90108a1c666c9b5ef22ba5b5341dbfcb93a0d3184a2e9eb6f2"
     },
     {
+      "path": "liquid_aux_clearance046.py",
+      "bytes": 1751,
+      "sha256": "5b82de49836d2a5b2a06f1916b1037abdf0d4a1f94de56435efed6c804582186"
+    },
+    {
+      "path": "liquid_block_geometry046.py",
+      "bytes": 35388,
+      "sha256": "7fb9697f70e41b7207c2e8d4e1d524cb3db6fc95f9af2b679ba1d796416142f9"
+    },
+    {
+      "path": "liquid_block_pump_expansion046.py",
+      "bytes": 107473,
+      "sha256": "63e84040ef3989c4c872b4aa2793b0a4399e813b82132a7eb05a1a63f1bdbf0d"
+    },
+    {
+      "path": "liquid_clearance046.py",
+      "bytes": 5396,
+      "sha256": "8fc494512569533669cf822a302ddf982b75843c9096958ba6317c26fa2c5f49"
+    },
+    {
+      "path": "liquid_component_runtime046.py",
+      "bytes": 1624,
+      "sha256": "47edd446cbc35b7fca45415e23cdd6f52cb768ae6d7248fa6ed4d15ffe21a04e"
+    },
+    {
       "path": "liquid_cooling_catalog044.py",
       "bytes": 21879,
       "sha256": "3fb4853f31a0610897c9c0c060b1fc326b25165063f77df0ececc029a17d3844"
+    },
+    {
+      "path": "liquid_fitting_tube_expansion046.py",
+      "bytes": 113506,
+      "sha256": "92b3aaf94d2e845c158ed263111d79547955b49704b2961b58c2f2ce4c2ba290"
+    },
+    {
+      "path": "liquid_geometry046.py",
+      "bytes": 13168,
+      "sha256": "0e967fa9d4bb7178e7ab988b6d43172060fed046f2f50f5689988a134f622ce3"
+    },
+    {
+      "path": "liquid_grip046.py",
+      "bytes": 1448,
+      "sha256": "11f8f606ea2ee23ab0ad8103c45c56608edfe0ca99ff09c312c977f17bedadbc"
+    },
+    {
+      "path": "liquid_ink046.py",
+      "bytes": 3903,
+      "sha256": "23a08472a16016ce5bffeac6fdb1f0f0e7e7fa859104b8d2930d2ae1b7c6d0b3"
+    },
+    {
+      "path": "liquid_inspection046.py",
+      "bytes": 4205,
+      "sha256": "0c2fa66ea294f16ea0b9da1bbe5d56787afce8113afc714462da84e9135ece09"
+    },
+    {
+      "path": "liquid_messages046.py",
+      "bytes": 3644,
+      "sha256": "38c7f7b625d9f4fa6b3aef1d492f8531c21e98be3e9381bc5141a5248fc47102"
+    },
+    {
+      "path": "liquid_pack_schema046.py",
+      "bytes": 15251,
+      "sha256": "45acb9d37677e4886071023d54de0c02bba4363020dbca8c94144f586de4b014"
+    },
+    {
+      "path": "liquid_path046.py",
+      "bytes": 6963,
+      "sha256": "67f0d7a0423352aa609e85bf8708f10b4692b05a903518f557d3b5fc0235e667"
     },
     {
       "path": "liquid_radiator_expansion045.py",
@@ -1698,14 +1893,34 @@
       "sha256": "c2bbda6c5eb201e31be576c8db45f415220978835a7cafc9fb80e9d1dc9b035c"
     },
     {
+      "path": "liquid_routes046.py",
+      "bytes": 4946,
+      "sha256": "3077ffe3c9224a798df80f7a8d24a067d6ce458a2131b3650dad12a9df5ae3a5"
+    },
+    {
       "path": "liquid_selection044.py",
       "bytes": 4378,
       "sha256": "ed821f052564289773bb68831a4d4ad41df97d71f2ed5a4787b73bf4e74466f7"
     },
     {
+      "path": "liquid_selection046.py",
+      "bytes": 9050,
+      "sha256": "44bb6ae755894532b1d000a250e1fabcaf391258a8dc45fb8b5ce2e8b541892f"
+    },
+    {
+      "path": "liquid_silhouette046.py",
+      "bytes": 6756,
+      "sha256": "4e040bfadae88a894c95ccfae4ee29e72beb7ad0acdd658bbe6e2ea94e217524"
+    },
+    {
+      "path": "liquid_svg046.py",
+      "bytes": 22125,
+      "sha256": "b685fe7462ff9ab6bb26331cc58769d865b919132a8ac5f3a45c72800a9d8069"
+    },
+    {
       "path": "locales.txt",
-      "bytes": 279252,
-      "sha256": "24ddb1f41254a83bf351950c4d4d1f2efca7b4af5c01b25f6e1d6a3253a8ab50"
+      "bytes": 312671,
+      "sha256": "018e003ffc30b36a4e0ff26ba54345693b41b222b8ee7e790ca8b82330f1b78c"
     },
     {
       "path": "localization.py",
@@ -1898,6 +2113,81 @@
       "sha256": "1a7527540350baa293d818d9708f67768006e0c4c09a846659925279bc14eb94"
     },
     {
+      "path": "model-packs/v046/DesktopStats-loop-brand-alphacool-046-1.0.0.dspack",
+      "bytes": 11675,
+      "sha256": "a6dfec8a1260dc470f7452cfab1409c014858fe3797efd73a5683566b9251d22"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-aqua-computer-046-1.0.0.dspack",
+      "bytes": 4405,
+      "sha256": "be4b97b8d65db99742e2b48aaa6bb370aba7bfa544f7ce9faa6ecd8fb912803e"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-corsair-046-1.0.0.dspack",
+      "bytes": 7751,
+      "sha256": "212b4dfbf47393d9075358de26d014230e37c123da4a60a3deced96ca7b939e7"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-koolance-046-1.0.0.dspack",
+      "bytes": 4191,
+      "sha256": "6ffa506bd61f3998b870b4918cf2d8b1d33718d21800ce29ba1d889ae3d02f95"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-phanteks-046-1.0.0.dspack",
+      "bytes": 4146,
+      "sha256": "00e3ce7a2f24c794366a4ac97a483a34cb69e9ed1e5152ebce842505251cf8c8"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-thermaltake-046-1.0.0.dspack",
+      "bytes": 6219,
+      "sha256": "f5b2bae0b148ba909cef6a77579901e4a68d71e053a9dc50538121c64f6d35ff"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-watercool-046-1.0.0.dspack",
+      "bytes": 4767,
+      "sha256": "954bb42a3568bccf07d15ed2cffd653944b7e986430df981d258dfb21d3e06b0"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-brand-xspc-046-1.0.0.dspack",
+      "bytes": 5071,
+      "sha256": "8e6fa761240b2c1d5dd2e57b3b9af62000c7fad8d7f97e124591a4fc921b89a6"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-collection-046-1.0.0.dspack",
+      "bytes": 24881,
+      "sha256": "9aec0ee47c0a13ad892618596a8a87d59b521d4f80093f7c9d1385e8d64d6e83"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-cpu-block-046-1.0.0.dspack",
+      "bytes": 7719,
+      "sha256": "983e44de8d50c411c2292f0406f0f45b30fe04d5b12021fee804d0136243ca0b"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-fitting-046-1.0.0.dspack",
+      "bytes": 8440,
+      "sha256": "a4dd67e8aacd98615e41603a876e897f484a7db36a91c11f3394bdc875bd67b4"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-pump-046-1.0.0.dspack",
+      "bytes": 6324,
+      "sha256": "4afd651d330691de7198afe27e2f08a3edf54f0d65eae33e44eb33a498fd7177"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-pump-reservoir-046-1.0.0.dspack",
+      "bytes": 8175,
+      "sha256": "07b2f97b0d6bb0d28371ec9710fa9a000d36baf78af9d5ed200110ca257908cf"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-reservoir-046-1.0.0.dspack",
+      "bytes": 4353,
+      "sha256": "7349939c3345f462623a0604fe4e62a24f0b4a2f6296f212b6ce6c5aeafe5d9b"
+    },
+    {
+      "path": "model-packs/v046/DesktopStats-loop-tubing-046-1.0.0.dspack",
+      "bytes": 5669,
+      "sha256": "cbeace432d52339e5c0bb6ea5e7be06c0fb8634d4b0f5855a1bad0b8792621ac"
+    },
+    {
       "path": "modern_menu.py",
       "bytes": 17853,
       "sha256": "1df3857975da2cce4cd04d992d7723053b6c7dad234e697fdf1c6196739859f1"
@@ -1909,8 +2199,8 @@
     },
     {
       "path": "motherboard_expansion045.py",
-      "bytes": 31335,
-      "sha256": "c3e5d149194115b6038ef3e6d905d301e801aba0f347e56d2235aae9de34c03f"
+      "bytes": 36090,
+      "sha256": "b4d32565bf76d5c4ff5e2f072c7a581de27ae711c9e1eacda644b7b613e1b221"
     },
     {
       "path": "motherboard_expansion_b.py",
@@ -1919,8 +2209,8 @@
     },
     {
       "path": "native/AccessoryGallery.qml",
-      "bytes": 9073,
-      "sha256": "38665ca842b036fb9bb2da986e53b615b1125fbeacc8eb472d1e68c3eecd3c6a"
+      "bytes": 9890,
+      "sha256": "2c4e78627bd23b79e0bbe77c14ce9754e537f614aadff8c5fa026ed0b6571f8c"
     },
     {
       "path": "native/AccessoryGlyph.qml",
@@ -1949,13 +2239,13 @@
     },
     {
       "path": "native/AssemblyParts.qml",
-      "bytes": 18975,
-      "sha256": "5da173fe0c5b491c632975ee8fb0b4d56b6e19ace15e8353cf4da22dafd6d815"
+      "bytes": 19147,
+      "sha256": "5f9cb33c6b48c6c18a86564a57c995fdc6d00cb1e0cff24a1b8f1b44a755d6a1"
     },
     {
       "path": "native/AssemblyProfiles.js",
-      "bytes": 3833,
-      "sha256": "399b37b773283e76273a9963ac99af0800a1dad4d1a90d5e735e744deb24b84c"
+      "bytes": 4113,
+      "sha256": "d944ab00d83cfbbdaabf8856ed30fb930e2935c995855aac0425911377db3f74"
     },
     {
       "path": "native/Check.qml",
@@ -2079,8 +2369,8 @@
     },
     {
       "path": "native/HardwareModelDetails.js",
-      "bytes": 15159,
-      "sha256": "ddeb197519ba8e24171170333511497aa213872239470d5ea23f36483612f63d"
+      "bytes": 15408,
+      "sha256": "9c562d82e31b13dec8e1ab4c1bfbbf8d18f1a86f09c22c3e248e6e0ed517e94d"
     },
     {
       "path": "native/HardwareModelNvidia042.js",
@@ -2094,8 +2384,8 @@
     },
     {
       "path": "native/HardwareNotebook.js",
-      "bytes": 23261,
-      "sha256": "dd79a9ab56dbcfe690a4d723c767aa17fcebf68d620fbb9dd87841fa84573802"
+      "bytes": 25049,
+      "sha256": "2e9c8ec31d77358d4e729d5027450abbf5559ec8a50ef8467f4bd2a06bdacd26"
     },
     {
       "path": "native/HardwareNotebookParts.js",
@@ -2104,8 +2394,8 @@
     },
     {
       "path": "native/HardwarePacks.qml",
-      "bytes": 2424,
-      "sha256": "c4d23bfe1d444bd2528ffa9718d491551386aca53bda86059f0b8ca5e66ce72f"
+      "bytes": 2439,
+      "sha256": "ab957747de9478e54da95e21a6ce9b47420ab132978f370530e24b7e9ac09878"
     },
     {
       "path": "native/HardwareSeriesCoreExpansion.js",
@@ -2179,8 +2469,8 @@
     },
     {
       "path": "native/HardwareVariants.js",
-      "bytes": 7614,
-      "sha256": "e17b78eea41c8a0b86d0c185b4ce7809484e2e690601a6d504ab3cf944701e77"
+      "bytes": 7655,
+      "sha256": "def12c1682041f9109eb085a619ab6cc93863e91ce3775d41c2cb165510b7d3f"
     },
     {
       "path": "native/HistoryPage.qml",
@@ -2206,6 +2496,11 @@
       "path": "native/InspectorSection.qml",
       "bytes": 448,
       "sha256": "c62ba3edbc4c47e5a5418a4ce65dc4080909ead11b2741e9391aa190f826fd90"
+    },
+    {
+      "path": "native/LoopParts046.qml",
+      "bytes": 6912,
+      "sha256": "14c9c1e3d4fb3def2748dd7a40e63bdc5af1e13b4ee2bf655b572b587b123913"
     },
     {
       "path": "native/MaterialSample.qml",
@@ -2324,8 +2619,8 @@
     },
     {
       "path": "native/TopBarSettings.qml",
-      "bytes": 39625,
-      "sha256": "0ce11b59708dc4f3753370534404fb5a19dfef77f06eca158b23c58452cdc60f"
+      "bytes": 39635,
+      "sha256": "51280fc6c3617f7b5449f7cf6a8121ac1a3af3c5b23e3fab5dfe903310a4d83a"
     },
     {
       "path": "native/TrendChart.qml",
@@ -2344,8 +2639,8 @@
     },
     {
       "path": "native/WidgetInspector.qml",
-      "bytes": 23053,
-      "sha256": "e32be2fce72f0281476211be23d6a867a705fd86ed076f2fc09c733a2db1bc8e"
+      "bytes": 23063,
+      "sha256": "a77d97cd296a37b717472fa4cc03f92b1ad357e52863849044ef786f5fd87451"
     },
     {
       "path": "native/WidgetPreview.qml",
@@ -2394,8 +2689,8 @@
     },
     {
       "path": "native_selfcheck.py",
-      "bytes": 15740,
-      "sha256": "cef0b094a098e6b4f53960c85eb774b4eaba3ae5d4f3626a5ecbbc883d1f3a3f"
+      "bytes": 18376,
+      "sha256": "760c6314ddfcce0d95cd0b1a83b9d0ce920847d37c9c75e6aed35549fab9e959"
     },
     {
       "path": "native_surface.py",
@@ -2435,7 +2730,7 @@
     {
       "path": "product_version.py",
       "bytes": 29,
-      "sha256": "0784a37b041e53ed0fa8c53faac20ffca8f668fedf21721a1f865f9af3654591"
+      "sha256": "9e7b4580be0c76b91289ed18a81e8355a159e426ee5cb5b7eae6548ac92425e0"
     },
     {
       "path": "profile_paths.py",
@@ -2534,8 +2829,8 @@
     },
     {
       "path": "tests/test_accessory_art.py",
-      "bytes": 11577,
-      "sha256": "4605883442c19b5634bda53a6a586cda33e7121cfdae186bb44ef98297caa60d"
+      "bytes": 11867,
+      "sha256": "f2182976c37b9f3ccdd6146b1905b06bd741de02ebc078b6f134cf2f6b811394"
     },
     {
       "path": "tests/test_accessory_art_export.py",
@@ -2653,6 +2948,11 @@
       "sha256": "e6516b05eb283dde054f1c69a5b2f7ae7585ab0804eefd0718e7e000febb5997"
     },
     {
+      "path": "tests/test_assembly_ink_priority046.py",
+      "bytes": 9385,
+      "sha256": "a7bb202259c5603b62c1372a8e5c8471475e85e4e63c6cf484cfdf75752190e6"
+    },
+    {
       "path": "tests/test_assembly_inspection.py",
       "bytes": 10341,
       "sha256": "8e26888839e60c2b119f86bcb76d817c36e8ae2010498820a360413d94446247"
@@ -2680,7 +2980,7 @@
     {
       "path": "tests/test_assembly_parts.py",
       "bytes": 8239,
-      "sha256": "3e8788a1492c9b28d0d87f8ad7e3919d9a393c36996795bf269778204530a34e"
+      "sha256": "7e8570241f8a45441a5a105bbeba665f583590e1d4fc9e92bfd63ae01ef003db"
     },
     {
       "path": "tests/test_assembly_profiles.py",
@@ -2913,6 +3213,11 @@
       "sha256": "6dd08fb07f0b74b7b8962ef65225cf98f0f70b1f5ba945d4639c683a7b671034"
     },
     {
+      "path": "tests/test_fitting_surfaces046.py",
+      "bytes": 3307,
+      "sha256": "0c49eaea2b018f702a992420814f6c41a82c4df349abe268a43fdfbf309dba1b"
+    },
+    {
       "path": "tests/test_frame_settlement.py",
       "bytes": 4431,
       "sha256": "1facfd4e854a50b7c82d9755a41feba645bf5bd38efba41a863802f1e4a3adb3"
@@ -2926,6 +3231,16 @@
       "path": "tests/test_glass_preferences.py",
       "bytes": 18687,
       "sha256": "022ec0137a9e6420e4288a5bbab11f55dc265b3c8868dc188516338df9351e91"
+    },
+    {
+      "path": "tests/test_gpu_cover_apertures046.py",
+      "bytes": 12551,
+      "sha256": "ff8c4d032ee37c4045d0942e85040c9b33551fe2d7a960be0fdbb19b9052e02d"
+    },
+    {
+      "path": "tests/test_gpu_evenodd046.py",
+      "bytes": 7540,
+      "sha256": "2caf87315c4debe102b6fdb10f4bd64fb1851323ca181a15382725823bdee305"
     },
     {
       "path": "tests/test_gpu_fan_feedback.py",
@@ -3113,6 +3428,16 @@
       "sha256": "1851fc81682f741ec4f623519f82c0baa5a2666b00ecd501f3435b9ce7bcd64f"
     },
     {
+      "path": "tests/test_liquid_block_geometry046.py",
+      "bytes": 13309,
+      "sha256": "d9e2947c6d9fae8e37e3d2c675393730fc18db83adca593c236a26e023d32001"
+    },
+    {
+      "path": "tests/test_liquid_block_pump_expansion046.py",
+      "bytes": 15756,
+      "sha256": "18d0a7a6bdae0c806e0436c856e55833bff3bfd55906bb06389faaeb4f546d9a"
+    },
+    {
       "path": "tests/test_liquid_controls044.py",
       "bytes": 3304,
       "sha256": "f0398fde776ccc3c29d060508c49b945efd0944f5645c043e60bae51853d3a2e"
@@ -3123,9 +3448,74 @@
       "sha256": "92d334e279cdb7dab506605c0d4078e449c07218557be4ff296076ac3d58efd2"
     },
     {
+      "path": "tests/test_liquid_fitting_tube_expansion046.py",
+      "bytes": 13993,
+      "sha256": "175a649e39f5aa119b31f3aa3efbece28aaa6faa8630c84f02cc6c3714516a2a"
+    },
+    {
+      "path": "tests/test_liquid_gallery046.py",
+      "bytes": 11523,
+      "sha256": "d6a582dd771221c66362a2bde94bafbf08070c3c7bbfe7a49ebbcbda99dac0b3"
+    },
+    {
+      "path": "tests/test_liquid_geometry046.py",
+      "bytes": 16389,
+      "sha256": "e68235edad4bbbdeaad162665611bafb28fa67f019a036ce5cf257a5ae9443a9"
+    },
+    {
+      "path": "tests/test_liquid_ink046.py",
+      "bytes": 9340,
+      "sha256": "0c66381492c7d59261593e7e9dbbe98eff15c384d4729ee7cc239fd8cadb2030"
+    },
+    {
+      "path": "tests/test_liquid_path046.py",
+      "bytes": 2642,
+      "sha256": "d2a27dd1ac8b9bc608e6967db089839b8ef6edd766bbc46c5d398eaefbd2795b"
+    },
+    {
       "path": "tests/test_liquid_radiator_expansion045.py",
       "bytes": 12575,
       "sha256": "d2b7fe9a5ab3900af147cef38c6e6bc39c496c14475f8dd77e0a002f6fed159b"
+    },
+    {
+      "path": "tests/test_liquid_svg046.py",
+      "bytes": 13505,
+      "sha256": "4a78356cc45c03cdd0ae06c20c1108c6ebd9433208f83f6bb61dab16032be7d3"
+    },
+    {
+      "path": "tests/test_loop_assembly046.py",
+      "bytes": 18009,
+      "sha256": "e0a7701c64f34e46d6b1729a985f97523609fb161a5f9fd5926cdddd70d77b22"
+    },
+    {
+      "path": "tests/test_loop_auxiliary_clearance046.py",
+      "bytes": 8316,
+      "sha256": "1b094718931a15fcc6144d9788f29704d95820b2fcfb86fb973623f42e5544be"
+    },
+    {
+      "path": "tests/test_loop_clearance046.py",
+      "bytes": 10420,
+      "sha256": "e71c74f6fa7b531bf828d29d8c81e9a4934bbdaf7a6fed801bdb21b3474c475d"
+    },
+    {
+      "path": "tests/test_loop_contract046.py",
+      "bytes": 8610,
+      "sha256": "5915a26de9777f2057efbd04caba5d8ba765f5394987df322d9e8c6fbe24014e"
+    },
+    {
+      "path": "tests/test_loop_controls046.py",
+      "bytes": 12110,
+      "sha256": "7f0d86aaa974bf1517392bf5dc1c3d19f82b3a73a7d8b69b9b1ccaad86ff7a51"
+    },
+    {
+      "path": "tests/test_loop_profiled046.py",
+      "bytes": 4058,
+      "sha256": "a0c26ce8937dc141d03d962b4765a07427f6aae7cd739572cfc53a9f6272d462"
+    },
+    {
+      "path": "tests/test_loop_silhouette046.py",
+      "bytes": 10222,
+      "sha256": "7f09a925c22333cbd9b77e9495c87bc6ff759e4075a83c410b04eb76f5e1dd43"
     },
     {
       "path": "tests/test_lucide_icons.py",
@@ -3193,9 +3583,14 @@
       "sha256": "c9820697c444242fef9ecc8b78b928c66bf7d84c428d10d7c42c5214f81914f5"
     },
     {
+      "path": "tests/test_motherboard_detail046.py",
+      "bytes": 8658,
+      "sha256": "4344e3705b06de6f89442c963505586d9e311fa8a54d8c8a6be5990da25cda29"
+    },
+    {
       "path": "tests/test_motherboard_expansion045.py",
-      "bytes": 17398,
-      "sha256": "11669ea1f143beb0ef599da146ca1c7366cae8e5c44773f3699b458c280266e4"
+      "bytes": 17399,
+      "sha256": "6d9c819e8a164d307e1b658d1e054f295430bc6f100587e8da069456ce23e118"
     },
     {
       "path": "tests/test_motion_continuity_qml.py",
@@ -3216,6 +3611,11 @@
       "path": "tests/test_network_snapshot.py",
       "bytes": 19840,
       "sha256": "411e1874d44330d8471c38c318fda5e3d2e5a0fc81c0f5cb516e271cf5d13a9c"
+    },
+    {
+      "path": "tests/test_notebook_color046.py",
+      "bytes": 12567,
+      "sha256": "6996ac86a575d063881916e5b1de86aae8eae69c4e4865bded2ee5b377bc1e32"
     },
     {
       "path": "tests/test_nvml_cleanup_isolation.py",
@@ -3354,8 +3754,8 @@
     },
     {
       "path": "tests/test_selfcheck.py",
-      "bytes": 5248,
-      "sha256": "4b92d7dd5ae2da0395b983d6074aa39c54653ba6d947898f8761a2c38773f697"
+      "bytes": 5337,
+      "sha256": "5004122ba1edf9afa52e76ba12be125aa042d87fbb731a3768a22c143650b9f6"
     },
     {
       "path": "tests/test_sensor_source_isolation.py",
@@ -3673,9 +4073,14 @@
       "sha256": "9b8d541b77b0ddc79afaa6a1de8941452c191b8b9006f04e7b8fc422e2b263f7"
     },
     {
+      "path": "tools/benchmark_loop046.py",
+      "bytes": 3819,
+      "sha256": "096e883d4efe94b2f0714d382206c0b505d05da62009251971a7e282a22597d8"
+    },
+    {
       "path": "tools/build.py",
-      "bytes": 28084,
-      "sha256": "e4b9b5c1c158231801476a228e4ae4e6321b9c787fc23a23ba39e4a214bdf4f0"
+      "bytes": 30785,
+      "sha256": "3a54749e92ea4b8af4612b1a96eb973240856cf31fbbd7025da86c982569d0be"
     },
     {
       "path": "tools/build_collector.py",
@@ -3704,8 +4109,8 @@
     },
     {
       "path": "tools/export_assembly_catalog.py",
-      "bytes": 9083,
-      "sha256": "42038549a5f6914379980d62631d1c8ee1f0965fe74a16e34ce65b2a7e77b0dc"
+      "bytes": 12761,
+      "sha256": "fff66ffd338fe03d086952979edbcb876df4781e41ea8db8b548e01b7116a941"
     },
     {
       "path": "tools/export_cooling_packs045.py",
@@ -3728,9 +4133,14 @@
       "sha256": "eeb3083fec8b669030ca11b4e9fec5e8f71b5ffd58ee20f8733ffe6cb1e25cab"
     },
     {
+      "path": "tools/export_loop_packs046.py",
+      "bytes": 3750,
+      "sha256": "0b2a25a727cf3b882e1bd3bf7ddc884793e894de2ec6270b05a08e95fe771523"
+    },
+    {
       "path": "tools/export_requirements.py",
-      "bytes": 11854,
-      "sha256": "e0ece474b2b80dc31fe171cb6014b49090259ac66b0a12626ae864bd672bf0b3"
+      "bytes": 15999,
+      "sha256": "90786342fdb12fa6a880393f06d4391032614c4578f4addfe53edb9eb6ca511b"
     },
     {
       "path": "tools/export_size_coverage045.py",
@@ -3739,8 +4149,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 25012,
-      "sha256": "d94e6dd28b7df7d4efa1a39ee56141d8886c8194c2a3f44640fba9dfa78e5bc4"
+      "bytes": 26076,
+      "sha256": "4b2d6052c803af909c45ff785a250271873eeb95294aaaac3edbdeb2ae9e9154"
     },
     {
       "path": "tools/fetch_qt_licenses.py",

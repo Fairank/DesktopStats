@@ -108,7 +108,45 @@ def bevel_extrude(poly,depth,bevel=.5):
     return tuple(out)
 
 
-def perforated_plate(poly,holes,depth,*,segments=24):
+def _material_wall_segments(a,b,poly,holes,material_left):
+    """Exact 2-D boundary intervals that still border the plate material.
+
+    A cap subtraction can cut through the original perimeter. Its old uncut
+    side wall must not survive as an edge-on curtain across that opening.
+    """
+    dx,dy=b[0]-a[0],b[1]-a[1];length=math.hypot(dx,dy)
+    if length<1e-10:return ()
+    cuts=[0.,1.]
+    for boundary in (poly,*holes):
+        for p,q in zip(boundary,(*boundary[1:],boundary[0])):
+            ex,ey=q[0]-p[0],q[1]-p[1];px,py=p[0]-a[0],p[1]-a[1]
+            denominator=dx*ey-dy*ex
+            if abs(denominator)>1e-12:
+                t=(px*ey-py*ex)/denominator;u=(px*dy-py*dx)/denominator
+                if -1e-10<=u<=1.+1e-10 and 0.<t<1.:cuts.append(t)
+            elif abs(px*dy-py*dx)<1e-9:
+                for point in (p,q):
+                    t=((point[0]-a[0])*dx+(point[1]-a[1])*dy)/(length*length)
+                    if 0.<t<1.:cuts.append(t)
+    cuts.sort();unique=[]
+    for value in cuts:
+        if value<1e-10:value=0.
+        elif value>1.-1e-10:value=1.
+        if not unique or value-unique[-1]>1e-10:unique.append(value)
+    span=max(max(p[k] for p in poly)-min(p[k] for p in poly) for k in (0,1))
+    epsilon=max(1.,span)*1e-8;sign=1. if material_left else -1.
+    nx,ny=-dy/length*sign,dx/length*sign
+    runs=[]
+    for low,high in zip(unique,unique[1:]):
+        mid=(low+high)/2;probe=(a[0]+dx*mid+nx*epsilon,a[1]+dy*mid+ny*epsilon)
+        if _point_inside(probe,poly) and not any(_point_inside(probe,hole) for hole in holes):
+            if runs and abs(runs[-1][1]-low)<1e-10:runs[-1]=(runs[-1][0],high)
+            else:runs.append((low,high))
+    point=lambda t:a if t==0. else b if t==1. else (a[0]+dx*t,a[1]+dy*t)
+    return tuple((point(low),point(high)) for low,high in runs)
+
+
+def perforated_plate(poly,holes,depth,*,segments=24,clip_walls=False):
     """Triangulated solid plate with actual open holes, not dark painted disks.
 
     Each convex hole is subtracted from cap triangles using disjoint convex
@@ -131,10 +169,15 @@ def perforated_plate(poly,holes,depth,*,segments=24):
         for n in range(1,len(piece)-1):
             a,b,c=piece[0],piece[n],piece[n+1]
             _tri(out,(*a,z),(*b,z),(*c,z));_tri(out,(*c,-z),(*b,-z),(*a,-z))
-    for a,b in zip(poly,(*poly[1:],poly[0])):_quad(out,(*a,-z),(*b,-z),(*b,z),(*a,z))
+    for a,b in zip(poly,(*poly[1:],poly[0])):
+        edges=_material_wall_segments(a,b,poly,hole_polys,_area(poly)>0) if clip_walls else ((a,b),)
+        for first,last in edges:_quad(out,(*first,-z),(*last,-z),(*last,z),(*first,z))
     for hole in hole_polys:
         for a,b in zip(hole,(*hole[1:],hole[0])):
-            if _point_inside(tuple((a[n]+b[n])/2 for n in range(2)),poly):
+            if clip_walls:
+                for first,last in _material_wall_segments(a,b,poly,hole_polys,False):
+                    _quad(out,(*last,-z),(*first,-z),(*first,z),(*last,z))
+            elif _point_inside(tuple((a[n]+b[n])/2 for n in range(2)),poly):
                 _quad(out,(*b,-z),(*a,-z),(*a,z),(*b,z))
     return tuple(out)
 
@@ -219,12 +262,16 @@ def clear_port_tunnels(vertices,holes,length,tunnel_depth=6.5):
     return tuple(out)
 
 
-def hollow_cover(poly,holes,depth,*,segments=24,open_front=False,edge_windows=None,edge_recesses=None):
+def hollow_cover(poly,holes,depth,*,segments=24,open_front=False,edge_windows=None,edge_recesses=None,front_cutouts=()):
     plate=min(2.2,depth*.12);front=depth/2
     extent=[max(abs(p[n]) for p in poly) for n in range(2)]
     face=tuple(tuple(v*(1-.55/max(extent[n],5)) for n,v in enumerate(p)) for p in poly)
     recess=min(.5,depth*.06)
-    out=[] if open_front else list(translated(perforated_plate(face,holes,plate,segments=segments),(0,0,front-recess-plate/2)))
+    # Source-declared front cutouts belong to this cap alone. They must not
+    # remove a later, independently layered cover, the PCB, or the backplate.
+    front_holes=(*holes,*front_cutouts) if front_cutouts else holes
+    out=[] if open_front else list(translated(perforated_plate(face,front_holes,plate,segments=segments,
+        clip_walls=bool(front_cutouts)),(0,0,front-recess-plate/2)))
     inner=tuple(tuple(v*(1-1.5/max(extent[n],5)) for n,v in enumerate(p)) for p in poly)
     for i,a in enumerate(poly):
         j=(i+1)%len(poly);b=poly[j];ia,ib=inner[i],inner[j]
@@ -305,7 +352,9 @@ def _gpu_detail(meshes,spec,level):
             points=row.get('points') if isinstance(row,dict) else row
             polygon=unit_polygon(points,length,width,margin=.3)
             if polygon:
-                mesh=replace(mesh,vertices=gpu_plane(perforated_plate(polygon,holes,.3,segments=segments)),
+                plate=perforated_plate(polygon,holes,.3,segments=segments,clip_walls=True)
+                if not plate:continue
+                mesh=replace(mesh,vertices=gpu_plane(plate),
                              position=(gx,gy-thickness/2+.2,gz))
         elif mesh.name=='gpu-pcb':
             mesh=replace(mesh,position=(gx,gy+thickness/2-3.3,gz))
@@ -408,8 +457,11 @@ def _gpu_detail(meshes,spec,level):
             windows.append(((.04,-thickness*.38),(.96,-thickness*.38),
                             (.96,thickness*.23),(.04,thickness*.23)))
         if windows:edge_windows[i]=tuple(windows)
+    shell_holes=tuple(polygon for points in gpu.get('shell_holes') or ()
+                      if (polygon:=unit_polygon(points,length,width)))
     body=hollow_cover(outer,holes,thickness,segments=segments,
-        open_front=appearance.get('fan_count')==0,edge_windows=edge_windows,edge_recesses=edge_recesses)
+        open_front=appearance.get('fan_count')==0,edge_windows=edge_windows,edge_recesses=edge_recesses,
+        front_cutouts=shell_holes)
     body=gpu_plane(clear_port_tunnels(body,port_holes,length))
     revised=[replace(mesh,vertices=body) if mesh.name=='gpu-shroud' else mesh for mesh in revised]
     # Only a documented backplate receives reference fasteners. They do not

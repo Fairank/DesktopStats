@@ -127,24 +127,61 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         depth=cover['depth_mm'];poly=cover['polygon']
         from assembly_detail import _point_inside
         mount_holes=[((u-.5)*bw,(.5-v)*bh,3.2) for u,v in mounts if _point_inside((u,v),poly)] if model['mount_method'].startswith('official_') else []
+        fan=cover.get('static_fan');vent=cover.get('surface_vent');mechanical_holes=list(mount_holes)
+        if fan:
+            u,v=fan['uv'];mechanical_holes.append(((u-.5)*bw,(.5-v)*bh,fan['diameter_mm']/2))
+        if vent:
+            # Only the visible perforated shroud is established in this view.
+            # A bounded hole sample is not an inferred internal fan position,
+            # factory hole count, blade pattern or tachometer mapping.
+            region=vent['polygon'];u0,u1=min(p[0] for p in region),max(p[0] for p in region)
+            v0,v1=min(p[1] for p in region),max(p[1] for p in region)
+            for line in range(5):
+                for col in range(3):
+                    u=u0+(u1-u0)*(.20+.30*col);v=v0+(v1-v0)*(.12+.19*line)
+                    if _point_inside((u,v),region):mechanical_holes.append(((u-.5)*bw,(.5-v)*bh,1.1))
         # These are open recesses with real depth above a lower plinth, not
         # gray lines painted on an otherwise solid block. The sampling count
         # is illustrative; the outline/region is manually model matched.
-        if level!='eco' and cover['grooves']:
+        if level!='eco' and cover['grooves'] and not vent:
             u0,u1=min(p[0] for p in poly),max(p[0] for p in poly);v0,v1=min(p[1] for p in poly),max(p[1] for p in poly)
             sample=min(cover['grooves']*(2 if level=='close' else 1),18)
-            recess=min(3.,depth*.42);plate(name,poly,depth-recess,metal,1.,mount_holes);channels=list(mount_holes)
+            recess=min(3.,depth*.42);plate(name,poly,depth-recess,metal,1.,mechanical_holes);channels=list(mechanical_holes)
             for n in range(sample):
-                u=u0+(u1-u0)*(.20+.60*n/max(1,sample-1));v=v0+(v1-v0)*.50
-                cx,cy=(u-.5)*bw,(.5-v)*bh;channel=chamfer_rect(.65,(v1-v0)*bh*.68,.12)
-                channels.append(tuple((x+cx,y+cy) for x,y in channel))
+                along=cover.get('groove_along')
+                if along is None:
+                    # Preserve the original16 payload when no new observation
+                    # supplies a different source-visible groove direction.
+                    u=u0+(u1-u0)*(.20+.60*n/max(1,sample-1));v=v0+(v1-v0)*.50
+                    cx,cy=(u-.5)*bw,(.5-v)*bh;channel=chamfer_rect(.65,(v1-v0)*bh*.68,.12)
+                    channels.append(tuple((x+cx,y+cy) for x,y in channel))
+                else:
+                    direction=(along[0]*bw,-along[1]*bh);length=math.hypot(*direction)
+                    direction=tuple(v/length for v in direction);across=(-direction[1],direction[0])
+                    physical=unit_polygon([list(p) for p in poly],bw,bh)
+                    dot=lambda p,q:sum(a*b for a,b in zip(p,q))
+                    forward=[dot(p,direction) for p in physical];side=[dot(p,across) for p in physical]
+                    center=(min(forward)+max(forward))/2
+                    offset=min(side)+(max(side)-min(side))*(.23+.54*n/max(1,sample-1))
+                    half=(max(forward)-min(forward))*.33
+                    for attempt in range(12):
+                        channel=tuple((direction[0]*(center+a*half)+across[0]*(offset+b*.325),
+                                       direction[1]*(center+a*half)+across[1]*(offset+b*.325))
+                                      for a,b in ((-1,-1),(1,-1),(1,1),(-1,1)))
+                        if all(_point_inside(p,physical) for p in channel):channels.append(channel);break
+                        half*=.80
             cap=perforated_plate(unit_polygon([list(p) for p in poly],bw,bh),channels,recess)
             add('board-heatsink-recessed-crown',rotate_vertices(cap,'left'),metal,(bx-1.-depth+recess/2,by,bz))
-        else:plate(name,poly,depth,metal,1.,mount_holes)
+        else:plate(name,poly,depth,metal,1.,mechanical_holes)
+        if fan:
+            center=point(fan['uv'],depth-1.8);radius=fan['diameter_mm']/2
+            add('board-onboard-fan-recess-floor',rotate_vertices(ring(radius*.985,0.,.35,segments=32),'left'),dark,center)
+            add('board-onboard-fan-opening-rim',rotate_vertices(ring(radius+.45,radius-.30,.45,segments=32),'left'),steel,point(fan['uv'],depth+1.05))
+            add('board-onboard-static-fan-hub',rotate_vertices(ring(radius*fan['hub_ratio'],0.,.9,segments=24),'left'),color('#34383d'),point(fan['uv'],depth+.2))
         # Countersunk retaining screws only on detachable M.2 covers.
         if is_m2:
             u0,u1=min(p[0] for p in poly),max(p[0] for p in poly);v=sum(p[1] for p in poly)/len(poly)
-            for u in (u0+.022,u1-.022):
+            for u,v in cover.get('fasteners_uv',((u0+.022,v),(u1-.022,v))):
                 pos=point((u,v),depth+1.3)
                 add('board-cover-screw',rotate_vertices(ring(1.65,.45,.45,segments=12),'left'),steel,pos)
     # The I/O cover's clear inset is an original simple translucent panel,
@@ -466,6 +503,10 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         unplaced_source_features=model.get('unplaced_source_features',()),
         bundled_m2_accessory_slots=model.get('bundled_m2_accessory_slots',0),bundled_m2_accessory_installed=False,
         battery_placement_status=model.get('battery_placement_status','manual_observed'))
+    if model.get('onboard_fans'):
+        meta['onboard_fans']=copy.deepcopy(model['onboard_fans'])
+        meta['onboard_fan_telemetry_bound']=False
+        meta['onboard_fan_motion']='static_unverified_tachometer_and_direction'
     cpu=spec.get('cpu') or {};identity=(cpu.get('appearance') or {}).get('id',cpu.get('model_id'))
     known_socket={'intel-13700kf':'LGA1700','amd-9950x':'AM5','amd-7800x3d':'AM5'}.get(identity)
     checks=[dict(kind='cpu_socket',state='unknown' if not known_socket else 'matching' if known_socket==model['socket'] else 'mismatch',

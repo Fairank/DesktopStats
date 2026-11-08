@@ -81,7 +81,7 @@ class MotherboardExpansion045Tests(unittest.TestCase):
 
     def test_unknown_photo_mount_and_battery_are_not_upgraded_to_verified(self):
         data=rows()
-        self.assertEqual(sum(r['finish_status']=='photo_reviewed' for r in data),7)
+        self.assertEqual(sum(r['finish_status']=='photo_reviewed' for r in data),12)
         for row in data:
             if row['finish_status']!='photo_reviewed':
                 self.assertEqual(row['finish_status'],'pending_primary_photo')

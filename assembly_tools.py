@@ -131,6 +131,23 @@ class AssemblyTools(WorkspaceTools):
         from assembly_parts import choices
         return choices(self.tr)
 
+    @Property('QVariantList',notify=assemblyChanged)
+    def assemblyLoopPorts(self):
+        from liquid_selection046 import MODEL_FIELDS
+        from liquid_component_runtime046 import get_component
+        from liquid_cooling_catalog044 import get_radiator
+        options=self._draft.get('assembly',{});rows=[]
+        labels={'cpu_block_model':'CPU 冷头','pump_model':'水泵','pump_top_model':'泵盖',
+                'reservoir_model':'水箱','pump_reservoir_model':'泵箱组合'}
+        for field,label in labels.items():
+            component=get_component(MODEL_FIELDS[field],options.get(field,''))
+            for port in component.get('ports',()):
+                rows.append(dict(key=field+':'+port['id'],label=self.tr(label)+' · '+port['id'],role=port['role'],thread=port['thread']))
+        radiator=get_radiator(options.get('radiator_model','')) or {}
+        for port in radiator.get('ports',()):
+            rows.append(dict(key='radiator_model:'+port['id'],label=self.tr('独立冷排')+' · '+port['id'],role=port['role'],thread=radiator.get('port_thread')))
+        return rows
+
     @Property('QVariantMap', notify=assemblyCasesChanged)
     def accessoryCatalog(self):
         from accessory_art import choices
@@ -183,8 +200,18 @@ class AssemblyTools(WorkspaceTools):
                          "window_mode", "desktop_frame",*PART_FIELDS):
             return
         value = copy.deepcopy(self._draft)
-        value["assembly"][field] = selected
+        from liquid_selection046 import MODEL_FIELDS,updated_choice
+        if field in MODEL_FIELDS:value['assembly']=updated_choice(value['assembly'],field,selected)
+        else:value["assembly"][field] = selected
+        if field=='loop_components_mode' and selected=='selected':value['assembly']['gpu_waterblock']=False
         self.edit(value, merge_key=("assembly", field))
+
+    @Slot(str,str)
+    def changeAssemblyLoopFitting(self,port,model):
+        value=copy.deepcopy(self._draft);fittings=value['assembly'].setdefault('loop_fittings',{})
+        if model:fittings[port]=model
+        else:fittings.pop(port,None)
+        self.edit(value,merge_key=('assembly','loop-fitting',port))
 
     @Slot(str)
     def useAssemblyReference(self,kind):

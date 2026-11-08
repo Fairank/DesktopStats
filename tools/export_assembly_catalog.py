@@ -5,6 +5,7 @@ Run with --check to verify the committed reproducible inventory.
 """
 import argparse
 from collections import Counter
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -12,6 +13,36 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 DESTINATION=ROOT/'docs/ASSEMBLY_CATALOG.json'
+
+
+def loop_pack_index(models):
+    """Read the real exported package inventory; never invent download hashes."""
+    from hardware_packs import _archive
+    path=ROOT/'docs/LOOP_PACKS_INDEX.json'
+    if not path.is_file():raise ValueError('Export the actual0.46 loop packs before the catalog')
+    index=json.loads(path.read_text(encoding='utf8'))
+    expected={row['id']:row for row in models}
+    counts=dict(sorted(Counter(row['reference']['part_kind'] for row in models).items()))
+    if (index.get('unique_products')!=len(expected) or index.get('by_kind')!=counts or
+            index.get('installed_by_default') is not False):
+        raise ValueError('Loop package index disagrees with the authoring inventory')
+    covered=set()
+    for item in index['packs']:
+        file=(ROOT/item['file']).resolve()
+        if not file.is_relative_to((ROOT/'model-packs/v046').resolve()) or file.suffix!='.dspack':
+            raise ValueError('Loop package path is outside the data-only release directory')
+        raw=file.read_bytes()
+        if len(raw)!=item['bytes'] or hashlib.sha256(raw).hexdigest()!=item['sha256']:
+            raise ValueError('Loop package index hash or byte size is stale')
+        manifest,contents=_archive(raw)
+        identities=[row['id'] for row in contents]
+        if (manifest['kind']!='loop' or manifest['id']!=item['id'] or
+                set(identities)!=set(item['model_ids']) or len(identities)!=item['products'] or
+                any(row!=expected.get(row['id']) for row in contents)):
+            raise ValueError('Loop package model contents disagree with the catalog')
+        covered.update(identities)
+    if covered!=set(expected):raise ValueError('Loop package index omits an authoring product')
+    return index
 
 
 def build_report():
@@ -22,6 +53,7 @@ def build_report():
     from fan_mounting044 import apply_mounting_facts
     from copy import deepcopy
     from tools.export_cooling_packs045 import pack_models
+    from tools.export_loop_packs046 import pack_models as loop_models
     from component_catalog import CATALOG as AUXILIARY
     from chassis_catalog import CASES
     from top_bar_config import HARDWARE_ICON_STYLES
@@ -101,6 +133,19 @@ def build_report():
                 model_status='original_schematic',styles='all_listed_styles',dimensions_verified=raw.get('dimensions_verified',raw.get('radiator_dimensions_verified',False)),
                 blade_count_verified=raw.get('blade_count_verified',False),blade_geometry_reviewed=raw.get('blade_geometry_reviewed',False),
                 geometry_scope='shared_generator_and_source_observed_reference',telemetry='not_bound_to_installed_sensor'))
+    loops=loop_models();loop_index=loop_pack_index(loops);optional_loops=[]
+    for row in loops:
+        raw=row['reference']
+        optional_loops.append(dict(kind=raw['part_kind'],model_id=row['id'],label=row['label'],brand=row['vendor'],series=row['series'],
+            delivery='optional_pack',pack_kind='loop',pack_collection_id='loop-collection-046',
+            dimensions_mm=raw['dimensions_mm'],reference_envelope_mm=raw['reference_envelope_mm'],
+            dimensions_verified=raw['dimensions_verified'],dimensions_scope=raw.get('dimensions_scope','unknown'),
+            body_dimensions_mm=raw.get('body_dimensions_mm'),body_dimensions_verified=raw.get('body_dimensions_verified',False),
+            ports_count=raw['ports_count'],ports_geometry_complete=raw['ports_geometry_complete'],exact_port_positions_verified=False,
+            contains_motor=raw.get('contains_motor'),requires_motor=raw.get('requires_motor'),
+            source_urls=list(row['sources']),model_status='original_schematic',styles='all_listed_styles',
+            geometry_scope='source_observed_reference_no_manufacturer_cad',telemetry='not_bound_to_installed_sensor',
+            installed_hardware_inferred=False,manufacturer_fit_verified=False))
     return dict(schema_version=1,market_exhaustive=False,machine_inventory=False,
         scope='Named selectable products, original schematic models; not manufacturing CAD or a fit guarantee.',
         styles=list(HARDWARE_ICON_STYLES),style_policy='Every product retains identical geometry and identity across all styles.',
@@ -111,13 +156,18 @@ def build_report():
             series_pending=sum(row['series'] is None for row in rows)),
         optional_summary=dict(cpu_products=len(optional_cpus),available_cpu_products=len(CPU_MODELS),
                               packs=2,cooling_products=len(optional_cooling),cooling_by_kind=dict(Counter(r['kind'] for r in optional_cooling)),
-                              cooling_pack_index='docs/COOLING_PACKS_INDEX.json',installed_by_default=False,executable_content=False),
+                              cooling_pack_index='docs/COOLING_PACKS_INDEX.json',loop_products=len(optional_loops),
+                              loop_by_kind=dict(sorted(Counter(r['kind'] for r in optional_loops).items())),
+                              loop_package_artifacts=len(loop_index['packs']),loop_pack_index='docs/LOOP_PACKS_INDEX.json',
+                              total_optional_products=len(optional_cpus)+len(optional_cooling)+len(optional_loops),
+                              total_named_products=sum(row['record_type']=='product' for row in rows)+len(optional_cpus)+len(optional_cooling)+len(optional_loops),
+                              installed_by_default=False,executable_content=False),
         artwork_2d=dict(kinds=['case','cooler','psu','fan'],
             records=sum(counts[kind] for kind in ('case','cooler','psu','fan')),
             styles=list(HARDWARE_ICON_STYLES),generator='on_demand_svg',cache_max_entries=16,
             motion='explicit_reference_demonstration',sensor_binding=False,
             download_format='standalone_svg_collections',market_exhaustive=False),
-        optional_products=optional_cpus+optional_cooling,products=rows)
+        optional_products=optional_cpus+optional_cooling+optional_loops,products=rows)
 
 
 def main():

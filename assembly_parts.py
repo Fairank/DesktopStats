@@ -28,8 +28,16 @@ def choices(translate=lambda text:text):
     from hardware_appearance import CATALOG,BRANDS
     from cpu_package_runtime import reference_choices
     from memory_appearance import CATALOG as memory,BRANDS as memory_brands
+    from liquid_component_runtime046 import grouped_choices
+    loop=grouped_choices()
     empty=lambda label:[dict(id='',label=translate(label))]
-    return dict(cpus=empty('按系统硬件识别')+[dict(id=row[0],label=row[4],brand=BRANDS[row[2]][0]) for row in CATALOG if row[1]=='cpu']+reference_choices(),
+    return dict(cpu_blocks=empty('未选择 CPU 冷头')+loop['cpu_block'],
+        loop_pumps=empty('未选择水泵／电机')+[r for r in loop['pump'] if r['form']!='pump_top'],
+        loop_pump_tops=empty('未选择泵盖')+[r for r in loop['pump'] if r['form']=='pump_top'],
+        loop_reservoirs=empty('未选择水箱')+loop['reservoir'],
+        loop_combos=empty('使用单独水泵与水箱')+loop['pump_reservoir'],
+        loop_fittings=empty('未选择默认接头')+loop['fitting'],loop_tubing=empty('未选择管材')+loop['tubing'],
+        cpus=empty('按系统硬件识别')+[dict(id=row[0],label=row[4],brand=BRANDS[row[2]][0]) for row in CATALOG if row[1]=='cpu']+reference_choices(),
         gpus=empty('按系统硬件识别')+[dict(zip(('id','label','brand','series_id','series_label'),row)) for row in _gpu_rows()],
         memory=[dict(id=row['id'],label=row['label'],brand=memory_brands[row['brand']][0]) for row in memory],
         boards=empty('按系统主板识别')+[dict(row,label=row['label']+(' · '+translate('外观待核实') if (get_board(row['id']) or {}).get('finish_status')!='photo_reviewed' else '')) for row in boards()],
@@ -54,7 +62,9 @@ def selected_parts(options):
     """Only explicit chosen IDs; unknown parts are not inferred from a board."""
     return dict(cooling=dict(cpu_cooler=options['cooler_model'] or 'none',gpu_waterblock=options['gpu_waterblock'],
         radiator_mount=options['cooler_mount'],case_fans=copy.deepcopy(options['case_fans']),
-        **{key:options[key] for key in ('radiator_model','radiator_fan_model','radiator_fan_layout',
+        **{key:copy.deepcopy(options[key]) for key in ('loop_components_mode','cpu_block_model','pump_model','pump_top_model',
+           'reservoir_model','pump_reservoir_model','fitting_model','tubing_model','loop_tubes_visible','loop_fittings',
+           'radiator_model','radiator_fan_model','radiator_fan_layout',
            'secondary_radiator_model','secondary_radiator_fan_model','secondary_radiator_fan_layout')}),
         auxiliary=dict(psu=dict(model_id=options['psu_model']),storage=copy.deepcopy(options['storage']),
             expansion_cards=copy.deepcopy(options['expansion_cards']),
@@ -67,7 +77,7 @@ def reference_preset(options,kind):
     result=validate_assembly(options)
     cooler={'air':'noctua-nh-u12a','aio':'arctic-liquid-freezer-iii-360',
             'loop':'custom-loop-360-reference'}[kind]
-    result.update(radiator_model='',radiator_fan_model='',radiator_fan_layout='single',
+    result.update(loop_components_mode='reference',loop_fittings={},radiator_model='',radiator_fan_model='',radiator_fan_layout='single',
         secondary_radiator_model='',secondary_radiator_fan_model='',secondary_radiator_fan_layout='single',
         case_model='corsair-5000d-airflow' if kind=='air' else 'hyte-y70',
         cooler_model=cooler,cooler_mount='top',gpu_waterblock=kind=='loop',
@@ -110,11 +120,17 @@ def fit_messages(spec,metadata):
     result=[]
     for group in ('cooling','auxiliary'):
         details=metadata.get(group,{})
+        if group=='cooling' and details.get('loop_issues'):
+            from liquid_messages046 import messages
+            result.extend(messages(details))
         if 'psu_form_factor_not_supported' in details.get('warnings',()):
             result.append('所选电源规格尚不适配此机箱。')
         if details.get('outside_reference'):result.append('部分配件超出机箱参考外形，请检查安装位置。')
         for row in details.get('rejected',()):
-            result.append(reasons.get(row.get('reason'),'部分自选配件未能放入当前参考装机。'))
+            if group=='cooling' and row.get('kind')=='loop_component':
+                from liquid_messages046 import REASONS
+                result.append(REASONS.get(row.get('reason'),'部分水冷连接尚待核实。'))
+            else:result.append(reasons.get(row.get('reason'),'部分自选配件未能放入当前参考装机。'))
     if metadata.get('attachments_outside_reference'):
         result.append('部分配件超出机箱参考外形，请检查安装位置。')
     if metadata.get('cooling',{}).get('mounting_issues'):

@@ -1,6 +1,6 @@
 """Bounded data-only hardware packs. No Qt, network, watcher, or import-time IO.
 
-Version 1 accepts CPU, fan, cooler and radiator data rendered by shared generators. Archives
+Version 1 accepts CPU, fan, cooler, radiator and independent loop references rendered by shared generators. Archives
 are never extracted or executed. Only small picker/identity indexes remain in
 memory; at most eight selected model records are retained. Future model kinds
 need an explicit schema and renderer contract, not executable plugins.
@@ -28,7 +28,7 @@ MAX_ARCHIVE_BYTES = 1536 * 1024
 MAX_MANIFEST_BYTES = 256 * 1024
 MAX_MODELS_BYTES = 1024 * 1024
 SELECTED_CACHE_LIMIT = 8
-PACK_RELEASE_URL = 'https://github.com/Fairank/DesktopStats/blob/codex/cooling-library-v045/docs/HARDWARE_PACKS.md'
+PACK_RELEASE_URL = 'https://github.com/Fairank/DesktopStats/blob/codex/loop-components-v046/docs/HARDWARE_PACKS.md'
 LICENSE = 'PolyForm-Noncommercial-1.0.0'
 LICENSE_SHA256 = 'ffcca38841adb694b6f380647e15f17c446a4d1656fed51a1e2041d064c94cc8'
 _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
@@ -174,6 +174,12 @@ def validate_cpu(row):
 
 def _pack_summary(kind,row):
     if kind=='cpu':return _summary(row)
+    if kind=='loop':
+        from liquid_pack_schema046 import validate_summary
+        result=validate_summary(row)
+        from cooling_pack_baseids045 import BASE_IDS
+        if result['id'] in _BASE_IDS or any(result['id'] in ids for ids in BASE_IDS.values()):raise PackError('Optional loop model shadows a built-in identity')
+        return result
     from cooling_pack_schema045 import validate_summary
     from cooling_pack_baseids045 import BASE_IDS
     result=validate_summary(kind,row)
@@ -183,12 +189,18 @@ def _pack_summary(kind,row):
 
 def _pack_model(kind,row):
     if kind=='cpu':return validate_cpu(row)
+    if kind=='loop':
+        from liquid_pack_schema046 import validate_model
+        return validate_model(row)
     from cooling_pack_schema045 import validate_model
     return validate_model(kind,row)
 
 
 def _model_summary(kind,row):
     if kind=='cpu':return {key:row[key] for key in ('id','label','vendor','series','aliases')}
+    if kind=='loop':
+        from liquid_pack_schema046 import summary_for
+        return summary_for(row)
     from cooling_pack_schema045 import summary_for
     return summary_for(kind,row)
 
@@ -213,7 +225,7 @@ def _archive(raw):
         raise PackError('Unreadable pack') from error
     manifest = _json(manifest_raw)
     _keys(manifest, ('format', 'id', 'version', 'kind', 'label', 'license', 'license_text', 'notice', 'models_sha256', 'models_bytes', 'products'))
-    if type(manifest['format']) is not int or manifest['format'] != FORMAT or manifest['kind'] not in ('cpu','fan','cooler','radiator'):
+    if type(manifest['format']) is not int or manifest['format'] != FORMAT or manifest['kind'] not in ('cpu','fan','cooler','radiator','loop'):
         raise PackError('Unsupported pack format or hardware kind')
     _identifier(manifest['id']); _string(manifest['label'], 120)
     if not isinstance(manifest['version'], str) or len(manifest['version'])>32 or not _VERSION.fullmatch(manifest['version']):
@@ -376,7 +388,7 @@ class PackStore:
 
     def get_model(self,kind,model_id):
         self._ensure()
-        if kind not in ('cpu','fan','cooler','radiator') or not isinstance(model_id,str):return None
+        if kind not in ('cpu','fan','cooler','radiator','loop') or not isinstance(model_id,str):return None
         cache_key=(kind,model_id)
         if cache_key in self._selected:
             self._selected.move_to_end(cache_key)

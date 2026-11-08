@@ -76,7 +76,7 @@ class AssemblyPartsTests(unittest.TestCase):
             dict(expansion_cards=[dict(model_id='same')]*2)]
         for options in invalid:
             with self.subTest(options=options),self.assertRaises(ValueError):validate_assembly(options)
-        self.assertEqual(len(PART_FIELDS),22)
+        self.assertEqual(len(PART_FIELDS),32)
 
     def test_reference_hardware_is_explicit_and_cannot_borrow_installed_temperature_or_rpm(self):
         from stats_config import DEFAULT

@@ -559,12 +559,13 @@ def _radiator(builder,cooler,mount,dimensions,part='cooler:radiator',planes=None
     barbs=[]
     if len(active)==2:
         for port in active:
-            normal=_unit(port['normal']);position=tuple(port['position']);out=_add(position,_mul(normal,10.))
+            normal=_unit(port['normal']);position=tuple(port['position']);out=position if cooler.get('_retail_loop_parts') else _add(position,_mul(normal,10.))
             # Original hollow collar; thread designation comes only from the
             # reviewed radiator. Thread teeth/compression fitting SKU is unknown.
             collar_basis=_basis(normal,basis[0])
-            builder.put('cooler-radiator-reference-hose-collars',ring(7.,4.,10.,builder.segments),'#687882',
-                _add(position,_mul(normal,5.)),collar_basis,part=part)
+            if not cooler.get('_retail_loop_parts'):
+                builder.put('cooler-radiator-reference-hose-collars',ring(7.,4.,10.,builder.segments),'#687882',
+                    _add(position,_mul(normal,5.)),collar_basis,part=part)
             barbs.append(out)
     elif profile is None:
         # Existing sealed-AIO or explicitly generic-reference hose outlets, schematic. No universal
@@ -583,6 +584,13 @@ def _radiator(builder,cooler,mount,dimensions,part='cooler:radiator',planes=None
         installed_fan_count=len(sides)*cooler['fan_count'],ports_count=profile.get('ports_count') if profile else 2,
         port_thread=profile.get('port_thread') if profile else None,telemetry_bound=False,
         detail_metadata=detail.get('metadata',{})))
+    if cooler.get('_retail_loop_parts'):
+        thread=profile.get('port_thread') if profile else None
+        thread='G1/4' if thread and 'G1/4' in thread else thread
+        builder.parts[-1]['connection_ports']=[dict(port,thread=thread,
+            thread_gender='female' if profile and profile.get('port_thread_verified') else 'unknown',
+            position_verified=False,role_verified=False) for port in ports
+            if port.get('open') is not False and not port.get('capped')]
     return barbs
 
 
@@ -882,8 +890,17 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
                 if kind=='custom_loop' and valid_size and isinstance(valid_position,(tuple,list)) and len(valid_position)==3 and all(type(v) in (int,float) and math.isfinite(v) for v in valid_position) and supported and fits:
                     gpu_pcb=pcb
                 else:meta['warnings'].append('GPU block omitted: requires custom loop, explicit posed PCB reference and a separate supported full-size radiator mount; original GPU cooler retained.')
-            if cooler is None:pass
-            elif check=='unsupported':meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
+            manual_loop=kind=='custom_loop' and selection.get('loop_components_mode')=='selected'
+            if cooler is not None and manual_loop and check!='unsupported':
+                from assembly_loop046 import add_selected_loop
+                loop=add_selected_loop(builder,cooler,selection,spec,anchors,dimensions,planes,p,basis,mount,meshes)
+                meta['selected_loop']=loop;meta['cooler']=cooler
+                meta['rejected'].extend(dict(row,kind='loop_component') for row in loop['issues'] if row['severity']=='error')
+                meta['loop_issues']=[row for row in loop['issues'] if row['severity']!='error']
+                occupied.update(row['mount'] for row in builder.parts if row['kind']=='radiator')
+                meta['fan_tach_mapping']='Independent loop components have no bound water temperature, flow or pump/fan tach.'
+            elif cooler is None:pass
+            elif check=='unsupported' :meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
             elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck'),secondary_cooler):
                 occupied.add(mount);meta['cooler']=cooler;meta['radiator_mount_compatibility']=check
                 occupied.update(row['mount'] for row in builder.parts if row['kind']=='radiator')

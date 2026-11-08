@@ -141,7 +141,8 @@ ColumnLayout {
         }
         Text {Layout.fillWidth:true;visible:root.coolerKind==="aio";text:ui.t("一体式水冷保留原厂冷排；独立冷排用于自定义回路。")
             font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
-        SettingRow {Layout.fillWidth:true;visible:root.coolerKind==="custom_loop";label:ui.t("显卡水冷头（参考）")
+        LoopParts046 {Layout.fillWidth:true;visible:root.coolerKind==="custom_loop";config:root.config;catalog:root.catalog}
+        SettingRow {Layout.fillWidth:true;visible:root.coolerKind==="custom_loop"&&root.config.loop_components_mode!=="selected";label:ui.t("显卡水冷头（参考）")
             note:ui.t("仅替换三维外观，不代表检测到本机改装。")
             Toggle {checked:root.config.gpu_waterblock===true;onToggled:stats.changeAssembly("gpu_waterblock",checked)}}
         RowLayout {

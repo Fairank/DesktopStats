@@ -14,7 +14,8 @@ Popup {
     property real phase:0
     property bool demoMotion:false
     property int demoRpm:1200
-    readonly property string catalogKey:({case:"cases",cooler:"coolers",psu:"psus",fan:"fans"})[category]
+    readonly property string catalogKey:({case:"cases",cooler:"coolers",psu:"psus",fan:"fans",
+        cpu_block:"cpu_blocks",pump:"loop_pumps",reservoir:"loop_reservoirs",pump_reservoir:"loop_combos",fitting:"loop_fittings",tubing:"loop_tubing"})[category]
     readonly property var entries:library[catalogKey] || []
     readonly property var brands:[{id:"",label:ui.t("全部品牌")}].concat([...new Set(entries.map(row=>row.brand).filter(Boolean))].sort().map(value=>({id:value,label:value})))
     readonly property var filtered:entries.filter(row=>(!brand||row.brand===brand)&&(!query||((row.label||"")+" "+(row.brand||"")).toLowerCase().includes(query.toLowerCase())))
@@ -47,7 +48,7 @@ Popup {
         RowLayout {
             Layout.fillWidth:true;spacing:12
             Text {Layout.fillWidth:true;text:ui.t("硬件型号图鉴");font.family:ui.fontFamily;font.pixelSize:21;font.weight:Font.DemiBold;color:ui.ink}
-            ActionButton {objectName:"accessoryDownload";text:ui.t("下载 SVG 图集");quiet:true;onClicked:stats.downloadAccessoryArt(root.category)
+            ActionButton {objectName:"accessoryDownload";visible:["case","cooler","psu","fan"].includes(root.category);text:ui.t("下载 SVG 图集");quiet:true;onClicked:stats.downloadAccessoryArt(root.category)
                 ToolTip.visible:hovered;ToolTip.text:ui.t("应用已自带这些外观；下载的是独立 SVG 图集。")}
             IconButton {objectName:"closeAccessoryGallery";symbol:"close";label:ui.t("关闭");onClicked:root.close()}
         }
@@ -57,7 +58,10 @@ Popup {
             Layout.fillWidth:true;spacing:6
             Repeater {
                 model:[{id:"case",key:"cases",label:ui.t("机箱")},{id:"cooler",key:"coolers",label:ui.t("CPU 散热器")},
-                       {id:"psu",key:"psus",label:ui.t("电源")},{id:"fan",key:"fans",label:ui.t("机箱风扇")}]
+                       {id:"psu",key:"psus",label:ui.t("电源")},{id:"fan",key:"fans",label:ui.t("机箱风扇")},
+                       {id:"cpu_block",key:"cpu_blocks",label:ui.t("CPU 冷头")},{id:"pump",key:"loop_pumps",label:ui.t("水泵／泵盖")},
+                       {id:"reservoir",key:"loop_reservoirs",label:ui.t("水箱")},{id:"pump_reservoir",key:"loop_combos",label:ui.t("泵箱组合")},
+                       {id:"fitting",key:"loop_fittings",label:ui.t("接头")},{id:"tubing",key:"loop_tubing",label:ui.t("管材")}]
                 ActionButton {
                     required property var modelData
                     objectName:"accessoryCategory_"+modelData.id
@@ -100,7 +104,7 @@ Popup {
                 id:card
                 required property var modelData
                 width:grid.cellWidth;height:grid.cellHeight
-                readonly property var art:stats.accessoryModelArt(root.category,modelData.id,root.selectedStyle)
+                readonly property var art:inViewport && root.visible?stats.accessoryModelArt(root.category,modelData.id,root.selectedStyle):({})
                 readonly property bool hasRotors:(art.rotors || []).length>0
                 readonly property bool inViewport:visible && y+height>grid.contentY && y<grid.contentY+grid.height
                 Rectangle {
@@ -129,7 +133,7 @@ Popup {
                     }
                 }
             }
-            Text {anchors.centerIn:parent;visible:root.filtered.length===0;text:ui.t("没有匹配的型号")
+            Text {anchors.centerIn:parent;visible:root.filtered.length===0;text:ui.t(root.entries.length===0 && !["case","cooler","psu","fan"].includes(root.category)?"导入对应型号扩展包后，即可浏览这些配件。":"没有匹配的型号")
                 font.family:ui.fontFamily;font.pixelSize:13;color:ui.muted}
         }
         Text {Layout.fillWidth:true;text:ui.t("参考插画；演示以转速的 1/120 播放，不绑定本机测速。")

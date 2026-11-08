@@ -217,6 +217,7 @@ def _check(report, output):
         report['accessory_catalog_counts']={key:len(rows) for key,rows in accessory_catalog.items()}
         expected_counts=dict(cases=report['assembly_cases'],**{
             key:sum(bool(row.get('id')) for row in catalog[key]) for key in ('coolers','psus','fans')})
+        expected_counts.update({key:0 for key in ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing')})
         assert report['accessory_catalog_counts']==expected_counts
         for kind,key in (('case','cases'),('cooler','coolers'),('psu','psus'),('fan','fans')):
             for style in ('miniature','notebook_line'):
@@ -274,6 +275,34 @@ def _check(report, output):
             assert fixture_store.memory_status()['selected_records']==0
             assert not any(name in sys.modules for name in ('cpu_catalog','cooling_expansion045','liquid_radiator_expansion045'))
             report['checks'].append('optional-cooling-pack-install-render-remove-no-graphics')
+            # A synthetic loop reference exercises bundled generators without
+            # importing any author catalogs or inferring installed hardware.
+            from liquid_pack_schema046 import selector_for
+            from liquid_component_runtime046 import get_component as get_loop
+            from liquid_geometry046 import build_component
+            identity='self-check-loop-block';url='https://example.test/isolated-reference'
+            reference=dict(id=identity,label='Isolated synthetic CPU block',brand='Synthetic fixture',series='Self-check',
+                part_kind='cpu_block',form='cpu_block',dimensions_mm=dict(width=None,height=None,depth=None),
+                reference_envelope_mm=dict(width=80,height=28,depth=80),dimensions_verified=False,
+                axis_verified=dict(width=False,height=False,depth=False),sources=[url],notes='Not a retail product.',
+                ports_count=2,ports_geometry_complete=True,geometry_family='cpu_armored_square',geometry_features=[],
+                supported_sockets=[],socket_support_verified=False,ports=[dict(id='port'+str(i+1),face='top',
+                    position_normalized=[x,.5,0],role='connection',thread='G1/4',thread_gender='female',
+                    position_verified=False,role_verified=False,source=url) for i,x in enumerate((-.18,.18))])
+            row=dict(id=identity,label=reference['label'],vendor=reference['brand'],series=reference['series'],
+                aliases=[identity],sources=[url],reference=reference,selector=selector_for(reference))
+            source=output.parent/(identity+'.dspack')
+            source.write_bytes(hardware_packs.make_pack(identity,reference['label'],[row],kind='loop'))
+            fixture_store.install(source)
+            actual=get_loop('cpu_block',identity);meshes,part=build_component(actual,'eco')
+            assert meshes and len(part['ports'])==2 and not part['telemetry_bound']
+            artwork=accessory_art('cpu_block',identity,'notebook_line')
+            assert artwork and QSvgRenderer(QByteArray(artwork['svg'].encode('utf8'))).isValid()
+            assert not artwork['rotors']
+            fixture_store.remove(identity);clear_cache()
+            assert get_loop('cpu_block',identity)=={} and cache_info()['entries']==0
+            assert not any(name in sys.modules for name in ('liquid_block_pump_expansion046','liquid_fitting_tube_expansion046'))
+            report['checks'].append('optional-loop-pack-mesh-svg-remove-no-graphics')
         finally:
             hardware_packs._store=previous_store
             clear_cache()

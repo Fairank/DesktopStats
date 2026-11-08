@@ -21,7 +21,9 @@ import cooling_catalog
 STYLES = ('miniature', 'cartoon', 'notebook_color', 'notebook_line', 'sticker',
           'papercut', 'inkwash', 'classic', 'outline', 'solid', 'soft', 'sketch',
           'notebook_smile')
-_KINDS = ('case', 'cooler', 'psu', 'fan')
+_LOOP_KINDS = ('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing')
+_LOOP_KEYS = ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing')
+_KINDS = ('case', 'cooler', 'psu', 'fan', *_LOOP_KINDS)
 _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
 _MAX_ENTRIES = 16
 _CACHE = OrderedDict()
@@ -1059,6 +1061,10 @@ def choices():
                   component_catalog.choices('psu'),cooling_catalog.choices_fans())
         _CHOICES={key:[dict(id=r['id'],label=r['label'],brand=r['brand'],fidelity='schematic_reference')
                        for r in rows] for key,rows in zip(('cases','coolers','psus','fans'),catalogs)}
+        from liquid_component_runtime046 import grouped_choices
+        loop=grouped_choices()
+        _CHOICES.update({key:[dict(r,fidelity='schematic_reference') for r in loop[kind]]
+                         for kind,key in zip(_LOOP_KINDS,_LOOP_KEYS)})
         _CHOICES_GENERATION=library_generation()
     return deepcopy(_CHOICES)
 
@@ -1074,6 +1080,13 @@ def art(kind, model_id, style='miniature'):
     if key in _CACHE:
         _CACHE.move_to_end(key)
         return deepcopy(_CACHE[key])
+    if kind in _LOOP_KINDS:
+        from liquid_svg046 import art as loop_art
+        result=loop_art(kind,model_id,style)
+        if not result:return {}
+        _CACHE[key]=result
+        while len(_CACHE)>_MAX_ENTRIES:_CACHE.popitem(last=False)
+        return deepcopy(result)
     getters=dict(case=chassis_catalog.get_case,cooler=cooling_catalog.get_cooler,
                  psu=component_catalog.get_component,fan=cooling_catalog.get_fan)
     row=getters[kind](model_id)

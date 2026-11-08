@@ -105,11 +105,25 @@ uniform float backgroundMode;
 uniform vec4 inkProjection;
 out vec3 worldNormal;
 out vec3 worldPosition;
+out vec3 adjacentNormal;
+flat out float silhouetteEdge;
+vec3 oct12Normal(float packedValue) {
+ vec2 p=vec2(mod(packedValue,4096.0),floor(packedValue/4096.0))/4095.0*2.0-1.0;
+ vec3 n=vec3(p,1.0-abs(p.x)-abs(p.y));
+ if(n.z<0.0)n.xy=(1.0-abs(n.yx))*vec2(n.x>=0.0?1.0:-1.0,n.y>=0.0?1.0:-1.0);
+ return normalize(n);
+}
 void main() {
+ adjacentNormal=vec3(0.0);silhouetteEdge=0.0;
  if(backgroundMode>0.5) {
   vec2 point=gl_VertexID==0?vec2(-1.0,-1.0):gl_VertexID==1?vec2(3.0,-1.0):vec2(-1.0,3.0);
   worldNormal=vec3(0.0,0.0,1.0);worldPosition=vec3(0.0);gl_Position=vec4(point,0.0,1.0);
- } else {worldNormal=normalMatrix*normal;worldPosition=(modelMatrix*vec4(position,1.0)).xyz;
+ } else {
+  if(normal.z < -1.5) {
+   worldNormal=normalMatrix*oct12Normal(normal.x);
+   adjacentNormal=normalMatrix*oct12Normal(normal.y);silhouetteEdge=1.0;
+  } else worldNormal=normalMatrix*normal;
+  worldPosition=(modelMatrix*vec4(position,1.0)).xyz;
   gl_Position=matrix*vec4(position,1.0);
   if(inkProjection.x>0.0) {
    float wave=dot(position,vec3(.071,.043,.053))+inkProjection.w*.17;
@@ -121,6 +135,8 @@ void main() {
 FRAGMENT_SHADER='''#version 330 core
 in vec3 worldNormal;
 in vec3 worldPosition;
+in vec3 adjacentNormal;
+flat in float silhouetteEdge;
 uniform vec4 baseColor;
 uniform float shadeMix;
 uniform float backgroundMode;
@@ -150,6 +166,10 @@ void main() {
  }
  vec3 n=normalize(worldNormal);
  vec3 v=normalize(eyePosition-worldPosition);
+ if(effectParams.w>.5&&silhouetteEdge>.5) {
+  float a=dot(worldNormal,v),b=dot(adjacentNormal,v);
+  if(min(a,b)>0.0||max(a,b)<0.0)discard;
+ }
  vec3 l=normalize(vec3(-0.7,1.0,0.8));
  float key=max(0.0,dot(n,l));
  float fill=max(0.0,dot(n,normalize(vec3(0.8,0.3,-0.6))));

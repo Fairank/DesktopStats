@@ -14,7 +14,7 @@ SettingsGroup {
         ActionButton { objectName:"hardwarePacksImport";text:ui.t("导入扩展包");onClicked:stats.importHardwarePack() }
     }
     Text {
-        Layout.fillWidth:true;text:ui.t("提供 CPU、风扇、散热器和冷排型号包，可按品牌或类别选择。已有硬件保留，所有外观共用同一目录。")
+        Layout.fillWidth:true;text:ui.t("按品牌或类别下载 CPU、风扇、散热器、冷排，以及冷头、水泵、水箱、接头和管材。六套风格共用同一型号目录。")
         color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap
     }
     Text {

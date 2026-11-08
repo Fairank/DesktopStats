@@ -987,7 +987,8 @@
       "sources": [
         "https://dlcdnets.asus.com/pub/ASUS/mb/Socket%20AM5/ROG_STRIX_B650E-I_GAMING_WIFI/E20253_ROG_STRIX_B650E-I_GAMING_WIFI_UM_WEB.pdf",
         "https://rog.asus.com/motherboards/rog-strix/rog-strix-b650e-i-gaming-wifi-model/",
-        "https://dlcdnwebimgs.asus.com/files/media/B21F5C75-0BAA-4FEB-8CFF-0116FE56039F/v1/img/spec/performance.png"
+        "https://dlcdnwebimgs.asus.com/files/media/B21F5C75-0BAA-4FEB-8CFF-0116FE56039F/v1/img/spec/performance.png",
+        "https://dlcdnwebimgs.asus.com/gain/FE82325B-98A9-4D55-B0FA-E8E168C2FB6B/w1000/h732"
       ]
     },
     {
@@ -1006,7 +1007,8 @@
       "sources": [
         "https://download.msi.com/archive/mnu_exe/mb/MPGB650IEDGEWIFI.pdf",
         "https://www.msi.com/Motherboard/MPG-B650I-EDGE-WIFI/Specification",
-        "https://storage-asset.msi.com/datasheet/mb/us/MPG-B650I-EDGE-WIFI.pdf"
+        "https://storage-asset.msi.com/datasheet/mb/us/MPG-B650I-EDGE-WIFI.pdf",
+        "https://storage-asset.msi.com/global/picture/product/product_1678348227e9a55fe78aa866f278abec97de2aa859.webp"
       ]
     },
     {
@@ -1015,7 +1017,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "form_factor": "itx",
       "label": "ASRock B550M-ITX/ac",
       "layout_status": "manual_reviewed",
@@ -1024,7 +1026,8 @@
       "socket": "AM4",
       "sources": [
         "https://download.asrock.com/Manual/B550M-ITXac.pdf",
-        "https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp"
+        "https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp",
+        "https://www.asrock.com/mb/photo/B550M-ITXac(L2).png"
       ]
     },
     {
@@ -1033,7 +1036,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "form_factor": "itx",
       "label": "ASRock H670M-ITX/ax",
       "layout_status": "manual_reviewed",
@@ -1042,7 +1045,8 @@
       "socket": "LGA1700",
       "sources": [
         "https://download.asrock.com/Manual/H670M-ITXax.pdf",
-        "https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp"
+        "https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp",
+        "https://www.asrock.com/mb/photo/H670M-ITXax(L2).png"
       ]
     },
     {
@@ -1108,7 +1112,7 @@
         "height": 244.0,
         "width": 244.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "form_factor": "matx",
       "label": "GIGABYTE B550M DS3H (rev. 1.5)",
       "layout_status": "manual_reviewed",
@@ -1117,7 +1121,8 @@
       "socket": "AM4",
       "sources": [
         "https://download.gigabyte.com/FileList/Manual/mb_manual_b550m-ds3h_e_1503.pdf?v=f48dcfee919cb5657d13fb0b7ff08940",
-        "https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp"
+        "https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp",
+        "https://static.gigabyte.com/StaticFile/Image/Global/88e20304d808c65f240b6b77f66c044e/ProductRemoveBg/35433"
       ]
     },
     {
@@ -1164,7 +1169,7 @@
         "height": 305.0,
         "width": 244.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "form_factor": "atx",
       "label": "ASRock B650 PG Lightning",
       "layout_status": "manual_reviewed",
@@ -1173,7 +1178,8 @@
       "socket": "AM5",
       "sources": [
         "https://download.asrock.com/Manual/B650%20PG%20Lightning.pdf",
-        "https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp"
+        "https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp",
+        "https://www.asrock.com/mb/photo/B650%20PG%20Lightning(L2).png"
       ]
     },
     {
@@ -1182,7 +1188,7 @@
         "height": 305.0,
         "width": 244.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "form_factor": "atx",
       "label": "ASRock X870 Pro RS",
       "layout_status": "manual_reviewed",
@@ -1191,7 +1197,8 @@
       "socket": "AM5",
       "sources": [
         "https://download.asrock.com/Manual/X870%20Pro%20RS.pdf",
-        "https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp"
+        "https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp",
+        "https://www.asrock.com/mb/photo/X870%20Pro%20RS(L2).png"
       ]
     }
   ],

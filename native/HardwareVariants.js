@@ -115,7 +115,7 @@ function body(state,collector) {
     if(!state || ["cpu","gpu","memory"].indexOf(state.kind)<0 || styles.indexOf(state.icon_set)<0)return ""
     var selected=state.icon_set,p=palette(selected,state.ink),normalized=copy(state),out=""
     if(selected==="inkwash") {
-        normalized.icon_set="notebook_color";normalized.ink="#455360"
+        normalized.icon_set="notebook_color";normalized.ink="#455360";normalized.notebookColorWash=false
         var moving=[],fixed=Notebook.body(normalized,moving)
         out=inkwash(fixed,p)
         moving.forEach(function(rotor){
@@ -137,6 +137,6 @@ function generic(kind,ink,moving,style) {
     if(kind==="gpu")return body({kind:"gpu",style:"gpu_neutral",fan_count:-1,ink:ink,icon_set:style})
     // Category symbols never assert an installed retail product. The face-free
     // notebook set covers the established semantic names without new polling.
-    var value=Notebook.generic(kind,"#455360",moving,"notebook_color")
+    var value=Notebook.generic(kind,"#455360",moving,"notebook_color",false)
     return '<g class="hardware-variants '+style+'">'+(style==="inkwash"?inkwash(value,p):paint(value,p))+'</g>'
 }

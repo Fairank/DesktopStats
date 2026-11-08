@@ -399,7 +399,29 @@ def tube(vertices,radius=1.2,sides=6):
 
 
 def add_auxiliary(spec,anchors,level='balanced'):
-    """Return ADDITIONAL meshes and source/placement metadata, without I/O."""
+    """Build both stages synchronously for legacy callers, without I/O."""
+    stages=auxiliary_stages(spec,anchors,level)
+    try:
+        next(stages)
+        return finish_auxiliary(stages,anchors)
+    finally:stages.close()
+
+
+def finish_auxiliary(stages,anchors):
+    """Resume a single construction with final cooling/cable anchors."""
+    try:stages.send(anchors)
+    except StopIteration as result:return result.value
+    raise RuntimeError('Auxiliary construction yielded more than one body stage')
+
+
+def auxiliary_stages(spec,anchors,level='balanced'):
+    """Yield actual bodies once, then finish cables with updated anchors.
+
+    A selected loop can reserve each already-built PSU/drive/card before
+    choosing a pump pose. The suspended frame belongs only to this scene
+    construction and its caller must close it in a finally block. Neither
+    Mesh objects nor this generator enter serializable scene metadata.
+    """
     level=level if level in ('eco','balanced','close') else 'balanced'
     anchors=anchors if isinstance(anchors,dict) else {};options=spec.get('auxiliary') or {}
     dimensions=_point(anchors.get('case_dimensions'),(300.,500.,500.));w,h,d=dimensions
@@ -750,8 +772,6 @@ def add_auxiliary(spec,anchors,level='balanced'):
 
     pcie_slots=list(connectors.get('pcie') or ());used_slots=set();gpu_anchor=anchors.get('gpu') or {};gpu_bounds=_bounds(gpu_anchor)
     gpu_clearance=None
-    if options.get('cables_enabled') is True and gpu_bounds and isinstance(anchors.get('_gpu_clearance_meshes'),(tuple,list)):
-        gpu_clearance=_GpuObstacle(gpu_bounds,anchors['_gpu_clearance_meshes'])
     if gpu_bounds and pcie_slots:used_slots.add(0)
     for selection in options.get('expansion_cards') or ():
         record=get_component(selection.get('model_id')) if isinstance(selection,dict) else None
@@ -846,6 +866,13 @@ def add_auxiliary(spec,anchors,level='balanced'):
         vertices=perforated_plate(chamfer_rect(columns*pitch+3,13. if kind=='gpu16' else 10.4,.8),tuple(holes),3.,segments=segments)
         add('gpu-power-inlet-'+str(index),vertices,_DARK,_sub(endpoint['position'],_mul(endpoint['normal'],1.5)),'gpu',_connector_basis(endpoint['normal'],endpoint['along']))
 
+    updated_anchors=yield tuple(meshes)
+    if isinstance(updated_anchors,dict):anchors=updated_anchors
+    # The final posed/replaced GPU and newly constructed cooling bodies are
+    # available only after the body stage. Build the cable obstacle once here.
+    gpu_bounds=_bounds(anchors.get('gpu') or {})
+    if options.get('cables_enabled') is True and gpu_bounds and isinstance(anchors.get('_gpu_clearance_meshes'),(tuple,list)):
+        gpu_clearance=_GpuObstacle(gpu_bounds,anchors['_gpu_clearance_meshes'])
     if options.get('cables_enabled') is True:
         active_part='cables:all'
         targets=[]

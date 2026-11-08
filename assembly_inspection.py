@@ -166,7 +166,12 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
         from component_catalog import get_component
         cooling=mapping(spec.get('cooling'));auxiliary=mapping(spec.get('auxiliary'))
         model_id=part.get('model_id','')
-        if component=='cooler' and part.get('kind')=='pump_reservoir':
+        if component=='cooler' and part.get('kind') in ('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing') and model_id:
+            from liquid_component_runtime046 import get_component as get_loop_part
+            from liquid_inspection046 import describe
+            selected=describe(part,get_loop_part(part['kind'],model_id))
+            identity=selected['identity'];rows=selected['rows'];notes.extend(selected['notes'])
+        elif component=='cooler' and part.get('kind')=='pump_reservoir':
             identity=part['label']
             rows=[_static('水温',None,False,'未提供此部件的独立传感器读数。'),
                 _static('流量',None,False,'未提供此部件的独立传感器读数。'),
@@ -260,14 +265,15 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
         metric=row.get('metric','')
         if any(metric.startswith(family+'_') for family in unbound) or 'gpu' in unbound and metric=='vram_percent':
             row.update(value='—',available=False,reason='参考型号未绑定本机传感器。',source='')
+    static_loop=component=='cooler' and part.get('kind') in ('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing') and bool(part.get('model_id'))
     if (component=='all' and unbound or component in ('cpu','gpu') and component in unbound
-            or component=='memory' and 'ram' in unbound or component=='cooler' and 'cpu' in unbound):
+            or component=='memory' and 'ram' in unbound or component=='cooler' and 'cpu' in unbound and not static_loop):
         notes.append('参考型号未绑定本机传感器。')
     if part.get('kind')=='gpu_waterblock':notes.append('自选配件模型不代表已识别的本机硬件。')
     if mapping(spec.get('options')).get('fan_motion')=='demo' and mapping(spec.get('options')).get('fan_animation'):
         notes.append('参考转动（非实测）')
-    if stale and component in ('all','cpu','gpu','memory','cooler'):notes.insert(0,'读数已过期')
+    if stale and component in ('all','cpu','gpu','memory','cooler') and not static_loop:notes.insert(0,'读数已过期')
     return dict(component=target,label=part.get('label') or COMPONENT_LABELS[component],identity=str(identity or ''),
                 identity_parts=[str(value) for value in (cpu.get('label'),gpu.get('label')) if value]
                     if component=='all' else [str(identity or '')],
-                rows=rows[:6],notes=notes,state='available' if any(row['available'] for row in rows) else 'unavailable')
+                rows=rows[:6],notes=list(dict.fromkeys(notes)),state='available' if any(row['available'] for row in rows) else 'unavailable')

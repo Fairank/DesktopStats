@@ -109,6 +109,15 @@ def apply_colors(meshes,style):
     values=[]
     for mesh in meshes:
         tone=paint_color(mesh.color,style,mesh.component)
+        if style=='papercut' and mesh.name.startswith('loop-'):
+            # Only the new loop artwork separates dark paper materials. Keep
+            # original paint, all older hardware and physical vertices intact.
+            name=mesh.name.casefold();alpha=mesh.color[3]
+            if any(word in name for word in ('window','display','lcd')):tone=rgba('#2d4d5a',alpha)
+            elif alpha<.999:tone=rgba('#cfddcf',alpha)
+            elif any(word in name for word in ('grip','seam','weave','slot','inner-channel')):tone=rgba('#55727a',alpha)
+            elif any(word in name for word in ('collar','shoulder','coldplate','metal','valve-lever','control-stem')):tone=rgba('#f0dab3',alpha)
+            elif sum(c*w for c,w in zip(mesh.color[:3],(.2126,.7152,.0722)))<.37:tone=rgba('#b58e78',alpha)
         if mesh.rotor and style in ('papercut','solid'):
             tone=rgba('#f3dfbd' if style=='papercut' else '#bdd5e2',mesh.color[3])
         elif mesh.name=='gpu-fan-hub' and style=='papercut':tone=rgba('#d39978',mesh.color[3])
@@ -263,7 +272,7 @@ def _contour_sample(edges,limit,groups=None):
     return tuple(edge for n,edge in enumerate(edges) if n in chosen)
 
 
-def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False):
+def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False,repair_under_cap=False):
     """Return boundary/crease edges, excluding coplanar triangulation diagonals."""
     if type(limit) is not int or limit<=0:return ()
     limit=min(limit,MAX_STYLE_EDGES);edges={};point_keys={};normal_keys={}
@@ -291,9 +300,9 @@ def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False):
             result.append(edge)
     normal_keys.clear()
     groups=None
-    if len(result)>limit:
-        if not repair_partitions:groups=_edge_groups(result)
-        if repair_partitions or max(len(indices) for indices,_ in groups)>limit:
+    if len(result)>limit or repair_under_cap:
+        if not repair_partitions and not repair_under_cap:groups=_edge_groups(result)
+        if repair_partitions or repair_under_cap or max(len(indices) for indices,_ in groups)>limit:
             # The first original coordinate for a rounded endpoint determines
             # its collinear partition axis. Reuse this scan's first occurrences
             # instead of quantizing every triangle vertex a second time.
@@ -330,12 +339,20 @@ def edge_batches(meshes,style,styles=None):
         # rounded pad has clipped coplanar partitions, so repair those before
         # sampling rather than silently omitting several complete corners.
         edges=crease_edges(mesh.vertices,contour_limit,
-                           repair_partitions=mesh.name.endswith('fan-pads'))
-        if edges:candidates.append((mesh,index,edges,policy))
+                           repair_partitions=mesh.name.endswith('fan-pads'),
+                           repair_under_cap=mesh.name.startswith('loop-'))
+        tags=();smooth_groups=()
+        if mesh.name.startswith('loop-') and policy['line_only']:
+            # Retain complete real smooth-surface groups once at upload. Their
+            # encoded adjacent normals let GPU/SVG/CPU gate by the same view.
+            from liquid_silhouette046 import silhouette_edges
+            edges,tags,smooth_groups=silhouette_edges(mesh.vertices,edges,
+                min(contour_limit,MAX_MESH_EDGES),split_long=bool(policy['wobble']))
+        if edges:candidates.append((mesh,index,edges,policy,tags,smooth_groups))
     fine_words=('spring-head','small-smd','small-package','pins','contacts','silkscreen','model-mark',
                 'label-rule','fastener','screw','water-channel','stator')
     plans=[]
-    for mesh,index,edges,policy in candidates:
+    for mesh,index,edges,policy,tags,smooth_groups in candidates:
         name=mesh.name.casefold();micro=any(word in name for word in fine_words)
         dense=any(word in name for word in ('perforat','grille','vent','mesh','floor-deck','fins','-fin'))
         span=max(max(mesh.vertices[axis::6])-min(mesh.vertices[axis::6]) for axis in range(3))
@@ -353,18 +370,137 @@ def edge_batches(meshes,style,styles=None):
             desired={n for indices,size in groups if size>=threshold for n in indices}
         weight=(.035 if micro else .10 if mesh.component=='cables' else .22 if dense else 2.5 if mesh.rotor else 1.)
         if policy['line_only'] and micro:weight=0.
-        plans.append(dict(mesh=mesh,index=index,edges=edges,policy=policy,costs=costs,ordered=ordered,
-                          desired=desired,selected=set(),weight=weight))
+        atomic={n for group,_ in smooth_groups for n in group}
+        plans.append(dict(mesh=mesh,index=index,edges=edges,policy=policy,costs=costs,
+                          ordered=[n for n in ordered if n not in atomic],
+                          desired=desired-atomic,selected=set(),weight=weight,tags=tags,
+                          smooth_groups=smooth_groups,atomic=atomic,structural=structural,
+                          split_long=bool(policy['wobble']),micro=micro,dense=dense,span=span))
+    crowded=sum(sum(row['costs']) for row in plans)>MAX_STYLE_EDGES
+    if crowded:
+        for row in plans:
+            if len(row['edges'])<=MAX_MESH_EDGES and sum(row['costs'])>MAX_MESH_EDGES:
+                # A collinear midpoint is cosmetic, not another physical edge.
+                # Keep full main contours rather than cutting a534-segment
+                # hand-ink group at512. Only crowded VBOs omit those midpoints;
+                # existing shader view-plane wobble remains the same path.
+                row['costs']=(1,)*len(row['edges']);row['split_long']=False
     reserved=sum(sum(row['costs'][n] for n in row['desired']) for row in plans)
     remaining=MAX_STYLE_EDGES
-    if sum(sum(row['costs']) for row in plans)<=MAX_STYLE_EDGES:
+    if not crowded:
         # A single model frequently fits comfortably. Do not thin its already
         # bounded connected contours a second time merely because one material
         # has a lower weight than another.
         for row in plans:row['selected'].update(range(len(row['edges'])))
         remaining=0
+    else:
+        if reserved>MAX_STYLE_EDGES*.80:
+            # Collinear hand-decoration midpoints double many long true edges
+            # without adding any mechanical contour. Under competing whole-PC
+            # reservations retain the exact same polylines with fewer vertices;
+            # real curve samples/tips and shader wobble remain untouched.
+            for row in plans:
+                row['costs']=(1,)*len(row['edges']);row['split_long']=False
+            # Core coverage belongs to each physical part, not whichever class
+            # happened to consume the budget first. A complete frame alone is
+            # insufficient when its water tubes and tank have disappeared.
+            case_groups=[];parts={};deferred=[]
+            minor=('grip','knurl','seam','fastener','screw','rgb','led','window',
+                   'rubber','decoupling','feet','foot','return-drop','crossed','fan-pads')
+            rotor_reserve=min(MAX_STYLE_EDGES*.55,sum(sum(row['costs'][n] for n in row['desired'])
+                               for row in plans if row['mesh'].rotor))
+            for row in plans:
+                mesh=row['mesh'];name=mesh.name.casefold()
+                if mesh.rotor:continue
+                loop=name.startswith('loop-')
+                tube=loop and 'routed-tube' in name
+                fixed_fan=(name in ('gpu-fan-opening','gpu-fan-hub') or name.endswith('-fan-frame'))
+                gpu_shell=name in ('gpu-shroud','gpu-backplate','gpu-pcb')
+                case_display=mesh.component in ('case','panel') and name.startswith('front-display')
+                board_cover=(mesh.component=='board' and not row['dense'] and row['span']>=20 and
+                             any(word in name for word in ('heatsink','retention-frame','memory-sockets','expansion-slot')))
+                if row['micro'] or row['dense'] or (loop and any(word in name for word in minor)):continue
+                if not(row['structural'] or board_cover or loop or fixed_fan or case_display):continue
+                part=mesh.part_id or mesh.component or 'part:'+str(row['index'])
+                primary=(name=='motherboard-reference' or fixed_fan or gpu_shell or board_cover or loop and any(word in name for word in
+                         ('clear-tank','source-reservoir-tube','clear-reservoir-body',
+                          'cpu-source-shell','cpu-clear-chamber','source-hydraulic-reservoir-base',
+                          'source-reservoir-lid','included-pump-motor')))
+                units=[]
+                if tube or primary and loop:
+                    # Mouth rims and all already-bounded side groups together:
+                    # selecting one bend or a chamber lid without its aperture
+                    # loops leaves a tube/block/tank visibly disconnected.
+                    units.append((tuple(range(len(row['edges']))),row['span'],0))
+                else:
+                    available=[n for n in range(len(row['edges'])) if n not in row['atomic']]
+                    groups=_edge_groups([row['edges'][n] for n in available]) if available else ()
+                    maximum=max((span for _,span in groups),default=0.)
+                    for group,span in groups:
+                        threshold=max(maximum*.45,min(4. if loop else 12.,row['span']*.14))
+                        if span>=threshold:
+                            units.append((tuple(available[n] for n in group),span,
+                                          0 if primary else 1))
+                    for group,area in row['smooth_groups']:
+                        units.append((group,math.sqrt(area),0 if primary else 1))
+                for group,score,rank in units:
+                    row['atomic'].update(group)
+                    unit=(rank,-score,row['index'],group,row)
+                    case_frame=(mesh.component in ('case','panel') and (name=='psu-shroud' or any(word in name for word in
+                                ('upright','rail','frame','case-back','case-bottom','case-right','left-glass'))))
+                    if case_frame:case_groups.append(unit)
+                    else:parts.setdefault(part,[]).append(unit)
+            for _,_,_,group,row in sorted(case_groups,key=lambda item:(item[0],item[1],item[2],item[3][0])):
+                row['atomic'].update(group)
+                charge=sum(row['costs'][n] for n in group if n not in row['selected'])
+                if charge<=remaining:
+                    row['selected'].update(group);remaining-=charge
+            for units in parts.values():units.sort(key=lambda item:(item[0],item[1],item[2],item[3][0]))
+            spent={part:0 for part in parts}
+            for phase in (0,1):
+                phase_parts={part:[unit for unit in units if unit[0]==phase] for part,units in parts.items()}
+                for turn in range(max((len(units) for units in phase_parts.values()),default=0)):
+                    for part,units in phase_parts.items():
+                        if turn>=len(units):continue
+                        unit=units[turn];_,_,_,group,row=unit
+                        charge=sum(row['costs'][n] for n in group if n not in row['selected'])
+                        quota=(512 if part.startswith(('cooler:tubing','cooler:pump-reservoir','cooler:cpu')) else
+                               64 if part.startswith(('fans:','cooler:radiator:front:','cooler:radiator:back:')) else
+                               128 if part.startswith(('cooler:fitting:','psu:','storage:')) else 256)
+                        if phase==0:quota=MAX_STYLE_EDGES
+                        # One coherent large first contour may use its full mesh
+                        # allowance; the quota only limits extra part decoration.
+                        if spent[part]==0:quota=max(quota,min(MAX_MESH_EDGES,charge))
+                        if charge<=remaining-rotor_reserve and spent[part]+charge<=quota:
+                            row['selected'].update(group);remaining-=charge;spent[part]+=charge
+                        else:deferred.append(unit)
+            # The original rotor desired set is already formed from complete
+            # major leaf/hub contour groups. Never scatter a rejected set via
+            # the later one-per-mesh or weighted residual sampling.
+            for row in plans:
+                if not row['mesh'].rotor:continue
+                group=row['desired'];row['atomic'].update(group)
+                charge=sum(row['costs'][n] for n in group if n not in row['selected'])
+                if charge<=remaining:
+                    row['selected'].update(group);remaining-=charge
+            for _,_,_,group,row in sorted(deferred,key=lambda item:(item[0],item[1],item[2],item[3][0])):
+                charge=sum(row['costs'][n] for n in group if n not in row['selected'])
+                if charge<=remaining:
+                    row['selected'].update(group);remaining-=charge
+            for row in plans:row['ordered']=[n for n in row['ordered'] if n not in row['atomic']]
+        # Smooth face groups are atomic: scattering the edges of one cylinder
+        # around its circumference recreates arbitrary-camera silhouette gaps.
+        # Total cap is unchanged. Only crowded high-reservation scenes gain
+        # the explicit major-frame priority above; isolated VBOs stay equal.
+        groups=[(area*row['weight'],index,group,row) for index,row in enumerate(plans)
+                for group,area in row['smooth_groups']]
+        for _,_,group,row in sorted(groups,key=lambda item:(-item[0],item[1],item[2][0])):
+            charge=sum(row['costs'][n] for n in group if n not in row['selected'])
+            if charge<=remaining:
+                row['selected'].update(group);remaining-=charge
     # Keep one trace for every mesh when possible, then close important frames.
     for row in plans:
+        if not row['ordered']:continue
         n=row['ordered'][0]
         if row['costs'][n]<=remaining:row['selected'].add(n);remaining-=row['costs'][n]
     if reserved<=MAX_STYLE_EDGES*.80:
@@ -379,15 +515,16 @@ def edge_batches(meshes,style,styles=None):
             if not row['mesh'].rotor:continue
             missing=row['desired']-row['selected'];cost=sum(row['costs'][n] for n in missing)
             if cost<=remaining:row['selected'].update(missing);remaining-=cost
-    weighted=sum(sum(cost for n,cost in enumerate(row['costs']) if n not in row['selected'])*row['weight'] for row in plans)
+    weighted=sum(sum(cost for n,cost in enumerate(row['costs']) if n not in row['selected'] and n not in row['atomic'])*row['weight'] for row in plans)
     allowance=remaining
     for row in plans:
         available=[n for n in row['ordered'] if n not in row['selected']]
         share=int(allowance*sum(row['costs'][n] for n in available)*row['weight']/max(1.,weighted))
+        if crowded:share=min(share,MAX_MESH_EDGES-sum(row['costs'][n] for n in row['selected']))
         # Alternate long contours with distributed arcs; fan rims and blades
         # remain recognizable without tracing every pin or cable strand.
         head=available[:min(len(available),share//4)];taken=set(head)
-        rest=[n for n in range(len(row['edges'])) if n not in row['selected'] and n not in taken]
+        rest=[n for n in range(len(row['edges'])) if n not in row['selected'] and n not in taken and n not in row['atomic']]
         count=min(len(rest),share)
         spread=[rest[n*len(rest)//count] for n in range(count)] if count else []
         for n in (*head,*spread):
@@ -397,11 +534,12 @@ def edge_batches(meshes,style,styles=None):
     output=[];remaining=MAX_STYLE_EDGES
     for row in plans:
         mesh,index,edges,policy=(row[key] for key in ('mesh','index','edges','policy'))
-        chosen=[edges[n] for n in sorted(row['selected'])]
         lines=[]
-        for a,b in chosen:
+        for n in sorted(row['selected']):
+            a,b=edges[n]
+            tag=row['tags'][n] if row['tags'] else (0.,0.,1.)
             points=(a,b)
-            if policy['wobble'] and math.dist(a,b)>12:
+            if row['split_long'] and math.dist(a,b)>12:
                 points=(a,tuple((a[k]+b[k])/2 for k in range(3)),b)
             # Keep physical ink on its actual crease. A millimetre-scale 3-D
             # pen displacement can sink through a thin lid and disappear in
@@ -411,6 +549,6 @@ def edge_batches(meshes,style,styles=None):
             # cap rather than multiplying draw work for hand-drawn variants.
             for p,q in zip(points,points[1:]):
                 if remaining<=0:break
-                lines.extend((*p,0.,0.,1.,*q,0.,0.,1.));remaining-=1
+                lines.extend((*p,*tag,*q,*tag));remaining-=1
         if lines:output.append((mesh,tuple(lines)))
     return tuple(output)

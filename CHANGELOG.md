@@ -1,5 +1,45 @@
 # Changes
 
+## 0.46.0-preview.1 (development candidate)
+
+- Add 63 optional data-only loop references: 10 CPU blocks, 8 pumps/motors/tops,
+  4 reservoirs, 10 pump/reservoir combinations, 20 fittings and 11 tubing models.
+  Fifteen collection/category/brand downloads are overlapping alternatives.
+- Distinguish motor-only, motorless housing, complete pump, side-port LCD block,
+  rounded rectangular reservoir, source-observed lighting and actual hose barbs.
+  Keep unknown dimensions, ports, telemetry and fit explicitly unverified.
+- Add explicit component selection, per-port fittings, independent inspection,
+  static reference tubing and bounded soft-tube obstacle avoidance. Reject
+  incompatible nominal sockets, threads, tube types and diameters. Never bend
+  carbon tubing or invent a GPU block solely from the graphics chip name.
+- Reserve actual selected PSU, storage and expansion bodies before placing
+  loop parts, then resume the same auxiliary build for cables. Reject the
+  reproduced pump/reservoir overlap with added hard drives; do not duplicate
+  device mesh construction or show a falsely connected route.
+- Refine fitting shoulders, crossed knurling, valve levers, open tube mouths and
+  smooth shared-ring lofts. Retain real longitudinal cylinder edges in line art
+  and distinguish the new loop materials in papercut without changing old art.
+- Preserve coherent case/part/rotor contours within the existing ink budgets;
+  crowded hand ink omits redundant collinear subdivision points. Correct thin
+  GPU decoration walls crossing fan apertures, preserve explicit shell cutouts,
+  and constrain reference fan radii by both face axes without changing blade
+  identity or hardware counts.
+- Add on-demand loop SVG gallery cards from the same production meshes. Reuse
+  the existing sixteen-entry gallery cache; no per-product clock or collector.
+- Verify five more motherboard finishes and distinguish a visible fan well
+  from a grille with unverified internal blades. Six older finishes remain open.
+- Preserve six numbered concepts and thirteen saved choices; original has no
+  smile. Update the full requirement ledger and partial PCBS comparison honestly.
+- Restore the colored-pencil wash to notebook-color GPU housings and actual
+  rotor paths. Preserve all model geometry and the other twelve saved styles,
+  including the older ink-wash adapter. Verify current widgets with the actual
+  software QML renderer and retained rotor-only transforms.
+- Combine six repeated loop picker-index copies into one. Scoped microbenchmark
+  and retained-object measurements do not stand for whole application usage.
+- No installation, restart, UAC or visible desktop test while the user is gaming.
+  Native CPU temperature, glass, fullscreen and application overhead remain open.
+
+
 ## 0.45.0-preview.1 (development candidate)
 
 - Preserve the six numbered concepts and all thirteen saved choices. Complete

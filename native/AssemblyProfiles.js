@@ -15,7 +15,14 @@ function state(input) {
         series_id:input.series_id,shroud:input.shroud,accent:input.accent,ink:"#455360",
         icon_set:"solid",model_id:input.confidence==="model"?input.id:""}
 }
-function shape(value) {return value?{d:value.d,m:value.m}:null}
+function shape(value) {
+    if(!value)return null
+    const result={d:value.d,m:value.m}
+    // Keep explicit compound-shell fill semantics. The bounded Python reader
+    // flattens these same subpaths; ordinary shapes retain their previous data.
+    if(value.a&&value.a["fill-rule"]==="evenodd")result.fill_rule="evenodd"
+    return result
+}
 function gpu(input) {
     const s=state(input),g=Solid.geometry(s),c=Board.colors(s,Solid.palette(s));c.ink="#455360"
     const front=Solid.front(s,g,c),rows=Notebook.sourceShapes(front)

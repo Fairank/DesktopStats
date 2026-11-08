@@ -23,7 +23,7 @@ from tools import build as BUILD  # noqa: E402 - direct tools/ CLI needs the pro
 
 _NATIVE = """
 ActionButton.qml Appearance.qml Check.qml Choice.qml ContentCanvas.qml
-AssemblyPage.qml AssemblyParts.qml AssemblyClock.qml AssemblyProfiles.js HardwarePacks.qml HardwareCpuPackages.js AccessoryGallery.qml AccessoryGlyph.qml
+AssemblyPage.qml AssemblyParts.qml LoopParts046.qml AssemblyClock.qml AssemblyProfiles.js HardwarePacks.qml HardwareCpuPackages.js AccessoryGallery.qml AccessoryGlyph.qml
 ContentLayoutEditor.qml DesktopWidget.qml DesktopHardwareModel.qml Details.qml FormField.qml
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
@@ -81,6 +81,27 @@ REVIEWED_FILES = frozenset(
         for name in (
             "icon-manifest.json",
             "showcase/hardware-schemes.png",
+            "showcase/loop-fitting-six046.png",
+            "showcase/loop-fittings-atlas046-1.png",
+            "showcase/loop-fittings-atlas046-2.png",
+            "showcase/motherboard-details046.png",
+            "showcase/cpu-gpu-six046-static.png",
+            "showcase/three-gpus-notebook-color046.png",
+            "showcase/assembly-loop-six046.png",
+            "showcase/assembly-loop-six046.gif",
+            "showcase/assembly-loop-six046.mp4",
+            "showcase/loop-block-six046-1.png",
+            "showcase/loop-block-six046-2.png",
+            "showcase/loop-block-six046-3.png",
+            "showcase/loop-block-six046-4.png",
+            "showcase/loop-block-six046-5.png",
+            "showcase/loop-block-six046-6.png",
+            "showcase/loop-block-six046-7.png",
+            "showcase/loop-block-six046-8.png",
+            "showcase/loop-blocks-atlas046-1.png",
+            "showcase/loop-blocks-atlas046-2.png",
+            "showcase/loop-blocks-atlas046-3.png",
+            "showcase/loop-blocks-atlas046-4.png",
             "showcase/assembly-3d.png",
             "showcase/case-expansion.png",
             "showcase/case-styles.png",

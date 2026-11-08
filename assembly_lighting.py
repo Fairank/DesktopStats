@@ -11,7 +11,12 @@ COLORS = {'off': (.13, .15, .16, 1.), 'warm': (1., .79, .53, 1.),
           'mint': (.49, .87, .78, 1.), 'violet': (.73, .62, .94, 1.)}
 _EXACT_RGB = frozenset(('ram-diffuser', 'front-light-strip', 'horizontal-light-strip',
     'cooler-top-accent-bars', 'cooler-corsair-lcd-rgb-ring', 'cooler-nucleus-static-light-ring',
-    'cooler-bridge-rgb-outline', 'cooler-pump-rgb-cap'))
+    'cooler-bridge-rgb-outline', 'cooler-pump-rgb-cap',
+    'loop-source-observed-corner-argb-window','loop-source-observed-display-rgb-ring',
+    'loop-source-observed-chamber-rgb-rim','loop-source-observed-motor-base-rgb-band',
+    'loop-source-observed-pump-top-halo','loop-source-observed-photon-rear-rgb-strip',
+    'loop-source-observed-reservoir-rgb-ring','loop-source-observed-r260-side-rgb-strip',
+    'loop-source-observed-xd3-front-chamber-rgb-rim','loop-source-observed-mini-tank-base-halo'))
 _FAN_RGB = ('-static-rgb-hub', '-static-rgb-rim', '-square-rgb-rim',
             '-stationary-polygon-light-ring', '-side-rgb', '-infinity-hub-rings')
 _FIXED_WHITE = frozenset(('cooler-pump-white-light-ring','cooler-pump-fixed-white-mark'))

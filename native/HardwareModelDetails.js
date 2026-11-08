@@ -101,10 +101,15 @@ function monochrome(source,state) {
         .replace(/stroke-width="([0-9.]+)"/g,function(all,width){return 'stroke-width="'+Math.min(Number(width),.15)+'"'})
     return '<g stroke="'+ink+'" stroke-width=".13">'+out+'</g>'
 }
-function paint(source,state) {
+function paint(source,state,fanProfile) {
     var style=state.icon_set
     if(["classic","outline"].indexOf(style)>=0)return monochrome(source,state)
-    if(["notebook_line","notebook_color","notebook_smile"].indexOf(style)>=0)
+    if(style==="notebook_color") {
+        var colors=Board.colors(state,Solid.palette(state));colors.ink=state.ink;colors.pencilColor=true
+        colors.blade=Notebook.pencilBladeColor(fanProfile)
+        return Notebook.rotorInk(source,colors)
+    }
+    if(["notebook_line","notebook_smile"].indexOf(style)>=0)
         return Notebook.rotorInk(source,{ink:state.ink})
     if(style==="sketch")return Sketch.linework(source,Sketch.palette(state),"model-rotor",{rotor:true,wobble:false,keepTiny:true})
     if(style==="inkwash")return Variants.inkwash(Notebook.rotorInk(source,{ink:"#455360"}),Variants.palette(style,state.ink))
@@ -231,7 +236,7 @@ function body(state,base,collector) {
         var hints={machined_hub:["nvidia-founders-rtx5090-32g","intel-limited-arc-a770-16g"].indexOf(state.model_id)>=0,
             red_label_edge:["msi-gtx980ti-gaming-6g","msi-vega64-8g-reference"].indexOf(state.model_id)>=0,
             light_label_edge:["biostar-radeon-rx7600-va7606rm81","biostar-radeon-rx7600-oc-va76s6rm81"].indexOf(state.model_id)>=0}
-        rotor.body=paint(Fans.modelRotor(p,hints),state)
+        rotor.body=paint(Fans.modelRotor(p,hints),state,p)
     })
     var line=["outline","sketch","notebook_line","notebook_color","notebook_smile","inkwash"].indexOf(state.icon_set)>=0
     var fixed=""

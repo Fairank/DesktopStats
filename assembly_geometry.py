@@ -797,21 +797,36 @@ def build_scene(spec=None):
                 span_mm=(main_span,d-32.),method='official_manual_observed_main_chamber_mount_reference',
                 dimensions_verified=False,source='https://content.ibuypower.com/hyte/product-page-pdfs/y70-touch-15-language.pdf',page=11 if mount=='top' else 8)
     from assembly_cooling import add_cooling
-    cooling_meshes,cooling_meta=add_cooling(meshes,spec,level,attachment_anchors)
-    gpu_cooler_replaced=cooling_meta.get('replace_gpu_cooler') is True
-    if gpu_cooler_replaced:
-        kept_gpu={'gpu-pcb','gpu-bracket','gpu-gold-contacts','detail-gpu-separated-edge-contacts',
-                  'detail-gpu-pcb-stack-edge','detail-gpu-port-recesses'}
-        meshes=tuple(m for m in meshes if m.component!='gpu' or m.name in kept_gpu or m.name.startswith('gpu-reference-port-'))
-    meshes=tuple((*meshes,*cooling_meshes));attachment_anchors['cooling']=cooling_meta
-    attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
     from assembly_auxiliary import add_auxiliary
-    # A transient reference supplies exact hollow GPU geometry for bounded
-    # cable clearance. Never duplicate/upload it or persist Mesh objects in
-    # the JSON metadata returned to the rest of the application.
-    attachment_anchors['_gpu_clearance_meshes']=tuple(m for m in meshes if m.component=='gpu')
-    auxiliary_meshes,auxiliary_meta=add_auxiliary(spec,attachment_anchors,level)
-    attachment_anchors.pop('_gpu_clearance_meshes',None)
+    auxiliary_stage=None;collision_meshes=meshes
+    try:
+        if (spec.get('cooling') or {}).get('loop_components_mode')=='selected':
+            from cooling_catalog import get_cooler
+            selected_cooler=get_cooler((spec.get('cooling') or {}).get('cpu_cooler'))
+            if selected_cooler and selected_cooler.get('kind')=='custom_loop':
+                from assembly_auxiliary import auxiliary_stages,finish_auxiliary
+                # Build every selected auxiliary body once. Retain each real
+                # device while the loop chooses a clear reference placement;
+                # the same suspended build later adds its updated wire routes.
+                auxiliary_stage=auxiliary_stages(spec,attachment_anchors,level)
+                auxiliary_bodies=next(auxiliary_stage)
+                collision_meshes=tuple((*meshes,*auxiliary_bodies))
+        cooling_meshes,cooling_meta=add_cooling(collision_meshes,spec,level,attachment_anchors)
+        gpu_cooler_replaced=cooling_meta.get('replace_gpu_cooler') is True
+        if gpu_cooler_replaced:
+            kept_gpu={'gpu-pcb','gpu-bracket','gpu-gold-contacts','detail-gpu-separated-edge-contacts',
+                      'detail-gpu-pcb-stack-edge','detail-gpu-port-recesses'}
+            meshes=tuple(m for m in meshes if m.component!='gpu' or m.name in kept_gpu or m.name.startswith('gpu-reference-port-'))
+        meshes=tuple((*meshes,*cooling_meshes));attachment_anchors['cooling']=cooling_meta
+        attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
+        # A transient reference supplies exact hollow GPU geometry for bounded
+        # cable clearance; it never enters serializable metadata.
+        attachment_anchors['_gpu_clearance_meshes']=tuple(m for m in meshes if m.component=='gpu')
+        if auxiliary_stage is None:auxiliary_meshes,auxiliary_meta=add_auxiliary(spec,attachment_anchors,level)
+        else:auxiliary_meshes,auxiliary_meta=finish_auxiliary(auxiliary_stage,attachment_anchors)
+        attachment_anchors.pop('_gpu_clearance_meshes',None)
+    finally:
+        if auxiliary_stage is not None:auxiliary_stage.close()
     meshes=tuple((*meshes,*auxiliary_meshes))
     added_bounds,added_notices=attachment_bounds(meshes,(w,h,d),case)
     budget=TRIANGLE_BUDGETS[level]-64

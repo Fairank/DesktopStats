@@ -14,8 +14,8 @@ _TOKENS = re.compile(r"[MmLlHhVvCcQqZz]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[Ee][-+]?\d+)
 _COUNTS = dict(M=2,L=2,H=1,V=1,C=6,Q=4)
 
 
-def path_polygon(shape):
-    """Flatten the bounded M/L/H/V/C/Q/Z paths emitted by our own drawings."""
+def _path_contours(shape):
+    """Flatten bounded trusted paths while retaining their individual subpaths."""
     if not isinstance(shape, dict) or not isinstance(shape.get("d"), str) or len(shape["d"]) > 20000:
         return []
     source=shape["d"]
@@ -49,12 +49,45 @@ def path_polygon(shape):
             or not all(type(v) in (int,float) and math.isfinite(v) and abs(v)<10000 for v in matrix)):
         return []
     path=QTransform(*matrix).map(path)
-    polygons=path.toSubpathPolygons(QTransform(8,0,0,8,0,0))
-    if not polygons:return []
-    polygon=max(polygons,key=lambda p:p.boundingRect().width()*p.boundingRect().height())
+    return path.toSubpathPolygons(QTransform(8,0,0,8,0,0))
+
+
+def _contour_points(polygon):
     points=[[round(p.x()/8,6),round(p.y()/8,6)] for p in polygon]
     if len(points)>1 and points[0]==points[-1]:points.pop()
     return points if 3<=len(points)<=1024 else []
+
+
+def path_polygon(shape):
+    """Return the previous outer silhouette, without changing its sampling."""
+    polygons=_path_contours(shape)
+    if not polygons:return []
+    polygon=max(polygons,key=lambda p:p.boundingRect().width()*p.boundingRect().height())
+    return _contour_points(polygon)
+
+
+def _shell_holes(shape):
+    """Keep explicitly evenodd, fully contained simple shell openings only.
+
+    Disconnected paths are not openings. Nested islands/intersecting contours
+    require a more general surface representation, so they are not inferred.
+    The reviewed shell currently has one simple internal rectangular opening.
+    """
+    if not isinstance(shape,dict) or shape.get('fill_rule')!='evenodd':return []
+    polygons=_path_contours(shape)
+    if not 2<=len(polygons)<=32:return []
+    outer=max(polygons,key=lambda p:p.boundingRect().width()*p.boundingRect().height())
+    if not _contour_points(outer):return []
+    outline=QPainterPath();outline.addPolygon(outer);outline.closeSubpath()
+    candidates=[]
+    for polygon in polygons:
+        if polygon is outer:continue
+        points=_contour_points(polygon)
+        if not points:return []
+        path=QPainterPath();path.addPolygon(polygon);path.closeSubpath()
+        if outline.contains(path):candidates.append((points,path))
+    if any(a.intersects(b) for i,(_,a) in enumerate(candidates) for _,b in candidates[i+1:]):return []
+    return [points for points,_ in candidates]
 
 
 def bounds(points):
@@ -65,6 +98,25 @@ def bounds(points):
 def normalized(points,box=None):
     x,y,w,h=box or bounds(points)
     return [[round((a-x)/w,6),round((b-y)/h,6)] for a,b in points] if w>0 and h>0 else []
+
+
+def _dimension(value,low,high):
+    return float(value) if type(value) in (int,float) and math.isfinite(value) and low<=value<=high else None
+
+
+def _fan_radius(uv,previous,length,width,count):
+    """Match the builder's bounded, circular fit to both illustration axes.
+
+    These are reference drawing proportions, not measured retail fan diameters.
+    When either physical axis is unknown the previous scalar remains a fallback;
+    radius_uv is authoritative once the builder resolves its reference envelope.
+    """
+    if length is None or width is None:return previous
+    fallback=min(width*.41,length/max(1,count)*.42)
+    base=_dimension(previous,5,75)
+    base=fallback if base is None else base
+    return min((_dimension(uv[0],.005,.5) or base/length)*length,
+               (_dimension(uv[1],.005,.5) or base/width)*width)
 
 
 class ProfileReader:
@@ -90,18 +142,26 @@ def bake_profiles(spec,engine):
     value=copy.deepcopy(spec);reader=ProfileReader(engine)
     try:
         gpu=value['gpu'];appearance=gpu['appearance'];profile=reader.read(appearance)
-        shell=path_polygon(profile.get('shell'));box=profile.get('bounds') or {}
+        shell_shape=profile.get('shell')
+        shell=path_polygon(shell_shape);box=profile.get('bounds') or {}
+        gpu.pop('shell_holes',None)
         gpu['shell_polygon']=normalized(shell) if shell else []
         # Fan positions refer to the reviewed face coordinates, including unequal hybrids.
         face_box=bounds(shell) if shell else (box.get('x',0),box.get('y',0),box.get('width',24),box.get('height',24))
+        holes=_shell_holes(shell_shape)
+        if holes:gpu['shell_holes']=[normalized(hole,face_box) for hole in holes]
         gx,gy,gw,gh=face_box;physical_width=gpu.get('width_mm') or 135
+        nominal=appearance.get('board_details',{}).get('dimensions_mm') or {}
+        physical_length=_dimension(gpu.get('length_mm'),80,450) or _dimension(nominal.get('length'),80,450)
+        physical_height=_dimension(gpu.get('width_mm'),50,190) or _dimension(nominal.get('height'),50,190)
         gpu['detail_polygons']=[]
         for detail in profile.get('details',[]):
             polygon=path_polygon(detail)
             if polygon:
                 gpu['detail_polygons'].append(dict(points=normalized(polygon,face_box),color=detail.get('color')))
         gpu['fans']=[]
-        for fan in profile.get('fans',[]):
+        front_fans=profile.get('fans',[])
+        for fan in front_fans:
             polygons=[]
             for leaf in fan.get('blade_paths',[]):
                 raw=path_polygon(dict(d=leaf['d'],m=[1,0,0,1,0,0]))
@@ -109,8 +169,10 @@ def bake_profiles(spec,engine):
                 raw=[[co*x-si*y,si*x+co*y] for x,y in raw]
                 if leaf.get('mirror'):raw=[[-x,y] for x,y in raw]
                 if raw:polygons.append(raw)
+            radius_uv=[fan['radius']/gw,fan['radius']/gh]
+            radius_mm=_fan_radius(radius_uv,fan['radius']/gh*physical_width,physical_length,physical_height,len(front_fans))
             gpu['fans'].append(dict(center_uv=[(fan['cx']-gx)/gw,(fan['cy']-gy)/gh],
-                x_ratio=(fan['cx']-gx)/gw,radius_mm=fan['radius']/gh*physical_width,
+                x_ratio=(fan['cx']-gx)/gw,radius_mm=radius_mm,radius_uv=radius_uv,
                 blade_polygons=polygons,profile=fan['profile'],direction=fan['direction'],
                 blades=fan['profile'].get('blades'),shape=fan['profile'].get('shape'),
                 hub_ratio=fan['hub_ratio'],outer_ring=fan['outer_ring'],group_size=fan['group_size'],face='front',

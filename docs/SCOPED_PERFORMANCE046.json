@@ -1,0 +1,50 @@
+{
+  "author_catalogs_imported": false,
+  "cpu_timing_scope": "Median of seven batches of 256 warm calls, process CPU time. Allocation tracing is separate. CPU-clock quantization and host load limit precision.",
+  "installed_app_changed": false,
+  "measurement_type": "isolated_python_microbenchmark",
+  "median_picker_cpu_reduction_percent": 80.95,
+  "native_application_acceptance": false,
+  "one_grouped_index_pass": {
+    "allocation_samples": 32,
+    "calls_per_sample": 256,
+    "median_cpu_ms": 0.2441,
+    "peak_traced_python_bytes": 58248,
+    "repeats": 7,
+    "retained_traced_python_bytes": 17144,
+    "timed_allocations_traced": false
+  },
+  "pack_sha256": "9aec0ee47c0a13ad892618596a8a87d59b521d4f80093f7c9d1385e8d64d6e83",
+  "priority": "below_normal",
+  "products": 63,
+  "qt_or_native_context_started": false,
+  "retained_index_python_bytes": 63170,
+  "retained_memory_scope": "Recursive sys.getsizeof over this pack index and at most eight selected records; excludes other modules, SVG, scene meshes, Python/Qt/GL and process working set.",
+  "retained_selected_python_bytes": 79963,
+  "scope": "Warm optional loop picker and retained data only; not application CPU/RAM/GPU or native acceptance.",
+  "selected_records_after_remove": 0,
+  "six_separate_index_passes": {
+    "allocation_samples": 32,
+    "calls_per_sample": 256,
+    "median_cpu_ms": 1.2817,
+    "peak_traced_python_bytes": 69136,
+    "repeats": 7,
+    "retained_traced_python_bytes": 17208,
+    "timed_allocations_traced": false
+  },
+  "source_sha256": {
+    "hardware_packs.py": "f04369de99ac5d075804de34d014bb180f2beee1ea2fafd0fba06d13130c82ba",
+    "liquid_component_runtime046.py": "47edd446cbc35b7fca45415e23cdd6f52cb768ae6d7248fa6ed4d15ffe21a04e",
+    "tools/benchmark_loop046.py": "096e883d4efe94b2f0714d382206c0b505d05da62009251971a7e282a22597d8"
+  },
+  "store": {
+    "background_workers": 0,
+    "packs": 1,
+    "periodic_scans": 0,
+    "persistent_meshes": 0,
+    "products": 63,
+    "selected_record_limit": 8,
+    "selected_records": 8
+  },
+  "version": "0.46.0-preview.1"
+}

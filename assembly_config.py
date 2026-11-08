@@ -9,12 +9,17 @@ DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, fan_animation=False, appe
                         cable_color="black",fan_motion="measured",gpu_waterblock=False,part_styles={},
                         cpu_model="",gpu_model="",memory_models=[],lighting_preview="artwork",
                         radiator_model="",radiator_fan_model="",radiator_fan_layout="single",
-                        secondary_radiator_model="",secondary_radiator_fan_model="",secondary_radiator_fan_layout="single")
+                        secondary_radiator_model="",secondary_radiator_fan_model="",secondary_radiator_fan_layout="single",
+                        loop_components_mode="reference",cpu_block_model="",pump_model="",pump_top_model="",
+                        reservoir_model="",pump_reservoir_model="",fitting_model="",tubing_model="",
+                        loop_tubes_visible=True,loop_fittings={})
 PART_FIELDS = ("board_model","cooler_model","cooler_mount","case_fans","psu_model","storage",
                "expansion_cards","cables_enabled","cable_color","fan_motion","gpu_waterblock","part_styles",
                "cpu_model","gpu_model","memory_models","lighting_preview",
                "radiator_model","radiator_fan_model","radiator_fan_layout",
-               "secondary_radiator_model","secondary_radiator_fan_model","secondary_radiator_fan_layout")
+               "secondary_radiator_model","secondary_radiator_fan_model","secondary_radiator_fan_layout",
+               "loop_components_mode","cpu_block_model","pump_model","pump_top_model","reservoir_model",
+               "pump_reservoir_model","fitting_model","tubing_model","loop_tubes_visible","loop_fittings")
 FAN_MOUNTS = ("front","top","rear","bottom","side")
 CABLE_COLORS = {"black":"#252d35","white":"#dddfe3","red":"#a63f4b","blue":"#3c6d9b"}
 DETAIL_LEVELS = ("eco","balanced","close")
@@ -23,7 +28,7 @@ DETAIL_LABELS = {"eco":"简洁","balanced":"精细","close":"近看细节"}
 STYLE_LABELS = {
     "miniature":"1 · 原版", "cartoon":"2 · 可爱笑脸", "notebook_color":"3 · 彩色手绘",
     "notebook_line":"4 · 纯线条", "sticker":"5 · 奶油贴纸", "papercut":"6 · 拼色剪纸",
-    "inkwash":"7 · 蓝墨手账", "classic":"经典通用", "outline":"结构线稿", "solid":"精简实物",
+    "inkwash":"蓝墨手账（旧选项）", "classic":"经典通用", "outline":"结构线稿", "solid":"精简实物",
     "soft":"柔和双色", "sketch":"手绘线稿", "notebook_smile":"笑脸手绘",
 }
 
@@ -86,18 +91,19 @@ def validate_assembly(value=None):
     if type(mode) is not str or mode not in WINDOW_MODES:
         raise ValueError("整机显示方式设置不正确")
     result['window_mode']=mode
-    for field in ("exploded", "fan_animation", "selection_effects", "cables_enabled", "gpu_waterblock", "desktop_frame"):
+    for field in ("exploded", "fan_animation", "selection_effects", "cables_enabled", "gpu_waterblock", "desktop_frame", "loop_tubes_visible"):
         if field in value:
             if type(value[field]) is not bool:
                 raise ValueError("整机视图开关设置不正确")
             result[field] = value[field]
     for field in ("board_model","cooler_model","psu_model","cpu_model","gpu_model",
-                  "radiator_model","radiator_fan_model","secondary_radiator_model","secondary_radiator_fan_model"):
+                  "radiator_model","radiator_fan_model","secondary_radiator_model","secondary_radiator_fan_model",
+                  "cpu_block_model","pump_model","pump_top_model","reservoir_model","pump_reservoir_model","fitting_model","tubing_model"):
         selected=value.get(field,"")
         if type(selected) is not str or selected and not _ID.fullmatch(selected):
             raise ValueError("配件型号设置不正确")
         result[field]=selected
-    for field,allowed in (("cooler_mount",FAN_MOUNTS),("fan_motion",("measured","demo")),
+    for field,allowed in (("loop_components_mode",("reference","selected")),("cooler_mount",FAN_MOUNTS),("fan_motion",("measured","demo")),
                           ("cable_color",CABLE_COLORS),("lighting_preview",("artwork","off","warm","mint","violet")),
                           ("radiator_fan_layout",("single","push_pull","none")),
                           ("secondary_radiator_fan_layout",("single","push_pull","none"))):
@@ -129,6 +135,12 @@ def validate_assembly(value=None):
                 seen.add(model)
             clean.append(entry)
         result[field]=clean
+    fittings=value.get('loop_fittings',{})
+    if type(fittings) is not dict or len(fittings)>48:raise ValueError('水冷接头设置不正确')
+    for port,model in fittings.items():
+        if type(port) is not str or not re.fullmatch(r'(?:cpu_block_model|pump_model|pump_top_model|reservoir_model|pump_reservoir_model|radiator_model):[a-z0-9][a-z0-9-]{0,63}',port) or type(model) is not str or not _ID.fullmatch(model):
+            raise ValueError('水冷接头设置不正确')
+    result['loop_fittings']=dict(fittings)
     styles=value.get('part_styles',{})
     if type(styles) is not dict or len(styles)>128:raise ValueError('部件外观设置不正确')
     for target,style in styles.items():

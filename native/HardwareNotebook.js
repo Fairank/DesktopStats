@@ -27,6 +27,7 @@ function n(value) {return Sketch.number(value)}
 function identity(state) {return String(state.model_id||state.series_id||state.style||"gpu")}
 function ink(state) {return Sketch.hex(state && state.ink,"#46535b")}
 function colored(state) {return state.icon_set!=="notebook_line"}
+function colorWashEnabled(state) {return state.icon_set==="notebook_color" && state.notebookColorWash!==false}
 function geometry(state) {return Solid.geometry(state)}
 function cpuModelKey(input) {return Parts.cpuModelKey(input)}
 function path(d,color,width,opacity,extra) {
@@ -168,6 +169,12 @@ function rotorInk(source,c) {
         if(type==="path") {
             var d=a.d
             if(cls==="hardware-fan-blade") {
+                // Colour follows the same reviewed closed leaf, never a
+                // generic fan disk. Its open pen contour below stays exact.
+                if(c.pencilColor===true && /[Zz]\s*$/.test(d))
+                    out+='<path class="hardware-notebook-color-blade-wash" d="'+d+'"'
+                        +(a.transform?' transform="'+a.transform+'"':'')+' fill="'+Sketch.hex(c.blade,'#9eb4be')
+                        +'" fill-opacity=".62" stroke="none"/>'
                 var commands=String(d).match(/[A-Za-z][^A-Za-z]*/g)||[]
                 d=commands.slice(0,3).join("")
                 extra+=' data-contour="open-source-leading-edge-and-tip"'
@@ -179,7 +186,9 @@ function rotorInk(source,c) {
     return out
 }
 function fanInk(state,c,layout,index,collector) {
-    var p=fanProfile(state,c,index,layout.kind),moving=rotorInk(Fans.rotor(p,c),c)
+    var p=fanProfile(state,c,index,layout.kind),rotorColors=c
+    if(colorWashEnabled(state))rotorColors=Object.assign({},c,{pencilColor:true,blade:pencilBladeColor(p)})
+    var moving=rotorInk(Fans.rotor(p,c),rotorColors)
     var out=circle(layout.cx,layout.cy,layout.radius,c.ink,.185,'class="hardware-notebook-fan-opening" data-fan-index="'+index+'"')
     var transform='translate('+layout.cx+' '+layout.cy+') scale('+(layout.radius/3)+')'
     // Unknown blades have a static opening/cap, never an invented vane count
@@ -188,6 +197,9 @@ function fanInk(state,c,layout,index,collector) {
         collector.push({cx:layout.cx,cy:layout.cy,radius:layout.radius,kind:layout.kind,basis:3,body:moving,direction:p.direction})
     else out+=group(moving,transform)
     return out
+}
+function pencilBladeColor(profile) {
+    return profile && profile.tone==="red"?'#c18e9a':profile && profile.tone==="light"?'#a2c6cc':'#81adbb'
 }
 function casePolygon(study) {
     // Bake clipping because Qt's SVG-Tiny renderer ignores SVG clipPath. The
@@ -278,14 +290,14 @@ function clippedStroke(points,polygon,holes,width) {
     }
     return out
 }
-function pencilCurve(start,control,end,polygon,holes,width,color,opacity) {
+function pencilCurve(start,control,end,polygon,holes,width,color,opacity,extra) {
     var points=[start]
     for(var step=1;step<=3;step++) {
         var t=step/3,u=1-t
         points.push([u*u*start[0]+2*u*t*control[0]+t*t*end[0],u*u*start[1]+2*u*t*control[1]+t*t*end[1]])
     }
     var d=clippedStroke(points,polygon,holes,width)
-    return d?path(d,color,width,opacity):""
+    return d?path(d,color,width,opacity,extra):""
 }
 function pencil(state,g,c,study,layout) {
     if(!colored(state))return ""
@@ -293,6 +305,19 @@ function pencil(state,g,c,study,layout) {
     var row=Board.profile(state),tones={dark:"#9ca8b0",light:"#c2cbd0",silver:"#a9b5bb",blue:"#91a9c5",pink:"#c7a8c2",
         mixed:"#abb8c0",gold:"#c3b181",copper:"#bc9274",red:"#c08e8e"}
     var strokes="",tone=row && tones[row.shroud_tone]?tones[row.shroud_tone]:"#9ca8af",mark=tone
+    if(colorWashEnabled(state)) {
+        // A quiet pencil underwash, clipped with the full stroke width to the
+        // actual uneven cover AND every real fan opening. Parallel marks keep
+        // paper gaps; no filled rectangle, SVG clipPath or invented RGB trim.
+        var washes={dark:'#7ca8b7',light:'#a7cdd2',silver:'#94bdcc',blue:'#85adcc',pink:'#d0a4c8',
+            mixed:'#84b4bd',gold:'#c8b478',copper:'#ca997e',red:'#d59e98'}
+        var wash=row && washes[row.shroud_tone]?washes[row.shroud_tone]:'#aebfc5'
+        for(var band=0;band<28;band++) {
+            var at=g.y+g.h*(.055+band*.89/27),bow=(band%3-1)*.025
+            strokes+=pencilCurve([g.x+.06,at],[g.x+g.w*.49,at+bow],[g.x+g.w-.06,at+.012],
+                polygon,layout,g.h*.028,wash,.65,'class="hardware-notebook-color-wash" data-coloring="illustrative-pencil"')
+        }
+    }
     // Only reviewed retail red trim is coloured red; UI brand accents are not
     // a claim about a card's paint or live RGB lighting.
     if(state.series_id==="sapphire_pulse" || state.series_id==="amd_reference")mark="#b87f79"
@@ -372,7 +397,7 @@ function body(state,collector) {
     if(state.kind!=="gpu")return Parts.body(state,collector)
     return '<g class="hardware-notebook '+state.icon_set+'" stroke-linecap="round" stroke-linejoin="round">'+gpu(state,collector)+'</g>'
 }
-function generic(kind,color,moving,style) {
-    if(kind==="gpu")return body({kind:"gpu",style:"gpu_neutral",fan_count:-1,ink:color,icon_set:style||"notebook_line"})
+function generic(kind,color,moving,style,colorWash) {
+    if(kind==="gpu")return body({kind:"gpu",style:"gpu_neutral",fan_count:-1,ink:color,icon_set:style||"notebook_line",notebookColorWash:colorWash})
     return Parts.generic(kind,color,moving,style)
 }

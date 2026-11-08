@@ -16,7 +16,9 @@ import cooling_catalog
 
 
 ROOT=Path(__file__).resolve().parents[1]
-KINDS={'cases':'case','coolers':'cooler','psus':'psu','fans':'fan'}
+KINDS={'cases':'case','coolers':'cooler','psus':'psu','fans':'fan',
+       'cpu_blocks':'cpu_block','loop_pumps':'pump','loop_reservoirs':'reservoir',
+       'loop_combos':'pump_reservoir','loop_fittings':'fitting','loop_tubing':'tubing'}
 SVG='{http://www.w3.org/2000/svg}'
 
 
@@ -28,7 +30,8 @@ class AccessoryArtTests(unittest.TestCase):
         artwork.clear_cache()
         rows=artwork.choices()
         self.assertEqual({key:len(value) for key,value in rows.items()},
-                         dict(cases=96,coolers=66,psus=21,fans=70))
+                         dict(cases=96,coolers=66,psus=21,fans=70,cpu_blocks=0,loop_pumps=0,
+                              loop_reservoirs=0,loop_combos=0,loop_fittings=0,loop_tubing=0))
         catalog_rows=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                       component_catalog.choices('psu'),cooling_catalog.choices_fans())
         for key,source in zip(KINDS,catalog_rows):

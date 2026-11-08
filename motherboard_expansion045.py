@@ -30,7 +30,14 @@ PHOTOS = {
     'b550m-pro-vdh': 'https://storage-asset.msi.com/datasheet/mb/us/B550M-PRO-VDH-WIFI.pdf',
     'b550-tomahawk': 'https://storage-asset.msi.com/datasheet/mb/us/MAG-B550-TOMAHAWK.pdf',
     'z690-tuf': 'https://dlcdnwebimgs.asus.com/files/media/f80add71-70c2-46cc-9722-1ddd47ae64ea/img/component_product.png',
+    'b550m-itx': 'https://www.asrock.com/mb/photo/B550M-ITXac(L2).png',
+    'h670m-itx': 'https://www.asrock.com/mb/photo/H670M-ITXax(L2).png',
+    'b550m-ds3h': 'https://static.gigabyte.com/StaticFile/Image/Global/88e20304d808c65f240b6b77f66c044e/ProductRemoveBg/35433',
+    'b650-pg-lightning': 'https://www.asrock.com/mb/photo/B650%20PG%20Lightning(L2).png',
+    'x870-pro-rs': 'https://www.asrock.com/mb/photo/X870%20Pro%20RS(L2).png',
 }
+MSI_FAN_PHOTO = 'https://storage-asset.msi.com/global/picture/product/product_1678348227e9a55fe78aa866f278abec97de2aa859.webp'
+ASUS_VENT_PHOTO = 'https://dlcdnwebimgs.asus.com/gain/FE82325B-98A9-4D55-B0FA-E8E168C2FB6B/w1000/h732'
 
 
 def records(make, slot, m2, connector, cover, rect, rear_observation):
@@ -85,7 +92,16 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
                        heatsink_polygons_method='not_added_without_primary_photo')
         else:
             row['heatsink_polygons_method'] = 'primary_photo_observed_reference_depth'
+            row.update(finish_status='photo_reviewed', finish_method='official_photo_observed',
+                       sources=tuple(dict.fromkeys((*row['sources'],PHOTOS[key]))))
         result.append(row)
+
+    def observed_cover(name, polygon, depth, grooves=0, *, along=None, screws=()):
+        """Original photo proportions; depths/channel sampling are reference."""
+        value=cover(name,polygon,depth,grooves)
+        if along is not None:value['groove_along']=along
+        value['fasteners_uv']=tuple(screws)
+        return value
 
     # Mini-ITX: four individual layouts, not reduced ATX coordinate templates.
     # ASUS page14, front PCB (185,223)-(750,785) at1500px; rear view is mirrored.
@@ -109,6 +125,14 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
                photo=PHOTOS['b650e-i'], battery=None)
     row['io_clear_inset']=False
     row['unplaced_source_features']=('onboard_auxiliary_heatsink_fan_geometry',)
+    row['heatsinks'][0]['surface_vent']=dict(
+        polygon=((.025,.218),(.143,.120),(.167,.144),(.167,.355),(.138,.400),(.138,.502),(.025,.407)),
+        source=ASUS_VENT_PHOTO, method='official_photo_observed_shroud_region',
+        hole_map_verified=False, internal_fan_position_verified=False)
+    row['onboard_fans']=(dict(id='vrm',placement_status='concealed_under_shroud_unverified',
+        blade_count=None,rotation_direction=None,rpm_source=None,source=ASUS_VENT_PHOTO,
+        geometry='visible_shroud_vent_only',dimensions_verified=False),)
+    row['sources']=(*row['sources'],ASUS_VENT_PHOTO)
     finish(row, 'b650e-i', 'ROG STRIX', 'B650E-I GAMING WIFI', (212,319,1040,520), [
         ('usb_a',311,382),('usb_a',311,431),('hdmi',311,497),
         ('usb_a',566,358),('usb_a',566,403),('usb_a',566,448),('usb_c',566,501),
@@ -132,16 +156,26 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
          c('fan',644,366,label='CPU_FAN1'),c('fan',660,392,along=(0,1),label='PUMP_FAN1'),
          c('fan',586,659,along=(0,1),label='SYS_FAN1'),c('argb',632,663,along=(0,1))),
         (cover('vrm-io',((.008,.070),(.159,.044),(.227,.171),(.235,.744),(.173,.852),(.008,.852)),25.,4),
-         cover('m2-front',((.274,.762),(.749,.762),(.775,.855),(.713,.923),(.274,.923)),13.,3)),
+         cover('m2-front',((.215,.807),(.315,.708),(.698,.708),(.761,.770),(.761,.941),(.372,.941),(.340,.901),(.296,.901)),13.,3)),
         dict(usb_a=5,usb_c=1,hdmi=1,lan=1,antenna=2,audio_3_5=3,buttons=2),MANUALS['b650i-edge'],26,
         'https://www.msi.com/Motherboard/MPG-B650I-EDGE-WIFI/Specification',finish='#bfc2c6',photo=PHOTOS['b650i-edge'],battery=None)
-    row['unplaced_source_features']=('onboard_m2_heatsink_fan_geometry',)
+    # The exact board's straight front photo shows a round opening in the
+    # right half of the lower M.2 cover. This is an image proportion, not a
+    # manufacturer-specified fan diameter or an identified replacement fan.
+    row['heatsinks'][1]['static_fan']=dict(id='m2',uv=(.618,.850),diameter_mm=28.,hub_ratio=.52,
+        source=MSI_FAN_PHOTO,placement_status='primary_photo_observed_proportions',
+        blade_count=None,rotation_direction=None,rpm_source=None,dimensions_verified=False,
+        leaf_geometry='not_rendered_unknown',operating_state='unknown_static_reference')
+    row['heatsinks'][1]['fasteners_uv']=((.473,.920),(.703,.732))
+    row['onboard_fans']=(dict(row['heatsinks'][1]['static_fan']),)
+    row['unplaced_source_features']=('onboard_m2_fan_leaf_shape_direction_and_tachometer',)
+    row['sources']=(*row['sources'],MSI_FAN_PHOTO)
     finish(row,'b650i-edge','MPG EDGE','B650I EDGE WIFI',(160,333,1041,615),[
         ('buttons',220,543),('buttons',220,586),('hdmi',336,563),
         ('usb_a',493,508),('usb_a',493,564),('usb_a',620,508),('usb_a',620,564),
         ('lan',755,422),('usb_a',755,514),('usb_c',755,582),
         ('antenna',865,395),('antenna',865,533),('audio_3_5',962,377),('audio_3_5',962,473),('audio_3_5',962,582)],22,
-        notes=('Onboard M.2 cooling fan is visible in the primary photo; blade shape/direction are unreviewed and no rotor is invented.',
+        notes=('Onboard M.2 fan opening and hub are photo-observed; blades/direction/tachometer remain unknown and static.',
                'Back-view M2_2 uses mirrored front coordinates.'))
 
     uv,s,drive,c=helpers((157,389,819,1030))
@@ -152,9 +186,12 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
          c('usb3',789,811,along=(0,1)),c('usb2',801,893,along=(0,1)),c('front_io',770,893,along=(0,1)),
          c('audio',181,942,along=(0,1)),c('fan',482,414,label='CPU_FAN1'),
          c('fan',664,413,label='CHA_FAN1/WP'),c('fan',780,963,along=(0,1),label='CHA_FAN2/WP'),
-         c('argb',550,413),c('rgb',610,413)),(),
+         c('argb',550,413),c('rgb',610,413)),
+        (observed_cover('vrm-io',((.120,.064),(.213,.064),(.213,.689),(.168,.671),(.168,.546),(.120,.497)),19.,5),
+         observed_cover('m2-front',((.204,.757),(.792,.757),(.792,.880),(.822,.880),(.822,.920),(.204,.920)),6.,3,
+                        along=(1.,.32),screws=((.287,.847),(.807,.891)))),
         dict(usb_a=5,usb_c=1,hdmi=1,displayport=1,ps2=1,lan=1,audio_3_5=3,antenna=2),MANUALS['b550m-itx'],11,
-        'https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp',battery=None)
+        'https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp',finish='#aab0b4',photo=PHOTOS['b550m-itx'],battery=None)
     finish(row,'b550m-itx','ITX/ac','B550M-ITX AC',(157,310,1019,495),[
         ('displayport',238,400),('hdmi',238,450),('usb_a',457,420),('usb_a',457,465),
         ('usb_a',567,352),('usb_a',567,398),('ps2',567,453),
@@ -172,9 +209,12 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
          c('usb3',818,638,along=(0,1)),c('usb2',785,663,along=(0,1)),c('usb_c',792,871,along=(0,1)),
          c('front_io',816,942,along=(0,1)),c('audio',149,987),c('fan',157,348,label='CHA_FAN1/WP'),
          c('fan',338,355,along=(0,1),label='CPU_FAN1'),c('fan',648,780,label='CHA_FAN2'),
-         c('argb',664,890,along=(0,1)),c('rgb',767,353,along=(0,1))),(),
+         c('argb',664,890,along=(0,1)),c('rgb',767,353,along=(0,1))),
+        (observed_cover('vrm-io',((.005,.175),(.228,.175),(.228,.628),(.114,.628),(.005,.568)),23.,4,along=(1.,.70)),
+         observed_cover('m2-front',((.150,.643),(.729,.643),(.729,.903),(.770,.903),(.770,.933),(.238,.933),(.213,.907),(.213,.847),(.150,.847)),7.,4,
+                        along=(1.,.80),screws=((.204,.665),(.751,.915)))),
         dict(usb_a=6,usb_c=1,hdmi=1,displayport=1,lan=2,audio_3_5=3,antenna=2,buttons=1),MANUALS['h670m-itx'],15,
-        'https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp',battery=None)
+        'https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp',finish='#bcc1c6',photo=PHOTOS['h670m-itx'],battery=None)
     finish(row,'h670m-itx','ITX/ax','H670M-ITX AX',(150,337,1007,540),[
         ('displayport',248,453),('hdmi',248,513),('buttons',384,380),('usb_a',366,438),
         ('usb_a',485,451),('usb_a',485,498),('lan',620,399),('usb_a',620,455),('usb_a',620,501),
@@ -269,10 +309,13 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
          *[c('sata',859,y,orientation='edge') for y in (896,982,1010,1039)],
          c('usb3',607,1042,label='F_U32'),c('usb2',517,1042,label='F_USB1'),c('front_io',704,1042,label='F_PANEL'),
          c('audio',206,1039,label='F_AUDIO'),c('fan',615,334,label='CPU_FAN'),c('fan',340,1042,label='SYS_FAN1'),
-         c('fan',764,1042,label='SYS_FAN2')),(),
+         c('fan',764,1042,label='SYS_FAN2')),
+        (observed_cover('vrm-io',rect(.176,.083,.279,.429,.008),19.,6),
+         observed_cover('chipset',rect(.735,.732,.861,.857,.008),6.,4)),
         dict(usb_a=8,dvi=1,displayport=1,hdmi=1,ps2=1,lan=1,audio_3_5=3),MANUALS['b550m-ds3h'],4,
-        'https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp',battery=uv(840,658))
+        'https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp',finish='#33363a',photo=PHOTOS['b550m-ds3h'],battery=uv(840,658))
     row['requires_revision']=True
+    row['finish_revision_association']='photo_linked_by_exact_revision_product_page_not_etched_revision_readback'
     finish(row,'b550m-ds3h','Ultra Durable','B550M DS3H REV 1 5',(182,195,1012,392),[
         ('usb_a',222,251),('usb_a',222,298),('ps2',222,358),('dvi',389,364),
         ('displayport',574,321),('hdmi',574,373),*[('usb_a',687,y) for y in (219,267,315,363)],
@@ -358,9 +401,13 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
          c('fan',650,331,label='CPU_FAN1/WP'),c('fan',650,351,label='CPU_FAN1'),
          c('fan',778,331,label='CHA_FAN1/WP'),c('fan',783,750,along=(0,1),label='CHA_FAN2/WP'),
          c('fan',354,704,label='CHA_FAN3/WP'),c('fan',439,1111,label='CHA_FAN4/WP'),
-         c('argb',366,1111),c('argb',404,1111),c('rgb',325,1111)),(),
+         c('argb',366,1111),c('argb',404,1111),c('rgb',325,1111)),
+        (observed_cover('vrm-io',((.064,.059),(.302,.059),(.302,.432),(.064,.432)),26.,8),
+         observed_cover('vrm-top',rect(.320,.005,.664,.073,.007),20.,4,along=(1.,0.)),
+         observed_cover('m2-upper',rect(.229,.490,.651,.569,.012),5.,2,along=(1.,0.),screws=((.251,.529),(.627,.529))),
+         observed_cover('chipset',rect(.712,.608,.923,.811,.010),8.,6)),
         dict(usb_a=11,usb_c=1,hdmi=1,lan=1,audio_3_5=3,buttons=1),MANUALS['b650-pg-lightning'],10,
-        'https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp',battery=uv(261,1031))
+        'https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp',finish='#303438',photo=PHOTOS['b650-pg-lightning'],battery=uv(261,1031))
     finish(row,'b650-pg-lightning','Phantom Gaming','B650 PG LIGHTNING',(172,278,856,430),[
         ('hdmi',223,410),('usb_a',322,364),('usb_a',322,400),*[('usb_a',417,y) for y in (295,331,368,405)],
         ('lan',507,323),('usb_a',507,364),('usb_a',507,400),('usb_a',597,364),('usb_a',597,400),
@@ -380,9 +427,16 @@ def records(make, slot, m2, connector, cover, rect, rear_observation):
          c('fan',685,327,label='CPU_FAN1'),c('fan',714,327,label='CPU_FAN2'),c('fan',745,327,label='AIO_PUMP'),
          c('fan',208,756,along=(0,1),label='CHA_FAN4'),c('fan',588,1142,label='CHA_FAN3'),
          c('fan',657,1142,label='CHA_FAN2'),c('fan',689,1142,label='CHA_FAN1'),
-         c('argb',369,1140),c('argb',420,1140),c('argb',805,383,along=(0,1)),c('rgb',312,1140)),(),
+         c('argb',369,1140),c('argb',420,1140),c('argb',805,383,along=(0,1)),c('rgb',312,1140)),
+        (observed_cover('vrm-io',((.003,.002),(.137,.002),(.337,.099),(.337,.501),(.005,.501)),28.,4,along=(1.,.63)),
+         observed_cover('vrm-top',rect(.311,.002,.724,.111,.012),20.,3,along=(1.,0.)),
+         observed_cover('m2-upper',((.102,.502),(.621,.502),(.621,.581),(.171,.581),(.102,.550)),7.,3,along=(1.,.45),screws=()),
+         observed_cover('chipset',((.700,.595),(.852,.595),(.948,.636),(.948,.816),(.700,.816)),9.,3,along=(1.,.5)),
+         observed_cover('m2-lower',((.061,.821),(.928,.821),(.989,.858),(.989,.903),(.061,.903)),7.,3,
+                        along=(1.,0.),screws=((.093,.861),(.902,.861)))),
         dict(usb_a=10,usb_c=2,hdmi=1,lan=1,audio_3_5=2,spdif=1,buttons=1),MANUALS['x870-pro-rs'],11,
-        'https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp',battery=uv(365,932))
+        'https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp',finish='#c5c9cc',photo=PHOTOS['x870-pro-rs'],battery=uv(365,932))
+    row['pcb_color']='#d6d8d7'
     finish(row,'x870-pro-rs','Pro RS','X870 PRO RS',(90,1083,889,1238),[
         ('buttons',130,1217),('hdmi',215,1219),('usb_a',314,1165),('usb_c',314,1211),
         ('usb_a',436,1165),('usb_c',436,1211),*[('usb_a',554,y) for y in (1116,1149,1180,1215)],

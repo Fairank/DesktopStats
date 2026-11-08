@@ -5744,6 +5744,2434 @@
       ],
       "styles": "all_listed_styles",
       "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 72,
+        "height": 26.5,
+        "width": 72
+      },
+      "body_dimensions_verified": true,
+      "brand": "Alphacool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Alphacool Core 1 Black · 13443",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-core1-black",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 30,
+        "width": 105
+      },
+      "requires_motor": false,
+      "series": "Core 1",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_13443_Alphacool_Core_1_Black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 87,
+        "height": 36,
+        "width": 78
+      },
+      "body_dimensions_verified": true,
+      "brand": "CORSAIR",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "CORSAIR iCUE XC7 RGB ELITE LCD · CX-9010023-WW",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xc7-rgb-elite-lcd",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 40,
+        "width": 105
+      },
+      "requires_motor": false,
+      "series": "XC7 RGB ELITE LCD",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9010023-ww/icue-xc7-rgb-elite-lcd-cpu-water-block-stealth-gray-cx-9010023-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 59,
+        "height": 17,
+        "width": 66
+      },
+      "body_dimensions_verified": true,
+      "brand": "Watercool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Watercool HEATKILLER IV PRO AMD AM4/AM5 ACETAL · 18015",
+      "manufacturer_fit_verified": false,
+      "model_id": "watercool-heatkiller-iv-pro-amd-acetal",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 90,
+        "height": 25,
+        "width": 105
+      },
+      "requires_motor": false,
+      "series": "HEATKILLER IV PRO",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-IV-PRO-AMD-AM4-AM5-ACETAL_1"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Aqua Computer",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": 78,
+        "width": null
+      },
+      "dimensions_scope": "partial",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Aqua Computer D5 NEXT",
+      "manufacturer_fit_verified": false,
+      "model_id": "aquacomputer-d5-next",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 0,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 65,
+        "height": 78,
+        "width": 66
+      },
+      "requires_motor": false,
+      "series": "D5 NEXT",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Water-Cooling/Pumps-Accessories/Pumps/D5-NEXT-pump%3A%3A3785.html?language=en"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Watercool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 70,
+        "height": 196,
+        "width": 70
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "reservoir",
+      "label": "Watercool HEATKILLER Tube150 · 30201",
+      "manufacturer_fit_verified": false,
+      "model_id": "watercool-heatkiller-tube150",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 70,
+        "height": 196,
+        "width": 70
+      },
+      "requires_motor": false,
+      "series": "HEATKILLER Tube",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-Tube-150_1",
+        "https://shop.watercool.de/HEATKILLER-Tube-150"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "CORSAIR Hydro X XC7 RGB PRO · CX-9010015-WW",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xc7-rgb-pro",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 35,
+        "width": 105
+      },
+      "requires_motor": false,
+      "series": "XC7 RGB PRO",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9010015-ww/hydro-x-series-xc7-rgb-pro-cpu-water-block-cx-9010015-ww",
+        "https://assets.corsair.com/image/upload/corsairmedia/sys_master/productcontent/49_002455_revAB_WW_XC7_RGB_PRO_SOCKET_1200_1700_AM4_QSG.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "CORSAIR Hydro X XD5 RGB Gen2 · CX-9040006-WW",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xd5-rgb-gen2",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 6,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 265,
+        "width": 105
+      },
+      "requires_motor": false,
+      "series": "XD5 RGB Gen2",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9040006-ww/hydro-x-series-xd5-rgb-pump-reservoir-combo-black-cx-9040006-ww",
+        "https://assets.corsair.com/image/upload/corsairmedia/sys_master/productcontent/WW_HXS_XD5_RGB_Gen2_AD.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "CORSAIR iCUE LINK XD5 RGB ELITE LCD · CX-9040011-WW",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xd5-rgb-elite-lcd",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 110,
+        "height": 290,
+        "width": 110
+      },
+      "requires_motor": false,
+      "series": "XD5 RGB ELITE LCD",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/CX-9040011-WW/icue-link-xd5-rgb-elite-lcd-pump-reservoir-combo-stealth-gray-cx-9040011-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "CORSAIR Hydro X XD3 RGB · CX-9040003-WW",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xd3-rgb",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 6,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 100,
+        "height": 120,
+        "width": 120
+      },
+      "requires_motor": false,
+      "series": "XD3 RGB",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9040003-ww/hydro-x-series-xd3-rgb-pump-reservoir-combo-cx-9040003-ww",
+        "https://assets.corsair.com/image/upload/corsairmedia/sys_master/productcontent/HXS_XD3_RGB_QSG_49_002027_revAB.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Watercool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 70,
+        "height": 146,
+        "width": 70
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "reservoir",
+      "label": "Watercool HEATKILLER Tube 100",
+      "manufacturer_fit_verified": false,
+      "model_id": "watercool-heatkiller-tube100",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 70,
+        "height": 146,
+        "width": 70
+      },
+      "requires_motor": false,
+      "series": "HEATKILLER Tube",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-Tube-100_1"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Watercool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 70,
+        "height": 246,
+        "width": 70
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "reservoir",
+      "label": "Watercool HEATKILLER Tube 200",
+      "manufacturer_fit_verified": false,
+      "model_id": "watercool-heatkiller-tube200",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 70,
+        "height": 246,
+        "width": 70
+      },
+      "requires_motor": false,
+      "series": "HEATKILLER Tube",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-Tube-200_1"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Watercool",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 65,
+        "height": 57,
+        "width": 65
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Watercool WCP D5 PWM",
+      "manufacturer_fit_verified": false,
+      "model_id": "watercool-wcp-d5-pwm",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 0,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 65,
+        "height": 57,
+        "width": 65
+      },
+      "requires_motor": false,
+      "series": "WCP D5",
+      "source_urls": [
+        "https://shop.watercool.de/WCP-D5-PWM_1"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 72,
+        "height": 265,
+        "width": 72
+      },
+      "body_dimensions_verified": true,
+      "brand": "Aqua Computer",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "Aqua Computer ULTITUBE D5 150 PRO with D5 NEXT",
+      "manufacturer_fit_verified": false,
+      "model_id": "aquacomputer-ultitube-d5-150-pro-next",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 95,
+        "height": 285,
+        "width": 100
+      },
+      "requires_motor": false,
+      "series": "ULTITUBE D5 PRO",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Water-Cooling/Pumps-Accessories/Pumps-with-reservoirs/ULTITUBE-D5-150-PRO-reservoir-with-D5-NEXT-pump%3A%3A3852.html?language=en"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 72,
+        "height": 210,
+        "width": 72
+      },
+      "body_dimensions_verified": true,
+      "brand": "Aqua Computer",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "Aqua Computer ULTITUBE D5 150 PRO (without pump)",
+      "manufacturer_fit_verified": false,
+      "model_id": "aquacomputer-ultitube-d5-150-pro-body",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 95,
+        "height": 230,
+        "width": 100
+      },
+      "requires_motor": true,
+      "series": "ULTITUBE D5 PRO",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Water-Cooling/Reservoirs-Accessories/Pump-Mounted/ULTITUBE-D5-150-PRO-reservoir-for-D5-pumps%3A%3A3846.html?language=en"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 72,
+        "height": 165,
+        "width": 72
+      },
+      "body_dimensions_verified": true,
+      "brand": "Aqua Computer",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "Aqua Computer ULTITUBE D5 50 PRO with D5 NEXT",
+      "manufacturer_fit_verified": false,
+      "model_id": "aquacomputer-ultitube-d5-50-pro-next",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 95,
+        "height": 185,
+        "width": 100
+      },
+      "requires_motor": false,
+      "series": "ULTITUBE D5 PRO",
+      "source_urls": [
+        "https://shop.aquacomputer.de/Water-Cooling/Pumps-Accessories/Pumps-with-reservoirs/ULTITUBE-D5-50-PRO-reservoir-with-D5-NEXT-pump%3A%3A4178.html?language=en"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 65,
+        "height": 57,
+        "width": 65
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Alphacool VPP655 PWM Single Edition ·13169",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-vpp655-pwm",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 0,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 65,
+        "height": 57,
+        "width": 65
+      },
+      "requires_motor": false,
+      "series": "VPP655",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/pumpen/vpp-d5/pum-alphacool-vpp655-pwm-single-edition"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": {
+        "depth": 76.5,
+        "height": 31,
+        "width": 63.5
+      },
+      "body_dimensions_verified": true,
+      "brand": "Alphacool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "body_only",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Alphacool Eisblock XPX PRO Aurora Full Brass ·13084",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-xpx-pro-aurora-brass",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 36,
+        "width": 110
+      },
+      "requires_motor": false,
+      "series": "Eisblock XPX PRO Aurora",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/cpu-water-cooling/intel/13084-alphacool-eisblock-xpx-pro-aurora-full-brass-black-digital-rgb"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "Alphacool Eisbecher Aurora D5 Glass 250 + VPP Apex ·13326",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eisbecher-aurora250-apex",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 5,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 100,
+        "height": 290,
+        "width": 100
+      },
+      "requires_motor": false,
+      "series": "Eisbecher Aurora D5",
+      "source_urls": [
+        "https://shop.alphacool.com/shop/ausgleichsbehaelter-distro-plates/ausgleichsbehaelter-mit-pumpe/13326-alphacool-eisbecher-aurora-d5-acetal/glas-250mm-inkl.-alphacool-vpp-apex-d5"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Thermaltake",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Thermaltake Pacific W9 ·CL-W348-CU00TR-A",
+      "manufacturer_fit_verified": false,
+      "model_id": "thermaltake-pacific-w9",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 100,
+        "height": 32,
+        "width": 100
+      },
+      "requires_motor": false,
+      "series": "Pacific W9",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-w9-cpu-waterblock"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Thermaltake",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 94.1,
+        "height": 309.7,
+        "width": 87.4
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "Thermaltake Pacific PR22-D5 Plus ·CL-W187-PL00SW-A",
+      "manufacturer_fit_verified": false,
+      "model_id": "thermaltake-pacific-pr22-d5-plus",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 94.1,
+        "height": 309.7,
+        "width": 87.4
+      },
+      "requires_motor": false,
+      "series": "Pacific PR22-D5 Plus",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-pr22-d5-plus"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 65,
+        "height": 41,
+        "width": 65
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Alphacool VPP Apex Pump ·13339",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-vpp-apex",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 0,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 65,
+        "height": 41,
+        "width": 65
+      },
+      "requires_motor": false,
+      "series": "VPP Apex",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/pumpen/vpp-d5/pum-alphacool-vpp-apex-pump"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Alphacool DC-LT 2 2600 Ceramic ·13332",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-dc-lt2-2600",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 0,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 41,
+        "height": 18,
+        "width": 52
+      },
+      "requires_motor": false,
+      "series": "DC-LT 2",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/pumpen/dc-lt/pum-alphacool-dc-lt-2-2600rpm-ceramic-12v-dc-3-phase-sine-pcb"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 50.62,
+        "height": 37.2,
+        "width": 50.62
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Alphacool Eisstation DC-LT Solo Top ·15372",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eisstation-dclt-solotop",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 3,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 50.62,
+        "height": 37.2,
+        "width": 50.62
+      },
+      "requires_motor": true,
+      "series": "Eisstation DC-LT",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/pump-tops/pump-cover/terms-and-conditions-alphacool-eisstation-dc-lt-solo-top"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Koolance",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Koolance CPU-400A",
+      "manufacturer_fit_verified": false,
+      "model_id": "koolance-cpu-400a",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 28,
+        "width": 110
+      },
+      "requires_motor": false,
+      "series": "CPU-400A",
+      "source_urls": [
+        "https://koolance.com/processor-water-block-amd-cpu-400a"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Koolance",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Koolance CPU-400A-S",
+      "manufacturer_fit_verified": false,
+      "model_id": "koolance-cpu-400a-s",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 130,
+        "height": 28,
+        "width": 100
+      },
+      "requires_motor": false,
+      "series": "CPU-400A-S",
+      "source_urls": [
+        "https://koolance.com/processor-water-block-amd-threadripper-cpu-400a-s"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Koolance",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 90,
+        "height": 107,
+        "width": 88
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "Koolance PMP-450 (13 mm ID barbs)",
+      "manufacturer_fit_verified": false,
+      "model_id": "koolance-pmp450",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 90,
+        "height": 107,
+        "width": 88
+      },
+      "requires_motor": false,
+      "series": "PMP-450",
+      "source_urls": [
+        "https://koolance.com/pmp-450-pump-id-13mm-1-2in",
+        "https://koolance.com/files/products/diagrams/pmp-450_d1.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "XSPC",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "XSPC RayStorm EDGE aRGB AMD AM4/AM5 ·5060596650893",
+      "manufacturer_fit_verified": false,
+      "model_id": "xspc-raystorm-edge-am5",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 30,
+        "width": 110
+      },
+      "requires_motor": false,
+      "series": "RayStorm EDGE",
+      "source_urls": [
+        "https://www.xs-pc.com/waterblocks-cpu-amd/raystorm-edge-waterblock-amd4-black"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "XSPC",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": 179,
+        "width": null
+      },
+      "dimensions_scope": "partial",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "reservoir",
+      "label": "XSPC Photon aRGB Tube Reservoir V4 ·5060596651838",
+      "manufacturer_fit_verified": false,
+      "model_id": "xspc-photon-v4-black",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 86,
+        "height": 179,
+        "width": 72
+      },
+      "requires_motor": false,
+      "series": "Photon V4",
+      "source_urls": [
+        "https://www.xs-pc.com/reservoirs/photon-v4-tube-170-reservoir"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "XSPC",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "XSPC D5 aRGB Mini Tank (without D5) ·5060596651807",
+      "manufacturer_fit_verified": false,
+      "model_id": "xspc-d5-argb-mini-tank",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 95,
+        "height": 95,
+        "width": 76
+      },
+      "requires_motor": true,
+      "series": "D5 Mini Tank",
+      "source_urls": [
+        "https://www.xs-pc.com/reservoirs/d5-argb-tank-reservoir-for-d5"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "XSPC",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 62.5,
+        "height": 47.5,
+        "width": 62.5
+      },
+      "dimensions_scope": "complete",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump",
+      "label": "XSPC QX5 aRGB Mini Pump Combo ·5060596651852",
+      "manufacturer_fit_verified": false,
+      "model_id": "xspc-qx5-argb-mini",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 62.5,
+        "height": 47.5,
+        "width": 62.5
+      },
+      "requires_motor": false,
+      "series": "QX5 Mini",
+      "source_urls": [
+        "https://www.xs-pc.com/water-pumps/xspc-qx5-argb-mini-pump-combo"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Phanteks",
+      "contains_motor": false,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "cpu_block",
+      "label": "Phanteks Glacier C370i ·PH-C370I_BK",
+      "manufacturer_fit_verified": false,
+      "model_id": "phanteks-glacier-c370i",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 105,
+        "height": 35,
+        "width": 105
+      },
+      "requires_motor": false,
+      "series": "Glacier C370",
+      "source_urls": [
+        "https://phanteks.com.tw/assets/manuals/Glacier%20C370I_manual-V1.0-WEB.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Phanteks",
+      "contains_motor": true,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "pump_reservoir",
+      "label": "Phanteks Glacier R260C D5 Combo ·PH-R260_D5_BK01",
+      "manufacturer_fit_verified": false,
+      "model_id": "phanteks-glacier-r260c-d5",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 7,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 95,
+        "height": 270,
+        "width": 110
+      },
+      "requires_motor": false,
+      "series": "Glacier R260",
+      "source_urls": [
+        "https://phanteks.com.tw/assets/manuals/PH-R260-manual-V1_1%20-%20print.pdf",
+        "https://phanteks.com/eol/"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 20,
+        "height": 27,
+        "width": 20
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen 13/10 straight (17626)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-soft-13-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 20,
+        "height": 27,
+        "width": 20
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17626_Alphacool_Eiszapfen_13-10mm_compression_fitting_G1-4_-_white_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 22,
+        "height": 27,
+        "width": 22
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen 16/10 straight (17234)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-soft-16-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 22,
+        "height": 27,
+        "width": 22
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17234_Alphacool_Eiszapfen_16-10mm_compression_fitting_G1-4_-_deep_black_sixpack_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 34.5,
+        "height": 33,
+        "width": 20
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen 90 degree 13/10 (17611)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-soft-90-13-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 34.5,
+        "height": 33,
+        "width": 20
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17611_Alphacool_Eiszapfen_13-10mm_compression_fitting_90_rotatable_G1-4_-_4pcs_Set_Deep_Black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 35.5,
+        "height": 34.5,
+        "width": 22
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen 90 degree 16/10 (17613)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-soft-90-16-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 35.5,
+        "height": 34.5,
+        "width": 22
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17613_Alphacool_Eiszapfen_16-10mm_compression_fitting_90_rotatable_G1-4_-_4pcs_Set_Deep_Black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 20,
+        "height": 18,
+        "width": 20
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen HF HardTube 12 (17645)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-hf-hard-12",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 20,
+        "height": 18,
+        "width": 20
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen HF",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17645_Alphacool_Eiszapfen_HF_12mm_HardTube_compression_fitting_G1-4__-_Deep_Black_Sixpack_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 24,
+        "height": 18,
+        "width": 24
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen knurled HardTube 16 (17379)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-hard-16",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 24,
+        "height": 18,
+        "width": 24
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17379_Alphacool_Eiszapfen_16mm_HardTube_compression_fitting_G1-4_-_knurled_-_deep_black_sixpack_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 23.5,
+        "height": 22.2,
+        "width": 23.5
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Apex Grip HardTube 13 (14795)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-apex-grip-hard-13",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 23.5,
+        "height": 22.2,
+        "width": 23.5
+      },
+      "requires_motor": null,
+      "series": "Apex Grip",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_14795_Alphacool_Apex_Grip_HardTube_fitting_13mm_G1-4_black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 25,
+        "height": 22.3,
+        "width": 25
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Apex Grip HardTube 16 (14796)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-apex-grip-hard-16",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 25,
+        "height": 22.3,
+        "width": 25
+      },
+      "requires_motor": null,
+      "series": "Apex Grip",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_14796_Alphacool_Apex_Grip_HardTube_fitting_16mm_G1-4_black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 42.5,
+        "height": null,
+        "width": 21
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen HardTube 90 degree 13 (17607)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-hard-90-13",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 42.5,
+        "height": 36,
+        "width": 21
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17607_Alphacool_Eiszapfen_13mm_HardTube_compression_fitting_90_rotatable_G1-4_for_Acryl-Brass_tubes_-_4pcs_Set_Deep_Black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 21,
+        "height": 21,
+        "width": 20
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen 45 degree OT/IT (17590)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-static-45",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 21,
+        "height": 21,
+        "width": 20
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17590_Alphacool_Eiszapfen_angled_adaptor_45_G1-4_OT_to_G1-4_IT_-_black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 24.7,
+        "height": 18,
+        "width": 19.7
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen compact L OT/IT (17594)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-static-l",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 24.7,
+        "height": 24.7,
+        "width": 19.7
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17594_Alphacool_Eiszapfen_L-connector_G1-4_OT_G1-4_IT_-_black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 31.5,
+        "height": 18,
+        "width": 32.5
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen rotary 90 degree OT/IT (17618)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-rotary-90",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 31.5,
+        "height": 32.5,
+        "width": 18
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17618_Alphacool_Eiszapfen_angled_adaptor_90_rotatable_G1-4_OT_to_G1-4_IT_4pcs_Set_Deep_Black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 17,
+        "height": 9.5,
+        "width": 17
+      },
+      "dimensions_scope": "overall",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Alphacool Eiszapfen screw plug (17622)",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-eiszapfen-plug",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 1,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 17,
+        "height": 9.5,
+        "width": 17
+      },
+      "requires_motor": null,
+      "series": "Eiszapfen",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17622_Alphacool_Eiszapfen_screw_plug_G1-4_-_6pcs_Set_Deep_Black_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 13,
+        "height": 3000,
+        "width": 13
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool AlphaTube HF 13/10 Ultra Clear",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-alphatube-hf-13-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 13,
+        "height": 80,
+        "width": 13
+      },
+      "requires_motor": null,
+      "series": "AlphaTube HF",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17495_Alphacool_tubing_AlphaTube_HF_13-10_(3-8ID)_-_Ultra_Clear_3m_(9,8ft)_Retailbox_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 16,
+        "height": 3000,
+        "width": 16
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool AlphaTube HF 16/10 Ultra Clear",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-alphatube-hf-16-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 16,
+        "height": 80,
+        "width": 16
+      },
+      "requires_motor": null,
+      "series": "AlphaTube HF",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17497_Alphacool_tubing_AlphaTube_HF_16-10_(3-8ID)_-_Ultra_Clear_3m_(9,8ft)_Retailbox_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 13,
+        "height": 3000,
+        "width": 13
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool EPDM 13/10 black",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-epdm-13-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 13,
+        "height": 80,
+        "width": 13
+      },
+      "requires_motor": null,
+      "series": "EPDM",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_18641_Alphacool_EPDM_Tube_13-10_-_Black_3m_(9,84ft)_Retailbox_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 16,
+        "height": 1000,
+        "width": 16
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool EPDM 16/10 black",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-epdm-16-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 16,
+        "height": 80,
+        "width": 16
+      },
+      "requires_motor": null,
+      "series": "EPDM",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_18713_Alphacool_EPDM_Tube_16-10_-_Black_1m_(3,28ft)_Retailbox_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 16,
+        "height": 3300,
+        "width": 16
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool AlphaTube TPV 16/10",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-alphatube-tpv-16-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 16,
+        "height": 80,
+        "width": 16
+      },
+      "requires_motor": null,
+      "series": "AlphaTube TPV",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_17490_Alphacool_tube_AlphaTube_TPV_16-10_-_Black_Matte_3,3m_(10ft)_Retailbox_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 13,
+        "height": 600,
+        "width": 13
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool HardTube Acryl 13/10",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-acryl-13-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 13,
+        "height": 80,
+        "width": 13
+      },
+      "requires_motor": null,
+      "series": "HardTube Acryl",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_18439_Alphacool_HardTube_13-10mm_Acryl_clear_60cm_-_4pcs_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 16,
+        "height": 800,
+        "width": 16
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool HardTube Acryl 16/13",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-acryl-16-13",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 16,
+        "height": 80,
+        "width": 16
+      },
+      "requires_motor": null,
+      "series": "HardTube Acryl",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_18444_Alphacool_HardTube_16-13mm_Acryl_clear_80cm_-_4pcs_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 13,
+        "height": 800,
+        "width": 13
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool Carbon HardTube 13/10",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-carbon-13-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 13,
+        "height": 80,
+        "width": 13
+      },
+      "requires_motor": null,
+      "series": "Carbon HardTube",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_18657_Alphacool_Carbon_HardTube_13mm_4x_80cm_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 16,
+        "height": 800,
+        "width": 16
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Alphacool Carbon HardTube 16/13",
+      "manufacturer_fit_verified": false,
+      "model_id": "alphacool-carbon-16-13",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 16,
+        "height": 80,
+        "width": 16
+      },
+      "requires_motor": null,
+      "series": "Carbon HardTube",
+      "source_urls": [
+        "https://download.alphacool.com/datasheet/ENG_18658_Alphacool_Carbon_HardTube_16mm_4x_80cm_datasheet.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "CORSAIR Hydro X XF Compression 10/13",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xf-soft-10-13",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 20,
+        "height": 25,
+        "width": 20
+      },
+      "requires_motor": null,
+      "series": "Hydro X XF",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9051002-ww/hydro-x-series-xf-compression-10-13mm-id-od-fitting-four-pack-black-cx-9051002-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "CORSAIR Hydro X XF Hardline 14",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xf-hard-14",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 22,
+        "height": 20,
+        "width": 22
+      },
+      "requires_motor": null,
+      "series": "Hydro X XF",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9052008-ww/hydro-x-series-xf-hardline-14mm-od-fitting-four-pack-aca-a-black-cx-9052008-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "CORSAIR Hydro X XF 90 degree Rotary Adapter",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xf-rotary-90",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 25,
+        "height": 34,
+        "width": 22
+      },
+      "requires_motor": null,
+      "series": "Hydro X XF",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9055009-ww/hydro-x-series-90aa-rotary-adapter-twin-pack-aca-a-black-cx-9055009-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "CORSAIR Hydro X XF Ball Valve",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xf-ball-valve",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 23,
+        "height": 33,
+        "width": 36
+      },
+      "requires_motor": null,
+      "series": "Hydro X XF",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9055019-ww/hydro-x-series-xf-ball-valve-aca-a-black-cx-9055019-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "CORSAIR",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 14,
+        "height": 1000,
+        "width": 14
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "CORSAIR Hydro X XT Hardline 14/10",
+      "manufacturer_fit_verified": false,
+      "model_id": "corsair-xt-hardline-14-10",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 14,
+        "height": 80,
+        "width": 14
+      },
+      "requires_motor": null,
+      "series": "Hydro X XT",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9059003-ww/hydro-x-series-xt-hardline-14mm-tubing-cx-9059003-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Thermaltake",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 24,
+        "height": 23.6,
+        "width": 24
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Thermaltake Pacific F-Pro Hard Tube16 OD",
+      "manufacturer_fit_verified": false,
+      "model_id": "thermaltake-f-pro-hard-16",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 24,
+        "height": 23.6,
+        "width": 24
+      },
+      "requires_motor": null,
+      "series": "Pacific F-Pro",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-f-pro-hard-tube-16mm-od-compression-chrome"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Thermaltake",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 42,
+        "height": 25,
+        "width": 42
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Thermaltake Pacific Dual Compression90 degree16 OD",
+      "manufacturer_fit_verified": false,
+      "model_id": "thermaltake-pacific-dual-hard-90-16",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 42,
+        "height": 42,
+        "width": 25
+      },
+      "requires_motor": null,
+      "series": "Pacific",
+      "source_urls": [
+        "https://thermaltake.com/products/pacific-petg-tube-90-degree-dual-compression-16mm-od-chrome"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Thermaltake",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 16,
+        "height": 500,
+        "width": 16
+      },
+      "dimensions_scope": "supplied_tube",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "tubing",
+      "label": "Thermaltake V-Tubler PETG16/12 500mm",
+      "manufacturer_fit_verified": false,
+      "model_id": "thermaltake-v-tubler-petg-16-12",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 16,
+        "height": 80,
+        "width": 16
+      },
+      "requires_motor": null,
+      "series": "V-Tubler",
+      "source_urls": [
+        "https://www.thermaltake.com/v-tubler-petg-tube.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Thermaltake",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 22,
+        "height": 30,
+        "width": 22
+      },
+      "dimensions_scope": "publisher_unspecified",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "installed_hardware_inferred": false,
+      "kind": "fitting",
+      "label": "Thermaltake Pacific G1/4 MM20mm Extender",
+      "manufacturer_fit_verified": false,
+      "model_id": "thermaltake-pacific-mm-ext20",
+      "model_status": "original_schematic",
+      "pack_collection_id": "loop-collection-046",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 22,
+        "height": 30,
+        "width": 22
+      },
+      "requires_motor": null,
+      "series": "Pacific",
+      "source_urls": [
+        "https://www.thermaltake.com/pacific-g1-4-male-to-male-20mm-extender-black.html"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
     }
   ],
   "optional_summary": {
@@ -5758,7 +8186,20 @@
     "cpu_products": 72,
     "executable_content": false,
     "installed_by_default": false,
-    "packs": 2
+    "loop_by_kind": {
+      "cpu_block": 10,
+      "fitting": 20,
+      "pump": 8,
+      "pump_reservoir": 10,
+      "reservoir": 4,
+      "tubing": 11
+    },
+    "loop_pack_index": "docs/LOOP_PACKS_INDEX.json",
+    "loop_package_artifacts": 15,
+    "loop_products": 63,
+    "packs": 2,
+    "total_named_products": 816,
+    "total_optional_products": 302
   },
   "products": [
     {
@@ -5767,7 +8208,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock B550M-ITX/ac",
@@ -5779,7 +8220,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/B550M-ITXac.pdf",
-        "https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp"
+        "https://www.asrock.com/mb/AMD/B550M-ITXac/index.asp",
+        "https://www.asrock.com/mb/photo/B550M-ITXac(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -5790,7 +8232,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock H670M-ITX/ax",
@@ -5802,7 +8244,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/H670M-ITXax.pdf",
-        "https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp"
+        "https://www.asrock.com/mb/Intel/H670M-ITXax/index.asp",
+        "https://www.asrock.com/mb/photo/H670M-ITXax(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -5813,7 +8256,7 @@
         "height": 305.0,
         "width": 244.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock B650 PG Lightning",
@@ -5825,7 +8268,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/B650%20PG%20Lightning.pdf",
-        "https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp"
+        "https://pg.asrock.com/mb/AMD/B650%20PG%20Lightning/index.asp",
+        "https://www.asrock.com/mb/photo/B650%20PG%20Lightning(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -5905,7 +8349,7 @@
         "height": 305.0,
         "width": 244.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock X870 Pro RS",
@@ -5917,7 +8361,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/X870%20Pro%20RS.pdf",
-        "https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp"
+        "https://www.asrock.com/mb/AMD/X870%20Pro%20RS/index.asp",
+        "https://www.asrock.com/mb/photo/X870%20Pro%20RS(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -6060,7 +8505,8 @@
       "source_urls": [
         "https://dlcdnets.asus.com/pub/ASUS/mb/Socket%20AM5/ROG_STRIX_B650E-I_GAMING_WIFI/E20253_ROG_STRIX_B650E-I_GAMING_WIFI_UM_WEB.pdf",
         "https://rog.asus.com/motherboards/rog-strix/rog-strix-b650e-i-gaming-wifi-model/",
-        "https://dlcdnwebimgs.asus.com/files/media/B21F5C75-0BAA-4FEB-8CFF-0116FE56039F/v1/img/spec/performance.png"
+        "https://dlcdnwebimgs.asus.com/files/media/B21F5C75-0BAA-4FEB-8CFF-0116FE56039F/v1/img/spec/performance.png",
+        "https://dlcdnwebimgs.asus.com/gain/FE82325B-98A9-4D55-B0FA-E8E168C2FB6B/w1000/h732"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -6216,7 +8662,7 @@
         "height": 244.0,
         "width": 244.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "GIGABYTE B550M DS3H (rev. 1.5)",
@@ -6228,7 +8674,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.gigabyte.com/FileList/Manual/mb_manual_b550m-ds3h_e_1503.pdf?v=f48dcfee919cb5657d13fb0b7ff08940",
-        "https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp"
+        "https://www.gigabyte.com/Motherboard/B550M-DS3H-rev-15/sp",
+        "https://static.gigabyte.com/StaticFile/Image/Global/88e20304d808c65f240b6b77f66c044e/ProductRemoveBg/35433"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -6373,7 +8820,8 @@
       "source_urls": [
         "https://download.msi.com/archive/mnu_exe/mb/MPGB650IEDGEWIFI.pdf",
         "https://www.msi.com/Motherboard/MPG-B650I-EDGE-WIFI/Specification",
-        "https://storage-asset.msi.com/datasheet/mb/us/MPG-B650I-EDGE-WIFI.pdf"
+        "https://storage-asset.msi.com/datasheet/mb/us/MPG-B650I-EDGE-WIFI.pdf",
+        "https://storage-asset.msi.com/global/picture/product/product_1678348227e9a55fe78aa866f278abec97de2aa859.webp"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
