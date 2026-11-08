@@ -31,6 +31,7 @@ class AccessoryAtlasTests(unittest.TestCase):
         cls.output=Path(cls.temporary.name)
         script='''import builtins,importlib.abc,json,pathlib,sys
 denied={'PySide6','PyQt6','PyQt5','assembly_geometry','assembly_cooling','assembly_auxiliary','assembly_viewer',
+ 'hardware_packs','profile_paths',
  'top_bar_config','ctypes','psutil','wmi','winreg','win32api','win32gui','win32com','pythoncom',
  'sensors','activity_sensors','gpu_fan_sensor','chassis_identity','memory_identity','native_controller',
  'hardware_monitor','sensor_diagnostics','subprocess','socket','ssl','urllib','http','requests','aiohttp','webbrowser'}

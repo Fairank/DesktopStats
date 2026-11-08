@@ -1,6 +1,6 @@
 """Selected independent loop data only; no author catalogs, probing or clock."""
 
-PART_KINDS=('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing')
+PART_KINDS=('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing','gpu_block')
 
 def choices(part_kind):
     if part_kind not in PART_KINDS:return []
@@ -17,10 +17,10 @@ def grouped_choices():
             series=row['series'],pack_id=row['pack_id'],**row['selector']))
     return result
 
-def get_component(part_kind,identity):
+def get_component(part_kind,identity,*,retain=True):
     if part_kind not in PART_KINDS or not identity:return {}
     from hardware_packs import runtime_store
-    row=runtime_store().get_model('loop',identity)
+    row=runtime_store().get_model('loop',identity,retain=retain)
     reference=row.get('reference') if row else None
     # PackStore already returns a detached model. Copying its reference again
     # doubles the same selected-record traversal without adding isolation.

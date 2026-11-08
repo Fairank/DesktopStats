@@ -17,6 +17,14 @@ _POWER_INTERFACE_SOURCE = 'https://www.molex.com/en-us/products/part-detail/3928
 _M2_INTERFACE_SOURCE = 'https://www.te.com/en/products/connectors/pcb-connectors/card-edge-connectors/m-2-connectors.html?tab=pgp-story'
 
 
+
+def _io_clear_cover(model):
+    # This original inset belongs only to the three already-authored ASUS
+    # profiles. A same-index cover or a new brand must not inherit that shape.
+    allowed=('asus-rog-strix-z790-a-wifi-d4','asus-rog-strix-x670e-e-wifi','asus-rog-maximus-z790-hero')
+    if model['id'] not in allowed or not model.get('io_clear_inset',True):return None
+    return next((cover for cover in model['heatsinks'] if cover['name']=='vrm-io'),None)
+
 def layout_anchors(spec,w,h,d,board_x,board_y,board_rear):
     """Canonical component anchors before the case's rigid orientation change."""
     model=resolve(spec.get('board') or {})
@@ -125,6 +133,7 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     for cover in model['heatsinks']:
         is_m2=cover['name'].startswith('m2');name='detail-board-m2-heatsink' if is_m2 else 'board-'+cover['name']+'-heatsink'
         depth=cover['depth_mm'];poly=cover['polygon']
+        cover_metal=color(cover.get('finish_color'),model['heatsink_color'])
         from assembly_detail import _point_inside
         mount_holes=[((u-.5)*bw,(.5-v)*bh,3.2) for u,v in mounts if _point_inside((u,v),poly)] if model['mount_method'].startswith('official_') else []
         fan=cover.get('static_fan');vent=cover.get('surface_vent');mechanical_holes=list(mount_holes)
@@ -146,7 +155,7 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         if level!='eco' and cover['grooves'] and not vent:
             u0,u1=min(p[0] for p in poly),max(p[0] for p in poly);v0,v1=min(p[1] for p in poly),max(p[1] for p in poly)
             sample=min(cover['grooves']*(2 if level=='close' else 1),18)
-            recess=min(3.,depth*.42);plate(name,poly,depth-recess,metal,1.,mechanical_holes);channels=list(mechanical_holes)
+            recess=min(3.,depth*.42);plate(name,poly,depth-recess,cover_metal,1.,mechanical_holes);channels=list(mechanical_holes)
             for n in range(sample):
                 along=cover.get('groove_along')
                 if along is None:
@@ -171,8 +180,8 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
                         if all(_point_inside(p,physical) for p in channel):channels.append(channel);break
                         half*=.80
             cap=perforated_plate(unit_polygon([list(p) for p in poly],bw,bh),channels,recess)
-            add('board-heatsink-recessed-crown',rotate_vertices(cap,'left'),metal,(bx-1.-depth+recess/2,by,bz))
-        else:plate(name,poly,depth,metal,1.,mechanical_holes)
+            add('board-heatsink-recessed-crown',rotate_vertices(cap,'left'),cover_metal,(bx-1.-depth+recess/2,by,bz))
+        else:plate(name,poly,depth,cover_metal,1.,mechanical_holes)
         if fan:
             center=point(fan['uv'],depth-1.8);radius=fan['diameter_mm']/2
             add('board-onboard-fan-recess-floor',rotate_vertices(ring(radius*.985,0.,.35,segments=32),'left'),dark,center)
@@ -184,11 +193,20 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
             for u,v in cover.get('fasteners_uv',((u0+.022,v),(u1-.022,v))):
                 pos=point((u,v),depth+1.3)
                 add('board-cover-screw',rotate_vertices(ring(1.65,.45,.45,segments=12),'left'),steel,pos)
+    # Static photo-observed material inlays; no emission, logo or animation.
+    for region in model.get('static_finish_regions',()):
+        parent_id=region.get('parent_cover')
+        parent=next((c for c in model['heatsinks'] if c['name']==parent_id),None) if parent_id else None
+        if parent_id and parent is None:continue
+        outward=1.1+(parent['depth_mm'] if parent else 0.)
+        plate('board-static-finish-'+region['id'],region['polygon'],region['depth_mm'],
+            color(region['finish_color']),outward)
     # The I/O cover's clear inset is an original simple translucent panel,
     # not the vendor's copyrighted logo or copied artwork.
-    if model.get('io_clear_inset',model['id'].startswith('asus-rog-')):
+    io_cover=_io_clear_cover(model)
+    if io_cover:
         plate('board-io-clear-inset',((.018,.079),(.100,.068),(.147,.125),(.143,.355),(.026,.420)),.5,
-            color('#a6c9d1',alpha=.54),model['heatsinks'][1]['depth_mm']+1.3)
+            color('#a6c9d1',alpha=.54),io_cover['depth_mm']+1.3)
     cp=anchors['cpu']['position'];cy,cz=cp[1],cp[2];am5=model['socket']=='AM5'
     if model['socket']=='AM4':
         # Official AM4 board drawings show a plastic PGA ZIF socket, not an
@@ -503,6 +521,13 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         unplaced_source_features=model.get('unplaced_source_features',()),
         bundled_m2_accessory_slots=model.get('bundled_m2_accessory_slots',0),bundled_m2_accessory_installed=False,
         battery_placement_status=model.get('battery_placement_status','manual_observed'))
+    if model.get('source_finish_model')==model['id']:
+        armor_names={'detail-board-m2-heatsink','board-heatsink-recessed-crown',
+                     *('board-'+cover['name']+'-heatsink' for cover in model['heatsinks'])}
+        roles={mesh.name:'pcb' if mesh.name=='motherboard-reference' else 'armor' if mesh.name in armor_names else 'inlay'
+               for mesh in parts if mesh.name=='motherboard-reference' or mesh.name in armor_names
+               or mesh.name.startswith('board-static-finish-')}
+        meta['finish_materials']=dict(model_id=model['id'],roles=roles)
     if model.get('onboard_fans'):
         meta['onboard_fans']=copy.deepcopy(model['onboard_fans'])
         meta['onboard_fan_telemetry_bound']=False

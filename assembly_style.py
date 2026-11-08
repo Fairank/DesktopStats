@@ -14,6 +14,9 @@ MAX_GRILLE_EDGES = 4096
 _PAPER = ("notebook_color", "notebook_line", "notebook_smile")
 _LINE = ("outline", "notebook_line", "sketch")
 _EXPRESSIVE = ("cartoon", "notebook_smile")
+_SOURCE_FINISH_BOARDS = frozenset(('asrock-z790-pg-itx-tb4','asrock-b650i-lightning-wifi',
+    'asrock-x670e-taichi','asrock-b650e-steel-legend-wifi','asrock-b650m-pg-riptide-wifi',
+    'gigabyte-z790-aorus-master'))
 
 
 def rgba(value, alpha=1.):
@@ -103,12 +106,28 @@ def paint_color(source,style,component="case"):
     return tuple(target)+(alpha,)
 
 
-def apply_colors(meshes,style):
+def _board_finish_color(source,style,role):
+    """Source-scoped material layers inside the existing illustration palette.
+
+    Original paint and pure lines stay exact. In the other treatments, lift a
+    dark metal's reference tone into the existing middle palette and an inlay
+    into its light palette. A three-tone flatten must not erase real armor.
+    """
+    if style=='miniature' or style in _LINE or role=='pcb':return paint_color(source,style,'board')
+    light=sum(c*w for c,w in zip(source[:3],(.2126,.7152,.0722)))
+    target=.54 if role=='armor' and light<.37 else .82 if role=='inlay' else light
+    if target>light:
+        source=_mix(source[:3],(1.,1.,1.),(target-light)/(1.-light))+(source[3],)
+    return paint_color(source,style,'board')
+
+
+def apply_colors(meshes,style,material_roles=None):
     style=resolve_style(style)
     if style=="miniature":return tuple(meshes)
     values=[]
     for mesh in meshes:
-        tone=paint_color(mesh.color,style,mesh.component)
+        role=material_roles.get(mesh.name) if material_roles and mesh.component=='board' else None
+        tone=_board_finish_color(mesh.color,style,role) if role in ('pcb','armor','inlay') else paint_color(mesh.color,style,mesh.component)
         if style=='papercut' and mesh.name.startswith('loop-'):
             # Only the new loop artwork separates dark paper materials. Keep
             # original paint, all older hardware and physical vertices intact.
@@ -125,17 +144,20 @@ def apply_colors(meshes,style):
     return tuple(values)
 
 
-def apply_model_styles(meshes,style,overrides,dimensions,panels,lighting_preview="artwork"):
+def apply_model_styles(meshes,style,overrides,dimensions,panels,lighting_preview="artwork",finish_materials=None):
     """Independent per-part treatments share geometry, one bounded draw system."""
     default=resolve_style(style);overrides=overrides if isinstance(overrides,dict) else {}
     values=[];styles=[];part_map={}
+    material_roles=(finish_materials.get('roles') if isinstance(finish_materials,dict)
+                    and finish_materials.get('model_id') in _SOURCE_FINISH_BOARDS else None)
+    if not isinstance(material_roles,dict):material_roles=None
     case_style=resolve_style(overrides.get('case',default))
     for mesh in meshes:
         if mesh.name.startswith('style-'):continue
         family='case' if mesh.component=='panel' else mesh.component
         part=getattr(mesh,'part_id','')
         selected=resolve_style(overrides.get(part,overrides.get(family,default)))
-        values.extend(apply_colors((mesh,),selected));styles.append(selected)
+        values.extend(apply_colors((mesh,),selected,material_roles));styles.append(selected)
         part_map.setdefault(family,resolve_style(overrides.get(family,default)))
         if part:part_map[part]=selected
     policy=style_for(case_style)

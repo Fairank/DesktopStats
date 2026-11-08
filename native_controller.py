@@ -2941,6 +2941,7 @@ class Controller(AssemblyTools):
         self._sync_process_requests()
 
     def close(self):
+        self.close_accessory_jobs()
         self._reading_notify_timer.stop()
         self._diagnostic_timer.stop()
         self.stop.set()

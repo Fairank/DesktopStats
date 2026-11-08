@@ -74,8 +74,9 @@ Window {
                     moduleKey: hardwareCard.moduleKey
                     config: hardwareCard.config
                     draftMode: root.appearanceConfig !== null
-                    active: root.visible && !root.resizing
-                    motionAllowed: root.modelMotionAllowed && root.visible && !root.resizing
+                    active: root.visible && root.visibility !== Window.Minimized && !root.resizing
+                    motionAllowed: root.modelMotionAllowed && root.visible
+                        && root.visibility !== Window.Minimized && !root.resizing
                 }
             }
         }

@@ -15,7 +15,7 @@ KINDS={'case':'cases','cooler':'coolers','psu':'psus','fan':'fans'}
 
 
 def export(destination):
-    from accessory_art import choices,art,clear_cache
+    from accessory_art import builtin_choices as choices,art,clear_cache
     from product_version import VERSION
     from top_bar_config import HARDWARE_ICON_STYLES
     destination=Path(destination);destination.mkdir(parents=True,exist_ok=True)

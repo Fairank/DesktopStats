@@ -104,6 +104,7 @@ def fit_messages(spec,metadata):
         'radiator_occupies_mount':'冷排已占用该安装面，请移除重复的机箱风扇。',
         'unsupported_fan_mount':'所选风扇尺寸或数量超出机箱已核安装位。',
         'fans_exceed_mount_plane':'风扇超出所选安装面的参考范围。',
+        'case_fan_clearance_conflict':'机箱风扇与显卡或其它已选部件的参考空间冲突，整组风扇未放入；请调整安装位或配件。',
         'unsupported_psu_form':'所选电源规格尚不适配此机箱。',
         'no_expansion_slot':'所选扩展卡没有可用插槽。',
         'expansion_slot_obstructed':'所选扩展卡没有可用插槽。',

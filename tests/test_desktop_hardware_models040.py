@@ -316,6 +316,37 @@ ApplicationWindow {
         self.window.setProperty("allowed",False);self.app.processEvents()
         self.assertFalse(icon.property("animationRunning"))
 
+    def test_minimized_model_keeps_snapshot_then_refreshes_once_restored(self):
+        self.load("cpu")
+        self._check_minimized_snapshot()
+
+    def test_actual_desktop_window_suspends_snapshots_while_minimized(self):
+        self.component=QQmlComponent(self.engine,QUrl.fromLocalFile(str(ROOT/"native/DesktopWidget.qml")))
+        spec=dict(id="cpu",width=240,height=240,cells=[dict(key="cpu",x=0,y=0,width=240,height=240)],
+            material_policy=render_policy(self.controller._saved,dict(id="cpu",cells=[dict(key="cpu")])))
+        self.window=self.component.createWithInitialProperties(dict(spec=spec))
+        self.assertIsNotNone(self.window,[e.toString() for e in self.component.errors()])
+        self.window.show();self.app.processEvents()
+        self._check_minimized_snapshot()
+
+    def _check_minimized_snapshot(self):
+        model=self.find("desktopHardwareModel")
+        self.assertTrue(model.property("active"))
+        original=copy.deepcopy(model.property("snapshot"))
+        self.window.showMinimized();self.app.processEvents()
+        self.assertFalse(model.property("active"))
+        icon=self.find("desktopHardwareModelIcon")
+        self.assertFalse(icon.property("animationRunning"))
+        self.assertIsNone(icon.property("clockSubscription"))
+        self.controller._data["cpu_name"]="Intel Core i7-13700KF"
+        for _ in range(3):
+            self.controller.dataChanged.emit();self.app.processEvents()
+        self.assertEqual(model.property("snapshot"),original)
+        self.window.showNormal();self.app.processEvents()
+        self.assertTrue(model.property("active"))
+        self.assertEqual(model.property("snapshot")["appearance"]["id"],"intel-13700kf")
+        self.assertIsNone(self.controller.thread)
+
     def test_motion_stops_when_hidden_disallowed_or_rpm_expires_and_svg_stays_retained(self):
         self.load("gpu")
         icon=self.find("desktopHardwareModelIcon")

@@ -33,8 +33,10 @@ OFFICIAL_HOSTS={
 class CoolingExpansion039Tests(unittest.TestCase):
     def test_previous_eighty_records_are_byte_equivalent_as_canonical_data(self):
         """The additions must not silently reclassify older product records."""
+        # Preserve static author records; the 0.44 mounting overlay has
+        # independent provenance/geometry coverage in test_fan_mounting044.
         old={'coolers':[catalog.get_cooler(c['id']) for c in catalog.choices_coolers()[:42]],
-             'fans':[catalog.get_fan(c['id']) for c in catalog.choices_fans()[:38]]}
+             'fans':[dict(catalog._FAN_BY_ID[c['id']]) for c in catalog.choices_fans()[:38]]}
         serial=json.dumps(old,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
         self.assertEqual(hashlib.sha256(serial).hexdigest(),
                          '5b242023e84617c860121e866040800ed0cdf3125d3605dc3fdc3dd720c87351')

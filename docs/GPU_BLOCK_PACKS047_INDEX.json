@@ -1,0 +1,115 @@
+{
+  "assembly_pose_verified": false,
+  "by_kind": {
+    "gpu_block": 12
+  },
+  "format": 1,
+  "geometry_accuracy": "original_reference_not_CAD",
+  "gpu_installation_supported": false,
+  "grouping_policy": "Collection/brand packages overlap; install one alternative for each model.",
+  "held_rows_included": false,
+  "installed_by_default": false,
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "loop_connection_supported": false,
+  "market_exhaustive": false,
+  "packs": [
+    {
+      "assembly_stage": "standalone_reference_only",
+      "bytes": 11666,
+      "download_url": "https://github.com/Fairank/DesktopStats/raw/refs/heads/codex/hardware-polish-v047/model-packs/v047/DesktopStats-gpu-block-collection-047-1.0.0.dspack",
+      "file": "model-packs/v047/DesktopStats-gpu-block-collection-047-1.0.0.dspack",
+      "group": "collection",
+      "id": "gpu-block-collection-047",
+      "kind": "loop",
+      "label": "GPU block references",
+      "minimum_app_version": "0.47.0-preview.1",
+      "model_ids": [
+        "alphacool-core-rtx5090-rog-astral",
+        "alphacool-es-rtx5090-reference-1slot",
+        "alphacool-core-rtx4090-fe",
+        "alphacool-aurora-rx7900xtx-reference",
+        "alphacool-core-rx9070-tuf-prime",
+        "alphacool-core-rx9070xt-swift-quicksilver",
+        "alphacool-core-rtx5090-suprim-vanguard",
+        "alphacool-core-rtx5090-tuf",
+        "watercool-heatkiller-v-ultra-rtx5090-tuf",
+        "watercool-heatkiller-v-pro-rtx4090-fe",
+        "corsair-xg7-rgb-rtx4090-strix-tuf",
+        "corsair-xg7-rgb-rtx3080ti-3080-fe"
+      ],
+      "part_kind": "gpu_block",
+      "products": 12,
+      "sha256": "bd06c24fb4615f7d62d87c742b2c56ce896c342186a93034966c391672fc4475",
+      "styles": "all_13_shared",
+      "version": "1.0.0"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "bytes": 9181,
+      "download_url": "https://github.com/Fairank/DesktopStats/raw/refs/heads/codex/hardware-polish-v047/model-packs/v047/DesktopStats-gpu-block-brand-alphacool-047-1.0.0.dspack",
+      "file": "model-packs/v047/DesktopStats-gpu-block-brand-alphacool-047-1.0.0.dspack",
+      "group": "brand",
+      "id": "gpu-block-brand-alphacool-047",
+      "kind": "loop",
+      "label": "Alphacool GPU block references",
+      "minimum_app_version": "0.47.0-preview.1",
+      "model_ids": [
+        "alphacool-core-rtx5090-rog-astral",
+        "alphacool-es-rtx5090-reference-1slot",
+        "alphacool-core-rtx4090-fe",
+        "alphacool-aurora-rx7900xtx-reference",
+        "alphacool-core-rx9070-tuf-prime",
+        "alphacool-core-rx9070xt-swift-quicksilver",
+        "alphacool-core-rtx5090-suprim-vanguard",
+        "alphacool-core-rtx5090-tuf"
+      ],
+      "part_kind": "gpu_block",
+      "products": 8,
+      "sha256": "607791b22695fc74b2050a861b13a8e45581040520a0255a8252f87c87b151f4",
+      "styles": "all_13_shared",
+      "version": "1.0.0"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "bytes": 5456,
+      "download_url": "https://github.com/Fairank/DesktopStats/raw/refs/heads/codex/hardware-polish-v047/model-packs/v047/DesktopStats-gpu-block-brand-corsair-047-1.0.0.dspack",
+      "file": "model-packs/v047/DesktopStats-gpu-block-brand-corsair-047-1.0.0.dspack",
+      "group": "brand",
+      "id": "gpu-block-brand-corsair-047",
+      "kind": "loop",
+      "label": "Corsair GPU block references",
+      "minimum_app_version": "0.47.0-preview.1",
+      "model_ids": [
+        "corsair-xg7-rgb-rtx4090-strix-tuf",
+        "corsair-xg7-rgb-rtx3080ti-3080-fe"
+      ],
+      "part_kind": "gpu_block",
+      "products": 2,
+      "sha256": "8f4d6ce246687aa21882ab13b911db22d2c6b477128c98b2189735962f8a2ab8",
+      "styles": "all_13_shared",
+      "version": "1.0.0"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "bytes": 5549,
+      "download_url": "https://github.com/Fairank/DesktopStats/raw/refs/heads/codex/hardware-polish-v047/model-packs/v047/DesktopStats-gpu-block-brand-watercool-047-1.0.0.dspack",
+      "file": "model-packs/v047/DesktopStats-gpu-block-brand-watercool-047-1.0.0.dspack",
+      "group": "brand",
+      "id": "gpu-block-brand-watercool-047",
+      "kind": "loop",
+      "label": "Watercool GPU block references",
+      "minimum_app_version": "0.47.0-preview.1",
+      "model_ids": [
+        "watercool-heatkiller-v-ultra-rtx5090-tuf",
+        "watercool-heatkiller-v-pro-rtx4090-fe"
+      ],
+      "part_kind": "gpu_block",
+      "products": 2,
+      "sha256": "134f0ec2a9a925d934fb1de50efab294fea0019368fd9bc3dfe7e9eb8af0d90b",
+      "styles": "all_13_shared",
+      "version": "1.0.0"
+    }
+  ],
+  "third_party_notice": "Product names/trademarks belong to their owners. Manufacturer photographs and manuals are not distributed.",
+  "unique_products": 12
+}

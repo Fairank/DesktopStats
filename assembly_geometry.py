@@ -800,17 +800,20 @@ def build_scene(spec=None):
     from assembly_auxiliary import add_auxiliary
     auxiliary_stage=None;collision_meshes=meshes
     try:
-        if (spec.get('cooling') or {}).get('loop_components_mode')=='selected':
+        selected_cooling=spec.get('cooling') or {}
+        stage_auxiliary=bool(selected_cooling.get('case_fans'))
+        if not stage_auxiliary and selected_cooling.get('loop_components_mode')=='selected':
             from cooling_catalog import get_cooler
-            selected_cooler=get_cooler((spec.get('cooling') or {}).get('cpu_cooler'))
-            if selected_cooler and selected_cooler.get('kind')=='custom_loop':
-                from assembly_auxiliary import auxiliary_stages,finish_auxiliary
-                # Build every selected auxiliary body once. Retain each real
-                # device while the loop chooses a clear reference placement;
-                # the same suspended build later adds its updated wire routes.
-                auxiliary_stage=auxiliary_stages(spec,attachment_anchors,level)
-                auxiliary_bodies=next(auxiliary_stage)
-                collision_meshes=tuple((*meshes,*auxiliary_bodies))
+            selected_cooler=get_cooler(selected_cooling.get('cpu_cooler'))
+            stage_auxiliary=bool(selected_cooler and selected_cooler.get('kind')=='custom_loop')
+        if stage_auxiliary:
+            from assembly_auxiliary import auxiliary_stages,finish_auxiliary
+            # Construct selected bodies once before either loop placement or
+            # case-fan clearance, including ordinary air/AIO configurations.
+            # Resume this same construction later for final cable anchors.
+            auxiliary_stage=auxiliary_stages(spec,attachment_anchors,level)
+            auxiliary_bodies=next(auxiliary_stage)
+            collision_meshes=tuple((*meshes,*auxiliary_bodies))
         cooling_meshes,cooling_meta=add_cooling(collision_meshes,spec,level,attachment_anchors)
         gpu_cooler_replaced=cooling_meta.get('replace_gpu_cooler') is True
         if gpu_cooler_replaced:
@@ -876,7 +879,8 @@ def build_scene(spec=None):
         hardware_parts.append(dict(id='memory:'+str(index),label=(module.get('label') or 'Memory')+' '+str(index+1),kind='memory',model_id=memory_models[index] if index<len(memory_models) else ''))
     meta['hardware']=dict(parts=hardware_parts)
     from assembly_style import apply_model_styles
-    meshes,style_meta=apply_model_styles(meshes,spec.get('visual_style'),spec.get('part_styles',{}),(w,h,d),panels,spec.get('lighting_preview','artwork'))
+    meshes,style_meta=apply_model_styles(meshes,spec.get('visual_style'),spec.get('part_styles',{}),(w,h,d),panels,spec.get('lighting_preview','artwork'),
+        finish_materials=component_details.get('board',{}).get('finish_materials'))
     meta.update(style_meta)
     return Scene(tuple(meshes),(w,h,d),meta)
 

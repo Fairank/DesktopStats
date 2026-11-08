@@ -217,7 +217,7 @@ def _check(report, output):
         report['accessory_catalog_counts']={key:len(rows) for key,rows in accessory_catalog.items()}
         expected_counts=dict(cases=report['assembly_cases'],**{
             key:sum(bool(row.get('id')) for row in catalog[key]) for key in ('coolers','psus','fans')})
-        expected_counts.update({key:0 for key in ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing')})
+        expected_counts.update({key:0 for key in ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing','gpu_blocks')})
         assert report['accessory_catalog_counts']==expected_counts
         for kind,key in (('case','cases'),('cooler','coolers'),('psu','psus'),('fan','fans')):
             for style in ('miniature','notebook_line'):
@@ -303,6 +303,45 @@ def _check(report, output):
             assert get_loop('cpu_block',identity)=={} and cache_info()['entries']==0
             assert not any(name in sys.modules for name in ('liquid_block_pump_expansion046','liquid_fitting_tube_expansion046'))
             report['checks'].append('optional-loop-pack-mesh-svg-remove-no-graphics')
+            # Read the actual shipped data pack, not an author catalogue or a
+            # fabricated GPU fixture. Frozen bundles retain it in source/.
+            source_root=Path(sys.executable).resolve().parent/'source' if getattr(sys,'frozen',False) else Path(__file__).resolve().parent
+            source=source_root/'model-packs/v047/DesktopStats-gpu-block-collection-047-1.0.0.dspack'
+            assert source.is_file(), 'Missing bundled optional GPU block collection'
+            fixture_store.install(source)
+            gpu_rows=fixture_store.choices('loop')
+            assert len(gpu_rows)==12 and len({row['id'] for row in gpu_rows})==12
+            assert all(row['selector']['part_kind']=='gpu_block' for row in gpu_rows)
+            identity='alphacool-core-rtx5090-rog-astral'
+            actual=get_loop('gpu_block',identity)
+            assert actual['id']==identity and actual['assembly_stage']=='standalone_reference_only'
+            meshes,part=build_component(actual,'eco')
+            assert meshes and not any(mesh.rotor for mesh in meshes)
+            assert part['kind']=='gpu_block' and not part['telemetry_bound']
+            assert not part['rotors_present'] and not part['pump_present']
+            assert not part['attached_to_gpu'] and not part['routes_supported']
+            assert not any(actual[key] for key in ('live_temperature_available','live_flow_available','live_rpm_available'))
+            artwork=accessory_art('gpu_block',identity,'notebook_line')
+            assert artwork and QSvgRenderer(QByteArray(artwork['svg'].encode('utf8'))).isValid()
+            assert not artwork['rotors']
+            from liquid_gpu_schema047 import compatibility
+            generic=compatibility(actual,card_label='NVIDIA GeForce RTX 5090')
+            assert generic['state']=='unlisted' and not generic['assembly_supported']
+            assert not generic['installed_hardware_inferred']
+            precise=compatibility(actual,product_code='90YV0LW1-M0NA00')
+            assert precise['state']=='manufacturer_listed' and not precise['assembly_supported']
+            fixture_store.remove('gpu-block-collection-047');clear_cache()
+            status=fixture_store.memory_status()
+            assert not fixture_store.choices('loop') and get_loop('gpu_block',identity)=={}
+            assert status['packs']==0 and status['selected_records']==0 and cache_info()['entries']==0
+            assert 'liquid_gpu_blocks047' not in sys.modules, 'Runtime imported the GPU author catalogue'
+            report['gpu_block_pack_check']=dict(models=len(gpu_rows),model_id=identity,
+                triangle_count=part['triangle_count'],svg_bytes=len(artwork['svg'].encode('utf8')),
+                rotors=0,telemetry_bound=False,assembly_supported=precise['assembly_supported'],
+                generic_chip_state=generic['state'],removed_packs=status['packs'],
+                selected_records=status['selected_records'],artwork_entries=cache_info()['entries'],
+                author_catalog_loaded=False)
+            report['checks'].append('optional-gpu-block-pack-mesh-svg-remove-no-graphics')
         finally:
             hardware_packs._store=previous_store
             clear_cache()

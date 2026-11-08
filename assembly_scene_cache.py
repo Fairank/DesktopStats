@@ -21,7 +21,8 @@ class SceneCache:
         lighting=spec.get('lighting_preview','artwork')
         if style=='miniature' and not overrides and lighting=='artwork':return self.base
         case=spec.get('case') or {}
-        meshes,metadata=apply_model_styles(self.base.meshes,style,overrides,self.base.dimensions,case.get('panels') or {},lighting)
+        meshes,metadata=apply_model_styles(self.base.meshes,style,overrides,self.base.dimensions,case.get('panels') or {},lighting,
+            finish_materials=self.base.metadata.get('motherboard',{}).get('finish_materials'))
         return Scene(meshes,self.base.dimensions,dict(self.base.metadata,**metadata))
 
     def clear(self):

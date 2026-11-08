@@ -12,6 +12,7 @@ Item {
     property bool previewPrefs: false
     property bool motionAllowed: false
     property bool active: visible && root.Window.window !== null && root.Window.window.visible
+        && root.Window.window.visibility !== Window.Minimized
     readonly property var prefs: config.widgets && config.widgets[moduleKey] || ({})
     readonly property var geometry: stats.widgetHardwareLayout(width, height, prefs)
     property var snapshot: ({})

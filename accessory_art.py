@@ -11,6 +11,7 @@ from copy import deepcopy
 from html import escape
 import math
 import re
+import sys
 
 import chassis_catalog
 import component_catalog
@@ -21,8 +22,8 @@ import cooling_catalog
 STYLES = ('miniature', 'cartoon', 'notebook_color', 'notebook_line', 'sticker',
           'papercut', 'inkwash', 'classic', 'outline', 'solid', 'soft', 'sketch',
           'notebook_smile')
-_LOOP_KINDS = ('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing')
-_LOOP_KEYS = ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing')
+_LOOP_KINDS = ('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing','gpu_block')
+_LOOP_KEYS = ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing','gpu_blocks')
 _KINDS = ('case', 'cooler', 'psu', 'fan', *_LOOP_KINDS)
 _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
 _MAX_ENTRIES = 16
@@ -1051,35 +1052,73 @@ def _psu(row, style):
     return p.finish(),rotors,fg.finish()
 
 
+def _picker_choices(catalogs):
+    return {key:[dict(id=r['id'],label=r['label'],brand=r['brand'],fidelity='schematic_reference')
+                 for r in rows] for key,rows in zip(('cases','coolers','psus','fans'),catalogs)}
+
+
+def builtin_choices():
+    """Detached bundled-only artwork inventory, without profile/pack access."""
+    # Cooling's application pickers also read installed optional packs. Export
+    # only its immutable bundled rows so another user's profile cannot alter it.
+    return _picker_choices((chassis_catalog.choices(),cooling_catalog._COOLERS,
+                            component_catalog.choices('psu'),cooling_catalog._FANS))
+
+
+def _library_generation():
+    # An unopened pack library has the same generation0 as library_generation.
+    # Pure bundled artwork must not import pack/profile/network-URL machinery.
+    module=sys.modules.get('hardware_packs')
+    return module.library_generation() if module is not None else 0
+
+
 def choices():
-    """Return detached picker records without rendering any SVGs."""
+    """Return detached app picker records, including installed optional packs."""
     global _CHOICES,_CHOICES_GENERATION
-    from hardware_packs import library_generation
-    generation=library_generation()
+    generation=_library_generation()
     if _CHOICES is None or _CHOICES_GENERATION!=generation:
-        catalogs=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
-                  component_catalog.choices('psu'),cooling_catalog.choices_fans())
-        _CHOICES={key:[dict(id=r['id'],label=r['label'],brand=r['brand'],fidelity='schematic_reference')
-                       for r in rows] for key,rows in zip(('cases','coolers','psus','fans'),catalogs)}
+        _CHOICES=_picker_choices((chassis_catalog.choices(),cooling_catalog.choices_coolers(),
+                                  component_catalog.choices('psu'),cooling_catalog.choices_fans()))
         from liquid_component_runtime046 import grouped_choices
         loop=grouped_choices()
         _CHOICES.update({key:[dict(r,fidelity='schematic_reference') for r in loop[kind]]
                          for kind,key in zip(_LOOP_KINDS,_LOOP_KEYS)})
-        _CHOICES_GENERATION=library_generation()
+        _CHOICES_GENERATION=_library_generation()
     return deepcopy(_CHOICES)
+
+
+def model_key(kind,model_id,style):
+    """Validate a small GUI request without looking up any selected record."""
+    if (not isinstance(kind,str) or kind not in _KINDS or not isinstance(model_id,str)
+            or len(model_id)>64 or not _ID.fullmatch(model_id)
+            or not isinstance(style,str) or style not in STYLES):return None
+    return (kind,model_id,style,_library_generation())
+
+
+def has_cached(key):return key in _CACHE
+
+
+def cached_art(key):
+    """GUI-only cache lookup; a cold miss never generates a mesh."""
+    if key not in _CACHE:return {}
+    _CACHE.move_to_end(key)
+    return deepcopy(_CACHE[key])
+
+
+def publish_art(key,result):
+    """GUI-only commit of a current completed data result, not worker state."""
+    if (key[3]!=_library_generation() or not result
+            or any(result.get(field)!=value for field,value in zip(('kind','id','style'),key[:3]))):return
+    _CACHE[key]=result
+    _CACHE.move_to_end(key)
+    while len(_CACHE)>_MAX_ENTRIES:_CACHE.popitem(last=False)
 
 
 def art(kind, model_id, style='miniature'):
     """Render one bounded, detached reference; unknown input returns an empty map."""
-    if (not isinstance(kind,str) or kind not in _KINDS or not isinstance(model_id,str)
-            or len(model_id)>64 or not _ID.fullmatch(model_id)
-            or not isinstance(style,str) or style not in STYLES):
-        return {}
-    from hardware_packs import library_generation
-    key=(kind,model_id,style,library_generation())
-    if key in _CACHE:
-        _CACHE.move_to_end(key)
-        return deepcopy(_CACHE[key])
+    key=model_key(kind,model_id,style)
+    if key is None:return {}
+    if key in _CACHE:return cached_art(key)
     if kind in _LOOP_KINDS:
         from liquid_svg046 import art as loop_art
         result=loop_art(kind,model_id,style)

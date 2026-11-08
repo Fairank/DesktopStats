@@ -40,6 +40,7 @@ class AccessoryArtExportTests(unittest.TestCase):
         # export immediately; the parent only reads the produced ZIPs afterward.
         script='''import builtins,importlib.abc,json,pathlib,sys
 denied={'PySide6','PyQt6','PyQt5','assembly_geometry','assembly_cooling','assembly_viewer',
+        'hardware_packs','profile_paths',
         'ctypes','psutil','wmi','winreg','win32api','win32gui','win32com','pythoncom',
         'sensors','activity_sensors','gpu_fan_sensor','chassis_identity','memory_identity',
         'native_controller','hardware_monitor','sensor_diagnostics','subprocess',

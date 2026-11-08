@@ -16,7 +16,7 @@ ROOT=Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 KINDS={'case':'cases','cooler':'coolers','psu':'psus','fan':'fans'}
 STYLE_NAMES={'miniature':'1 · 原版','cartoon':'2 · 可爱笑脸','notebook_color':'3 · 彩色手绘',
-    'notebook_line':'4 · 纯线条','sticker':'5 · 奶油贴纸','papercut':'6 · 拼色剪纸','inkwash':'7 · 蓝墨手账',
+    'notebook_line':'4 · 纯线条','sticker':'5 · 奶油贴纸','papercut':'6 · 拼色剪纸','inkwash':'蓝墨手账（旧选项）',
     'classic':'经典通用','outline':'结构线稿','solid':'精简实物','soft':'柔和双色',
     'sketch':'手绘线稿','notebook_smile':'笑脸手绘'}
 _ID=re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z',re.ASCII)
@@ -57,7 +57,7 @@ def export(destination):
     destination=Path(destination);destination.mkdir(parents=True,exist_ok=True)
     name=f'DesktopStats-{VERSION}-Model-Atlas.zip';target=destination/name
     if target.exists():raise FileExistsError('Refuse to replace an existing model atlas')
-    from accessory_art import STYLES,art,choices,clear_cache
+    from accessory_art import STYLES,art,builtin_choices as choices,clear_cache
     catalog=choices();styles=tuple(STYLES)
     if set(styles)!=set(STYLE_NAMES):raise ValueError('Atlas labels must cover all artwork styles')
     for key,rows in catalog.items():

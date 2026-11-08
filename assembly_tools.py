@@ -13,6 +13,7 @@ class AssemblyTools(WorkspaceTools):
     assemblyCasesChanged = Signal()
     assemblyViewRequested = Signal(dict)
     hardwarePacksChanged = Signal()
+    accessoryArtChanged = Signal()
 
     def __init__(self):
         super().__init__()
@@ -25,6 +26,8 @@ class AssemblyTools(WorkspaceTools):
         self._assembly_summary = dict(initialized=False)
         self._pack_status = ''
         self._accessory_gallery_active = False
+        self._accessory_jobs = None
+        self._accessory_art_revision = 0
 
     def initialize_assembly_signals(self):
         self.dataChanged.connect(self._refresh_assembly)
@@ -45,6 +48,8 @@ class AssemblyTools(WorkspaceTools):
         import sys
         gallery=sys.modules.get('accessory_art')
         if gallery is not None:gallery.clear_cache()
+        if self._accessory_jobs is not None:self._accessory_jobs.invalidate()
+        self._accessory_art_ready()
         self._assembly_fingerprint=None
         self._refresh_assembly()
         self.hardwarePacksChanged.emit()
@@ -155,15 +160,59 @@ class AssemblyTools(WorkspaceTools):
 
     @Slot(str,str,str,result='QVariantMap')
     def accessoryModelArt(self,kind,model,style):
-        from accessory_art import art
+        if not self._accessory_gallery_active:return {}
+        from accessory_art import art,cached_art,model_key,_LOOP_KINDS
+        if kind in _LOOP_KINDS:
+            key=model_key(kind,model,style)
+            if not key:return {}
+            cached=cached_art(key)
+            if cached:return cached
+            unavailable=self._accessory_jobs is not None and key in self._accessory_jobs.done
+            return dict(unavailable=True) if unavailable else dict(pending=True)
         return art(kind,model,style)
+
+    accessoryArtRevision = Property(int,lambda self:self._accessory_art_revision,notify=accessoryArtChanged)
+
+    @Slot()
+    def _accessory_art_ready(self):
+        self._accessory_art_revision+=1
+        self.accessoryArtChanged.emit()
+
+    @Slot('QVariantList')
+    def setAccessoryArtDemand(self,rows):
+        if not self._accessory_gallery_active:return
+        from accessory_art import model_key,has_cached,publish_art,_LOOP_KINDS
+        from hardware_packs import library_generation
+        keys=[]
+        if not isinstance(rows,(list,tuple)):rows=[]
+        for row in rows[:16]:
+            if not isinstance(row,dict) or row.get('kind') not in _LOOP_KINDS:continue
+            key=model_key(row.get('kind'),row.get('id'),row.get('style'))
+            if key and key not in keys:keys.append(key)
+        if self._accessory_jobs is None:
+            if not any(not has_cached(key) for key in keys):return
+            from accessory_jobs047 import ArtJobs
+            from liquid_svg046 import art_from_reference
+            from liquid_component_runtime046 import get_component
+            self._accessory_jobs=ArtJobs(lambda key:get_component(key[0],key[1],retain=False),
+                art_from_reference,has_cached,publish_art,library_generation,self)
+            self._accessory_jobs.changed.connect(self._accessory_art_ready)
+            self._accessory_jobs.activate(True)
+        self._accessory_jobs.demand(keys)
 
     @Slot(bool)
     def setAccessoryGalleryActive(self,active):
         self._accessory_gallery_active=active is True
+        if self._accessory_jobs is not None:self._accessory_jobs.activate(self._accessory_gallery_active)
         if not self._accessory_gallery_active:
-            from accessory_art import clear_cache
-            clear_cache()
+            import sys
+            gallery=sys.modules.get('accessory_art')
+            if gallery is not None:gallery.clear_cache()
+            self._accessory_art_ready()
+
+    def close_accessory_jobs(self):
+        self.setAccessoryGalleryActive(False)
+        if self._accessory_jobs is not None:self._accessory_jobs.close()
 
     @Slot(str)
     def downloadAccessoryArt(self,kind):

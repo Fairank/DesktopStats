@@ -165,6 +165,9 @@ def _fitting(builder,row,center,basis,part):
 
 def build_component(row,level='balanced',center=(0.,0.,0.),basis=((1.,0.,0.),(0.,0.,-1.),(0.,1.,0.)),part=None):
     """No selected/reference renderer ever imports the full author catalogs."""
+    if row.get('part_kind')=='gpu_block':
+        from liquid_gpu_geometry047 import build_component as build_gpu
+        return build_gpu(row,level,center,basis,part)
     from assembly_cooling import _Builder,_transform,_add
     from assembly_geometry import ring
     from dataclasses import replace

@@ -4,9 +4,9 @@ import math
 import re
 from cooling_pack_schema045 import _keys,_id,_text,_urls,_number,_fail
 
-PART_KINDS=('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing')
+PART_KINDS=('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing','gpu_block')
 FORMS=frozenset(('cpu_block','pump_complete','pump_body','pump_top','pump_reservoir_combo',
-    'reservoir_tube','reservoir_flat','soft_compression','hard_compression','barb',
+    'reservoir_tube','reservoir_flat','gpu_block','soft_compression','hard_compression','barb',
     'rotary_adapter','static_adapter','dual_compression','plug','drain','extension','soft_tube','hard_tube'))
 FAMILIES=frozenset(('cpu_clear_square','cpu_armored_square','cpu_round_lcd','cpu_rect_extended',
     'pump_d5_motor','pump_d5_top','pump_d5_complete','pump_ddc_top','pump_ddc_complete','pump_dc_lt_motor','pump_top_compact','reservoir_cylinder','reservoir_flat',
@@ -20,7 +20,7 @@ _FORMS_BY_KIND={
     'cpu_block':{'cpu_block'},'pump':{'pump_complete','pump_body','pump_top'},
     'reservoir':{'reservoir_tube','reservoir_flat'},'pump_reservoir':{'pump_reservoir_combo'},
     'fitting':{'soft_compression','hard_compression','barb','rotary_adapter','static_adapter','dual_compression','plug','drain','extension'},
-    'tubing':{'soft_tube','hard_tube'}}
+    'tubing':{'soft_tube','hard_tube'},'gpu_block':{'gpu_block'}}
 _FAMILY_PREFIX={'cpu_block':'cpu_','pump':'pump_','reservoir':'reservoir_',
     'pump_reservoir':'pump_reservoir_','fitting':'fitting_','tubing':'tube_'}
 _EXTRA_FAMILIES={'fitting':frozenset(('knurled_soft_compression','knurled_hard_compression','smooth_hard_compression',
@@ -86,6 +86,9 @@ def _port(port):
     _diameters(port)
 
 def validate_reference(row):
+    if type(row) is dict and row.get('part_kind')=='gpu_block':
+        from liquid_gpu_schema047 import validate_reference as validate_gpu
+        return validate_gpu(row)
     _keys(row,_COMMON,(*_COMMON,*_OPTIONAL))
     _id(row['id']);_text(row['label']);_text(row['brand'],120);_text(row['series'],120)
     if (type(row['part_kind']) is not str or row['part_kind'] not in PART_KINDS

@@ -8172,6 +8172,986 @@
       ],
       "styles": "all_listed_styles",
       "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "ASUS ROG Astral GeForce RTX 5090 32GB GDDR7",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0LW1-M0NA00",
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS ROG Astral GeForce RTX 5090 OC 32GB GDDR7",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0LW0-M0NA00",
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS ROG Astral LC GeForce RTX 5090 32GB GDDR7",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0LW3-M0NA00",
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS ROG Astral LC GeForce RTX 5090 OC 32GB GDDR7",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0LW2-M0NA00",
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Core RTX 5090 ROG Astral with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": "brass",
+        "fascia": null,
+        "terminal": "Nylon",
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-core-rtx5090-rog-astral",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 34.32,
+        "height": 160.9,
+        "width": 260.25
+      },
+      "requires_motor": null,
+      "series": "Core",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/nvidia/10270-alphacool-core-geforce-rtx-5090-rog-astral-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_10270_Alphacool_Core_Geforce_RTX_5090_ROG_Astral_with_backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/10270_Alphacool_Core_Geforce_RTX_5090_ROG_Astral_with_backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "INNO3D GeForce RTX 5090 iChill X3",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "C50903-32D7X-175967H",
+            "state": "listed"
+          },
+          {
+            "card_label": "INNO3D GeForce RTX 5090 X3",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "N50903-32D7-17593928",
+            "state": "listed"
+          },
+          {
+            "card_label": "INNO3D GeForce RTX 5090 X3 OC",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "N50903-32D7X-17593928",
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool ES RTX 5090 Reference 1-slot with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "Carbon (publisher term)",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": "brass",
+        "fascia": null,
+        "terminal": "brass",
+        "top": "Carbon (publisher term)"
+      },
+      "model_id": "alphacool-es-rtx5090-reference-1slot",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 2,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 21.34,
+        "height": 119.32,
+        "width": 224.29
+      },
+      "requires_motor": null,
+      "series": "ES",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/nvidia/10262-alphacool-es-rtx-5090-reference-1-slot-design-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_10262_Alphacool_ES_RTX_5090_Reference_1-Slot-Design_with_Backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/10262_Alphacool_ES_RTX_5090_Reference_1-Slot-Design_with_Backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "NVIDIA GeForce RTX 4090 Founders Edition 24GB",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "900-1G136-2530-000",
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Core RTX 4090 Founders Edition with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": null,
+        "fascia": null,
+        "terminal": null,
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-core-rtx4090-fe",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 32.33,
+        "height": 148.69,
+        "width": 208.87
+      },
+      "requires_motor": null,
+      "series": "Core",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/nvidia/13470-alphacool-core-geforce-rtx-4090-founders-edition-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_13470_Alphacool_Core_Geforce_RTX_4090_Founders_Edition_with_Backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/13470_Alphacool_Core_Geforce_RTX_4090_Founders_Edition_with_Backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "AMD Radeon RX 7900 XTX 24GB",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASRock Radeon RX 7900 XTX 24GB",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS Radeon RX 7900 XTX RX7900XTX-24G",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0IT0-U0NM00",
+            "state": "listed"
+          },
+          {
+            "card_label": "BIOSTAR Radeon RX 7900 XTX",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "VA7906AEF4",
+            "state": "listed"
+          },
+          {
+            "card_label": "GIGABYTE Radeon RX 7900 XTX 24G",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "GV-R79XTX-24GC-B",
+            "state": "listed"
+          },
+          {
+            "card_label": "PowerColor Radeon RX 7900 XTX",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "RX 7900 XTX 24G",
+            "state": "listed"
+          },
+          {
+            "card_label": "XFX Radeon RX 7900 XTX",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "RX-79XMBABF9",
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Eisblock Aurora RX 7900 XTX Reference with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": null,
+        "fascia": null,
+        "terminal": null,
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-aurora-rx7900xtx-reference",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 34.2,
+        "height": 135.2,
+        "width": 268.58
+      },
+      "requires_motor": null,
+      "series": "Eisblock Aurora",
+      "source_urls": [
+        "https://shop.alphacool.com/shop/gpu-wasserkuehlung/amd/13547-alphacool-eisblock-aurora-rx-7900xtx-reference-mit-backplate",
+        "https://download.alphacool.com/datasheet/ENG_13547_Alphacool_Eisblock_Aurora_RX_7900XTX_Reference_with_Backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/13547_Alphacool_Eisblock_Aurora_RX_7900XTX_Reference_with_Backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "ASUS Prime Radeon RX 9070 OC 16GB",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS TUF Gaming Radeon RX 9070 OC 16GB",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS Prime Radeon RX 9070 XT OC 16GB",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS TUF Gaming Radeon RX 9070 XT OC 16GB",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Core RX 9070 XT TUF + Prime with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": "brass",
+        "fascia": null,
+        "terminal": "Nylon",
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-core-rx9070-tuf-prime",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 33.07,
+        "height": 144.5,
+        "width": 220
+      },
+      "requires_motor": null,
+      "series": "Core",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/amd/14779-alphacool-core-rx-9070-xt-tuf-prime-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_14779_Alphacool_Core_RX_9070_XT_TUF__Prime_with_Backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/14779_Alphacool_Core_RX_9070_XT_TUF__Prime_with_Backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "XFX Quicksilver Radeon RX 9070 XT Gaming Edition",
+            "code_precision": "publisher_abbreviated",
+            "pcb_revision": "V2.0",
+            "product_code": "RX-97TQIC",
+            "state": "listed"
+          },
+          {
+            "card_label": "XFX Quicksilver Radeon RX 9070 XT White Gaming Edition",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "RX-97TQICKW9",
+            "state": "requires_revision_confirmation"
+          },
+          {
+            "card_label": "XFX Swift Radeon RX 9070 XT White Triple Fan Gaming Edition",
+            "code_precision": "complete",
+            "pcb_revision": "V2.0",
+            "product_code": "RX-97TSWF3W9",
+            "state": "listed"
+          },
+          {
+            "card_label": "XFX Swift Radeon RX 9070 XT White Triple Fan Gaming Edition",
+            "code_precision": "complete",
+            "pcb_revision": "V3.0",
+            "product_code": "RX-97TSWF3W9",
+            "state": "held_source_conflict"
+          }
+        ],
+        "exclusions": [
+          {
+            "card_label": null,
+            "pcb_revision": "A.0",
+            "reason": "Manufacturer explicitly unsupported"
+          }
+        ],
+        "global_pcb_revision": "V2.0",
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Core RX 9070 XT Swift + Quicksilver with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": "brass",
+        "fascia": null,
+        "terminal": "Nylon",
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-core-rx9070xt-swift-quicksilver",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 33.35,
+        "height": 127.3,
+        "width": 195.6
+      },
+      "requires_motor": null,
+      "series": "Core",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/amd/14799-alphacool-core-rx-9070-xt-swift-quicksilver-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_14799_Alphacool_Core_RX_9070_XT_Swift__Quicksilver_with_Backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/14799_Alphacool_Core_RX_9070_XT_Swift__Quicksilver_with_Backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "MSI GeForce RTX 5090 32G GAMING TRIO OC",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "MSI GeForce RTX 5090 32G SUPRIM LIQUID SOC",
+            "code_precision": "not_published",
+            "pcb_revision": "MS-V530 Ver:2.1",
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "MSI GeForce RTX 5090 32G SUPRIM SOC",
+            "code_precision": "not_published",
+            "pcb_revision": "MS-V530 Ver:2.1",
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "MSI GeForce RTX 5090 32G VANGUARD SOC",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "MSI GeForce RTX 5090 32G VANGUARD SOC Launch Edition",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Core RTX 5090 Suprim + Vanguard + Gaming Trio with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": "brass",
+        "fascia": null,
+        "terminal": "Nylon",
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-core-rtx5090-suprim-vanguard",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 34.12,
+        "height": 160.81,
+        "width": 222.4
+      },
+      "requires_motor": null,
+      "series": "Core",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/nvidia/10268-alphacool-core-geforce-rtx-5090-suprim-vanguard-gaming-trio-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_10268_Alphacool_Core_Geforce_RTX_5090_Suprim__Vanguard__Gaming_Trio_with_backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/10268_Alphacool_Core_Geforce_RTX_5090_Suprim__Vanguard__Gaming_Trio_with_backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Alphacool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "ASUS TUF Gaming GeForce RTX 5090 32GB GDDR7",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0LY1-M0NA00",
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS TUF Gaming GeForce RTX 5090 32GB GDDR7 OC Edition",
+            "code_precision": "complete",
+            "pcb_revision": null,
+            "product_code": "90YV0LY0-M0NA00",
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Alphacool Core RTX 5090 TUF Gaming with backplate",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "chrome-plated copper",
+        "connection_threads": "brass",
+        "fascia": null,
+        "terminal": "Nylon",
+        "top": "acrylic"
+      },
+      "model_id": "alphacool-core-rtx5090-tuf",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 34.12,
+        "height": 155.57,
+        "width": 235.95
+      },
+      "requires_motor": null,
+      "series": "Core",
+      "source_urls": [
+        "https://shop.alphacool.com/en/shop/gpu-water-cooling/nvidia/10269-alphacool-core-geforce-rtx-5090-tuf-gaming-with-backplate",
+        "https://download.alphacool.com/datasheet/ENG_10269_Alphacool_Core_Geforce_RTX_5090_TUF_Gaming_mit_Backplate_datasheet.pdf",
+        "https://download.alphacool.com/manual/10269_Alphacool_Core_Geforce_RTX_5090_TUF_Gaming_mit_Backplate_Manual.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Watercool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 27.5,
+        "height": 130,
+        "width": 259.5
+      },
+      "dimensions_scope": "overall",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "ASUS TUF Gaming GeForce RTX 5090",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS TUF Gaming GeForce RTX 5090 OC Edition",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Watercool HEATKILLER V ULTRA RTX5090 ASUS TUF ACRYL Ni aRGB",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": null,
+        "cold_plate": "nickel-plated electrolytic copper",
+        "connection_threads": null,
+        "fascia": "anodised aluminium",
+        "terminal": "POM/acetal",
+        "top": "PLEXIGLAS GS"
+      },
+      "model_id": "watercool-heatkiller-v-ultra-rtx5090-tuf",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 6,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 27.5,
+        "height": 130,
+        "width": 259.5
+      },
+      "requires_motor": null,
+      "series": "HEATKILLER V",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-V-ULTRA-for-RTX-5090-ASUS-TUF-ACRYL-Ni-aRGB_1",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_HK_V_PRO_ULTRA_VGA_RTX_5090_ASUS_TUF.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Watercool",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": 32.8,
+        "height": 124,
+        "width": 220
+      },
+      "dimensions_scope": "overall",
+      "dimensions_verified": true,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "NVIDIA GeForce RTX4090 Founders Edition",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Watercool HEATKILLER V PRO RTX4090 FE ACRYL Ni aRGB",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": null,
+        "cold_plate": "nickel-plated electrolytic copper",
+        "connection_threads": null,
+        "fascia": "annealed stainless steel",
+        "terminal": "POM/acetal",
+        "top": "PLEXIGLAS GS"
+      },
+      "model_id": "watercool-heatkiller-v-pro-rtx4090-fe",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 32.8,
+        "height": 124,
+        "width": 220
+      },
+      "requires_motor": null,
+      "series": "HEATKILLER V",
+      "source_urls": [
+        "https://shop.watercool.de/HEATKILLER-V-PRO-for-RTX-4090-FE-ACRYL-Ni-aRGB_1",
+        "https://shop.watercool.de/mediafiles/Manuals/MA_.HK_V_PRO_VGA_RTX_4090_FE.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Corsair",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "ASUS ROG STRIX GeForce RTX4090",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "ASUS TUF GeForce RTX4090",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Corsair Hydro X XG7 RGB4090 STRIX/TUF",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "nickel-plated copper",
+        "connection_threads": null,
+        "fascia": null,
+        "terminal": null,
+        "top": "PMMA"
+      },
+      "model_id": "corsair-xg7-rgb-rtx4090-strix-tuf",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": null,
+      "ports_geometry_complete": false,
+      "reference_envelope_mm": {
+        "depth": 25.5,
+        "height": 157.2,
+        "width": 232
+      },
+      "requires_motor": null,
+      "series": "Hydro X XG7 RGB",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9020020-ww/hydro-x-series-xg7-rgb-40-series-gpu-water-block-4090-strix-tuf-cx-9020020-ww"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
+    },
+    {
+      "assembly_stage": "standalone_reference_only",
+      "body_dimensions_mm": null,
+      "body_dimensions_verified": false,
+      "brand": "Corsair",
+      "contains_motor": null,
+      "delivery": "optional_pack",
+      "dimensions_mm": {
+        "depth": null,
+        "height": null,
+        "width": null
+      },
+      "dimensions_scope": "unknown",
+      "dimensions_verified": false,
+      "exact_port_positions_verified": false,
+      "geometry_scope": "source_observed_reference_no_manufacturer_cad",
+      "gpu_compatibility": {
+        "assembly_pose_verified": false,
+        "chip_name_sufficient": false,
+        "entries": [
+          {
+            "card_label": "NVIDIA GeForce RTX3080 Ti Founders Edition",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          },
+          {
+            "card_label": "NVIDIA GeForce RTX3080 Founders Edition",
+            "code_precision": "not_published",
+            "pcb_revision": null,
+            "product_code": null,
+            "state": "listed"
+          }
+        ],
+        "exclusions": [],
+        "global_pcb_revision": null,
+        "policy": "exact_model_and_required_revision"
+      },
+      "gpu_installation_supported": false,
+      "installed_hardware_inferred": false,
+      "kind": "gpu_block",
+      "label": "Corsair Hydro X XG7 RGB3080Ti/3080 Founders Edition",
+      "loop_connection_supported": false,
+      "manufacturer_fit_verified": false,
+      "materials": {
+        "backplate": "aluminium",
+        "cold_plate": "nickel-plated copper",
+        "connection_threads": null,
+        "fascia": null,
+        "terminal": null,
+        "top": "PMMA"
+      },
+      "model_id": "corsair-xg7-rgb-rtx3080ti-3080-fe",
+      "model_status": "original_schematic",
+      "pack_collection_id": "gpu-block-collection-047",
+      "pack_kind": "loop",
+      "ports_count": 4,
+      "ports_geometry_complete": true,
+      "reference_envelope_mm": {
+        "depth": 26.0,
+        "height": 125.0,
+        "width": 240.0
+      },
+      "requires_motor": null,
+      "series": "Hydro X XG7 RGB",
+      "source_urls": [
+        "https://www.corsair.com/us/en/p/custom-liquid-cooling/cx-9020011-ww/hydro-x-series-xg7-rgb-30-series-gpu-water-block-3080-ti-3080-fe-cx-9020011-ww",
+        "https://assets.corsair.com/image/upload/corsairmedia/sys_master/productcontent/WW_HXS_XG5-XG7_RGB_AA.pdf"
+      ],
+      "styles": "all_listed_styles",
+      "telemetry": "not_bound_to_installed_sensor"
     }
   ],
   "optional_summary": {
@@ -8185,21 +9165,25 @@
     "cooling_products": 167,
     "cpu_products": 72,
     "executable_content": false,
+    "gpu_block_pack_index": "docs/GPU_BLOCK_PACKS047_INDEX.json",
+    "gpu_block_package_artifacts": 4,
+    "gpu_block_products": 12,
     "installed_by_default": false,
     "loop_by_kind": {
       "cpu_block": 10,
       "fitting": 20,
+      "gpu_block": 12,
       "pump": 8,
       "pump_reservoir": 10,
       "reservoir": 4,
       "tubing": 11
     },
     "loop_pack_index": "docs/LOOP_PACKS_INDEX.json",
-    "loop_package_artifacts": 15,
-    "loop_products": 63,
+    "loop_package_artifacts": 19,
+    "loop_products": 75,
     "packs": 2,
-    "total_named_products": 816,
-    "total_optional_products": 302
+    "total_named_products": 828,
+    "total_optional_products": 314
   },
   "products": [
     {
@@ -8280,7 +9264,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock B650I Lightning WiFi",
@@ -8292,7 +9276,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/B650I%20Lightning%20WiFi.pdf",
-        "https://pg.asrock.com/mb/AMD/B650I%20Lightning%20WiFi/index.asp"
+        "https://pg.asrock.com/mb/AMD/B650I%20Lightning%20WiFi/index.asp",
+        "https://www.asrock.com/mb/photo/B650I%20Lightning%20WiFi(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -8303,7 +9288,7 @@
         "height": 244.0,
         "width": 244.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock B650M PG Riptide WiFi",
@@ -8315,7 +9300,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/B650M%20PG%20Riptide%20WiFi.pdf",
-        "https://pg.asrock.com/mb/AMD/B650M%20PG%20Riptide%20WiFi/index.asp"
+        "https://pg.asrock.com/mb/AMD/B650M%20PG%20Riptide%20WiFi/index.asp",
+        "https://www.asrock.com/mb/photo/B650M%20PG%20Riptide%20WiFi(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -8326,7 +9312,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock Z790 PG-ITX/TB4",
@@ -8338,7 +9324,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/Z790%20PG-ITXTB4.pdf",
-        "https://pg.asrock.com/mb/Intel/Z790%20PG-ITXTB4/index.asp"
+        "https://pg.asrock.com/mb/Intel/Z790%20PG-ITXTB4/index.asp",
+        "https://www.asrock.com/mb/photo/Z790%20PG-ITXTB4(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -8373,7 +9360,7 @@
         "height": 305.0,
         "width": 244.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock B650E Steel Legend WiFi",
@@ -8385,7 +9372,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/B650E%20Steel%20Legend%20WiFi.pdf",
-        "https://www.asrock.com/mb/AMD/B650E%20Steel%20Legend%20WiFi/index.asp"
+        "https://www.asrock.com/mb/AMD/B650E%20Steel%20Legend%20WiFi/index.asp",
+        "https://www.asrock.com/mb/photo/B650E%20Steel%20Legend%20WiFi(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -8396,7 +9384,7 @@
         "height": 305.0,
         "width": 267.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "ASRock X670E Taichi",
@@ -8408,7 +9396,8 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.asrock.com/Manual/X670E%20Taichi_English.pdf",
-        "https://www.asrock.com/mb/AMD/X670E%20Taichi/index.asp"
+        "https://www.asrock.com/mb/AMD/X670E%20Taichi/index.asp",
+        "https://www.asrock.com/mb/photo/X670E%20Taichi(L2).png"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"
@@ -8639,7 +9628,7 @@
         "height": 305.0,
         "width": 260.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "internal_pcb_routing": "unverified",
       "kind": "board",
       "label": "GIGABYTE Z790 AORUS MASTER (rev.1.0)",
@@ -8651,7 +9640,9 @@
       "small_package_placement": "schematic",
       "source_urls": [
         "https://download.gigabyte.com/FileList/Manual/mb_manual_z790-aorus-master_1003_e.pdf?v=1f20e5dc0c9024d7deb15884b210f135",
-        "https://www.gigabyte.com/Motherboard/Z790-AORUS-MASTER-rev-10/sp"
+        "https://www.gigabyte.com/Motherboard/Z790-AORUS-MASTER-rev-10/sp",
+        "https://static.gigabyte.com/StaticFile/Image/Global/cfdc92a87adda3585c6f1e67b49d9a58/ProductRemoveBg/32069",
+        "https://www.aorus.com/motherboards/z790-aorus-master-rev-10/gallery"
       ],
       "styles": "all_listed_styles",
       "taxonomy_status": "classified"

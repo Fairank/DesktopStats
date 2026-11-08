@@ -861,6 +861,7 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
     if not isinstance(dimensions,(tuple,list)) or len(dimensions)!=3 or not all(type(v) in (int,float) and math.isfinite(v) and 60<=v<=2000 for v in dimensions):dimensions=(320.,470.,470.)
     dimensions=tuple(dimensions);case=anchors.get('case',spec.get('case',{}));case=case if isinstance(case,dict) else {}
     planes=anchors.get('case_mount_planes',{})
+    if not isinstance(planes,dict):planes={}
     builder=_Builder(level);meta=dict(parts=[],fans=[],rejected=[],warnings=[],geometry_accuracy='original_schematic_reference',
         sources=[],cpu_fan_tach_usable=False,real_cpu_rotor_parts=[],replace_gpu_cooler=False,fan_tach_mapping='No selected air cooler; CPU_FAN tachometer is not assigned.',
         automatic_detection=False,new_pollers=0,default_fan_motion='static_without_fresh_group_tach',mount_positions_schematic=True)
@@ -923,6 +924,8 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
             meta['sources'].extend(cooler['sources'])
             if kind=='custom_loop' and meta.get('replace_gpu_cooler') and secondary_cooler:meta['sources'].extend(secondary_cooler['sources'])
     groups=selection.get('case_fans',[]);groups=groups if isinstance(groups,(tuple,list)) else []
+    from case_fan_clearance047 import blockers,envelope,conflicts,half_extents
+    fan_obstacles=blockers(meshes,builder.static,builder.rotors,gpu_replaced=meta['replace_gpu_cooler']) if groups else []
     used_mounts=set()
     for group in groups[:12]:
         if not isinstance(group,dict):meta['rejected'].append(dict(kind='case_fan',reason='invalid_group'));continue
@@ -937,16 +940,43 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
         elif _mount_check(case,mount,model['size_mm'],count)=='unsupported':reason='unsupported_fan_mount'
         if not reason:
             center,basis,span=_mount_plane(mount,dimensions,model['depth_mm']/2+10,planes)
-            if model.get('width_mm',model['size_mm'])>span[0]+1 or model['size_mm']*count>span[1]+1:reason='fans_exceed_mount_plane'
-        if reason:meta['rejected'].append(dict(kind='case_fan',model_id=group.get('model'),mount=mount,reason=reason));continue
+            half=half_extents(model)
+            stack_length=(count-1)*model['size_mm']+half[1]*2
+            if half[0]*2>span[0]+1 or stack_length>span[1]+1:reason='fans_exceed_mount_plane'
+            # A legacy central rear plane put the exhaust fan directly through
+            # expansion cards. Use an explicitly schematic upper-rear position
+            # only when there is no authored mount plane; never move that plane.
+            if not reason and mount=='rear' and not planes.get('rear'):
+                horizontal_reach=sum(abs(basis[k][0])*half[k] for k in range(3))
+                center=(-dimensions[0]/2+horizontal_reach+8.,(span[1]-stack_length)/2,center[2])
+        placement_source=None
+        if not reason and mount=='rear' and not planes.get('rear') and case.get('id')=='fractal-torrent-tg':
+            # Torrent has its PSU at the top. The official possible-fan diagram
+            # places both rear sizes below that bay, not at the generic top.
+            # This ratio is a diagram observation, never measured screw holes.
+            center=(center[0],dimensions[1]*.14,center[2])
+            placement_source='https://assets.fractal-design.com/files/uxzbxy2o/production/af5f587352e8fa20cb09151326dae43796eebb44.pdf'
+        positions=[];blocked=set()
+        if not reason:
+            positions=[_add(center,_mul(basis[1],(i-(count-1)/2)*model['size_mm'])) for i in range(count)]
+            for position in positions:blocked.update(conflicts(envelope(model,position,basis),fan_obstacles))
+            if blocked:reason='case_fan_clearance_conflict'
+        if reason:
+            meta['rejected'].append(dict(kind='case_fan',model_id=group.get('model'),mount=mount,reason=reason,
+                **(dict(conflicting_parts=sorted(blocked),omitted_count=count) if blocked else {})))
+            continue
         used_mounts.add(mount)
-        for i in range(count):
-            position=_add(center,_mul(basis[1],(i-(count-1)/2)*model['size_mm']))
+        for i,position in enumerate(positions):
             part='fans:'+mount+':'+str(i)
             _fan(builder,model,position,basis[2] if direction=='intake' else _mul(basis[2],-1),basis[0],component='fans',part=part,role='case',direction=direction)
             builder.parts.append(dict(id=part,label=model['label']+' · '+mount+' '+str(i+1),kind='case_fan',model_id=model['id'],mount=mount,
-                compatibility=_mount_check(case,mount,model['size_mm'],count)))
+                compatibility=_mount_check(case,mount,model['size_mm'],count),
+                placement_method='authored_mount_plane' if planes.get(mount) else 'official_manual_rear_below_psu_reference' if placement_source else 'upper_rear_reference' if mount=='rear' else 'centered_mount_reference',
+                clearance_check='conservative_selected_solid_envelopes',cad_fit_verified=False,
+                **(dict(placement_source=placement_source,placement_source_page=39,mounting_hole_positions_verified=False) if placement_source else {})))
+            fan_obstacles.append((part,'case-fan-swept-envelope',envelope(model,position,basis)))
         meta['sources'].extend(model['sources'])
+        if placement_source:meta['sources'].append(placement_source)
     if meta.get('cooler',{}).get('vrm_fan') and not any(f['role']=='vrm_independent' for f in builder.fans):
         meta['known_unplaced_vrm_fans']=1
         meta['warnings'].append('Manufacturer documents an embedded VRM fan; its unverified internal pose is not invented in this reference model.')

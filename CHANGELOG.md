@@ -1,5 +1,26 @@
 # Changes
 
+## 0.47.0-preview.1 (development candidate)
+
+- Correct the default rear case-fan reference pose and check whole fan groups
+  against selected solid bodies before insertion. Include full rotor sweep and
+  round-frame mounting ears; preserve authored planes and explicit rejections.
+  Stage selected auxiliary bodies once for ordinary air/AIO builds as well as
+  custom loops. Keep Torrent's reference rear fan below its top-mounted PSU.
+- Refine six existing motherboard finishes from official front observations,
+  keeping unobserved blades, hidden locations and exact mounting details unknown.
+  Preserve the six numbered styles, original without a smile, and all saved IDs.
+- Add twelve optional independent GPU-water-block references and four overlapping
+  data packs. Store exact manufacturer compatibility and PCB-revision boundaries;
+  do not claim GPU installation, full-card replacement or connected GPU loops.
+- Prepare visible complex gallery cards with one bounded, cancellable graphics
+  worker. Drop obsolete results and release closed-gallery work. This improves
+  measured UI responsiveness, not a demonstrated total CPU/RAM reduction.
+- Pause CPU/GPU model-widget snapshots while minimized and refresh on restore.
+  Add no hardware sampling, permanent download, per-frame collision or clock.
+- Retain current installation while gaming. No restart, elevation, visible
+  test window or native CPU-temperature/glass/fullscreen acceptance is claimed.
+
 ## 0.46.0-preview.1 (development candidate)
 
 - Add 63 optional data-only loop references: 10 CPU blocks, 8 pumps/motors/tops,

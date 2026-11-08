@@ -202,7 +202,11 @@ class CoolingGeometryTests(unittest.TestCase):
     def test_rear_fan_lead_can_exit_glass_side_without_moving_verified_fan(self):
         for mount in ('rear','bottom'):
             spec={'cooling':{'case_fans':[dict(model='arctic-p12-pwm',mount=mount,count=1,direction='exhaust')]}}
-            meshes,meta=add_cooling((),spec,anchors=ANCHORS)
+            anchors=copy.deepcopy(ANCHORS)
+            if mount=='rear':
+                anchors['case_mount_planes']={'rear':dict(position=(0.,0.,-400.),normal=(0.,0.,-1.),up=(0.,1.,0.),
+                    source='explicit-test-plane',method='authored-reference')}
+            meshes,meta=add_cooling((),spec,anchors=anchors)
             self.assertEqual(meta['fans'][0]['position'][0],0)
             anchor=meta['wire_anchors'][0]
             self.assertLess(anchor['position'][0],-60)

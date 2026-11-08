@@ -15,11 +15,11 @@ sys.path.insert(0,str(ROOT))
 DESTINATION=ROOT/'docs/ASSEMBLY_CATALOG.json'
 
 
-def loop_pack_index(models):
+def loop_pack_index(models,index_file='docs/LOOP_PACKS_INDEX.json',release_directory='model-packs/v046'):
     """Read the real exported package inventory; never invent download hashes."""
     from hardware_packs import _archive
-    path=ROOT/'docs/LOOP_PACKS_INDEX.json'
-    if not path.is_file():raise ValueError('Export the actual0.46 loop packs before the catalog')
+    path=ROOT/index_file
+    if not path.is_file():raise ValueError('Export the actual data packs before the catalog')
     index=json.loads(path.read_text(encoding='utf8'))
     expected={row['id']:row for row in models}
     counts=dict(sorted(Counter(row['reference']['part_kind'] for row in models).items()))
@@ -29,7 +29,7 @@ def loop_pack_index(models):
     covered=set()
     for item in index['packs']:
         file=(ROOT/item['file']).resolve()
-        if not file.is_relative_to((ROOT/'model-packs/v046').resolve()) or file.suffix!='.dspack':
+        if not file.is_relative_to((ROOT/release_directory).resolve()) or file.suffix!='.dspack':
             raise ValueError('Loop package path is outside the data-only release directory')
         raw=file.read_bytes()
         if len(raw)!=item['bytes'] or hashlib.sha256(raw).hexdigest()!=item['sha256']:
@@ -54,6 +54,7 @@ def build_report():
     from copy import deepcopy
     from tools.export_cooling_packs045 import pack_models
     from tools.export_loop_packs046 import pack_models as loop_models
+    from tools.export_gpu_block_packs047 import pack_models as gpu_block_models
     from component_catalog import CATALOG as AUXILIARY
     from chassis_catalog import CASES
     from top_bar_config import HARDWARE_ICON_STYLES
@@ -133,11 +134,14 @@ def build_report():
                 model_status='original_schematic',styles='all_listed_styles',dimensions_verified=raw.get('dimensions_verified',raw.get('radiator_dimensions_verified',False)),
                 blade_count_verified=raw.get('blade_count_verified',False),blade_geometry_reviewed=raw.get('blade_geometry_reviewed',False),
                 geometry_scope='shared_generator_and_source_observed_reference',telemetry='not_bound_to_installed_sensor'))
-    loops=loop_models();loop_index=loop_pack_index(loops);optional_loops=[]
+    loops=loop_models();loop_index=loop_pack_index(loops)
+    gpu_blocks=gpu_block_models()
+    gpu_index=loop_pack_index(gpu_blocks,'docs/GPU_BLOCK_PACKS047_INDEX.json','model-packs/v047')
+    loops=loops+gpu_blocks;optional_loops=[]
     for row in loops:
         raw=row['reference']
         optional_loops.append(dict(kind=raw['part_kind'],model_id=row['id'],label=row['label'],brand=row['vendor'],series=row['series'],
-            delivery='optional_pack',pack_kind='loop',pack_collection_id='loop-collection-046',
+            delivery='optional_pack',pack_kind='loop',pack_collection_id='gpu-block-collection-047' if raw['part_kind']=='gpu_block' else 'loop-collection-046',
             dimensions_mm=raw['dimensions_mm'],reference_envelope_mm=raw['reference_envelope_mm'],
             dimensions_verified=raw['dimensions_verified'],dimensions_scope=raw.get('dimensions_scope','unknown'),
             body_dimensions_mm=raw.get('body_dimensions_mm'),body_dimensions_verified=raw.get('body_dimensions_verified',False),
@@ -145,7 +149,9 @@ def build_report():
             contains_motor=raw.get('contains_motor'),requires_motor=raw.get('requires_motor'),
             source_urls=list(row['sources']),model_status='original_schematic',styles='all_listed_styles',
             geometry_scope='source_observed_reference_no_manufacturer_cad',telemetry='not_bound_to_installed_sensor',
-            installed_hardware_inferred=False,manufacturer_fit_verified=False))
+            installed_hardware_inferred=False,manufacturer_fit_verified=False,
+            **(dict(assembly_stage=raw['assembly_stage'],gpu_compatibility=raw['gpu_compatibility'],materials=raw['materials'],
+                gpu_installation_supported=False,loop_connection_supported=False) if raw['part_kind']=='gpu_block' else {})))
     return dict(schema_version=1,market_exhaustive=False,machine_inventory=False,
         scope='Named selectable products, original schematic models; not manufacturing CAD or a fit guarantee.',
         styles=list(HARDWARE_ICON_STYLES),style_policy='Every product retains identical geometry and identity across all styles.',
@@ -158,7 +164,8 @@ def build_report():
                               packs=2,cooling_products=len(optional_cooling),cooling_by_kind=dict(Counter(r['kind'] for r in optional_cooling)),
                               cooling_pack_index='docs/COOLING_PACKS_INDEX.json',loop_products=len(optional_loops),
                               loop_by_kind=dict(sorted(Counter(r['kind'] for r in optional_loops).items())),
-                              loop_package_artifacts=len(loop_index['packs']),loop_pack_index='docs/LOOP_PACKS_INDEX.json',
+                              loop_package_artifacts=len(loop_index['packs'])+len(gpu_index['packs']),loop_pack_index='docs/LOOP_PACKS_INDEX.json',
+                              gpu_block_products=len(gpu_blocks),gpu_block_package_artifacts=len(gpu_index['packs']),gpu_block_pack_index='docs/GPU_BLOCK_PACKS047_INDEX.json',
                               total_optional_products=len(optional_cpus)+len(optional_cooling)+len(optional_loops),
                               total_named_products=sum(row['record_type']=='product' for row in rows)+len(optional_cpus)+len(optional_cooling)+len(optional_loops),
                               installed_by_default=False,executable_content=False),

@@ -9,8 +9,9 @@ import math
 import re
 import struct
 from collections import deque
+from accessory_cancel047 import checkpoint
 
-KINDS=('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing')
+KINDS=('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing','gpu_block')
 STYLES=('miniature','cartoon','notebook_color','notebook_line','sticker','papercut',
         'inkwash','classic','outline','solid','soft','sketch','notebook_smile')
 MAX_TRIANGLES=2600
@@ -143,7 +144,7 @@ def _subtract_cover(poly,edges):
     return result
 
 
-def _merge_faces(faces):
+def _merge_faces(faces,cancel=None):
     """Join exact adjacent coplanar convex faces, preserving every bore.
 
     Concave unions and material/plane changes are rejected. This removes the
@@ -158,8 +159,11 @@ def _merge_faces(faces):
         for edge in edge_keys(rows[index]):
             ids=edges.setdefault(edge,set());ids.add(index)
             if len(ids)==2:pending.append(edge)
-    for index in rows:insert(index)
+    for index in rows:
+        if index%64==0:checkpoint(cancel)
+        insert(index)
     while pending and work<40000:
+        if work%64==0:checkpoint(cancel)
         edge=pending.popleft();work+=1;ids=edges.get(edge)
         if not ids or len(ids)!=2:continue
         a_id,b_id=sorted(ids);a,b=rows[a_id],rows[b_id]
@@ -190,8 +194,8 @@ def _merge_faces(faces):
 
 class _Visibility:
     """Bounded exact convex depth clipping; no per-pixel buffers or workers."""
-    def __init__(self,faces):
-        self.faces=faces;self.grid={};self.work=0
+    def __init__(self,faces,cancel=None):
+        self.faces=faces;self.grid={};self.work=0;self.cancel=cancel
         for index,face in enumerate(faces):
             poly=face['polygon']
             face['edge_terms']=tuple((q[0]-p[0],q[1]-p[1],p[0],p[1]) for p,q in zip(poly,(*poly[1:],poly[0])))
@@ -211,6 +215,7 @@ class _Visibility:
         return sorted(indices,key=lambda i:-self.faces[i]['near'])
     def tick(self):
         self.work+=1
+        if self.work%64==0:checkpoint(self.cancel)
         if self.work>MAX_CLIP_WORK:raise ValueError('SVG occlusion work limit')
     def visible_face(self,index):
         face=self.faces[index];pieces=[(face['polygon'],face['bounds'])];a,b,c,d=face['bounds']
@@ -297,15 +302,30 @@ def art(kind,model_id,style='miniature'):
     from liquid_component_runtime046 import get_component
     row=get_component(kind,model_id)
     if not row:return {}
+    return art_from_reference(row,style)
+
+
+def art_from_reference(row,style='miniature',cancel=None):
+    """Project one detached validated row; no store, catalog or shared cache.
+
+    Optional callers resolve/validate the reference before dispatching it. A
+    cancellation exception is intentionally not converted to an unknown model.
+    """
+    if not isinstance(row,dict) or row.get('part_kind') not in KINDS or style not in STYLES:return {}
+    kind=row['part_kind'];model_id=row.get('id')
+    if not isinstance(model_id,str) or not _ID.fullmatch(model_id) or len(model_id)>64:return {}
+    checkpoint(cancel)
     from liquid_geometry046 import build_component
     from assembly_style import apply_colors,edge_batches,style_for
     from liquid_silhouette046 import clip_edge
     try:meshes,physical=build_component(row,'eco')
     except ValueError:return {}
+    checkpoint(cancel)
     count=sum(len(mesh.vertices)//18 for mesh in meshes)
     if not meshes or count>MAX_TRIANGLES:return {}
     digest=hashlib.sha256();low_x=low_y=math.inf;high_x=high_y=-math.inf
     for mesh in meshes:
+        checkpoint(cancel)
         digest.update(mesh.name.encode('utf8'));digest.update(struct.pack('<3d',*mesh.position))
         for at in range(0,len(mesh.vertices),6):
             chunk=mesh.vertices[at:at+6]
@@ -327,7 +347,9 @@ def art(kind,model_id,style='miniature'):
     # Triangle cap holes remain real holes. No rectangle/silhouette replacement,
     # copied logo, separate invented OEM port or source-image trace is used.
     for mesh_index,mesh in enumerate(styled):
+        checkpoint(cancel)
         for at in range(0,len(mesh.vertices),18):
+            if at%1152==0:checkpoint(cancel)
             normal=mesh.vertices[at+3:at+6]
             # The actual native/software renderer draws both sides of its
             # thin walls and inner channels. Back-face culling here would
@@ -341,10 +363,11 @@ def art(kind,model_id,style='miniature'):
             fill='#ffffff' if policy['line_only'] else _rgb(mesh.color,lighting)
             faces.append(dict(polygon=polygon,plane=plane,bounds=_bounds(polygon),near=max(p[2] for p in triangle),far=min(p[2] for p in triangle),
                               depth=sum(p[2] for p in triangle)/3,fill=fill,alpha=mesh.color[3],material=mesh_index))
-    front_count=len(faces);faces,merge_work=_merge_faces(faces)
-    visibility=_Visibility(faces);visible_polygons=0
+    front_count=len(faces);faces,merge_work=_merge_faces(faces,cancel)
+    visibility=_Visibility(faces,cancel);visible_polygons=0
     try:
         for index,face in enumerate(faces):
+            if index%64==0:checkpoint(cancel)
             for polygon in visibility.visible_face(index):
                 visible_polygons+=1
                 if visible_polygons>MAX_VISIBLE_POLYGONS:return {}
@@ -355,7 +378,9 @@ def art(kind,model_id,style='miniature'):
     if policy['edges']:
         materials={id(mesh):index for index,mesh in enumerate(styled)}
         for mesh,vertices in edge_batches(styled,style):
+            checkpoint(cancel)
             for at in range(0,len(vertices),12):
+                if at%768==0:checkpoint(cancel)
                 if edge_count>=MAX_EDGES:break
                 world_a=tuple(vertices[at+k]+mesh.position[k] for k in range(3))
                 world_b=tuple(vertices[at+6+k]+mesh.position[k] for k in range(3))
@@ -408,7 +433,7 @@ def art(kind,model_id,style='miniature'):
         key=(mode,tone,alpha)
         if key!=last:flush();last=key
         pending.append(path)
-    flush();body=_svg(''.join(fragments))
+    flush();checkpoint(cancel);body=_svg(''.join(fragments))
     if len(body.encode('utf8'))>MAX_SVG_BYTES:return {}
     # Meshes and reference records are local variables, never retained in a
     # module cache. The outer gallery's existing 16-item cache owns SVG only.

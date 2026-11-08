@@ -133,11 +133,30 @@ class AssemblyInspectionTests(unittest.TestCase):
 
     def test_pending_primary_photo_is_visible_in_the_picker_and_board_inspector(self):
         from assembly_parts import choices
-        self.config['assembly']['board_model']='gigabyte-z790-aorus-master'
+        from motherboard_catalog import get_model
+        identity='gigabyte-z790-aorus-master'
+        reviewed=get_model(identity)
+        pending=copy.deepcopy(reviewed)
+        pending['finish_status']='pending_primary_photo'
+        self.config['assembly']['board_model']=identity
+
+        def detached_pending(model_id):
+            return copy.deepcopy(pending) if model_id==identity else get_model(model_id)
+
+        # Exercise the real picker/spec/inspector paths without relabelling the
+        # now source-reviewed retail record or mutating its shared catalog data.
+        with patch('motherboard_catalog.get_model',side_effect=detached_pending):
+            spec=build_spec(self.data,self.config,dict(state='unavailable'),[])
+            result=snapshot(self.data,spec,self.config,'board',now=100.)
+            self.assertIn('外观细节尚未核实，当前显示参考布局。',result['notes'])
+            self.assertIn('外观待核实',next(row['label'] for row in choices()['boards'] if row['id']==identity))
+
+        self.assertEqual(get_model(identity),reviewed)
+        self.assertEqual(get_model(identity)['finish_status'],'photo_reviewed')
         spec=build_spec(self.data,self.config,dict(state='unavailable'),[])
         result=snapshot(self.data,spec,self.config,'board',now=100.)
-        self.assertIn('外观细节尚未核实，当前显示参考布局。',result['notes'])
-        self.assertIn('外观待核实',next(row['label'] for row in choices()['boards'] if row['id']=='gigabyte-z790-aorus-master'))
+        self.assertNotIn('外观细节尚未核实，当前显示参考布局。',result['notes'])
+        self.assertNotIn('外观待核实',next(row['label'] for row in choices()['boards'] if row['id']==identity))
 
     def test_psu_static_details_do_not_borrow_system_power_or_oled_readings(self):
         for identity,attachment,form in (

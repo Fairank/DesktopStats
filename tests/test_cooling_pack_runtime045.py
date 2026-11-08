@@ -46,11 +46,15 @@ class CoolingPackRuntimeTests(unittest.TestCase):
             return actual_import(name,*args,**kwargs)
         signal=SimpleNamespace(emit=lambda:None)
         controller=SimpleNamespace(_assembly_fingerprint='old',_refresh_assembly=lambda:None,
+            _accessory_jobs=None,_accessory_art_revision=0,accessoryArtChanged=signal,
             hardwarePacksChanged=signal,assemblyCasesChanged=signal,dataChanged=signal)
+        controller._accessory_art_ready=lambda:AssemblyTools._accessory_art_ready(controller)
         try:
             with patch('builtins.__import__',side_effect=guarded):AssemblyTools._hardware_packs_updated(controller)
             self.assertNotIn('accessory_art',sys.modules)
             self.assertIsNone(controller._assembly_fingerprint)
+            self.assertIsNone(controller._accessory_jobs)
+            self.assertEqual(controller._accessory_art_revision,1)
         finally:
             if previous is not None:sys.modules['accessory_art']=previous
 

@@ -28,7 +28,7 @@ MAX_ARCHIVE_BYTES = 1536 * 1024
 MAX_MANIFEST_BYTES = 256 * 1024
 MAX_MODELS_BYTES = 1024 * 1024
 SELECTED_CACHE_LIMIT = 8
-PACK_RELEASE_URL = 'https://github.com/Fairank/DesktopStats/blob/codex/loop-components-v046/docs/HARDWARE_PACKS.md'
+PACK_RELEASE_URL = 'https://github.com/Fairank/DesktopStats/blob/codex/hardware-polish-v047/docs/HARDWARE_PACKS.md'
 LICENSE = 'PolyForm-Noncommercial-1.0.0'
 LICENSE_SHA256 = 'ffcca38841adb694b6f380647e15f17c446a4d1656fed51a1e2041d064c94cc8'
 _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
@@ -386,12 +386,12 @@ class PackStore:
     def get_cpu(self, model_id):
         return self.get_model('cpu',model_id)
 
-    def get_model(self,kind,model_id):
+    def get_model(self,kind,model_id,*,retain=True):
         self._ensure()
         if kind not in ('cpu','fan','cooler','radiator','loop') or not isinstance(model_id,str):return None
         cache_key=(kind,model_id)
         if cache_key in self._selected:
-            self._selected.move_to_end(cache_key)
+            if retain:self._selected.move_to_end(cache_key)
             return deepcopy(self._selected[cache_key])
         match = next(((key, manifest) for key, manifest in self._indexes.items()
                       if manifest['kind']==kind and any(row['id'] == model_id for row in manifest['products'])), None)
@@ -407,7 +407,7 @@ class PackStore:
         if _retained_index(manifest) != index:
             return None
         result = next((row for row in models if row['id'] == model_id), None)
-        if result:
+        if result and retain:
             self._selected[cache_key] = result
             while len(self._selected) > SELECTED_CACHE_LIMIT:
                 self._selected.popitem(last=False)
