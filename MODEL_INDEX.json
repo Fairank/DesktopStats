@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "standalone_reference_glb",
+  "version": "0.49.0-preview.1",
+  "source_commit": "949e12aa4dcfe091bc1ad3dad265305f5a3cb67a",
+  "archive": "DesktopStats-independent-reference049.zip",
+  "bytes": 1083635,
+  "sha256": "4969a3523964db525802cdb289791838be1d84001d7452379da4983ee1f7aa1b",
+  "glb_bytes": 8186188,
+  "glb_sha256": "0a26be2733617a22136d913d484768802a1aae956b8ac6d7f617b3d5c6553bd4",
+  "physical_meshes": 363,
+  "triangles": 107662,
+  "real_part_id_groups": 18,
+  "unassigned_component_groups": 3,
+  "no_textures": true,
+  "installed_by_default": false,
+  "importable_stats_pack": false,
+  "all_part_mechanical_interactions_complete": false,
+  "license": "Original project noncommercial terms with existing third-party exceptions; see bundled LICENSE and LICENSING.md"
+}
