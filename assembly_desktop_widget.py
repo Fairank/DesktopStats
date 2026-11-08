@@ -215,6 +215,10 @@ class AssemblyWidgetWindow(AssemblyWindow):
         frame=menu.addAction(self.controller.tr('显示小组件边框'));frame.setCheckable(True)
         frame.setChecked(self._desktop_frame)
         frame.triggered.connect(lambda value:self.controller.changeAssembly('desktop_frame',value))
+        show_psu=menu.addAction(self.controller.tr('展示电源'));show_psu.setCheckable(True)
+        show_psu.setChecked(bool(self._spec and self._spec.get('options',{}).get('show_psu')))
+        show_psu.setToolTip(self.controller.tr('有电源仓时临时移开遮罩；开放式机箱仍按实际布局显示。'))
+        show_psu.triggered.connect(lambda value:self.controller.changeAssembly('show_psu',value))
         parts=QMenu(self.controller.tr('查看部件'),menu);menu.addMenu(parts)
         for identity,label in COMPONENT_LABELS.items():
             action=parts.addAction(self.controller.tr(label));action.setCheckable(True)
@@ -227,6 +231,13 @@ class AssemblyWidgetWindow(AssemblyWindow):
                 action=parts.addAction(row['label'])
                 action.triggered.connect(lambda _checked=False,key=row['id']:self._select_part(key))
         menu.addAction(self.controller.tr('重置视角'),self.viewport.reset_camera)
+        gpu_state=self._gpu_assembly_state()
+        for label,removed in (('拔出查看',True),('插回插槽',False)):
+            action=menu.addAction(self.controller.tr(label),lambda _checked=False,value=removed:self._preview_gpu_insertion(value))
+            action.setEnabled(gpu_state.get('available') is True and not gpu_state.get('active')
+                              and (gpu_state.get('progress',0.)<1. if removed else gpu_state.get('progress',0.)>0.))
+            action.setToolTip(self.controller.tr('沿插槽方向移动；未模拟螺丝、卡扣及电源线拔插。')
+                              if gpu_state.get('available') else self._gpu_assembly_reason(gpu_state))
         size_menu=QMenu(self.controller.tr('小组件大小'),menu);menu.addMenu(size_menu)
         menu._submenus=(parts,size_menu)
         for label,size in (('紧凑尺寸',(320,380)),('标准尺寸',(420,480)),('大尺寸',(520,600))):

@@ -128,6 +128,16 @@ class AssemblyWindow(QWidget):
             self.part_style_choice.addItem(controller.tr('跟随默认外观') if row['id']=='follow' else row['label'],row['id'])
         self.part_style_choice.setAccessibleName(controller.tr('此部件外观'))
         inspector_layout.addWidget(QLabel(controller.tr('此部件外观')));inspector_layout.addWidget(self.part_style_choice)
+        inspector_layout.addWidget(QLabel(controller.tr('显卡插拔演示')))
+        gpu_controls=QHBoxLayout()
+        self.gpu_remove=QPushButton(controller.tr('拔出查看'));self.gpu_remove.setObjectName('assemblyGpuRemove')
+        self.gpu_insert=QPushButton(controller.tr('插回插槽'));self.gpu_insert.setObjectName('assemblyGpuInsert')
+        gpu_controls.addWidget(self.gpu_remove);gpu_controls.addWidget(self.gpu_insert)
+        inspector_layout.addLayout(gpu_controls)
+        self.gpu_assembly_hint=QLabel();self.gpu_assembly_hint.setWordWrap(True);self.gpu_assembly_hint.setTextFormat(Qt.PlainText)
+        self.gpu_assembly_hint.setStyleSheet('font-size:11px;');inspector_layout.addWidget(self.gpu_assembly_hint)
+        self.gpu_remove.clicked.connect(lambda:self._preview_gpu_insertion(True))
+        self.gpu_insert.clicked.connect(lambda:self._preview_gpu_insertion(False))
         self.reference_choice=QComboBox();self.reference_choice.setObjectName('assemblyReferenceChoice')
         for label,key in (("载入参考装机",""),("风冷参考装机","air"),("一体水冷参考装机","aio"),("分体水冷参考装机","loop")):
             self.reference_choice.addItem(controller.tr(label),key)
@@ -139,12 +149,15 @@ class AssemblyWindow(QWidget):
         inspector_scroll.setWidget(inspector);scene_row.addWidget(inspector_scroll);layout.addLayout(scene_row,1)
         tools=QHBoxLayout()
         self.exploded=QCheckBox(controller.tr("展开组件"));tools.addWidget(self.exploded)
+        self.show_psu=QCheckBox(controller.tr('展示电源'));self.show_psu.setObjectName('assemblyShowPsuCheck')
+        self.show_psu.setToolTip(controller.tr('有电源仓时临时移开遮罩；开放式机箱仍按实际布局显示。'));tools.addWidget(self.show_psu)
         self.animate=QCheckBox(controller.tr("风扇随转速转动"));tools.addWidget(self.animate)
         tools.addStretch(1)
         self.status=QLabel(controller.tr("比例示意 · 未知部件保留标记"));tools.addWidget(self.status)
         self.status.setWordWrap(True);self.status.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
         layout.addLayout(tools)
         self.exploded.toggled.connect(lambda value:controller.changeAssembly("exploded",value))
+        self.show_psu.toggled.connect(lambda value:controller.changeAssembly('show_psu',value))
         self.animate.toggled.connect(lambda value:controller.changeAssembly("fan_animation",value))
         self.style_choice.currentIndexChanged.connect(
             lambda _:controller.changeAssembly("appearance_style",self.style_choice.currentData()))
@@ -159,7 +172,7 @@ class AssemblyWindow(QWidget):
         self.component_choice.currentIndexChanged.connect(self._choose_component)
         self.viewport.componentSelected.connect(self._component_selected)
         reset.clicked.connect(self.viewport.reset_camera)
-        self.focus_choice.currentIndexChanged.connect(lambda _:self.viewport.focus_component(self.focus_choice.currentData()))
+        self.focus_choice.currentIndexChanged.connect(self._focus_view)
         self.viewport.rendererError.connect(self._render_failed)
         self.viewport.animationActiveChanged.connect(self._clock_active)
 
@@ -168,6 +181,9 @@ class AssemblyWindow(QWidget):
         self._clock=self._clock_component.createWithInitialProperties(dict(backend=self,active=False))
         if self._clock is None:raise RuntimeError("Assembly animation bridge could not load")
         self._clock.setParent(self)
+        gpu_signal=getattr(self.viewport,'gpuAssemblyChanged',None)
+        if gpu_signal is not None:
+            gpu_signal.connect(self._sync_gpu_assembly);self._connections.append((gpu_signal,self._sync_gpu_assembly))
         for signal,slot in ((controller.assemblyChanged,self._controller_changed),
                             (controller.dataChanged,self.update_readings),
                             (controller.motionChanged,self.update_readings)):
@@ -190,8 +206,8 @@ class AssemblyWindow(QWidget):
         self.style_choice.blockSignals(True)
         self.style_choice.setCurrentIndex(self.style_choice.findData(options.get('appearance_style','follow')))
         self.style_choice.blockSignals(False)
-        for control,field in ((self.exploded,'exploded'),(self.animate,'fan_animation')):
-            control.blockSignals(True);control.setChecked(options[field]);control.blockSignals(False)
+        for control,field in ((self.exploded,'exploded'),(self.show_psu,'show_psu'),(self.animate,'fan_animation')):
+            control.blockSignals(True);control.setChecked(options.get(field,False));control.blockSignals(False)
         self.selection_effects.blockSignals(True);self.selection_effects.setChecked(options.get('selection_effects',True))
         self.selection_effects.blockSignals(False)
         self._sync_part_style()
@@ -243,6 +259,7 @@ class AssemblyWindow(QWidget):
         self.viewport.set_selection_effects_enabled(options.get('selection_effects',True))
         self.viewport.set_exploded(options['exploded'])
         if hasattr(self.viewport,'set_inspection_cutaway'):self.viewport.set_inspection_cutaway(options.get('inspection_cutaway',False))
+        if hasattr(self.viewport,'set_show_psu'):self.viewport.set_show_psu(options.get('show_psu',False))
         if hasattr(self.viewport,'set_fan_motion'):self.viewport.set_fan_motion(options.get('fan_motion','measured'))
         self.viewport.set_fan_animation_enabled(options['fan_animation'] and self.controller.motionEnabled
             and self.property('modelMotionAllowed') is not False and not self._renderer_error)
@@ -273,6 +290,57 @@ class AssemblyWindow(QWidget):
             self.preview_effect.setEnabled(motion and bool(self._spec and self._spec['options'].get('selection_effects',True)))
         self._update_status()
         self._update_inspection()
+        self._sync_gpu_assembly()
+
+    def _gpu_assembly_state(self):
+        method=getattr(self.viewport,'gpu_insertion_state',None)
+        state=method() if callable(method) else dict(available=False,reason='scene_unavailable',active=False,progress=0.)
+        if (self._renderer_error or not self.controller.motionEnabled or self.property('modelMotionAllowed') is False):
+            state=dict(state,available=False,reason='动效已关闭。')
+        return state
+
+    def _gpu_assembly_reason(self,state):
+        reasons={
+            'scene_unavailable':'当前模型尚未准备好。',
+            'gpu_mount_unsupported':'此安装方式尚未支持显卡插拔演示。',
+            'gpu_waterblock_unsupported':'水冷显卡的管路拆装尚未支持。',
+            'board_normal_unverified':'尚未确认此模型的插槽方向。',
+            'case_dimensions_unverified':'尚未确认此机箱的内部范围。',
+            'gpu_geometry_unverified':'当前显卡模型尚未准备好。',
+            'gpu_outside_case_envelope':'此显卡超出机箱参考范围，暂不演示插拔。',
+            'insufficient_side_clearance':'此机箱的侧向空间不足以演示脱离插槽。',
+            'gpu_cable_metadata_invalid':'此模型的显卡供电线关联尚未准备好。',
+            'gpu_cable_prefix_missing':'此模型的显卡供电线关联尚未准备好。',
+            'gpu_cable_geometry_unverified':'此模型的显卡供电线关联尚未准备好。',
+            'gpu_cable_prefix_ambiguous':'此模型的显卡供电线关联尚未准备好。',
+            'cable_owner_unverified':'此模型的显卡供电线关联尚未准备好。',
+            '请先关闭展开组件，再演示显卡插拔。':'请先关闭展开组件，再演示显卡插拔。',
+            '请先切换到整机或显卡视图。':'请先切换到整机或显卡视图。',
+            '动效已关闭。':'动效已关闭。',
+        }
+        return self.controller.tr(reasons.get(state.get('reason'),'当前模型尚未准备好。'))
+
+    def _sync_gpu_assembly(self):
+        if self._closing:return
+        state=self._gpu_assembly_state();enabled=state.get('available') is True and not state.get('active')
+        if hasattr(self,'gpu_remove'):
+            self.gpu_remove.setEnabled(enabled and state.get('progress',0.)<1.)
+            self.gpu_insert.setEnabled(enabled and state.get('progress',0.)>0.)
+            note=(self.controller.tr('沿插槽方向移动；未模拟螺丝、卡扣及电源线拔插。')
+                  if state.get('available') else self._gpu_assembly_reason(state))
+            if self.gpu_assembly_hint.text()!=note:self.gpu_assembly_hint.setText(note)
+        if hasattr(self,'status'):self._update_status()
+
+    def _preview_gpu_insertion(self,removed):
+        if self._closing:return False
+        if not self._gpu_assembly_state().get('available'):
+            self._sync_gpu_assembly();return False
+        method=getattr(self.viewport,'preview_gpu_insertion',None)
+        accepted=bool(callable(method) and method(removed))
+        self._sync_gpu_assembly();return accepted
+
+    def _focus_view(self,_index):
+        self.viewport.focus_component(self.focus_choice.currentData());self._sync_gpu_assembly()
 
     def _choose_component(self,_index):
         self._component_selected(self.component_choice.currentData())
@@ -329,8 +397,13 @@ class AssemblyWindow(QWidget):
         self._update_status()
 
     def _update_status(self):
+        gpu=self._gpu_assembly_state()
         if self._renderer_error:
             text=self.controller.tr("当前环境无法显示三维视图")
+        elif gpu.get('active'):
+            text=self.controller.tr('模型正在脱离插槽（演示）' if gpu.get('target')==1. else '模型正在插回插槽（演示）')
+        elif gpu.get('progress',0.)>0:
+            text=self.controller.tr('模型已脱离插槽（演示）；实际监控继续。')
         elif self._spec and self._spec['options']['fan_animation']:
             if not self.controller.motionEnabled:
                 text=self.controller.tr("动效已关闭")

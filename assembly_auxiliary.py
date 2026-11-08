@@ -193,8 +193,8 @@ def _segment_box(a,b,bounds,padding=0.):
 
 
 def segment_hits_box(a,b,bounds,padding=0.):
-    """Conservative boxes, or a bounded static GPU triangle narrowphase."""
-    return bounds.intersects(a,b,padding) if isinstance(bounds,_GpuObstacle) else _segment_box(a,b,bounds,padding)
+    """Conservative boxes, exact GPU triangles or a real AIO hose segment."""
+    return bounds.intersects(a,b,padding) if isinstance(bounds,(_GpuObstacle,_TubeObstacle)) else _segment_box(a,b,bounds,padding)
 
 
 def _segment_triangle(a,b,triangle):
@@ -260,6 +260,35 @@ class _GpuObstacle(tuple):
         u,v,_=_basis(_sub(b,a))
         return any(self._ray(_add(a,offset),_add(b,offset)) for offset in
                    (_add(_mul(u,math.cos(n*math.tau/8)*padding),_mul(v,math.sin(n*math.tau/8)*padding)) for n in range(8)))
+
+
+class _TubeObstacle(tuple):
+    """One finite swept hose segment; its empty AABB corners remain empty."""
+    def __new__(cls,a,b,radius):
+        bounds=tuple(tuple(fn(a[n],b[n])+sign*radius for n in range(3)) for fn,sign in ((min,-1),(max,1)))
+        self=super().__new__(cls,bounds);self.a=a;self.b=b;self.radius=radius
+        return self
+
+    def intersects(self,a,b,padding):
+        if not _segment_box(a,b,self,padding):return False
+        from liquid_clearance046 import segment_distance
+        return segment_distance(a,b,self.a,self.b)<self.radius+padding-1e-6
+
+
+def _aio_tube_obstacles(cooling):
+    rows=cooling.get('aio_hoses') or ();result=[]
+    if not isinstance(rows,(tuple,list)) or len(rows)>8:raise ValueError('Invalid physical AIO hose collection')
+    for row in rows:
+        if not isinstance(row,dict):raise ValueError('Invalid physical AIO hose record')
+        raw=row.get('points');radius=row.get('outer_radius_mm')
+        if (not isinstance(raw,(tuple,list)) or not 2<=len(raw)<=128
+                or type(radius) not in (int,float) or not math.isfinite(radius) or not 0<radius<=30.):
+            raise ValueError('Invalid physical AIO hose clearance description')
+        points=tuple(_point(p,None) for p in raw)
+        if any(p is None for p in points):raise ValueError('Invalid physical AIO hose path')
+        result.extend(_TubeObstacle(a,b,radius) for a,b in zip(points,points[1:]))
+    if len(result)>256:raise ValueError('Physical AIO hose clearance exceeds its budget')
+    return tuple(result)
 
 
 def rounded_path(points,radius=7.,steps=4):
@@ -889,6 +918,8 @@ def auxiliary_stages(spec,anchors,level='balanced'):
         for raw in anchors.get('obstacles') or ():
             bounds=_bounds(raw)
             if bounds and bounds not in obstacles:obstacles.append(bounds)
+        hose_obstacles=_aio_tube_obstacles(anchors.get('cooling') or {}) if anchors.get('case_tray') else ()
+        obstacles.extend(hose_obstacles)
         graph_groups={}
         for raw in anchors.get('obstacles') or ():
             bounds=_bounds(raw)
@@ -896,6 +927,7 @@ def auxiliary_stages(spec,anchors,level='balanced'):
         graph_boxes=[tuple(tuple((min if side==0 else max)(bounds[side][n] for bounds in group) for n in range(3)) for side in (0,1)) for group in graph_groups.values()]
         if psu_bounds:graph_boxes.append(psu_bounds)
         graph_boxes.extend(psu_harness_bounds)
+        graph_boxes.extend(hose_obstacles)
         if gpu_bounds:graph_boxes.append(gpu_bounds)
         # Close detail refines the same loom; it never widens the physical
         # envelope merely because more illustrative samples are available.
@@ -913,7 +945,35 @@ def auxiliary_stages(spec,anchors,level='balanced'):
             points=[]
             owner=source.get('owner','')
             case_fan=isinstance(owner,str) and owner in case_fan_owners
+            tray=anchors.get('case_tray') or {}
+            if tray:aperture_z=tray['cable_columns_z_mm'][0]
+            if tray and owner=='psu':
+                # North XL only: leave the existing PSU outlet normally, then
+                # turn along its bay edge into the documented rear cable space.
+                points.extend(((start[0],source_y,aperture_z),(rear_x,source_y,aperture_z)))
+                if target.get('kind') in ('eps8','aux4'):
+                    edge_y=tray['top_lane_y_mm']
+                    # The long fore/aft section belongs behind the tray. Cross
+                    # its top opening only beside the fixed EPS header.
+                    points.extend(((rear_x,edge_y,aperture_z),(rear_x,edge_y,end[2]),
+                                   (front_x,edge_y,end[2]),(front_x,target_y,end[2])))
+                    return tuple(points)
+                if target.get('owner')=='gpu' and gpu_bounds:
+                    edge_y=gpu_bounds[0][1]-14.
+                    outer_x=min(end[0]-14.4,gpu_bounds[0][0]-14.4)
+                    points.extend(((rear_x,edge_y,aperture_z),(outer_x,edge_y,aperture_z),
+                                   (outer_x,edge_y,end[2]),(outer_x,target_y,end[2])))
+                    return tuple(points)
             if case_fan and owner.startswith('fans:rear:'):
+                if tray:
+                    # Enter the back of North's fixed tray above its top edge,
+                    # then use its existing upper passage beside this header.
+                    edge_y=tray['top_lane_y_mm']
+                    approach_z=end[2] if target_y>by+board_h/2-24. else end[2]-24.
+                    points.extend(((rear_x,source_y,start[2]),(rear_x,source_y,approach_z),
+                                   (rear_x,edge_y,approach_z),(front_x,edge_y,approach_z),
+                                   (front_x,target_y,approach_z),(front_x,target_y,end[2])))
+                    return tuple(points)
                 # A short reference lane behind the rear fan plane, then the
                 # actual tray side. No factory grommet location is claimed.
                 rear_lane_z=-d/2+6.
@@ -932,6 +992,7 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                 # then stay behind the tray. Avoid crossing the divider at
                 # its solid bottom or routing diagonally across the card.
                 case_entry_z=min(d/2-22.,max(aperture_z+30.,(gpu_bounds[1][2]+24.) if gpu_bounds else aperture_z+30.))
+                if tray:case_entry_z=max(case_entry_z,tray['front_entry_z_mm'])
                 points.append((rear_x,source_y,case_entry_z))
             if source.get('owner')=='board':points.append((front_x,source_y,aperture_z))
             points.append((rear_x,source_y,aperture_z))
@@ -1020,6 +1081,7 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                 issues.append('cable_clearance_requires_review');return
             add(prefix+'-rounded-loom',tuple(vertices),cable_tone,component='cables')
             cables.append(dict(kind=kind,source_owner=source.get('owner'),target_owner=target.get('owner'),
+                mesh_prefix=prefix,
                 source_socket=source['position'],target_socket=target['position'],start=start,end=end,path=path,
                 rendered_strands=cable_strands,strand_count_is_sampling=True,layout_schematic=True,
                 routing_policy='rear_tray_grommet_reference' if state.get('preferred_waypoints_used') else 'clearance_visibility_reference',**state))

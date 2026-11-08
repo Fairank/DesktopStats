@@ -779,10 +779,29 @@ def build_scene(spec=None):
             transformed.append(mesh)
         meshes=transformed
     attachment_anchors=final_anchors(anchors,board_pose,gpu_pose,gpu_anchor_position,gpu_anchor_size,spec,gpu_vector=gpu_vector,board_vector=board_vector)
+    if appearance.get('id')=='asus-astral-5090' and gpu_anchor_size:
+        # The official side photo puts the socket near the PCB/backplate, not
+        # halfway through the76mm cooler. Only depth is photo-observed here;
+        # longitudinal placement remains the existing unverified reference.
+        source='https://dlcdnwebimgs.asus.com/gain/B625A69F-626B-4451-B08B-DE635451FA0E/w1000/h732'
+        depth_shift=gpu_vector((0.,gpu_anchor_size[1]*.40,0.))
+        for inlet in attachment_anchors.get('gpu',{}).get('power',()):
+            if inlet.get('type') not in ('16pin','12vhpwr','12v_2x6'):continue
+            inlet['position']=tuple(inlet['position'][n]+depth_shift[n] for n in range(3))
+            inlet.update(position_verified=False,position_schematic=True,
+                         position_source='official_photo_observed_depth_reference',source=source)
+        attachment_anchors['gpu']['power_depth_observation']=dict(source=source,method='official_photo_observed_reference',
+            canonical_depth_fraction=.40,position_verified=False,dimensions_verified=False,
+            longitudinal_position_verified=False)
     cooling_meta={};auxiliary_meta={}
     from assembly_case_detail import enrich_case
     meshes=enrich_case(meshes,(w,h,d),case,component_level(spec,'case'))
+    tray_meta={}
+    if case.get('id')=='fractal-north-xl-mesh':
+        from assembly_north_tray049 import add_tray,add_obstacles
+        meshes,tray_meta=add_tray(meshes,case,(w,h,d))
     attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
+    if tray_meta:attachment_anchors=add_obstacles(attachment_anchors,tray_meta)
     if case.get('id')=='hyte-y70':
         main_center=(-w/2+board_x+5.)/2;main_span=board_x+5.+w/2-16.
         attachment_anchors['case_floor_deck']=dict(position=(main_center,-h/2+45.,0.),normal=(0.,1.,0.),
@@ -822,6 +841,7 @@ def build_scene(spec=None):
             meshes=tuple(m for m in meshes if m.component!='gpu' or m.name in kept_gpu or m.name.startswith('gpu-reference-port-'))
         meshes=tuple((*meshes,*cooling_meshes));attachment_anchors['cooling']=cooling_meta
         attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
+        if tray_meta:attachment_anchors=add_obstacles(attachment_anchors,tray_meta)
         # A transient reference supplies exact hollow GPU geometry for bounded
         # cable clearance; it never enters serializable metadata.
         attachment_anchors['_gpu_clearance_meshes']=tuple(m for m in meshes if m.component=='gpu')
@@ -870,6 +890,7 @@ def build_scene(spec=None):
                 attachments_outside_reference=added_notices,divider_aperture=divider_aperture,
                 gpu_mount_observation=gpu_mount_observation,
                 gpu_air_cooler_replaced=gpu_cooler_replaced,original_gpu_air_cooler_fans=original_gpu_air_cooler_fans)
+    if tray_meta:meta['case_tray']=tray_meta
     hardware_parts=[]
     for component,identity,label in (('cpu','cpu:0',(spec.get('cpu') or {}).get('label','CPU')),
             ('gpu','gpu:0',gpu.get('label','GPU')),('board','board:0',motherboard_meta.get('model_label',board.get('label','Motherboard')))):

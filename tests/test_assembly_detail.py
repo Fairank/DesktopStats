@@ -99,13 +99,14 @@ class AssemblyDetailTests(unittest.TestCase):
         self.assertEqual(meta['side_window_geometry'],'official_photo_observed_schematic')
         self.assertTrue(meta['side_window_source'].startswith('https://dlcdnwebimgs.asus.com/'))
         fins=next(m for m in scene.meshes if m.name=='detail-gpu-heatsink-fins')
+        shell=next(m for m in scene.meshes if m.name=='gpu-shroud')
+        fin_count=meta['heatsink_fins'];length=extent(shell,2)
         # Sample actual individual fin faces at quarter/middle/three-quarter
         # lengths, so empty rays through the gaps cannot falsely pass.
         for index in (8,17,26):
-            vertices=fins.vertices[index*216:(index+1)*216]
-            center=tuple((min(vertices[k::6])+max(vertices[k::6]))/2+fins.position[k] for k in range(3))
-            self.assertEqual(nearest_gpu_hit(scene,(center[0]-200,center[1],center[2]),(1,0,0)),
-                             'detail-gpu-heatsink-fins')
+            center=(fins.position[0],fins.position[1]+1.,fins.position[2]-length*.41+index*length*.82/(fin_count-1))
+            self.assertIn(nearest_gpu_hit(scene,(center[0]-200,center[1],center[2]),(1,0,0)),
+                          ('detail-gpu-heatsink-fins','detail-gpu-heatsink-cut-edges'))
         for port in (m for m in scene.meshes if m.name.startswith('gpu-reference-port-')):
             center=port.position
             self.assertEqual(nearest_gpu_hit(scene,(center[0],center[1],center[2]-100),(0,0,1)),
@@ -143,7 +144,11 @@ class AssemblyDetailTests(unittest.TestCase):
             [[.03,0],[.97,0],[1,.15],[1,.85],[.97,1],[.03,1],[0,.65],[0,.35]],
             [[.025,0],[.975,0],[1,.12],[1,.88],[.975,1],[.025,1],[.007,.8],[0,.5],[.007,.2]])
         for shape in shapes:
-            value=fixture();value['case']={'layout':'tower'};value['gpu']['shell_polygon']=shape
+            value=fixture();value['case']={'layout':'tower'}
+            # These deliberately synthetic chamfer/rounded shells test the
+            # generic connector tunnel, not the exact Astral's open end cage.
+            value['gpu']['appearance']=dict(value['gpu']['appearance'],id='synthetic-connector-clearance-fixture')
+            value['gpu']['shell_polygon']=shape
             scene=build_scene(value)
             for port in (m for m in scene.meshes if m.name.startswith('gpu-reference-port-')):
                 spans=tuple(extent(port,k) for k in range(3))

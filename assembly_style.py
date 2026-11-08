@@ -34,10 +34,13 @@ def style_for(value):
           "sticker":"#415d60","papercut":"#2b485a","inkwash":"#3b5874",
           "classic":"#526373","outline":"#405b6a","soft":"#748994",
           "sketch":"#61727d","notebook_smile":"#5d6576"}
+    # Matte light follows real face normals. Preserve each palette and ink
+    # treatment while allowing curved/stacked geometry to read as a volume.
+    depth={"cartoon":.44,"notebook_color":.30,"sticker":.36,"papercut":.24}
     return dict(id=style,edges=style!="miniature",
         hardware_ink_only=style in ("solid","papercut"),
         ink=rgba(inks.get(style,"#46525e")),dark_ink=rgba("#c5dce4"),
-        shading=1. if style=="miniature" else .45 if style in ("soft","inkwash") else 0.,
+        shading=1. if style=="miniature" else .45 if style in ("soft","inkwash") else depth.get(style,0.),
         line_only=style in _LINE,paper_grid=style in _PAPER,
         wobble=1.1 if style in _PAPER else 1.35 if style=="sketch" else 0.,
         line_width=1.6 if style in _LINE else 1.2,
@@ -374,7 +377,13 @@ def edge_batches(meshes,style,styles=None):
     fine_words=('spring-head','small-smd','small-package','pins','contacts','silkscreen','model-mark',
                 'label-rule','fastener','screw','water-channel','stator')
     plans=[]
+    repair_plate_partitions=sum(len(item[2]) for item in candidates)>MAX_STYLE_EDGES
     for mesh,index,edges,policy,tags,smooth_groups in candidates:
+        if repair_plate_partitions and mesh.name=='detail-board-m2-heatsink':
+            # Clipped mount holes can leave coplanar T partitions below512.
+            # Cancel those false seams only under whole-PC budget pressure;
+            # real cover/hole creases survive and isolated ink stays identical.
+            edges=crease_edges(mesh.vertices,MAX_MESH_EDGES,repair_under_cap=True)
         name=mesh.name.casefold();micro=any(word in name for word in fine_words)
         dense=any(word in name for word in ('perforat','grille','vent','mesh','floor-deck','fins','-fin'))
         span=max(max(mesh.vertices[axis::6])-min(mesh.vertices[axis::6]) for axis in range(3))

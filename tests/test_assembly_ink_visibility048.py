@@ -1,5 +1,6 @@
 """Complete primary-part ink in actual crowded AIO references; no native GL/UI."""
 import copy
+from collections import Counter
 import os
 import tempfile
 import unittest
@@ -17,7 +18,7 @@ import hardware_packs
 from assembly_parts import reference_preset
 from assembly_profiles import bake_profiles
 from assembly_spec import build_spec
-from assembly_geometry import build_scene
+from assembly_geometry import Mesh,box,build_scene
 from assembly_style import edge_batches,crease_edges,_edge_groups,MAX_STYLE_EDGES
 from stats_config import DEFAULT
 from tests.test_assembly_ink_priority046 import retained,same_path
@@ -137,6 +138,42 @@ class AssemblyInkVisibility048Tests(unittest.TestCase):
         for style in STYLES:
             values={id(m):data for m,data in edge_batches(selected,style)}
             for mesh in selected:self.assertTrue(all(retained(edge,values[id(mesh)]) for edge in crease_edges(mesh.vertices)))
+
+    def test_crowded_actual_m2_cover_removes_t_seams_without_losing_true_creases_or_holes(self):
+        scene=next(iter(self.scenes.values()))
+        mesh=max((m for m in scene.meshes if m.name=='detail-board-m2-heatsink'),
+                 key=lambda m:len(crease_edges(m.vertices)))
+        raw=crease_edges(mesh.vertices)
+        self.assertGreater(len(raw),300,'Exercise the actual clipped mounting-hole plate')
+        # Independently identify incident non-coplanar triangle faces. Their
+        # true bevel/wall creases must survive cancellation of cap partitions.
+        normals={}
+        for start in range(0,len(mesh.vertices),18):
+            row=mesh.vertices[start:start+18]
+            points=[tuple(round(v,5) for v in row[n:n+3]) for n in (0,6,12)]
+            for a,b in ((0,1),(1,2),(2,0)):
+                normals.setdefault(tuple(sorted((points[a],points[b]))),[]).append(row[3:6])
+        real=[edge for edge,faces in normals.items() if any(
+            -.05<sum(a*b for a,b in zip(faces[0],face))<.8 for face in faces[1:])]
+        self.assertGreaterEqual(len(real),10)
+        # Dense small contacts create budget pressure without competing for
+        # main-cover priority. No physical plate, hole or GPU is rebuilt.
+        contact=Mesh('contacts',box(1.,1.,1.),(0.2,0.2,0.2,1.),component='board')
+        for style in STYLES:
+            isolated=dict((id(m),data) for m,data in edge_batches((mesh,),style))[id(mesh)]
+            self.assertTrue(all(retained(edge,isolated) for edge in raw))
+            values=edge_batches((mesh,)+(contact,)*700,style)
+            data=next(data for m,data in values if m is mesh)
+            self.assertTrue(all(retained(edge,data) for edge in real))
+            self.assertGreater(sum(not retained(edge,data) for edge in raw),100)
+            lines=[(tuple(data[n:n+3]),tuple(data[n+6:n+9])) for n in range(0,len(data),12)]
+            holes=[group for group,span in _edge_groups(lines) if 6.3<span<6.5]
+            self.assertEqual(len(holes),3,'All three real 6.4mm mounting apertures stay closed')
+            for group in holes:
+                degrees=Counter(point for n in group for point in lines[n])
+                self.assertEqual(set(degrees.values()),{2})
+            self.assertLessEqual(sum(len(value)//12 for _,value in values),MAX_STYLE_EDGES)
+            self.assertLessEqual(max(len(value)//12 for _,value in values),512)
 
 
 if __name__=='__main__':unittest.main()

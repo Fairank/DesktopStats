@@ -53,10 +53,15 @@ def normalized(value):
     return value
 
 
-def port_digest(cables):
+def port_digest(cables,*,gpu_depth_correction=0.):
     rows=[]
     for cable in cables:
         row=[cable['kind'],cable['source_owner'],cable['target_owner'],normalized(cable['target_socket']),normalized(cable['end'])]
+        if cable['kind']=='gpu16' and gpu_depth_correction:
+            # Only the source-reviewed Astral depth correction is reversed for
+            # this historical digest; every other fixed coordinate stays locked.
+            row[3][1]=round(row[3][1]-gpu_depth_correction,6)
+            row[4][1]=round(row[4][1]-gpu_depth_correction,6)
         if not str(cable['source_owner']).startswith('fans:rear:'):
             row.extend((normalized(cable['source_socket']),normalized(cable['start'])))
         rows.append(row)
@@ -134,7 +139,19 @@ class CaseFanCableRouting048Tests(unittest.TestCase):
                         self.assertEqual(meta['auxiliary']['rejected'],[])
                         self.assertEqual(meta['auxiliary']['omitted_routes'],[])
                         self.assertEqual(len(cables),14 if kind=='air' else 8)
-                        self.assertEqual(port_digest(cables),FIXED_PORTS_SHA[kind])
+                        gpu=anchors['gpu'];observation=gpu['power_depth_observation']
+                        self.assertEqual(spec['gpu']['appearance']['id'],'asus-astral-5090')
+                        self.assertEqual(observation['method'],'official_photo_observed_reference')
+                        self.assertFalse(observation['position_verified'])
+                        self.assertFalse(observation['dimensions_verified'])
+                        self.assertFalse(observation['longitudinal_position_verified'])
+                        corrected=next(c for c in cables if c['kind']=='gpu16')
+                        self.assertAlmostEqual(corrected['target_socket'][1],gpu['center'][1]+gpu['thickness_mm']*.40)
+                        self.assertAlmostEqual(corrected['target_socket'][2],gpu['center'][2]+gpu['length_mm']*.08)
+                        self.assertEqual(gpu['power'][0]['normal'],(-1.,0.,0.))
+                        self.assertEqual(gpu['power'][0]['position_source'],'official_photo_observed_depth_reference')
+                        self.assertFalse(gpu['power'][0]['position_verified'])
+                        self.assertEqual(port_digest(cables,gpu_depth_correction=gpu['thickness_mm']*.40),FIXED_PORTS_SHA[kind])
                         self.assertFalse(any(cable['external_route'] for cable in cables))
                         self.assertEqual(fit_messages(spec,meta),[])
                         fans=[row for row in cables if str(row['source_owner']).startswith('fans:')]

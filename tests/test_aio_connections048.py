@@ -108,16 +108,29 @@ class AioConnections048Tests(unittest.TestCase):
         p,basis=cooling._cpu_frame(anchors);u,v,n=basis
         row=get_cooler(identity)
         name='cooler-lfiii-twin-hose-elbows' if row['pump_style']=='arctic_vrm' else 'cooler-block-fittings'
-        outlets=mouths(meshes,name,p,u,v)
+        #049 primary installation/side views replace the old straight-v elbow:
+        #the whole LFIII head clocks toward PCIe and its final mouth exits+n.
+        outlets=mouths(meshes,name,p,v,n) if row['pump_style']=='arctic_vrm' else mouths(meshes,name,p,u,v)
         _,rad_basis,_=cooling._mount_plane(mount,anchors['case_dimensions'],0.,anchors.get('case_mount_planes'))
         rad_axis=mul(rad_basis[2],-1.)
         rad_origin=cooling._mount_plane(mount,anchors['case_dimensions'],0.,anchors.get('case_mount_planes'))[0]
         outlets+=mouths(meshes,'cooler-radiator-fittings',rad_origin,rad_basis[0],rad_axis)
         self.assertEqual(len(outlets),4)
+        issues=[row for row in meta['connection_issues'] if row.get('reason')=='aio_hose_route_unverified']
+        if issues:
+            # The old800mm-tall schematic fixture is not a450mm routing proof.
+            #049 must fail closed here instead of drawing a short hose and
+            #silently calling it the factory length. Actual NorthXL fits and
+            #full shared-ring topology are covered in test_aio_hose_geometry049.
+            self.assertIn(identity,cooling._LFIII_FACTORY_IDS)
+            self.assertTrue(all(row.get('hoses_omitted') for row in issues))
+            self.assertFalse(any(m.name=='cooler-liquid-tubes' for m in meshes))
+            self.assertFalse(meta['aio_hoses'])
+            return meshes,meta
         for mouth in outlets:self.assert_mouth_join(meshes,mouth,level)
         return meshes,meta
 
-    def test_all_builtin_aio_families_join_real_outlet_triangles_at_three_lods(self):
+    def test_all_builtin_aio_families_join_or_explicitly_reject_factory_length_at_three_lods(self):
         for item in choices_coolers():
             row=get_cooler(item['id'])
             if row['kind']!='aio':continue
@@ -133,7 +146,12 @@ class AioConnections048Tests(unittest.TestCase):
                 with self.subTest(model=identity,mount=mount):self.inspect_connections(identity,'balanced',mount,anchors)
 
     def test_lfiii_keeps_vrm_crown_unknown_impeller_and_factory_radiator_fans(self):
-        meshes,meta=self.inspect_connections('arctic-liquid-freezer-iii-240')
+        # Use the actual NorthXL reference CPU pose, rather than the old bare
+        #(-35,35,10) schematic point whose downward elbows sit below the CPU.
+        anchors=dict(cpu=dict(position=(80.4,76.975,-103.056),normal=(-1.,0.,0.),up=(0.,1.,0.)),
+                     case_dimensions=(240.,509.,503.))
+        meshes,meta=self.inspect_connections('arctic-liquid-freezer-iii-240',anchors=anchors)
+        self.assertEqual(len(meta['aio_hoses']),2)
         row=get_cooler('arctic-liquid-freezer-iii-240')
         self.assertEqual(row['radiator_mm'],dict(length=277,width=120,thickness=38))
         self.assertEqual(row['fan_model'],'arctic-p12-pwm')

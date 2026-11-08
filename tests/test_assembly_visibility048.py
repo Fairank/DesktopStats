@@ -29,6 +29,8 @@ class InspectionVisibilityTests(unittest.TestCase):
             Mesh('front-panel',box(30,30,1),(.2,.3,.4,1.),(0.,0.,10.),'case'),
             Mesh('psu-shroud',box(30,10,24),(.2,.3,.4,1.),(0.,-15.,0.),'case'),
             Mesh('left-glass',box(1,30,24),(.4,.5,.6,.15),(-16.,0.,0.),'panel'),
+            Mesh('case-right',box(1,30,24),(.2,.3,.4,1.),(18.,0.,0.),'case'),
+            Mesh('case-back',box(30,30,1),(.2,.3,.4,1.),(0.,0.,-18.),'case'),
             Mesh('case-depth-rail',box(2,2,30),(.3,.4,.5,1.),(20.,15.,0.),'case'),
             Mesh('psu-shell',box(8,8,8),(.3,.4,.5,1.),(0.,0.,0.),'psu',part_id='psu:0'),
             Mesh('ram-pcb',box(1,15,4),(.3,.5,.4,1.),(8.,0.,0.),'memory',part_id='memory:0'))
@@ -61,9 +63,12 @@ class InspectionVisibilityTests(unittest.TestCase):
     def test_only_declared_covers_hide_hardware_frames_and_unknown_batches_stay(self):
         for mesh in self.meshes:self.assertTrue(mesh_visible(mesh))
         self.assertEqual([mesh.name for mesh in self.meshes if not mesh_visible(mesh,True)],
+                         ['front-panel','left-glass'])
+        self.assertEqual([mesh.name for mesh in self.meshes if not mesh_visible(mesh,True,True)],
                          ['front-panel','psu-shroud','left-glass'])
         for name,component in (('case-tubular-metal-frame','case'),('open-frame-tray','case'),
             ('case-bench-metal-platform','case'),('case-foot','case'),('unknown-future-case','case'),
+            ('case-right','case'),('case-back','case'),
             ('translucent-stand','panel'),('psu-shroud','psu'),('left-glass','memory')):
             self.assertTrue(mesh_visible(SimpleNamespace(name=name,component=component),True),(name,component))
 
@@ -80,11 +85,20 @@ class InspectionVisibilityTests(unittest.TestCase):
                 renderer.draw(320,240,yaw=0,pitch=0,inspection_cutaway=True)
                 visible=tuple(calls);calls.clear()
                 self.assertTrue(visible)
-                self.assertFalse(any(name in ('front-panel','psu-shroud','left-glass') for name,mode in visible))
+                self.assertFalse(any(name in ('front-panel','left-glass') for name,mode in visible))
+                self.assertIn(('psu-shroud',GL_TRIANGLES),visible,'Default cutaway retains the real PSU enclosure')
                 self.assertIn(('psu-shell',GL_TRIANGLES),visible)
                 self.assertIn(('ram-pcb',GL_TRIANGLES),visible)
                 self.assertIn(('case-depth-rail',GL_TRIANGLES),visible)
+                for wall in ('case-right','case-back'):
+                    self.assertIn((wall,GL_TRIANGLES),visible)
+                    self.assertNotIn(id(next(mesh for mesh in scene.meshes if mesh.name==wall)),renderer._cutaway_hidden)
+                    if style=='notebook_line':self.assertIn((wall,GL_LINES),visible)
                 if renderer.edge_ranges:self.assertTrue(any(mode==GL_LINES for name,mode in visible))
+                renderer.draw(320,240,yaw=0,pitch=0,inspection_cutaway=True,show_psu=True)
+                shown=tuple(calls);calls.clear()
+                self.assertNotIn(('psu-shroud',GL_TRIANGLES),shown)
+                self.assertIn(('psu-shell',GL_TRIANGLES),shown)
                 renderer.draw(320,240,yaw=0,pitch=0,inspection_cutaway=False)
                 self.assertEqual(tuple(calls),normal)
                 self.assertEqual(renderer.upload_count,1)
@@ -96,10 +110,28 @@ class InspectionVisibilityTests(unittest.TestCase):
     def test_actual_click_ray_passes_through_hidden_shell_then_restores_occlusion(self):
         renderer=self.renderer('notebook_line')
         renderer._draw_part=lambda *args,**kwargs:None
-        for cutaway,expected in ((False,'case'),(True,'psu:0'),(False,'case')):
-            renderer.draw(640,480,yaw=0,pitch=0,inspection_cutaway=cutaway)
-            point=renderer.project_point((0.,0.,0.))
-            self.assertEqual(renderer.pick(*point[:2]),expected)
+        # The lower camera clears the front panel and meets the PSU shroud itself.
+        for pitch in (0.,-60.):
+            with self.subTest(pitch=pitch):
+                for cutaway,expected in ((False,'case'),(True,'psu:0'),(False,'case')):
+                    renderer.draw(640,480,yaw=0,pitch=pitch,inspection_cutaway=cutaway,show_psu=cutaway)
+                    point=renderer.project_point((0.,0.,0.))
+                    self.assertEqual(renderer.pick(*point[:2]),expected)
+        self.assertEqual(renderer.upload_count,1)
+
+    def test_retained_far_wall_and_rear_io_wall_still_occlude_actual_clicks_in_cutaway(self):
+        renderer=self.renderer('notebook_line')
+        renderer._draw_part=lambda *args,**kwargs:None
+        for yaw in (90.,180.):
+            with self.subTest(yaw=yaw):
+                for cutaway in (False,True,False):
+                    renderer.draw(640,480,yaw=yaw,pitch=0,inspection_cutaway=cutaway)
+                    point=renderer.project_point((0.,0.,0.))
+                    self.assertEqual(renderer.pick(*point[:2]),'case')
+        # The opposite side is the removable glass, so the PSU remains accessible.
+        renderer.draw(640,480,yaw=-90,pitch=0,inspection_cutaway=True,show_psu=True)
+        point=renderer.project_point((0.,0.,0.))
+        self.assertEqual(renderer.pick(*point[:2]),'psu:0')
         self.assertEqual(renderer.upload_count,1)
 
     def test_cutaway_is_not_a_physical_cache_field_and_never_rebuilds_geometry(self):

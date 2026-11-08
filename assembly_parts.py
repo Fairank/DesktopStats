@@ -142,7 +142,10 @@ def fit_messages(spec,metadata):
         result.append('部分配件超出机箱参考外形，请检查安装位置。')
     if metadata.get('cooling',{}).get('mounting_issues'):
         result.append('风扇标称孔距与冷排不同，安装间隙待核。')
-    if metadata.get('cooling',{}).get('connection_issues'):
+    connection_issues=metadata.get('cooling',{}).get('connection_issues') or ()
+    if any(row.get('reason')=='aio_hose_route_unverified' for row in connection_issues):
+        result.append('原厂长度的水冷软管未找到可用路线，未缩短或强行连接。')
+    if any(row.get('reason')!='aio_hose_route_unverified' for row in connection_issues):
         result.append('部分冷排接口位置尚未核实，对应管路未强行连接。')
     if metadata.get('auxiliary',{}).get('omitted_routes'):
         result.append('部分线缆缺少对应接口或可用路线，未强行连接。')

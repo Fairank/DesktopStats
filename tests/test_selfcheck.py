@@ -23,6 +23,12 @@ class SelfCheckTests(unittest.TestCase):
         report=json.loads(self.output.read_text(encoding='utf8'))
         self.assertTrue(report['ok'])
         self.assertEqual(len(report['checks']),18)
+        insertion=report['gpu_insertion_check']
+        self.assertIs(insertion['finite_out_and_back'],True)
+        self.assertGreaterEqual(insertion['distance_mm'],16.)
+        self.assertLessEqual(insertion['distance_mm'],52.)
+        self.assertIs(insertion['scene_rebuilt'],False)
+        self.assertIs(insertion['graphics_context'],False)
         self.assertIn('optional-loop-pack-mesh-svg-remove-no-graphics',report['checks'])
         self.assertIn('optional-cooling-pack-install-render-remove-no-graphics',report['checks'])
         self.assertIn('optional-gpu-block-pack-mesh-svg-remove-no-graphics',report['checks'])

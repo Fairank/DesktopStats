@@ -197,6 +197,19 @@ def _check(report, output):
         assert assembled.metadata['part_style_map']['gpu']=='miniature'
         assert assembled.metadata['part_style_map']['fans:front:0']=='notebook_line'
         assert assembled.metadata['cooling']['parts'] and assembled.metadata['auxiliary']['parts']
+        from assembly_gpu_insertion049 import GpuInsertion,insertion_plan
+        insertion=insertion_plan(assembled)
+        assert insertion['available'],insertion['reason']
+        assert 16.<=insertion['distance_mm']<=52.
+        motion=GpuInsertion()
+        assert motion.start(True)
+        for _ in range(32):motion.advance(34.)
+        assert motion.progress==1. and not motion.active
+        assert motion.start(False)
+        for _ in range(32):motion.advance(34.)
+        assert motion.progress==0. and not motion.active
+        report['gpu_insertion_check']=dict(available=True,distance_mm=insertion['distance_mm'],
+            finite_out_and_back=True,scene_rebuilt=False,graphics_context=False)
         report['assembly_catalog_counts']={key:len(value) for key,value in catalog.items() if key in ('gpus','memory','boards','coolers','fans','psus','storage','expansion')}
         report["checks"].append("assembly-reference-parts-and-mixed-styles-no-graphics")
         from hardware_packs import PackStore

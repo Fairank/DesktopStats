@@ -332,6 +332,10 @@ def _gpu_detail(meshes,spec,level):
     gpu=spec.get('gpu') or {};appearance=gpu.get('appearance') or {};facts=appearance.get('board_details') or {}
     shroud=next((m for m in meshes if m.name=='gpu-shroud'),None)
     if shroud is None:return tuple(meshes),dict(heatsink_fins=0,ports=0,layout_schematic=True)
+    radius_observation={}
+    if appearance.get('id')=='asus-astral-5090':
+        from assembly_gpu_exterior049 import prepare_front_fans
+        meshes,radius_observation=prepare_front_fans(meshes,spec)
     width,thickness,length=_extent(shroud);gx,gy,gz=shroud.position
     outer=unit_polygon(gpu.get('shell_polygon'),length,width) or chamfer_rect(length,width,min(7.,width*.07))
     openings=[m for m in meshes if m.name=='gpu-fan-opening' and m.position[1]<gy]
@@ -471,7 +475,13 @@ def _gpu_detail(meshes,spec,level):
         caps,slots=_screws(screw_points,1.5)
         add('detail-gpu-backplate-fasteners',gpu_plane(caps,True),metal,(gx,gy+thickness/2-.6,gz))
         add('detail-gpu-fastener-slots',gpu_plane(slots,True),dark,(gx,gy+thickness/2-.6,gz))
-    return tuple((*revised,*detail)),dict(heatsink_fins=fin_count,ports=len(ports),port_types=tuple(ports),
+    completed=tuple((*revised,*detail));exterior={}
+    if observed_rear:
+        from assembly_gpu_exterior049 import refine
+        completed,exterior=refine(completed,spec,level,outer=outer,front_holes=holes,rear_hole=rear_hole,
+            edge_windows=edge_windows,edge_recesses=edge_recesses,front_cutouts=shell_holes,port_holes=port_holes)
+        fin_count=exterior.get('fin_sampling_count',fin_count)
+    return completed,dict(heatsink_fins=fin_count,ports=len(ports),port_types=tuple(ports),
         connector_pads=contact_count,backplate=backplate,layout_schematic=True,pcb_dimensions_schematic=True,
         fin_count_is_sampling=True,ports_count_documented=bool(ports),connector_pad_count_is_sampling=True,
         observed_rear_fans=1 if observed_rear else 0,rear_blades=7 if observed_rear else None,
@@ -484,8 +494,8 @@ def _gpu_detail(meshes,spec,level):
         port_clearance_tunnel_mm=6.5 if port_holes else 0.,observed_side_fin_window=observed_rear,
         side_window_geometry='official_photo_observed_schematic' if observed_rear else None,
         side_window_source='https://dlcdnwebimgs.asus.com/gain/B625A69F-626B-4451-B08B-DE635451FA0E/w1000/h732' if observed_rear else None,
-        side_window_ratios=dict(edge_fraction_min=.04,edge_fraction_max=.96,
-            depth_min=-.38,depth_max=.23) if observed_rear else None)
+        side_window_ratios=dict(edge_fraction_min=.015,edge_fraction_max=.985,
+            depth_min=-.385,depth_max=.33) if observed_rear else None,**radius_observation,**exterior)
 
 
 def _memory_detail(meshes,spec,level):

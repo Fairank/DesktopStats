@@ -18,7 +18,8 @@ from assembly_geometry import build_scene, number, vertex_bytes
 from assembly_style import edge_batches,material_for,style_for
 from assembly_effects import SelectionEffect,component_family,effect_for,effect_sample
 from assembly_scene_cache import SceneCache
-from assembly_visibility048 import hidden_mesh_ids
+from assembly_visibility048 import hidden_mesh_ids,psu_cover_mesh_ids
+from assembly_gpu_insertion049 import GpuInsertion,insertion_plan
 from top_bar_feedback import GPU_FAN_MAX_AGE
 
 GL_FLOAT=0x1406
@@ -261,6 +262,8 @@ class AssemblyRenderer:
         self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
         self._wide_lines=False
         self._cutaway_hidden=frozenset()
+        self._psu_cover_ids=frozenset()
+        self._gpu_power_ids=frozenset()
 
     def initialize(self):
         self.functions=QOpenGLFunctions_3_3_Core()
@@ -290,6 +293,11 @@ class AssemblyRenderer:
         if self.program is None:raise RuntimeError('3-D context is not ready')
         self.scene=scene;raw=vertex_bytes(scene)
         self._cutaway_hidden=hidden_mesh_ids(scene.meshes)
+        self._psu_cover_ids=psu_cover_mesh_ids(scene.meshes)
+        prefixes=tuple(row['mesh_prefix'] for row in scene.metadata.get('auxiliary',{}).get('cables',())
+                       if row.get('target_owner')=='gpu' and isinstance(row.get('mesh_prefix'),str) and row['mesh_prefix'])
+        self._gpu_power_ids=frozenset(id(mesh) for mesh in scene.meshes if mesh.component=='cables'
+            and any(mesh.name==prefix or mesh.name.startswith(prefix+'-') for prefix in prefixes))
         self.policy=style_for(scene.metadata.get('canvas_style',scene.metadata.get('visual_style')))
         styles=scene.metadata.get('mesh_style_ids')
         if not isinstance(styles,(tuple,list)) or len(styles)!=len(scene.meshes):
@@ -338,28 +346,36 @@ class AssemblyRenderer:
         return (focus=='all' or mesh.component==focus or bool(focus) and getattr(mesh,'part_id','')==focus
                 or focus=='case' and mesh.component=='panel')
 
-    def _visible(self,mesh,focus,inspection_cutaway=False):
-        return self._selected(mesh,focus) and (inspection_cutaway is not True or id(mesh) not in self._cutaway_hidden)
+    def _visible(self,mesh,focus,inspection_cutaway=False,hide_gpu_power=False,show_psu=False):
+        return (self._selected(mesh,focus) and (inspection_cutaway is not True or id(mesh) not in self._cutaway_hidden)
+                and (show_psu is not True or id(mesh) not in self._psu_cover_ids)
+                and (not hide_gpu_power or id(mesh) not in self._gpu_power_ids))
 
-    def _shift(self,mesh,exploded):
-        if not exploded:return (0,0,0)
-        w,h,d=self.scene.dimensions
-        return {'panel':(-w*.43,0,d*.11),'gpu':(-w*.54,-h*.02,d*.32),
+    def _shift(self,mesh,exploded,gpu_offset=None):
+        shift=(0,0,0)
+        if exploded:
+            w,h,d=self.scene.dimensions
+            shift={'panel':(-w*.43,0,d*.11),'gpu':(-w*.54,-h*.02,d*.32),
                 'cpu':(-w*.58,h*.20,0),'memory':(-w*.32,h*.16,d*.12),
                 'cooler':(-w*.72,h*.30,0),'fans':(w*.45,h*.10,d*.22),
                 'psu':(w*.42,-h*.22,-d*.20),'storage':(w*.45,-h*.15,d*.28),
                 'expansion':(-w*.40,-h*.22,d*.22)}.get(mesh.component,(0,0,0))
+        if mesh.component=='gpu' and gpu_offset is not None:
+            return tuple(shift[n]+gpu_offset[n] for n in range(3))
+        return shift
 
     def _scalar(self,name,value):
         # Use the explicit GL scalar entry point. PySide's overloaded Qt setter
         # can select an integer uniform overload for Python float arguments.
         self.functions.glUniform1f(self._uniforms[name],float(value))
 
-    def _shadow(self,projection,width,height,focus,exploded):
+    def _shadow(self,projection,width,height,focus,exploded,gpu_offset=None):
         """A cached projected ground ellipse, not a scene mesh or a render target."""
-        key=(self._pick_camera_key,focus,exploded)
+        key=(self._pick_camera_key,focus,exploded,tuple(gpu_offset) if gpu_offset is not None and component_family(focus)=='gpu' else None)
         if key==self._shadow_key:return self._shadow_parameters
         low,high=self.pick_bounds.get((focus,exploded),self.pick_bounds[('all',False)])
+        if gpu_offset is not None and component_family(focus)=='gpu':
+            low,high=tuple(tuple(p[n]+gpu_offset[n] for n in range(3)) for p in (low,high))
         center=((low[0]+high[0])/2,low[1],(low[2]+high[2])/2)
         def project(point):
             value=projection.map(QVector4D(*point,1.))
@@ -374,9 +390,12 @@ class AssemblyRenderer:
         self._shadow_key=key;self._shadow_parameters=(point,inverse)
         return self._shadow_parameters
 
-    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False,inspection_cutaway=False):
+    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False,inspection_cutaway=False,gpu_offset=None,hide_gpu_power=False,show_psu=False):
         f=self.functions
         if f is None or self.scene is None:return
+        if not (isinstance(gpu_offset,(tuple,list)) and len(gpu_offset)==3
+                and all(type(v) in (int,float) and math.isfinite(v) and abs(v)<=128 for v in gpu_offset)):
+            gpu_offset=None
         f.glViewport(0,0,max(1,width),max(1,height))
         original=self.policy['id']=='miniature'
         background=((.075,.095,.12,1.) if dark else (.94,.955,.965,1.)) if original else self.policy['dark_background' if dark else 'light_background']
@@ -400,7 +419,8 @@ class AssemblyRenderer:
             combined=projection*view;inverse,valid=combined.inverted()
             self._pick_inverse=inverse if valid else None;self._pick_projection=combined
             self._pick_camera_key=camera_key
-        self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus,inspection_cutaway=inspection_cutaway)
+        self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus,
+                              inspection_cutaway=inspection_cutaway,gpu_offset=gpu_offset,hide_gpu_power=hide_gpu_power,show_psu=show_psu)
         self._frame_effect=effect if isinstance(effect,dict) and effect.get('active') is True else None
         self._frame_effect_samples={}
         self.program.bind();self.vao.bind()
@@ -409,6 +429,8 @@ class AssemblyRenderer:
         target=self._frame_effect.get('component','') if self._frame_effect else ''
         limits=self.pick_bounds.get((target,exploded),self.pick_bounds[('all',False)])
         effect_center=tuple((limits[0][n]+limits[1][n])/2 for n in range(3))
+        if gpu_offset is not None and component_family(target)=='gpu':
+            effect_center=tuple(effect_center[n]+gpu_offset[n] for n in range(3))
         effect_scale=tuple(1/max(1.,limits[1][n]-limits[0][n]) for n in range(3))
         self.program.setUniformValue('effectCenter',QVector3D(*effect_center))
         self.program.setUniformValue('effectScale',QVector3D(*effect_scale))
@@ -419,7 +441,7 @@ class AssemblyRenderer:
             f.glDisable(GL_DEPTH_TEST);f.glDepthMask(False)
             self._scalar('backgroundMode',1. if self.policy['paper_grid'] else 2.)
             self.program.setUniformValue('paperGridColor',QVector4D(*self.policy['grid_dark' if dark else 'grid_light']))
-            shadow_center,shadow_inverse=self._shadow(self._pick_projection,width,height,focus,exploded)
+            shadow_center,shadow_inverse=self._shadow(self._pick_projection,width,height,focus,exploded,gpu_offset)
             self.program.setUniformValue('shadowCenter',QVector2D(*shadow_center))
             self.program.setUniformValue('shadowInverse',QVector4D(*shadow_inverse))
             self.program.setUniformValue('shadowColor',QVector4D(.01,.025,.04,self.policy['contact_shadow']*(.7 if dark else 1.)))
@@ -430,16 +452,16 @@ class AssemblyRenderer:
             f.glEnable(GL_POLYGON_OFFSET_FILL);f.glPolygonOffset(1.,1.)
         transparent=[]
         for row in self.ranges:
-            if not self._visible(row[0],focus,inspection_cutaway):continue
+            if not self._visible(row[0],focus,inspection_cutaway,hide_gpu_power,show_psu):continue
             policy=self._mesh_policies.get(id(row[0]),self.policy)
             if row[0].color[3]<1:transparent.append(row)
             else:self._draw_part(row,projection,view,exploded,phase,
-                    tone=background if policy['line_only'] else self._highlight_tone(row[0],selected))
+                    tone=background if policy['line_only'] else self._highlight_tone(row[0],selected),gpu_offset=gpu_offset)
         # Glass is drawn last without writing depth; opaque internal parts remain.
         f.glDepthMask(False)
         for row in transparent:
             if not self._mesh_policies.get(id(row[0]),self.policy)['line_only']:
-                self._draw_part(row,projection,view,exploded,phase,tone=self._highlight_tone(row[0],selected))
+                self._draw_part(row,projection,view,exploded,phase,tone=self._highlight_tone(row[0],selected),gpu_offset=gpu_offset)
         f.glDepthMask(True)
         if self.edge_ranges:
             f.glDisable(GL_POLYGON_OFFSET_FILL);f.glDepthFunc(GL_LEQUAL);f.glLineWidth(1.)
@@ -447,14 +469,14 @@ class AssemblyRenderer:
             self._frame_shade=0.
             line_width=1.
             for row in self.edge_ranges:
-                if self._visible(row[0],focus,inspection_cutaway):
+                if self._visible(row[0],focus,inspection_cutaway,hide_gpu_power,show_psu):
                     policy=self._mesh_policies.get(id(row[0]),self.policy)
                     stroke_width=max(1.,min(8.,policy['line_width']*number(pixel_scale,1.,.5,8.))) if self._wide_lines else 1.
                     if stroke_width!=line_width:f.glLineWidth(stroke_width);line_width=stroke_width
                     ink=policy['dark_ink' if dark else 'ink']
                     tone=(.28,.74,1.,1.) if dark else (.05,.47,.78,1.)
                     self._draw_part(row,projection,view,exploded,phase,mode=GL_LINES,
-                                    tone=tone if self._matches_selection(row[0],selected) else self._preview_light_tones.get(id(row[0]),ink))
+                                    tone=tone if self._matches_selection(row[0],selected) else self._preview_light_tones.get(id(row[0]),ink),gpu_offset=gpu_offset)
             f.glDepthFunc(GL_LESS)
         self.vao.release();self.program.release();self.draw_count+=1
 
@@ -493,13 +515,16 @@ class AssemblyRenderer:
         candidates=[]
         for component in allowed:
             bounds=self.pick_bounds.get((component,state['exploded']))
+            if component_family(component)=='gpu' and bounds is not None and state.get('gpu_offset') is not None:
+                bounds=tuple(tuple(point[n]+state['gpu_offset'][n] for n in range(3)) for point in bounds)
             if bounds is not None and ray_box(origin,direction,*bounds) is not None:candidates.append(component_family(component))
         hits={};opaque_case=float('inf')
         for mesh in self.scene.meshes:
             component='case' if mesh.component=='panel' else mesh.component
-            if component not in candidates or mesh.name.startswith('style-') or not self._visible(mesh,focus,state.get('inspection_cutaway',False)):continue
+            if (component not in candidates or mesh.name.startswith('style-') or not self._visible(
+                    mesh,focus,state.get('inspection_cutaway',False),state.get('hide_gpu_power',False),state.get('show_psu',False))):continue
             target=getattr(mesh,'part_id','') or component
-            shift=self._shift(mesh,state['exploded']);vertices=mesh.vertices
+            shift=self._shift(mesh,state['exploded'],state.get('gpu_offset'));vertices=mesh.vertices
             points=[posed_point(mesh,vertices[n:n+3],shift,state['phase']) for n in range(0,len(vertices),6)]
             for n in range(0,len(points),3):
                 hit=ray_triangle(origin,direction,*points[n:n+3])
@@ -512,11 +537,11 @@ class AssemblyRenderer:
             return component if distance<=opaque_case+1e-7 else 'case'
         return 'case' if 'case' in hits else ''
 
-    def _draw_part(self,row,projection,view,exploded,phase,*,mode=GL_TRIANGLES,tone=None):
+    def _draw_part(self,row,projection,view,exploded,phase,*,mode=GL_TRIANGLES,tone=None,gpu_offset=None):
         mesh,start,count=row
         policy=self._mesh_policies.get(id(mesh),self.policy)
         model=QMatrix4x4();x,y,z=mesh.position
-        shift=self._shift(mesh,exploded);x+=shift[0];y+=shift[1];z+=shift[2]
+        shift=self._shift(mesh,exploded,gpu_offset);x+=shift[0];y+=shift[1];z+=shift[2]
         model.translate(x,y,z)
         if mesh.rotor:model.rotate(mesh_phase(mesh,phase)*mesh.direction,*mesh.axis)
         self.program.setUniformValue('matrix',projection*view*model)
@@ -557,6 +582,8 @@ class AssemblyRenderer:
         self._materials={};self._frame_effect=None;self._shadow_key=None;self._shadow_parameters=None
         self._mesh_policies={};self._preview_light_tones={};self._frame_effect_samples={};self._frame_shade=None
         self._cutaway_hidden=frozenset()
+        self._psu_cover_ids=frozenset()
+        self._gpu_power_ids=frozenset()
 
 
 class AssemblyViewport(QOpenGLWidget):
@@ -571,6 +598,7 @@ class AssemblyViewport(QOpenGLWidget):
     sceneChanged=Signal()
     focusChanged=Signal(str)
     componentSelected=Signal(str)
+    gpuAssemblyChanged=Signal()
 
     def __init__(self,parent=None):
         super().__init__(parent)
@@ -585,6 +613,8 @@ class AssemblyViewport(QOpenGLWidget):
         self._cpu_tach_usable=False
         self._real_cpu_rotor_parts=()
         self._demo=False;self._demo_phase=0.
+        self._gpu_demo_phase=0.
+        self._gpu_insertion=GpuInsertion();self._gpu_plan=insertion_plan(self._scene)
         self._fan_expiry=0.
         self._effect=SelectionEffect();self._effect_active=False;self._clock_active_state=False
         self._motion=True;self._selection_effects=True
@@ -593,6 +623,7 @@ class AssemblyViewport(QOpenGLWidget):
         self._pointer=None;self._error='';self._closed=False
         self._transparent_background=False
         self._inspection_cutaway=False
+        self._show_psu=False
 
     @property
     def scene(self):return self._scene
@@ -614,9 +645,12 @@ class AssemblyViewport(QOpenGLWidget):
     def set_scene(self,spec):
         scene=self._scene_cache.build(spec)
         self.set_inspection_cutaway(spec.get('inspection_cutaway',False))
+        self.set_show_psu(spec.get('show_psu',False))
         if scene==self._scene:return
         self._effect.cancel()
+        self._gpu_insertion.reset()
         self._scene=scene;self._pending=True
+        self._gpu_plan=insertion_plan(scene);self.gpuAssemblyChanged.emit()
         self._cpu_tach_usable=scene.metadata.get('cooling',{}).get('cpu_fan_tach_usable') is True
         self._real_cpu_rotor_parts=tuple(scene.metadata.get('cooling',{}).get('real_cpu_rotor_parts') or ())
         if ':' in self._selected and not any(getattr(mesh,'part_id','')==self._selected for mesh in scene.meshes):
@@ -663,6 +697,25 @@ class AssemblyViewport(QOpenGLWidget):
         self._update_animation_state()
         if canceled:self.update()
 
+    def gpu_insertion_state(self):
+        state=dict(getattr(self,'_gpu_plan',{}))
+        motion=getattr(self,'_gpu_insertion',None)
+        state.update(active=bool(motion and motion.active),progress=motion.progress if motion else 0.,
+                     target=motion.target if motion else 0.)
+        if getattr(self,'_exploded',False):state.update(available=False,reason='请先关闭展开组件，再演示显卡插拔。')
+        elif getattr(self,'_focus','all') not in ('all','gpu','gpu:0'):
+            state.update(available=False,reason='请先切换到整机或显卡视图。')
+        elif not getattr(self,'_motion',True):state.update(available=False,reason='动效已关闭。')
+        return state
+
+    def preview_gpu_insertion(self,removed=True):
+        """A finite slot-direction demonstration, never a hardware operation."""
+        if (self._closed or self._error or not self.isVisible() or self.window().isMinimized()
+                or not self.gpu_insertion_state().get('available')):return False
+        if not self._gpu_insertion.start(removed is True):return False
+        self._renderer._pick_state=None
+        self._update_animation_state();self.gpuAssemblyChanged.emit();self.update();return True
+
     def set_selection_effects_enabled(self,enabled):
         self._selection_effects=enabled is True
         canceled=self._effect.cancel() if not self._selection_effects else False
@@ -689,10 +742,15 @@ class AssemblyViewport(QOpenGLWidget):
         if not self._active:return False
         elapsed=number(elapsed_ms,0,0,136)
         if elapsed<=0:return False
-        if self._fan_available:self._phase=(self._phase+elapsed*self._rpm*360/(60000*120))%360
+        gpu=getattr(self,'_gpu_insertion',None)
+        gpu_paused=bool(gpu and (gpu.active or gpu.progress>0))
+        if self._fan_available and not gpu_paused:self._phase=(self._phase+elapsed*self._rpm*360/(60000*120))%360
         if getattr(self,'_cpu_tach_usable',False) and getattr(self,'_cpu_available',False):
             self._cpu_phase=(self._cpu_phase+elapsed*self._cpu_rpm*360/(60000*120))%360
-        if getattr(self,'_demo',False):self._demo_phase=(self._demo_phase+elapsed*1200*360/(60000*120))%360
+        if getattr(self,'_demo',False):
+            previous=self._demo_phase
+            self._demo_phase=(self._demo_phase+elapsed*1200*360/(60000*120))%360
+            if not gpu_paused:self._gpu_demo_phase=(getattr(self,'_gpu_demo_phase',previous)+elapsed*1200*360/(60000*120))%360
         return True
 
     def advance_fans(self,elapsed_ms):
@@ -704,12 +762,18 @@ class AssemblyViewport(QOpenGLWidget):
         """Advance one shared bounded tick; RPM absence does not block ink FX."""
         fan_changed=AssemblyViewport._step_fans(self,elapsed_ms)
         effect_changed=self._effect.advance(elapsed_ms) if self._effect_active else False
+        gpu=getattr(self,'_gpu_insertion',None)
+        was_active=bool(gpu and gpu.active)
+        insertion_changed=gpu.advance(elapsed_ms) if gpu and was_active else False
+        if insertion_changed:self._renderer._pick_state=None
         self._update_animation_state()
-        if fan_changed or effect_changed:self.update()
-        return fan_changed or effect_changed
+        if was_active and not gpu.active:self.gpuAssemblyChanged.emit()
+        if fan_changed or effect_changed or insertion_changed:self.update()
+        return fan_changed or effect_changed or insertion_changed
 
     def set_exploded(self,enabled):
-        if self._exploded!=(enabled is True):self._exploded=enabled is True;self.update()
+        if self._exploded!=(enabled is True):
+            self._exploded=enabled is True;self._update_animation_state();self.update()
 
     def set_inspection_cutaway(self,enabled):
         """Change only draw/pick visibility; keep the uploaded physical scene."""
@@ -720,6 +784,12 @@ class AssemblyViewport(QOpenGLWidget):
         # cover visibility. The next regular draw restores the same camera ray.
         self._renderer._pick_state=None
         self.update()
+
+    def set_show_psu(self,enabled):
+        """Temporarily remove only a real PSU cover; never rebuild hardware."""
+        enabled=enabled is True
+        if getattr(self,'_show_psu',False)==enabled:return
+        self._show_psu=enabled;self._renderer._pick_state=None;self.update()
 
     def set_dark(self,enabled):
         if self._dark!=(enabled is True):self._dark=enabled is True;self.update()
@@ -761,8 +831,14 @@ class AssemblyViewport(QOpenGLWidget):
     def _update_animation_state(self):
         visible=bool(not self._closed and not self._error and self.isVisible() and not self.window().isMinimized())
         motion=getattr(self,'_motion',True)
+        insertion=getattr(self,'_gpu_insertion',None)
+        if insertion and (not visible or not motion or self._exploded or self._focus not in ('all','gpu','gpu:0')):
+            if insertion.reset():
+                self._renderer._pick_state=None;self.gpuAssemblyChanged.emit();self.update()
+        gpu_paused=bool(insertion and (insertion.active or insertion.progress>0))
         def eligible(mesh):
             if not mesh.rotor or not AssemblyRenderer._selected(mesh,self._focus):return False
+            if mesh.component=='gpu' and gpu_paused:return False
             if getattr(self,'_demo',False):return True
             if mesh.component=='gpu':return self._fan_available and self._rpm>0 and time.monotonic()<=self._fan_expiry
             if mesh.component=='cooler':return (getattr(mesh,'part_id','') in getattr(self,'_real_cpu_rotor_parts',())
@@ -776,7 +852,7 @@ class AssemblyViewport(QOpenGLWidget):
             if (not visible or not motion or not self._selection_effects
                     or self._focus!='all' and self._focus not in (effect.component,component_family(effect.component))):effect.cancel()
             self._effect_active=bool(effect.active and visible and motion and self._selection_effects)
-        combined=active or getattr(self,'_effect_active',False)
+        combined=active or getattr(self,'_effect_active',False) or bool(insertion and insertion.active and visible and motion)
         if combined!=getattr(self,'_clock_active_state',False):
             self._clock_active_state=combined;self.animationActiveChanged.emit(combined)
 
@@ -794,11 +870,16 @@ class AssemblyViewport(QOpenGLWidget):
             ratio=self.devicePixelRatioF()
             phase=self._phase
             if hasattr(self,'_cpu_phase'):
-                phase=({key:self._demo_phase for key in ('gpu','cooler','fans','psu')} if self._demo
+                phase=(dict(gpu=getattr(self,'_gpu_demo_phase',self._demo_phase),
+                            **{key:self._demo_phase for key in ('cooler','fans','psu')}) if self._demo
                        else dict(gpu=self._phase,**{key:self._cpu_phase for key in self._real_cpu_rotor_parts}))
             options=dict(yaw=self._yaw,pitch=self._pitch,zoom=self._zoom,exploded=self._exploded,
                          phase=phase,dark=self._dark,focus=self._focus)
             if getattr(self,'_inspection_cutaway',False):options['inspection_cutaway']=True
+            if getattr(self,'_show_psu',False):options['show_psu']=True
+            insertion=getattr(self,'_gpu_insertion',None)
+            if insertion and (insertion.active or insertion.progress>0):
+                options.update(gpu_offset=insertion.offset(self._gpu_plan),hide_gpu_power=True,inspection_cutaway=True)
             if self._transparent_background:options['transparent_background']=True
             if getattr(self,'_selected',''):options['selected']=self._selected
             effect=getattr(self,'_effect',None)

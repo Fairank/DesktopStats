@@ -196,9 +196,12 @@ ScrollView {
                     onPicked:selected=>stats.changeAssembly("lighting_preview",selected)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("展开组件");note:ui.t("将硬件分开，查看机箱内部布局。")
                 Toggle {checked:root.config.exploded===true;onToggled:stats.changeAssembly("exploded",checked)}}
-            SettingRow {Layout.fillWidth:true;label:ui.t("内部检视");note:ui.t("隐藏外盖与电源罩以查看内部，保留完整硬件与安装检查。")
+            SettingRow {Layout.fillWidth:true;label:ui.t("内部检视");note:ui.t("隐藏外盖查看内部；电源仓由“展示电源”单独控制。")
                 Toggle {objectName:"assemblyInspectionCutawayToggle";checked:root.config.inspection_cutaway===true
                     onToggled:stats.changeAssembly("inspection_cutaway",checked)}}
+            SettingRow {Layout.fillWidth:true;label:ui.t("展示电源");note:ui.t("有电源仓时临时移开遮罩；开放式机箱仍按实际布局显示。")
+                Toggle {objectName:"assemblyShowPsuToggle";checked:root.config.show_psu===true
+                    onToggled:stats.changeAssembly("show_psu",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风扇随转速转动");note:ui.t("仅在三维视图可见且转速有效时运行。")
                 Toggle {checked:root.config.fan_animation===true;onToggled:stats.changeAssembly("fan_animation",checked)}}
             SettingRow {Layout.fillWidth:true;label:ui.t("风格特效");note:ui.t("选择部件时短暂播放，结束后停止。")
