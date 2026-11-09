@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 114894,
-      "sha256": "e24a855701b0768c2cfa4cd5dc3ce1e4a41c59d50d87ab209402bd40ab9d5dbe"
+      "bytes": 116536,
+      "sha256": "5df3fa1df0b7b8d653d34a87d40b19b0d0f933609fabb98bb5c97e2edba6d198"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1644,8 +1644,8 @@
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 142180,
-      "sha256": "317316f2f1ec3c96b71c98babb06dd0b355eb76df4bec2ea383ac0d8254b62ae"
+      "bytes": 144682,
+      "sha256": "c01d9acfd9f89df2c0f30c58d24dbad5f17fad81c0790fa29e9303ee0b461911"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",
