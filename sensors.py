@@ -36,7 +36,9 @@ ASUS_RETRY_SECONDS = 60.0
 NVML_RETRY_SECONDS = 5.0
 NVML_GPU_TARGETS = frozenset(map(str, range(16)))
 GPU_CARD_TACH_FIELDS = frozenset(("gpu_fan_rpm", "gpu_fan_rpm_source", "gpu_fan_rpm_semantics",
-                                "gpu_fan_rpm_scope", "gpu_fan_rpm_timestamp", "gpu_fans"))
+                                "gpu_fan_rpm_scope", "gpu_fan_rpm_timestamp", "gpu_fans",
+                                "gpu_fan_rpm_capture_monotonic", "gpu_fan_rpm_capture_sequence",
+                                "gpu_fan_rpm_provider_epoch"))
 MAX_LOGICAL_PROCESSORS = 4096
 CPU_LOGICAL_API = "psutil.cpu_percent(percpu=True)"
 _NVML_CLEANUP_RETAINERS = set()
@@ -421,7 +423,10 @@ class Nvidia:
         channels["gpu_fan_rpm"] = status
         result.update(gpu_fans=reading.get("fans", []), gpu_fan_rpm_source=status["source"],
                       gpu_fan_rpm_semantics=status["semantics"], gpu_fan_rpm_scope="card",
-                      gpu_fan_rpm_timestamp=status["timestamp"])
+                      gpu_fan_rpm_timestamp=status["timestamp"],
+                      gpu_fan_rpm_capture_monotonic=status.get("capture_monotonic"),
+                      gpu_fan_rpm_capture_sequence=status.get("capture_sequence"),
+                      gpu_fan_rpm_provider_epoch=status.get("provider_epoch"))
         if reading["rpm"] is not None:
             result["gpu_fan_rpm"] = reading["rpm"]
 

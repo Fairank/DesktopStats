@@ -354,14 +354,17 @@ def _gpu_detail(meshes,spec,level):
         from assembly_geometry import known_fan_profiles
         fan_rows=[dict(profile=p) for p in known_fan_profiles(appearance)]
     observed_rear=(appearance.get('id')=='asus-astral-5090' and appearance.get('fan_count')==4 and backplate is True)
-    paint_metadata={};paint_vertices=()
+    paint_metadata={};paint_vertices=();observed_front_cutouts=()
+    if appearance.get('id')=='msi-n480gtx-m2d15':
+        from assembly_gpu_exterior053 import front_cutouts
+        observed_front_cutouts=front_cutouts(appearance,length,width)
     if not observed_rear:
         from assembly_gpu_panels051 import partition
         polygons=[]
         for row in (gpu.get('detail_polygons') or ())[:6]:
             points=row.get('points') if isinstance(row,dict) else row
             polygons.append(unit_polygon(points,length,width,margin=.3))
-        paint_vertices,paint_metadata=partition(tuple(polygons),holes,.3,segments=segments)
+        paint_vertices,paint_metadata=partition(tuple(polygons),holes,.3,segments=segments,front_cutouts=observed_front_cutouts)
     rear_u=(589.-45.)/659.;rear_v=(370.-238.)/256.
     rear_radius=min(105./659.*length,105./256.*width)
     rear_hole=((rear_u-.5)*length,(.5-rear_v)*width,rear_radius*1.005)
@@ -500,7 +503,7 @@ def _gpu_detail(meshes,spec,level):
                       if (polygon:=unit_polygon(points,length,width)))
     body=hollow_cover(outer,holes,thickness,segments=segments,
         open_front=appearance.get('fan_count')==0,edge_windows=edge_windows,edge_recesses=edge_recesses,
-        front_cutouts=shell_holes)
+        front_cutouts=(*shell_holes,*observed_front_cutouts))
     body=gpu_plane(clear_port_tunnels(body,port_holes,length))
     revised=[replace(mesh,vertices=body) if mesh.name=='gpu-shroud' else mesh for mesh in revised]
     # Only a documented backplate receives reference fasteners. They do not
@@ -519,6 +522,14 @@ def _gpu_detail(meshes,spec,level):
     elif appearance.get('id') in ('msi-n260gtx-lightning','gigabyte-fx5200-n52128d','gigabyte-fx5200-n52128d-rev10-reference'):
         from assembly_gpu_legacy052 import refine
         completed,exterior=refine(completed,spec,level)
+        fin_count=exterior.get('fin_sampling_count',fin_count)
+    if appearance.get('id') in ('msi-n480gtx-m2d15','nvidia-gtx780ti-reference'):
+        from assembly_gpu_exterior053 import refine
+        completed,observed_exterior=refine(completed,spec,level)
+        # The outer metadata owns this same sampling flag. Keep the helper's
+        # direct contract, but consume its duplicate before keyword expansion.
+        observed_exterior.pop('fin_count_is_sampling',None)
+        exterior.update(observed_exterior)
         fin_count=exterior.get('fin_sampling_count',fin_count)
     return completed,dict(heatsink_fins=fin_count,ports=len(ports),port_types=tuple(ports),
         connector_pads=contact_count,backplate=backplate,layout_schematic=True,pcb_dimensions_schematic=True,

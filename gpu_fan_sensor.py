@@ -22,6 +22,7 @@ https://github.com/NVIDIA/nvapi/blob/main/nvapi_lite_common.h
 
 import copy
 import ctypes as c
+from itertools import count
 import os
 import time
 from pathlib import Path
@@ -37,6 +38,10 @@ MAX_CACHE = 16  # Same bound as the existing NVML device enumeration.
 MAX_FAN_CHANNELS = 8
 NOT_SUPPORTED = frozenset((-3, -104))
 HANDLE_INVALIDATED = -10
+# Process-local logical generations, not a hardware identifier or persisted ID.
+# Each joined device slot gets a distinct epoch. A retired/replaced owner or
+# invalidated handle can never reuse its old (epoch, sequence) capture identity.
+_CAPTURE_EPOCHS = count(1)
 
 
 class FanCoolerStatusItem(c.Structure):
@@ -176,6 +181,7 @@ class Tachometer:
         self._setup_error = None
         self._setup_retry = 0.0
         self._cache = {}
+        self._capture_state = {}
         self._closed = False
 
     @staticmethod
@@ -183,7 +189,8 @@ class Tachometer:
                 semantics="measured", fans=None, private_api=False, aggregate=""):
         status = dict(state=state, api=api, status_code=code, unit="RPM",
                       source=source, semantics=semantics, scope="card", private_api=private_api,
-                      timestamp=time.time())
+                      timestamp=time.time(), capture_monotonic=None,
+                      capture_sequence=None, provider_epoch=None)
         if reason:
             status["reason"] = reason
         if aggregate:
@@ -191,6 +198,28 @@ class Tachometer:
         rows = [dict(row, source=source, semantics=semantics, timestamp=status["timestamp"],
                      scope="cooler_channel") for row in fans or ()]
         return dict(rpm=rpm, status=status, fans=rows)
+
+    def _capture_result(self, result, identity=None, *, completed_at=None, successful=False):
+        """Attach existing-query completion, never refresh a cached sample.
+
+        Device identities are already provided by the existing unique PCI join;
+        they are not exported. Current private-API cooler IDs keep their driver
+        channel semantics and do not become physical/front-view fan identities.
+        """
+        previous = self._capture_state.get(identity)
+        epoch = previous[0] if previous is not None else None
+        sequence = None
+        if successful:
+            epoch, old_sequence = previous if previous is not None else (next(_CAPTURE_EPOCHS), 0)
+            sequence = old_sequence + 1
+            self._capture_state[identity] = (epoch, sequence)
+        status = result["status"]
+        status.update(capture_monotonic=completed_at if successful else None,
+                      capture_sequence=sequence, provider_epoch=epoch)
+        for row in result.get("fans", ()):
+            row.update(capture_monotonic=status["capture_monotonic"],
+                       capture_sequence=sequence, provider_epoch=epoch)
+        return result
 
     @classmethod
     def _failure(cls, error):
@@ -213,22 +242,23 @@ class Tachometer:
         """An actual NVML handle change invalidates the native identity join."""
         self._devices = None
         self._cache.clear()
+        self._capture_state.clear()
         self._setup_error, self._setup_retry = None, 0.0
 
     def read(self, identity):
         if self._closed:
-            return self._result("closed")
+            return self._capture_result(self._result("closed"))
         if (not isinstance(identity, tuple) or len(identity) != 3
                 or any(type(part) is not int for part in identity)
                 or identity[0] != 0 or not 0 <= identity[1] <= 255
                 or not 0 <= identity[2] <= 31):
-            return self._result("identity_unavailable")
+            return self._capture_result(self._result("identity_unavailable"))
         now = time.monotonic()
         cached = self._cache.get(identity)
         if cached is not None and now < cached[0]:
             return copy.deepcopy(cached[1])
         if self._setup_error is not None and now < self._setup_retry:
-            return copy.deepcopy(self._setup_error)
+            return self._capture_result(copy.deepcopy(self._setup_error), identity)
         if self._devices is None:
             try:
                 if self._backend is None:
@@ -238,14 +268,15 @@ class Tachometer:
                         # A missing optional driver DLL is stable for this owner.
                         self._setup_error = self._result("dll_unavailable")
                         self._setup_retry = float("inf")
-                        return copy.deepcopy(self._setup_error)
+                        return self._capture_result(copy.deepcopy(self._setup_error), identity)
                 self._devices = self._backend.devices()
             except (NvapiError, OSError, AttributeError, RuntimeError, ValueError) as error:
                 self._setup_error, delay = self._failure(error)
                 self._setup_retry = time.monotonic() + delay
-                return copy.deepcopy(self._setup_error)
+                return self._capture_result(copy.deepcopy(self._setup_error), identity)
             self._setup_error, self._setup_retry = None, 0.0
         handle = self._devices.get(identity[1:])
+        successful_capture = False
         if handle is None:
             result = self._result("identity_unavailable", reason="no_unique_pci_match")
             delay = float("inf")
@@ -258,6 +289,7 @@ class Tachometer:
                 if type(value) not in (int, float) or not 0 <= value < 0xFFFFFFFF:
                     raise ValueError("Invalid tachometer reading")
                 result = self._result(facts.pop("state", "available"), rpm=value, code=0, **facts)
+                successful_capture = result["status"]["state"] == "available"
                 delay = INTERVAL
             except (NvapiError, OSError, AttributeError, RuntimeError, ValueError) as error:
                 result, delay = self._failure(error)
@@ -266,13 +298,21 @@ class Tachometer:
                     self.invalidate()
                     self._setup_error, self._setup_retry = result, time.monotonic() + RETRY_SECONDS
         if len(self._cache) >= MAX_CACHE and identity not in self._cache:
-            self._cache.pop(next(iter(self._cache)))
-        self._cache[identity] = (time.monotonic() + delay, result)
+            retired = next(iter(self._cache))
+            self._cache.pop(retired)
+            self._capture_state.pop(retired, None)
+        # Reuse the existing cache-completion clock read, not another poll or
+        # clock query. It occurs after the actual driver reply and validation.
+        completed_at = time.monotonic()
+        result = self._capture_result(result, identity, completed_at=completed_at,
+                                      successful=successful_capture)
+        self._cache[identity] = (completed_at + delay, result)
         return copy.deepcopy(result)
 
     def close(self):
         self._closed = True
         self._cache.clear()
+        self._capture_state.clear()
         self._devices = None
         if self._backend is not None:
             self._backend.close()

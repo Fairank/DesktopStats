@@ -11,7 +11,39 @@ MAX_FRAGMENTS=2048
 MAX_PANEL_TRIANGLES=8192
 
 
-def partition(polygons,fan_holes,depth,*,segments=20):
+def _convex_cutout(poly):
+    """Accept only one finite, simple convex source cutout without a close point.
+
+    The existing half-plane subtractor requires convex cutters. A generous
+    arithmetic domain (not a manufactured GPU size) bounds its cross products.
+    Every vertex must lie on/left of every CCW edge; local-turn checks alone
+    would miss a self-intersecting pentagram. Equal points/zero edges are invalid.
+    """
+    from math import isfinite
+    if (not isinstance(poly,(tuple,list)) or not 3<=len(poly)<=64
+            or not all(isinstance(p,(tuple,list)) and len(p)==2
+                and all(type(v) in (int,float) and -1e6<=v<=1e6 and isfinite(v) for v in p) for p in poly)):
+        raise ValueError('GPU source cutout requires bounded finite polygon points')
+    points=tuple(tuple(p) for p in poly)
+    if len(set(points))!=len(points):
+        raise ValueError('GPU source cutout has repeated point or zero edge')
+    from assembly_detail import _area
+    area=_area(points)
+    if not isfinite(area) or abs(area)<1e-8:
+        raise ValueError('Invalid GPU source cutout polygon area')
+    if area<0:points=tuple(reversed(points))
+    for a,b in zip(points,(*points[1:],points[0])):
+        dx,dy=b[0]-a[0],b[1]-a[1]
+        if dx==0 and dy==0:
+            raise ValueError('GPU source cutout has zero edge')
+        for p in points:
+            cross=dx*(p[1]-a[1])-dy*(p[0]-a[0])
+            if not isfinite(cross) or cross<0:
+                raise ValueError('GPU source cutout must be simple and convex')
+    return points
+
+
+def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=()):
     """Per-source-index meshes and explicit conservative budget omissions.
 
     Unsupported/over-budget lower paint is omitted, exposing the existing
@@ -29,11 +61,16 @@ def partition(polygons,fan_holes,depth,*,segments=20):
         cap_triangles.append(triangles)
         source_edges.append(poly if poly and _area(poly)>0 else tuple(reversed(poly or ())))
     fan_polys=[circle(*hole,segments) for hole in fan_holes]
+    # Fixed source-authored openings apply to the face AND every paint layer;
+    # default empty preserves the original circle-only construction exactly.
+    if len(front_cutouts)>8:raise ValueError('GPU source cutouts exceeded budget')
+    cutout_polys=[_convex_cutout(poly) for poly in front_cutouts]
+    aperture_polys=(*fan_polys,*cutout_polys)
     values=[];omitted=[];partitioned=0
     for index,poly in enumerate(polygons):
         if not cap_triangles[index]:values.append(());continue
         later=[tri for group in cap_triangles[index+1:] for tri in group]
-        cuts=(*fan_polys,*later)
+        cuts=(*aperture_polys,*later)
         if len(cuts)>MAX_CUTTERS:
             values.append(());omitted.append(dict(index=index,reason='source_partition_cutters_exceeded'));continue
         if any(p and not ts for p,ts in zip(polygons[index+1:],cap_triangles[index+1:])):
@@ -53,7 +90,7 @@ def partition(polygons,fan_holes,depth,*,segments=20):
                 _tri(out,(*a,z),(*b,z),(*c,z));_tri(out,(*c,-z),(*b,-z),(*a,-z))
         # Walls use only the real source perimeter, circular fan mouths and
         # later polygon perimeters. Triangulation diagonals aren't hardware.
-        boundaries=(*fan_polys,*(p for p in source_edges[index+1:] if p))
+        boundaries=(*aperture_polys,*(p for p in source_edges[index+1:] if p))
         for a,b in zip(source_edges[index],(*source_edges[index][1:],source_edges[index][0])):
             for first,last in _material_wall_segments(a,b,poly,boundaries,True):
                 _quad(out,(*first,-z),(*last,-z),(*last,z),(*first,z))

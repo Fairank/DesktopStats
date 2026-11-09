@@ -695,6 +695,11 @@ SOURCES = (
     'model-packs/v047/DesktopStats-gpu-block-brand-alphacool-047-1.0.0.dspack',
     'model-packs/v047/DesktopStats-gpu-block-brand-corsair-047-1.0.0.dspack',
     'model-packs/v047/DesktopStats-gpu-block-brand-watercool-047-1.0.0.dspack',
+    'assembly_gpu_exterior053.py',
+    'tests/test_gpu_capture053.py',
+    'tests/test_gpu_exterior053.py',
+    'tests/test_gpu_cutouts053.py',
+    'docs/DEVELOPMENT053.md',
 )
 
 

@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 118757,
-      "sha256": "f55a944d2ce380287e3776da18fe100afec98e3cab4f45ec55cca15649885b68"
+      "bytes": 119449,
+      "sha256": "c85b872e2c9a1736ea1d702848da9b566f4b07d66daad12a2e109b781dc9a844"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -179,8 +179,8 @@
     },
     {
       "path": "assembly_detail.py",
-      "bytes": 45820,
-      "sha256": "0d688f412dbbb4e7b8fbab48d0f5bedd49e559557f2d1dba1f0c77cc5bc71cf6"
+      "bytes": 46610,
+      "sha256": "27667c74190e9becb61aa3220d51b8a3b5d722471c4e0b1b7188062d3f575a08"
     },
     {
       "path": "assembly_effects.py",
@@ -213,6 +213,11 @@
       "sha256": "6e6313ee4ef9d0361bf69a7fe1431627d62e46f0df649921a0ba3b8d3e11c255"
     },
     {
+      "path": "assembly_gpu_exterior053.py",
+      "bytes": 5449,
+      "sha256": "a0600fc917dee91af944673abd246e0c13b82aaa3eea0c31e4a296904896b27d"
+    },
+    {
       "path": "assembly_gpu_insertion049.py",
       "bytes": 9280,
       "sha256": "9cb2d09cb5951a994abd3965740741425e1457b05bd2a429267bc44a3937cfa8"
@@ -224,8 +229,8 @@
     },
     {
       "path": "assembly_gpu_panels051.py",
-      "bytes": 4028,
-      "sha256": "57d89490ada87bd6a27d9c72c24a740c8c510072a835606e0a7302f513a40fe8"
+      "bytes": 5963,
+      "sha256": "0c90d2ec2d1a089387dec533c67c437eba4952098340b8b8e0b88dfd7f2870d7"
     },
     {
       "path": "assembly_gpu_rotor051.py",
@@ -1543,6 +1548,11 @@
       "sha256": "ad623b6a9a704671f2fd173c14c77595161507c62ca47fd8c936bb7bc7370023"
     },
     {
+      "path": "docs/DEVELOPMENT053.md",
+      "bytes": 7672,
+      "sha256": "79094817a9193f3392ad573222a9e9adff9288e91db83b817955e5c2e0fd4e99"
+    },
+    {
       "path": "docs/GPU_BLOCKS047.md",
       "bytes": 6283,
       "sha256": "2a1dcbefecb1b6a263418bc500210edf6ecd46f3727a674e9ecd46b87f5129e2"
@@ -1724,8 +1734,8 @@
     },
     {
       "path": "gpu_fan_sensor.py",
-      "bytes": 13303,
-      "sha256": "001abaad14fe830de8eee00adf399f72606216cf4479b47fa41e8a7bac4bc0c7"
+      "bytes": 15647,
+      "sha256": "d088da5f59244bf0c3fc66d6d3b40ea0db9922833a3bf244e08caa75c6a48d2c"
     },
     {
       "path": "gpu_verified046.py",
@@ -3219,8 +3229,8 @@
     },
     {
       "path": "sensors.py",
-      "bytes": 55730,
-      "sha256": "8a5aadd3193932f11da0925f56f971d86e95f5e023730151f78b6f1ce6442d74"
+      "bytes": 56136,
+      "sha256": "e52e254e96fc8e4ff16a56321ad11dc147a52e733936660957333d43a47418b7"
     },
     {
       "path": "settings_acrylic_material.py",
@@ -3833,9 +3843,19 @@
       "sha256": "022ec0137a9e6420e4288a5bbab11f55dc265b3c8868dc188516338df9351e91"
     },
     {
+      "path": "tests/test_gpu_capture053.py",
+      "bytes": 11545,
+      "sha256": "abf99645b66913fe122205d6d8f19726243916194880d8ec4ffedaec39316665"
+    },
+    {
       "path": "tests/test_gpu_cover_apertures046.py",
       "bytes": 20002,
       "sha256": "6c8291dd987c5ba733d12f9a713d26ce8e33b94892765e5602e7f53a79588ce9"
+    },
+    {
+      "path": "tests/test_gpu_cutouts053.py",
+      "bytes": 5451,
+      "sha256": "7989b4a090522fb44d172546ee334d88be1f2d80f69692e79ca9dcd985d4146b"
     },
     {
       "path": "tests/test_gpu_evenodd046.py",
@@ -3851,6 +3871,11 @@
       "path": "tests/test_gpu_exterior049.py",
       "bytes": 20558,
       "sha256": "9a0e01efb1ce71f30a8ddb01043377e04f70204d1057c6bcecc147dc02d7ff46"
+    },
+    {
+      "path": "tests/test_gpu_exterior053.py",
+      "bytes": 10996,
+      "sha256": "752cf57ac76769acc74eef1814b1f5388dd8b53253a4ccc5c2739dcb5112fcde"
     },
     {
       "path": "tests/test_gpu_fan_feedback.py",
@@ -4924,8 +4949,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 36572,
-      "sha256": "ef1e255d64d14fd7f76ab5615570e4a373e99dd752a90fbb904f9d2fbe68c3b2"
+      "bytes": 36746,
+      "sha256": "65a3e2ada302bbc970ff49416b1b694eb3adaeb2befe7286d349617153c5f5ac"
     },
     {
       "path": "tools/build_collector.py",
