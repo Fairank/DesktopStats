@@ -1,0 +1,296 @@
+{
+  "schema": 1,
+  "scope": "Offline decoded accessor/finite/index validation only, preserving known source defects; not render, dimensional, assembly or mechanical acceptance.",
+  "models": [
+    {
+      "file": "models/cpu.glb",
+      "source_sha256": "98f5a17c4c8a7130f68fef110088312fd4edc77f84c0fdbfdb14f2eed81a4818",
+      "decode_report_sha256": "c0af84c05d7d2fdcfd12cb530d5cf02970b261ff664d9103b1a0bbc84616b67b",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 426,
+      "vertex_records": 655,
+      "degenerate_or_collinear_triangles": 0,
+      "face_normal_opposed_local": 0,
+      "face_normal_opposed_world": 0,
+      "world_bounds_reference_units": {
+        "min": [
+          -1.5683220028877258,
+          -0.25611693365088706,
+          -1.6156320571899414
+        ],
+        "max": [
+          1.5941640734672546,
+          -0.02535312413785805,
+          1.546854019165039
+        ]
+      },
+      "world_dimensions_reference_units": [
+        3.1624860763549805,
+        0.230763809513029,
+        3.1624860763549805
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    },
+    {
+      "file": "models/gpu.glb",
+      "source_sha256": "027b9135933e71839572007c5cd5208a137da598ab8d122f64bacaaf3682522b",
+      "decode_report_sha256": "9f3104b4875981b445ddd1d27b5c533227514282a7c543486843350e6cf5bc8d",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 105530,
+      "vertex_records": 85542,
+      "degenerate_or_collinear_triangles": 37,
+      "face_normal_opposed_local": 84,
+      "face_normal_opposed_world": 84,
+      "world_bounds_reference_units": {
+        "min": [
+          0.09246747008058742,
+          -14.301611050641885,
+          -7.560726479858415
+        ],
+        "max": [
+          4.473929160180029,
+          15.885303844422785,
+          5.257979938098671
+        ]
+      },
+      "world_dimensions_reference_units": [
+        4.381461690099442,
+        30.186914895064668,
+        12.818706417957086
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    },
+    {
+      "file": "models/ram.glb",
+      "source_sha256": "6a8533f4272f540d7213b82e7dd541c07e0c0856ba81d0a70ba6755fe68c63e4",
+      "decode_report_sha256": "94a4d9614b9223be221042ac4f20e6df58835c3a06bd02be6b2ae79e5fdef917",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 36622,
+      "vertex_records": 51926,
+      "degenerate_or_collinear_triangles": 570,
+      "face_normal_opposed_local": 573,
+      "face_normal_opposed_world": 573,
+      "world_bounds_reference_units": {
+        "min": [
+          -0.01647358003202487,
+          0.0008556367913022667,
+          -0.30417313310507116
+        ],
+        "max": [
+          0.016473593070540624,
+          0.22653223534475592,
+          0.3041730804194343
+        ]
+      },
+      "world_dimensions_reference_units": [
+        0.032947173102565494,
+        0.22567659855345365,
+        0.6083462135245055
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    },
+    {
+      "file": "models/cooler.glb",
+      "source_sha256": "723b3a0a238924afb830508d8f4a246b19e58599a329e1313a646f02867a3a0d",
+      "decode_report_sha256": "152d7e951d482087e95689b5f554013228897d891c7c71734cbc79d57a796a70",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 107910,
+      "vertex_records": 198578,
+      "degenerate_or_collinear_triangles": 70,
+      "face_normal_opposed_local": 546,
+      "face_normal_opposed_world": 108,
+      "world_bounds_reference_units": {
+        "min": [
+          -10.581834554672241,
+          0.37905159592628473,
+          -1.9417439699172974
+        ],
+        "max": [
+          -9.096012130379677,
+          2.313867944751072,
+          0.9947257041931152
+        ]
+      },
+      "world_dimensions_reference_units": [
+        1.4858224242925644,
+        1.9348163488247874,
+        2.9364696741104126
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    },
+    {
+      "file": "models/fan.glb",
+      "source_sha256": "6f176d1d32ecc955a4df8869b483d9125b41bb9562997e5b975e2e4a48f5e39b",
+      "decode_report_sha256": "233e314a82a8eb9e9b9f090014ea29c659e83d927fe035d9e6026957dece8dd7",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 4755,
+      "vertex_records": 12978,
+      "degenerate_or_collinear_triangles": 0,
+      "face_normal_opposed_local": 0,
+      "face_normal_opposed_world": 0,
+      "world_bounds_reference_units": {
+        "min": [
+          -1.2842085074437737,
+          -1.2842085074437737,
+          -0.2761558701049718
+        ],
+        "max": [
+          1.2842085074437737,
+          1.2842085074437737,
+          0.2761558701049718
+        ]
+      },
+      "world_dimensions_reference_units": [
+        2.5684170148875474,
+        2.5684170148875474,
+        0.5523117402099436
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    },
+    {
+      "file": "models/psu.glb",
+      "source_sha256": "60aa4b6c959cdc0cde5b99c7979066ac1dcfe24e8cdbe951f061cbec8db65f04",
+      "decode_report_sha256": "e0f30dd76cf10ca7cdbdc4626fbcd89d8057ae0c78bfa2684566b0d713ac7e5c",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 12229,
+      "vertex_records": 17520,
+      "degenerate_or_collinear_triangles": 19,
+      "face_normal_opposed_local": 5,
+      "face_normal_opposed_world": 5,
+      "world_bounds_reference_units": {
+        "min": [
+          -10.138499496355333,
+          -5.218856553302232,
+          -10.92144075657906
+        ],
+        "max": [
+          10.306375589117643,
+          16.71854318257042,
+          11.808066725730896
+        ]
+      },
+      "world_dimensions_reference_units": [
+        20.444875085472976,
+        21.937399735872653,
+        22.729507482309955
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    },
+    {
+      "file": "models/storage.glb",
+      "source_sha256": "6f0657646486fc7eb5cdc4cfc7b7ec2ea8bd767a04123d770340f55e85eaa22a",
+      "decode_report_sha256": "0a75c5b1ce66a539e580d5108b38562273521da0c5d73a532f88a98d2d936097",
+      "decoder_commit": "f0a684f11ead064e176775c9b796f82a55910e92",
+      "decoder_sha256": "10b313edaa0e322b0c1b46443f6c8b186b42139fe1eca189d50c09511d0ebedc",
+      "decode_finite_index_checks_passed": true,
+      "model_modified": false,
+      "triangles": 2038,
+      "vertex_records": 3070,
+      "degenerate_or_collinear_triangles": 4,
+      "face_normal_opposed_local": 1,
+      "face_normal_opposed_world": 1,
+      "world_bounds_reference_units": {
+        "min": [
+          -2.165832232702547,
+          0.00023425648341768925,
+          -0.6002843262971882
+        ],
+        "max": [
+          2.1664373390427816,
+          0.00930061174451429,
+          0.6008835898289382
+        ]
+      },
+      "world_dimensions_reference_units": [
+        4.332269571745329,
+        0.0090663552610966,
+        1.2011679161261264
+      ],
+      "source_units_manufacturer_verified": false,
+      "closed_outward_winding_certified": false,
+      "textures_decoded": false,
+      "renderer_acceptance": false,
+      "fixed_mount_verified": false,
+      "installation_eligible": false,
+      "native_six_style_visual_acceptance": false,
+      "animation_rpm_verified": false,
+      "source_quality_all_green": false
+    }
+  ],
+  "model_count": 7,
+  "source_models_modified": false,
+  "native": false,
+  "Scene": false,
+  "hardware": false,
+  "image_pixels_decoded": false,
+  "all_installation_eligible": false,
+  "triangle_quality_method": "Existing decoder relative double-area/longest-edge-squared <=1e-12; face/mean-normal cosine<-0.25. Counts are observations, not a closed outward-winding proof.",
+  "gpu_animation_boundary": "Stored quaternion shortest-arc samples alias the1500/1200RPM labels to about61/-239RPM; source labels are not verified rotation speed or live telemetry.600label approximately600. No clips were changed.",
+  "source_size_boundary": "Raw model units remain unknown. CustomPc render-fit dimensions300GPU/142RAM/100SSD/80PSU are not authoritative manufacturer dimensions and are not applied here."
+}
