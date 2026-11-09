@@ -1,0 +1,182 @@
+{
+  "record": {
+    "schema": "DesktopStats.optional-data-release.052.1",
+    "source_commit": "f68f1f1dc7488b24b1635ebb17755a12869bacb8",
+    "version": "0.52.0-preview.1",
+    "publisher": "Fairank / Desktop Stats contributors",
+    "files": {
+      "DesktopStats-protected-reference052.zip": {
+        "bytes": 1371262,
+        "sha256": "1e420e2deda84960ad32eefca63bd30d1803372e7839122479fd881a09853944"
+      },
+      "LICENSE": {
+        "bytes": 4563,
+        "sha256": "ffcca38841adb694b6f380647e15f17c446a4d1656fed51a1e2041d064c94cc8"
+      },
+      "LICENSING.md": {
+        "bytes": 8053,
+        "sha256": "4dc5a024f40bce162a6f3c362d935bd4d74bd9e0c2985607c71a4bd3bb7cb1bf"
+      },
+      "NOTICE": {
+        "bytes": 948,
+        "sha256": "4555c6cc1b50172d287bde9bc365875eff578581a9730c1d51763ac0255f73d1"
+      },
+      "README.md": {
+        "bytes": 1796,
+        "sha256": "1e22b54e1b4c52de4aea2da021a95dfa330ddd562fa2eb4cd7829988fd2e9d8b"
+      },
+      "THIRD_PARTY_NOTICES.md": {
+        "bytes": 4992,
+        "sha256": "ccc43eb94f6b338e31e8a323e5fb442ba7a258348a8f226a1e8b4f8aed46188c"
+      },
+      "desktopstats-native-six-atlas052.zip": {
+        "bytes": 1980510,
+        "sha256": "3a7964416823dabcf0e7df9986bb1bc9e40adfac0adf377731dbb73f5190c202"
+      },
+      "h5-assembly-six052-protected.png": {
+        "bytes": 861692,
+        "sha256": "83315473844388000efce1254c019a90179dc012b92b9f2ef236f79442cd1dae"
+      },
+      "h5-assembly-six052-protected.png.watermark.json": {
+        "bytes": 3039,
+        "sha256": "02c9df7213b34ba6d3e417393180cc33371c7204ddf4834c7e1f47ff4596816f"
+      },
+      "h5-gpu-return052-protected.gif": {
+        "bytes": 812954,
+        "sha256": "9ab049c1b5361136fca4d089e35168b87b5a2a5e16def8e1ea9b777b3a83d9e1"
+      },
+      "h5-gpu-return052-protected.gif.watermark.json": {
+        "bytes": 3282,
+        "sha256": "3190c023754c385c382e7eebd0255cdfe1598cc0b77771beb0726e25b1aa06b2"
+      },
+      "h5-ram0-or-pair-return052-protected.gif": {
+        "bytes": 446015,
+        "sha256": "15e190619c5551d7ff2800f4bd1decce281855feebc476279d16fc0606118c3d"
+      },
+      "h5-ram0-or-pair-return052-protected.gif.watermark.json": {
+        "bytes": 3294,
+        "sha256": "3025289c117842d275239f456fac940327b158e521a262b2461ce621978fdeab"
+      },
+      "h5-ram1-return052-protected.gif": {
+        "bytes": 1705134,
+        "sha256": "4b6c4b9c0be3e1233a68ec844d38f6a9e2a306528aa4b1e5d07fac6b8e0e26a2"
+      },
+      "h5-ram1-return052-protected.gif.watermark.json": {
+        "bytes": 3284,
+        "sha256": "cc33433d6d2d681e20057153260520c6ad5cd998333f3ea40d50abc8aac38f27"
+      },
+      "h5-reference-rpm052-protected.gif": {
+        "bytes": 617600,
+        "sha256": "be67469e07da7e40f7520fe165c795d037e622b6dd48599418fcc1971d27d3f9"
+      },
+      "h5-reference-rpm052-protected.gif.watermark.json": {
+        "bytes": 3281,
+        "sha256": "7c5f65e9dc3c99e8a6d4ca7ef29306b8537aec5c77ff9706e51c2336706d8a42"
+      },
+      "helios-assembly-six052-protected.png": {
+        "bytes": 793522,
+        "sha256": "7523d7b3ab9feedb0164917cefd0044d8e98395e78e26f324ae808c8a646fedd"
+      },
+      "helios-assembly-six052-protected.png.watermark.json": {
+        "bytes": 3043,
+        "sha256": "acacb59e593353d6d72a794cf05ce951768f5b77a09702888f54626bd1ee5b05"
+      },
+      "helios-gpu-return052-protected.gif": {
+        "bytes": 599451,
+        "sha256": "7573333a61b5084970a8c09eb4d6c403afa69132dcbbbd4a4ccffc638b30888c"
+      },
+      "helios-gpu-return052-protected.gif.watermark.json": {
+        "bytes": 3287,
+        "sha256": "9c2b13c7c888863221facf37d922e0c01e4468f7aa19141d40f1a4327b3a34f0"
+      },
+      "helios-independent-original052-protected.glb": {
+        "bytes": 8798352,
+        "sha256": "824a66c4a93bb50adaeccef2cebef592ccbd5d2dbe6774bfbb8a593f3c82672a"
+      },
+      "helios-independent-original052-protected.glb.watermark.json": {
+        "bytes": 30973,
+        "sha256": "387438aedac771550b87109d3782cebe8ce5ae7a587852c0b8db2c9ca492f54f"
+      },
+      "helios-ram0-or-pair-return052-protected.gif": {
+        "bytes": 384643,
+        "sha256": "97effcfff1e51201c2b87b3730e198daeb3848f7662b020cdb2733fd3564aa24"
+      },
+      "helios-ram0-or-pair-return052-protected.gif.watermark.json": {
+        "bytes": 3295,
+        "sha256": "0e0b46ff159015b978337e749f816fb68c9ae7317ffc4fe2faabfa101613a870"
+      },
+      "helios-ram1-return052-protected.gif": {
+        "bytes": 404651,
+        "sha256": "1f78f3bea703bd14897816b301715a114364d6261c504f13095a0e46c69d71d8"
+      },
+      "helios-ram1-return052-protected.gif.watermark.json": {
+        "bytes": 3288,
+        "sha256": "3956f0a7ff5a2169256e0432c86c1f24013c3127c02b4fb4b692a33fffa41956"
+      },
+      "helios-reference-rpm052-protected.gif": {
+        "bytes": 416772,
+        "sha256": "eb1b322bbccb6424643b6cbf12ba3fe87786f4ea69607242f0b9b9770630a88f"
+      },
+      "helios-reference-rpm052-protected.gif.watermark.json": {
+        "bytes": 3285,
+        "sha256": "cc799f42366c94afd14789acb40565eed3863da344af9f57498a82afed35ccae"
+      },
+      "public-model-quality052.json": {
+        "bytes": 129388,
+        "sha256": "0a47f9ea27554641eab22915c29d762e25a1043b7b5d18984005fccf6e98f2b1"
+      },
+      "public-summary052.json": {
+        "bytes": 9966,
+        "sha256": "bb9354decee6ae87e52eb82c7102d29885a4f0a88fadaccb9b5c4a4c7f6db2ea"
+      },
+      "publisher-public.json": {
+        "bytes": 412,
+        "sha256": "440e8f917933c691cef09c8eaeebc04ba9d5efa7111a9e7a75c03f9a3a8cdad3"
+      },
+      "widgets-six052-protected.gif": {
+        "bytes": 2182025,
+        "sha256": "182f6a2c002b0450992eecdbe4d63e99e61d59e02e22815e00e940b61f71e53d"
+      },
+      "widgets-six052-protected.gif.watermark.json": {
+        "bytes": 3279,
+        "sha256": "a9084cf17e8dca960712de1d23190a7950f563beb5d842b39c52b0c28de77858"
+      },
+      "widgets-six052-protected.png": {
+        "bytes": 477665,
+        "sha256": "08c73757b3e51c2c0c1399c8e94a9635786cb6e60c6757370f292d69c11ece02"
+      },
+      "widgets-six052-protected.png.watermark.json": {
+        "bytes": 3032,
+        "sha256": "08dfd9b8570141b7325b462c2effc60c811594f0dcf12f113c52ffeb926b4ec7"
+      },
+      "模型说明.txt": {
+        "bytes": 1305,
+        "sha256": "f2a230cdbbb6607d046fd61510bbc618e6b10168a70228c8d942224042283b1f"
+      }
+    },
+    "source_archive_sha256": "ebc2d1de62d7b1e520dfb37ff8894bac1803e157cc855030214ad6a22ad9b375",
+    "styles": [
+      "miniature",
+      "cartoon",
+      "notebook_color",
+      "notebook_line",
+      "sticker",
+      "papercut"
+    ],
+    "original_has_smiley": false,
+    "hidden_marked_assets": 13,
+    "static_atlas_hidden_marked": false,
+    "all_catalog_marked": false,
+    "installed": false,
+    "native_acceptance": false,
+    "all_requirements_complete": false,
+    "mechanical_disassembly_complete": false,
+    "independent_review_sha256": "a4526f383152a78f08e7671ea066ca7dbf3ffc90b37df63f9c2653b88d23662f",
+    "legal_conclusion": false
+  },
+  "signature": {
+    "algorithm": "Ed25519",
+    "key_id": "7055a716d2763fc595eb150e4d2a1c07a965d8ca8a053d3255f93812ee7ef0f7",
+    "signature_base64": "N/dBHHrtGDsDUNZq28cLMLnGLYjhL3GMv3UnkDSkDsj17O5bRiWyslIujQPqxkC/tzQm6ow3WVB3oIJzmy2wCg=="
+  }
+}

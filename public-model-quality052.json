@@ -1,0 +1,4495 @@
+{
+  "schema": 1,
+  "passed": true,
+  "source_commit": "f68f1f1dc7488b24b1635ebb17755a12869bacb8",
+  "owner_summary_sha256": "e772db64af1835ff075652ab5ced7ac683c4dfbffaac16543716ed04b1720d7c",
+  "plan_sha256": "27002c1f48403a8cad0a0f0fd69297304ed35ab4dd3aeb8a986476750742156c",
+  "assets": [
+    {
+      "role": "widgets_six_png",
+      "file": "widgets-six052-protected.png",
+      "bytes": 477665,
+      "sha256": "08c73757b3e51c2c0c1399c8e94a9635786cb6e60c6757370f292d69c11ece02",
+      "original_sha256": "fae70ff1bbbfb7194a59a197da32f14efacbac0082c2b8edb3454f8f8975371c",
+      "receipt_sha256": "08dfd9b8570141b7325b462c2effc60c811594f0dcf12f113c52ffeb926b4ec7",
+      "signature_verified": true,
+      "quality": {
+        "format": "png",
+        "size": [
+          1800,
+          940
+        ],
+        "frames": 1,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 344,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 344
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": false,
+        "durations_cs": null,
+        "loop": null,
+        "disposal_exact": null
+      }
+    },
+    {
+      "role": "h5_overview_six_png",
+      "file": "h5-assembly-six052-protected.png",
+      "bytes": 861692,
+      "sha256": "83315473844388000efce1254c019a90179dc012b92b9f2ef236f79442cd1dae",
+      "original_sha256": "fdec0651ab1bc3e25e553ea58c8d16557f1c428e07f345e820bf2c8ea93b8765",
+      "receipt_sha256": "02c9df7213b34ba6d3e417393180cc33371c7204ddf4834c7e1f47ff4596816f",
+      "signature_verified": true,
+      "quality": {
+        "format": "png",
+        "size": [
+          1860,
+          1590
+        ],
+        "frames": 1,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 323,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 323
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": false,
+        "durations_cs": null,
+        "loop": null,
+        "disposal_exact": null
+      }
+    },
+    {
+      "role": "h5_reference_rpm_gif",
+      "file": "h5-reference-rpm052-protected.gif",
+      "bytes": 617600,
+      "sha256": "be67469e07da7e40f7520fe165c795d037e622b6dd48599418fcc1971d27d3f9",
+      "original_sha256": "88b8b55c80ea386017f114c84ce9c436d9b8145fd5da192aab4d1a76a358db5b",
+      "receipt_sha256": "7c5f65e9dc3c99e8a6d4ca7ef29306b8537aec5c77ff9706e51c2336706d8a42",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 8,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 10592260,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324105
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324150
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324077
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1323995
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1323976
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1323951
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324009
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1323997
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          25
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "helios_overview_six_png",
+      "file": "helios-assembly-six052-protected.png",
+      "bytes": 793522,
+      "sha256": "7523d7b3ab9feedb0164917cefd0044d8e98395e78e26f324ae808c8a646fedd",
+      "original_sha256": "2858270594dec42cc41d7730149a668fd132ad06b78b2c8bfec741108f7ce371",
+      "receipt_sha256": "acacb59e593353d6d72a794cf05ce951768f5b77a09702888f54626bd1ee5b05",
+      "signature_verified": true,
+      "quality": {
+        "format": "png",
+        "size": [
+          1860,
+          1590
+        ],
+        "frames": 1,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 337,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 337
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": false,
+        "durations_cs": null,
+        "loop": null,
+        "disposal_exact": null
+      }
+    },
+    {
+      "role": "helios_reference_rpm_gif",
+      "file": "helios-reference-rpm052-protected.gif",
+      "bytes": 416772,
+      "sha256": "eb1b322bbccb6424643b6cbf12ba3fe87786f4ea69607242f0b9b9770630a88f",
+      "original_sha256": "48e82e583a537eb93544bdf4ff0613d2ce5e64b4cf3ee052ec23e367910122ab",
+      "receipt_sha256": "cc799f42366c94afd14789acb40565eed3863da344af9f57498a82afed35ccae",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 8,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 9347900,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168523
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168425
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168475
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168462
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168493
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168460
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168516
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1168546
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          25
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "independent_original_glb",
+      "file": "helios-independent-original052-protected.glb",
+      "bytes": 8798352,
+      "sha256": "824a66c4a93bb50adaeccef2cebef592ccbd5d2dbe6774bfbb8a593f3c82672a",
+      "original_sha256": "3d2df717e92f0bfafeab0c15581f2bb372e8c6a588fc64180cf88b91f80e4867",
+      "receipt_sha256": "387438aedac771550b87109d3782cebe8ce5ae7a587852c0b8db2c9ca492f54f",
+      "signature_verified": true,
+      "quality": {
+        "format": "glb",
+        "physical_meshes": 399,
+        "nodes": 435,
+        "triangles": 113608,
+        "clips": 7,
+        "channels": 64,
+        "position_low2_only": true,
+        "normals_indices_nodes_materials_animations_exact": true,
+        "all_other_BIN_bytes_exact": true,
+        "JSON_exact_except_POSITION_bounds": true,
+        "max_world_displacement_mm": 0.000129475118651844,
+        "max_world_bbox_delta_mm": 0.0,
+        "max_face_angle_deg": 0.010683132028346169,
+        "orientation_flips": 0,
+        "new_degenerate": 0,
+        "removed_degenerate": 0,
+        "changed_vertex_occurrences": 229899,
+        "meshes": [
+          {
+            "mesh": 0,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003163816042739948
+          },
+          {
+            "mesh": 1,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003163816042739948
+          },
+          {
+            "mesh": 2,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003163816042739948
+          },
+          {
+            "mesh": 3,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003163816042739948
+          },
+          {
+            "mesh": 4,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000637239514381696
+          },
+          {
+            "mesh": 5,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000637239514381696
+          },
+          {
+            "mesh": 6,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003104633026596728
+          },
+          {
+            "mesh": 7,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003104633026596728
+          },
+          {
+            "mesh": 8,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000637239514381696
+          },
+          {
+            "mesh": 9,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000637239514381696
+          },
+          {
+            "mesh": 10,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003104633026596728
+          },
+          {
+            "mesh": 11,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003104633026596728
+          },
+          {
+            "mesh": 12,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 13,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.537736462515939e-07
+          },
+          {
+            "mesh": 14,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 15,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 16,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 17,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 18,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 19,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 20,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.185906153590075e-05
+          },
+          {
+            "mesh": 21,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00010198932833887202
+          },
+          {
+            "mesh": 22,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 23,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 24,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 25,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 26,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 27,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 28,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.185906153590075e-05
+          },
+          {
+            "mesh": 29,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00010198932833887202
+          },
+          {
+            "mesh": 30,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 31,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 32,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 33,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 34,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 35,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 36,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 37,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 38,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 39,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 40,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 41,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 42,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 43,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 44,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 45,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.461876859383899e-05
+          },
+          {
+            "mesh": 46,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.461876859383899e-05
+          },
+          {
+            "mesh": 47,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.461876859383899e-05
+          },
+          {
+            "mesh": 48,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.461876859383899e-05
+          },
+          {
+            "mesh": 49,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0029143365512361596
+          },
+          {
+            "mesh": 50,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 51,
+            "triangles": 28,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00017990532218920815
+          },
+          {
+            "mesh": 52,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0003168731171435592
+          },
+          {
+            "mesh": 53,
+            "triangles": 5376,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004079165192441733
+          },
+          {
+            "mesh": 54,
+            "triangles": 552,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0013881687374784968
+          },
+          {
+            "mesh": 55,
+            "triangles": 816,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0013759181500178296
+          },
+          {
+            "mesh": 56,
+            "triangles": 188,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0013665118629664576
+          },
+          {
+            "mesh": 57,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0014368462580208814
+          },
+          {
+            "mesh": 58,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 59,
+            "triangles": 188,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0013665118629664576
+          },
+          {
+            "mesh": 60,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0014368462580208814
+          },
+          {
+            "mesh": 61,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 62,
+            "triangles": 1190,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0060084348740504
+          },
+          {
+            "mesh": 63,
+            "triangles": 762,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00451212086351232
+          },
+          {
+            "mesh": 64,
+            "triangles": 576,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005386825266909969
+          },
+          {
+            "mesh": 65,
+            "triangles": 88,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0018784555007839954
+          },
+          {
+            "mesh": 66,
+            "triangles": 108,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0009389107592991962
+          },
+          {
+            "mesh": 67,
+            "triangles": 144,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004045831977700898
+          },
+          {
+            "mesh": 68,
+            "triangles": 172,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.002333945918034893
+          },
+          {
+            "mesh": 69,
+            "triangles": 162,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001748501746961109
+          },
+          {
+            "mesh": 70,
+            "triangles": 224,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001671871927760877
+          },
+          {
+            "mesh": 71,
+            "triangles": 256,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00034740300404744113
+          },
+          {
+            "mesh": 72,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001380159363274386
+          },
+          {
+            "mesh": 73,
+            "triangles": 602,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0010583752929823457
+          },
+          {
+            "mesh": 74,
+            "triangles": 128,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00020821752146603218
+          },
+          {
+            "mesh": 75,
+            "triangles": 256,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00034740300404744113
+          },
+          {
+            "mesh": 76,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001380159363274386
+          },
+          {
+            "mesh": 77,
+            "triangles": 658,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0010334015693885762
+          },
+          {
+            "mesh": 78,
+            "triangles": 128,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00020821752146603218
+          },
+          {
+            "mesh": 79,
+            "triangles": 256,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00034740300404744113
+          },
+          {
+            "mesh": 80,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001380159363274386
+          },
+          {
+            "mesh": 81,
+            "triangles": 602,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0010583752929823457
+          },
+          {
+            "mesh": 82,
+            "triangles": 128,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00020821752146603218
+          },
+          {
+            "mesh": 83,
+            "triangles": 588,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0007273399865974636
+          },
+          {
+            "mesh": 84,
+            "triangles": 256,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0004038195917309999
+          },
+          {
+            "mesh": 85,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011418245025642874
+          },
+          {
+            "mesh": 86,
+            "triangles": 768,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 3.0617041963544e-05
+          },
+          {
+            "mesh": 87,
+            "triangles": 24,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 88,
+            "triangles": 336,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 89,
+            "triangles": 76,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.781841187916403e-05
+          },
+          {
+            "mesh": 90,
+            "triangles": 76,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.781841187916403e-05
+          },
+          {
+            "mesh": 91,
+            "triangles": 76,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.781841187916403e-05
+          },
+          {
+            "mesh": 92,
+            "triangles": 84,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.829655540638536e-05
+          },
+          {
+            "mesh": 93,
+            "triangles": 84,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.829655540638536e-05
+          },
+          {
+            "mesh": 94,
+            "triangles": 408,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001268286427059996
+          },
+          {
+            "mesh": 95,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 7.926312405546997e-05
+          },
+          {
+            "mesh": 96,
+            "triangles": 288,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.006160140099083836
+          },
+          {
+            "mesh": 97,
+            "triangles": 72,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005501846754748277
+          },
+          {
+            "mesh": 98,
+            "triangles": 384,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 99,
+            "triangles": 112,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0008702428962982365
+          },
+          {
+            "mesh": 100,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0022756384815454333
+          },
+          {
+            "mesh": 101,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 102,
+            "triangles": 24,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00019869644253731644
+          },
+          {
+            "mesh": 103,
+            "triangles": 512,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004291226023206704
+          },
+          {
+            "mesh": 104,
+            "triangles": 744,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005469166890697639
+          },
+          {
+            "mesh": 105,
+            "triangles": 744,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005469166890697639
+          },
+          {
+            "mesh": 106,
+            "triangles": 704,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0051320666254654245
+          },
+          {
+            "mesh": 107,
+            "triangles": 1152,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0025080664240423765
+          },
+          {
+            "mesh": 108,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0009621479744423837
+          },
+          {
+            "mesh": 109,
+            "triangles": 364,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00031227697526973455
+          },
+          {
+            "mesh": 110,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001402612128792674
+          },
+          {
+            "mesh": 111,
+            "triangles": 280,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00031737650111905605
+          },
+          {
+            "mesh": 112,
+            "triangles": 380,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001387849964287772
+          },
+          {
+            "mesh": 113,
+            "triangles": 720,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.002670579536979256
+          },
+          {
+            "mesh": 114,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.8387202421472124e-05
+          },
+          {
+            "mesh": 115,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.8387202421472124e-05
+          },
+          {
+            "mesh": 116,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0008083938085010363
+          },
+          {
+            "mesh": 117,
+            "triangles": 242,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0036444326918864687
+          },
+          {
+            "mesh": 118,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0018628018387619656
+          },
+          {
+            "mesh": 119,
+            "triangles": 236,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0004876325770162513
+          },
+          {
+            "mesh": 120,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.8387202421472124e-05
+          },
+          {
+            "mesh": 121,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.8387202421472124e-05
+          },
+          {
+            "mesh": 122,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0012511603461774876
+          },
+          {
+            "mesh": 123,
+            "triangles": 248,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00015183494778322164
+          },
+          {
+            "mesh": 124,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.8387202421472124e-05
+          },
+          {
+            "mesh": 125,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.8387202421472124e-05
+          },
+          {
+            "mesh": 126,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 127,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 128,
+            "triangles": 1344,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.537736462515939e-07
+          },
+          {
+            "mesh": 129,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00010537448526471727
+          },
+          {
+            "mesh": 130,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 131,
+            "triangles": 384,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004296303429058743
+          },
+          {
+            "mesh": 132,
+            "triangles": 128,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0027316582211001847
+          },
+          {
+            "mesh": 133,
+            "triangles": 144,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0012031542893996855
+          },
+          {
+            "mesh": 134,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 135,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00040430757288518847
+          },
+          {
+            "mesh": 136,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011680172678929125
+          },
+          {
+            "mesh": 137,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 138,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 139,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 3.728362160838717e-05
+          },
+          {
+            "mesh": 140,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 141,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011680172678929125
+          },
+          {
+            "mesh": 142,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 143,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 144,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011680172678929125
+          },
+          {
+            "mesh": 145,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 146,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 147,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.352232000419905e-05
+          },
+          {
+            "mesh": 148,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 149,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 150,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 151,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 152,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.352232000419905e-05
+          },
+          {
+            "mesh": 153,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 154,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 155,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 156,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00025549809375565786
+          },
+          {
+            "mesh": 157,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 158,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 159,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 160,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 161,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 9.352232000419905e-05
+          },
+          {
+            "mesh": 162,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 163,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 164,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.9501555047256526e-05
+          },
+          {
+            "mesh": 165,
+            "triangles": 1368,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0007968448325736063
+          },
+          {
+            "mesh": 166,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 167,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 168,
+            "triangles": 432,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011385960685519409
+          },
+          {
+            "mesh": 169,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 170,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 171,
+            "triangles": 432,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011385960685519409
+          },
+          {
+            "mesh": 172,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 173,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 174,
+            "triangles": 480,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0031482797572910627
+          },
+          {
+            "mesh": 175,
+            "triangles": 100,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.205589598431106e-05
+          },
+          {
+            "mesh": 176,
+            "triangles": 100,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.205589598431106e-05
+          },
+          {
+            "mesh": 177,
+            "triangles": 100,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.205589598431106e-05
+          },
+          {
+            "mesh": 178,
+            "triangles": 100,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.205589598431106e-05
+          },
+          {
+            "mesh": 179,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 180,
+            "triangles": 204,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0003338560641856394
+          },
+          {
+            "mesh": 181,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 182,
+            "triangles": 108,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00016692748625065482
+          },
+          {
+            "mesh": 183,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 184,
+            "triangles": 108,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00016692748625065482
+          },
+          {
+            "mesh": 185,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 186,
+            "triangles": 228,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0002225714372438552
+          },
+          {
+            "mesh": 187,
+            "triangles": 100,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 3.9012878241710284e-05
+          },
+          {
+            "mesh": 188,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 189,
+            "triangles": 240,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001655880725738189
+          },
+          {
+            "mesh": 190,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 191,
+            "triangles": 108,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00016692748625065482
+          },
+          {
+            "mesh": 192,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 193,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 194,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 195,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 196,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 197,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 198,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 199,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 200,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 201,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 202,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 203,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 204,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 205,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 206,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 207,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 208,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 209,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 210,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 211,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 212,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 213,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 214,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 215,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 216,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 217,
+            "triangles": 24,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.4614250772341616e-05
+          },
+          {
+            "mesh": 218,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 219,
+            "triangles": 120,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00016692748625065482
+          },
+          {
+            "mesh": 220,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 221,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.346483480392628e-05
+          },
+          {
+            "mesh": 222,
+            "triangles": 216,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000674732942744616
+          },
+          {
+            "mesh": 223,
+            "triangles": 864,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004034290710007961
+          },
+          {
+            "mesh": 224,
+            "triangles": 156,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0021086136745988794
+          },
+          {
+            "mesh": 225,
+            "triangles": 444,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004386406001463515
+          },
+          {
+            "mesh": 226,
+            "triangles": 888,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004106829711438191
+          },
+          {
+            "mesh": 227,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00011214374530776632
+          },
+          {
+            "mesh": 228,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001375635749999398
+          },
+          {
+            "mesh": 229,
+            "triangles": 288,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0022681441380581566
+          },
+          {
+            "mesh": 230,
+            "triangles": 228,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 231,
+            "triangles": 3380,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 232,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 233,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 234,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 235,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 236,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 237,
+            "triangles": 2132,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0013237605515871932
+          },
+          {
+            "mesh": 238,
+            "triangles": 276,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0006601680158088716
+          },
+          {
+            "mesh": 239,
+            "triangles": 84,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0011055897320542127
+          },
+          {
+            "mesh": 240,
+            "triangles": 76,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0010928306007238853
+          },
+          {
+            "mesh": 241,
+            "triangles": 376,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0011244289678966242
+          },
+          {
+            "mesh": 242,
+            "triangles": 800,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005825208181107962
+          },
+          {
+            "mesh": 243,
+            "triangles": 200,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005081301835063049
+          },
+          {
+            "mesh": 244,
+            "triangles": 100,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00029948354528533275
+          },
+          {
+            "mesh": 245,
+            "triangles": 376,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0011898370384020786
+          },
+          {
+            "mesh": 246,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000647746423965031
+          },
+          {
+            "mesh": 247,
+            "triangles": 940,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0016325777420946649
+          },
+          {
+            "mesh": 248,
+            "triangles": 88,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 249,
+            "triangles": 576,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0007768622415003289
+          },
+          {
+            "mesh": 250,
+            "triangles": 72,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 251,
+            "triangles": 176,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.537736462515939e-07
+          },
+          {
+            "mesh": 252,
+            "triangles": 704,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 253,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 254,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 255,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.537736462515939e-07
+          },
+          {
+            "mesh": 256,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 257,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 258,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 259,
+            "triangles": 256,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.4787793334710982e-06
+          },
+          {
+            "mesh": 260,
+            "triangles": 128,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 261,
+            "triangles": 512,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 262,
+            "triangles": 256,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 8.537736462515939e-07
+          },
+          {
+            "mesh": 263,
+            "triangles": 524,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0020780131460410712
+          },
+          {
+            "mesh": 264,
+            "triangles": 1416,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00484565022770019
+          },
+          {
+            "mesh": 265,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0032784849101205825
+          },
+          {
+            "mesh": 266,
+            "triangles": 304,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.002438529988692316
+          },
+          {
+            "mesh": 267,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 268,
+            "triangles": 132,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.9090959104164312e-05
+          },
+          {
+            "mesh": 269,
+            "triangles": 1640,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00044502905244029
+          },
+          {
+            "mesh": 270,
+            "triangles": 700,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.003946224639592346
+          },
+          {
+            "mesh": 271,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001658454593676406
+          },
+          {
+            "mesh": 272,
+            "triangles": 700,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0019029597604266358
+          },
+          {
+            "mesh": 273,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0010821199540090225
+          },
+          {
+            "mesh": 274,
+            "triangles": 700,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.006037480851990853
+          },
+          {
+            "mesh": 275,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0018248632292251889
+          },
+          {
+            "mesh": 276,
+            "triangles": 384,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004867525070689457
+          },
+          {
+            "mesh": 277,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00213700652241735
+          },
+          {
+            "mesh": 278,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.002341842283815868
+          },
+          {
+            "mesh": 279,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00033746746644345714
+          },
+          {
+            "mesh": 280,
+            "triangles": 88,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0021856338539473067
+          },
+          {
+            "mesh": 281,
+            "triangles": 64,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0015990321128093222
+          },
+          {
+            "mesh": 282,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00028159391180664246
+          },
+          {
+            "mesh": 283,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0011392325697672562
+          },
+          {
+            "mesh": 284,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0007786139483159206
+          },
+          {
+            "mesh": 285,
+            "triangles": 360,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0033847608282577867
+          },
+          {
+            "mesh": 286,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0009572493216968324
+          },
+          {
+            "mesh": 287,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0017174700470521582
+          },
+          {
+            "mesh": 288,
+            "triangles": 896,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0026173997354144614
+          },
+          {
+            "mesh": 289,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 290,
+            "triangles": 404,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0021954146443450254
+          },
+          {
+            "mesh": 291,
+            "triangles": 44,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0012831644163801873
+          },
+          {
+            "mesh": 292,
+            "triangles": 32,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0028008550338378133
+          },
+          {
+            "mesh": 293,
+            "triangles": 864,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0010096316489318733
+          },
+          {
+            "mesh": 294,
+            "triangles": 700,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00010288238131095046
+          },
+          {
+            "mesh": 295,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0029655182076150765
+          },
+          {
+            "mesh": 296,
+            "triangles": 16,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005149403873602899
+          },
+          {
+            "mesh": 297,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 298,
+            "triangles": 700,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00013066921282357894
+          },
+          {
+            "mesh": 299,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0027371045691978752
+          },
+          {
+            "mesh": 300,
+            "triangles": 16,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0034054779062917834
+          },
+          {
+            "mesh": 301,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 302,
+            "triangles": 700,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005523526198995851
+          },
+          {
+            "mesh": 303,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0042367360831198925
+          },
+          {
+            "mesh": 304,
+            "triangles": 16,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.008277130934044136
+          },
+          {
+            "mesh": 305,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 306,
+            "triangles": 516,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0008081633910784696
+          },
+          {
+            "mesh": 307,
+            "triangles": 516,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.001149074662890897
+          },
+          {
+            "mesh": 308,
+            "triangles": 516,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000918801273494806
+          },
+          {
+            "mesh": 309,
+            "triangles": 684,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0016235798391537294
+          },
+          {
+            "mesh": 310,
+            "triangles": 516,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0006045899077070769
+          },
+          {
+            "mesh": 311,
+            "triangles": 516,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0006646928048382723
+          },
+          {
+            "mesh": 312,
+            "triangles": 516,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0008048133403142097
+          },
+          {
+            "mesh": 313,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 7.491833340751661e-06
+          },
+          {
+            "mesh": 314,
+            "triangles": 15932,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0019216144268426978
+          },
+          {
+            "mesh": 315,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0011494482414519881
+          },
+          {
+            "mesh": 316,
+            "triangles": 588,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0006049093230426747
+          },
+          {
+            "mesh": 317,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001959238453812942
+          },
+          {
+            "mesh": 318,
+            "triangles": 384,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0032828255067877754
+          },
+          {
+            "mesh": 319,
+            "triangles": 7248,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0007719180905456438
+          },
+          {
+            "mesh": 320,
+            "triangles": 160,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0002806929375784803
+          },
+          {
+            "mesh": 321,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00045749124446300526
+          },
+          {
+            "mesh": 322,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.2426798989897964e-05
+          },
+          {
+            "mesh": 323,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00019307180680457154
+          },
+          {
+            "mesh": 324,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 325,
+            "triangles": 64,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 4.880718601561057e-05
+          },
+          {
+            "mesh": 326,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 327,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 328,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 329,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 330,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 331,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 332,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 333,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005490474871004738
+          },
+          {
+            "mesh": 334,
+            "triangles": 484,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0009464068352946406
+          },
+          {
+            "mesh": 335,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 336,
+            "triangles": 912,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00546821099111431
+          },
+          {
+            "mesh": 337,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 338,
+            "triangles": 164,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.006857848529990525
+          },
+          {
+            "mesh": 339,
+            "triangles": 36,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00021877272902949682
+          },
+          {
+            "mesh": 340,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 1.2074182697257333e-06
+          },
+          {
+            "mesh": 341,
+            "triangles": 744,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0027437843633825814
+          },
+          {
+            "mesh": 342,
+            "triangles": 12,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0
+          },
+          {
+            "mesh": 343,
+            "triangles": 336,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.000683018383396582
+          },
+          {
+            "mesh": 344,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0009106919782793704
+          },
+          {
+            "mesh": 345,
+            "triangles": 64,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 2.969856261220141e-05
+          },
+          {
+            "mesh": 346,
+            "triangles": 806,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0007517708454810289
+          },
+          {
+            "mesh": 347,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001517052707674515
+          },
+          {
+            "mesh": 348,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00014902202618946803
+          },
+          {
+            "mesh": 349,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00024001519445010323
+          },
+          {
+            "mesh": 350,
+            "triangles": 288,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0005960893276143388
+          },
+          {
+            "mesh": 351,
+            "triangles": 1152,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.009703926486733558
+          },
+          {
+            "mesh": 352,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001517052707674515
+          },
+          {
+            "mesh": 353,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00014902202618946803
+          },
+          {
+            "mesh": 354,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001936297644907316
+          },
+          {
+            "mesh": 355,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00014902202618946803
+          },
+          {
+            "mesh": 356,
+            "triangles": 1512,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.006518855155418457
+          },
+          {
+            "mesh": 357,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001517052707674515
+          },
+          {
+            "mesh": 358,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00014902202618946803
+          },
+          {
+            "mesh": 359,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001936297644907316
+          },
+          {
+            "mesh": 360,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00014902202618946803
+          },
+          {
+            "mesh": 361,
+            "triangles": 1512,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.007518085728475464
+          },
+          {
+            "mesh": 362,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001517052707674515
+          },
+          {
+            "mesh": 363,
+            "triangles": 96,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00014902202618946803
+          },
+          {
+            "mesh": 364,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0002497824202687488
+          },
+          {
+            "mesh": 365,
+            "triangles": 192,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00023576677508180513
+          },
+          {
+            "mesh": 366,
+            "triangles": 1512,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00762850408415249
+          },
+          {
+            "mesh": 367,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00016400011719960864
+          },
+          {
+            "mesh": 368,
+            "triangles": 240,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001133816545425373
+          },
+          {
+            "mesh": 369,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00015164519755880802
+          },
+          {
+            "mesh": 370,
+            "triangles": 240,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001133816545425373
+          },
+          {
+            "mesh": 371,
+            "triangles": 768,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.009252325239874704
+          },
+          {
+            "mesh": 372,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00016400011719960864
+          },
+          {
+            "mesh": 373,
+            "triangles": 240,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001133816545425373
+          },
+          {
+            "mesh": 374,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00015164519755880802
+          },
+          {
+            "mesh": 375,
+            "triangles": 240,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001133816545425373
+          },
+          {
+            "mesh": 376,
+            "triangles": 768,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.010683132028346169
+          },
+          {
+            "mesh": 377,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00031775064824434335
+          },
+          {
+            "mesh": 378,
+            "triangles": 120,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001700767677526746
+          },
+          {
+            "mesh": 379,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0002963664651845846
+          },
+          {
+            "mesh": 380,
+            "triangles": 120,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001133816545425373
+          },
+          {
+            "mesh": 381,
+            "triangles": 1008,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005785469659884157
+          },
+          {
+            "mesh": 382,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00031775064824434335
+          },
+          {
+            "mesh": 383,
+            "triangles": 120,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001700767677526746
+          },
+          {
+            "mesh": 384,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0002963664651845846
+          },
+          {
+            "mesh": 385,
+            "triangles": 120,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0001133816545425373
+          },
+          {
+            "mesh": 386,
+            "triangles": 1008,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.005785469659884157
+          },
+          {
+            "mesh": 387,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00012065727809124185
+          },
+          {
+            "mesh": 388,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.439626991265405e-05
+          },
+          {
+            "mesh": 389,
+            "triangles": 288,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004986966561174633
+          },
+          {
+            "mesh": 390,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00012065727809124185
+          },
+          {
+            "mesh": 391,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.439626991265405e-05
+          },
+          {
+            "mesh": 392,
+            "triangles": 1008,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.004571367451499347
+          },
+          {
+            "mesh": 393,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00012065727809124185
+          },
+          {
+            "mesh": 394,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.439626991265405e-05
+          },
+          {
+            "mesh": 395,
+            "triangles": 888,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.0058797325065540074
+          },
+          {
+            "mesh": 396,
+            "triangles": 60,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.00012065727809124185
+          },
+          {
+            "mesh": 397,
+            "triangles": 48,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 6.439626991265405e-05
+          },
+          {
+            "mesh": 398,
+            "triangles": 888,
+            "orientation_flips": 0,
+            "new_degenerate": 0,
+            "removed_degenerate": 0,
+            "max_face_angle_deg": 0.009913321300020586
+          }
+        ]
+      }
+    },
+    {
+      "role": "widgets_reference_rpm_gif",
+      "file": "widgets-six052-protected.gif",
+      "bytes": 2182025,
+      "sha256": "182f6a2c002b0450992eecdbe4d63e99e61d59e02e22815e00e940b61f71e53d",
+      "original_sha256": "bfd43a379b618af138e2284c298ab8ceee949fb83beb16f463529c3caee1d2f0",
+      "receipt_sha256": "a9084cf17e8dca960712de1d23190a7950f563beb5d842b39c52b0c28de77858",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1800,
+          940
+        ],
+        "frames": 24,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 39062759,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1630575
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1627087
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1626957
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1628510
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1626523
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1628919
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1627398
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1626122
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1631024
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1628067
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1620749
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1629873
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1626606
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1627724
+          },
+          {
+            "frame": 14,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1627169
+          },
+          {
+            "frame": 15,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1628080
+          },
+          {
+            "frame": 16,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1628460
+          },
+          {
+            "frame": 17,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1628660
+          },
+          {
+            "frame": 18,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1627394
+          },
+          {
+            "frame": 19,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1629927
+          },
+          {
+            "frame": 20,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1629367
+          },
+          {
+            "frame": 21,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1627929
+          },
+          {
+            "frame": 22,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1626268
+          },
+          {
+            "frame": 23,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1623371
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          8,
+          9,
+          8,
+          8,
+          9,
+          8,
+          8,
+          9,
+          8,
+          8,
+          9,
+          8,
+          8,
+          9,
+          8,
+          8,
+          9,
+          8,
+          8,
+          9,
+          8,
+          8,
+          9,
+          8
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "h5_gpu_return_gif",
+      "file": "h5-gpu-return052-protected.gif",
+      "bytes": 812954,
+      "sha256": "9ab049c1b5361136fca4d089e35168b87b5a2a5e16def8e1ea9b777b3a83d9e1",
+      "original_sha256": "99ddfda946624124440ea7144c4efc78d73d54e1fa0f601cf9b28653306411a1",
+      "receipt_sha256": "3190c023754c385c382e7eebd0255cdfe1598cc0b77771beb0726e25b1aa06b2",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 14,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 20774966,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483976
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483976
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1484495
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483758
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483493
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483670
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483670
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483493
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483758
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1484495
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1484254
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483976
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483976
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1483976
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "h5_ram0_or_pair_return_gif",
+      "file": "h5-ram0-or-pair-return052-protected.gif",
+      "bytes": 446015,
+      "sha256": "15e190619c5551d7ff2800f4bd1decce281855feebc476279d16fc0606118c3d",
+      "original_sha256": "573d9f38d189d7461c90526b4fae950c282b52ae10c1e1050b5c0b79d7b0841f",
+      "receipt_sha256": "3025289c117842d275239f456fac940327b158e521a262b2461ce621978fdeab",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 14,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 18542850,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324500
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324500
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324292
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324573
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324643
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324430
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324430
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324643
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324573
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324292
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324474
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324500
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324500
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1324500
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "h5_ram1_return_gif",
+      "file": "h5-ram1-return052-protected.gif",
+      "bytes": 1705134,
+      "sha256": "4b6c4b9c0be3e1233a68ec844d38f6a9e2a306528aa4b1e5d07fac6b8e0e26a2",
+      "original_sha256": "2306bffe0c300f4f553d2d64824414943329b6dc97a8bc163678b37d7d6a8905",
+      "receipt_sha256": "cc33433d6d2d681e20057153260520c6ad5cd998333f3ea40d50abc8aac38f27",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 14,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 16193143,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157136
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157136
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157162
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1156345
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1155889
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1155760
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1155760
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1155889
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1156345
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157162
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157151
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157136
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157136
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1157136
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "helios_gpu_return_gif",
+      "file": "helios-gpu-return052-protected.gif",
+      "bytes": 599451,
+      "sha256": "7573333a61b5084970a8c09eb4d6c403afa69132dcbbbd4a4ccffc638b30888c",
+      "original_sha256": "d4dd5da528018e20eeb2728c12af3a4f2749e27646a2b6fb6bd3bb1d174cea80",
+      "receipt_sha256": "9c2b13c7c888863221facf37d922e0c01e4468f7aa19141d40f1a4327b3a34f0",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 14,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 22164482,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582851
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582851
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582429
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1583115
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1584200
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1584229
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1584229
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1584200
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1583115
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582429
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582281
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582851
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582851
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1582851
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "helios_ram0_or_pair_return_gif",
+      "file": "helios-ram0-or-pair-return052-protected.gif",
+      "bytes": 384643,
+      "sha256": "97effcfff1e51201c2b87b3730e198daeb3848f7662b020cdb2733fd3564aa24",
+      "original_sha256": "57ec259651e0e6c5484a6c9b6da9d200a7c8c4d63a69946f523f8074bc0992ff",
+      "receipt_sha256": "0e0b46ff159015b978337e749f816fb68c9ae7317ffc4fe2faabfa101613a870",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 14,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 16435026,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173794
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173794
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173991
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1174171
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1174040
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173919
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173919
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1174040
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1174171
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173991
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173814
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173794
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173794
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1173794
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    },
+    {
+      "role": "helios_ram1_return_gif",
+      "file": "helios-ram1-return052-protected.gif",
+      "bytes": 404651,
+      "sha256": "1f78f3bea703bd14897816b301715a114364d6261c504f13095a0e46c69d71d8",
+      "original_sha256": "27dd140506142819d12e9bd33d9950fd369ace34620a6d3a42ab14b8064ca576",
+      "receipt_sha256": "3956f0a7ff5a2169256e0432c86c1f24013c3127c02b4fb4b692a33fffa41956",
+      "signature_verified": true,
+      "quality": {
+        "format": "gif",
+        "size": [
+          1560,
+          1140
+        ],
+        "frames": 14,
+        "max_RGB_delta": 1,
+        "alpha_exact": true,
+        "transparent_RGBA_exact": true,
+        "changed_frame_pixel_occurrences": 14179433,
+        "all_frames": [
+          {
+            "frame": 0,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1013152
+          },
+          {
+            "frame": 1,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1013152
+          },
+          {
+            "frame": 2,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012767
+          },
+          {
+            "frame": 3,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012620
+          },
+          {
+            "frame": 4,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012542
+          },
+          {
+            "frame": 5,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012379
+          },
+          {
+            "frame": 6,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012379
+          },
+          {
+            "frame": 7,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012542
+          },
+          {
+            "frame": 8,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012620
+          },
+          {
+            "frame": 9,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1012767
+          },
+          {
+            "frame": 10,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1013057
+          },
+          {
+            "frame": 11,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1013152
+          },
+          {
+            "frame": 12,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1013152
+          },
+          {
+            "frame": 13,
+            "max_RGB_delta": 1,
+            "alpha_exact": true,
+            "changed_pixels": 1013152
+          }
+        ],
+        "playback_exact": true,
+        "palette_only": true,
+        "durations_cs": [
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24,
+          24
+        ],
+        "loop": null,
+        "disposal_exact": true
+      }
+    }
+  ],
+  "public_key_sha256": "440e8f917933c691cef09c8eaeebc04ba9d5efa7111a9e7a75c03f9a3a8cdad3",
+  "independent_public_signatures": 13,
+  "signature_verifier": "IndependentNodecryptoEd25519",
+  "release_index_verified": false,
+  "owner_keys_read": false,
+  "owner_store_read": false,
+  "payload_extraction_performed": false,
+  "signed_payload_claim_scope": "Publisher-signed issuance attestation only; no-keyQA does not independently extract the secret-selected marker.",
+  "Scene_builds": 0,
+  "renderers": 0,
+  "Qt": 0,
+  "native": false,
+  "hardware": false,
+  "wall_seconds": 7.89810910000233,
+  "independent_no_key_review_passed": true,
+  "independent_review_sha256": "a4526f383152a78f08e7671ea066ca7dbf3ffc90b37df63f9c2653b88d23662f",
+  "original_public_numerical_report_sha256": "0dc2fac4b5c32c28c8823c506d77cfff838868c7fc1c6c320c5fda1a5225f421",
+  "review_scope": "Exact public signatures, lossless PNG/GIF changes, and GLB structure/numerical bounds; no native renderer or whole-app burden measurement.",
+  "native_acceptance": false,
+  "installed": false,
+  "all_catalog_marked": false,
+  "all_requirements_complete": false,
+  "whole_application_cpu_or_memory_measured": false,
+  "source_connection_scope": {
+    "known_reference_connections": 12,
+    "omitted_front_io_connection_entries": 2,
+    "omission_reason": "header_capacity_unverified",
+    "capture_status": "draft_incomplete"
+  },
+  "blocked_radiator_internal_harness_actions_exported": false,
+  "mechanical_disassembly_complete": false,
+  "real_RPM_bound": false,
+  "legal_conclusion": false
+}
