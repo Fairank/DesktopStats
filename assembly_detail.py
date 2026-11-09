@@ -354,7 +354,7 @@ def _gpu_detail(meshes,spec,level):
         from assembly_geometry import known_fan_profiles
         fan_rows=[dict(profile=p) for p in known_fan_profiles(appearance)]
     observed_rear=(appearance.get('id')=='asus-astral-5090' and appearance.get('fan_count')==4 and backplate is True)
-    paint_metadata={};paint_vertices=();observed_front_cutouts=()
+    paint_metadata={};paint_vertices=();observed_front_cutouts=();fixed_front={}
     if appearance.get('id')=='msi-n480gtx-m2d15':
         from assembly_gpu_exterior053 import front_cutouts
         observed_front_cutouts=front_cutouts(appearance,length,width)
@@ -364,7 +364,14 @@ def _gpu_detail(meshes,spec,level):
         for row in (gpu.get('detail_polygons') or ())[:6]:
             points=row.get('points') if isinstance(row,dict) else row
             polygons.append(unit_polygon(points,length,width,margin=.3))
-        paint_vertices,paint_metadata=partition(tuple(polygons),holes,.3,segments=segments,front_cutouts=observed_front_cutouts)
+        fixed_partition={}
+        if appearance.get('id')=='leadtek-hurricane-4090-24g':
+            from assembly_gpu_exterior053 import fixed_front_layers
+            fixed_front=fixed_front_layers(gpu,len(polygons),holes)
+            if fixed_front:
+                fixed_partition=dict(layer_fan_indices=fixed_front['fan_indices'],layer_depths=fixed_front['depths'])
+        paint_vertices,paint_metadata=partition(tuple(polygons),holes,.3,segments=segments,
+            front_cutouts=observed_front_cutouts,**fixed_partition)
     rear_u=(589.-45.)/659.;rear_v=(370.-238.)/256.
     rear_radius=min(105./659.*length,105./256.*width)
     rear_hole=((rear_u-.5)*length,(.5-rear_v)*width,rear_radius*1.005)
@@ -378,8 +385,12 @@ def _gpu_detail(meshes,spec,level):
                 plate=(perforated_plate(polygon,holes,.3,segments=segments,clip_walls=True) if observed_rear
                        else paint_vertices[cover_index-1] if cover_index<=len(paint_vertices) else ())
                 if not plate:continue
+                # The exact source X frame is in front of its unchanged hub.
+                # These thin-layer offsets are photo-reference, not CAD metal
+                # thickness or a manufacturer's .05mm clearance certificate.
+                offset=(fixed_front['center_offsets'][cover_index-1] if fixed_front else .2)
                 mesh=replace(mesh,vertices=gpu_plane(plate),
-                             position=(gx,gy-thickness/2+.2,gz))
+                             position=(gx,gy-thickness/2+offset,gz))
         elif mesh.name=='gpu-pcb':
             mesh=replace(mesh,position=(gx,gy+thickness/2-3.3,gz))
             if observed_rear:
@@ -513,7 +524,7 @@ def _gpu_detail(meshes,spec,level):
         caps,slots=_screws(screw_points,1.5)
         add('detail-gpu-backplate-fasteners',gpu_plane(caps,True),metal,(gx,gy+thickness/2-.6,gz))
         add('detail-gpu-fastener-slots',gpu_plane(slots,True),dark,(gx,gy+thickness/2-.6,gz))
-    completed=tuple((*revised,*detail));exterior={}
+    completed=tuple((*revised,*detail));exterior=dict(fixed_front.get('metadata') or {})
     if observed_rear:
         from assembly_gpu_exterior049 import refine
         completed,exterior=refine(completed,spec,level,outer=outer,front_holes=holes,rear_hole=rear_hole,

@@ -699,6 +699,7 @@ SOURCES = (
     'tests/test_gpu_capture053.py',
     'tests/test_gpu_exterior053.py',
     'tests/test_gpu_cutouts053.py',
+    'tests/test_leadtek_fixed_x053.py',
     'docs/DEVELOPMENT053.md',
 )
 

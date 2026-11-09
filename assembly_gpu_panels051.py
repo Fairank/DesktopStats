@@ -3,7 +3,8 @@
 The reviewed source polygons already establish painter order. This partitions
 those same regions rather than inventing cuts, thickness offsets or new trim.
 Concave later paint is subtracted as its real ear-clipped triangles. Physical
-fan apertures cut every colour region. No render-time boolean or retained cache.
+fan apertures cut every colour region by default; documented fixed-frame layers
+can cross a fan bay. No render-time boolean or retained cache.
 """
 
 MAX_CUTTERS=128
@@ -43,7 +44,7 @@ def _convex_cutout(poly):
     return points
 
 
-def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=()):
+def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=(),layer_fan_indices=None,layer_depths=None):
     """Per-source-index meshes and explicit conservative budget omissions.
 
     Unsupported/over-budget lower paint is omitted, exposing the existing
@@ -53,6 +54,21 @@ def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=()):
     from assembly_geometry import extrude
     from assembly_detail import _area,_subtract,_tri,_quad,_material_wall_segments,circle
     if len(polygons)>6:raise ValueError('GPU paint supports the existing six source layers only')
+    # Optional fixed source-frame regions may cross a fan bay. This is a
+    # bounded per-layer construction input, not a renderer/collision bypass.
+    # None retains the previous exact default tuple/metadata path.
+    from math import isfinite
+    if layer_fan_indices is not None:
+        if (not isinstance(layer_fan_indices,(tuple,list)) or len(layer_fan_indices)!=len(polygons)
+                or any(not isinstance(row,(tuple,list)) or len(row)>len(fan_holes)
+                    or any(type(n) is not int or not 0<=n<len(fan_holes) for n in row) or len(set(row))!=len(row)
+                    for row in layer_fan_indices)):
+            raise ValueError('Invalid bounded GPU source-layer fan apertures')
+    if layer_depths is not None:
+        if (not isinstance(layer_depths,(tuple,list)) or len(layer_depths)!=len(polygons)
+                or any(type(value) not in (int,float) or not isfinite(value) or not 0<value<=depth
+                       for value in layer_depths)):
+            raise ValueError('Invalid bounded GPU source-layer depth')
     cap_triangles=[];source_edges=[]
     for poly in polygons:
         solid=extrude(poly,depth) if poly else ()
@@ -70,7 +86,9 @@ def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=()):
     for index,poly in enumerate(polygons):
         if not cap_triangles[index]:values.append(());continue
         later=[tri for group in cap_triangles[index+1:] for tri in group]
-        cuts=(*aperture_polys,*later)
+        layer_apertures=(tuple(fan_polys[n] for n in layer_fan_indices[index])+tuple(cutout_polys)
+                         if layer_fan_indices is not None else aperture_polys)
+        cuts=(*layer_apertures,*later)
         if len(cuts)>MAX_CUTTERS:
             values.append(());omitted.append(dict(index=index,reason='source_partition_cutters_exceeded'));continue
         if any(p and not ts for p,ts in zip(polygons[index+1:],cap_triangles[index+1:])):
@@ -82,7 +100,7 @@ def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=()):
                 failed=True;break
         if failed:
             values.append(());omitted.append(dict(index=index,reason='source_partition_fragments_exceeded'));continue
-        out=[];z=depth/2
+        out=[];z=(layer_depths[index] if layer_depths is not None else depth)/2
         for piece in pieces:
             if _area(piece)<0:piece=tuple(reversed(piece))
             for n in range(1,len(piece)-1):
@@ -90,7 +108,7 @@ def partition(polygons,fan_holes,depth,*,segments=20,front_cutouts=()):
                 _tri(out,(*a,z),(*b,z),(*c,z));_tri(out,(*c,-z),(*b,-z),(*a,-z))
         # Walls use only the real source perimeter, circular fan mouths and
         # later polygon perimeters. Triangulation diagonals aren't hardware.
-        boundaries=(*aperture_polys,*(p for p in source_edges[index+1:] if p))
+        boundaries=(*layer_apertures,*(p for p in source_edges[index+1:] if p))
         for a,b in zip(source_edges[index],(*source_edges[index][1:],source_edges[index][0])):
             for first,last in _material_wall_segments(a,b,poly,boundaries,True):
                 _quad(out,(*first,-z),(*last,-z),(*last,z),(*first,z))

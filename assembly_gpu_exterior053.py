@@ -1,4 +1,4 @@
-"""Exact exterior observations for two models; no new rotor evidence.
+"""Source-observed exterior details; no new rotor evidence.
 
 Original reference construction, not manufacturer CAD. The N480 front window
 comes from its own MSI source front and the already authored 0..100 window
@@ -92,3 +92,37 @@ def refine(meshes, spec, level):
                         manufacturer_dimensions_verified=False, reference_depth_unmeasured=True,
                         added_meshes=0, original_ports_pose_and_rotor_meshes_preserved=True,
                         blade_counts_changed=False, bounds_expansion_intended=False)
+
+
+LEADTEK = 'leadtek-hurricane-4090-24g'
+LEADTEK_SOURCE = 'https://www.leadtek.com/eng/products/graphics_cards(1)/WinFast_RTX_4090_HURRICANE_24G(40950)/detail'
+
+
+def fixed_front_layers(gpu, polygon_count, fan_holes):
+    """Exact source's two existing fixed X paint regions cross its middle bay.
+
+    Their original U/V contours stay unchanged. Front depth .2 and center .1
+    are an original photo-reference layer strategy, not measured frame metal,
+    a manufacturer's clearance or an exemption for a colliding hub. Unknown
+    middle blades and every original rotor/hub/port remain untouched.
+    """
+    if not isinstance(gpu, dict) or (gpu.get('appearance') or {}).get('id') != LEADTEK:
+        return {}
+    if type(polygon_count) is not int or polygon_count != 4 or len(fan_holes) != 3:
+        return {}
+    if not all(isinstance(h, (tuple, list)) and len(h) == 3
+               and all(type(v) in (int, float) and math.isfinite(v) and abs(v) <= 1e6 for v in h)
+               and h[2] > 0 for h in fan_holes):
+        return {}
+    order=sorted(range(3), key=lambda n: fan_holes[n][0])
+    if not fan_holes[order[0]][0] < fan_holes[order[1]][0] < fan_holes[order[2]][0]:
+        return {}
+    center=order[1];outer=tuple(n for n in range(3) if n != center)
+    return dict(fan_indices=(outer, outer, (0, 1, 2), (0, 1, 2)),
+                depths=(.2, .2, .3, .3), center_offsets=(.1, .1, .2, .2),
+                metadata=dict(fixed_center_x_frame=True, fixed_x_source=LEADTEK_SOURCE,
+                              fixed_x_source_layer_indices=(0, 1), fixed_x_center_fan_index=center,
+                              fixed_x_depth_mm_reference=.2, fixed_x_center_offset_mm_reference=.1,
+                              fixed_x_depth_accuracy='official_photo_reference_unmeasured',
+                              fixed_x_manufacturer_clearance_verified=False,
+                              fixed_x_blade_counts_changed=False))

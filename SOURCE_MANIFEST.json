@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 119449,
-      "sha256": "c85b872e2c9a1736ea1d702848da9b566f4b07d66daad12a2e109b781dc9a844"
+      "bytes": 119486,
+      "sha256": "c6633788843144670e139057179c32eaa14502fa9b2b06e26a705f7d77ab65d3"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -179,8 +179,8 @@
     },
     {
       "path": "assembly_detail.py",
-      "bytes": 46610,
-      "sha256": "27667c74190e9becb61aa3220d51b8a3b5d722471c4e0b1b7188062d3f575a08"
+      "bytes": 47394,
+      "sha256": "9233087fcc8d5c474ea78302a1aa4da68897b0d56b55f905712027601aa8a61e"
     },
     {
       "path": "assembly_effects.py",
@@ -214,8 +214,8 @@
     },
     {
       "path": "assembly_gpu_exterior053.py",
-      "bytes": 5449,
-      "sha256": "a0600fc917dee91af944673abd246e0c13b82aaa3eea0c31e4a296904896b27d"
+      "bytes": 7405,
+      "sha256": "9c915c688e5eb392116b96c4c0ff86023bcad424e394ffbf82fcfd9d17c75024"
     },
     {
       "path": "assembly_gpu_insertion049.py",
@@ -229,8 +229,8 @@
     },
     {
       "path": "assembly_gpu_panels051.py",
-      "bytes": 5963,
-      "sha256": "0c90d2ec2d1a089387dec533c67c437eba4952098340b8b8e0b88dfd7f2870d7"
+      "bytes": 7359,
+      "sha256": "c5ebbc14437699e743fa383aa518ff3b3c98a09bf5d2942e04a18180481f83b0"
     },
     {
       "path": "assembly_gpu_rotor051.py",
@@ -1549,8 +1549,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 7672,
-      "sha256": "79094817a9193f3392ad573222a9e9adff9288e91db83b817955e5c2e0fd4e99"
+      "bytes": 9055,
+      "sha256": "dbb8df0e9ef5eecf6c0b37e18879c9a78390270b688e85a14740bdde51537e0e"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -4123,6 +4123,11 @@
       "sha256": "1851fc81682f741ec4f623519f82c0baa5a2666b00ecd501f3435b9ce7bcd64f"
     },
     {
+      "path": "tests/test_leadtek_fixed_x053.py",
+      "bytes": 8150,
+      "sha256": "7048e726fe38db7a4fdee0f8b1282cbe940adbe99c4696c0fb0848d4a752689d"
+    },
+    {
       "path": "tests/test_liquid_block_geometry046.py",
       "bytes": 13309,
       "sha256": "d9e2947c6d9fae8e37e3d2c675393730fc18db83adca593c236a26e023d32001"
@@ -4949,8 +4954,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 36746,
-      "sha256": "65a3e2ada302bbc970ff49416b1b694eb3adaeb2befe7286d349617153c5f5ac"
+      "bytes": 36786,
+      "sha256": "5275a57d521ae01ab0f4a7c2e2c512dc9420fe3d5182bdd1c8796e031cc5cdd4"
     },
     {
       "path": "tools/build_collector.py",
