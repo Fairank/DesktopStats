@@ -7,6 +7,9 @@ executable path is requested. Native/schema errors remain explicit failures.
 
 API: https://learn.microsoft.com/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation
 Layout reference: https://github.com/winsiderss/phnt/blob/master/ntexapi.h
+The x64 prefix ends with six LARGE_INTEGER I/O counters. ReadTransferCount at
+232 and WriteTransferCount at 240 are process-wide bytes, not physical-disk
+attribution. They are decoded only when explicitly requested by the same worker.
 """
 
 import ctypes as c
@@ -46,7 +49,7 @@ class WindowsProcessSnapshot:
             self.query.argtypes = [c.c_uint32, c.c_void_p, c.c_uint32, c.POINTER(c.c_uint32)]
             self.query.restype = c.c_int32
 
-    def read(self):
+    def read(self, *, include_io=False):
         self._bind()
         if self.buffer is None:
             self.buffer = c.create_string_buffer(_INITIAL)
@@ -64,10 +67,10 @@ class WindowsProcessSnapshot:
                 raise SnapshotError(status)
             if not _HEADER <= returned.value <= capacity:
                 raise SnapshotError(0xC000000D, "Invalid native return length")
-            return self._decode(returned.value)
+            return self._decode(returned.value, include_io=include_io)
         raise SnapshotError(status, "Native snapshot kept changing during bounded retries")
 
-    def _decode(self, used):
+    def _decode(self, used, *, include_io=False):
         buffer = self.buffer
         address = c.addressof(buffer)
         rows, skipped, offset, count = [], 0, 0, 0
@@ -103,15 +106,20 @@ class WindowsProcessSnapshot:
                 name = "System" if pid == 4 else ""
             if pid:
                 if name:
-                    rows.append(
-                        dict(
+                    row = dict(
                             pid=pid,
                             name=name,
                             started=(created - _EPOCH) / _TICKS if created else 0.0,
                             cpu_seconds=(user + kernel) / _TICKS,
                             memory_bytes=working_set,
                         )
-                    )
+                    if include_io:
+                        read_bytes, write_bytes = struct.unpack_from('<qq', buffer, offset + 232)
+                        # Invalid signed counters do not fabricate zero I/O or
+                        # discard otherwise usable CPU/memory observations.
+                        if read_bytes >= 0 and write_bytes >= 0:
+                            row.update(io_read_bytes=read_bytes, io_write_bytes=write_bytes)
+                    rows.append(row)
                 else:
                     skipped += 1
             if not next_offset:

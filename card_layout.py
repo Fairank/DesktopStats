@@ -63,7 +63,30 @@ def _grid(indices, box, columns, mode="stack", size=24, gap=8, column_gap=None):
     )
 
 
-def plan(width, count, style="auto", show_title=True, chart=False, footer=False, compact=False):
+def summary_plan(body, *, title=None, footer=None, compact=False):
+    """Give an unchanged three-channel template one clear primary reading."""
+    if body.width >= 260:
+        gap = 16
+        primary_width = (body.width - gap) * .47
+        primary = Box(body.x, body.y, primary_width, body.height)
+        support = Box(primary.right + gap, body.y,
+                      body.width - primary_width - gap, body.height)
+        readings = (Reading(0, primary, size=36),) + _grid(
+            (1, 2), support, 1, "stack" if compact else "row", size=20, gap=10
+        )
+    else:
+        primary_height = body.height * .54
+        primary = Box(body.x, body.y, body.width, primary_height)
+        support = Box(body.x, primary.bottom + 8, body.width,
+                      body.height - primary_height - 8)
+        readings = (Reading(0, primary, size=36),) + _grid(
+            (1, 2), support, 2, size=22, gap=12
+        )
+    return CardLayout(body, readings, title=title, footer=footer)
+
+
+def plan(width, count, style="auto", show_title=True, chart=False, footer=False, compact=False,
+         summary=False):
     """Keep every selected reading in a non-overlapping content rectangle.
 
     Dimensions are design units, independent of screen DPI. Small cards use the
@@ -76,6 +99,9 @@ def plan(width, count, style="auto", show_title=True, chart=False, footer=False,
     foot = Box(14, 133, width - 28, 16) if footer else None
     indices = tuple(range(count))
     wide = width >= 248
+
+    if summary and style == "auto" and count == 3 and wide:
+        return summary_plan(body, footer=foot, compact=compact)
 
     if style == "cores":
         if count == 1:

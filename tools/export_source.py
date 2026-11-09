@@ -23,10 +23,20 @@ from tools import build as BUILD  # noqa: E402 - direct tools/ CLI needs the pro
 
 _NATIVE = """
 ActionButton.qml Appearance.qml Check.qml Choice.qml ContentCanvas.qml
-ContentLayoutEditor.qml DesktopWidget.qml Details.qml FormField.qml
+AssemblyPage.qml AssemblyParts.qml LoopParts046.qml AssemblyClock.qml AssemblyProfiles.js HardwarePacks.qml HardwareCpuPackages.js AccessoryGallery.qml AccessoryGlyph.qml
+ContentLayoutEditor.qml DesktopWidget.qml DesktopHardwareModel.qml Details.qml FormField.qml
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
+HardwareGlyph.qml HardwareShapes.js HardwareCpuModel.js HardwareModelDetails.js HardwareDenseInk052.js
+HardwareModelNvidia042.js HardwareModelRadeonArc042.js
+HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js HardwareNotebook.js HardwareNotebookParts.js HardwareVariants.js
+HardwareFanDesigns.js HardwareFanProfileData.js
+HardwareBoardDesigns.js HardwareBoardProfileData.js
+HardwareVariantGroupA.js HardwareVariantGroupB.js HardwareVariantGroupC.js
+HardwareSeriesShapes.js
+HardwareSeriesGroupA.js HardwareSeriesGroupB.js HardwareSeriesGroupC.js HardwareSeriesCoreExpansion.js
+HardwareSeriesNvidiaLegacy.js HardwareSeriesRadeonArc.js HardwareMemoryShapes.js
 OptionTabs.qml Preview.qml SamplingControl.qml SensorBrowser.qml SettingRow.qml
 Settings.qml SettingsGroup.qml SkinPicker.qml Theme.qml Toggle.qml TopBar.qml
 TopBarDetails.qml TopBarItemInspector.qml TopBarMetricContent.qml TopBarGroupContent.qml TopBarChrome.qml ProcessUsageCard.qml
@@ -70,6 +80,64 @@ REVIEWED_FILES = frozenset(
         "assets/" + name
         for name in (
             "icon-manifest.json",
+            "showcase/hardware-schemes.png",
+            "showcase/assembly-depth-review049.png",
+            "showcase/gpu-six-depth049.png",
+            "showcase/gpu-insertion049.gif",
+            "showcase/assembly-six-depth049.png",
+            "showcase/gpu-insertion-six049.gif",
+            "showcase/assembly-complete-six048.png",
+            "showcase/aio-connections048.png",
+            "showcase/assembly-complete-six048.gif",
+            "showcase/case-fan-before-after047.png",
+            "showcase/case-fan-six047.png",
+            "showcase/gpu-blocks047-style-1-twelve-r4.png",
+            "showcase/gpu-blocks047-style-2-twelve-r4.png",
+            "showcase/gpu-blocks047-style-3-twelve-r4.png",
+            "showcase/gpu-blocks047-style-4-twelve-r4.png",
+            "showcase/gpu-blocks047-style-5-twelve-r4.png",
+            "showcase/gpu-blocks047-style-6-twelve-r4.png",
+            "showcase/gpu-blocks047-original-front-twelve-r4.png",
+            "showcase/motherboard047-asrock-z790-pg-itx-tb4-six.png",
+            "showcase/motherboard047-asrock-b650i-lightning-wifi-six.png",
+            "showcase/motherboard047-asrock-x670e-taichi-six.png",
+            "showcase/motherboard047-asrock-b650e-steel-legend-wifi-six.png",
+            "showcase/motherboard047-asrock-b650m-pg-riptide-wifi-six.png",
+            "showcase/motherboard047-gigabyte-z790-aorus-master-six.png",
+            "showcase/motherboard047-original-oblique-six-models.png",
+            "showcase/loop-fitting-six046.png",
+            "showcase/loop-fittings-atlas046-1.png",
+            "showcase/loop-fittings-atlas046-2.png",
+            "showcase/motherboard-details046.png",
+            "showcase/cpu-gpu-six046-static.png",
+            "showcase/three-gpus-notebook-color046.png",
+            "showcase/assembly-loop-six046.png",
+            "showcase/assembly-loop-six046.gif",
+            "showcase/assembly-loop-six046.mp4",
+            "showcase/loop-block-six046-1.png",
+            "showcase/loop-block-six046-2.png",
+            "showcase/loop-block-six046-3.png",
+            "showcase/loop-block-six046-4.png",
+            "showcase/loop-block-six046-5.png",
+            "showcase/loop-block-six046-6.png",
+            "showcase/loop-block-six046-7.png",
+            "showcase/loop-block-six046-8.png",
+            "showcase/loop-blocks-atlas046-1.png",
+            "showcase/loop-blocks-atlas046-2.png",
+            "showcase/loop-blocks-atlas046-3.png",
+            "showcase/loop-blocks-atlas046-4.png",
+            "showcase/assembly-3d.png",
+            "showcase/case-expansion.png",
+            "showcase/case-styles.png",
+            "showcase/assembly-inspector.png",
+            "showcase/assembly-quality.png",
+            "showcase/assembly-parts.png",
+            "showcase/assembly-parts-styles.png",
+            "showcase/assembly-effects.gif",
+            "showcase/assembly-effects.mp4",
+            "showcase/accessory-art.png",
+            "showcase/accessory-models-3d.png",
+            "showcase/accessory-atlas.png",
             "ICON-NOTES.md",
             "icon.ico",
             "icon.png",
@@ -101,6 +169,47 @@ REVIEWED_FILES = frozenset(
             "showcase/hardware-motion-dark.gif",
             "showcase/motion-continuity-light.gif",
             "showcase/motion-continuity-dark.gif",
+            "showcase/model-widgets042.png",
+            "showcase/cpu-six043.gif",
+            "showcase/cpu-six043.mp4",
+            "showcase/cpu-six043.png",
+            "showcase/gpu-six043.gif",
+            "showcase/gpu-six043.mp4",
+            "showcase/gpu-six043.png",
+            "showcase/assembly-six043.gif",
+            "showcase/assembly-six043.mp4",
+            "showcase/assembly-six043.png",
+            "showcase/assembly-air-six043.png",
+            "showcase/assembly-aio-six043.png",
+            "showcase/assembly-loop-six043.png",
+            "showcase/radiators-atlas044.png",
+            "showcase/liquid-six044.png",
+            "showcase/liquid-six044.gif",
+            "showcase/liquid-six044.mp4",
+            "showcase/motherboards-original045.png",
+            "showcase/motherboards-six045.png",
+            "showcase/board-socket-io045.png",
+            "showcase/radiators-atlas045-01.png",
+            "showcase/radiators-atlas045-02.png",
+            "showcase/radiators-atlas045-03.png",
+            "showcase/radiators-atlas045-04.png",
+            "showcase/radiators-atlas045-05.png",
+            "showcase/radiators-atlas045-06.png",
+            "showcase/radiators-atlas045-07.png",
+            "showcase/fan-atlas045-01.png",
+            "showcase/fan-atlas045-02.png",
+            "showcase/fan-atlas045-03.png",
+            "showcase/cooler-atlas045-01.png",
+            "showcase/cooler-atlas045-02.png",
+            "showcase/cooling-six045-01.png",
+            "showcase/cooling-six045-02.png",
+            "showcase/cooling-six045-03.png",
+            "showcase/cooling-motion-six045.gif",
+            "showcase/cooling-geometry-six045-01.png",
+            "showcase/cooling-geometry-six045-02.png",
+            "showcase/cooling-geometry-six045-03.png",
+            "showcase/cooling-geometry-six045-04.png",
+            "showcase/cooling-geometry-six045-05.png",
         )
     ]
     + [f"assets/lucide/icons/{name}.svg" for name in _LUCIDE]
@@ -120,6 +229,7 @@ REVIEWED_FILES = frozenset(
         "hooks/hook-PySide6.QtGui.py",
         "hooks/hook-PySide6.QtQml.py",
         "docs/USER_GUIDE.md",
+        "assets/showcase/cpu-packages.png",
     ]
 )
 EXTRA_FILES = frozenset(
@@ -169,9 +279,12 @@ _PRIVATE_PARTS = frozenset(
         "root-qml-isolated-profile",
         ".qa-profile",
         ".test-profile",
+        "desktopstatspublisher",
+        ".publisher-private",
+        ".watermark-keys",
     }
 )
-_PRIVATE_SUFFIXES = {".pfx", ".p12", ".pem", ".key", ".token", ".pid", ".log", ".dmp"}
+_PRIVATE_SUFFIXES = {".pfx", ".p12", ".pem", ".key", ".token", ".pid", ".log", ".dmp", ".dpapi"}
 _BINARY_SUFFIXES = frozenset(
     {
         ".exe",
@@ -208,6 +321,8 @@ _TEXT_SUFFIXES = {
     ".py",
     ".qml",
     ".js",
+    ".mjs",
+    ".html",
     ".json",
     ".md",
     ".txt",
@@ -223,7 +338,7 @@ _TOKEN = re.compile(
     r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|"
     r"sk-(?:proj-)?[A-Za-z0-9_-]{20,}|AKIA[A-Z0-9]{16})\b"
 )
-_PRIVATE_KEY = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")
+_PRIVATE_KEY = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----")
 _HOME = re.compile(r"(?i)(?:[A-Z]:[/\\]+Users[/\\]+|/home/|/Users/)([\w.@-]+)(?=[/\\])")
 _FIXTURE_USERS = {
     "user",
@@ -322,6 +437,15 @@ def _read(root, name):
 
 
 def _scan(name, data):
+    if PurePosixPath(name).suffix.casefold()=='.dspack':
+        if not name.startswith('model-packs/'):
+            raise ExportError('Model data archive outside reviewed folder: '+name)
+        from hardware_packs import _archive,PackError
+        try:manifest,models=_archive(data)
+        except PackError as error:raise ExportError('Invalid data-only model archive: '+name) from error
+        for leaf,content in (('manifest.json',manifest),('models.json',models)):
+            _scan(name+'!/'+leaf,json.dumps(content,ensure_ascii=False).encode('utf8'))
+        return
     if _binary_path(name) or _binary_magic(data):
         raise ExportError(
             "Executable/object binary is not permitted in this source export: " + name
@@ -332,6 +456,15 @@ def _scan(name, data):
         content = data.decode("utf-8-sig")
     except UnicodeDecodeError as error:
         raise ExportError("Expected UTF-8 source text: " + name) from error
+    if PurePosixPath(name).suffix.casefold() == '.json':
+        try:
+            value = json.loads(content)
+        except (ValueError, RecursionError):
+            value = None
+        if isinstance(value, dict) and ('signing_der' in value or 'carrier_master' in value
+                or value.get('protection') == 'Windows-DPAPI-CurrentUser'
+                or value.get('scheme') == 'scrypt-32768-8-1/aes-256-gcm'):
+            raise ExportError('Publisher secret stores and encrypted backups are not public source: ' + name)
     for number, line in enumerate(content.splitlines(), 1):
         if _TOKEN.search(line) or _PRIVATE_KEY.search(line):
             # Never echo the possible secret into a log or exception.
@@ -374,6 +507,78 @@ def _build_sources(root):
     ):
         raise ExportError("Packaging source allowlist is not an explicit sequence")
     return tuple(values[0])
+
+
+def _native_relative_imports(content):
+    """Read literal QML/JS import directives, excluding comments and strings."""
+    index = 0
+    line_start = True
+    directive = re.compile(r'''(?:\.import|import)\b\s+(["'])([^"'\r\n]+)\1''')
+    while index < len(content):
+        char = content[index]
+        if char == "\n":
+            line_start = True
+            index += 1
+        elif char.isspace():
+            index += 1
+        elif content.startswith("//", index):
+            end = content.find("\n", index + 2)
+            index = len(content) if end < 0 else end
+        elif content.startswith("/*", index):
+            end = content.find("*/", index + 2)
+            if end < 0:
+                raise ExportError("Unterminated comment in native source")
+            if "\n" in content[index:end + 2]:
+                line_start = True
+            index = end + 2
+        else:
+            match = directive.match(content, index) if line_start else None
+            if match:
+                yield match.group(2)
+                index = match.end()
+            elif char in "\"'`":
+                quote = char
+                index += 1
+                while index < len(content):
+                    if content[index] == "\\":
+                        index += 2
+                    elif content[index] == quote:
+                        index += 1
+                        break
+                    else:
+                        index += 1
+            else:
+                index += 1
+            line_start = False
+
+
+def _validate_native_source_closure(root, paths):
+    """Dependencies must be reviewed explicitly; never expand the allowlist."""
+    included = set(paths)
+    for name in sorted(included):
+        if not name.startswith("native/") or PurePosixPath(name).suffix.casefold() not in {".js", ".qml"}:
+            continue
+        try:
+            content = _read(root, name).decode("utf-8-sig")
+        except UnicodeDecodeError as error:
+            raise ExportError("Expected UTF-8 native source: " + name) from error
+        for reference in _native_relative_imports(content):
+            if PurePosixPath(reference).suffix.casefold() not in {".js", ".qml"}:
+                continue
+            if PurePosixPath(reference).is_absolute() or "\\" in reference or ":" in reference:
+                raise ExportError("Non-relative native source import in " + name)
+            parts = list(PurePosixPath(name).parent.parts)
+            for part in PurePosixPath(reference).parts:
+                if part == "..":
+                    if not parts:
+                        raise ExportError("Native source import escapes the project: " + name)
+                    parts.pop()
+                elif part != ".":
+                    parts.append(part)
+            target = "/".join(parts)
+            _relative_name(target)
+            if target not in included:
+                raise ExportError("Native import omitted from reviewed source: " + name + " -> " + target)
 
 
 def collect_paths(root, contract=BUILD):
@@ -456,11 +661,13 @@ def collect_paths(root, contract=BUILD):
     folded = [name.casefold() for name in paths]
     if len(set(folded)) != len(folded):
         raise ExportError("Case-colliding source paths")
-    return sorted(
+    exported = sorted(
         name
         for name in paths
         if not _binary_path(name) and not name.casefold().startswith("collector/runtime/")
     )
+    _validate_native_source_closure(root, exported)
+    return exported
 
 
 def _output_path(root, output):
@@ -513,7 +720,7 @@ def export_source(output=None, *, root=ROOT, contract=BUILD):
         "version": version,
         "archive_root": prefix,
         "binaries_included": False,
-        "binary_policy": "No executable/object/install binaries; reviewed image assets retained.",
+        "binary_policy": "No executable/object/install binaries; reviewed original image/video and validated data-only model packs retained.",
         "dependency_preparation_required": True,
         "files": rows,
         "manifest_note": "This manifest describes every other archive member; no self-hash.",

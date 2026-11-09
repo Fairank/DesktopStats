@@ -81,7 +81,8 @@ def main():
             process = subprocess.run(
                 [sys.executable, "-X", "utf8", str(Path(__file__).resolve()), "--worker", path.name],
                 cwd=ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                timeout=180, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                timeout=180, creationflags=(getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                                           | getattr(subprocess, "BELOW_NORMAL_PRIORITY_CLASS", 0)),
             )
             return path.name, process.returncode, process.stdout.decode("utf-8", errors="replace")
         except subprocess.TimeoutExpired:

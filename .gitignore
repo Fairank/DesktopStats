@@ -32,6 +32,10 @@ qa-private/
 .idea/
 .vscode/
 *.dmp
+*.dpapi
+.publisher-private/
+.watermark-keys/
+DesktopStatsPublisher/
 collector/runtime/
 collector/cpu-temperature-runtime/
 third_party/librehardwaremonitor/0.9.6/*.dll

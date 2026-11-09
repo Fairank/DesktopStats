@@ -7,8 +7,9 @@ computes a legal effective rectangle before a native window is created/resized.
 
 from math import ceil, floor, isfinite
 
-from card_layout import Box, CardLayout, Reading
+from card_layout import Box, CardLayout, Reading, summary_plan
 from card_layout import plan as legacy_plan
+from widget_catalog import TEMPLATES
 
 CELL_WIDTH = 128
 ROW_HEIGHT = 30
@@ -22,9 +23,23 @@ class ResponsiveLayoutError(ValueError):
     """The requested content rectangle is incomplete or too small."""
 
 
+def default_summary(prefs, metrics):
+    """Only unchanged automatic three-reading templates receive the new layout.
+
+    A selected manual/grid/list mode or edited metric sequence keeps its own
+    geometry. This is a presentation choice, never a preference migration.
+    """
+    template = TEMPLATES.get(prefs.get("template"), {})
+    return (prefs.get("form") != "bar"
+            and prefs.get("layout_mode", "auto") == "auto"
+            and prefs.get("presentation", "auto") == "auto"
+            and len(metrics) == 3 and tuple(template.get("content", ())) == tuple(metrics))
+
+
 def is_responsive(prefs):
     return (
-        prefs.get("width") is not None
+        prefs.get("presentation") == "hardware"
+        or prefs.get("width") is not None
         or prefs.get("height") is not None
         or prefs.get("form", "square") in ("free", "bar")
         or prefs.get("layout_mode", "auto") != "auto"
@@ -36,6 +51,41 @@ def metric_count(prefs):
     if selected:
         return len(selected)
     return 2 if prefs.get("kind") == "power" and prefs.get("primary") == "watts" else 1
+
+
+def hardware_model_geometry(width, height, metrics, prefs):
+    """One DIP contract for model artwork, numbers, hit targets and previews.
+
+    The artwork never overlaps the fixed reading band. GPU artwork has its own
+    wide slot; CPU artwork stays square rather than stretching the package.
+    """
+    if (type(width) not in (int, float) or type(height) not in (int, float)
+            or not isfinite(width) or not isfinite(height) or width < 220 or height < 220
+            or prefs.get("kind") not in ("cpu", "gpu") or not 2 <= len(metrics) <= 3):
+        raise ResponsiveLayoutError("Hardware models need at least 220 × 220 DIP and 2–3 readings")
+    inset = max(14, min(24, width * .065))
+    title = Box(inset, 12, width - 2 * inset, 20) if _title(prefs) else None
+    top = 39 if title else 10
+    band_height = max(52, min(68, height * .225))
+    bottom = height - 8
+    body = Box(inset, top, width - 2 * inset, bottom - top)
+    band_top = bottom - band_height
+    caption_height = 32
+    art_bottom = band_top - caption_height - 12
+    if prefs["kind"] == "cpu":
+        edge = min(body.width * .78, art_bottom - top)
+        image = Box((width - edge) / 2, top + (art_bottom - top - edge) / 2, edge, edge)
+    else:
+        # GPU source geometry is a square viewbox containing a shallow card.
+        # HardwareGlyph's existing wide mode crops the empty vertical margins.
+        image_height = min(art_bottom - top, body.width * .60)
+        image = Box(inset, top + (art_bottom - top - image_height) / 2, body.width, image_height)
+    gap = 8
+    slot_width = (body.width - gap * (len(metrics) - 1)) / len(metrics)
+    readings = tuple(Box(inset + i * (slot_width + gap), band_top, slot_width, band_height)
+                     for i in range(len(metrics)))
+    caption = Box(inset, band_top - caption_height - 6, body.width, caption_height)
+    return dict(body=body, title=title, image=image, caption=caption, readings=readings)
 
 
 def _mode(prefs):
@@ -97,6 +147,10 @@ def minimum_dimensions(prefs, width=None):
     if width is not None and (type(width) not in (int, float) or not isfinite(width) or width <= 0):
         raise ResponsiveLayoutError("Invalid candidate width")
     count = max(1, min(6, metric_count(prefs)))
+    if prefs.get("presentation") == "hardware":
+        if prefs.get("kind") not in ("cpu", "gpu") or not 2 <= count <= 3:
+            raise ResponsiveLayoutError("Hardware models need two or three readings")
+        return 220, 220
     if not is_responsive(prefs):
         edge = 132 if count >= 5 else 114
         return (edge * 2 + 8 if prefs.get("form") == "wide" else edge, edge)
@@ -178,6 +232,13 @@ def responsive_plan(width, height, metrics, prefs):
     metrics = tuple(metrics)
     if not 1 <= len(metrics) <= 6 or len(set(metrics)) != len(metrics):
         raise ResponsiveLayoutError("Choose one to six distinct metrics")
+    if prefs.get("presentation") == "hardware":
+        geometry = hardware_model_geometry(width, height, metrics, prefs)
+        readings = geometry["readings"]
+        return CardLayout(geometry["body"], tuple(
+            Reading(i, box, "model", min(30, max(20, width * .085)), metric)
+            for i, (box, metric) in enumerate(zip(readings, metrics))
+        ), title=geometry["title"])
     if not is_responsive(prefs):
         scale = height / 160
         style = prefs.get("presentation", "auto")
@@ -191,6 +252,7 @@ def responsive_plan(width, height, metrics, prefs):
             or not prefs.get("content")
             and style != "cores"
             and prefs.get("secondary", "none") != "none",
+            summary=default_summary(prefs, metrics),
         )
 
         def box(item):
@@ -221,6 +283,15 @@ def responsive_plan(width, height, metrics, prefs):
     title_height = TITLE_HEIGHT if _title(prefs) else 0
     body = Box(PAD_X, PAD_Y + title_height, width - 2 * PAD_X, height - 2 * PAD_Y - title_height)
     title = Box(PAD_X, PAD_Y, width - 2 * PAD_X, TITLE_HEIGHT - 2) if title_height else None
+    if default_summary(prefs, metrics) and height >= 148:
+        inset = 14 if width >= 170 else 10
+        body_top = 42 if title_height else 14
+        body = Box(inset, body_top, width - 2 * inset, height - body_top - 14)
+        title = Box(inset, 10, width - 2 * inset, 22) if title_height else None
+        layout = summary_plan(body, title=title)
+        return CardLayout(layout.body,
+                          tuple(Reading(r.index, r.box, r.mode, r.size, metrics[r.index])
+                                for r in layout.readings), title=title)
     mode = _mode(prefs)
     if mode == "manual":
         boxes = tuple(

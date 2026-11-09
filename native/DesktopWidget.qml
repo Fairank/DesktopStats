@@ -7,6 +7,8 @@ Window {
     required property var spec
     property bool registered: false
     property bool resizing: false
+    // Runtime owns exposure/lock/fullscreen gating; a missing gate stays quiet.
+    property bool modelMotionAllowed: false
     property int nativeFlags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint | Qt.WindowDoesNotAcceptFocus
     property var composition: ({material:"solid"})
     property var appearanceConfig: null
@@ -45,6 +47,7 @@ Window {
         id:cards
         model:root.spec.cells
         HardwareCard {
+            id: hardwareCard
             required property var modelData
             property var cardPrefs: root.paintConfig.widgets[modelData.key] || ({})
             x:modelData.x*root.width/root.spec.width; y:modelData.y*root.height/root.spec.height
@@ -64,6 +67,18 @@ Window {
             history:cardPrefs.chart===false?[]:stats.history
             frosted:root.composition.coating_translucent===true
             surface:root.surfacePolicy.card_surfaces
+            Loader {
+                anchors.fill: parent
+                active: hardwareCard.cardPrefs.presentation === "hardware"
+                sourceComponent: DesktopHardwareModel {
+                    moduleKey: hardwareCard.moduleKey
+                    config: hardwareCard.config
+                    draftMode: root.appearanceConfig !== null
+                    active: root.visible && root.visibility !== Window.Minimized && !root.resizing
+                    motionAllowed: root.modelMotionAllowed && root.visible
+                        && root.visibility !== Window.Minimized && !root.resizing
+                }
+            }
         }
     }
     MouseArea {
@@ -175,15 +190,7 @@ Window {
             if(!accepted) {root.width=root.spec.width;root.height=root.spec.height}
         }
         onCanceled: {root.resizing=false;root.width=root.spec.width;root.height=root.spec.height}
-        Canvas {
-            anchors.right:parent.right;anchors.bottom:parent.bottom;anchors.margins:7;width:12;height:12
-            opacity:resizeHandle.containsMouse || resizeHandle.pressed || moveArea.containsMouse ? .65 : .18
-            onPaint: {
-                let ctx=getContext("2d")
-                ctx.clearRect(0,0,width,height);ctx.strokeStyle=stats.saved.theme==="dark"?"#d9e4f2":"#65768b";ctx.lineWidth=1.2
-                ctx.beginPath();ctx.moveTo(3,10);ctx.lineTo(10,3);ctx.moveTo(7,10);ctx.lineTo(10,7);ctx.stroke()
-            }
-        }
+        // Keep the resize cursor and hit area without painting corner marks.
         Accessible.name:stats.tr("缩放小组件")
     }
 }

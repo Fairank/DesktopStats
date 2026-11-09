@@ -110,6 +110,56 @@ class SourceExportTests(unittest.TestCase):
             self.assertFalse(any(export._binary_magic(archive.read(name)) for name in actual))
             self.assertIn(prefix + "tests/test_example.py", actual)
 
+    def test_present_but_unreviewed_native_dependency_blocks_export(self):
+        self.write("native/Main.qml", 'import "sub/Bridge.js" as Bridge\n')
+        self.write("native/sub/Bridge.js", '.import "../Dependency.js" as Dependency\n')
+        self.write("native/Dependency.js", '.pragma library\nvar value = 42;\n')
+        reviewed = {"assets/icon.svg", "native/Main.qml", "native/sub/Bridge.js"}
+        with patch.object(export, "REVIEWED_FILES", frozenset(reviewed)):
+            with self.assertRaisesRegex(export.ExportError,
+                    r"Native import omitted.*native/sub/Bridge.js -> native/Dependency.js"):
+                self.run_export()
+        self.assertFalse(self.output.exists())
+
+    def test_explicit_native_dependency_closure_roundtrips_without_unreviewed_neighbors(self):
+        names = ("native/Main.qml", "native/sub/Bridge.js", "native/Dependency.js")
+        self.write(names[0], 'import "sub/Bridge.js" as Bridge\n')
+        self.write(names[1], '.import "../Dependency.js" as Dependency\n')
+        self.write(names[2], '.pragma library\nvar value = 42;\n')
+        self.write("native/unreviewed.js", 'var private_note = "not part of source export";\n')
+        with patch.object(export, "REVIEWED_FILES", frozenset({"assets/icon.svg", *names})):
+            self.run_export()
+        with zipfile.ZipFile(self.output) as archive:
+            prefix = "DesktopStats-0.19.0-preview.1-source/"
+            for name in names:
+                self.assertEqual(archive.read(prefix + name), (self.root / name).read_bytes())
+            self.assertNotIn(prefix + "native/unreviewed.js", archive.namelist())
+
+    def test_native_import_scan_skips_comments_and_string_content(self):
+        self.write("native/Main.qml", '''// import "not-reviewed.js" as Ignored
+/* .import "also-not-reviewed.qml" as Ignored */
+import QtQuick
+property string note: "import 'unlisted.js' as Ignored"
+property string template: `
+import "unlisted-template.js" as Ignored
+`
+''')
+        with patch.object(export, "REVIEWED_FILES", frozenset({"assets/icon.svg", "native/Main.qml"})):
+            self.run_export()
+        self.assertTrue(self.output.is_file())
+
+    def test_native_relative_qml_dependency_and_private_escape_are_not_silently_ignored(self):
+        self.write("native/Main.qml", 'import "Child.qml" as Child\n')
+        self.write("native/Child.qml", 'import QtQuick\nItem {}\n')
+        with patch.object(export, "REVIEWED_FILES", frozenset({"assets/icon.svg", "native/Main.qml"})):
+            with self.assertRaisesRegex(export.ExportError, "Native import omitted.*native/Child.qml"):
+                self.run_export()
+        self.write("native/Main.qml", 'import "../qa-private/note.js" as Private\n')
+        with patch.object(export, "REVIEWED_FILES", frozenset({"assets/icon.svg", "native/Main.qml"})):
+            with self.assertRaisesRegex(export.ExportError, "Private directory"):
+                self.run_export()
+        self.assertFalse(self.output.exists())
+
     def test_even_explicit_build_binary_inputs_are_excluded_but_png_and_ico_remain(self):
         sources = list(self.contract.SOURCES)
         for name in (
@@ -216,6 +266,9 @@ class SourceExportTests(unittest.TestCase):
             "assets/../../outside.py",
             "C:/outside.py",
             "assets/private.key",
+            "assets/owner-key.dpapi",
+            "DesktopStatsPublisher/publisher-public.json",
+            ".watermark-keys/owner.json",
         ):
             contract = copy.copy(self.contract)
             contract.SOURCES = (*self.contract.SOURCES, name)
@@ -357,6 +410,30 @@ class SourceExportTests(unittest.TestCase):
             self.run_export()
         self.assertFalse(self.output.exists())
 
+    def test_offline_html_templates_receive_the_source_privacy_checks(self):
+        personal = "C:" + "/" + "Users/" + "private-person/OneDrive/data.json"
+        with self.assertRaisesRegex(export.ExportError, "Personal home-directory literal"):
+            export._scan("tools/templates/accessory-atlas.html", ('<p>'+personal+'</p>').encode('utf8'))
+        secret = "ghp" + "_" + "8Yv0FudqRbNmS74pAz6G1Ci9Xk3D5LwE"
+        with self.assertRaises(export.ExportError) as caught:
+            export._scan("tools/templates/accessory-atlas.html", ('<script>'+secret+'</script>').encode('utf8'))
+        self.assertNotIn(secret,str(caught.exception))
+
+    def test_offline_mjs_and_renamed_publisher_secrets_are_not_exportable(self):
+        secret = "ghp" + "_" + "8Yv0FudqRbNmS74pAz6G1Ci9Xk3D5LwE"
+        with self.assertRaises(export.ExportError) as caught:
+            export._scan('tools/publisher-fixture.mjs', ('const value="'+secret+'";').encode())
+        self.assertNotIn(secret,str(caught.exception))
+        sealed = ({'schema':1,'protection':'Windows-DPAPI-CurrentUser','ciphertext_base64':'synthetic-fixture'},
+                  {'schema':1,'scheme':'scrypt-32768-8-1/aes-256-gcm','ciphertext':'synthetic-fixture'},
+                  {'schema':1,'signing_der':'synthetic-fixture','carrier_master':'synthetic-fixture'})
+        for value in sealed:
+            with self.subTest(scheme=value),self.assertRaises(export.ExportError):
+                export._scan('docs/innocent-name.json',json.dumps(value).encode())
+        encrypted_header = '-----BEGIN ' + 'ENCRYPTED PRIVATE KEY-----'
+        with self.assertRaises(export.ExportError):export._scan('docs/key-as-note.txt',encrypted_header.encode())
+        export._scan('docs/publisher-public.json',json.dumps({'algorithm':'Ed25519','public_key_spki_der_base64':'public-fixture'}).encode())
+
     def test_generic_fixture_paths_are_allowed_and_export_is_reproducible(self):
         self.write(
             "tests/test_paths.py",
@@ -387,6 +464,16 @@ class SourceExportTests(unittest.TestCase):
                 self.run_export()
         self.assertFalse(self.output.exists())
         self.assertIn("changed mid-export", (self.root / "app.py").read_text(encoding="utf-8"))
+
+
+class CurrentNativeSourceClosureTests(unittest.TestCase):
+    def test_real_reviewed_native_import_graph_contains_dense_ink_dependency(self):
+        # Real current collection only: no source ZIP, Qt engine or application.
+        paths = export.collect_paths(PROJECT)
+        self.assertIn("HardwareDenseInk052.js", export._NATIVE)
+        self.assertIn("native/HardwareDenseInk052.js", paths)
+        self.assertIn('.import "HardwareDenseInk052.js"',
+                      (PROJECT / "native/HardwareModelDetails.js").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

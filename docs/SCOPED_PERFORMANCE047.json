@@ -1,0 +1,148 @@
+{
+  "passed": true,
+  "scope": "One actual Phanteks R260C D5 notebook-line card, fresh private one-model data pack; QApplication events and never-created software QML host. Not whole-app RSS/CPU, gaming, full Windows widgets or60FPS acceptance.",
+  "qa_priority": "BelowNormal process; LowPriority single QThread",
+  "source_sha256": {
+    "accessory_jobs047.py": "f6dcbb5a3052f7ca40355ac09e02cb5a5416680a170469646a7004e853209828",
+    "accessory_cancel047.py": "75afb1f289f3332575d9547397ecabaf33125f7f4b9a0a6bed340493e13290a3",
+    "assembly_tools.py": "7cc5ea57863a56939fe3ce2345123ab5c4a8f2f3b30b85b65dcaa502a1ffba62",
+    "accessory_art.py": "964fb6fa938d0bcfc8690aaa77c29f73657c4a61814bbf5e8ab9114724f8170e",
+    "liquid_svg046.py": "3e47b0996def90591880942c2c18ec332043252257739cba69b8b8eec6516a6e",
+    "hardware_packs.py": "12c07b572a58d38d5a1c0cf22bd7dc5bcbff7ca9d6a718d08b323ef103d9e11c",
+    "liquid_component_runtime046.py": "3dec11b2f19d4f85e443725fa6ddd10b1ade2dbd4a40e413518bcd318cda40a9",
+    "liquid_geometry046.py": "f3d20c03834df39a43baba172e73c07a33e7d6e17f2ab405092fcc5dd3364d59",
+    "liquid_block_geometry046.py": "7fb9697f70e41b7207c2e8d4e1d524cb3db6fc95f9af2b679ba1d796416142f9",
+    "assembly_style.py": "8795fabe484ba65a257616a726e7e4651684d7296b0518e44c8864266184c73d",
+    "native/AccessoryGallery.qml": "e3784091f1f2b6cb99382c953add3e077d4b0602ba30ca655224fd01dc8defe9",
+    "native/AccessoryGlyph.qml": "6c1bc8a487e850605f0a798be93af47b14d7a4e31f9b0a7ef4211c78acb6352b"
+  },
+  "source_bytes_unchanged": true,
+  "lookup_first_nonretaining_ms": 1.3067999971099198,
+  "cold_graphics_including_lazy_import_ms": 589.9580999976024,
+  "sync": [
+    {
+      "compute_ms": 555.0230999942869,
+      "callbacks": 0,
+      "max_event_gap_ms": 555.0230999942869,
+      "median_event_gap_ms": 555.0230999942869
+    },
+    {
+      "compute_ms": 560.5171000061091,
+      "callbacks": 0,
+      "max_event_gap_ms": 560.5171000061091,
+      "median_event_gap_ms": 560.5171000061091
+    },
+    {
+      "compute_ms": 567.1413000090979,
+      "callbacks": 0,
+      "max_event_gap_ms": 567.1413000090979,
+      "median_event_gap_ms": 567.1413000090979
+    }
+  ],
+  "async_jobs": [
+    {
+      "request_ms": 1.7007999995257705,
+      "wall_to_commit_ms": 576.2128999922425,
+      "compute_ms": 571.8001000059303,
+      "callbacks": 34,
+      "max_event_gap_ms": 20.02969998284243,
+      "median_event_gap_ms": 17.999099974986166
+    },
+    {
+      "request_ms": 1.713800011202693,
+      "wall_to_commit_ms": 576.8995999824256,
+      "compute_ms": 572.031199990306,
+      "callbacks": 34,
+      "max_event_gap_ms": 21.004100010031834,
+      "median_event_gap_ms": 17.999700008658692
+    },
+    {
+      "request_ms": 1.7539999971631914,
+      "wall_to_commit_ms": 586.1662999959663,
+      "compute_ms": 581.6346000065096,
+      "callbacks": 33,
+      "max_event_gap_ms": 19.997900002636015,
+      "median_event_gap_ms": 18.02075000887271
+    }
+  ],
+  "lookup_per_dispatch_ms": [
+    1.5824000001884997,
+    1.6109000134747475,
+    1.6537000192329288,
+    1.7656999989412725
+  ],
+  "cancellation_request_to_producer_exit_ms": 1.821299985749647,
+  "svg_bytes": 297003,
+  "geometry_digest": "4cc15048bf1f016e25c4de38fa8d1cb46d73c09a9f308d244fb5613b66adfe31",
+  "shape_digest": "19ea06327439f5401f7d476bfc7ab73cb1c05f938bfb34fc9f6b4230fa53a0bc",
+  "js_encodeURIComponent_ms": [
+    1.6404000052716583,
+    1.4396000187844038,
+    1.4057999942451715
+  ],
+  "qt_svg_parse_ms": [
+    3.040799987502396,
+    2.665700012585148,
+    2.686599997105077
+  ],
+  "qt_svg_paint_420x280_ms": [
+    30.874799995217472,
+    29.01880000717938,
+    29.40860000671819
+  ],
+  "actual_qml_accessory_glyph": [
+    {
+      "qvariant_binding_ms": 2.5545000098645687,
+      "until_image_ready_ms": 41.47900000680238
+    },
+    {
+      "qvariant_binding_ms": 2.283999987412244,
+      "until_image_ready_ms": 31.294799991883337
+    },
+    {
+      "qvariant_binding_ms": 2.241199981654063,
+      "until_image_ready_ms": 31.540099997073412
+    }
+  ],
+  "selected_record_cache_retained": 0,
+  "owned_workers_after_close": 0,
+  "hardware_queries": 0,
+  "visible_windows": 0,
+  "platform_windows_created": 0,
+  "gl_contexts": 0,
+  "new_production_timers": 0,
+  "measurement_type": "isolated_gallery_responsiveness",
+  "native_application_acceptance": false,
+  "installed_app_changed": false,
+  "whole_application_memory_measured": false,
+  "cpu_time_reduction_claimed": false,
+  "per_frame_geometry_generation": false,
+  "final_qml_source_bridge": {
+    "only_owned_source_changed_after_perf": "native/AccessoryGallery.qml",
+    "before_sha256": "e3784091f1f2b6cb99382c953add3e077d4b0602ba30ca655224fd01dc8defe9",
+    "after_sha256": "51e42ff18143bb2a37470d0388822850b73752b8b0c09c21e5778ed0b4a2959c",
+    "reason": "Added GPU block category mapping/button and GPU-only standalone-stage note. No producer/helper/cache/timing/AccessoryGlyph logic changed. Actual performance probe uses AccessoryGlyph, not Gallery layout."
+  },
+  "cancellation_limitations": "One cooperative-cancellation sample at this exact snapshot; other development samples took about17 or31ms. No guaranteed instant interruption or universal upper latency bound.",
+  "memory_limitations": "Selected-record and SVG cache limits are object retention scope only; Qt textures, Python imports, GL and process RSS are not measured.",
+  "final_worker_count_limit": 1,
+  "maximum_visible_pending_keys": 16,
+  "later_source_bridge": {
+    "changed_files": {
+      "accessory_art.py": {
+        "capture_sha256": "964fb6fa938d0bcfc8690aaa77c29f73657c4a61814bbf5e8ab9114724f8170e",
+        "current_sha256": "f5191bdde660146958fbba0f40b3f488bec1f4fc29259b1e1441f835226a2b5e"
+      },
+      "hardware_packs.py": {
+        "capture_sha256": "12c07b572a58d38d5a1c0cf22bd7dc5bcbff7ca9d6a718d08b323ef103d9e11c",
+        "current_sha256": "e867be07c240ffef653283fe3ebc962a9fb451ef091993ff953d8ebaad3e9446"
+      }
+    },
+    "accessory_art_change": "Bundled-only choices for offline exports and cached-module generation lookup; application choices still include installed optional models. The recorded probe explicitly imports hardware_packs before measurement and calls ArtJobs/art_from_reference, not accessory_art.art or choices.",
+    "hardware_packs_change": "Only the package documentation URL constant changed after the capture; PackStore lookup/retention logic remains the measured implementation.",
+    "measured_producer_worker_glyph_files_unchanged": true,
+    "capture_values_preserved": true,
+    "exact_final_snapshot_timings_repeated": false,
+    "scope": "These are capture-snapshot mechanism timings, not a fresh benchmark of every final file, whole-app CPU/RAM, gaming or native acceptance."
+  }
+}

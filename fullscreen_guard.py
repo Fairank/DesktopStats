@@ -12,9 +12,11 @@ GetWindowRect, DWMWINDOWATTRIBUTE and MONITORINFO.
 from __future__ import annotations
 
 import ctypes as c
+import math
 import os
 import sys
 import threading
+import time
 from collections import OrderedDict
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -35,6 +37,7 @@ EVENTS = (
 )
 _FAILED_CLOSE_RETAINERS = []  # Keep C callback pointers alive if native unhook fails.
 _MAX_TRACKED = 32
+_QUERY_RETRY_DELAYS = (2., 4., 8., 16., 30.)
 
 
 class FullscreenQueryError(RuntimeError):
@@ -93,10 +96,14 @@ class FullscreenGuard:
     means destroyed; query failures must raise. No background worker is started.
     """
 
-    def __init__(self, on_change, *, environ=None, api_factory=None):
+    def __init__(self, on_change, *, environ=None, api_factory=None, clock=None):
         self._notify = on_change
         self._environ = os.environ if environ is None else environ
         self._factory = api_factory
+        self._clock = clock or time.monotonic
+        self._query_failed = False
+        self._query_failures = 0
+        self._query_retry_at = self._query_retry_clock = None
         self._api = None
         self._handles = []
         self._thread = None
@@ -141,6 +148,42 @@ class FullscreenGuard:
         """Mark dirty for a caller-owned AppBar/display/DPI notification."""
         if not self._closed:
             self._dirty = True
+
+    def _failed_query(self):
+        self._query_failed = True
+        self._query_failures = min(self._query_failures + 1, len(_QUERY_RETRY_DELAYS))
+        self._query_retry_at = self._query_retry_clock = None
+        try:
+            now = self._clock()
+            if type(now) in (int, float) and math.isfinite(now):
+                self._query_retry_clock = now
+                self._query_retry_at = now + _QUERY_RETRY_DELAYS[self._query_failures - 1]
+        except (OSError, RuntimeError, ValueError, TypeError):
+            pass
+
+    def retry_failed_query(self):
+        """Caller-owned, rate-bounded invalidation; never queries a window.
+
+        Existing reading updates may retry a transient foreground/state read
+        even if its WinEvent was missed. Healthy caches and hook failures do
+        no work. Hooks, tracked games and the fail-closed result stay intact.
+        """
+        if self._closed or self._disabled or self._hook_failed or not self._query_failed or self._dirty:
+            return False
+        try:
+            now = self._clock()
+            if type(now) not in (int, float) or not math.isfinite(now):
+                return False
+            if (self._query_retry_at is None or self._query_retry_clock is not None
+                    and now < self._query_retry_clock):
+                self._query_retry_at = now + _QUERY_RETRY_DELAYS[0]
+            self._query_retry_clock = now
+            if now < self._query_retry_at:
+                return False
+        except (OSError, RuntimeError, ValueError, TypeError):
+            return False
+        self.invalidate()
+        return True
 
     def _event(self, event, hwnd, object_id=0, child_id=0):
         if self._closed or event not in EVENTS:
@@ -272,14 +315,20 @@ class FullscreenGuard:
             self._monitors = current
             self._known = True
             self.failure = None
+            self._query_failed = False
+            self._query_failures = 0
+            self._query_retry_at = self._query_retry_clock = None
             return self._last_blocked
         except Exception as exc:
             self.failure = f"Fullscreen window query failed: {exc}"
             self._cached = self._fallback(current)
+            self._failed_query()
             return self._cached
 
     def close(self):
         self._closed = True
+        self._query_failed = False
+        self._query_retry_at = self._query_retry_clock = None
         self._notify = None
         if not self._handles:
             release = getattr(self._api, "release_callback", None)

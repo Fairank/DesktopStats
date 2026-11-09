@@ -2,6 +2,8 @@
 
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,6 +13,42 @@ import native_selfcheck
 
 
 class SelfCheckTests(unittest.TestCase):
+    def test_real_isolated_selfcheck_follows_the_current_catalog(self):
+        root=Path(__file__).resolve().parents[1]
+        result=subprocess.run([sys.executable,'-X','utf8','-c',
+            'import native_selfcheck,sys; raise SystemExit(native_selfcheck.run(sys.argv[1]))',str(self.output)],
+            cwd=root,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+            timeout=60,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0)|getattr(subprocess,'BELOW_NORMAL_PRIORITY_CLASS',0))
+        self.assertEqual(result.returncode,0,result.stdout.decode('utf8',errors='replace')[-2000:])
+        report=json.loads(self.output.read_text(encoding='utf8'))
+        self.assertTrue(report['ok'])
+        self.assertEqual(len(report['checks']),18)
+        insertion=report['gpu_insertion_check']
+        self.assertIs(insertion['finite_out_and_back'],True)
+        self.assertGreaterEqual(insertion['distance_mm'],16.)
+        self.assertLessEqual(insertion['distance_mm'],52.)
+        self.assertIs(insertion['scene_rebuilt'],False)
+        self.assertIs(insertion['graphics_context'],False)
+        self.assertIn('optional-loop-pack-mesh-svg-remove-no-graphics',report['checks'])
+        self.assertIn('optional-cooling-pack-install-render-remove-no-graphics',report['checks'])
+        self.assertIn('optional-gpu-block-pack-mesh-svg-remove-no-graphics',report['checks'])
+        gpu=report['gpu_block_pack_check']
+        self.assertEqual(gpu['models'],12)
+        self.assertEqual(gpu['model_id'],'alphacool-core-rtx5090-rog-astral')
+        self.assertGreater(gpu['triangle_count'],0)
+        self.assertLessEqual(gpu['triangle_count'],2600)
+        self.assertGreater(gpu['svg_bytes'],0)
+        self.assertEqual(gpu['generic_chip_state'],'unlisted')
+        for key in ('rotors','removed_packs','selected_records','artwork_entries'):
+            self.assertEqual(gpu[key],0,key)
+        for key in ('telemetry_bound','assembly_supported','author_catalog_loaded'):
+            self.assertIs(gpu[key],False,key)
+        self.assertFalse(report['hardware'])
+        self.assertFalse(report['foreground_windows'])
+        self.assertEqual(report['qml_warnings'],[])
+        from accessory_art import choices
+        self.assertEqual(report['accessory_catalog_counts'],{key:len(rows) for key,rows in choices().items()})
+
     def setUp(self):
         directory = Path(__file__).resolve().parents[1] / "qa-private/selfcheck-unit-temp"
         directory.mkdir(parents=True, exist_ok=True)

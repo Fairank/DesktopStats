@@ -13,8 +13,9 @@ from localization import LANGUAGES
 from metrics import METRICS
 from profile_paths import resolve_profile_paths
 from skin_styles import SKINS
-from top_bar_config import default_top_bar, validate_top_bar
+from top_bar_config import HARDWARE_ICON_STYLES, default_top_bar, validate_top_bar
 from widget_catalog import GLASS_DEFAULTS, MODULES, TEMPLATES, from_template, widget_defaults
+from assembly_config import DEFAULT_ASSEMBLY, validate_assembly
 
 ASSETS = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 PROFILE_PATHS = resolve_profile_paths()
@@ -50,6 +51,7 @@ DEFAULT = dict(
     refresh=2,
     history_enabled=True,
     cpu_temperature_prompt_on_start=False,
+    assembly=dict(DEFAULT_ASSEMBLY),
     top_bar=default_top_bar(),
     magnet_enabled=False,
     magnet_gap=12,
@@ -91,6 +93,7 @@ def validate(value):
         raise ValueError("不支持的设置版本")
     legacy = version < 5
     out = copy.deepcopy(DEFAULT)
+    out["assembly"] = validate_assembly(value.get("assembly"))
     out["top_bar"] = validate_top_bar(value.get("top_bar", out["top_bar"]))
     if value.get("theme") == "glass":
         value["theme"] = "light"
@@ -169,7 +172,7 @@ def validate(value):
             raise ValueError("不支持的组件类型")
         prefs = widget_defaults(kind)
         meta = MODULES[kind]
-        for field in ("enabled", "chart", "grouped", "show_title"):
+        for field in ("enabled", "chart", "grouped", "show_title", "skinFrame"):
             if field in source:
                 if type(source[field]) is not bool:
                     raise ValueError("组件开关不正确")
@@ -221,7 +224,7 @@ def validate(value):
             raise ValueError("布局列数不正确")
         prefs["columns"] = columns
         for field, options in [
-            ("presentation", ("auto", "hero", "list", "ring", "bar", "cores")),
+            ("presentation", ("auto", "hero", "list", "ring", "bar", "cores", "hardware")),
             ("form", ("square", "wide", "free", "bar")),
             ("layout_mode", ("auto", "horizontal", "vertical", "grid", "manual")),
             ("dock", ("free", "top")),
@@ -295,6 +298,28 @@ def validate(value):
         if not isinstance(template, str) or template not in TEMPLATES:
             raise ValueError("不支持的组件模板")
         prefs["template"] = template
+        style = source.get("hardware_icon_style", "miniature")
+        if not isinstance(style, str) or style not in HARDWARE_ICON_STYLES:
+            raise ValueError("不支持的硬件模型风格")
+        prefs["hardware_icon_style"] = style
+        model = source.get("hardware_model", "")
+        if not isinstance(model, str) or model and not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,95}", model):
+            raise ValueError("不支持的硬件外观型号")
+        prefs["hardware_model"] = model
+        effect = source.get("icon_effect", "auto")
+        if effect not in ("auto", "off"):
+            raise ValueError("不支持的硬件模型动效")
+        prefs["icon_effect"] = effect
+        for field, lo, hi in (("effect_intensity", 0.0, 1.0), ("effect_speed", 0.5, 2.0)):
+            number = source.get(field, prefs[field])
+            if type(number) not in (int, float) or not math.isfinite(number) or not lo <= number <= hi:
+                raise ValueError("硬件模型动效参数超出范围")
+            prefs[field] = float(number)
+        if prefs["presentation"] == "hardware":
+            if kind not in ("cpu", "gpu") or not content or not 2 <= len(content) <= 3:
+                raise ValueError("硬件模型仅支持 CPU、显卡和 2–3 项读数")
+            if prefs["layout_mode"] != "auto":
+                raise ValueError("硬件模型使用独立图形与读数布局")
         if prefs["presentation"] == "cores" and kind != "cpu":
             raise ValueError("每核负载仅适用于处理器")
         out["widgets"][key] = prefs

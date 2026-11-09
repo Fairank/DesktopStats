@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "version": "0.51.0-preview.1",
+  "stage": "signed_optional_review_data_commit",
+  "source_producer_commit": "b48f178155010845fbf79c3e37a07a944d5f9b37",
+  "data_commit": "c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc",
+  "data_branch": "codex/hardware-artwork-data-v051",
+  "gallery_url": "https://github.com/Fairank/DesktopStats/tree/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc",
+  "native_acceptance": false,
+  "installed": false,
+  "all_requirements_complete": false,
+  "distribution": "Optional models and software previews; not startup loaded and not a stable/native-accepted binary release.",
+  "styles": [
+    "miniature",
+    "cartoon",
+    "notebook_color",
+    "notebook_line",
+    "sticker",
+    "papercut"
+  ],
+  "public_key_file": "WATERMARK050_PUBLIC_KEY.json",
+  "public_key_download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/publisher-public.json",
+  "public_key_sha256": "440e8f917933c691cef09c8eaeebc04ba9d5efa7111a9e7a75c03f9a3a8cdad3",
+  "private_keys_included": false,
+  "legal_conclusion": false,
+  "archive": {
+    "file": "DesktopStats-protected-reference051.zip",
+    "bytes": 1275838,
+    "sha256": "540d799051992eea3d3cc5646487a13c8c9d2493bbc213d99325b8ed5bc96cc8",
+    "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/DesktopStats-protected-reference051.zip"
+  },
+  "public_quality_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/public-model-quality051.json",
+  "public_quality_sha256": "9ca80a9612ae231e06a9a8f9838d8eb0eb41095014dc460ade53c18456b8abd2",
+  "signed_release_index_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/RELEASE_INDEX.json",
+  "signed_release_index_sha256": "6c8704156b4fcd89933fcae79de0962ccc7bc870da07693c8428729a7284ca27",
+  "marker_scope": {
+    "assets": 10,
+    "glb_reference_groups": 21,
+    "supported_reference_groups": 20,
+    "unsupported_transparent_panel_capacity": 0,
+    "all_catalog_marked": false,
+    "every_mesh_marked": false
+  },
+  "model_scope": {
+    "meshes": 398,
+    "triangles": 112850,
+    "nodes": 432,
+    "original_part_groups": 18,
+    "component_fallback_groups": 3,
+    "derived_cable_groups": 12,
+    "all_mechanical_interactions_complete": false
+  },
+  "assets": [
+    {
+      "id": "helios_glb",
+      "file": "helios-independent-protected051.glb",
+      "bytes": 8604288,
+      "sha256": "6397c892a9a8ed69e5437e1726a3278f1c28902c936a19d41e3fad52e218bd0c",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/helios-independent-protected051.glb",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/helios-independent-protected051.glb.watermark.json",
+      "receipt_sha256": "1eee9a6fa81a5200e15af1d48afe17d7e8eaa8065fc2eeae2d32f22f6f3b2de4",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "widgets_png",
+      "file": "widgets-six051.png",
+      "bytes": 440033,
+      "sha256": "b5b375752b29b95e40fe710be7c7aa260f0ef3939f8967da08fc3834c25c4d7a",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/widgets-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/widgets-six051.png.watermark.json",
+      "receipt_sha256": "ac7f6d86b3d6d42e3af54c93789105a7c034a3e4c4835d6dc49d002fcd12c94e",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "gpu_intel",
+      "file": "gpu-intel-six051.png",
+      "bytes": 694980,
+      "sha256": "c2524c372d6199309700b5527ee2bbec2d4d7504304536396eb0c155352f1900",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/gpu-intel-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/gpu-intel-six051.png.watermark.json",
+      "receipt_sha256": "0f2a29ad228844f7b4b1a81ddf90fa4670628f4832447dd4844fd7cc4721df2e",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "gpu_asus",
+      "file": "gpu-asus-dual-six051.png",
+      "bytes": 661578,
+      "sha256": "fcaff1ec30b0cfbcee57e6cfc37c1eeeb42b0980280a3583d5e2366399f0f5a8",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/gpu-asus-dual-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/gpu-asus-dual-six051.png.watermark.json",
+      "receipt_sha256": "996c81b2f18a2f60d6732ff8b49efaa630e33ccef16ba834f2b9fe5c40e016a3",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "gpu_amd",
+      "file": "gpu-amd-six051.png",
+      "bytes": 632903,
+      "sha256": "6aed350b1e7b64afc0a75d953d8b44277f30b0da3a1a5838a503500a9be4d525",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/gpu-amd-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/gpu-amd-six051.png.watermark.json",
+      "receipt_sha256": "fba516624803b91011086b4bb245c56e3c2d770ce5b00f4fe670e7bce4eb7143",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "helios_pc",
+      "file": "helios-assembly-six051.png",
+      "bytes": 1472400,
+      "sha256": "89b91f2875fc30623d86cd5cfc8ee08a790379c4909d4f20d45e13d2499cd494",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/helios-assembly-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/helios-assembly-six051.png.watermark.json",
+      "receipt_sha256": "621a5a5d82a2d5a9c5bdee3e495a413a0287a27c1a086e8c6002341490e738c1",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "north_pc",
+      "file": "north-assembly-six051.png",
+      "bytes": 1587961,
+      "sha256": "cc89c6d320f6b1049697a549bfcc9658eb23967682aaa6c002140b0080f03489",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/north-assembly-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/north-assembly-six051.png.watermark.json",
+      "receipt_sha256": "695b04edd9509d9b2cd1bbd32fe63eb80ab7e31f801a6ffb17d6855d57aa34b3",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "cpu_context",
+      "file": "cpu-vrm-six051.png",
+      "bytes": 827467,
+      "sha256": "5e17397d94ee291f8331f3fcefa88dad64e92facf8ba4e6cfe369d43274be466",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/cpu-vrm-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/cpu-vrm-six051.png.watermark.json",
+      "receipt_sha256": "8be2feec5dcacc85075f8adba00d29d1b7bb17120e94c617dc5f98a8c5ab3eac",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "psu_focus",
+      "file": "psu-six051.png",
+      "bytes": 592577,
+      "sha256": "cac223ec7863079d661355088df991f4b5176a1498cd6994e1f015bae6ea398c",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/psu-six051.png",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/psu-six051.png.watermark.json",
+      "receipt_sha256": "967a1896ac3df46edb66554db7c9819117cda7b9e067c90a4cd18452fcd05497",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    },
+    {
+      "id": "widgets_gif",
+      "file": "widgets-six051.gif",
+      "bytes": 3327940,
+      "sha256": "1ce429aa29efd92003f94e184f1acd0136d616ecd574e6557497e09e25e65cf7",
+      "download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/widgets-six051.gif",
+      "receipt_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/c9d38f6f6c8fb76b52a6d1a6230a8515a642bafc/widgets-six051.gif.watermark.json",
+      "receipt_sha256": "a6cd6b3511dd5c14f524693678a50a9455b20562d4db2810e031a2ad71614c89",
+      "signature_verified": true,
+      "embedded_bit_errors": 0
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import DesktopStats 1.0
+import "HardwareBoardDesigns.js" as BoardDesigns
 
 Window {
     id: root
@@ -52,6 +53,11 @@ Window {
     readonly property bool dark: foreground.r > 0.5
     property bool showMissing: false
     property bool showMetadata: false
+    property string hardwareStructureView: ""
+    readonly property var boardFacts: (detail.hardware_appearance || ({})).board_details || ({})
+    readonly property string hardwareDrawingKey: BoardDesigns.modelKey(detail.hardware_appearance || ({}))
+    onHardwareDrawingKeyChanged: hardwareStructureView=""
+    onShowMetadataChanged: if(!showMetadata)hardwareStructureView=""
     property bool showCpuDetails: false
     property int chartCursorIndex: -1
     property real chartCursorTime: NaN
@@ -322,18 +328,21 @@ Window {
             Layout.minimumHeight: 28; Layout.preferredHeight: 28; Layout.maximumHeight: 28
             spacing: 6
             MetricIcon {
+                id: detailMetricIcon
                 visible: !root.overflowMode
                 name: ({network:"network",disk_io:"disk",volume:"disk",storage:"disk",cooling:"fan",memory:"memory",cpu:"cpu",gpu:"gpu",battery:"battery",power:"power"})[root.detail.family] || root.detail.icon || "sensors"; ink: root.secondary
                 Layout.preferredWidth: 16; Layout.preferredHeight: 16
                 metric: root.detail.metric || ""
                 hardwareState: root.detail.hardware_state || ({})
+                hardwareAppearance: root.detail.hardware_appearance || ({})
+                iconStyle: root.detail.hardware_icon_style || "classic"
                 automaticEffect: root.detail.auto_effect || ""
                 effect: root.detail.icon_effect || "off"
                 level: root.detail.effect_level === undefined ? null : root.detail.effect_level
                 intensity: root.detail.effect_intensity === undefined ? 0.5 : root.detail.effect_intensity
                 speed: root.detail.effect_speed === undefined ? 1 : root.detail.effect_speed
                 available: root.detail.available === true && Number.isFinite(root.detail.numeric_value)
-                motionEnabled: root.barState.motionEnabled === true
+                motionEnabled: root.barState.motionEnabled === true && !root.hostMinimized
             }
             Text {
                 id: detailTitle
@@ -1098,6 +1107,178 @@ Window {
                                 Layout.fillWidth: true; visible: !!text
                                 text: root.detail.source || ""; textFormat: Text.PlainText
                                 color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                            }
+                            RowLayout {
+                                id: appearanceSummary
+                                readonly property var appearance: root.detail.hardware_appearance || ({})
+                                Layout.fillWidth: true; spacing: 12
+                                visible: ["cpu", "gpu", "memory"].includes(appearance.kind)
+                                Loader {
+                                    objectName: "topBarDetailAppearanceLoader"
+                                    Layout.preferredWidth: 64; Layout.minimumWidth: 64; Layout.maximumWidth: 64
+                                    Layout.preferredHeight: 64; Layout.alignment: Qt.AlignTop
+                                    active: root.showMetadata && root.visible && !root.hostMinimized
+                                        && root.visibility !== Window.Minimized && appearanceSummary.visible
+                                    sourceComponent: HardwareGlyph {
+                                        appearance: appearanceSummary.appearance; ink: root.secondary
+                                        fanMotionEnabled: detailMetricIcon.gpuFanMotionActive
+                                        fanRotation: detailMetricIcon.gpuFanPhase*360
+                                    }
+                                }
+                                ColumnLayout {
+                                    Layout.fillWidth: true; Layout.minimumWidth: 0; spacing: 4
+                                    Text {
+                                        objectName: "topBarDetailAppearance"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: {
+                                            const appearance = appearanceSummary.appearance
+                                            const confidence = appearance.confidence
+                                            const parts = [root.tr(appearance.selection_source==="manual"?"手动外观":(appearance.board_details || ({})).illustration_status==="schematic_unverified_exterior"?"布局示意":appearance.icon_set === "classic" ? "经典通用"
+                                                : confidence === "model" ? "型号外观" : confidence === "series" ? "系列外观" : confidence === "brand" ? "品牌外观" : "通用外观")]
+                                            if (["model", "brand"].includes(confidence) && typeof appearance.label === "string" && appearance.label.trim())
+                                                parts.push(appearance.label.trim())
+                                            if (appearance.kind === "gpu" && confidence === "model") {
+                                                const total = appearance.fan_count
+                                                const front = appearance.visible_fan_count
+                                                const knownTotal = Number.isInteger(total) && [0, 1, 2, 3, 4].includes(total)
+                                                if (knownTotal) parts.push(root.tr("风扇数量") + ": " + total)
+                                                else if (total == null) parts.push(root.tr("风扇总数未确认"))
+                                                if (Number.isInteger(front) && [0, 1, 2, 3].includes(front) && front !== total)
+                                                    parts.push(root.tr("正面可见风扇") + ": " + front)
+                                            }
+                                            return parts.join(" · ")
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailAppearanceSeries"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: appearanceSummary.appearance.icon_set !== "classic"
+                                            && ["model", "series"].includes(appearanceSummary.appearance.confidence)
+                                            && typeof appearanceSummary.appearance.series_label === "string"
+                                            ? appearanceSummary.appearance.series_label.trim() : ""
+                                        textFormat: Text.PlainText
+                                        color: root.foreground; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailFanProfile"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: {
+                                            const profile=appearanceSummary.appearance.fan_profile
+                                            if (!profile || appearanceSummary.appearance.icon_set==="classic"
+                                                || appearanceSummary.appearance.fan_count===0) return ""
+                                            const counts=profile.blade_counts && profile.blade_counts.length
+                                                ? profile.blade_counts : [profile.blades]
+                                            const known=counts.every(value=>Number.isInteger(value))
+                                            return (profile.label || "") + " · " + (known
+                                                ? counts.join(" / ")+" "+root.tr("叶片") : root.tr("风扇外观待核实"))
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailFanRpm"
+                                        Layout.fillWidth: true
+                                        visible: appearanceSummary.appearance.kind==="gpu"
+                                            && ["solid","miniature","soft","cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(appearanceSummary.appearance.icon_set)
+                                        text: {
+                                            const rpm=detailMetricIcon.gpuFanRpm, sample=detailMetricIcon.gpuFanReading
+                                            if (!Number.isFinite(rpm)) return root.tr("显卡风扇")+" · "+root.tr("转速未知")
+                                            const origin=root.tr(sample.semantics==="driver_current_rpm"?"驱动当前转速":"测速转速")
+                                            const scope=sample.aggregate==="mean_valid_cooler_channels"?" · "+root.tr("通道均值"):""
+                                            const ready=appearanceSummary.appearance.fan_profile && appearanceSummary.appearance.fan_profile.render_ready===true
+                                            return origin+scope+" · "+Math.round(rpm)+" RPM · "+root.tr(rpm===0?"已停转":ready?"动画慢放 120×":"外观待核实，保持静态")
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailAppearanceFeatures"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: appearanceSummary.appearance.icon_set !== "classic"
+                                            && appearanceSummary.appearance.features && typeof appearanceSummary.appearance.features.filter === "function"
+                                            ? appearanceSummary.appearance.features.filter(value => typeof value === "string" && value.trim()).slice(0, 2).join("\n") : ""
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailBoardSockets"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: [root.boardFacts.ports_text,root.boardFacts.power_text].filter(value=>!!value).map(value=>root.tr(value)).join("\n")
+                                        textFormat: Text.PlainText
+                                        color: root.foreground; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        objectName: "topBarDetailBoardStructure"
+                                        Layout.fillWidth: true; visible: !!text
+                                        text: {
+                                            const facts=root.boardFacts,parts=[]
+                                            if(facts.host_text)parts.push(root.tr(facts.host_text))
+                                            if(Number.isFinite(facts.slot_width))parts.push(facts.slot_width+" "+root.tr("槽"))
+                                            if(facts.kind==="memory") {
+                                                if(facts.generation)parts.push(String(facts.generation).toUpperCase())
+                                                if(Number.isInteger(facts.pins))parts.push(facts.pins+" pin")
+                                            }
+                                            return parts.join(" · ")
+                                        }
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        visible: root.boardFacts.illustration_status==="schematic_unverified_exterior"
+                                        text: root.tr("该型号外壳与叶片尚未核实，当前为布局示意")
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                    Flow {
+                                        objectName: "topBarHardwareStructureViews"
+                                        Layout.fillWidth: true; spacing: 6
+                                        Layout.preferredHeight: childrenRect.height
+                                        visible: root.boardFacts.kind==="gpu" && !!root.hardwareDrawingKey
+                                        Repeater {
+                                            model: [{id:"ports",label:root.tr("查看接口"),ready:root.boardFacts.ports && root.boardFacts.ports.length>0},
+                                                {id:"power",label:root.tr("查看供电"),ready:root.boardFacts.extra_power_interface || root.boardFacts.power_connectors && root.boardFacts.power_connectors.length>0},
+                                                {id:"backplate",label:root.tr("查看背板"),ready:!!root.boardFacts.backplate_recipe},
+                                                {id:"accessory",label:root.tr("查看配件背板"),ready:!!root.boardFacts.accessory_backplate_recipe}]
+                                            delegate: Button {
+                                                id: structureButton
+                                                required property var modelData
+                                                objectName: "topBarHardwareStructure_"+modelData.id
+                                                text: modelData.label; enabled: !!modelData.ready
+                                                visible: !!modelData.ready || ["ports","power"].includes(modelData.id)
+                                                onClicked: root.hardwareStructureView=root.hardwareStructureView===modelData.id?"":modelData.id
+                                                padding: 6
+                                                contentItem: Text { text: structureButton.text; color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11 }
+                                                background: Rectangle { radius: 6; color: root.tint(structureButton.hovered?0.08:0.03); border.width: 1; border.color: root.hardwareStructureView===structureButton.modelData.id?root.pairColor(0):root.tint(0.1) }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Loader {
+                                objectName: "topBarHardwareStructureLoader"
+                                Layout.fillWidth: true
+                                active: root.showMetadata && root.visible && !root.hostMinimized
+                                    && root.visibility!==Window.Minimized && !!root.hardwareDrawingKey && !!root.hardwareStructureView
+                                visible: active
+                                sourceComponent: ColumnLayout {
+                                    spacing: 4
+                                    Image {
+                                        objectName: "topBarHardwareStructureImage"
+                                        Layout.fillWidth: true; Layout.preferredHeight: 90
+                                        source: BoardDesigns.technicalSource(root.hardwareDrawingKey,root.hardwareStructureView)
+                                        sourceSize.width: 320; sourceSize.height: 140
+                                        fillMode: Image.PreserveAspectFit; cache: true; smooth: true; mipmap: false
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.tr(root.hardwareStructureView==="ports"?"接口数量示意，排列未核实":root.hardwareStructureView==="backplate"?"原厂背板简化外观":root.hardwareStructureView==="accessory"?"附送背板外观，未确认实际安装":root.boardFacts.alternative_power?"供电插座示意，连接位置二选一":"供电插座示意")
+                                        textFormat: Text.PlainText
+                                        color: root.secondary; font.family: root.barState.fontFamily; font.pixelSize: 11; wrapMode: Text.Wrap
+                                    }
+                                }
                             }
                         }
                     }

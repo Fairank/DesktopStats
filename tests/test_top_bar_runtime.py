@@ -2042,6 +2042,46 @@ class QmlTopBarTests(unittest.TestCase):
             self.assertLessEqual(end, item.width() - 5)
             self.assertGreaterEqual(number.mapToItem(item, QPointF(0, 0)).y(), 0)
 
+    def test_modern_hardware_icon_boxes_fit_all_bar_heights_and_measured_hit_regions(self):
+        cases = [('gpu', 'gpu_usage', height, icon_set)
+                 for height in (28, 32, 40)
+                 for icon_set in ('classic', 'outline', 'solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile', 'sticker', 'papercut', 'inkwash')]
+        cases += [(kind, metric, 32, icon_set)
+                  for kind, metric in (('cpu', 'cpu_usage'), ('memory', 'ram_percent'))
+                  for icon_set in ('classic', 'outline', 'solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile', 'sticker', 'papercut', 'inkwash')]
+        for kind, metric, height, icon_set in cases:
+            with self.subTest(kind=kind, height=height, icon_set=icon_set):
+                configuration = config()
+                configuration['top_bar']['height'] = height
+                configuration['top_bar']['items'] = [dict(id='b_0', metric=metric, prefs={'style':'icon_value'})]
+                appearance = dict(kind=kind, icon_set=icon_set, vendor='unknown', board_vendor='unknown',
+                                  style='gpu_neutral' if kind == 'gpu' else 'memory_neutral' if kind == 'memory' else 'chip')
+                self.controller.rows = [dict(rows(1)[0], metric=metric, hardware_appearance=appearance,
+                                            number_text='88.8', unit_text='%', number_reserve='999.9')]
+                # Independently register each supported height; this checks
+                # leaf geometry rather than the window resize transaction.
+                if self.manager._config['top_bar']['height'] != height:
+                    disabled = copy.deepcopy(configuration)
+                    disabled['top_bar']['enabled'] = False
+                    self.manager.apply(disabled)
+                self.manager.apply(configuration)
+                self.host = self.manager.hosts.get('DISPLAY1')
+                self.assertIsNotNone(self.host, self.controller.status)
+                QTest.qWait(1)
+                item = self.metric()
+                icon = item.findChild(QObject, 'topBarContentIcon')
+                number = item.findChild(QObject, 'topBarContentValue')
+                unit = item.findChild(QObject, 'topBarContentUnit')
+                modern = icon_set in ('solid', 'miniature', 'soft', 'cartoon', 'sketch', 'notebook_line', 'notebook_color', 'notebook_smile', 'sticker', 'papercut', 'inkwash')
+                expected_height = max(18, min(26, height - 10)) if modern else 18
+                expected_width = round(expected_height * 15 / 11) if modern and kind == 'gpu' else expected_height
+                self.assertEqual((icon.width(), icon.height()), (expected_width, expected_height))
+                self.assertGreaterEqual(icon.mapToItem(item, QPointF(0, 0)).y(), 0)
+                self.assertLessEqual(icon.mapToItem(item, QPointF(0, icon.height())).y(), height)
+                self.assertGreaterEqual(number.mapToItem(item, QPointF(0, 0)).x(),
+                                        icon.mapToItem(item, QPointF(icon.width(), 0)).x() + 5)
+                self.assertLessEqual(unit.mapToItem(item, QPointF(unit.width(), 0)).x(), item.width() - 5)
+
     def test_real_click_pin_close_and_edit_use_actual_qml_events(self):
         QTest.mouseClick(
             self.host.window,

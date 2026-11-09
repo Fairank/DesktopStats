@@ -265,6 +265,33 @@ ColumnLayout {
             }
         }
     }
+    SettingRow {
+        id: hardwareIconSetting
+        objectName: "topBarHardwareIconSetting"
+        Layout.fillWidth: true; visible: root.appearanceEditing
+        label: ui.t("硬件图标")
+        note: ["sticker","papercut","inkwash"].includes(root.config.hardware_icon_style)
+            ? ui.t("插画配色；每套型号目录和读数相同。")
+            : ui.t("切换外观版本，自动匹配规则和读数保持一致。")
+        Choice {
+            objectName: "topBarHardwareIconChoice"
+            width: Math.min(220, Math.max(150, hardwareIconSetting.width * .36))
+            implicitHeight: 34; Accessible.name: ui.t("硬件图标")
+            model: [{id:"miniature",label:ui.t("1 · 原版")},
+                    {id:"cartoon",label:ui.t("2 · 可爱笑脸")},
+                    {id:"notebook_color",label:ui.t("3 · 彩色手绘")},
+                    {id:"notebook_line",label:ui.t("4 · 纯线条")},
+                    {id:"sticker",label:ui.t("5 · 奶油贴纸")},
+                    {id:"papercut",label:ui.t("6 · 拼色剪纸")},
+                    {id:"inkwash",label:ui.t("蓝墨手账（旧选项）")},
+                    {id:"classic",label:ui.t("经典通用")},{id:"outline",label:ui.t("结构线稿")},
+                    {id:"solid",label:ui.t("精简实物")},
+                    {id:"soft",label:ui.t("柔和双色")},{id:"sketch",label:ui.t("手绘线稿")},
+                    {id:"notebook_smile",label:ui.t("笑脸手绘")}]
+            value: root.config.hardware_icon_style || "classic"
+            onPicked: selected => stats.changeTopBar("hardware_icon_style", selected)
+        }
+    }
     Flow {
         parent: barOptions
         Layout.fillWidth:true;spacing:6

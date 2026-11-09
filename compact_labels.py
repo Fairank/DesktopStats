@@ -4,7 +4,7 @@ Order matches the eight supported UI languages. Short names retain measurement
 source and battery direction; they are selected only after real font measurement.
 """
 
-from localization import LANGUAGES
+from localization import LANGUAGES, translate
 
 _ROWS = """
 cpu_temp|CPU 温度|CPU 溫度|CPU temp.|CPU温度|CPU 온도|CPU-Temp.|Temp. CPU|Temp. CPU
@@ -67,3 +67,18 @@ for _row in _ROWS.strip().splitlines():
 def label_options(metric, full_label, language):
     short = COMPACT_LABELS.get(metric, {}).get(language)
     return tuple(dict.fromkeys((full_label, short or full_label)))
+
+
+def model_label_options(metric, full_label, language, kind=None):
+    """The CPU/GPU model caption already supplies the device context.
+
+    Only equivalent measurements lose a repeated device prefix. Package/ASIC
+    power and other distinct sources retain their complete semantic labels.
+    Hit testing and accessibility continue to use the complete metric name.
+    """
+    title = {
+        'cpu_usage': '使用率', 'gpu_usage': '使用率',
+        'cpu_temp': '温度', 'gpu_temp': '温度',
+        'cpu_frequency': '频率', 'gpu_power': '功率',
+    }.get(metric) if kind in ('cpu', 'gpu') and metric.startswith(kind + '_') else None
+    return (translate(title, language),) if title else label_options(metric, full_label, language)

@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "asset_release_version": "0.50.0-preview.1",
+  "data_branch": "codex/invisible-watermark-data-v050",
+  "data_commit": "7319224c4999d59a9eebbae654dc5db452ece498",
+  "data_tree": "cc5133494b49b45b226d1a69160a96af4818499f",
+  "publisher_source_branch": "codex/invisible-watermark-v050",
+  "public_key_file": "docs/WATERMARK050_PUBLIC_KEY.json",
+  "public_key_sha256": "440e8f917933c691cef09c8eaeebc04ba9d5efa7111a9e7a75c03f9a3a8cdad3",
+  "publisher_key_id": "7055a716d2763fc595eb150e4d2a1c07a965d8ca8a053d3255f93812ee7ef0f7",
+  "signed_release_index_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/7319224c4999d59a9eebbae654dc5db452ece498/RELEASE_INDEX.json",
+  "signed_release_index_sha256": "d679ec4c30215a50adc503c454597cb745298dd538389dfbd6c004b1a25ac5cf",
+  "model_download_url": "https://raw.githubusercontent.com/Fairank/DesktopStats/7319224c4999d59a9eebbae654dc5db452ece498/DesktopStats-protected-reference050.zip",
+  "archives": [
+    {
+      "file": "DesktopStats-protected-reference050.zip",
+      "bytes": 1190244,
+      "sha256": "25f585d6f2cc4f239219813adfd4c580f60cd3d06f6a6c975621be8d5c915793"
+    }
+  ],
+  "assets": [
+    {
+      "bytes": 8186188,
+      "distribution": {
+        "archive": "DesktopStats-protected-reference050.zip",
+        "member": "DesktopStats-protected-reference050/north-xl-independent-protected050.glb",
+        "receipt_member": "DesktopStats-protected-reference050/north-xl-independent-protected050.glb.watermark.json"
+      },
+      "file": "north-xl-independent-protected050.glb",
+      "format": "glb",
+      "marker_id": "4319c3c2b2bf1f96a72d45f2",
+      "original_sha256": "0a26be2733617a22136d913d484768802a1aae956b8ac6d7f617b3d5c6553bd4",
+      "receipt": "north-xl-independent-protected050.glb.watermark.json",
+      "receipt_sha256": "e29a55267726230885297f138f97bb44d7a76686aa620c94c22b28395e3a74c7",
+      "sha256": "b45805ffdcd19b699626f8dd0d916e8203b54269809f0393f28c0baceca1c096"
+    },
+    {
+      "bytes": 1621440,
+      "file": "assembly-six-depth050-protected.png",
+      "format": "png",
+      "marker_id": "6bd3f7161e43789c4959b93a",
+      "original_sha256": "d9ced87eb2aff08759cbea8f9ecf804b01a5c357f947b5b58fcd904e26dba16e",
+      "receipt": "assembly-six-depth050-protected.png.watermark.json",
+      "receipt_sha256": "6a1547b57622c623b6fa4e0a910b5d70477eb021b2534c5d1b692d90318f71c2",
+      "sha256": "5ae6d497e488f2ca8a038dcfdd77e627ac7b3fc37a5aa98bf4923755801f2ad9"
+    },
+    {
+      "bytes": 790857,
+      "file": "gpu-six-depth050-protected.png",
+      "format": "png",
+      "marker_id": "2e33cc7a7aecdc198e28471b",
+      "original_sha256": "19ee22aeec44db1eda30a146c151e423c807069342c17e59d3ff87bbb62b6b3b",
+      "receipt": "gpu-six-depth050-protected.png.watermark.json",
+      "receipt_sha256": "d288de04f30d720fde249174dad4f9062939a74b2fb7eb26649667f4b7539743",
+      "sha256": "bd9d6e2f9d438f2cebb5ed1a8338c639cd3c62d0cec1b8d8b2df9fe7fc901aec"
+    },
+    {
+      "bytes": 343989,
+      "file": "assembly-depth-review050-protected.png",
+      "format": "png",
+      "marker_id": "f078053d394b8ae3a5f7ca7b",
+      "original_sha256": "ca4b1b1f7c8eb0901d56ea4f2a829e2db20a8d29bb6c88584af19e7a406063ed",
+      "receipt": "assembly-depth-review050-protected.png.watermark.json",
+      "receipt_sha256": "0144d44be40db543149729e198bd1229b075bbeb16f5b6c2c18e54544ba1e923",
+      "sha256": "9f08df9c2af0f14682c5a3c59f5d9ddf34aed2687c889cd4e48d239faddc4900"
+    },
+    {
+      "bytes": 2908594,
+      "file": "gpu-insertion050-protected.gif",
+      "format": "gif",
+      "marker_id": "c471e461a4730ad7668fbe20",
+      "original_sha256": "1645c957e7034fc5868634586de015c2ef4db12865f6d0b6b0fe57a79562a4e1",
+      "receipt": "gpu-insertion050-protected.gif.watermark.json",
+      "receipt_sha256": "358c4eaf191d8c65eff46ca2f802bf096decfa6914b48cd819415331306df2dd",
+      "sha256": "338345625499b5e4ee8f64773160d9b7d6b927c524d157b823b2122a29cb27c1"
+    },
+    {
+      "bytes": 9168985,
+      "file": "gpu-insertion-six050-protected.gif",
+      "format": "gif",
+      "marker_id": "6b814239f94dfe94fcc2abb9",
+      "original_sha256": "9e333425ef669267c9b29ec375c2a514581189ba60359d859e7982b28c3ac50a",
+      "receipt": "gpu-insertion-six050-protected.gif.watermark.json",
+      "receipt_sha256": "cbae725bba4bbcaf28ce9ed2c638362f4e1c983910c415b7a00eb22a0be8ab5b",
+      "sha256": "0379168569e69ef9920f43ee6dcb5e226a604f8c432851269ec8a0d5870d10f4"
+    }
+  ],
+  "scope": "one original reference GLB and three PNG/two GIF release previews, not live Stats/full catalog",
+  "private_keys_included": false,
+  "runtime_embedding": false,
+  "legal_conclusion": false
+}

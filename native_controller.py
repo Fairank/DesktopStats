@@ -24,6 +24,7 @@ from configuration_scopes import merge_scope, rebase_saved_changes, scope_dirty
 from cpu_temperature import is_requested as cpu_temperature_requested
 from desktop_placement import desktop_plan
 from external_sensor import EXTERNAL_SLOTS, PROVIDER, inventory_display, sensor_binding
+from hardware_appearance import metric_appearance
 from history_store import DEFAULT_METRICS
 from installer import set_autostart
 from layout_assist import (
@@ -43,6 +44,7 @@ from product_version import VERSION
 from responsive_layout import (
     ResponsiveLayoutError,
     dimensions,
+    hardware_model_geometry,
     is_responsive,
     metric_rects,
     minimum_dimensions,
@@ -63,14 +65,14 @@ from top_bar_profiles import (
     validate_group_metrics,
 )
 from widget_catalog import CATEGORIES, TEMPLATES, from_template
-from workspace_tools import WorkspaceTools
+from assembly_tools import AssemblyTools
 
 
 def choices(value):
     return [dict(id=key, label=label) for key, label in value.items()]
 
 
-class Controller(WorkspaceTools):
+class Controller(AssemblyTools):
     draftChanged = Signal()
     savedChanged = Signal()
     dataChanged = Signal()
@@ -147,6 +149,7 @@ class Controller(WorkspaceTools):
         self.draftChanged.connect(self._update_theme)
         self.savedChanged.connect(self.historyRecordingChanged.emit)
         self.devicesChanged.connect(self.historyOptionsChanged.emit)
+        self.initialize_assembly_signals()
 
     draft = Property("QVariantMap", lambda self: self._draft, notify=draftChanged)
     saved = Property("QVariantMap", lambda self: self._saved, notify=savedChanged)
@@ -208,7 +211,7 @@ class Controller(WorkspaceTools):
 
     @Slot(str, "QVariant")
     def changeTopBar(self, field, selected):
-        if field not in ("enabled", "monitor_mode", "height", "screens", "spacing"):
+        if field not in ("enabled", "monitor_mode", "height", "screens", "spacing", "hardware_icon_style"):
             return
         # QVariant parameters retain a JavaScript array as QJSValue. Convert
         # this explicit list boundary before validation/deepcopy, not into the
@@ -455,11 +458,14 @@ class Controller(WorkspaceTools):
             "placement",
             "style",
             "icon_effect",
+            "hardware_model",
         ):
             return
         value = copy.deepcopy(self._draft)
         item = next((item for item in value["top_bar"]["items"] if item["id"] == identifier), None)
         if item is not None:
+            if field=="gpu_target" and selected!=(item['prefs'].get('gpu_target') or '0'):
+                item['prefs'].pop('hardware_model',None)
             item["prefs"][field] = selected
             self.edit(value)
 
@@ -709,6 +715,13 @@ class Controller(WorkspaceTools):
                         used_text=used_text+' '+used_unit, total_text=total_text+' '+total_unit,
                         fraction=used/total)
             include_history = force_history or detail_id is not None or prefs.get('style') in ('trend_value', 'graph')
+            appearance = metric_appearance(data, metric, prefs, scope=scope,
+                                           target=target, external=bool(binding))
+            if appearance:
+                appearance["icon_set"] = config["top_bar"].get("hardware_icon_style", "classic")
+                appearance["features"] = [translate(feature, language) for feature in appearance["features"]]
+                if appearance.get("kind") == "memory" and (appearance.get("reported_label") or appearance.get("label")):
+                    hardware_name = translate(appearance.get("reported_label") or appearance["label"], language)
             result.append(
                 dict(
                     id=item["id"],
@@ -728,6 +741,8 @@ class Controller(WorkspaceTools):
                     effect_intensity=effect_intensity,
                     effect_speed=effect_speed,
                     hardware_state=hardware_feedback(data, metric, prefs, stale=stale),
+                    hardware_appearance=appearance,
+                    hardware_icon_style=config["top_bar"].get("hardware_icon_style", "classic"),
                     source=source,
                     reason=reason,
                     hardware_name=hardware_name,
@@ -786,6 +801,14 @@ class Controller(WorkspaceTools):
     @Slot(result="QVariantList")
     def topBarRows(self):
         return self._top_bar_rows(self._saved)
+
+    @Slot(str,result="QVariantList")
+    def hardwareAppearanceChoices(self,identifier):
+        from hardware_appearance import appearance_choices
+        item=next((row for row in self._draft['top_bar']['items'] if row['id']==identifier),None)
+        if item is None or (not item['metric'].startswith('ram_') and METRICS.get(item['metric'],{}).get('scope')!='gpus'):
+            return []
+        return [dict(id='',label=self.tr('自动匹配'))]+appearance_choices(self._data,item['metric'],item['prefs'])
 
     @Slot(result="QVariantList")
     def topBarDraftRows(self):
@@ -867,7 +890,7 @@ class Controller(WorkspaceTools):
         raw = self._process_results.get(token, process_usage.empty_report(kind))
         state, rows = raw['state'], raw.get('rows', [])
         reason_code, reason = raw.get('reason_code', ''), ''
-        captions = {'cpu': 'CPU 使用率', 'memory': '内存工作集', 'gpu': 'GPU 使用率', 'vram': '专用显存'}
+        captions = {'cpu': 'CPU 使用率', 'memory': '内存工作集', 'gpu': 'GPU 使用率', 'vram': '专用显存','io':'进程读写 I/O'}
         if not kind:
             state, reason_code, rows = 'unavailable', 'not_attributable', []
             reason = ('当前未启用按软件统计网速的网络事件跟踪。' if metric.startswith('net_') else
@@ -881,6 +904,8 @@ class Controller(WorkspaceTools):
         reason = reason or reasons.get(state, '')
         if reason_code == 'adapter_identity':
             reason = '无法将所选显卡与 Windows 适配器唯一对应，不会使用另一块显卡的数据。'
+        elif reason_code=='io_counters_unavailable':
+            reason='进程读写 I/O 计数不可用。'
         elif reason_code == 'query_failed':
             reason = 'Windows 未返回可用的软件占用读数。'
         denied = raw.get('denied_count', 0)
@@ -893,9 +918,14 @@ class Controller(WorkspaceTools):
         note = ('按整机 CPU 使用率排序；不代表软件的温度或功耗占比。' if kind == 'cpu' else
                 '工作集包含共享内存，同名进程合并后可能重复计入共享页。' if kind == 'memory' else
                 '同一软件按最忙的 GPU 引擎排序；不同引擎的占比不相加。' if kind == 'gpu' else
-                '专用显存包含进程间共享分配，不能将各软件数值相加作为显卡总量。' if kind == 'vram' else '')
+                '专用显存包含进程间共享分配，不能将各软件数值相加作为显卡总量。' if kind == 'vram' else
+                '所有进程读写 I/O，含缓存与设备，非当前磁盘统计。' if kind=='io' else '')
         language = self._saved['language']
         projected = []
+        def io_text(value):
+            if not numeric(value) or value<0:return '—'
+            scale,unit=(2**20,'MiB/s') if value>=2**20 else (2**10,'KiB/s') if value>=2**10 else (1,'B/s')
+            return f'{value/scale:.1f}'.rstrip('0').rstrip('.')+' '+unit
         for row in rows[:5]:
             value = row.get('value')
             if not numeric(value) or value <= 0:
@@ -903,14 +933,16 @@ class Controller(WorkspaceTools):
             if kind in ('memory', 'vram'):
                 size, unit = (value/2**30, 'GiB') if value >= 2**30 else (value/2**20, 'MiB')
                 value_text = (f'{size:.1f}'.rstrip('0').rstrip('.'))+' '+unit
+            elif kind=='io':value_text=io_text(value)
             else:
                 value_text = f'{value:.1f}'.rstrip('0').rstrip('.')+' %'
-            projected.append(dict(row, value_text=value_text))
+            extra=dict(read_text=io_text(row.get('read_bytes_per_second')),write_text=io_text(row.get('write_bytes_per_second'))) if kind=='io' else {}
+            projected.append(dict(row,value_text=value_text,**extra))
         error = raw.get('error', {})
         technical = ' · '.join(str(error[field]) for field in ('api', 'code', 'winerror', 'errno')
                                 if error.get(field) is not None)
         return dict(raw, state=state, reason_code=reason_code, rows=projected,
-                    title=translate('占用最多的软件', language),
+                    title=translate('软件读写 I/O Top 5' if kind=='io' else '占用最多的软件',language),
                     caption=translate(captions.get(kind, '软件占用'), language),
                     reason=translate(reason, language), note=translate(note, language),
                     technical=technical,
@@ -1457,6 +1489,10 @@ class Controller(WorkspaceTools):
             value = int(value)
         draft = copy.deepcopy(self._draft)
         draft["widgets"][key][field] = value
+        if field == "gpu_target":
+            draft["widgets"][key]["hardware_model"] = ""
+        if field == "presentation" and value == "hardware":
+            draft["widgets"][key].update(layout_mode="auto", metric_positions={}, chart=False)
         if field == "layout_mode" and value == "manual":
             self._seed_manual(draft, key)
         if field == "content":
@@ -1655,6 +1691,73 @@ class Controller(WorkspaceTools):
         except ValueError:
             return {}
 
+    @Slot(float, float, "QVariantMap", result="QVariantMap")
+    def widgetHardwareLayout(self, width, height, prefs):
+        """Pure geometry, also used by the painter and editor hit regions."""
+        if isinstance(prefs, QJSValue):
+            prefs = prefs.toVariant()
+        if not isinstance(prefs, dict) or prefs.get("presentation") != "hardware":
+            return {}
+        try:
+            geometry = hardware_model_geometry(width, height, self._content_for(prefs), prefs)
+            return dict(image=asdict(geometry["image"]), body=asdict(geometry["body"]),
+                        caption=asdict(geometry["caption"]))
+        except (ValueError, TypeError, KeyError):
+            return {}
+
+    @Slot(str, bool, result="QVariantMap")
+    def widgetHardwareState(self, key, draftMode):
+        """Expose sampled identity and feedback; opening a widget never samples."""
+        config = self._draft if draftMode else self._saved
+        prefs = config["widgets"].get(key, {})
+        return self._hardware_model_snapshot(prefs)
+
+    @Slot("QVariantMap", result="QVariantMap")
+    def widgetHardwarePreviewState(self, prefs):
+        """Templates and skin previews use their own validated presentation copy."""
+        if isinstance(prefs, QJSValue):
+            prefs = prefs.toVariant()
+        return self._hardware_model_snapshot(prefs) if isinstance(prefs, dict) else {}
+
+    def _hardware_model_snapshot(self, prefs):
+        kind = prefs.get("kind")
+        if prefs.get("presentation") != "hardware" or kind not in ("cpu", "gpu"):
+            return {}
+        if (not isinstance(prefs.get("gpu_target", "0"), str)
+                or not isinstance(prefs.get("hardware_model", ""), str)):
+            return {}
+        data = self._data
+        stamp = data.get("time")
+        stale = not numeric(stamp) or not 0 <= time.time() - stamp < 35
+        metric = kind + "_usage"
+        appearance = metric_appearance(data, metric, prefs,
+            scope="gpus" if kind == "gpu" else None, target=prefs.get("gpu_target", "0"))
+        appearance["icon_set"] = prefs.get("hardware_icon_style", "miniature")
+        feedback = hardware_feedback(data, metric, prefs, stale=stale)
+        # Authoritative per-device tables never borrow identity from flat GPU 0.
+        if kind == "gpu":
+            devices = data.get("gpus")
+            device = devices.get(str(prefs.get("gpu_target", "0")), {}) if isinstance(devices, dict) else (
+                data if prefs.get("gpu_target", "0") == "0" else {})
+            device = device if isinstance(device, dict) else {}
+            name = device.get("gpu_name") or device.get("label") or ""
+            if name and prefs.get("hardware_model") and appearance.get("confidence") == "model":
+                name = appearance.get("label") or name
+        else:
+            name = data.get("cpu_name") or ""
+        return dict(kind=kind, appearance=appearance, hardware_state=feedback,
+                    available=not stale and feedback.get("available", False), name=str(name))
+
+    @Slot(str, result="QVariantList")
+    def widgetHardwareChoices(self, key):
+        from hardware_appearance import appearance_choices
+
+        prefs = self._draft["widgets"].get(key, {})
+        if prefs.get("kind") != "gpu" or prefs.get("presentation") != "hardware":
+            return []
+        return [dict(id="", label=translate("自动匹配", self._draft["language"]))] + appearance_choices(
+            self._data, "gpu_usage", prefs)
+
     @Slot(str, result="QVariantList")
     def widgetContentIds(self, key):
         prefs = self._draft["widgets"].get(key)
@@ -1847,7 +1950,7 @@ class Controller(WorkspaceTools):
             return
         prefs = self._draft["widgets"][key]
         content = list(prefs["content"] or [])
-        if len(content) >= 6:
+        if len(content) >= (3 if prefs.get("presentation") == "hardware" else 6):
             return
         if metric in self._discovered_ids:
             row = self._external_rows.get(self._discovered_ids[metric])
@@ -1877,8 +1980,8 @@ class Controller(WorkspaceTools):
         prefs = candidate["widgets"][key]
         content = self._content_for(prefs)
         for metric in metrics:
-            if not isinstance(metric, str) or len(content) >= 6:
-                self.set_status("自由内容请选择 1–6 项指标")
+            if not isinstance(metric, str) or len(content) >= (3 if prefs.get("presentation") == "hardware" else 6):
+                self.set_status("硬件模型请选择 2–3 项读数" if prefs.get("presentation") == "hardware" else "自由内容请选择 1–6 项指标")
                 return False
             if metric in self._discovered_ids:
                 channel = self._external_rows.get(self._discovered_ids[metric])
@@ -1921,7 +2024,8 @@ class Controller(WorkspaceTools):
         if key not in self._draft["widgets"]:
             return
         content = list(self._draft["widgets"][key]["content"] or [])
-        if len(content) > 1 and 0 <= index < len(content):
+        minimum = 2 if self._draft["widgets"][key].get("presentation") == "hardware" else 1
+        if len(content) > minimum and 0 <= index < len(content):
             removed = content.pop(index)
             value = copy.deepcopy(self._draft)
             value["widgets"][key]["content"] = content
@@ -1979,7 +2083,7 @@ class Controller(WorkspaceTools):
         if template not in TEMPLATES:
             return {}
         prefs = from_template(template)
-        if prefs["presentation"] != "cores":
+        if prefs["presentation"] not in ("cores", "hardware"):
             prefs["content"] = prefs["content"][:1]
             prefs["presentation"] = "auto"
         return dict(self._draft, widgets={"gallery": prefs})
@@ -2837,6 +2941,7 @@ class Controller(WorkspaceTools):
         self._sync_process_requests()
 
     def close(self):
+        self.close_accessory_jobs()
         self._reading_notify_timer.stop()
         self._diagnostic_timer.stop()
         self.stop.set()

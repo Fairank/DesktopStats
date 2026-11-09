@@ -157,6 +157,9 @@ class SettingsMaterialBridge(QObject):
         self._latched_frame_epoch = -1
         self._update_requested_epoch = -1
         self._first_frame = False
+        self._render_recovery_reason = None
+        self._observed_window_state = window.windowState()
+        self._observed_frame_state = self._frame_window.windowState()
         self._exposed = False
         self._frame_connected = False
         self._invalidated_connected = False
@@ -228,6 +231,14 @@ class SettingsMaterialBridge(QObject):
         """Invalidate queued render notices without touching the Qt window."""
         self._render_epoch += 1
         self._first_frame = False
+
+    def _retire_render_preparation(self, reason="composition_changed"):
+        # A real presentation transition retires bootstrap adoption. Carry its
+        # reason through the first-frame gate so a caller's own prepared cache
+        # is retired too; ordinary frame/Expose notifications never set this.
+        self._invalidate_hidden_preparation()
+        if self._render_recovery_reason != "display_changed":
+            self._render_recovery_reason = reason
 
     def _adopt_frame_surface(self):
         # Show/visible proves a rendering surface can exist. Never obtain the
@@ -396,6 +407,7 @@ class SettingsMaterialBridge(QObject):
             return None
         self._sync_context()
         self._invalidate_hidden_preparation()
+        self._render_recovery_reason = None
         self._hidden_token_counter += 1
         token = dict(token=self._hidden_token_counter, identity=(self._surface_serial, self._handle),
                      revision=self._hidden_revision, epoch=self._render_epoch,
@@ -572,7 +584,7 @@ class SettingsMaterialBridge(QObject):
     @Slot()
     def _queue_graphics_invalidated(self):
         if not self._closed:
-            self._invalidate_hidden_preparation()
+            self._retire_render_preparation()
             if self._separate_frame_source:
                 # Only scalar metadata changes on the render thread. Reject
                 # an in-flight host success even before queued GUI delivery.
@@ -603,6 +615,9 @@ class SettingsMaterialBridge(QObject):
                 self._latched_frame_epoch = -1
                 return
             self._first_frame = True
+            if self._render_recovery_reason is not None:
+                reason = self._render_recovery_reason
+                self._render_recovery_reason = None
         self.request(reason)
 
     def eventFilter(self, watched, event):
@@ -639,7 +654,7 @@ class SettingsMaterialBridge(QObject):
             self._arm()
         elif kind in (QEvent.Show, QEvent.Hide):
             if kind == QEvent.Hide:
-                self._invalidate_hidden_preparation()
+                self._retire_render_preparation()
             self._reset_render_wait()
             if kind == QEvent.Show:
                 self._adopt_visible_surface()
@@ -652,6 +667,8 @@ class SettingsMaterialBridge(QObject):
             exposed = self._window.isExposed()
             if exposed != self._exposed:
                 self._exposed = exposed
+                if not exposed:
+                    self._retire_render_preparation()
                 self._reset_render_wait()
                 self._sync_context()
                 if exposed:
@@ -659,9 +676,26 @@ class SettingsMaterialBridge(QObject):
                     self._request_render()
                 self._arm()
         elif kind == QEvent.WindowStateChange:
+            state = self._window.windowState()
+            if state != self._observed_window_state:
+                self._observed_window_state = state
+                self._retire_render_preparation()
             if self._wait_for_frame:
                 self._reset_render_wait()
             self._sync_context()
+            self._request_render()
+            self._arm()
+        elif kind in (QEvent.ScreenChangeInternal, QEvent.DevicePixelRatioChange):
+            self._retire_render_preparation("display_changed")
+            if self._wait_for_frame:
+                self._reset_render_wait()
+            else:
+                # A synchronous native request can dispatch this event. Even
+                # without a Quick first-frame gate, retire its old token and
+                # schedule one debounced recovery for the new display state.
+                self._pause_frame_context()
+            self._sync_context()
+            self._life.notify("display_changed")
             self._request_render()
             self._arm()
         elif self._activation_requests and kind in (QEvent.WindowActivate, QEvent.WindowDeactivate):
@@ -676,7 +710,7 @@ class SettingsMaterialBridge(QObject):
                 self._frame_surface_alive = True
                 self._frame_surface_serial += 1
             elif event.surfaceEventType() == QPlatformSurfaceEvent.SurfaceAboutToBeDestroyed:
-                self._invalidate_hidden_preparation()
+                self._retire_render_preparation()
                 self._frame_surface_alive = False
             else:
                 return False
@@ -684,14 +718,22 @@ class SettingsMaterialBridge(QObject):
             if kind == QEvent.Show:
                 self._adopt_frame_surface()
             else:
-                self._invalidate_hidden_preparation()
+                self._retire_render_preparation()
         elif kind == QEvent.Expose:
             exposed = self._frame_window.isExposed()
             if exposed == self._frame_exposed:
                 return False
             self._frame_exposed = exposed
-        elif kind not in (QEvent.WindowStateChange, QEvent.ScreenChangeInternal,
-                           QEvent.DevicePixelRatioChange):
+            if not exposed:
+                self._retire_render_preparation()
+        elif kind == QEvent.WindowStateChange:
+            state = self._frame_window.windowState()
+            if state != self._observed_frame_state:
+                self._observed_frame_state = state
+                self._retire_render_preparation()
+        elif kind in (QEvent.ScreenChangeInternal, QEvent.DevicePixelRatioChange):
+            self._retire_render_preparation("display_changed")
+        else:
             return False
         self._reset_render_wait()
         self._pause_frame_context()
@@ -809,6 +851,7 @@ class SettingsMaterialBridge(QObject):
             return
         preparing = self._hidden_token is not None
         self._invalidate_hidden_preparation()
+        self._render_recovery_reason = None
         self._hidden_token = None
         self._closed = True
         self._timer.stop()

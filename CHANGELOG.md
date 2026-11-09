@@ -1,5 +1,595 @@
 # Changes
 
+## 0.52.0-preview.1 (code/software evidence; native acceptance pending)
+
+- Keep the six numbered styles and all thirteen saved choices; original has no
+  smile. Refine actual sockets, individual RAM envelopes, sourced case bays,
+  fixed open supports and independent component identities without a new sampler.
+- Add bounded CPU/DIMM/exact-case-fan reference disengagement with shared
+  solid/ink/picking poses and explicit dependency masks. This is not full
+  fastener/connector animation, physical extraction or manufacturer CAD.
+- Record C1 (`f68f1f1dc7488b24b1635ebb17755a12869bacb8`) two-case six-style software previews, independent CPU/GPU/
+  RAM/PSU inspections and actual finite GIF readback. H5 GPU moves 38.186 mm;
+  listed Helios GPU/RAM paths 52 mm. Six motion GIFs last 3.36 s, RPM/widget GIFs 2 s,
+  without a loop extension; synthetic values are not live hardware readings.
+- Stage fixed data candidate `f09e0b74815dbbd81233ea8f1e62335292f0df28`: 38 files, 13 marked copies
+  (3PNG/9GIF/1GLB), public receipts and 14 verified signatures. GLB 20 of 23
+  reference groups support markers; three do not. The optional 179-identity
+  staticSVG atlas is unmarked, not native/browser-performance acceptance.
+- Preserve first-run failures and the 167-module/1882-case/1-skip deduplicated
+  differential scope; latest 14/131 and carried 153 retain separate provenance.
+  This is not a single full current run. C700M private 8 pure checks remain an
+  unapplied draft; its first complete P12 host timed out after 60 s with 8 retained rearwall
+  witnesses, 7 jobs unrun and other materials/wiring unverified. 20 GPU references,
+  whole-market coverage and full mechanics remain open.
+- No stable release, installation, restart, elevation or live sensor check.
+  Native temperature/glass/screen2/game behavior and whole-Stats CPU/RSS remain
+  unaccepted. C2 changes existing documentation only; package gates are separate.
+
+## 0.47.0-preview.1 (development candidate)
+
+- Correct the default rear case-fan reference pose and check whole fan groups
+  against selected solid bodies before insertion. Include full rotor sweep and
+  round-frame mounting ears; preserve authored planes and explicit rejections.
+  Stage selected auxiliary bodies once for ordinary air/AIO builds as well as
+  custom loops. Keep Torrent's reference rear fan below its top-mounted PSU.
+- Refine six existing motherboard finishes from official front observations,
+  keeping unobserved blades, hidden locations and exact mounting details unknown.
+  Preserve the six numbered styles, original without a smile, and all saved IDs.
+- Add twelve optional independent GPU-water-block references and four overlapping
+  data packs. Store exact manufacturer compatibility and PCB-revision boundaries;
+  do not claim GPU installation, full-card replacement or connected GPU loops.
+- Prepare visible complex gallery cards with one bounded, cancellable graphics
+  worker. Drop obsolete results and release closed-gallery work. This improves
+  measured UI responsiveness, not a demonstrated total CPU/RAM reduction.
+- Pause CPU/GPU model-widget snapshots while minimized and refresh on restore.
+  Add no hardware sampling, permanent download, per-frame collision or clock.
+- Retain current installation while gaming. No restart, elevation, visible
+  test window or native CPU-temperature/glass/fullscreen acceptance is claimed.
+
+## 0.46.0-preview.1 (development candidate)
+
+- Add 63 optional data-only loop references: 10 CPU blocks, 8 pumps/motors/tops,
+  4 reservoirs, 10 pump/reservoir combinations, 20 fittings and 11 tubing models.
+  Fifteen collection/category/brand downloads are overlapping alternatives.
+- Distinguish motor-only, motorless housing, complete pump, side-port LCD block,
+  rounded rectangular reservoir, source-observed lighting and actual hose barbs.
+  Keep unknown dimensions, ports, telemetry and fit explicitly unverified.
+- Add explicit component selection, per-port fittings, independent inspection,
+  static reference tubing and bounded soft-tube obstacle avoidance. Reject
+  incompatible nominal sockets, threads, tube types and diameters. Never bend
+  carbon tubing or invent a GPU block solely from the graphics chip name.
+- Reserve actual selected PSU, storage and expansion bodies before placing
+  loop parts, then resume the same auxiliary build for cables. Reject the
+  reproduced pump/reservoir overlap with added hard drives; do not duplicate
+  device mesh construction or show a falsely connected route.
+- Refine fitting shoulders, crossed knurling, valve levers, open tube mouths and
+  smooth shared-ring lofts. Retain real longitudinal cylinder edges in line art
+  and distinguish the new loop materials in papercut without changing old art.
+- Preserve coherent case/part/rotor contours within the existing ink budgets;
+  crowded hand ink omits redundant collinear subdivision points. Correct thin
+  GPU decoration walls crossing fan apertures, preserve explicit shell cutouts,
+  and constrain reference fan radii by both face axes without changing blade
+  identity or hardware counts.
+- Add on-demand loop SVG gallery cards from the same production meshes. Reuse
+  the existing sixteen-entry gallery cache; no per-product clock or collector.
+- Verify five more motherboard finishes and distinguish a visible fan well
+  from a grille with unverified internal blades. Six older finishes remain open.
+- Preserve six numbered concepts and thirteen saved choices; original has no
+  smile. Update the full requirement ledger and partial PCBS comparison honestly.
+- Restore the colored-pencil wash to notebook-color GPU housings and actual
+  rotor paths. Preserve all model geometry and the other twelve saved styles,
+  including the older ink-wash adapter. Verify current widgets with the actual
+  software QML renderer and retained rotor-only transforms.
+- Combine six repeated loop picker-index copies into one. Scoped microbenchmark
+  and retained-object measurements do not stand for whole application usage.
+- No installation, restart, UAC or visible desktop test while the user is gaming.
+  Native CPU temperature, glass, fullscreen and application overhead remain open.
+
+
+## 0.45.0-preview.1 (development candidate)
+
+- Preserve the six numbered concepts and all thirteen saved choices. Complete
+  existing categories and unresolved model details before introducing new art.
+- Add 104 sourced radiator, 40 fan and 23 cooler references as optional data-only
+  class/brand packs. Three class collections total 37,392 bytes; 32 downloads
+  are overlapping alternatives, never 32 disjoint inventories. Add no sampler,
+  background downloader, directory poll, persistent mesh or animation clock.
+- Add 12 distinct ITX/mATX/ATX boards. Correct AM4 PGA sockets, keyed DVI wells
+  and paired SATA orientation. Preserve all 16 earlier boards' geometry.
+- Share qualified foil contours between SVG and 3D; distinguish center-fan
+  towers, low-profile downflow fins, factory C-shape placement, fixed-white
+  bearing windows, Corsair circular LCD pedestals and NZXT infinity mirrors.
+  Keep visible papercut leaf edges so rotation cannot merge into a plain disc.
+- Correct obstructed mounting-hole rims on two earlier radiators and verified
+  XSPC openings without shifting product envelopes or attachment anchors.
+- Add on-demand process read/write I/O Top 5 to the existing snapshot worker.
+  Label cached/device/all-process scope explicitly; do not attribute it to one
+  physical disk or issue extra process/device queries outside demand.
+- Bound shared selected records to eight and retain compact authenticated
+  manifest indexes. Reuse a selected cooler's validated bundled fan description
+  without another optional archive read; invalidate model caches after changes.
+- Publish reproducible category, size/form-factor, PCBS partial-list comparison
+  and complete requirement ledgers with explicit unknowns. 753 named products
+  are not full-market or PCBS-level completion. No game assets are copied.
+- Source/local candidate only. No installation, restart, UAC or visible window
+  while gaming; native temperature/glass/fullscreen/performance acceptance open.
+
+
+## 0.44.0-preview.1 (development candidate)
+
+- Separate standalone custom-loop radiators and each radiator fan, with primary
+  and secondary models, single-side/push-pull/structure-only layouts, independent
+  picking and per-part styles. Preserve the factory body of sealed AIO products.
+- Add24 exact radiators from8 brands with linked manufacturer evidence. Draw
+  actual open mounting flanges and observed connection throats, folded foil or
+  source-specific sheet/tube cores, and stepped tank seams. Unknown ports remain
+  missing; hoses are omitted rather than attached to invented AIO outlets.
+- Correct5 fans' manufacturer mounting facts, including the105mm hole spacing
+  of the round140mm NF-A15. Reject unverified round-frame radiator mounting.
+- Keep coolant temperature/flow/pump RPM unbound in reservoir/radiator/fan
+  inspection; do not substitute CPU or CPU_FAN readings. An unused stored fan
+  cannot block structure-only inspection.
+- Put the complete29-group requirement audit and explicit unfinished work into
+  README and a reproducible structured ledger. PCBS-level coverage/detail is
+  still an unmet target; do not claim full completion or native acceptance.
+- Keep documentation showcase media in source, without a duplicate unused
+  runtime asset copy. No added sampler, device-control service or motion clock.
+- Code/software-only work while gaming; no installation, restart or UAC.
+
+
+## 0.43.0-preview.1 (development candidate)
+
+- Show the six current numbered styles in actual CPU/GPU widget animations
+  and a complete reference assembly, preserving every older style choice.
+- Verify six exact GPU rotor designs from primary photographs: BIOSTAR RX7600
+  base/OC, Intel A770 LE, Reaper9070XT, GTX1080FE and MSI R9 290X reference.
+  Keep20 pending SKUs explicit; both BIOSTAR shells now have distinct traces.
+- Rasterize only the visible GPU model base viewport. Typical300px widgets use
+  39.85% fewer base RGBA pixels; no whole-application memory claim. Keep rotor
+  planes, stable stop/start textures, hardware freshness and existing clocks.
+- Separate mainboard power contacts and open M.2 receptacles without changing
+  attachment anchors; reference assembly adds624 triangles and one mesh.
+- Add24 source-linked storage references across2230/2242/2280/22110 NVMe,
+  factory heatsinks, SATA SSD and sealed HDD. Check documented M.2 mount lengths;
+  preserve source-specific shell families and product/capacity markings.
+- Add static preview colors/off for existing model light zones, including
+  colored ink in line styles. Fixed-white zones remain white. No device control,
+  new lights, background clock, sampler or physical mesh rebuild for color edits.
+- Document the exact catalog count and gaps against PCBS1/2, including cooling,
+  loop and lighting limits. Original art/code retains the noncommercial license.
+- Source/local candidate only; no restart or installation during gaming.
+
+
+## 0.42.0-preview.1 (development candidate)
+
+- Extend model-only panel studies to every one of the 147 catalog GPUs:
+  NVIDIA92, AMD46 and Intel9. Retain exact source face/variant traces across
+  all13 styles, with the miniature front-plane offset and baked fan-hole
+  exclusion.145 have source-linked traces; two unverified BIOSTAR exteriors
+  remain neutral with explicit unknowns. Shared OC shells stay shared.
+- Apply retained model rotor treatment using each exact board's existing
+  profile, without changing physical fan counts, planes, known blades,
+  relative direction or freshness/zero-RPM guards. Unknown remains unknown.
+- Reuse a model GPU's retained base URL instead of also building and retaining
+  an unused complete-card SVG. Allocate the two exact-contour directories only
+  on a matching model request; pure top-bar mode leaves them uninitialized.
+  No new sensor, service, polling or motion clock.
+- Correct model-only HD7970 metal-cover selection and Sakura ribbon perimeter;
+  constrain panel ink to the actual hand-drawn shroud while preserving the
+  source-confirmed protruding White Taichi LCD frame. Use shorter contextual
+  labels in CPU/GPU models while retaining distinct package/ASIC source names.
+- Record the original six icon options and all later additions in README;
+  preserve all13 saved values and the expression-free Original. Keep the CPU
+  package artwork, two-line captions, frame options and fullscreen protection.
+- Source/local review candidate only; do not restart or replace the running
+  application during gaming, or infer live Windows acceptance from offscreen QA.
+
+## 0.41.0-preview.1 (development candidate)
+
+- Refine CPU model artwork using all seven existing package contours: thin
+  substrate edges, IHS lips, restrained metal finish and specific model marks.
+  Keep all75 available CPU identities and13 styles, with expressions confined
+  to the two existing expressive styles. Added depth/finish remains reference.
+- Separate every model artwork key from the ordinary top-bar key. Reuse exact
+  GPU casing/fan planes and refine reviewed model-specific leaf/hub contours;
+  unknown geometry stays unknown. Compose static and moving art from the same
+  retained descriptors, without a new sampling or animation loop.
+- Let small widgets display complete hardware identities on two lines while
+  reserving separate image, caption and reading regions. Preserve existing
+  device binding, RPM validity, frame choices and fullscreen protection.
+- Clip model-only pen trim around the actual fan apertures without deleting
+  PCB/connector branches. Keep the same retained textures while stopped and
+  moving, so notebook ink does not shift from a separate rasterization path.
+- Source/local candidate only; no installed Windows or live-game acceptance is
+  inferred from software/offscreen previews and tests.
+
+## 0.40.0-preview.1 (development candidate)
+
+- Add CPU/GPU model widgets with large retained hardware artwork, current
+  identity, compact readings, per-widget styles and a real frameless option.
+  Preserve hardware identity/counts across all13 styles and keep Original
+  expression-free. Reuse sampled readings, valid device RPM and the shared clock.
+- Add a compact interactive assembly desktop mode with optional rounded frame,
+  alpha background, part selection and nonactivating placement. Share the
+  existing foreground guard; stop motion and hide the assembly desktop widget
+  for same-screen fullscreen games. Native desktop acceptance remains pending.
+- Defer the settings QML tree until explicitly opened, preserve edits thereafter
+  and keep read-only status/clean-exit paths from creating the editor.
+- Add16 cases,12 cooler references and16 fan entries, including two documented
+  bundled-only fans. Current accessory inventory is253 records across13 styles;
+  retail availability and unverified internal geometry remain explicit.
+- Redraw four low-profile/radial coolers with one world projection, attached
+  heatpipes, open fin channels and correctly interleaved static/fan layers.
+  Rotate circular leaves before affine projection in Qt and the offline atlas.
+- Pause offscreen gallery rotors and honor reduced motion. Keep shared clocks,
+  bounded caches and the existing scene ink cap; add no hardware poller/service.
+- Candidate only: do not infer installed CPU temperature, desktop glass or live
+  gaming performance from isolated renders/tests. The running install is intact.
+
+## 0.38.0-preview.1
+
+- Expand PSUs from six to 21 models across 11 brands using manufacturer
+  specifications. Preserve the six existing records and their original meshes;
+  keep unverified grilles, socket layouts, colors and support details schematic.
+- Model fixed-wire and semi-modular supplies separately from detachable socket
+  banks. Keep factory harness obstacles local, retain the PSU body for routing,
+  and attach generated cables at actual rendered wire ends without source plugs.
+- Add source-linked OLED blank faces, static RGB diffuser colors, joined blade
+  tips, funnel inlets, open motor supports and white cases across all 13 styles.
+  Show PSU cable type, form factor and fan dimensions in the inspector; unknown
+  power/OLED readings stay unavailable and static values follow the UI language.
+- Give notebook artwork continuous pen drift, restrained retracing and a shared
+  paper-grid tile. Keep all 150 existing Original SVGs byte-identical and retain
+  visible-only gallery generation with no animation unless explicitly enabled.
+- Reuse per-call coordinate/normal keys and connected-point visits while
+  preparing crease ink. Retain identical output, the 8,192-edge cap and no
+  persistent cache. Representative first builds take 27–42% less time, with
+  managed preparation peak reduced from 22.575 to 16.587 MiB.
+- Run isolated test children below normal priority on Windows, preserving
+  offscreen private-profile boundaries during background verification.
+- Export a separate offline model atlas for all 165 accessories and 13 styles,
+  using 52 local category/style slices and at most 12 displayed cards. Keep
+  demonstration off by default, pause hidden/offscreen content, and include
+  complete licensing, source references and hashes without a server or install.
+
+## 0.37.0-preview.1
+
+- Add a lazy searchable 2D model gallery for all 64 cases, 42 cooling references,
+  six PSUs and 38 fans in the current catalog. Every record has all 13 styles;
+  Original remains expression-free. The custom loop is a reference combination.
+- Preserve model-family shells, pumps, radiator layouts, grilles and fan profiles
+  in original schematic SVG artwork, with explicit reference-detail status.
+  Export four independent noncommercial SVG collections with source links,
+  per-file checksums, the complete license, Required Notice and scope statement.
+- Keep the gallery static by default, generate visible cards on demand and clear
+  its bounded cache on close. Optional rotor demonstration transforms retained
+  layers using one shared clock; it never polls hardware or claims a measured RPM.
+- Move assembly style and accessory counts to the first screen. Add a direct
+  gallery entry, three complete reference presets and an explicit action that
+  clears independent part-style overrides without changing chosen hardware.
+- Preserve connected fan-blade, hub, corner-pad and PSU-grille ink contours.
+  Stitch coplanar T-junctions and retain complete contours within existing bounds;
+  leave physical triangles, depth testing, Original and the 8,192-edge cap intact.
+
+## 0.36.0-preview.1
+
+- Add optional, data-only Intel and AMD CPU packs: 72 additional named SKUs,
+  plus the three preserved base models. Use seven shared physical package
+  families across all 13 styles, with per-SKU markings and explicit unknowns.
+- Add GitHub download, local import and remove controls. Keep a small identity
+  index and at most eight selected records; no executable plugins, extracted
+  files, periodic scans, extra sensor polling or background workers.
+- Validate archive bounds, generator schemas, checksums, inventory collisions,
+  full noncommercial license, and profile-local installation boundaries.
+- Expand cooling to 42 references and 38 fans, including thin low-profile,
+  mixed-diameter tower and radiator-integrated-pump structures. Preserve real
+  dimensions, distinguish bundled references and keep unmatched tachometers static.
+- Repair hand-drawn surface ink without disabling depth testing; smooth fan
+  foil lighting while retaining vertex positions and all existing geometry caps.
+
+## 0.35.0-preview.1
+
+- Add 16 exact motherboard layouts from official manuals, with distinct socket,
+  DIMM, PCIe, M.2, header and rear-I/O positions. Keep photo-unverified exterior
+  finishes visibly marked as reference; do not invent PCB circuits or CAD precision.
+- Add 26 cooling references, 26 fan models, six PSUs, five storage devices and
+  three expansion cards. Preserve product envelopes and distinct grilles,
+  heatsinks, pumps, tubing and connectors. The custom loop is a reference
+  combination rather than a retail product or an installed-hardware claim.
+- Select reference CPUs, GPUs and individual memory modules independently from
+  the top bar. Do not borrow installed temperatures, power or tachometers for
+  replacement reference models. Report unknown selections and basic socket,
+  memory-generation, slot-count and case-support conflicts.
+- Mix all 13 existing styles per component family or individual part; retain
+  physical meshes and one shared finite animation clock. Original remains
+  expression-free. Add GPU brand/series filters without changing saved models.
+- Add explicit air, AIO and CPU/GPU custom-loop reference configurations,
+  recessed PSU and storage connections, and original reference cable routes.
+  Unverified connections remain unconnected and are reported rather than forced.
+- Correct the Y70 vertical GPU reference pose and side-cooling divider opening.
+  Bound static geometry and retained ink; no additional hardware sampler,
+  background service, rendering engine or downloaded model is introduced.
+- Publish a reproducible brand/series/product inventory and preserve the
+  existing noncommercial license and third-party notices.
+
+## 0.34.0-preview.1
+
+- Replace solid GPU slabs with perforated thin shells, recessed fan openings,
+  schematic heatsink fins, PCB edges, separated contacts and reviewed port counts.
+  Keep verified envelopes, original fan profiles and unknown-data boundaries.
+- Add the Astral 5090 rear seven-blade fan from an official rear product photo,
+  with a schematic backplate opening. Keep it static while rotation direction
+  and an independent tachometer remain unverified; preserve the three RPM-driven
+  front fans and distinguish photo ratios from manufacturer dimensions.
+- Align the motherboard, rear I/O, expansion bracket and edge connector to one
+  schematic mounting reference. Stand DIMMs perpendicular to the motherboard;
+  preserve the separate SO-DIMM reference pose and per-module identity.
+- Refine known ASUS Z790-A D4 colors, slots, heatsinks and rear connector counts.
+  Add source-linked front I/O facts for twelve cases, real bevels, finer mesh,
+  recessed sockets and folded case edges. Placement and internal layouts remain
+  original schematic construction, not manufacturer CAD or fit guarantees.
+- Add three bounded on-demand detail levels, keeping real-time reading updates
+  independent from mesh generation. Refine metal, glass, wood and contact light
+  within the existing OpenGL passes, without new dependencies or postprocessing.
+- Give all thirteen artwork styles distinct selection effects lasting 400–850 ms.
+  Reuse the shared clock and existing buffers; complete even with unknown RPM,
+  then stop. Hide, minimize, close and reduced motion cancel rather than loop.
+  Preserve the expression-free Original and existing top-bar preferences.
+
+## 0.33.0-preview.1
+
+- Expand the source-linked chassis catalog from 24 to 64 cases across 18 brands
+  and six layouts. Keep every saved model ID and the unverified-firmware fallback.
+- Add a local brand filter without changing the selected case or settings until
+  a model is chosen. Preserve static defaults and on-demand resource ownership.
+- Draw glass/solid roofs, pillarless corners, open-frame wings and standoffs,
+  carry handles/straps, mesh bands, wood frames, blank status screens and stands.
+  Preserve 84 mm slim-case dimensions and report no-GPU/low-profile restrictions;
+  never shrink or hide the selected GPU to manufacture a fit.
+- Keep original noncommercial model licensing and manufacturer source links.
+- Match the case and its components to all 13 hardware illustration styles,
+  following the bar by default or selected independently. Preserve dimensions
+  and rotor feedback; keep expressions exclusive to the two smile styles.
+- Add a direct desktop-inspector tray entry and click selection independent of
+  camera focus. Show selected-component status from existing, freshness-checked
+  readings without starting extra sensors; retain selected-screen game avoidance.
+
+## 0.32.0-preview.1
+
+- Remove the visible desktop-widget corner grip while preserving corner resize
+  behavior. Give unchanged automatic three-metric defaults a primary/supporting
+  hierarchy; retain customized ordering, manual layouts and existing templates.
+- Add an optional, rotatable OpenGL assembly window with exploded and component
+  views. Convert the existing 178-entry hardware catalog into original schematic
+  meshes, retaining reviewed shells, fan geometry, CPU lids and module profiles.
+  Do not invent unverified fan blades or installed cooling/power components.
+- Add a bounded, source-linked catalog of 24 case references across 14 brands
+  and five layout families. Manual selection is available. Read SMBIOS only on
+  demand and cache whitelisted identity fields; no serial numbers, UUIDs, WMI
+  worker, driver, background network lookup or extra hardware poll is added.
+  No verified retail-case firmware mappings are available in this first batch;
+  unidentified DIY cases remain reference models rather than motherboard guesses.
+- Keep the assembly static by default. Optional GPU fan motion uses existing
+  fresh RPM feedback and the shared animation clock, pauses outside the visible
+  view and releases graphics resources on close. Use Qt Base OpenGL components
+  from the existing Essentials dependency, without Qt Quick 3D or Qt 3D.
+- Preserve Original's expression-free art, other saved appearances, temperature
+  bridge behavior and third-party license rights. Extend the original-art
+  noncommercial notice to the generated assembly models and rendering code.
+
+## 0.31.0-preview.1
+
+- Add optional Cream Sticker, Paper Cutout and Blue Ink Journal illustrations,
+  with no expressions. Every scheme uses the same 178-entry catalog as Original:
+  147 GPUs, 28 RAM modules and 3 CPUs. Existing choices and Original artwork
+  remain unchanged; the new schemes are illustrative colors, not factory paint.
+- Keep exact reviewed fan geometry, DDR keys and bounded CPU model marks.
+  New fan planes reuse the same RPM feedback, shared clock and retained textures;
+  unknown blade profiles remain static. Add full-catalog and motion regressions.
+- Make the noncommercial scope prominent in README, LICENSING and NOTICE,
+  explicitly covering original hardware illustrations and rendering code while
+  preserving all third-party and prior-license rights. LICENSE remains unchanged.
+
+## 0.30.0-preview.2
+
+- Correct the four primary artwork choices: Original is the pre-smiley
+  Miniature treatment, Cute Smiley is the separate Cartoon treatment, followed
+  by Pencil Color and Pen Lines. Keep Smiley Doodle as an additional option.
+  No original drawing is repainted or given an expression.
+- Expand retained fan-motion regression coverage across every modern treatment,
+  including the four primary choices. Preserve measured-RPM timing, stopped
+  and stale readings, relative directions and visibility suspension.
+
+## 0.30.0-preview.1
+
+- Add three optional notebook treatments: Loose Pen, Pencil Color and Smiley
+  Doodle. Existing artwork and the saved selection remain available. All 178
+  catalog entries share their reviewed identities, cooler layouts and memory
+  forms across the new treatments; this is a bounded catalog, not every retail SKU.
+- Keep sparse, uneven casing lines and transparent pencil gaps instead of a
+  technical wireframe. Confirmed fan blades retain their leading curves, tips,
+  linked rings and relative directions; unknown blades remain static.
+- Distinguish the registered Intel LGA1700 and AMD AM5 front packages. AM5
+  models share the same real lid shape and use bounded model marks to differ;
+  arbitrary device names never enter SVG text. Notebook artwork adds no
+  sampling, animation clock, driver or background service.
+- Retain the temperature-startup status fix and scoped style switching from
+  the previous prepared build, without requiring a restart to change artwork.
+
+## 0.29.0-preview.3
+
+- Add an optional Hand-drawn Lines treatment with simple slightly uneven ink
+  contours and no solid color casing or decorative faces. Existing selected
+  illustrations remain unchanged until the user applies another style.
+
+- Update temperature-startup status after a verified fresh CPU reading arrives,
+  retaining one consent attempt per app session and the fullscreen deferral.
+- Support a bounded local hardware-icon preference change without restarting
+  the app or temperature helper. Reject unknown styles, changed instance IDs
+  and unsaved settings; use the existing top-bar-only save and rollback.
+
+## 0.29.0-preview.2
+
+- Add optional Cute Cartoon artwork for all 178 current GPU, CPU and memory
+  entries, preserving each reviewed enclosure, fan profile and memory key.
+  Cartoon quantity and device symbols also cover storage, network, battery,
+  cooling and the other existing metric icons without asserting retail models.
+- Enlarge modern top-bar GPU drawings from an 18-pixel square to a 30-by-22
+  frame at the normal 32-pixel bar height. CPU/RAM icons use 22-pixel frames;
+  text spacing, hit regions, grouping and previews share the new width contract.
+  Keep Classic/Outline sizing and all five previous artwork choices.
+- Reuse retained SVGs, rotor textures and the shared effect clock. No extra
+  sampling cadence, hardware scan, frame timer or background service is added.
+
+## 0.28.0-preview.2
+
+- Allow up to 60 seconds for a verified clean shutdown during installation.
+  Explicit background installation keeps settings closed even after the previous
+  instance has exited; failures log and return an error without a blocking dialog.
+
+- Retain 103 source-linked base GPU representatives across 24 brands, 16 base
+  RAM designs across 6 brands, and the 3 CPU examples. Extend matching with
+  complete version SKUs: the 56 recorded versions are now supported, with zero
+  pending version registrations and 34 explicit artwork registrations, including
+  the two earlier SUPRIM 5090 entries and 32 newly implemented versions. The
+  runtime catalog contains 178 entries: 147 GPU, 28 RAM and 3 CPU. Support does
+  not imply every visual detail is confirmed or every retail SKU is covered.
+  See [the generated coverage report](docs/HARDWARE_COVERAGE.json) for exact
+  model guards, field-level unknowns, sources and the bounded version inventory.
+- Add 16 NVIDIA historical designs from GTX/GT 10 through GTX 900/700/600/500/
+  400/200 to GeForce 8800 GTS and FX 5200, plus 20 Radeon/Arc representatives.
+  Keep era-specific enclosures tied to exact SKUs instead of reusing a current
+  cooler with the same series name. Add generation and product-line filters;
+  entry/mainstream/flagship labels describe the board line within its era,
+  rather than GPU performance rankings.
+- Give Solid, Miniature and Soft distinct major panels, shoulders, end caps and
+  illustration proportions for each series. Apply reviewed model colors to
+  shrouds, metal panels and rotors instead of treating brand accents as paint.
+  Add exposed PCB edges, separated gold-contact segments, bracket outlines and
+  narrow heatsink edges without inventing an internal board layout. Electrical
+  PCIe lane counts do not imply a mechanically shortened connector.
+- Reduce Miniature's exaggerated upper/side extrusion and heavy shadow. Keep
+  documented thickness differences through a shallow projection while leaving
+  the circular fan plane, fan placement and the other icon versions intact.
+- Add on-demand video-port and power-connector technical views with reviewed
+  connector types and quantities. These are schematics, not claims about the
+  physical port order, socket placement or exact cutouts. Preserve unknown
+  interfaces and distinguish verified absence of auxiliary power; documented
+  alternative power positions do not become simultaneous extra sockets.
+- Share OC/non-OC artwork only for individually reviewed complete SKUs. Verify
+  the ROG Astral RTX 5090 standard/OC visible enclosure against the reviewed
+  Astral RTX 5080 OC, including official product imagery and external dimensions.
+  Give MSI RTX 5090 SUPRIM SOC/OC an independent metal-panel recipe with
+  STORMFORCE seven-blade front fans instead of inheriting the RTX 4090 cover.
+  Shared artwork never transfers chip identity, memory, power ratings or sensor
+  readings between cards. White, copper, rear-power and revision treatments
+  retain their own reviewed finishes and structures. The black and white Astral
+  front layouts preserve the source-confirmed reversed center fan.
+- Retain unconfirmed blade counts for ZOTAC Infinity 5080 10A, GIGABYTE GTX 460
+  Rev2/Rev3 and BIOSTAR RX 7600 OC; their fans remain static. BIOSTAR OC's
+  unverified cover is explicitly labelled as a technical schematic rather than
+  a verified retail enclosure. Version matching can be ready while individual
+  appearance fields remain unknown.
+- Add on-demand factory-backplate and separate removable-accessory views where
+  exact sources support them. Keep GC_HPWR and 16-pin power as alternative
+  routes only for the documented SAPPHIRE NITRO+ PhantomLink editions; never draw both as
+  simultaneous required sockets. RAM RGB diffuser covers remain static physical
+  parts, without claiming the current LED state.
+- Distinguish radial blower housings, the Acer BiFrost's left small
+  blower/right axial arrangement and fanless fins for confirmed passive cards.
+- Add exact-SKU fan profiles to the base GPU representatives and apply reviewed
+  version overrides separately. Confirm blades, rotor contours, hubs, rings,
+  linked blade groups and relative counter-rotation only from model-specific
+  evidence; retain neutral, static faces for unconfirmed blade details.
+  Illustration proportions remain visual approximations rather than engineering
+  measurements. Current review totals are recorded in the coverage report.
+- Correct the modern fan faces: use visibly swept vanes with open curved gaps,
+  a recessed dark cavity and an independent cap, rather than bright radial
+  discs. Distinguish wide, swept, straight, linked and claw-textured contours;
+  align confirmed linked tip arcs with the blade ends and keep fixed shroud
+  rings separate from the rotor. Preserve source-confirmed light and dark fans,
+  including the distinct SPARKLE A750/B580 TITAN rotors. Label unreviewed active
+  fan faces as pending and keep them static; gallery motion requires a reviewed
+  face rather than an empty placeholder. The completed export has 119
+  motion-ready GPU entries; other active faces retain their unknown status.
+- Give the modern leaves longer asymmetric curves and quieter dark-plastic
+  shading. Encode the reviewed old MSI TORX seven-wide/seven-narrow pattern;
+  preserve the distinct SUPRIM 4090 silver cap, B580 TITAN dark caps, TITAN Luna
+  light caps and RDNA3/RDNA4 Taichi center-fan paint. Exact shared versions can
+  override their reviewed fan finish without changing live telemetry.
+- Animate confirmed visible fans in Solid, Miniature and Soft only when Auto
+  receives fresh same-card RPM. Keep a fixed base
+  and small retained fan textures; phase changes update local transforms without
+  rebuilding shapes or SVG sources. Reuse the existing shared 34 ms clock and
+  metric subscription, without adding a timer or raising frame-driven cadence.
+  Use fixed 120x slow motion proportional to RPM, independent of usage,
+  temperature and effect-speed preferences; zero, unknown and stale RPM stop.
+  Never infer current RPM from duty percentage or intended speed. Driver fan
+  channels have no verified physical-position mapping, so their card mean drives
+  all illustrated front fans and is labelled as a channel mean.
+- Add demand-only NVIDIA RPM using existing PCI identity and a read-only NvAPI
+  query capped at 1Hz per card, with 5s transient-failure backoff. Prefer the
+  private CurrentRpm ABI used by LibreHardwareMonitor v0.9.6, explicitly labelled
+  as driver current RPM; fall back to the public single-channel tachometer where
+  supported. No administrator prompt, driver, service or control call is added.
+  AMD/Intel RPM remains unknown unless a same-card provider supplies it.
+- Release rotating layers to the original static illustration when hidden,
+  minimized, Off or motion-disabled. Keep Classic/Outline hardware art static
+  and CPU/memory load, thermal and electrical channels unchanged. Share the
+  details header phase with the expanded 64px illustration without another
+  subscription. Gate startup on completed visibility bindings and explicitly
+  pause the details header for native-host minimization.
+- Extend the existing top-bar RAM metrics and expanded details with memory
+  appearances. Preserve unknown form factors and mixed-module identities;
+  individual module part numbers do not inherit a kit's design by suffix guesses.
+  Physical diffuser covers do not claim current lighting or add RGB animation.
+- Keep all five hardware-icon versions in top-bar Appearance settings.
+  Preserve the original Classic glyphs and earlier Outline drawings alongside
+  Solid, Miniature and Soft. Existing preferences default to Classic. Switching
+  versions updates the shared preview and follows the existing scoped Apply flow.
+- Add an optional per-item appearance model selection. GPU candidates use the
+  currently selected device's cached chip identity, retaining Ti/SUPER/XT and
+  other chip distinctions. An explicit choice is labelled Manual appearance;
+  clearing it restores automatic matching. RAM artwork can also be selected
+  manually. These choices change the illustration only: selected devices,
+  metrics, readings and data sources stay intact, with no new discovery query.
+  Changing a GPU target clears only that item's manual artwork choice and
+  restores automatic matching, preserving its other display preferences.
+  A missing secondary GPU never borrows the default GPU or legacy flat identity.
+- Distinguish physical fan totals from front-visible fans: opposed MSI EXPERT
+  and rear/side auxiliary layouts retain their true totals. Keep the GALAX SG+
+  total unknown when auxiliary installation is optional, and keep BIOSTAR's
+  unverified layout neutral. Complete reviewed identities establish layouts;
+  bare chip names do not automatically select a reference board.
+- Preserve confirmed front fans when Qt represents an unknown Python total as
+  an undefined QML value. Retain the larger center fans of Advanced and EX Gamer
+  representatives and the lowered central FTW3 fan.
+- Recognise brand, series and exact-model identities separately. Show series
+  shroud motifs and feature summaries in expanded details, with an on-demand
+  64px illustration. Unknown fan layouts remain neutral rather than guessed.
+- Add an offline, searchable comparison gallery exported from the real QML
+  drawing code, including the base entries and ready exact versions, across all
+  five icon versions and two themes: 178 entries and 1,780 static SVG variants.
+  Retain 18px
+  top-bar comparisons and hardware/brand/vendor/generation/product-line filters.
+  Add enlarged per-item browsing with Previous/Next and keyboard navigation.
+  Keep the page static by default; optional CSS fan preview runs only in view,
+  while the page is active and reduced motion is disabled. Interface schematics
+  retain their type/count and unverified-position labels. Neither gallery art nor
+  a full-card dimension is evidence of a reviewed internal PCB layout.
+- Reuse existing identity strings with a bounded offline match cache. Retain PCI
+  fields already returned by DXGI without adding monitoring queries or polling.
+  The series drawings are static vectors and add no sampling or animation clock;
+  real temperature/load effects and hidden/minimized pause behavior remain.
+- Keep memory matching pure and acquire Windows module identity separately,
+  only when an enabled top bar requests a non-Classic RAM appearance. Attempt
+  one bounded SMBIOS snapshot per process using a size query and data read,
+  caching failures as well as success. Limit input to 4 MiB and 64 populated
+  modules; retain manufacturer/part/form only, without serials, asset tags or
+  raw firmware data. Add no SPD/SMBus scan, WMI query, administrator prompt,
+  service or polling loop.
+
 ## 0.27.0-preview.2
 
 - Restore top-bar background material after returning from administrator

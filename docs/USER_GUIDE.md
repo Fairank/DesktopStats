@@ -1,9 +1,9 @@
 # Desktop Stats for Windows
 
 Native Windows top-bar monitoring and optional desktop widgets, with real
-hardware readings and local history. Development candidate
-**0.27.0-preview.2** organizes settings around one live top-bar
-preview, separate content/appearance tasks and contextual desktop controls.
+hardware readings and local history. Preview release
+**0.34.0-preview.1** refines optional 3D mechanical geometry, materials and finite
+style effects, preserving the 64-case catalog, top-bar workflow and scoped settings.
 Desktop widgets, top bar and preferences save independently. Original application
 source is licensed under [PolyForm Noncommercial 1.0.0](../LICENSING.md).
 
@@ -14,8 +14,9 @@ change their appearance. A failed or unsupported material request keeps a
 readable fallback. Offscreen screenshots and successful API requests alone do
 not verify desktop blur. The original Niangao artwork and Lucide symbols remain.
 
-Preview.2 targets material lost after administrator authorization or a hidden
-top bar returning from fullscreen avoidance. These return events request the
+The material recovery introduced in 0.27.0-preview.2 targets loss after
+administrator authorization or a hidden top bar returning from fullscreen
+avoidance. These return events request the
 existing background material again, without permanent polling. Saved layout,
 temperature authorization and sampling settings remain independent; visible
 blur still needs verification on the target Windows system.
@@ -26,7 +27,7 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 ## 安装与使用
 
 1. 解压发布包，保留 DesktopStats.exe 与 _internal 在同一目录。双击运行，或用 Install.cmd 安装。升级前先应用或撤销待保存设置；旧版本如不能安全自动退出，请从托盘退出后重试。安装先准备新目录，再换入并保留原版备份；准备、替换或注册失败会尝试回滚并明确记录未完成的步骤，配置文件保持独立。
-2. 左侧保留 **桌面组件 / 顶部栏 / 历史记录 / 偏好** 四个主要入口。侧栏的组件列表、**＋** 和场景操作只在桌面编辑页显示；在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
+2. 左侧提供 **桌面组件 / 顶部栏 / 历史记录 / 整机视图 / 偏好** 五个主要入口。侧栏的组件列表、**＋** 和场景操作只在桌面编辑页显示；在组件列表旁按 **＋** 添加模板。选中组件后，在同一页查看预览和指标，并调整皮肤、透明度、标题及大小；窄窗口直接上下滚动，不必逐层打开抽屉。
 3. 点击 **卡片 / 横条 / 竖条** 一键选择布局。**＋添加指标** 支持连续选择，点击“添加所选”才一次加入；取消或 Esc 不更改组件。每组件最多六项，同一模板可重复添加。
 4. 默认使用自适应排列，拖动指标调整顺序。需要手工编辑时展开 **精细排版**；开启 **自由摆放** 后，拖动有边缘/中心吸附和参考线，按住 Alt 临时关闭吸附。拖到另一项中央可交换位置，拖动选中项的小角可调整其区域。
 5. 按住 Ctrl 点击多选，再使用 **对齐与均分**。重叠或空间不足的操作不会部分提交；新增指标会保留手动摆放的旧位置，没有空位时向下扩展。移除指标不重铺剩余项。
@@ -38,6 +39,100 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 全屏游戏或应用位于前台时，顶部栏会在被覆盖的屏幕上自动隐藏，关联的详情浮窗和提示也会关闭；切回该屏幕的普通桌面窗口后恢复。启动时即检查已运行的全屏窗口。避让期间保留采样与本地历史，隐藏栏的动效停止，不增加周期性的窗口检查。
 
 设置隐藏或最小化时，预览动效、实时预览投影、历史页查询和额外传感器检查暂停，常规采样继续按已保存的间隔运行。最小化保留未确认分组、筛选与滚动位置；恢复窗口立即显示最近的读数。只改标题、间距等外观内容不会触发额外硬件检查。
+
+### 小组件布局（0.32.0 预览版）
+
+桌面组件角落不再绘制缩放斜线，右下角的缩放区域和指针提示仍然保留。
+尚未修改的默认三指标卡片采用主指标与辅助指标的层级：宽卡片左侧突出主指标，
+右侧分成两行；高卡片上方为主指标，下方并排显示两项。布局随实际宽高调整，
+不会把手动位置、自定义顺序或已选的网格、横条、列表重新排回默认值。
+这些改动只影响显示，不增加采样、后台线程或动画时钟。
+
+### 三维整机视图（0.32.0 预览版）
+
+0.37 在页首显示机箱、散热器、电源和风扇的数量及统一外观设置。**浏览全部型号与外观**
+打开独立二维图鉴：当前 64 款机箱、42 套散热方案、6 款电源、38 款风扇，全部支持
+原版、可爱、彩色手绘和纯线条等 13 种风格。0.38 将电源补至 21 款，图鉴当前共 165 条。
+搜索和切换图鉴不会改动装配或顶部栏设置。
+**下载 SVG 图集** 只下载当前类别的独立插画文件；应用已自带外观，不需要导入。
+图鉴默认静止，**演示叶轮转动（非实测）** 使用选择的参考转速以 1/120 播放，
+不读取本机传感器；关闭图鉴后停止时钟并清空图形缓存。
+
+**统一应用此风格** 清除已有的逐类和单件风格覆盖，不改变选中的硬件。
+风冷、水冷和自定义水冷示例会替换尚未保存的机箱及配件草稿，保留已选 CPU、显卡和内存；
+示例不表示本机已安装对应配件。未知风扇测速不会用演示转速替代。
+
+0.36 增加 **硬件扩展包**：从 GitHub 选择 Intel 或 AMD CPU 包，下载后在此页导入。
+新增型号共用全部外观和已有绘制能力；可随时移除，不影响本机读数采集。
+首版只开放 CPU 数据包，其他硬件已有型号保留在本体。见 [扩展包说明](HARDWARE_PACKS.md)。
+
+0.35 增加 **配件与安装**：可独立选择参考 CPU、显卡、主板、散热器、电源以及每条
+内存，按机箱支持的安装面配置风扇，再添加存储和扩展卡。显卡型号可按品牌和系列
+筛选；筛选不替换已经选择的型号。未知型号或外观未核实的部分会明确标注。
+风冷、一体水冷和分体水冷按钮会载入参考配置，保存仍使用 **应用偏好**。
+
+**混搭外观** 可分别设置每类硬件；三维窗口选中具体一件后，可再设置这一件的风格。
+选择 **恢复统一外观** 移除混搭设置，不更改配件。原版没有笑脸，所有风格共享部件
+型号、尺寸和数量。参考 CPU、显卡或内存不借用本机另一件硬件的传感器读数。
+
+**实测转速** 只驱动已对应的叶轮；未绑定测速、读数过期或叶片结构未核实会保持静止。
+需要观察动作时可手动选择 **参考转动（非实测）**，再开启风扇动效。该模式为演示，
+不代表本机 RPM。窗口隐藏、最小化或关闭会停止共享动画，关闭时释放图形资源。
+完整清单见 [装配目录](ASSEMBLY_CATALOG.json)，细节、来源和边界见
+[模型质量说明](ASSEMBLY_QUALITY.md)。
+
+在 **整机视图** 选择机箱外观，再点击 **打开三维视图**。独立窗口支持拖动旋转、
+滚轮缩放、重置视角，以及切换整机、显卡、CPU、内存和主板的局部视图。
+**展开组件** 将部件分开，便于查看形状。机箱选择和查看偏好暂存在偏好草稿中，
+按现有 **应用偏好** 流程保存；不会改动顶部栏或桌面布局草稿。窗口按顶部栏配置
+选择屏幕，不因为打开三维视图自动迁移顶部栏。
+
+也可从托盘菜单 **桌面 3D 检视** 直接打开。点击模型中的 CPU、显卡、内存或
+主板可选中部件并查看状态，拖动只旋转视角；部件选择与局部放大相互独立。
+状态使用当前缓存的传感器读数，未知或失效值保持缺测，不因为点击模型发起额外
+硬件查询。机箱与主板的身份、比例尺寸和安装限制不冒充未检测到的传感器状态。
+
+硬件模型复用现有 178 项目录（147 显卡、28 内存、3 CPU）的型号、盖板、风扇和
+内存缺口资料；内存按已识别的模块分别选择外形，不从第一条借用所有模块的身份。
+机箱现有 64 款、18 个品牌、6 类结构的原创示意模型，可先按品牌筛选，完整品牌、尺寸、形态与
+官方来源保存在 `chassis_catalog.py`。**这不是所有市售机箱的完整目录。**
+
+机箱与内部组件默认 **跟随顶部栏硬件风格**，也可在整机视图独立选择原版、可爱、
+彩色手绘、纯线条及其余旧方案。风格选择只属于整机视图偏好，不会反向改动顶部栏。
+同一型号的尺寸、安装限制、面板结构和风扇保留；配色、光照、描边与手绘笔触随方案
+改变。无表情原版继续保留，笑脸只属于可爱笑脸和笑脸手绘。
+
+**模型细节** 提供简洁、精细和近看细节三档，默认精细；可在设置页或三维窗口
+右侧面板选择。切换细节重新生成模型，实时数值更新不重复生成。
+选择部件会播放对应风格的短时特效，400–850 毫秒后停止；可关闭 **风格特效**，
+或点击 **预览特效** 手动查看。它不改变几何或点击区域，也不启动额外传感器。
+关闭动效、隐藏、最小化与关闭窗口均停止播放。结构与来源范围见
+[模型质量与特效说明](ASSEMBLY_QUALITY.md)。
+
+系统读取的机箱标识来自 Windows SMBIOS。读取仅在该页或三维窗口需要身份时
+进行并缓存，没有新增 WMI 工作进程、驱动、网络检索或周期轮询；返回数据不含
+序列号、资产标签、UUID 或原始固件。DIY 主机常只提供主板或整机厂商，不能据此
+知道实际机箱。自动匹配只接受经过验证的精确机箱标识，不能把 ASUS 主板视为
+ASUS 机箱。当前首批目录尚无经过验证的零售机箱固件映射，因此通常需要手动
+选择；识别不到时显示明确标注的参考机箱，手动选择不篡改系统识别结果。
+
+模型按可用外形尺寸绘制，并保留玻璃、网孔、双仓或立式等结构差异，但不是厂商
+CAD，也不代表内部安装孔位、线缆位置或精确安装兼容性。部分已核主板有真实
+外形尺寸，内部元件和接口位置仍属示意。未知部件不补造已安装的散热器、电源或
+机箱风扇；机箱风扇安装位表示支持能力，不表示实际装了几把风扇。显卡长度与
+机箱参考限值的对比只是部分检查，冷排、支架、电源接头、厚度等仍需实物确认。
+不兼容部件不会被缩小到看似能装下。未知尺寸使用参考形状并保留限制说明。
+
+三维窗口默认静止，只在打开时创建渲染资源，关闭后释放。可选的 **风扇随转速
+转动** 使用当前所选显卡已有的有效 RPM 与共同动画时钟；转速缺失、过期、为零、
+系统要求减少动画、窗口隐藏或最小化时静止。未知叶片结构保持静态，驱动提供的
+通道不等于每一把物理风扇都有独立测速；模型不虚构未核实的背面风扇位置。
+旋转视角和展开部件不发起新的硬件检测，读数更新不重复生成整套网格。
+
+此功能使用现有 PySide6-Essentials 内的 Qt Base OpenGL/QtOpenGLWidgets，
+不安装 Qt Quick 3D、Qt 3D 或额外模型包。原创三维模型和渲染代码适用项目的
+非商业许可，第三方 Qt 库的 LGPL 权利继续保留；详见
+[许可范围](../LICENSING.md) 和 [第三方声明](../THIRD_PARTY_NOTICES.md)。
 
 ### 顶部栏设置
 
@@ -63,7 +158,33 @@ the app does not repeatedly close/reinitialize that source or add normal polling
 
 硬件联动对 CPU/GPU 分别使用负载、温度和功耗，黄红热感与蓝色功耗电弧可同时出现。短电弧会在不同位置和方向出现、分叉、熄灭，十个视觉阶段逐步增加幅度、放电次数和重叠细丝，并在阶段之间平滑过渡；真实读数不分成十档。内存使用实际占用量，网络和磁盘分别使用两个方向，电池分别使用电量、充电和放电，风扇使用实际转速或设备报告的风扇百分比，NVMe 使用真实温度。只叠加有来源的通道；缺测不借另一块设备的值，不从内存占用推测温度，也不把 SSD 损耗作为当前负载。主使用率为零或缺失时，有真实温度或功耗的层仍可独立呈现。
 
-开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。风扇旋转和功率流动是装饰反馈，不是经过标定的转速或电流动画。
+开启动效后可连续调节 **强度**（0–100%）及 **速度**（0.5–2 倍）。强度为零时静止。动效只用于带图标的显示方式；选择没有图标的格式时保留动效设置，不自动改格式。选择“图标与数值”或双向读数即可看到效果。通用风扇符号与功率流动属于装饰反馈。预览版的实物显卡叶轮单独跟随当前 RPM，以固定 120 倍慢放，速度偏好不改变其比例；详见下文显卡风扇说明。
+
+### 硬件图标与型号（0.31.0 预览版）
+
+选单前四项依次为 **1 · 原版**（加笑脸之前的微型实物，无表情）、**2 · 可爱笑脸**（独立保留的可爱卡通）、**3 · 彩色手绘**、**4 · 纯线条**，每套都使用同一份具体硬件目录，不退回统一盒子图案。其余旧外观仍在选单中。升级保留你当前的选择。
+
+另外可选 **5 · 奶油贴纸**、**6 · 拼色剪纸**、**7 · 蓝墨手账**，三套都没有表情。奶油贴纸使用柔和浅色和细描边；拼色剪纸以平面色块区分面板；蓝墨手账保留不齐的蓝色笔触和淡彩。配色属于插画表现，型号外形、风扇布局和内存缺口仍来自同一份已核资料，不表示原厂漆色或当前灯光。
+
+**所有方案的硬件数量和型号集合与原版相同**：当前每套均为 178 项（147 显卡、28 内存、3 CPU），不另建缩减目录。以后向原目录加入型号，各方案同步读取。风扇继续使用已有所选显卡转速数据和共同动画时钟，不按风格增加硬件轮询。新增方案不修改原版图形，也不会自动替换你保存的选择。
+
+原创应用代码、原创硬件插画和对应绘制代码采用非商业许可，未经另行书面授权禁止商业使用或商用盈利；第三方及既有授权素材的范围与例外见 [许可范围](../LICENSING.md)。
+
+新增 **随手线条、手涂淡彩、笑脸手绘**：随手线条只有略歪、不齐的笔触；手涂淡彩在相同线条间加入疏松的铅笔色；笑脸手绘单独增加小表情。透明图标不带方格纸底纹，方格纸只用于样式预览。三套覆盖当前 147 个显卡、28 个内存、3 个 CPU 条目，沿用已核型号和手动外观选择。Intel 长方形封装与 AMD AM5 八缺口顶盖分别绘制；相同 AM5 封装不虚构外形差异，用型号小标识区分。小标识用于辅助辨认，不复刻原厂刻字位置。
+
+**手绘线稿** 使用简单、略有不齐的线条和留白，不加立体阴影、大片填色或表情。图标切换不需要重启软件，已有 CPU 温度连接会继续使用；只有软件本身重启才需要按已选偏好重新确认系统授权。
+
+在 **顶部栏 → 外观 → 硬件图标** 选择前述七套方案，或保留的 **经典通用、结构线稿、精简实物、柔和双色、手绘线稿、笑脸手绘**，共十三种外观。升级保留已保存的选择；切换后按现有 **应用顶部栏** 流程保存。实物及卡通风格按已核型号绘制盖板、风扇、外露 PCB 边缘、分段金手指、挡板和散热鳍片边缘；有官方依据时保留型号特征。卡通版覆盖现有 178 个型号，以及磁盘、网络、电池、风扇与其他指标符号；圆润描边和小表情属于插画，不代表厂商印刷或实测状态。标准 32 像素顶部栏中，实物、卡通及手绘显卡使用 30×22 显示区域，CPU/内存为 22×22；经典与原结构线稿仍为 18×18。未知外形与叶片继续明确标注，不补造内部元件或走线。
+
+基础图库包括 103 个显卡代表型号、16 个内存代表型号，以及原有 CPU 示例。经过核实且图示已就绪的完整版本型号会另行加入匹配；同系列的 OC、非 OC、白色、特殊供电和修订版分别记录，不通过删除型号后缀自动合并。有证据证明外观相同的版本才共用图示；结构不同的版本需要单独实现。例如 MSI RTX 5090 SUPRIM SOC/OC 使用独立金属盖板和 STORMFORCE 七叶前扇，不套用 RTX 4090 的外壳；ROG Astral RTX 5090 标准版/OC 版在逐项核对官方图库和外部规格后，共用已核 Astral RTX 5080 OC 的可见散热外观。共用外观不会把另一型号的芯片、显存或读数带过来。
+
+未识别出具体非公型号时，可在该指标的 **外观型号** 中手动选择，详情会标明 **手动外观**。显卡候选只来自当前所选设备已缓存的 GPU 芯片身份，Ti、SUPER、XT 等不同芯片变体不会混为一个候选；设备缺失或身份不明确时，不借用另一块显卡来提供候选或读数。内存也可手动选择图示。手动选择仅改变图示，不改变所选设备、指标、传感器来源和数值，也不证明电脑实际安装了所选零售型号。选回 **自动匹配** 可恢复现有识别规则；切换所选显卡时，也会只清除该项手动外观并恢复自动匹配，保留其余显示设置。打开或切换外观选项复用缓存身份，不增加硬件查询。
+
+展开硬件说明后，**查看接口** 与 **查看供电** 按已有资料提供实体插口的类型和数量示意。视频口的排列、供电插座的安装位置和挡板开孔未核实时会明确说明；示意图不代表已确认的实物顺序。已确认无需外接供电的型号会单独标明；未知供电不当作没有供电。主机接口区分 PCIe/AGP，电气通道数不会被画成未经确认的短金手指。内存接口按已确认的代际、DIMM/SO-DIMM 和物理引脚规格说明；三种实物风格的 DDR4 DIMM、DDR5 DIMM、DDR4 SO-DIMM 缺口按官方正视 PCB 尺寸图的中心、宽度和深度比例绘制，其他未核规格仍保留简化示意。图中的触点细线不是逐针工程图，经典通用与结构线稿保持原样。
+
+本次运行图库共 178 项：147 个显卡、28 个内存和 3 个 CPU 示例。清单中的 56 个具体版本已全部支持，待实现版本为 0；其中 34 项有明确的专用绘图登记，包含原有两款 SUPRIM 5090 和本次新增的 32 个版本处理。就绪表示可以精确选择这个版本，不表示每个外观细节都已查明。ZOTAC Infinity 5080 10A、GIGABYTE GTX 460 Rev2/Rev3 和 BIOSTAR RX 7600 OC 的叶片数仍未知，保持静态；BIOSTAR OC 的盖板未核，界面明确显示为技术示意。基础图库、版本、来源及逐项未知字段见 [硬件覆盖报告](HARDWARE_COVERAGE.json)；它不表示已覆盖市面上每个品牌、系列和版本。
+
+有来源支持的原厂背板和可拆装饰背板可分别按需查看，装饰件图不表示电脑已安装该配件。GC_HPWR 与 16pin 仅在有依据的 SAPPHIRE NITRO+ PhantomLink 版本中按替代供电路线说明，不同时画成两个必接插口。内存 RGB 导光罩只画物理结构，不增加灯效动画，也不读取或推测当前灯光。三种实物风格继续采用浅薄侧面投影；新增外观、接口和背板只按需构建，不增加硬件轮询、动画计时器或采样频率。
 
 ### 顶部栏整体设计
 
@@ -143,6 +264,89 @@ attempt to save pending data. Unexpected process termination can lose the most
 recent uncommitted batch; a paused or failing writer does not establish a strict
 five-second durability guarantee. The pending buffer and existing retention
 limits remain bounded. This batching does not change sensor polling frequency.
+
+### Hardware appearances, model selection and fan RPM (development)
+
+The source-linked base catalog contains 103 GPU and 16 RAM representatives,
+alongside the existing CPU examples. Ready exact versions extend that catalog
+only after their visible exterior is reviewed and either confirmed to share art
+or given an independent structural recipe. OC/non-OC, white, rear-power and
+revision suffixes are not discarded. MSI RTX 5090 SUPRIM SOC/OC has its own
+metal-panel cover and STORMFORCE seven-blade front rotors; reviewed ROG Astral
+RTX 5090 standard/OC exteriors share the reviewed Astral RTX 5080 OC art only
+after checking official images and external specifications. The
+[coverage report](HARDWARE_COVERAGE.json)
+records all 56 supported version registrations, with zero pending versions, and
+the unknown fields that remain. The 0.28.0-preview.2 runtime catalog has 178
+entries: 147 GPU, 28 RAM and 3 CPU. Its 34 explicit artwork registrations include
+the two earlier SUPRIM 5090 entries and 32 new treatments. This is a bounded
+inventory, not a claim of full market coverage or complete visual verification.
+
+All seven selectable icon versions remain available: Classic, Outline, Solid,
+Miniature, Soft, Cute Cartoon and Hand-drawn Lines. Existing settings retain Classic. Reviewed model colors,
+exposed PCB edges, separated contacts, bracket and heatsink edges refine the
+hardware drawings. Internal PCB layouts, unverified notches and bare-board
+lengths are not invented. Electrical PCIe lanes do not establish mechanical
+connector length. Port and power views show documented connector types and
+counts, with unverified order and position explicitly labelled; they are not
+physical installation diagrams.
+
+Factory backplates and documented removable accessories have separate on-demand
+views. GC_HPWR and 16-pin are alternative routes only on the source-confirmed
+SAPPHIRE NITRO+ PhantomLink editions, never simultaneous required sockets. RAM RGB covers are
+static physical diffusers. Modern drawings retain shallow side projection, and
+these new exterior views add no hardware polls, timers or sampling cadence.
+
+Modern DDR4 DIMM, DDR5 DIMM and DDR4 SO-DIMM keys use the nominal center,
+width and depth ratios from published front-view PCB mechanical drawings.
+Other unreviewed classes retain schematic keys; contact dividers do not depict
+every physical pin. Classic and Outline remain unchanged.
+
+An optional Appearance model choice is labelled Manual appearance. GPU choices
+use only the selected device's cached chip identity; chip variants and missing
+secondary GPUs cannot borrow another device's cooler or readings. RAM art can
+also be selected manually. Only the illustration changes: metrics, device
+targets, sensor sources and values stay the same. Selecting Automatic matching
+restores the existing resolver, and opening or changing these choices adds no
+hardware query. Manual art does not establish the installed retail model.
+Changing the GPU target clears only that item's manual artwork choice and
+restores automatic matching, preserving its other display preferences.
+
+Blade counts, rings, linked blade groups, hubs and relative counter-rotation
+are applied only where exact-model references support them. A bare GPU chip
+name does not establish a retail cooler. Illustration proportions are visual
+estimates, not measured factory dimensions. Source-confirmed light and dark
+rotors retain their own colors; fixed shroud rings do not rotate with the fan.
+Unreviewed active fan faces are labelled pending and remain neutral and static.
+The completed export has 119 motion-ready GPU entries. ZOTAC Infinity 5080 10A,
+GIGABYTE GTX 460 Rev2/Rev3 and BIOSTAR RX 7600 OC retain unknown blade counts.
+BIOSTAR OC's unverified cover is explicitly labelled as a technical schematic.
+The offline gallery enables motion only for reviewed fan faces; field-level
+limits remain recorded in the coverage report. Black and white Astral front
+fans preserve the source-confirmed reversed center fan.
+
+Solid, Miniature and Soft Auto effects use fresh same-card current RPM, displayed
+unchanged and animated at a fixed 120x slow-motion scale. Higher RPM rotates
+faster in the same proportion. Zero stops; missing, failed or stale readings
+remain unknown and stop. Load, temperature, percentage and intended fan speed
+do not substitute for current RPM. Classic, Outline and manual Pulse keep their
+static hardware illustrations. The offline gallery's RPM control is explicitly
+simulated and never reads the computer.
+
+The NVIDIA provider uses a bounded read-only NvAPI query, at most once per
+second per requested card, with cached capability/PCI matching and five-second
+transient-failure backoff. The private CurrentRpm interface follows
+[LibreHardwareMonitor v0.9.6](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/v0.9.6/LibreHardwareMonitorLib/Interop/NvApi.cs);
+it is labelled driver current RPM, without claiming independent physical
+validation. Where unavailable, the provider tries the public single-channel
+[tachometer](https://docs.nvidia.com/nvapi/group__gpucooler.html). Driver cooler
+channel IDs do not establish left/center/right physical positions: a labelled
+card channel mean drives the illustrated fans together. This does not claim
+independent per-fan speed. AMD/Intel RPM remains unknown without a compatible
+same-card provider. No fan controls, new driver, service, administrator prompt,
+polling thread or animation timer is added. Existing sampling and hidden-window
+animation pause behavior remain; an enabled Auto item still requests sampling
+while the bar is temporarily hidden by fullscreen avoidance.
 
 ### ASUS CPU temperature bridge
 
@@ -351,6 +555,28 @@ compiling the original collector locally is required before running the full
 test suite or re-exporting. A new binary distribution still needs its own
 third-party notice and corresponding-source review; a passing source export
 does not certify a future binary package.
+
+## Model widgets (0.40 development candidate)
+
+In the widget gallery choose CPU model or GPU model. The large artwork and
+caption retain the matched hardware identity; the lower readings use the
+existing metric pipeline. Each widget has its own hardware style and frame
+toggle. Original has no face. A GPU selector binds readings and fresh RPM to
+the selected GPU; an unavailable device does not borrow another card's data.
+Unknown, stale or zero RPM leaves fans still. Reduced motion pauses effects.
+
+The assembly page can open a compact desktop model, separately from the full
+inspector. Choose frame on/off there or in the desktop model's context menu.
+Drag to rotate, wheel to zoom, click a part to inspect its available readings,
+and Alt-drag to move the desktop widget. Right-click to return to the full
+inspector or close it. The desktop mode opens without activation and stays
+below ordinary windows. Same-screen fullscreen suppression uses the existing
+foreground monitor guard; unknown/locked sessions never initiate a window.
+No hardware is assumed installed from a reference model selection.
+
+The new modes are candidate source. Windows composition and installed gaming
+acceptance are separate from offscreen tests; do not upgrade an active game
+session merely to view these changes.
 
 ## Licensing
 

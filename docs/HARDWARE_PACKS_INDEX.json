@@ -1,0 +1,41 @@
+{
+  "base_cpu_products": 3,
+  "format": 1,
+  "market_exhaustive": false,
+  "optional_cpu_products": 72,
+  "package_policy": "Original shared package geometry; unverified mechanics remain explicitly unknown.",
+  "packs": [
+    {
+      "background_workers": 0,
+      "bytes": 5047,
+      "download_url": "https://github.com/Fairank/DesktopStats/releases/download/v0.36.0-preview.1/DesktopStats-cpu-intel-desktop-1.0.0.dspack",
+      "file": "DesktopStats-cpu-intel-desktop-1.0.0.dspack",
+      "id": "cpu-intel-desktop",
+      "kind": "cpu",
+      "label": "Intel Desktop & HEDT",
+      "license": "PolyForm-Noncommercial-1.0.0",
+      "minimum_app_version": "0.36.0-preview.1",
+      "persistent_meshes": 0,
+      "products": 33,
+      "sha256": "533f584a0b2c87656fba1705fa2bc3c77a29b58fb210dd7c7fc48ba3bdb9709e",
+      "styles": "all_13_shared",
+      "version": "1.0.0"
+    },
+    {
+      "background_workers": 0,
+      "bytes": 5037,
+      "download_url": "https://github.com/Fairank/DesktopStats/releases/download/v0.36.0-preview.1/DesktopStats-cpu-amd-desktop-1.0.0.dspack",
+      "file": "DesktopStats-cpu-amd-desktop-1.0.0.dspack",
+      "id": "cpu-amd-desktop",
+      "kind": "cpu",
+      "label": "AMD Ryzen & Threadripper",
+      "license": "PolyForm-Noncommercial-1.0.0",
+      "minimum_app_version": "0.36.0-preview.1",
+      "persistent_meshes": 0,
+      "products": 39,
+      "sha256": "cfbbb0f9a73c6474f78bec29bf0c68a6edda33d2d707a0441499bcfed3301429",
+      "styles": "all_13_shared",
+      "version": "1.0.0"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ Item {
     property string fontFamily: "Segoe UI Variable"
     property bool reserveValueWidth: false
     property bool motionEnabled: false
+    property real barHeight: 32
     property string design: "classic"
     readonly property string effectiveDesign: ["capsule", "instrument"].includes(design) ? design : "classic"
     readonly property bool instrument: effectiveDesign === "instrument"
@@ -19,6 +20,13 @@ Item {
     readonly property string style: row.style || "label_value"
     readonly property bool hasLabel: style === "label_value"
     readonly property bool hasIcon: style === "icon_value"
+    readonly property var iconAppearance: row.hardware_appearance || ({})
+    readonly property bool modernHardwareIcon: ["cpu", "gpu", "memory"].includes(row.icon)
+        && iconAppearance.kind === row.icon
+        && ["solid", "miniature", "soft", "cartoon", "sketch", "notebook_line", "notebook_color", "notebook_smile", "sticker", "papercut", "inkwash"].includes(iconAppearance.icon_set)
+    readonly property real iconHeight: modernHardwareIcon ? Math.max(18, Math.min(26, barHeight - 10)) : 18
+    readonly property real iconWidth: modernHardwareIcon && iconAppearance.kind === "gpu"
+        ? Math.round(iconHeight * 15 / 11) : iconHeight
     readonly property bool hasTrend: style === "trend_value"
     readonly property bool hasBar: style === "bar_value"
     readonly property bool hasRing: style === "ring_value"
@@ -39,7 +47,7 @@ Item {
     readonly property bool gaugeAvailable: row.available === true && row.gauge_available === true && row.gauge_supported !== false
         && Number.isFinite(row.gauge_fraction) && row.gauge_fraction >= 0 && row.gauge_fraction <= 1
     readonly property real prefixWidth: hasLabel ? Math.min(110, labelMeasure.advanceWidth)
-        : hasIcon ? 18 : hasRing ? 14 : hasTrend ? 36 : hasBar ? 22 : 0
+        : hasIcon ? iconWidth : hasRing ? 14 : hasTrend ? 36 : hasBar ? 22 : 0
     readonly property real contentGap: hasIcon ? 5 : prefixWidth > 0 ? 6 : 0
     readonly property real actualValueWidth: valueMeasure.advanceWidth + unitGap + unitMeasure.advanceWidth
     readonly property real valueWidth: reserveValueWidth && !isGraph
@@ -51,7 +59,7 @@ Item {
     implicitWidth: isDuplex ? Math.max(44, pairedWidth) : isGraph ? Math.max(44, valueWidth)
         : isStacked ? Math.max(Math.min(66, labelMeasure.advanceWidth), valueWidth)
         : prefixWidth + contentGap + valueWidth
-    implicitHeight: twoRows ? 24 : Math.max(hasIcon ? 18 : 14, valueText.implicitHeight, hasLabel ? shortLabel.implicitHeight : 0)
+    implicitHeight: twoRows ? 24 : Math.max(hasIcon ? iconHeight : 14, valueText.implicitHeight, hasLabel ? shortLabel.implicitHeight : 0)
     TextMetrics {id:pairAMeasure;text:root.pairRows[0] ? String(root.pairRows[0].number_text || "—") : "—";font.family:root.fontFamily;font.pixelSize:11;font.weight:Font.Medium;font.features:{"tnum":1}}
     TextMetrics {id:pairBMeasure;text:root.pairRows[1] ? String(root.pairRows[1].number_text || "—") : "—";font:pairAMeasure.font}
     TextMetrics {id:pairReserveMeasure;text:"999.9";font:pairAMeasure.font}
@@ -84,6 +92,7 @@ Item {
                     ink:root.instrument && ["download","read","charge"].includes(pairLine.pairData.direction) ? root.accent : root.secondaryInk
                     metric: pairLine.pairData.metric || ""
                     hardwareState: pairLine.pairData.hardware_state || ({})
+                    iconStyle: root.row.hardware_icon_style || "classic"
                     automaticEffect: pairLine.pairData.auto_effect || ""
                     effect: root.row.icon_effect || "off"
                     level: pairLine.pairData.effect_level === undefined ? null : pairLine.pairData.effect_level
@@ -158,12 +167,14 @@ Item {
     MetricIcon {
         objectName: "topBarContentIcon"
         visible: root.hasIcon
-        width: 18; height: 18
+        width: root.iconWidth; height: root.iconHeight
         anchors.verticalCenter: parent.verticalCenter
         name: root.row.icon || "sensors"
         ink: root.row.available === true ? root.ink : root.muted
         metric: root.row.metric || ""
         hardwareState: root.row.hardware_state || ({})
+        hardwareAppearance: root.row.hardware_appearance || ({})
+        iconStyle: root.row.hardware_icon_style || "classic"
         automaticEffect: root.row.auto_effect || ""
         effect: root.row.icon_effect || "off"
         level: root.row.effect_level === undefined ? null : root.row.effect_level

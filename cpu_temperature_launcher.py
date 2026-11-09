@@ -20,11 +20,13 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 
-from cpu_temperature import FRESH_SECONDS, is_requested
+from cpu_temperature import FRESH_SECONDS, INTERVAL, is_requested
 
 PREFERENCE = "cpu_temperature_prompt_on_start"
 HELPER_SHA256 = "09a329fe88294a017fb7db39ed123ad27312ab889b09d473dd5c0dfe8e1708ac"
 HELPER_RELATIVE = Path("_internal/cpu-temperature/AsusCpuTemperatureBridge.exe")
+FOREGROUND_RETRY_SECONDS = INTERVAL
+_THROTTLED = object()
 _LOG = logging.getLogger("DesktopStats.temperature_startup")
 _LOG.setLevel(logging.INFO)
 
@@ -43,7 +45,7 @@ def temperature_ready(data, now):
 
 class CpuTemperatureLauncher:
     def __init__(self, *, headless=False, platform=None, frozen=None, executable=None,
-                 environ=None, app_pid=None, api_factory=None, wall_clock=None):
+                 environ=None, app_pid=None, api_factory=None, wall_clock=None, clock=None):
         self._headless = headless
         self._platform = sys.platform if platform is None else platform
         self._frozen = bool(getattr(sys, "frozen", False)) if frozen is None else frozen
@@ -52,6 +54,9 @@ class CpuTemperatureLauncher:
         self._pid = os.getpid() if app_pid is None else app_pid
         self._factory = api_factory or _NativeApi
         self._wall = wall_clock or time.time
+        self._clock = clock or time.monotonic
+        self._next_foreground = 0.0
+        self._last_foreground = None
         self._api = None
         self._closed = self._terminal = self._attempted = self._updating = False
         self._state, self._reason, self._error = "idle", "", 0
@@ -67,8 +72,34 @@ class CpuTemperatureLauncher:
         return dict(state=self._state, reason=self._reason, attempted=self._attempted,
                     error=self._error)
 
+    def _foreground(self, observation, *, force=False):
+        if not callable(observation):
+            return observation
+        try:
+            now = self._clock()
+            if type(now) not in (int, float) or not math.isfinite(now):
+                return None
+            if self._last_foreground is not None and now < self._last_foreground:
+                self._next_foreground = 0.0
+            self._last_foreground = now
+            if not force and now < self._next_foreground:
+                return _THROTTLED
+            self._next_foreground = now + FOREGROUND_RETRY_SECONDS
+            return observation()
+        except (OSError, RuntimeError, ValueError, AttributeError, TypeError):
+            return None
+
     def update(self, config, data, *, fullscreen=None):
-        if self._closed or self._terminal or self._updating:
+        if self._closed or self._updating:
+            return self.status()
+        if self._terminal:
+            # Consent remains once per session. After a successful launch only
+            # the existing cached sample can change this diagnostic state; a
+            # missing/stale reading must never trigger another native query.
+            if self._attempted and self._state in ("launched", "ready"):
+                if temperature_ready(data, self._wall()):
+                    return self._set("ready", "existing_temperature")
+                return self._set("launched", "awaiting_sensor")
             return self.status()
         if (self._headless or self._platform != "win32" or not self._frozen
                 or self._environ.get("DESKTOP_STATS_CPU_BRIDGE_DISABLED") == "1"
@@ -85,9 +116,13 @@ class CpuTemperatureLauncher:
         if expected is None or not expected.is_absolute() or not _same_path(self._executable, expected):
             self._terminal = True
             return self._set("blocked", "installed_identity")
-        fullscreen = fullscreen() if callable(fullscreen) else fullscreen
-        if fullscreen is not False:
-            return self._set("deferred", "fullscreen" if fullscreen is True else "foreground_unknown")
+        observed = self._foreground(fullscreen)
+        if self._closed:
+            return self.status()
+        if observed is _THROTTLED:
+            return self.status()
+        if observed is not False:
+            return self._set("deferred", "fullscreen" if observed is True else "foreground_unknown")
         helper = expected.parent / HELPER_RELATIVE
         self._updating = True
         try:
@@ -98,6 +133,13 @@ class CpuTemperatureLauncher:
                 # Preflight can be reentered by a caller-owned shutdown.
                 if self._closed:
                     return self.status()
+                # File verification can outlive the first foreground fact.
+                # Recheck once immediately before consent, never after it.
+                observed = self._foreground(fullscreen, force=True)
+                if self._closed:
+                    return self.status()
+                if observed is not False:
+                    return self._set("deferred", "fullscreen" if observed is True else "foreground_unknown")
                 self._attempted = self._terminal = True
                 result = self._api.launch(helper, self._pid)
                 if self._closed:
@@ -124,19 +166,31 @@ class CpuTemperatureLauncher:
         self._set("closed")
 
 
-def foreground_fullscreen(manager=None, *, api_factory=None):
+def foreground_fullscreen(manager=None, *, api_factory=None, desktop_ready=None):
     """Use existing observations first, otherwise one read-only foreground query.
 
     No hooks, window enumeration, timer or process-name query is installed.
     Unknown native state deliberately defers the consent dialog.
     """
     try:
+        if desktop_ready is not None:
+            ready = desktop_ready() if callable(desktop_ready) else desktop_ready
+            if ready is not True:
+                return None
         observed = False
         if manager is not None:
-            if manager._fullscreen_active():
-                return True
+            shell_active = manager._fullscreen_active()
             guard = getattr(manager, "_fullscreen_guard", None)
             if guard is not None:
+                if (shell_active or getattr(manager, "_fullscreen_guard_error", None)
+                        or getattr(guard, "failure", None)
+                        or getattr(manager, "_foreground_hidden_screens", ())):
+                    # ABN_FULLSCREENAPP is only Shell ordering and can miss its
+                    # closing notice. Recover through the existing guard without
+                    # clearing its tracked games on other screens or new hooks.
+                    invalidate = getattr(guard, "invalidate", None)
+                    if callable(invalidate):
+                        invalidate()
                 manager._read_foreground_visibility()
                 if (getattr(manager, "_fullscreen_guard_error", None)
                         or getattr(guard, "failure", None) or not getattr(guard, "_known", False)):
@@ -144,6 +198,8 @@ def foreground_fullscreen(manager=None, *, api_factory=None):
                 if getattr(manager, "_foreground_hidden_screens", ()):
                     return True
                 observed = True
+            elif shell_active:
+                return True  # No verified observation can yet displace it.
         from fullscreen_guard import _NativeApi as ForegroundApi, _covers, _rect
         api = (api_factory or ForegroundApi)()
         hwnd = api.foreground()

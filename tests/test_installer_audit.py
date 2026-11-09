@@ -206,6 +206,51 @@ class CloseExistingAuditTests(unittest.TestCase):
         self.absent.assert_called_once_with()
         self.process.close.assert_called_once_with()
 
+    def test_slow_clean_exit_beyond_the_previous_wait_preserves_process_confirmation(self):
+        elapsed = [0.0]
+        self.sleep.side_effect = lambda seconds: elapsed.__setitem__(0, elapsed[0] + seconds)
+        reads = 0
+
+        def send(command, **_kwargs):
+            nonlocal reads
+            if command["command"] == "quit_if_clean":
+                return dict(ok=True, quitting=True, dirty=False, pid=7007)
+            reads += 1
+            return self.status() if reads <= 2 else None
+
+        self.send.side_effect = send
+        self.process.exited.side_effect = lambda: elapsed[0] >= 20.5
+        with patch.object(installer.time, "monotonic", side_effect=lambda: elapsed[0]):
+            result = installer.close_existing()
+        self.assertEqual(result, self.status())
+        self.assertEqual(elapsed[0], 20.5)
+        self.assertGreater(self.sleep.call_count, 20)
+        self.assertEqual(
+            sum(call.args[0]["command"] == "quit_if_clean" for call in self.send.call_args_list), 1
+        )
+        self.process.close.assert_called_once_with()
+
+    def test_slow_ipc_probes_count_toward_the_absolute_exit_deadline(self):
+        elapsed = [0.0]
+        self.sleep.side_effect = lambda seconds: elapsed.__setitem__(0, elapsed[0] + seconds)
+
+        def send(command, *, timeout):
+            if command["command"] == "quit_if_clean":
+                return dict(ok=True, quitting=True, dirty=False, pid=7007)
+            if timeout == 150:
+                elapsed[0] += 10.0  # Simulate slow native calls without a real delay.
+                return None
+            return self.status()
+
+        self.send.side_effect = send
+        self.absent.return_value = False
+        with patch.object(installer.time, "monotonic", side_effect=lambda: elapsed[0]):
+            with self.assertRaises(RuntimeError):
+                installer.close_existing()
+        self.assertEqual(self.sleep.call_count, 6)
+        self.assertEqual(elapsed[0], 63.0)
+        self.process.close.assert_called_once_with()
+
     def test_ack_without_confirmed_termination_refuses_installation(self):
         replies = iter([
             self.status(), self.status(), dict(ok=True, quitting=True, dirty=False, pid=7007)
@@ -503,6 +548,16 @@ class InstallerTransactionAuditTests(unittest.TestCase):
         installer.install()
         self.spawn.assert_called_once_with(
             [str(self.target / "DesktopStats.exe")], creationflags=0x08000000
+        )
+        self.assertEqual(installer.close_existing.call_count, 2)
+
+    def test_explicit_background_install_without_an_instance_keeps_settings_hidden(self):
+        self.bundle()
+        installer.close_existing.return_value = None
+        installer.install(background=True)
+        self.spawn.assert_called_once_with(
+            [str(self.target / "DesktopStats.exe"), "--background"],
+            creationflags=0x08000000,
         )
         self.assertEqual(installer.close_existing.call_count, 2)
 
@@ -907,6 +962,29 @@ class InstallerTransactionAuditTests(unittest.TestCase):
 
 
 class EarlySelfCheckAuditTests(unittest.TestCase):
+    def test_background_install_error_exits_without_a_native_dialog(self):
+        source = Path(app.__file__)
+        tree = ast.parse(source.read_text(encoding="utf-8"))
+        guard = tree.body[-1]
+        self.assertIsInstance(guard, ast.If)
+        dialog = Mock(side_effect=AssertionError("Background installation must stay hidden"))
+        fake_sys = SimpleNamespace(
+            argv=["DesktopStats.exe", "--install", "--background"],
+            exit=Mock(side_effect=SystemExit(1)),
+        )
+        log = Mock()
+        with self.assertRaises(SystemExit) as raised:
+            exec(compile(ast.Module(body=[guard], type_ignores=[]), str(source), "exec"), {
+                "__name__": "__main__", "sys": fake_sys, "logging": log,
+                "main": Mock(side_effect=RuntimeError("synthetic installation failure")),
+                "c": SimpleNamespace(windll=SimpleNamespace(
+                    user32=SimpleNamespace(MessageBoxW=dialog))),
+            })
+        self.assertEqual(raised.exception.code, 1)
+        fake_sys.exit.assert_called_once_with(1)
+        log.exception.assert_called_once_with("Application failed")
+        dialog.assert_not_called()
+
     def test_empty_self_check_returns_before_profile_qt_ipc_or_logging(self):
         original_import = builtins.__import__
 
@@ -967,6 +1045,17 @@ class ApplicationLifecycleAuditTests(unittest.TestCase):
         self.enterContext(patch.object(app, "RotatingFileHandler", return_value=Mock()))
         self.enterContext(patch.object(app.logging, "basicConfig"))
         self.enterContext(patch.object(app.c, "windll", Mock(side_effect=AssertionError("No native"))))
+
+    def test_install_forwards_the_explicit_background_selection_without_starting_runtime(self):
+        for background in (False, True):
+            with self.subTest(background=background):
+                arguments = ["app.py", "--install"] + (["--background"] if background else [])
+                with patch.object(app.sys, "argv", arguments), patch.object(installer, "install") as install:
+                    app.main()
+                install.assert_called_once_with(background=background)
+        self.modules["native_ipc"].send.assert_not_called()
+        self.modules["native_runtime"].Runtime.assert_not_called()
+        self.server.start.assert_not_called()
 
     def test_failed_migration_or_runtime_constructor_always_closes_its_server(self):
         for name, attribute in (("legacy_migration", "migrate"), ("native_runtime", "Runtime")):
@@ -1176,9 +1265,11 @@ class LocalServerCleanQuitAuditTests(unittest.TestCase):
         cls.method = ast.Module(body=[method], type_ignores=[])
 
     def setUp(self):
+        from native_runtime import Runtime
         self.callbacks = []
         self.logger = Mock(spec=logging)
         namespace = dict(
+            Runtime=Runtime,
             json=json,
             os=SimpleNamespace(getpid=lambda: 7007),
             logging=self.logger,
@@ -1243,6 +1334,62 @@ class LocalServerCleanQuitAuditTests(unittest.TestCase):
                 self.server.application.quit.assert_not_called()
                 self.assertEqual(self.callbacks, [])
                 self.logger.exception.assert_called_once_with("Local command rejected")
+
+    def style_controller(self, *, applied=True):
+        controller = self.runtime.controller
+        controller.changeTopBar = Mock()
+        controller.applyTopBar = Mock(return_value=applied)
+        controller.revertTopBarDraft = Mock()
+        controller.saved = {"top_bar": {"hardware_icon_style": "miniature"}}
+        return controller
+
+    def test_clean_style_change_uses_scoped_save_without_quit_or_queued_work(self):
+        controller = self.style_controller()
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertEqual(reply, dict(ok=True, pid=7007, hardware_icon_style="miniature"))
+        controller.changeTopBar.assert_called_once_with("hardware_icon_style", "miniature")
+        controller.applyTopBar.assert_called_once_with()
+        controller.revertTopBarDraft.assert_not_called()
+        self.server.application.quit.assert_not_called()
+        self.assertEqual(self.callbacks, [])
+
+    def test_style_change_refuses_unknown_values_stale_instance_and_unsaved_input(self):
+        controller = self.style_controller()
+        cases = [(None, 7007, False, False), ("unknown", 7007, False, False),
+                 ([], 7007, False, False), ("miniature", True, False, False),
+                 ("miniature", 7008, False, False), ("miniature", 7007, True, False),
+                 ("miniature", 7007, False, True)]
+        for style, expected, dirty, pending in cases:
+            with self.subTest(style=style, expected=expected, dirty=dirty, pending=pending):
+                controller.dirty, self.pending = dirty, pending
+                self.assertFalse(self.request(dict(command="hardware_icon_style", style=style,
+                                                  expected_pid=expected))["ok"])
+                controller.changeTopBar.assert_not_called()
+                controller.applyTopBar.assert_not_called()
+                self.server.application.quit.assert_not_called()
+
+    def test_failed_style_save_reverts_only_its_new_draft(self):
+        controller = self.style_controller(applied=False)
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertFalse(reply["ok"])
+        controller.revertTopBarDraft.assert_called_once_with()
+        self.server.application.quit.assert_not_called()
+
+    def test_pending_same_config_replacement_refuses_style_change_without_new_draft(self):
+        controller = self.style_controller()
+        controller.replacementPending = True
+        self.assertFalse(controller.dirty)
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertEqual(reply["reason"], "unsaved_changes")
+        controller.changeTopBar.assert_not_called()
+        controller.applyTopBar.assert_not_called()
+
+    def test_successful_noop_save_cannot_claim_an_unapplied_style(self):
+        controller = self.style_controller()
+        controller.saved["top_bar"]["hardware_icon_style"] = "classic"
+        reply = self.request(dict(command="hardware_icon_style", style="miniature", expected_pid=7007))
+        self.assertFalse(reply["ok"])
+        controller.revertTopBarDraft.assert_called_once_with()
 
 
 if __name__ == "__main__":

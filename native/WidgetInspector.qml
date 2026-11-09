@@ -13,19 +13,21 @@ Item {
     property bool positionOpen:false
     property bool displayOpen:false
     property alias previewHost:previewHost
-    readonly property real commonHeight:sizeRow.implicitHeight+(styleFields.visible?styleFields.implicitHeight+16:0)
+    readonly property real commonHeight:sizeRow.implicitHeight+(frameRow.visible?frameRow.implicitHeight+16:0)+(modelFields.visible?modelFields.implicitHeight+16:0)+(styleFields.visible?styleFields.implicitHeight+16:0)
     implicitHeight:fields.implicitHeight+(inlineMode?0:76)
     property string section:"style"
     signal selectSection(string section)
     readonly property var prefs:root.config.widgets[widgetKey] || ({})
-    readonly property bool glassSkin:["glass","frost","tint"].includes(root.prefs.skin || root.config.skin)
+    readonly property bool glassSkin:root.prefs.skinFrame !== false && ["glass","frost","tint"].includes(root.prefs.skin || root.config.skin)
+    readonly property bool hardwareModel:root.prefs.presentation === "hardware"
+    property var hardwareChoices:[]
     readonly property var dimensions:root.canvas.dimensions
     readonly property bool percentFirst:{const draft=root.config;const ids=root.canvas.contents;return !!ids.length && stats.metricInfoFor(widgetKey,ids[0]).unit==="%"}
     property var health:({})
     property bool advanced:false
     readonly property bool pendingInput:{if(widthInput.userEdited || heightInput.userEdited)return true;for(let i=0;i<coordinateInputs.count;i++){const item=coordinateInputs.itemAt(i);if(item && item.pendingInput)return true}return false}
     Theme {id:ui}
-    function refreshHealth(){if(active)health=stats.widgetHealth(widgetKey)}
+    function refreshHealth(){if(active){health=stats.widgetHealth(widgetKey);hardwareChoices=hardwareModel && prefs.kind==="gpu"?stats.widgetHardwareChoices(widgetKey):[]}}
     function openSection(value){if(value==="devices")devicesOpen=true;else if(value==="position")positionOpen=true}
     function sectionPosition(value){const item=value==="devices"?dataSettings:value==="position"?positionSettings:styleFields;return item.mapToItem(root,0,0).y}
     onActiveChanged:refreshHealth()
@@ -58,6 +60,41 @@ Item {
                     Toggle {objectName:"showTitleToggle";checked:root.prefs.show_title!==false;Accessible.name:ui.t("显示标题");onToggled:stats.changeWidget(root.widgetKey,"show_title",checked)}
                 }
                 Text {id:sizeNotice;Layout.fillWidth:true;visible:!!text;text:"";color:ui.muted;font.family:ui.fontFamily;font.pixelSize:ui.captionSize;wrapMode:Text.WordWrap}
+                SettingRow {
+                    id:frameRow
+                    visible:root.inlineMode || root.section==="style"
+                    Layout.fillWidth:true;label:ui.t("背景与边框")
+                    Toggle {objectName:"widgetSkinFrame";checked:root.prefs.skinFrame!==false;onToggled:stats.changeWidget(root.widgetKey,"skinFrame",checked)}
+                }
+                ColumnLayout {
+                    id:modelFields
+                    visible:root.hardwareModel && (root.inlineMode || root.section==="style")
+                    Layout.fillWidth:true;spacing:10
+                    FormField {
+                        Layout.fillWidth:true;label:ui.t("硬件画风")
+                        Choice {
+                            objectName:"widgetHardwareStyle";Layout.fillWidth:true
+                            model:[{id:"miniature",label:ui.t("1 · 原版")},{id:"cartoon",label:ui.t("2 · 可爱笑脸")},
+                                {id:"notebook_color",label:ui.t("3 · 彩色手绘")},{id:"notebook_line",label:ui.t("4 · 纯线条")},
+                                {id:"sticker",label:ui.t("5 · 奶油贴纸")},{id:"papercut",label:ui.t("6 · 拼色剪纸")},
+                                {id:"inkwash",label:ui.t("蓝墨手账（旧选项）")},{id:"classic",label:ui.t("经典通用")},
+                                {id:"outline",label:ui.t("结构线稿")},{id:"solid",label:ui.t("精简实物")},
+                                {id:"soft",label:ui.t("柔和双色")},{id:"sketch",label:ui.t("手绘线稿")},
+                                {id:"notebook_smile",label:ui.t("笑脸手绘")}]
+                            value:root.prefs.hardware_icon_style || "miniature"
+                            onPicked:selected=>stats.changeWidget(root.widgetKey,"hardware_icon_style",selected)
+                        }
+                    }
+                    FormField {
+                        visible:root.prefs.kind==="gpu";Layout.fillWidth:true;label:ui.t("显卡外观型号")
+                        Choice {objectName:"widgetHardwareModelChoice";Layout.fillWidth:true;model:root.hardwareChoices;value:root.prefs.hardware_model || "";onPicked:selected=>stats.changeWidget(root.widgetKey,"hardware_model",selected)}
+                    }
+                    SettingRow {
+                        Layout.fillWidth:true;label:ui.t("跟随硬件状态的动效")
+                        Toggle {objectName:"widgetHardwareMotion";checked:root.prefs.icon_effect!=="off";onToggled:stats.changeWidget(root.widgetKey,"icon_effect",checked?"auto":"off")}
+                    }
+                    Text {Layout.fillWidth:true;text:ui.t("图形与 2–3 项读数各有独立区域。没有有效风扇转速时保持静止。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
+                }
                 ColumnLayout {
                     id:styleFields;visible:(root.inlineMode || root.section==="style") && !root.canvas.enabled;Layout.fillWidth:true;spacing:10
                     SkinPicker {objectName:"widgetSkinPicker";Layout.fillWidth:true;allowGlobal:true;compact:root.inlineMode;widgetKey:root.widgetKey;value:root.prefs.skin || "global";onPicked:selected=>stats.changeWidget(root.widgetKey,"skin",selected==="global"?null:selected)}
@@ -85,8 +122,8 @@ Item {
                 Item {id:previewHost;objectName:"widgetPreviewHost";Layout.fillWidth:true;implicitHeight:childrenRect.height}
                 ActionButton {objectName:"displayOptionsToggle";Layout.alignment:Qt.AlignLeft;leftPadding:0;text:(root.displayOpen?"− ":"＋ ")+ui.t("显示选项");quiet:true;implicitHeight:34;onClicked:root.displayOpen=!root.displayOpen}
                 ColumnLayout {visible:root.displayOpen;Layout.fillWidth:true;spacing:10
-                    SettingRow {Layout.fillWidth:true;label:ui.t("显示图表");Toggle {objectName:"showChartToggle";checked:root.prefs.chart || false;onToggled:stats.changeWidget(root.widgetKey,"chart",checked)}}
-                    FormField {Layout.fillWidth:true;label:ui.t("信息样式");Choice {objectName:"widgetPresentation";Layout.fillWidth:true;model:[{id:"auto",label:ui.t("自动")},{id:"hero",label:ui.t("大数字")},{id:"list",label:ui.t("详细列表")}].concat(root.percentFirst || ["ring","bar"].includes(root.prefs.presentation)?[{id:"ring",label:ui.t("圆环")},{id:"bar",label:ui.t("进度条")}]:[]).concat(root.prefs.kind==="cpu"?[{id:"cores",label:ui.t("每核负载")}]:[]);value:root.prefs.presentation;onPicked:selected=>stats.changeWidget(root.widgetKey,"presentation",selected)}}
+                    SettingRow {visible:!root.hardwareModel;Layout.fillWidth:true;label:ui.t("显示图表");Toggle {objectName:"showChartToggle";checked:root.prefs.chart || false;onToggled:stats.changeWidget(root.widgetKey,"chart",checked)}}
+                    FormField {Layout.fillWidth:true;label:ui.t("信息样式");Choice {objectName:"widgetPresentation";Layout.fillWidth:true;model:[{id:"auto",label:ui.t("自动")},{id:"hero",label:ui.t("大数字")},{id:"list",label:ui.t("详细列表")}].concat(root.percentFirst || ["ring","bar"].includes(root.prefs.presentation)?[{id:"ring",label:ui.t("圆环")},{id:"bar",label:ui.t("进度条")}]:[]).concat(root.prefs.kind==="cpu"?[{id:"cores",label:ui.t("每核负载")}]:[]).concat(["cpu","gpu"].includes(root.prefs.kind) && root.canvas.contents.length>=2 && root.canvas.contents.length<=3?[{id:"hardware",label:ui.t("硬件模型")}]:[]);value:root.prefs.presentation;onPicked:selected=>stats.changeWidget(root.widgetKey,"presentation",selected)}}
                 }
                 ActionButton {id:dataSettings;objectName:"inlineDataSettings";visible:root.inlineMode;Layout.alignment:Qt.AlignLeft;leftPadding:0;text:(root.devicesOpen?"− ":"＋ ")+ui.t("数据来源与单位");quiet:true;implicitHeight:34;onClicked:root.devicesOpen=!root.devicesOpen}
                 ColumnLayout {

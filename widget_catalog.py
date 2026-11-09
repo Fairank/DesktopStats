@@ -149,6 +149,18 @@ TEMPLATES = {
         description="显卡负载、温度和板卡功率",
         content=["gpu_usage", "gpu_temp", "gpu_power"],
     ),
+    "cpu_model": dict(
+        kind="cpu", label="CPU 硬件模型", description="大幅处理器模型与真实负载、温度、频率",
+        content=["cpu_usage", "cpu_temp", "cpu_frequency"], presentation="hardware",
+        form="free", width=280, height=280, chart=False, grouped=False, show_title=False,
+        skinFrame=False, hardware_icon_style="miniature", icon_effect="auto",
+    ),
+    "gpu_model": dict(
+        kind="gpu", label="显卡硬件模型", description="按实际型号展示显卡，风扇跟随有效转速",
+        content=["gpu_usage", "gpu_temp", "gpu_power"], presentation="hardware",
+        form="free", width=320, height=260, chart=False, grouped=False, show_title=False,
+        skinFrame=False, hardware_icon_style="miniature", icon_effect="auto",
+    ),
     "memory": dict(
         kind="memory",
         label="内存",
@@ -248,6 +260,12 @@ def widget_defaults(kind):
         title="",
         show_title=True,
         skin=None,
+        skinFrame=True,
+        hardware_icon_style="miniature",
+        hardware_model="",
+        icon_effect="auto",
+        effect_intensity=0.5,
+        effect_speed=1.0,
         **dict.fromkeys(GLASS_DEFAULTS),
         grouped=kind in ("cpu", "gpu", "memory"),
         presentation="auto",
@@ -285,6 +303,7 @@ def from_template(key):
         "layer",
         "show_title",
         "chart",
+        "grouped", "skinFrame", "hardware_icon_style", "icon_effect",
     ):
         if field in template:
             result[field] = template[field]

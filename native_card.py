@@ -9,11 +9,11 @@ from PySide6.QtQuick import QQuickPaintedItem
 
 from battery_sensor import power_state
 from card_layout import Box, core_boxes, plan
-from compact_labels import label_options
+from compact_labels import label_options, model_label_options
 from localization import translate
 from metrics import display_value, metric_info, metric_value, numeric
 from native_surface import paint_surface
-from responsive_layout import ResponsiveLayoutError, is_responsive, responsive_plan
+from responsive_layout import ResponsiveLayoutError, default_summary, is_responsive, responsive_plan
 from skin_styles import effective_skin, glass_options, palette
 from stats_config import DEFAULT, MODULES
 from widget_catalog import TEMPLATES
@@ -176,6 +176,7 @@ class HardwareCard(QQuickPaintedItem):
             show_title=prefs.get("show_title", True),
             chart=bool(prefs["chart"] and style == "auto" and len(content) <= 2),
             footer=footer,
+            summary=default_summary(prefs, content),
         )
         layout = plan(self.width() / scale, len(content), **args)
         draw = _CardPainter(
@@ -249,7 +250,7 @@ class HardwareCard(QQuickPaintedItem):
         try:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-            if self._surface:
+            if self._surface and prefs.get("skinFrame", True):
                 paint_surface(
                     painter, width, height, colors, radius=min(colors.get("radius", 18), height / 2)
                 )
@@ -287,7 +288,10 @@ class HardwareCard(QQuickPaintedItem):
                 value, unit = formatted(data, metric, prefs)
                 labels = label_options(metric, metric_label(metric), config["language"])
                 box = reading.box
-                if reading.mode == "compact":
+                if reading.mode == "model":
+                    model_labels = model_label_options(metric, metric_label(metric), config["language"], prefs.get("kind"))
+                    draw.responsive_stack(model_labels, value, unit, box, reading.size)
+                elif reading.mode == "compact":
                     draw.compact(labels, value, unit, box, reading.size)
                 elif reading.mode == "row":
                     draw.responsive_row(labels, value, unit, box, reading.size)
@@ -389,6 +393,7 @@ class HardwareCard(QQuickPaintedItem):
             show_title,
             chart=bool(prefs["chart"] and style == "auto" and len(content) <= 2),
             footer=bool(footer),
+            summary=default_summary(prefs, content),
         )
         values = data.get("cpu_per_core", [])
         values = values if isinstance(values, (list, tuple)) else []
@@ -397,7 +402,7 @@ class HardwareCard(QQuickPaintedItem):
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
             painter.scale(scale, scale)
-            if self._surface:
+            if self._surface and prefs.get("skinFrame", True):
                 paint_surface(painter, width, 160, colors)
             painter.setClipRect(QRectF(1, 1, width - 2, 158), Qt.ClipOperation.IntersectClip)
             draw = _CardPainter(painter, config, colors, meta["color"], scale)
@@ -420,6 +425,7 @@ class HardwareCard(QQuickPaintedItem):
                     show_title,
                     chart=bool(prefs["chart"] and style == "auto" and len(content) <= 2),
                     footer=bool(footer),
+                    summary=default_summary(prefs, content),
                     compact=True,
                 )
             if show_title:

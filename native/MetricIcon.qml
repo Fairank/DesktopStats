@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Window
 import "IconData.js" as IconData
 import "MetricEffectClock.js" as EffectClock
+import "HardwareShapes.js" as HardwareShapes
+import "HardwareCpuPackages.js" as CpuPackages
 
 // Optional feedback. Fill follows normalized readings; motion is decorative, never an alarm.
 Item {
@@ -13,6 +15,14 @@ Item {
     property string automaticEffect: ""
     property var level: null
     property var hardwareState: ({})
+    property var hardwareAppearance: ({})
+    property string iconStyle: "classic"
+    property bool modelMode: false
+    readonly property string cartoonSymbol: ["cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(iconStyle) && !hasHardwareAppearance
+        ? HardwareShapes.genericSource(name, ink, spinActive, iconStyle) : ""
+    readonly property bool hasHardwareAppearance: (processorGlyph || name === "memory")
+        && hardwareAppearance && hardwareAppearance.kind === name
+        && (hardwareAppearance.icon_set !== "classic" || modelMode)
     property bool available: false
     property bool motionEnabled: false
     property real intensity: 0.5
@@ -36,8 +46,11 @@ Item {
     property real inboundPhase: 0
     property real outboundPhase: 0
     property real spinPhase: 0
+    property real gpuFanPhase: 0
+    property double gpuFanSampleTick: 0
     property double previousTick: 0
     property var clockSubscription: null
+    property bool feedbackReady: false
     readonly property var clockHost: root.Window.window ? root.Window.window.contentItem : null
     readonly property bool effectControlsValid: Number.isFinite(intensity) && intensity >= 0 && intensity <= 1
         && Number.isFinite(speed) && speed >= 0.5 && speed <= 2
@@ -74,7 +87,7 @@ Item {
         ? thermometerEnabled && (thermometerTarget > .28 || thermometerChanging) ? Math.max(.001, thermometerTarget) : 0
         : compositeActive ? Math.max(supportsLoad && loadTarget || 0,
         supportsThermal && (thermalTarget>.28?thermalTarget:0) || 0,supportsEnergy && energyTarget || 0,
-        supportsInbound && inboundTarget || 0,supportsOutbound && outboundTarget || 0,name==="fan" && spinTarget || 0)
+        supportsInbound && inboundTarget || 0,supportsOutbound && outboundTarget || 0,name==="fan" && spinTarget || 0,gpuFanCanAnimate?1:0)
         : levelValid ? resolvedEffect==="heat" && level<=.28?0:level : 0
     readonly property bool loadActive: animationRunning && compositeActive && supportsLoad && loadTarget > 0
     readonly property bool thermalActive: animationRunning && compositeActive && supportsThermal && thermalTarget > 0
@@ -91,6 +104,10 @@ Item {
     // A local decorative stress response: temperature and utilisation remain
     // independent real channels. Missing temperature never invents a hot reading.
     readonly property real processorLoadPressure:processorGlyph && compositeActive && loadActive?displayedLoad:0
+    readonly property string processorModelPackageId: modelMode && name==="cpu" && hardwareAppearance && hardwareAppearance.cpu_package
+        && typeof hardwareAppearance.cpu_package.id==="string" ? hardwareAppearance.cpu_package.id : ""
+    readonly property var processorModelPackage: processorModelPackageId!==""
+        ? CpuPackages.profile(processorModelPackageId) : null
     readonly property real processorWarmth:animationRunning && processorGlyph
         ?Math.max(thermalContext?thermalArcStrength:0,Math.max(0,(processorLoadPressure-.5)*2)):0
     readonly property var processorWarmColors:darkSurface
@@ -138,14 +155,46 @@ Item {
     readonly property bool windowVisible: root.Window.window !== null
         && root.Window.window.visible && root.Window.window.visibility !== Window.Minimized
     readonly property bool exposed: {
-        if(!(root.width>0 && root.height>0))return false
+        // Item.visible already includes ancestor visibility. Wait until caller
+        // bindings settle before reading exposure or subscribing a new clock.
+        if(!root.feedbackReady || !root.visible || !(root.width>0 && root.height>0))return false
         for (let item = root; item; item = item.parent)
-            if (!item.visible || item.opacity <= 0) return false
+            if (item.opacity <= 0) return false
         return true
     }
     readonly property bool animationRunning: exposed && windowVisible && motionEnabled && (compositeActive?stateAvailable:available)
         && targetActivity > 0 && effectControlsValid && intensity > 0 && resolvedEffect !== "off"
         && (resolvedEffect !== "spin" || name === "fan")
+    readonly property int gpuVisibleFans: {
+        const value=root.hardwareAppearance
+        if (!value || value.kind!=="gpu" || value.confidence!=="model"
+            || !["gpu_axial","gpu_blower","gpu_hybrid"].includes(value.style)) return 0
+        const front=value.visible_fan_count, total=value.fan_count
+        if (Number.isInteger(front) && front>0 && front<=3 && (total==null || Number.isInteger(total) && front<=total)) return front
+        return Number.isInteger(total) && total>0 && total<=3 ? total : 0
+    }
+    readonly property var gpuFanReading: compositeActive && hardwareState.fan_speed ? hardwareState.fan_speed : ({})
+    readonly property real gpuFanRpm: {
+        const wake=root.gpuFanSampleTick, sample=root.gpuFanReading
+        const now=Date.now()/1000
+        if (sample.available!==true || ["measured","driver_current_rpm"].indexOf(sample.semantics)<0 || sample.scope!=="card"
+            || typeof sample.rpm!=="number" || !Number.isFinite(sample.rpm) || sample.rpm<0 || sample.rpm>100000
+            || typeof sample.timestamp!=="number" || !Number.isFinite(sample.timestamp)
+            || now-sample.timestamp<-.01 || now-sample.timestamp>3) return NaN
+        return sample.rpm
+    }
+    // Fixed slow motion keeps blade direction readable on a low-cadence bar.
+    // Keep reported RPM unchanged; load, heat and effect-speed never set it.
+    readonly property real gpuFanDisplaySlowdown: 120
+    readonly property bool gpuFanCanAnimate: name==="gpu" && hasHardwareAppearance && compositeActive
+        && Number.isFinite(gpuFanRpm) && gpuFanRpm>0
+        && gpuVisibleFans>0 && (["solid","miniature","soft","cartoon","sketch","notebook_line","notebook_color","notebook_smile", "sticker", "papercut", "inkwash"].includes(hardwareAppearance.icon_set)
+            || modelMode && ["classic","outline"].includes(hardwareAppearance.icon_set))
+        && hardwareAppearance.fan_profile && (hardwareAppearance.fan_profile.render_ready===true
+            || Array.isArray(hardwareAppearance.fan_profile.blade_counts)
+                && hardwareAppearance.fan_profile.blade_counts.some(count => Number.isInteger(count) && count>=2 && count<=64))
+        && resolvedEffect==="hardware"
+    readonly property bool gpuFanMotionActive: gpuFanCanAnimate && animationRunning
     readonly property real activityStrength: 0.28 + 0.72 * displayedLevel
     readonly property real feedbackStrength: intensity * activityStrength
     readonly property real intensityGain: effectControlsValid?intensity*(1.8-.8*intensity):0
@@ -285,6 +334,7 @@ Item {
         if (!Number.isFinite(now)) return
         if (!animationRunning) {previousTick = now;resetFeedback();return}
         const elapsed = Math.max(0, Math.min(136, now - previousTick))
+        gpuFanSampleTick=now
         const smoothing = 1-Math.exp(-elapsed/200)
         previousTick = now
         if (thermometerEnabled) displayedTemperature=converge(displayedTemperature,thermometerTarget,smoothing)
@@ -309,6 +359,10 @@ Item {
             inboundPhase=inboundActive?(inboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedInbound)/1000:(.82+.36*displayedInbound)/2400))%1:0
             outboundPhase=outboundActive?(outboundPhase+elapsed*speed*(transportGlyph?streamCadence(displayedOutbound)/1000:(.82+.36*displayedOutbound)/2400))%1:0
         } else displayedLevel=converge(displayedLevel,level,smoothing)
+        // Follow the measured card tachometer with a fixed 120x slow-motion
+        // ratio. Never synthesize RPM from utilization, temperature or percent.
+        if (gpuFanMotionActive)
+            gpuFanPhase=(gpuFanPhase+elapsed*gpuFanRpm/(60000*gpuFanDisplaySlowdown))%1
         // Four identical blades repeat every quarter-turn; bound a delayed
         // rotor step below half that pitch so it cannot appear to reverse.
         phase = (phase + (spinActive?Math.min(.1,elapsed/cycleDuration):elapsed/cycleDuration)) % 1
@@ -369,7 +423,7 @@ Item {
         if(name!=="fan")spinPhase=0
         syncClock()
     }
-    Component.onCompleted: syncClock()
+    Component.onCompleted: { feedbackReady=true; syncClock() }
     Component.onDestruction: EffectClock.unsubscribe(clockSubscription)
     Loader {
         objectName:"metricIconPowerCore";anchors.fill:parent;z:-1
@@ -388,16 +442,30 @@ Item {
         sourceComponent:Item {
             visible:root.processorWarmth>0
             Item {
-                width:18;height:18;anchors.centerIn:parent
-                scale:Math.min(root.width,root.height)/18
+                id:processorGlow
+                readonly property bool packageModel:root.modelMode && root.name==="cpu"
+                readonly property real packageWidth:root.processorModelPackage?18*root.processorModelPackage.reference_size[0]
+                    /Math.max(root.processorModelPackage.reference_size[0],root.processorModelPackage.reference_size[1]):18
+                readonly property real packageHeight:root.processorModelPackage?18*root.processorModelPackage.reference_size[1]
+                    /Math.max(root.processorModelPackage.reference_size[0],root.processorModelPackage.reference_size[1]):18
+                width:packageModel?24:18;height:width;anchors.centerIn:parent
+                scale:Math.min(root.width,root.height)/width
                 Item {
-                    x:-2.5;y:-root.paintBleed.top;width:23;height:18+root.paintBleed.top+root.paintBleed.bottom;clip:true
+                    // Large CPU models use the same24-unit package viewport.
+                    // The old18-unit bar halo grew beyond the artwork clip and
+                    // left a hard rectangular heat patch on frameless widgets.
+                    x:processorGlow.packageModel?0:-2.5;y:processorGlow.packageModel?0:-root.paintBleed.top
+                    width:processorGlow.packageModel?24:23
+                    height:processorGlow.packageModel?24:18+root.paintBleed.top+root.paintBleed.bottom;clip:true
                     Item {
-                        x:2.5;y:root.paintBleed.top;width:18;height:18
+                        x:processorGlow.packageModel?0:2.5;y:processorGlow.packageModel?0:root.paintBleed.top
+                        width:processorGlow.width;height:processorGlow.height
                         Rectangle {
                             id:processorBody;objectName:"metricIconProcessorBodyWarmth"
-                            x:root.name==="gpu"?1.5:3;y:root.name==="gpu"?3.75:3
-                            width:root.name==="gpu"?15:12;height:root.name==="gpu"?9:12
+                            x:processorGlow.packageModel?(24-width)/2:root.name==="gpu"?1.5:3
+                            y:processorGlow.packageModel?(24-height)/2:root.name==="gpu"?3.75:3
+                            width:processorGlow.packageModel?processorGlow.packageWidth:root.name==="gpu"?15:12
+                            height:processorGlow.packageModel?processorGlow.packageHeight:root.name==="gpu"?9:12
                             radius:1.6;antialiasing:true;color:root.processorWarmColor
                             opacity:root.channelOpacity(root.processorWarmth)*root.processorWarmth*.22
                         }
@@ -406,7 +474,7 @@ Item {
                             Rectangle {
                                 required property int index
                                 objectName:"metricIconProcessorHalo_"+index
-                                readonly property real spread:4.8-index*1.6
+                                readonly property real spread:processorGlow.packageModel?.85-index*.25:4.8-index*1.6
                                 width:processorBody.width+spread*2;height:processorBody.height+spread*2
                                 x:processorBody.x-spread;y:processorBody.y-spread;radius:processorBody.radius+spread
                                 antialiasing:true;color:root.processorWarmColor
@@ -421,8 +489,32 @@ Item {
     Icon {
         objectName: "metricIconGlyph"
         anchors.fill: parent; name: root.name; ink: root.ink
+        visible: !root.hasHardwareAppearance && !root.cartoonSymbol
         // The neutral carrier survives strength→0; active arrow/rotor layers blend in.
         opacity: root.spinActive ? Math.pow(1-root.rotorOpacity,6) : 1
+    }
+    Image {
+        objectName: "metricCartoonSymbol"
+        anchors.fill: parent
+        visible: !!root.cartoonSymbol
+        source: root.cartoonSymbol
+        sourceSize.width: Math.max(1,Math.ceil(root.width*Screen.devicePixelRatio))
+        sourceSize.height: Math.max(1,Math.ceil(root.height*Screen.devicePixelRatio))
+        fillMode: Image.PreserveAspectFit
+        opacity: root.ink.a
+        smooth: true; cache: true; asynchronous: false; mipmap: false
+    }
+    Loader {
+        objectName: "metricHardwareGlyphLoader"
+        anchors.fill: parent
+        active: root.hasHardwareAppearance
+        sourceComponent: HardwareGlyph {
+            appearance: root.hardwareAppearance
+            modelMode: root.modelMode
+            ink: root.ink
+            fanMotionEnabled: root.gpuFanMotionActive
+            fanRotation: root.gpuFanPhase*360
+        }
     }
     // Exact Lucide subpaths separated into fixed structure and moving parts.
     component VectorPart: Image {
@@ -744,12 +836,15 @@ Item {
             readonly property real strength:root.intensity*(.28+.72*activity)
             readonly property bool proportional:root.compositeActive || /(?:_usage|_percent)$/.test(root.metric)
             readonly property real fillExtent:proportional?activity:.55
-            readonly property bool horizontal:["memory","vram","battery","disk"].includes(root.name)
-            width:root.name==="gpu"?10*fillExtent:horizontal?(root.name==="battery"?10:13)*fillExtent:4.4
-            height:root.name==="gpu"?2:horizontal?(root.name==="disk"?3.8:4.5):4.4*fillExtent
-            x:root.name==="gpu"?3:horizontal?2.5:6.8
-            y:root.name==="gpu"?10:root.name==="disk"?10.5:horizontal?6:11.2-height
-            radius:.35;antialiasing:true;clip:true
+            // Small bar glyphs use a central fill; large physical models need
+            // a quiet retained meter so model marks and fan blades stay clear.
+            readonly property bool modelMeter:root.modelMode && root.processorGlyph
+            readonly property bool horizontal:modelMeter || ["memory","vram","battery","disk"].includes(root.name)
+            width:modelMeter?8*fillExtent:root.name==="gpu"?10*fillExtent:horizontal?(root.name==="battery"?10:13)*fillExtent:4.4
+            height:modelMeter?.16:root.name==="gpu"?2:horizontal?(root.name==="disk"?3.8:4.5):4.4*fillExtent
+            x:modelMeter?5:root.name==="gpu"?3:horizontal?2.5:6.8
+            y:modelMeter?15.2:root.name==="gpu"?10:root.name==="disk"?10.5:horizontal?6:11.2-height
+            radius:modelMeter?(root.iconStyle==="papercut"?0:.08):.35;antialiasing:true;clip:true
             color:root.memoryGlyph?root.paletteColor(root.memoryColors,activity):root.compositeActive?root.loadColor:root.accentColor
             opacity:root.channelOpacity(activity)*(["cpu","gpu"].includes(root.name)?.5:.88+.12*localWave)
             Rectangle {
@@ -769,7 +864,7 @@ Item {
             }
             Loader {
                 objectName:"metricIconCapacityActivity"
-                active:pulseCore.visible && pulseCore.horizontal && !root.memoryGlyph
+                active:pulseCore.visible && pulseCore.horizontal && !root.memoryGlyph && !pulseCore.modelMeter
                 sourceComponent:DischargeAtlas {
                     x:-pulseCore.x;y:-pulseCore.y;amount:pulseCore.activity
                     phaseValue:root.compositeActive?root.loadPhase:root.phase

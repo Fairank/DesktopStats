@@ -9,6 +9,7 @@ Item {
     property string fontFamily:"Segoe UI Variable"
     property bool reserveValueWidth:false
     property bool motionEnabled:false
+    property real barHeight:32
     property string design:"classic"
     readonly property bool grouped:row.grouped===true && (row.group_rows || []).length>1
     readonly property var members:grouped?(row.group_rows || []).slice(0,4):[]
@@ -35,6 +36,7 @@ Item {
         ink:root.ink;muted:root.muted;fontFamily:root.fontFamily
         reserveValueWidth:root.reserveValueWidth
         motionEnabled:root.motionEnabled
+        barHeight:root.barHeight
         design:root.design
         width:implicitWidth;height:implicitHeight
         anchors.verticalCenter:parent.verticalCenter
@@ -56,6 +58,7 @@ Item {
                 ink:root.ink;muted:root.muted;fontFamily:root.fontFamily
                 reserveValueWidth:root.reserveValueWidth
                 motionEnabled:root.motionEnabled
+                barHeight:root.barHeight
                 design:root.design
                 width:implicitWidth;height:implicitHeight
                 y:(groupLine.height-height)/2

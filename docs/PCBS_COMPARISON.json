@@ -1,0 +1,142 @@
+{
+  "by_kind": {
+    "board": 21,
+    "case": 29,
+    "cooler": 51,
+    "cpu": 12,
+    "cpu_block": 8,
+    "expansion": 1,
+    "fan": 18,
+    "fitting": 1,
+    "gpu": 46,
+    "gpu_block": 3,
+    "memory": 20,
+    "peripheral": 16,
+    "psu": 24,
+    "radiator": 3,
+    "storage": 8
+  },
+  "grouped_variants": 10,
+  "name_exact_matches": 15,
+  "reference_entries": 261,
+  "reviewed": "2026-11-08",
+  "scope": "Published-update part-list entries only; grouped variants are not expanded; exact normalized name matches are not visual/model acceptance.",
+  "source_policy": "Publisher articles only; no game files, screenshots or models copied.",
+  "sources": [
+    {
+      "by_kind": {
+        "board": 3,
+        "case": 10,
+        "cooler": 5,
+        "cpu": 1,
+        "cpu_block": 5,
+        "gpu_block": 3,
+        "psu": 2
+      },
+      "grouped_variant_entries": 0,
+      "id": "pcbs2-13",
+      "name_exact_matches": 3,
+      "reference_entries": 29,
+      "snapshot_sha256": "49345ffcf17d13ddddceb362b624c49d4ca1eb41ecda0e4f5ff663871bd87837",
+      "unmatched_or_review": 26,
+      "url": "https://www.pcbuildingsim.com/news/pc-building-simulator-2-update-v1-3"
+    },
+    {
+      "by_kind": {
+        "case": 5,
+        "cooler": 8,
+        "fan": 7,
+        "psu": 2
+      },
+      "grouped_variant_entries": 0,
+      "id": "pcbs2-19",
+      "name_exact_matches": 3,
+      "reference_entries": 22,
+      "snapshot_sha256": "68343aacf9d1c0cd4035c32d1d78abd7a41a997b84b6a9d75c20bd0e2b704a7b",
+      "unmatched_or_review": 19,
+      "url": "https://www.pcbuildingsim.com/news/pc-building-simulator-2-update-v1-9"
+    },
+    {
+      "by_kind": {
+        "board": 6,
+        "case": 5,
+        "cooler": 4,
+        "cpu_block": 1,
+        "fan": 5,
+        "fitting": 1,
+        "gpu": 10,
+        "peripheral": 4,
+        "psu": 4,
+        "radiator": 3
+      },
+      "grouped_variant_entries": 0,
+      "id": "pcbs2-115",
+      "name_exact_matches": 4,
+      "reference_entries": 43,
+      "snapshot_sha256": "03c257743146b12c4f8b6eb057f0242afd598d2544055c43821bb97a1ec30128",
+      "unmatched_or_review": 39,
+      "url": "https://www.pcbuildingsim.com/news/pc-building-simulator-2-update-115-out-now-on-pc-xbox-ps5"
+    },
+    {
+      "by_kind": {
+        "board": 3,
+        "case": 3,
+        "cooler": 1,
+        "cpu": 10,
+        "gpu": 11,
+        "peripheral": 10,
+        "psu": 2,
+        "storage": 2
+      },
+      "grouped_variant_entries": 0,
+      "id": "pcbs2-116",
+      "name_exact_matches": 3,
+      "reference_entries": 42,
+      "snapshot_sha256": "491388d695a9370155091ff6f43543f7e84d78314e43c458a68c7d3b31dad31e",
+      "unmatched_or_review": 39,
+      "url": "https://www.pcbuildingsim.com/news/pc-building-simulator-2-update-116-out-now-on-pc-xbox-ps5"
+    },
+    {
+      "by_kind": {
+        "case": 3,
+        "cooler": 1,
+        "fan": 1,
+        "gpu": 11,
+        "memory": 3,
+        "storage": 1
+      },
+      "grouped_variant_entries": 9,
+      "id": "pcbs2-117",
+      "name_exact_matches": 0,
+      "reference_entries": 20,
+      "snapshot_sha256": "be3d5424f9dc0228ee98ad14330168c1edf0a498529247e011dc6483d45c883b",
+      "unmatched_or_review": 20,
+      "url": "https://www.pcbuildingsim.com/news/pc-building-simulator-2-update-117-out-now-on-pc-xbox-ps5"
+    },
+    {
+      "by_kind": {
+        "board": 9,
+        "case": 3,
+        "cooler": 32,
+        "cpu": 1,
+        "cpu_block": 2,
+        "expansion": 1,
+        "fan": 5,
+        "gpu": 14,
+        "memory": 17,
+        "peripheral": 2,
+        "psu": 14,
+        "storage": 5
+      },
+      "grouped_variant_entries": 1,
+      "id": "pcbs1-announcements",
+      "name_exact_matches": 2,
+      "reference_entries": 105,
+      "snapshot_sha256": "408f049e171af3ee7acb892b76e03a868255cbcbbbe2ce6b366cfd9900b82eca",
+      "unmatched_or_review": 103,
+      "url": "https://steamcommunity.com/app/621060/announcements/?l=english"
+    }
+  ],
+  "unmatched_or_review": 246,
+  "whole_game_inventory": false
+}

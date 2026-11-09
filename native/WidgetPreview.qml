@@ -8,6 +8,7 @@ Item {
     property var readings: ({})
     property var history: []
     property real renderScale: 1
+    property bool modelMotionAllowed: true
     clip: true
     Item {
         id: plane
@@ -39,6 +40,17 @@ Item {
             frosted: root.previewInfo.coating_translucent===true
             textureSize: Qt.size(Math.max(1,Math.round(width*Math.min(Math.max(1,root.renderScale),2048/Math.max(1,width),2048/Math.max(1,height),Math.sqrt(2000000/Math.max(1,width*height))))),
                                  Math.max(1,Math.round(height*Math.min(Math.max(1,root.renderScale),2048/Math.max(1,width),2048/Math.max(1,height),Math.sqrt(2000000/Math.max(1,width*height))))))
+            Loader {
+                anchors.fill: parent
+                active: !!root.config.widgets && !!root.config.widgets[root.moduleKey]
+                    && root.config.widgets[root.moduleKey].presentation === "hardware"
+                sourceComponent: DesktopHardwareModel {
+                    moduleKey: root.moduleKey; config: root.config
+                    draftMode: true
+                    previewPrefs: true
+                    motionAllowed: root.modelMotionAllowed
+                }
+            }
         }
     }
 }
