@@ -374,6 +374,13 @@ def _gpu_detail(meshes,spec,level):
                 # Replace the old flat fin/background drawing with actual
                 # window-depth samples. Keep the original two frame contours.
                 for index in kepler['replaced_source_layers']:polygons[index]=()
+        if appearance.get('id')=='nvidia-gtx1080-founders':
+            from assembly_gpu_pascal053 import front_reference
+            pascal=front_reference(gpu,length,width,thickness,holes)
+            if pascal:
+                observed_front_cutouts=pascal['cutouts']
+                paint_holes=(*holes,*pascal['paint_head_seats'])
+                for index in pascal['replaced_source_layers']:polygons[index]=()
         fixed_partition={}
         if appearance.get('id')=='leadtek-hurricane-4090-24g':
             from assembly_gpu_exterior053 import fixed_front_layers
@@ -550,6 +557,11 @@ def _gpu_detail(meshes,spec,level):
         # The outer metadata owns this same sampling flag. Keep the helper's
         # direct contract, but consume its duplicate before keyword expansion.
         observed_exterior.pop('fin_count_is_sampling',None)
+        exterior.update(observed_exterior)
+        fin_count=exterior.get('fin_sampling_count',fin_count)
+    if appearance.get('id')=='nvidia-gtx1080-founders':
+        from assembly_gpu_pascal053 import refine
+        completed,observed_exterior=refine(completed,spec,level)
         exterior.update(observed_exterior)
         fin_count=exterior.get('fin_sampling_count',fin_count)
     return completed,dict(heatsink_fins=fin_count,ports=len(ports),port_types=tuple(ports),

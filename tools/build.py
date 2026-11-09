@@ -696,11 +696,14 @@ SOURCES = (
     'model-packs/v047/DesktopStats-gpu-block-brand-corsair-047-1.0.0.dspack',
     'model-packs/v047/DesktopStats-gpu-block-brand-watercool-047-1.0.0.dspack',
     'assembly_gpu_exterior053.py',
+    'assembly_gpu_pascal053.py',
     'tests/test_gpu_capture053.py',
     'tests/test_gpu_exterior053.py',
     'tests/test_gpu_cutouts053.py',
     'tests/test_leadtek_fixed_x053.py',
     'tests/test_kepler_window053.py',
+    'tests/test_pascal_front053.py',
+    'tests/test_pack_entry053.py',
     'radiator_svg053.py',
     'gpu_gallery053.py',
     'tests/test_gpu_gallery053.py',
@@ -711,6 +714,8 @@ SOURCES = (
     'tests/test_radiator_camera053.py',
     'tests/fixtures/liquid_svg046_pre053.py.txt',
     'docs/DEVELOPMENT053.md',
+    'docs/OPEN_HARDWARE_SOURCES053.md',
+    'docs/OPEN_HARDWARE_SOURCES053.json',
 )
 
 

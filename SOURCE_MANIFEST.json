@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 120241,
-      "sha256": "03f50dcd3b247bb30dd1c4cf9fa11e38c97d94ded4bc82b77227f0616137b377"
+      "bytes": 120936,
+      "sha256": "88bb4b04d2a1c3e1b7980c66c7b28f0e98267f113b2286214448cdd8a308f99a"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -179,8 +179,8 @@
     },
     {
       "path": "assembly_detail.py",
-      "bytes": 48028,
-      "sha256": "1ed44882650bba545b5e51851a9f5b0e4a1f3e98af1455f4460802a2fe3eb482"
+      "bytes": 48723,
+      "sha256": "69320c7c378a868138bf1eb8b8c18649bf2aa05aa2b62b155c585780073051d3"
     },
     {
       "path": "assembly_effects.py",
@@ -231,6 +231,11 @@
       "path": "assembly_gpu_panels051.py",
       "bytes": 7359,
       "sha256": "c5ebbc14437699e743fa383aa518ff3b3c98a09bf5d2942e04a18180481f83b0"
+    },
+    {
+      "path": "assembly_gpu_pascal053.py",
+      "bytes": 7421,
+      "sha256": "59d712ced62fe0fcb4f804ae6b3403c6b36e5b6d3020977df2b959ae6ca1920c"
     },
     {
       "path": "assembly_gpu_rotor051.py",
@@ -1549,8 +1554,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 18934,
-      "sha256": "8ceb9ffcabe9141ff5b5cf13cd364fdac2b8fe495cf706d6bf04cda8cb84464c"
+      "bytes": 22924,
+      "sha256": "c68edc0c13aa9a8139e05094ac57fed37c00bf93184de3028d721e193fc6af33"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -1616,6 +1621,16 @@
       "path": "docs/MOTHERBOARD_FINISH047.md",
       "bytes": 7013,
       "sha256": "f7e1408acc81bf9209333b5e9b00aeae6c672c9ef332abb4ff7434a088a497fa"
+    },
+    {
+      "path": "docs/OPEN_HARDWARE_SOURCES053.json",
+      "bytes": 33012,
+      "sha256": "46a4e7f5c39ce2e23f7521f2a9a795c12bef316ed6afa0a66d6af483f579818a"
+    },
+    {
+      "path": "docs/OPEN_HARDWARE_SOURCES053.md",
+      "bytes": 13847,
+      "sha256": "3da15b214df1dfe2d9a024480b9577593ce820e3491612664bd58ca7a8892866"
     },
     {
       "path": "docs/PCBS_COMPARISON.json",
@@ -2659,8 +2674,8 @@
     },
     {
       "path": "native/AccessoryGallery.qml",
-      "bytes": 18934,
-      "sha256": "bd22dbb747a63d2e7c176ab6a2d7f29b89adf1016af09a668ffaa1b3fb6729bb"
+      "bytes": 20354,
+      "sha256": "d7d0ab77fb3a9522da534b1f66916466e2519052b9650bbc75ca64eb11e54963"
     },
     {
       "path": "native/AccessoryGlyph.qml",
@@ -4413,6 +4428,11 @@
       "sha256": "1b1cd26db7f906f3ea426d802527c9eebc1b70b5b796cd7c024097909651ebba"
     },
     {
+      "path": "tests/test_pack_entry053.py",
+      "bytes": 6282,
+      "sha256": "12693ded193133cec186568c0c5c56e7d0b6d51e9f8a64f50876680f5996f908"
+    },
+    {
       "path": "tests/test_part_identity052.py",
       "bytes": 8024,
       "sha256": "0f9bba3ec9a96ca6d52698cdd1a25dc7d42fcd026f2bad83fb9482fcb8e4c6cb"
@@ -4431,6 +4451,11 @@
       "path": "tests/test_part_pose_renderer052.py",
       "bytes": 9080,
       "sha256": "2450d1e87c308b5fb5fe96a0834ff1a5600bcdced081fccb27b4785638a28948"
+    },
+    {
+      "path": "tests/test_pascal_front053.py",
+      "bytes": 22851,
+      "sha256": "68df6eb6658c74862745219bcb408c0951fa50b3764408b7b41a44a701779226"
     },
     {
       "path": "tests/test_pcbs_comparison045.py",
@@ -5004,8 +5029,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 37161,
-      "sha256": "b792999b5dccb0d3ae6c1b23d181448b7eec14daf5115b9c7bb19394850075fa"
+      "bytes": 37348,
+      "sha256": "250451cc15a8d4de460afcc16aa0980ef350350f2c427d625259f70ca85096dd"
     },
     {
       "path": "tools/build_collector.py",

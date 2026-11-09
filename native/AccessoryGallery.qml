@@ -105,6 +105,11 @@ Popup {
         RowLayout {
             Layout.fillWidth:true;spacing:12
             Text {Layout.fillWidth:true;text:ui.t("硬件型号图鉴");font.family:ui.fontFamily;font.pixelSize:21;font.weight:Font.DemiBold;color:ui.ink}
+            ActionButton {
+                objectName:"accessoryPacksDownload";text:ui.t("硬件扩展包");quiet:true
+                enabled:typeof stats.openHardwarePacksDownload==="function"
+                onClicked:stats.openHardwarePacksDownload()
+            }
             ActionButton {objectName:"accessoryDownload";visible:["case","cooler","psu","fan"].includes(root.category);text:ui.t("下载 SVG 图集");quiet:true;onClicked:stats.downloadAccessoryArt(root.category)
                 ToolTip.visible:hovered;ToolTip.text:ui.t("应用已自带这些外观；下载的是独立 SVG 图集。")}
             IconButton {objectName:"closeAccessoryGallery";symbol:"close";label:ui.t("关闭");onClicked:root.close()}
@@ -207,8 +212,32 @@ Popup {
                     }
                 }
             }
-            Text {anchors.centerIn:parent;visible:root.filtered.length===0;text:ui.t(root.entries.length===0 && !["case","cooler","psu","fan"].includes(root.category)?"导入对应型号扩展包后，即可浏览这些配件。":"没有匹配的型号")
-                font.family:ui.fontFamily;font.pixelSize:13;color:ui.muted}
+            ColumnLayout {
+                objectName:"accessoryEmptyState"
+                parent:grid
+                anchors.centerIn:parent;width:Math.min(parent.width-32,440);spacing:14
+                visible:root.filtered.length===0
+                readonly property bool needsPack:root.entries.length===0 && !["case","cooler","psu","fan"].includes(root.category)
+                Text {
+                    Layout.fillWidth:true;horizontalAlignment:Text.AlignHCenter
+                    text:ui.t(parent.needsPack?"导入对应型号扩展包后，即可浏览这些配件。":"没有匹配的型号")
+                    font.family:ui.fontFamily;font.pixelSize:13;color:ui.muted;wrapMode:Text.WordWrap
+                }
+                RowLayout {
+                    Layout.alignment:Qt.AlignHCenter;spacing:8
+                    visible:parent.needsPack
+                    ActionButton {
+                        objectName:"accessoryEmptyDownload";text:ui.t("前往 GitHub 下载")
+                        enabled:typeof stats.openHardwarePacksDownload==="function"
+                        onClicked:stats.openHardwarePacksDownload()
+                    }
+                    ActionButton {
+                        objectName:"accessoryEmptyImport";text:ui.t("导入扩展包")
+                        enabled:typeof stats.importHardwarePack==="function"
+                        onClicked:stats.importHardwarePack()
+                    }
+                }
+            }
         }
         RowLayout {
             objectName:"accessoryGpuBrowser"
