@@ -2640,16 +2640,17 @@
   "final_differential_regression052": {
     "passed": true,
     "deduplicated_modules": 167,
-    "deduplicated_cases": 1877,
+    "deduplicated_cases": 1882,
     "skipped": 1,
-    "latest_modules": 16,
-    "latest_cases": 148,
-    "latest_seconds": 64.797,
+    "latest_modules": 14,
+    "latest_cases": 131,
+    "latest_seconds": 33.984,
     "code_files": 656,
     "source_stable": true,
     "not_a_single_full_current_run": true,
-    "carried_modules": 151,
+    "carried_modules": 153,
     "all_requirements_complete": false,
-    "native": false
+    "native": false,
+    "source_export_native_closure_added_cases": 5
   }
 }

@@ -28,7 +28,7 @@ ContentLayoutEditor.qml DesktopWidget.qml DesktopHardwareModel.qml Details.qml F
 FrostedBackdrop.qml Gallery.qml GlassControl.qml GlassControls.qml GlassSurface.qml
 HistoryPage.qml TrendChart.qml ScenarioPicker.qml DiagnosticsPanel.qml ScenePreview.qml MetricEffectClock.js
 Icon.qml IconButton.qml IconData.js InspectorSection.qml MaterialSample.qml MetricIcon.qml
-HardwareGlyph.qml HardwareShapes.js HardwareCpuModel.js HardwareModelDetails.js
+HardwareGlyph.qml HardwareShapes.js HardwareCpuModel.js HardwareModelDetails.js HardwareDenseInk052.js
 HardwareModelNvidia042.js HardwareModelRadeonArc042.js
 HardwareSolid.js HardwareMiniature.js HardwareSoft.js HardwareCartoon.js HardwareSketch.js HardwareNotebook.js HardwareNotebookParts.js HardwareVariants.js
 HardwareFanDesigns.js HardwareFanProfileData.js
@@ -509,6 +509,78 @@ def _build_sources(root):
     return tuple(values[0])
 
 
+def _native_relative_imports(content):
+    """Read literal QML/JS import directives, excluding comments and strings."""
+    index = 0
+    line_start = True
+    directive = re.compile(r'''(?:\.import|import)\b\s+(["'])([^"'\r\n]+)\1''')
+    while index < len(content):
+        char = content[index]
+        if char == "\n":
+            line_start = True
+            index += 1
+        elif char.isspace():
+            index += 1
+        elif content.startswith("//", index):
+            end = content.find("\n", index + 2)
+            index = len(content) if end < 0 else end
+        elif content.startswith("/*", index):
+            end = content.find("*/", index + 2)
+            if end < 0:
+                raise ExportError("Unterminated comment in native source")
+            if "\n" in content[index:end + 2]:
+                line_start = True
+            index = end + 2
+        else:
+            match = directive.match(content, index) if line_start else None
+            if match:
+                yield match.group(2)
+                index = match.end()
+            elif char in "\"'`":
+                quote = char
+                index += 1
+                while index < len(content):
+                    if content[index] == "\\":
+                        index += 2
+                    elif content[index] == quote:
+                        index += 1
+                        break
+                    else:
+                        index += 1
+            else:
+                index += 1
+            line_start = False
+
+
+def _validate_native_source_closure(root, paths):
+    """Dependencies must be reviewed explicitly; never expand the allowlist."""
+    included = set(paths)
+    for name in sorted(included):
+        if not name.startswith("native/") or PurePosixPath(name).suffix.casefold() not in {".js", ".qml"}:
+            continue
+        try:
+            content = _read(root, name).decode("utf-8-sig")
+        except UnicodeDecodeError as error:
+            raise ExportError("Expected UTF-8 native source: " + name) from error
+        for reference in _native_relative_imports(content):
+            if PurePosixPath(reference).suffix.casefold() not in {".js", ".qml"}:
+                continue
+            if PurePosixPath(reference).is_absolute() or "\\" in reference or ":" in reference:
+                raise ExportError("Non-relative native source import in " + name)
+            parts = list(PurePosixPath(name).parent.parts)
+            for part in PurePosixPath(reference).parts:
+                if part == "..":
+                    if not parts:
+                        raise ExportError("Native source import escapes the project: " + name)
+                    parts.pop()
+                elif part != ".":
+                    parts.append(part)
+            target = "/".join(parts)
+            _relative_name(target)
+            if target not in included:
+                raise ExportError("Native import omitted from reviewed source: " + name + " -> " + target)
+
+
 def collect_paths(root, contract=BUILD):
     """Resolve explicit paths and verify the actual packaging collector contract."""
     root = Path(root).absolute()
@@ -589,11 +661,13 @@ def collect_paths(root, contract=BUILD):
     folded = [name.casefold() for name in paths]
     if len(set(folded)) != len(folded):
         raise ExportError("Case-colliding source paths")
-    return sorted(
+    exported = sorted(
         name
         for name in paths
         if not _binary_path(name) and not name.casefold().startswith("collector/runtime/")
     )
+    _validate_native_source_closure(root, exported)
+    return exported
 
 
 def _output_path(root, output):

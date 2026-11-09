@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 106711,
-      "sha256": "3476896cc264f9265bf1c105120a22c4ee2ccecd33e5df1f04d0a241019134bd"
+      "bytes": 107535,
+      "sha256": "a732ac6d500ac19bdcb30117ccd3a889c0bd16461a29a825f0d79651080bec26"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1639,13 +1639,13 @@
     },
     {
       "path": "docs/QUALITY052.md",
-      "bytes": 23578,
-      "sha256": "9409b679faf51364a21697551bb9cbdec057bf9a736eff5e911d61fcdbf222e3"
+      "bytes": 24617,
+      "sha256": "881bf523a53e5260872db08fb75fa6278e9b21b8e4eb0b52a07309de15e85445"
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 134814,
-      "sha256": "1b0f2b034d5527ad32d5950fe69f7e48e0e5a1c72c5a1b3bb1c5c05490fe503c"
+      "bytes": 134866,
+      "sha256": "08a931aa7d57958989ec342bbf1da400cab385a09fba4f900786293c6858d0c0"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",
@@ -2776,6 +2776,11 @@
       "path": "native/HardwareCpuPackages.js",
       "bytes": 8272,
       "sha256": "1e63484544a31ea0f873852ebc0971941572773314268300992e304c039c7d42"
+    },
+    {
+      "path": "native/HardwareDenseInk052.js",
+      "bytes": 18613,
+      "sha256": "00c49b2b1446dc9e9804693eb3ff73896976b2c4d54b21cd13463d73f02ad378"
     },
     {
       "path": "native/HardwareFanDesigns.js",
@@ -4619,8 +4624,8 @@
     },
     {
       "path": "tests/test_source_export.py",
-      "bytes": 19939,
-      "sha256": "c1fc1eab6feb5bfa1c357b9baee0fd555cfbed0004d42ce4188a6fc6a8f39d9d"
+      "bytes": 23493,
+      "sha256": "427a7816028923bad1fef3f89fcf6191ede0e828ee53345f02bcdc052fb22ac9"
     },
     {
       "path": "tests/test_special_case_hosts052.py",
@@ -4999,8 +5004,8 @@
     },
     {
       "path": "tools/export_source.py",
-      "bytes": 28160,
-      "sha256": "dca8c272a3688842aaf6199cb2fbb6322c6657c8ed8c9c1ddf3768ac10b2af0c"
+      "bytes": 31254,
+      "sha256": "e39d4d353c200e0d80c937bca981cda17cd9b6f380050efae7549c963f6e01fe"
     },
     {
       "path": "tools/fetch_qt_licenses.py",
