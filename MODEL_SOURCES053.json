@@ -227,6 +227,70 @@
       "original_author_download_byte_identity_claimed": false,
       "mirror_file_generator": "glTF-Transform v4.4.2",
       "original_model_and_mirror_may_have_different_optimized_topology": true
+    },
+    {
+      "asset_file": "case.glb",
+      "bytes": 12259856,
+      "sha256": "bc459f3cefe029bd3ef41180b99ead27365a7797acba08e3a3c3c23b53eaab4a",
+      "git_blob_sha1": "c25f1010c163da12deaebc64d1d366e960b60f98",
+      "mirror_repository": "Jacob-Baker-Git/CustomPc",
+      "mirror_commit": "45995ba9341a685d71946bc87bbd907b0f60af06",
+      "pinned_raw_url": "https://raw.githubusercontent.com/Jacob-Baker-Git/CustomPc/45995ba9341a685d71946bc87bbd907b0f60af06/models-staging/case.glb",
+      "original_author": "MUSHROOM_BUILDS",
+      "original_username": "MUSHROOM_BUILDS",
+      "original_title": "Fractal Design. Meshify C  -  PC Case",
+      "original_model_url": "https://sketchfab.com/3d-models/fractal-design-meshify-c-pc-case-a46526af2ac84fa098edc3f01c012450",
+      "original_public_metadata_url": "https://api.sketchfab.com/v3/models/a46526af2ac84fa098edc3f01c012450",
+      "original_public_metadata_sha256": "39bb003861bfc5de7404d7f019b9d779bb62c1aea09ae92b8b1dd4fca2f61b4b",
+      "original_published_at": "2021-02-25T20:42:59.116975",
+      "relative_file": "models/case.glb",
+      "rights": {
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "upstream_label": "CC Attribution",
+        "attribution_required": true,
+        "original_author_retains_rights": true,
+        "project_noncommercial_terms_do_not_replace_upstream_license": true,
+        "mirror_engineering_code_license_verified": false,
+        "changes_here": "None: fixed Git blob downloaded exactly; no conversion, LOD, repair, scaling or watermark.",
+        "third_party_trademark_or_retail_identity_accuracy_verified": false
+      },
+      "changes_in_this_staging": "None: bytes copied exactly from the pinned third-party mirror Git blob; no LOD, transformation, repair, re-export or watermark.",
+      "original_author_download_byte_identity_claimed": false,
+      "mirror_file_generator": "Sketchfab-13.74.0",
+      "original_model_and_mirror_may_have_different_optimized_topology": true
+    },
+    {
+      "asset_file": "motherboard.glb",
+      "bytes": 8073496,
+      "sha256": "d100590563e86c13d74eb38dc5be3599c7aee4b221a04a33a6e94895861190b4",
+      "git_blob_sha1": "3df4f0eb88020377175841937558ddd12824b454",
+      "mirror_repository": "Jacob-Baker-Git/CustomPc",
+      "mirror_commit": "45995ba9341a685d71946bc87bbd907b0f60af06",
+      "pinned_raw_url": "https://raw.githubusercontent.com/Jacob-Baker-Git/CustomPc/45995ba9341a685d71946bc87bbd907b0f60af06/public/models/motherboard.glb",
+      "original_author": "MUSHROOM_BUILDS",
+      "original_username": "MUSHROOM_BUILDS",
+      "original_title": "Asus Strix b-550-f Gaming Motherboard Realistic",
+      "original_model_url": "https://sketchfab.com/3d-models/3eba5f45bed74fbeb2647de38047000f",
+      "original_public_metadata_url": "https://api.sketchfab.com/v3/models/3eba5f45bed74fbeb2647de38047000f",
+      "original_public_metadata_sha256": "9b41ddb7986d8eae2cec1c20b971839ea7386057ed717ebc92fdbcff5ed5e770",
+      "original_published_at": "2023-01-06T03:54:27.959437",
+      "relative_file": "models/motherboard.glb",
+      "rights": {
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "upstream_label": "CC Attribution",
+        "attribution_required": true,
+        "original_author_retains_rights": true,
+        "project_noncommercial_terms_do_not_replace_upstream_license": true,
+        "mirror_engineering_code_license_verified": false,
+        "changes_here": "None: fixed Git blob downloaded exactly; no conversion, LOD, repair, scaling or watermark.",
+        "third_party_trademark_or_retail_identity_accuracy_verified": false
+      },
+      "changes_in_this_staging": "None: bytes copied exactly from the pinned third-party mirror Git blob; no LOD, transformation, repair, re-export or watermark.",
+      "original_author_download_byte_identity_claimed": false,
+      "mirror_file_generator": "glTF-Transform v4.4.2",
+      "original_model_and_mirror_may_have_different_optimized_topology": true
     }
   ],
   "cc_by_legal_text": {
@@ -239,5 +303,8 @@
   "local_project_license_applied_to_models": false,
   "models_claimed_as_our_original_art": false,
   "source_model_watermark_added": false,
-  "source_model_tracking_added": false
+  "source_model_tracking_added": false,
+  "model_count": 9,
+  "model_bytes": 23873776,
+  "previous_reference_data_commit": "4fc766265fa44ec4866fdef8a0f005056fc81421"
 }

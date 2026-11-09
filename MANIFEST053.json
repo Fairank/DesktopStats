@@ -2,24 +2,36 @@
   "schema": 1,
   "status": "reference-download",
   "source_mirror_commit": "45995ba9341a685d71946bc87bbd907b0f60af06",
-  "model_count": 7,
-  "model_bytes": 3540424,
+  "model_count": 9,
+  "model_bytes": 23873776,
   "files": {
     "ATTRIBUTION053.md": {
-      "bytes": 3575,
-      "sha256": "d882365cc8516f39ff942c3e2fbf9cff84171ba23521f5b9b3c171b3e5220c37"
+      "bytes": 4579,
+      "sha256": "c456da7ea24fc112b59faedf2f2414f35c463094d9db651c12b4190d55e47801"
     },
     "LICENSE-CC-BY-4.0.txt": {
       "bytes": 18657,
       "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
     },
     "MODEL_QUALITY053.json": {
-      "bytes": 11156,
-      "sha256": "a756ca5a5bb19cbcf1ab73a0f1bc5f084c04a08af2e98af972bf15d10c3bdbe8"
+      "bytes": 15941,
+      "sha256": "c129956ff569c84e167596849ba2735b21a67f80ec6b267aadf7182ad53af9de"
     },
     "MODEL_SOURCES053.json": {
-      "bytes": 14976,
-      "sha256": "075047c069a661a7084f3b2f2339203c48106d9d89df1973f2829c1b91652764"
+      "bytes": 19203,
+      "sha256": "9a477523d717c8396c5ea9d314c5decaaf23f3f3dea9cb1a21477f1dc5569ec3"
+    },
+    "README.md": {
+      "bytes": 3382,
+      "sha256": "1ccf70a6eff7503a9a717433185839aeceb03d08ed078d693d164de5b1440f78"
+    },
+    "UPSTREAM-MODEL-CREDITS.md": {
+      "bytes": 3559,
+      "sha256": "18c94be30e8c8fbee79bf1ace321e2aadd5e7f545875c36ced3821e77ae1fbfa"
+    },
+    "models/case.glb": {
+      "bytes": 12259856,
+      "sha256": "bc459f3cefe029bd3ef41180b99ead27365a7797acba08e3a3c3c23b53eaab4a"
     },
     "models/cooler.glb": {
       "bytes": 628004,
@@ -37,6 +49,10 @@
       "bytes": 1412620,
       "sha256": "027b9135933e71839572007c5cd5208a137da598ab8d122f64bacaaf3682522b"
     },
+    "models/motherboard.glb": {
+      "bytes": 8073496,
+      "sha256": "d100590563e86c13d74eb38dc5be3599c7aee4b221a04a33a6e94895861190b4"
+    },
     "models/psu.glb": {
       "bytes": 139236,
       "sha256": "60aa4b6c959cdc0cde5b99c7979066ac1dcfe24e8cdbe951f061cbec8db65f04"
@@ -48,19 +64,16 @@
     "models/storage.glb": {
       "bytes": 429224,
       "sha256": "6f0657646486fc7eb5cdc4cfc7b7ec2ea8bd767a04123d770340f55e85eaa22a"
-    },
-    "README.md": {
-      "bytes": 2445,
-      "sha256": "030c5a941ff0d2b896bb9cd322c053db35bb4d9e81142dbd0f819e69854654ed"
-    },
-    "UPSTREAM-MODEL-CREDITS.md": {
-      "bytes": 3559,
-      "sha256": "18c94be30e8c8fbee79bf1ace321e2aadd5e7f545875c36ced3821e77ae1fbfa"
     }
   },
   "manifest_self_excluded": true,
   "signed": false,
   "current_stats_dspack_import_supported": false,
   "native_acceptance": false,
-  "fixed_mount_verified": false
+  "fixed_mount_verified": false,
+  "previous_reference_data_commit": "4fc766265fa44ec4866fdef8a0f005056fc81421",
+  "verification_scope_counts": {
+    "decoded_geometry_checks_assets": 7,
+    "container_only_assets": 2
+  }
 }
