@@ -23,7 +23,23 @@ def dimensions(row):
 
 class ChassisExpansion040Tests(unittest.TestCase):
     def test_original_eighty_records_are_canonically_unchanged(self):
-        raw=json.dumps(list(catalog.CASES[:80]),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()
+        import copy
+        canonical=copy.deepcopy(list(catalog.CASES[:80]))
+        gt=next(row for row in canonical if row['id']=='asus-tuf-gt502')
+        self.assertEqual(gt['fan_mounts'],[{'position': 'top', 'count': 3, 'size_mm': [120]}, {'position': 'top', 'count': 2, 'size_mm': [140]}, {'position': 'side', 'count': 3, 'size_mm': [120]}, {'position': 'bottom', 'count': 3, 'size_mm': [120]}, {'position': 'rear', 'count': 1, 'size_mm': [120]}])
+        self.assertEqual([m for m in gt['fan_mounts'] if m['position']=='bottom'],
+                         [dict(position='bottom',count=3,size_mm=[120])])
+        self.assertFalse(any(140 in m['size_mm'] for m in gt['fan_mounts'] if m['position']=='bottom'))
+        # Reverse only this exact newly sourced bottom120 bank; every other
+        # original field/row remains covered by the original canonical hash.
+        gt['fan_mounts'].remove(dict(position='bottom',count=3,size_mm=[120]))
+        ch=next(row for row in canonical if row['id']=='deepcool-ch780')
+        self.assertEqual(ch['fan_mounts'],[{'position': 'top', 'count': 3, 'size_mm': [120, 140]}, {'position': 'top', 'count': 2, 'size_mm': [180, 200]}, {'position': 'side', 'count': 3, 'size_mm': [120, 140]}, {'position': 'bottom', 'count': 3, 'size_mm': [120, 140]}, {'position': 'bottom', 'count': 2, 'size_mm': [180, 200]}])
+        self.assertEqual(ch['fit_note'],'按原厂竖置显卡与独立电源仓示意；风冷限高132mm、ATX电源限长180mm。风扇容量来自原厂产品页与手册，不代表已安装；实际显卡厚度及供电线空间仍需核对。')
+        self.assertIn('https://deepcool.com/download/pdf/CH780.pdf',ch['sources'])
+        ch['fan_mounts']=[]
+        ch['fit_note']='按原厂竖置显卡与独立电源仓示意；实际显卡厚度及供电线空间仍需核对。'
+        raw=json.dumps(canonical,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()
         self.assertEqual(hashlib.sha256(raw).hexdigest(),
                          '351f55cb5503fb584c6c9990418e78b309609e93092978b8a399d6deddd55c3b')
 

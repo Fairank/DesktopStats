@@ -17,8 +17,12 @@ Item {
     readonly property var geometry: stats.widgetHardwareLayout(width, height, prefs)
     property var snapshot: ({})
     readonly property bool isModel: prefs.presentation === "hardware" && ["cpu","gpu"].includes(prefs.kind)
+    // Sampled state is fresh every update, but the complete identity descriptor
+    // normally stays unchanged. A value key keeps the retained drawing inputs
+    // stable, including nested package/profile changes and manual model choices.
+    readonly property string appearanceIdentity: JSON.stringify(snapshot.appearance || ({}))
     readonly property var appearance: {
-        const value=Object.assign({},snapshot.appearance || ({}))
+        const value=JSON.parse(appearanceIdentity)
         value.icon_set=prefs.hardware_icon_style || "miniature"
         return value
     }

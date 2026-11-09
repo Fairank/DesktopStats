@@ -19,6 +19,25 @@ COMPONENT_LABELS = {"all":"整机", "cpu":"处理器", "gpu":"显卡", "memory":
 FRAME_MAX_AGE = 35.0
 
 
+def part_family(target,metadata=None):
+    """Resolve authored independent IDs without guessing from their spelling."""
+    family=component_family(target)
+    if family in COMPONENT_LABELS:return family
+    details=metadata if isinstance(metadata,dict) else {}
+    known={'case_fan':'fans','radiator_fan':'cooler'}
+    families=set()
+    for group in ('hardware','cooling','auxiliary'):
+        rows=details.get(group,{})
+        rows=rows.get('parts',()) if isinstance(rows,dict) else ()
+        if not isinstance(rows,(tuple,list)) or len(rows)>256:continue
+        for row in rows:
+            if isinstance(row,dict) and row.get('id')==target:
+                value=row.get('component');kind=row.get('kind')
+                if not isinstance(value,str) or not value:value=known.get(kind) if isinstance(kind,str) else None
+                if isinstance(value,str) and value in COMPONENT_LABELS and value!='all':families.add(value)
+    return next(iter(families)) if len(families)==1 else 'all'
+
+
 def mapping(value):
     return value if isinstance(value,dict) else {}
 
@@ -77,7 +96,7 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
     """Return at most six fixed rows without changing any supplied snapshot."""
     data=mapping(data);spec=mapping(spec);config=mapping(config)
     target=component
-    component=component_family(component)
+    component=part_family(component,scene_metadata)
     component=component if component in COMPONENT_LABELS else 'all'
     target=target if component!='all' else 'all'
     details=mapping(scene_metadata);part={}
@@ -140,6 +159,21 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
         profile=mapping(board.get('model_profile'))
         if profile and profile.get('finish_status')!='photo_reviewed':
             notes.append('外观细节尚未核实，当前显示参考布局。')
+    elif component=='case' and part.get('kind') in ('case_cover','case_window','case_structure'):
+        identity=part.get('label') or '机箱独立部件'
+        # A case's external dimensions do not establish its cover thickness,
+        # seam, aperture or window dimensions. Keep those unknown explicitly.
+        verified=part.get('dimensions_verified') is True
+        size=_dimensions(part.get('dimensions_mm'),('width','height','depth')) if verified else None
+        installed=part.get('assembly_state')=='installed'
+        rows=[_static('所属机箱',case.get('label'),bool(case.get('label'))),
+              _static('装配状态','已安装（参考装配）' if installed else None,installed,
+                      '此部件的装配状态尚未明确。'),
+              _static('外形依据','实物照片与手册参考'),
+              _static('制造尺寸',size,size is not None,'此部件的制造尺寸、厚度或开孔尺寸尚未核实。'),
+              _static('实测功率',None,False,'罩板与观察窗没有独立功率传感器。')]
+        notes.append('独立部件模型；照片参考比例不代表制造 CAD 或拆装指导。')
+        if part.get('kind')=='case_window':notes.append('这是透明观察窗，不是电子显示屏；未生成虚构功率读数。')
     elif component=='case':
         identity=case.get('label') or '参考机箱（未识别）'
         size=_dimensions(case.get('dimensions_mm'),('width','height','depth'))
@@ -156,6 +190,10 @@ def snapshot(data,spec,config,component='all',*,now=None,scene_metadata=None):
         source=case.get('selection_source')
         notes.append('手动外观' if source=='manual' else '已按机箱固件标识匹配。'
                      if source=='automatic' else '参考机箱（未识别）')
+        removed=mapping(details.get('case_shroud')).get('removed_parts',())
+        if isinstance(removed,(tuple,list)) and any(isinstance(row,dict) and
+                row.get('reason')=='front_cover_removed_for_radiator_lower_bay' for row in removed):
+            notes.append('前冷排延入下仓：参考装配已移除前段电源罩，保留后罩及透明观察窗。')
         for check in spec.get('checks',()):
             if check.get('kind')=='gpu_mount' and check.get('state')=='unsupported':
                 notes.append('机箱仅支持半高扩展卡。' if check.get('reason')=='low_profile' else '机箱不支持独立显卡安装。')

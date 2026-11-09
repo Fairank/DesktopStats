@@ -71,6 +71,79 @@ def curve_front_rotor(vertices,radius,direction,level):
     return tuple(result)
 
 
+def _conforming_panel_edges(panels):
+    from bisect import bisect_left,bisect_right
+    from assembly_detail import _tri
+    # Merge only floating clipping duplicates, using the first original
+    # coordinate as canonical representative rather than moving to a grid.
+    if sum(len(v) for v in panels)>8192*18:raise ValueError('GPU bevel input budget exceeded')
+    aliases={};canonical=[]
+    for vertices in panels:
+        values=[]
+        for at in range(0,len(vertices),6):
+            p=tuple(vertices[at:at+3]);key=tuple(round(x,9) for x in p)
+            q=aliases.setdefault(key,p)
+            if math.dist(p,q)>2e-9:raise ValueError('GPU canonical point exceeded tolerance')
+            values.extend((*q,*vertices[at+3:at+6]))
+        canonical.append(tuple(values))
+    panels=tuple(canonical)
+    points={tuple(vertices[n:n+3]) for vertices in panels for n in range(0,len(vertices),6)}
+    edges={tuple(sorted((tuple(v[n+k:n+k+3]),tuple(v[n+j:n+j+3]))))
+           for v in panels for n in range(0,len(v),18) for k,j in ((0,6),(6,12),(12,0))}
+    if len(points)>8192 or len(edges)>32768:raise ValueError('Bounded GPU bevel edge refinement exceeded budget')
+    ordered=[sorted(points,key=lambda p:p[k]) for k in range(3)]
+    coords=[[p[k] for p in ordered[k]] for k in range(3)]
+    splits={};tolerance=1e-8;candidate_checks=0
+    for a,b in edges:
+        delta=tuple(b[k]-a[k] for k in range(3));den=sum(q*q for q in delta)
+        if den<1e-18:continue
+        axis=max(range(3),key=lambda k:abs(delta[k]))
+        candidates=ordered[axis][bisect_left(coords[axis],min(a[axis],b[axis])):bisect_right(coords[axis],max(a[axis],b[axis]))]
+        candidate_checks+=len(candidates)
+        if candidate_checks>2000000:raise ValueError('GPU bevel scan budget exceeded')
+        found=[]
+        for p in candidates:
+            if p==a or p==b or any(p[k]<min(a[k],b[k])-tolerance or p[k]>max(a[k],b[k])+tolerance for k in range(3)):continue
+            t=sum((p[k]-a[k])*delta[k] for k in range(3))/den
+            if 1e-8<t<1.-1e-8 and math.dist(p,tuple(a[k]+t*delta[k] for k in range(3)))<tolerance:found.append((t,p))
+        if found:
+            unique=[]
+            for t,p in sorted(found):
+                if not unique or math.dist(p,unique[-1])>tolerance:unique.append(p)
+            splits[(a,b)]=tuple(unique)
+    result=[]
+    for vertices in panels:
+        out=[]
+        for n in range(0,len(vertices),18):
+            corners=[tuple(vertices[n+k:n+k+3]) for k in (0,6,12)];boundary=[]
+            for a,b in zip(corners,(*corners[1:],corners[0])):
+                key=tuple(sorted((a,b)));inner=splits.get(key,())
+                boundary.extend((a,*(inner if key[0]==a else tuple(reversed(inner)))))
+            if len(boundary)==3:out.extend(vertices[n:n+18]);continue
+            # Convex source triangle boundary: retain every inserted edge
+            # vertex without adding a center point or a cap fan T junction.
+            normal=vertices[n+3:n+6];remaining=list(boundary)
+            while len(remaining)>3:
+                for j,b in enumerate(remaining):
+                    a,c=remaining[j-1],remaining[(j+1)%len(remaining)]
+                    ab=tuple(b[k]-a[k] for k in range(3));ac=tuple(c[k]-a[k] for k in range(3))
+                    cross=(ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0])
+                    if sum(cross[k]*normal[k] for k in range(3))>1e-10:
+                        def contained(p):
+                            for u,v in ((a,b),(b,c),(c,a)):
+                                uv=tuple(v[k]-u[k] for k in range(3));up=tuple(p[k]-u[k] for k in range(3))
+                                cr=(uv[1]*up[2]-uv[2]*up[1],uv[2]*up[0]-uv[0]*up[2],uv[0]*up[1]-uv[1]*up[0])
+                                if sum(cr[k]*normal[k] for k in range(3))<-1e-8:return False
+                            return True
+                        if any(contained(p) for p in remaining if p not in (a,b,c)):continue
+                        _tri(out,a,b,c);remaining.pop(j);break
+                else:raise ValueError('GPU bevel edge refinement found a degenerate boundary')
+            _tri(out,*remaining)
+        result.append(tuple(out))
+    if sum(len(v)//18 for v in result)>min(8192,2*sum(len(v)//18 for v in panels)+64):raise ValueError('GPU bevel output budget exceeded')
+    return tuple(result)
+
+
 def _bevel_silver_panel(vertices,outer,holes,depth):
     """Shallow true facet at the structural perimeter and real fan mouths.
 
@@ -83,6 +156,20 @@ def _bevel_silver_panel(vertices,outer,holes,depth):
     for a,b in zip(outer,(*outer[1:],outer[0])):
         dx,dy=b[0]-a[0],b[1]-a[1];size=math.hypot(dx,dy)
         edges.append((a,b,(-dy/size*signed,dx/size*signed),size))
+    # One transient shared-point guard for all source paint pieces. A cap
+    # vertex moves by at most 1/8 of the minimum incident cap altitude;
+    # both front and rear copies use the same deterministic position map.
+    limits={}
+    for at in range(0,len(vertices),18):
+        points=[tuple(vertices[at+k:at+k+3]) for k in (0,6,12)]
+        if abs(vertices[at+5])<.999:continue
+        ab=tuple(points[1][k]-points[0][k] for k in range(3))
+        ac=tuple(points[2][k]-points[0][k] for k in range(3))
+        cross=(ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0])
+        area2=math.sqrt(sum(q*q for q in cross))
+        edge=max(math.dist(a,b) for a,b in zip(points,(*points[1:],points[0])))
+        bound=area2/max(edge,1e-20)/8.
+        for p in points:limits[p]=min(limits.get(p,bound),bound)
     def point(v):
         x,y,z=v;front=max(0.,min(1.,z/depth+.5));bevel=.35*front
         inward=[]
@@ -97,11 +184,24 @@ def _bevel_silver_panel(vertices,outer,holes,depth):
                 if abs(det)>1e-8:dx,dy=bevel*(by-ny)/det,bevel*(nx-bx)/det
                 else:dx,dy=nx*bevel,ny*bevel
             else:dx,dy=nx*bevel,ny*bevel
+            # Do not move a structural chamfer into a real fan aperture.
+            # Chord intersections are inside its circumscribed circle and
+            # must retain their original position; true mouth vertices still
+            # receive the separate outward chamfer below.
+            distance=math.hypot(dx,dy)
+            clearance=min((max(0.,math.hypot(v[0]-hx,v[1]-hy)-radius)
+                           for hx,hy,radius in holes),default=distance)
+            if distance>clearance:
+                scale=clearance/distance;dx*=scale;dy*=scale
             x+=dx;y+=dy
         for hx,hy,radius in holes:
             old=math.hypot(v[0]-hx,v[1]-hy)
             if abs(old-radius)<1e-5:
                 scale=(radius+.40*front)/max(1e-9,math.hypot(x-hx,y-hy));x=hx+(x-hx)*scale;y=hy+(y-hy)*scale
+        # Do not fold a source cap sliver while preserving its topology.
+        move=math.hypot(x-v[0],y-v[1]);limit=limits.get(tuple(v),move)
+        if move>limit:
+            scale=limit/move;x=v[0]+(x-v[0])*scale;y=v[1]+(y-v[1])*scale
         return x,y,z
     result=[]
     for n in range(0,len(vertices),18):
@@ -277,6 +377,25 @@ def refine(meshes,spec,level,*,outer,front_holes,rear_hole,edge_windows,edge_rec
         points=row.get('points') if isinstance(row,dict) else row
         polygon=unit_polygon(points,length,width,margin=.3)
         if polygon:panel_rows.append(polygon)
+    # Source paint contains T junctions. Split only those existing edges
+    # before the shared deformation so a bevel cannot pull a long edge away
+    # from its short neighbors. No additional hardware or material is added.
+    panel_depth=1.1
+    raw_panels=tuple(perforated_plate(poly,(*front_holes,*panel_rows[i+1:]),panel_depth,
+                                     segments=segments,clip_walls=True)
+                     for i,poly in enumerate(panel_rows))
+    bevel_fallback=False
+    try:
+        conforming=_conforming_panel_edges(raw_panels)
+        beveled_vertices=_bevel_silver_panel(tuple(v for panel in conforming for v in panel),
+                                  panel_rows[0],front_holes,panel_depth) if panel_rows else ()
+        silver_panels=[];offset=0
+        for panel in conforming:
+            silver_panels.append(beveled_vertices[offset:offset+len(panel)]);offset+=len(panel)
+    except (ValueError,OverflowError,ZeroDivisionError):
+        # Preserve the complete original through-hole plate on a bounded
+        # refinement failure; never apply a nonconforming bevel as fallback.
+        silver_panels=raw_panels;bevel_fallback=True
     panel_index=0
     fin_count=128 if level=='close' else 12 if level=='eco' else 96
     fin_rows=[((width*.84,thickness*.60,.25),(0,1.,-length*.41+n*length*.82/(fin_count-1))) for n in range(fin_count)]
@@ -293,13 +412,9 @@ def refine(meshes,spec,level,*,outer,front_holes,rear_hole,edge_windows,edge_rec
     for mesh in meshes:
         if mesh.name=='gpu-shroud':mesh=replace(mesh,vertices=body,color=frame)
         elif mesh.name=='gpu-cover-panel':
-            if panel_index<len(panel_rows):
-                panel_depth=1.1
-                panel=perforated_plate(panel_rows[panel_index],(*front_holes,*panel_rows[panel_index+1:]),panel_depth,
-                                        segments=segments,clip_walls=True)
-                panel_index+=1
+            if panel_index<len(silver_panels):
+                panel=silver_panels[panel_index];panel_index+=1
                 if not panel:continue
-                panel=_bevel_silver_panel(panel,panel_rows[0],front_holes,panel_depth)
                 mesh=replace(mesh,vertices=gpu_plane(panel),position=(gx,gy-thickness/2+panel_depth/2+.12,gz))
         elif mesh.name=='gpu-fan-rotor' and mesh.position[1]<gy:
             opening=min(front_openings,key=lambda m:(m.position[0]-mesh.position[0])**2+(m.position[2]-mesh.position[2])**2)
@@ -365,4 +480,7 @@ def refine(meshes,spec,level,*,outer,front_holes,rear_hole,edge_windows,edge_rec
         electrical_anchor_changed=False,power_socket_clearance=True,power_socket_clearance_is_reference=True,
         power_socket_depth_reference=.4,front_fan_reference_radius_resized=True,front_blade_profile_retained=True,front_fans_reoriented=False,
         rear_rpm_verified=False,retail_pcb_outline_verified=False)
+    if bevel_fallback:
+        metadata.update(silver_panel_bevel_reference_mm=0.,fan_mouth_bevel_reference_mm=0.,
+                        silver_panel_bevel_fallback='safe_unbeveled_source_plate_refinement_budget')
     return tuple(result),metadata

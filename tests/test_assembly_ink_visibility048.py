@@ -140,6 +140,7 @@ class AssemblyInkVisibility048Tests(unittest.TestCase):
             for mesh in selected:self.assertTrue(all(retained(edge,values[id(mesh)]) for edge in crease_edges(mesh.vertices)))
 
     def test_crowded_actual_m2_cover_removes_t_seams_without_losing_true_creases_or_holes(self):
+        import math
         scene=next(iter(self.scenes.values()))
         mesh=max((m for m in scene.meshes if m.name=='detail-board-m2-heatsink'),
                  key=lambda m:len(crease_edges(m.vertices)))
@@ -156,6 +157,47 @@ class AssemblyInkVisibility048Tests(unittest.TestCase):
         real=[edge for edge,faces in normals.items() if any(
             -.05<sum(a*b for a,b in zip(faces[0],face))<.8 for face in faces[1:])]
         self.assertGreaterEqual(len(real),10)
+        # These are the exact ASUS reference clearances already used by the
+        # source model, not three manufacturer-dimensioned M.2 screw holes.
+        # The interior one has a front/back loop; the right one meets the edge.
+        board=scene.metadata['attachment_anchors']['board']
+        self.assertEqual((board['width'],board['height']),(244.,305.))
+        radius=3.2;cy=(.5-.538)*board['height']
+        left=(.676-.5)*board['width'];right=(.972-.5)*board['width']
+        border=(.974-.5)*board['width'];layers=(min(mesh.vertices[0::6]),max(mesh.vertices[0::6]))
+        self.assertGreater(border-right,0.);self.assertLess(border-right,radius)
+        self.assertAlmostEqual(border-right,.488,places=6)
+        # A local segment/triangle calculation checks the actual material,
+        # independent of any producer clipping, hole or polygon helper.
+        def subtract(a,b):return tuple(a[k]-b[k] for k in range(3))
+        def dot(a,b):return sum(a[k]*b[k] for k in range(3))
+        def cross(a,b):return (a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0])
+        def intersects(a,b):
+            direction=subtract(b,a)
+            for at in range(0,len(mesh.vertices),18):
+                p,q,r=(mesh.vertices[at+k:at+k+3] for k in (0,6,12))
+                one,two=subtract(q,p),subtract(r,p);h=cross(direction,two);det=dot(one,h)
+                if abs(det)<1e-12:continue
+                inv=1./det;s=subtract(a,p);u=dot(s,h)*inv
+                if u < -1e-9 or u > 1.+1e-9:continue
+                t=cross(s,one);v=dot(direction,t)*inv
+                if v < -1e-9 or u+v > 1.+1e-9:continue
+                distance=dot(two,t)*inv
+                if -1e-9<=distance<=1.+1e-9:return True
+            return False
+        for center in (left,right):self.assertFalse(intersects((-10.,cy,center),(10.,cy,center)))
+        self.assertFalse(intersects((0.,cy,border+4.),(0.,cy,right)),'The edge notch mouth stays open')
+        self.assertTrue(intersects((0.,cy+3.7,border+4.),(0.,cy+3.7,border-1.)),'Adjacent material wall stays present')
+        self.assertTrue(intersects((-10.,cy,right-3.7),(10.,cy,right-3.7)),'Adjacent cap material stays present')
+        # Independent intersections of the reference24-gon with the right
+        # edge define both notch mouths. Each cap must keep its arc-to-rim join.
+        circle=[(right+radius*math.cos(i*math.tau/24),cy+radius*math.sin(i*math.tau/24)) for i in range(24)]
+        mouths=[]
+        for a,b in zip(circle,circle[1:]+circle[:1]):
+            if (a[0]-border)*(b[0]-border)<0:
+                t=(border-a[0])/(b[0]-a[0]);mouths.append(a[1]+t*(b[1]-a[1]))
+        self.assertEqual(len(mouths),2)
+        def close(a,b):return all(abs(a[k]-b[k])<1e-4 for k in range(3))
         # Dense small contacts create budget pressure without competing for
         # main-cover priority. No physical plate, hole or GPU is rebuilt.
         contact=Mesh('contacts',box(1.,1.,1.),(0.2,0.2,0.2,1.),component='board')
@@ -168,10 +210,27 @@ class AssemblyInkVisibility048Tests(unittest.TestCase):
             self.assertGreater(sum(not retained(edge,data) for edge in raw),100)
             lines=[(tuple(data[n:n+3]),tuple(data[n+6:n+9])) for n in range(0,len(data),12)]
             holes=[group for group,span in _edge_groups(lines) if 6.3<span<6.5]
-            self.assertEqual(len(holes),3,'All three real 6.4mm mounting apertures stay closed')
+            self.assertEqual(len(holes),2,'One interior aperture retains its front/back closed loops; the edge aperture is a notch')
+            kept_layers=[]
             for group in holes:
                 degrees=Counter(point for n in group for point in lines[n])
-                self.assertEqual(set(degrees.values()),{2})
+                self.assertEqual(set(degrees.values()),{2});self.assertGreaterEqual(len(group),24)
+                points=tuple(degrees);layer=min(layers,key=lambda x:abs(points[0][0]-x));kept_layers.append(layer)
+                for point in points:
+                    self.assertAlmostEqual(point[0],layer,places=4)
+                    self.assertAlmostEqual(math.hypot(point[1]-cy,point[2]-left),radius,places=4)
+                self.assertAlmostEqual((min(p[1] for p in points)+max(p[1] for p in points))/2,cy,places=4)
+                self.assertAlmostEqual((min(p[2] for p in points)+max(p[2] for p in points))/2,left,places=4)
+            self.assertEqual(sorted(kept_layers),list(layers))
+            notch=[edge for edge in raw if any(abs(edge[0][0]-x)<1e-5 and abs(edge[1][0]-x)<1e-5 for x in layers)
+                   and all(radius*math.cos(math.pi/24)-1e-4<=math.hypot(p[1]-cy,p[2]-right)<=radius+1e-4 for p in edge)]
+            self.assertGreaterEqual(len(notch),28);self.assertTrue(all(retained(edge,data) for edge in notch))
+            for layer in layers:
+                for y in mouths:
+                    point=(layer,y,border)
+                    neighbours=[b if close(a,point) else a for a,b in lines if close(a,point) or close(b,point)]
+                    self.assertTrue(any(p[2]<border-1e-5 for p in neighbours),'Notch arc reaches the rim')
+                    self.assertTrue(any(abs(p[2]-border)<1e-4 and abs(p[1]-cy)>abs(y-cy)+1e-5 for p in neighbours),'Rim continues outside the notch')
             self.assertLessEqual(sum(len(value)//12 for _,value in values),MAX_STYLE_EDGES)
             self.assertLessEqual(max(len(value)//12 for _,value in values),512)
 

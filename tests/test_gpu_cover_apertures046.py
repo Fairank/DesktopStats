@@ -152,16 +152,31 @@ class ProfiledGpuCover046Tests(unittest.TestCase):
             for other_x,other_z,other_radius in circles[n+1:]:
                 self.assertGreaterEqual(math.hypot(x-other_x,z-other_z)+1e-5,radius+other_radius)
     def test_real_baked_front_panels_do_not_leave_walls_across_fan_apertures(self):
-        meaningful=False
-        import assembly_detail
+        meaningful=False;meaningful_models=set()
+        import assembly_detail,assembly_gpu_panels051
         real=assembly_detail.perforated_plate
+        current_partition=assembly_gpu_panels051.partition
+        def legacy_cover_walls(polygons,fan_holes,depth,*,segments=20):
+            # Inject only at the generic cover boundary. Retain the actual
+            # disjoint painter-order caps; deliberately restore prior uncut
+            # cover walls using those same live source polygons/fan holes.
+            # Exact Astral backplate/retention/port construction stays real.
+            values,meta=current_partition(polygons,fan_holes,depth,segments=segments)
+            prior=[]
+            for polygon,current in zip(polygons,values):
+                legacy=real(polygon,fan_holes,depth,segments=segments,clip_walls=False) if polygon else ()
+                caps=tuple(v for n in range(0,len(current),18) if abs(current[n+5])>.999 for v in current[n:n+18])
+                walls=tuple(v for n in range(0,len(legacy),18) if abs(legacy[n+5])<=.999 for v in legacy[n:n+18])
+                prior.append(caps+walls)
+            return tuple(prior),dict(meta,legacy_unclipped_cover_wall_control=True)
         for identity in self.IDS:
             for level in ('eco','balanced','close'):
                 with self.subTest(model=identity,lod=level):
                     value=self.spec(identity,level);scene=build_scene(value)
                     self.assert_front_openings_fit(scene,value)
-                    with patch('assembly_detail.perforated_plate',side_effect=lambda *a,**kw:real(*a,**dict(kw,clip_walls=False))):
+                    with patch('assembly_gpu_panels051.partition',side_effect=legacy_cover_walls) as prior:
                         before=build_scene(value)
+                    self.assertEqual(prior.call_count,0 if identity=='asus-astral-5090' else 1)
                     def unchanged(s):return [(m.name,m.vertices,m.color,m.position,m.rotor,m.axis,m.direction,m.part_id)
                                              for m in s.meshes if m.name!='gpu-cover-panel']
                     self.assertEqual(unchanged(scene),unchanged(before))
@@ -170,10 +185,105 @@ class ProfiledGpuCover046Tests(unittest.TestCase):
                     n=32 if level=='close' else 12 if level=='eco' else 20
                     holes=[circle(f.position[0],f.position[2],max(abs(v) for v in f.vertices[0::6])*1.005,n) for f in fans]
                     old=[m for m in before.meshes if m.name=='gpu-cover-panel'];new=[m for m in scene.meshes if m.name=='gpu-cover-panel']
-                    meaningful|=any(wall_crossings(m.vertices,holes,(0,2),1,m.position) for m in old)
+                    crossed=any(wall_crossings(m.vertices,holes,(0,2),1,m.position) for m in old)
+                    meaningful|=crossed
+                    if crossed:meaningful_models.add(identity)
                     for panel in new:self.assertEqual(wall_crossings(panel.vertices,holes,(0,2),1,panel.position),[],(identity,panel.name))
                     self.assertLessEqual(scene.triangle_count,TRIANGLE_BUDGETS[level])
         self.assertTrue(meaningful,'Real crossing-wall regression fixture must actually exercise the bug')
+        self.assertTrue({'intel-limited-arc-a770-16g','amd-reference-rx7900xtx-24g'}<=meaningful_models,
+                        'Two actual source profiles must retain a meaningful uncut-wall negative control')
+
+    def test_astral_shared_bevel_keeps_actual_apertures_caps_and_edge_coverage(self):
+        # Every LOD uses its actual ProfileReader geometry. Keep the existing
+        # through-hole wall assertion above; additionally cover bevelled caps
+        # and near-identical clipping vertices at source T junctions.
+        import collections,assembly_gpu_exterior049 as exterior
+        from assembly_geometry import gpu_plane
+        original=exterior._bevel_silver_panel
+        def overlap_area(triangle,hole):
+            points=tuple(triangle)
+            for a,b in zip(hole,(*hole[1:],hole[0])):
+                if not points:return 0.
+                def side(p):return (b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0])
+                out=[];previous=points[-1];old=side(previous)
+                for point in points:
+                    current=side(point)
+                    if (current>=0)!=(old>=0):
+                        t=old/(old-current)
+                        out.append(tuple(previous[k]+t*(point[k]-previous[k]) for k in (0,1)))
+                    if current>=0:out.append(point)
+                    previous,old=point,current
+                points=tuple(out)
+            return abs(_area(points)) if len(points)>=3 else 0.
+        for level in ('eco','balanced','close'):
+            with self.subTest(lod=level):
+                captured=[]
+                def record(vertices,outer,holes,depth):
+                    result=original(vertices,outer,holes,depth)
+                    captured.append((vertices,result,holes))
+                    return result
+                with patch.object(exterior,'_bevel_silver_panel',side_effect=record):
+                    scene=build_scene(self.spec(exterior.EXACT_ID,level))
+                self.assertEqual(len(captured),1)
+                raw,bevel,holes=captured[0];self.assertEqual(len(raw),len(bevel))
+                panels=[m for m in scene.meshes if m.name=='gpu-cover-panel']
+                self.assertEqual(len(panels),6)
+                self.assertTrue(all(m.vertices for m in panels))
+                self.assertNotIn('silver_panel_bevel_fallback',scene.metadata['detail']['gpu'])
+                self.assertEqual(tuple(v for panel in panels for v in panel.vertices),gpu_plane(bevel),
+                                 'The actual scene must use the guarded geometry, not discard it')
+                segments={'eco':12,'balanced':20,'close':32}[level]
+                hole_polys=[circle(*hole,segments) for hole in holes]
+                shared={};moved=0
+                for n in range(0,len(raw),6):
+                    key=tuple(round(v,9) for v in raw[n:n+3]);point=tuple(bevel[n:n+3])
+                    if key in shared:self.assertEqual(shared[key],point)
+                    shared[key]=point
+                    if math.dist(raw[n:n+3],point)>.01:moved+=1
+                self.assertGreater(moved,0,'The guard must retain a real shallow bevel')
+                for n in range(0,len(bevel),18):
+                    a,b,c=(bevel[n+k:n+k+3] for k in (0,6,12))
+                    ab=tuple(b[k]-a[k] for k in range(3));ac=tuple(c[k]-a[k] for k in range(3))
+                    cross=(ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0])
+                    length=math.sqrt(sum(v*v for v in cross));self.assertGreater(length,1e-10)
+                    for k in range(3):self.assertAlmostEqual(bevel[n+3+k],cross[k]/length,places=10)
+                    if abs(raw[n+5])>.999:self.assertGreater(cross[2]*raw[n+5],0.)
+                    projected=[p[:2] for p in (a,b,c)]
+                    self.assertTrue(all(overlap_area(projected,hole)<1e-8 for hole in hole_polys))
+                for panel in (m for m in scene.meshes if m.name=='gpu-cover-panel'):
+                    edges=collections.Counter()
+                    for n in range(0,len(panel.vertices),18):
+                        points=[tuple(round(v,7) for v in panel.vertices[n+k:n+k+3]) for k in (0,6,12)]
+                        edges.update(tuple(sorted((a,b))) for a,b in zip(points,(*points[1:],points[0])))
+                    # Existing source paint can share an edge more than twice;
+                    # every geometric edge must nevertheless have a mate.
+                    self.assertTrue(edges)
+                    self.assertTrue(all(count>=2 for count in edges.values()))
+
+    def test_astral_refinement_budget_preserves_safe_unbeveled_source_plate(self):
+        import assembly_gpu_exterior049 as exterior
+        from assembly_geometry import gpu_plane
+        value=self.spec(exterior.EXACT_ID,'eco');captured=[]
+        def reject(panels):
+            captured.append(panels)
+            raise ValueError('Bounded test input')
+        with patch.object(exterior,'_conforming_panel_edges',side_effect=reject):
+            scene=build_scene(value)
+        self.assertEqual(len(captured),1)
+        panels=[m for m in scene.meshes if m.name=='gpu-cover-panel']
+        self.assertEqual(len(panels),6);self.assertEqual(len(captured[0]),6)
+        self.assertTrue(all(m.vertices for m in panels))
+        self.assertEqual(tuple(m.vertices for m in panels),tuple(gpu_plane(v) for v in captured[0]),
+                         'Fallback must retain every actual unmodified source cap and wall')
+        details=scene.metadata['detail']['gpu']
+        self.assertEqual(details['silver_panel_bevel_fallback'],'safe_unbeveled_source_plate_refinement_budget')
+        self.assertEqual(details['silver_panel_bevel_reference_mm'],0.)
+        shroud=next(m for m in scene.meshes if m.name=='gpu-shroud')
+        fans=[m for m in scene.meshes if m.name=='gpu-fan-opening' and m.position[1]<shroud.position[1]]
+        holes=[circle(f.position[0],f.position[2],max(abs(v) for v in f.vertices[0::6])*1.005,12) for f in fans]
+        for panel in (m for m in scene.meshes if m.name=='gpu-cover-panel'):
+            self.assertEqual(wall_crossings(panel.vertices,holes,(0,2),1,panel.position),[])
 
     def test_explicit_shell_window_only_opens_front_shroud_and_preserves_later_bridge(self):
         for level in ('eco','balanced','close'):

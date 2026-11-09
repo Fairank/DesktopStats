@@ -47,6 +47,82 @@ DEFAULT_FAN_SHA={
     ('close','rear'):'011ca48334fad22aa5eb7d7f9c629b2e8290ceb6fc1b8850c6413b8dabd32af8'}
 
 
+def historical_route_ast(source):
+    """Reverse only the reviewed052 optional H5 hint, not default algorithms."""
+    node=ast.parse(source).body[0]
+    def require(ok,message):
+        if not ok:raise AssertionError(message)
+    require(isinstance(node,ast.FunctionDef) and node.name=='route_cable','Expected exact router')
+    require(node.args.args[-1].arg=='normal_lead_mm'
+        and ast.dump(node.args.defaults[-1])==ast.dump(ast.Constant(None)),'Exact optional default must remain None')
+    node.args.args.pop();node.args.defaults.pop()
+    guard=ast.parse("if normal_lead_mm is not None and (type(normal_lead_mm) not in (int,float) or normal_lead_mm!=2.):\n return (),dict(routing_failed=True,external_route=False)").body[0]
+    branch=ast.parse("if normal_lead_mm is None:\n a,b=escape(start,sn),escape(end,en)\nelse:\n a,b=_add(start,_mul(sn,normal_lead_mm)),_add(end,_mul(en,normal_lead_mm))").body[0]
+    old_assignment=ast.parse('a,b=escape(start,sn),escape(end,en)').body[0]
+    guards=[i for i,n in enumerate(node.body) if ast.dump(n)==ast.dump(guard)]
+    branches=[i for i,n in enumerate(node.body) if ast.dump(n)==ast.dump(branch)]
+    require(len(guards)==len(branches)==1,'Exact2mm guard/branch changed')
+    node.body[branches[0]]=old_assignment;node.body.pop(guards[0])
+    recursive=[n for n in ast.walk(node) if isinstance(n,ast.Call)
+        and isinstance(n.func,ast.Name) and n.func.id=='route_cable']
+    require(len(recursive)==1,'Only the existing recursive fallback is expected')
+    keyword=[k for k in recursive[0].keywords if k.arg=='normal_lead_mm']
+    require(len(keyword)==1 and ast.dump(keyword[0].value)==ast.dump(ast.Name(id='normal_lead_mm',ctx=ast.Load())),
+        'Exact recursive hint propagation changed')
+    recursive[0].keywords.remove(keyword[0])
+    return node
+
+
+def historical_haf_fixed_ports(scene,cables):
+    """Undo only source-backed052 HAF rigid pose for the unchanged048 SHA.
+
+    Actual production cables/anchors are never modified. Current ports must
+    first satisfy the exact fixed original HAF reference layout. The existing
+    verified header-role and actual route/strand assertions still run on the
+    unmodified scene after this historical comparison.
+    """
+    def require(ok,message):
+        if not ok:raise AssertionError(message)
+    def close(actual,expected):return len(actual)==len(expected) and all(abs(a-b)<1e-7 for a,b in zip(actual,expected))
+    meta=scene.metadata;anchors=meta['attachment_anchors'];w,h,d=scene.dimensions
+    require(meta['case_id']=='cooler-master-haf-700-evo' and close((w,h,d),(291.,626.,666.)),
+        'Historical transform only covers the exact HAF fixture')
+    source=meta['case_pose_reference'];chamber=meta['case_shroud']
+    require(chamber['horizontal_psu_cover_present'] is False and chamber['psu_chamber']=='behind_motherboard_lower_rear',
+        'Real HAF source rear-chamber structure must remain')
+    require(source['main_chamber_is_not_a_psu_bay'] is True and source['positions_verified'] is False,
+        'Unmeasured original reference, not a factory mount datum')
+    tray=min(w,279.)/2-96.;new_bx=tray-8.
+    board=anchors['board'];old_board=(w*.36,h*.02,-d/2+14.+board['width']/2)
+    new_board=(new_bx,old_board[1],old_board[2])
+    require(close(board['position'],new_board) and close(board['normal'],(-1.,0.,0.))
+        and close(board['up'],(0.,1.,0.)),'Only fixed board X translation is authorized')
+    delta=tuple(new_board[k]-old_board[k] for k in range(3))
+    psu=anchors['psu'];basis=((0.,1.,0.),(-1.,0.,0.),(0.,0.,1.))
+    require(psu['model_id']=='corsair-rm1000x-2024' and tuple(map(tuple,psu['basis']))==basis
+        and close(psu['world_dimensions_mm'],(86.,150.,160.)),'Expected real selected ATX PSU upright envelope')
+    old_psu=(0.,-h/2+86./2+12.,-d/2+160./2+10.)
+    new_psu=(tray+5.+86./2,-h/2+46.+150./2,-d/2+10.+160./2)
+    require(close(psu['position'],new_psu) and psu['placement_verified'] is False,
+        'Exact fixed original rear PSU pose must remain')
+    def board_inverse(point):return tuple(point[k]-delta[k] for k in range(3))
+    def psu_inverse(point):
+        relative=tuple(point[k]-new_psu[k] for k in range(3))
+        # basis columns rotate canonical PSU-local coordinates to world.
+        return tuple(old_psu[k]+sum(relative[n]*basis[k][n] for n in range(3)) for k in range(3))
+    historical=copy.deepcopy(cables)
+    for row in historical:
+        if row['source_owner']=='psu':
+            require(close(tuple(row['start'][k]-row['source_socket'][k] for k in range(3)),(0.,0.,9.)),
+                'The fixed modular mouth normal/9mm plug may not move')
+            row['source_socket']=psu_inverse(row['source_socket']);row['start']=psu_inverse(row['start'])
+        if row['target_owner'] in ('board','gpu'):
+            row['target_socket']=board_inverse(row['target_socket']);row['end']=board_inverse(row['end'])
+    headers=copy.deepcopy(anchors['connectors']['fan'])
+    for header in headers:header['position']=board_inverse(header['position'])
+    return historical,headers
+
+
 def normalized(value):
     if isinstance(value,float):return round(value,6)
     if isinstance(value,(tuple,list)):return [normalized(item) for item in value]
@@ -117,7 +193,7 @@ class CaseFanCableRouting048Tests(unittest.TestCase):
         self.assertIsNone(QOpenGLContext.currentContext())
 
     def test_route_solver_and_padding_contract_have_no_algorithm_change(self):
-        node=ast.parse(inspect.getsource(auxiliary.route_cable)).body[0]
+        node=historical_route_ast(inspect.getsource(auxiliary.route_cable))
         self.assertEqual(hashlib.sha256(ast.dump(node).encode()).hexdigest(),ROUTER_AST_SHA)
 
     def test_isolated_default_fans_keep_bytes_and_tail_override_never_moves_the_body(self):
@@ -167,7 +243,13 @@ class CaseFanCableRouting048Tests(unittest.TestCase):
                         self.assertEqual(gpu['power'][0]['normal'],(-1.,0.,0.))
                         self.assertEqual(gpu['power'][0]['position_source'],'official_photo_observed_depth_reference')
                         self.assertFalse(gpu['power'][0]['position_verified'])
-                        self.assertEqual(port_digest(cables,gpu_depth_correction=gpu['thickness_mm']*.40,fan_headers=anchors['connectors']['fan']),FIXED_PORTS_SHA[kind])
+                        # Only HAF's source-fixed board/PSU rigid poses changed.
+                        # Keep the historical hash; do not use these copies for
+                        # actual routing/role/clearance assertions below.
+                        old_ports,old_headers=(historical_haf_fixed_ports(scene,cables) if kind=='loop'
+                            else (cables,anchors['connectors']['fan']))
+                        self.assertEqual(port_digest(old_ports,gpu_depth_correction=gpu['thickness_mm']*.40,
+                            fan_headers=old_headers),FIXED_PORTS_SHA[kind])
                         for cable in (c for c in cables if c['kind']=='fan4'):
                             expected=('CPU_FAN',) if cable.get('role')=='aio_control_reference' else ('CPU_FAN','CPU_OPT') if cable.get('role')=='cpu_main' else tuple('CHA_FAN'+str(i) for i in range(1,6))
                             self.assertIn(cable['target_header_label'],expected)

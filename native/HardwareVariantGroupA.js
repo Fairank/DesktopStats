@@ -39,6 +39,9 @@ function geometry(recipe,state,g) {
 }
 
 function face(recipe,g,c,state) {
+    if(state && ((recipe==='a_msi_480_observed' && state.model_id==='msi-n480gtx-m2d15')
+            || (recipe==='a_gigabyte_460_rev1_observed' && state.model_id==='gigabyte-gtx460-oc-1g-rev1')))
+        return legacy052Face(state,g,c)
     var body=""
     if(recipe==="a_asus_dual_white") {
         // White lower shell and smoked blue-grey upper band are both visible
@@ -133,4 +136,71 @@ function back(recipe,g,c,state) {
     }
     body+=p("M25 99Q45 107 88 99","none","#b8794d",1.8)
     return wrap(recipe,g,body)
+}
+
+// Exact observed 2010 exteriors. Coordinates/ridge samples are reference art;
+// no unreviewed blade count, hidden pipe connection or label illustration.
+function legacy052Rect(x,y,w,h,tone,extra) {
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+tone+'"'+(extra?' '+extra:'')+'/>'
+}
+function legacy052Path(d,tone,extra) {
+    return '<path d="'+d+'" fill="'+tone+'"'+(extra?' '+extra:'')+'/>'
+}
+function legacy052Face(state,g,c){
+ if(!state||state.kind!=='gpu'||['msi-n480gtx-m2d15','gigabyte-gtx460-oc-1g-rev1'].indexOf(state.model_id)<0)return '';
+ let value='';
+ if(state.model_id==='msi-n480gtx-m2d15'){
+  value=p('M0 8H61L68 3H94L100 18V88L91 97H0Z',c.caseBody);
+  value+=legacy052Rect(2,13,58,74,c.caseShade,'class="hardware-observed-silver-window"');
+  // Bounded horizontal ridge samples, not a manufacturer's fin count.
+  for(let row=0;row<16;row++)value+=legacy052Rect(3,14+row*4.5,56,1.5,c.metal,'data-reference="sampled-horizontal-ridge"');
+  for(let x of[14,26,38,50])value+=legacy052Rect(x,13,1.3,74,c.metal,'data-reference="sampled-cross-support"');
+  // Photo5 shows four distinct visible arcs. Middle arcs overlap;these are
+  // four observed segments,not a total-pipe count or guessed hidden joins.
+  value+=legacy052Path('M24 10C24 4 31 -2 34 0Q38 3 38 10M37 10C37 5 39 -1 41 1Q43 4 43 10M41 10C42 2 47 -1 50 1Q54 4 54 10M47 10C48 2 53 1 56 4Q59 7 59 10','none','stroke="'+c.metal+'" stroke-width="1.3" stroke-linecap="round" data-reference="four-observed-visible-arc-segments-not-total"');
+  value+=p('M61 8L68 3H94L100 18V29L90 19H70L65 37H60Z',c.caseShade)
+   +p('M61 72L69 89H94L91 97H61Z',c.caseShade);
+  // Only broad observed warm label colour fields. No aeroplane,licensed
+  // illustration,manufacturer wordmark bitmap or copied label artwork.
+  value+=legacy052Path('M71 10H93L99 20V40L92 31L86 18Z','#a75d58','data-reference="abstract-warm-label-field"')
+   +legacy052Path('M62 71L72 89H94L99 80V91L91 97H67Z','#bd795d','data-reference="abstract-warm-label-field"');
+ }else{
+  // Keep the CURRENT Rev1 silhouette and positions, not Rev2 inclined fans.
+  value=p('M0 34Q1 12 17 6H41L49 17L58 7H83Q99 15 100 35V72Q97 89 83 94H61L50 84L39 94H16Q2 88 0 69Z',c.caseBody)
+   +p('M0 34Q1 12 17 6H41L49 17L41 26L31 16H17Q7 20 6 39Z',c.caseTop)
+   +p('M58 7H83Q99 15 100 35L93 42Q93 22 82 17H66L58 26L50 17Z',c.caseShade)
+   +p('M0 69Q2 88 16 94H39L50 84L40 76H18L8 64Z M61 94H83Q97 89 100 72L92 64L82 82H65L58 76L50 84Z',c.caseTop)
+   +legacy052Rect(43,35,13,30,c.caseShade);
+ }
+ return '<g class="hardware-observed-legacy052" data-exact-id="'+state.model_id+'" transform="translate('+g.x+' '+g.y+') scale('+(g.w/100)+' '+(g.h/100)+')">'+value+'</g>';
+}
+// Plain monoline alphabet;this is not the manufacturer italic MSI wordmark.
+var legacy052Letters={M:'M0 .8V0L.32 .42L.64 0V.8',S:'M.60 .10Q.16 -.12 .06 .18Q-.03 .40 .31 .42Q.73 .44 .59 .69Q.42 .95 .02 .72',I:'M0 0H.52M.26 0V.8M0 .8H.52',N:'M0 .8V0L.62 .8V0',G:'M.62 .13Q.12 -.12 .04 .29Q-.08 .87 .51 .80L.62 .70V.44H.34',T:'M0 0H.64M.32 0V.8',X:'M0 0L.64 .8M.64 0L0 .8',4:'M.50 .8V0L0 .53H.64',8:'M.31 .39C-.06 .34 -.05 -.04 .31 0C.68 -.04 .68 .34 .31 .39C-.08 .43 -.08 .85 .31 .8C.70 .85 .70 .43 .31 .39',0:'M.31 0Q-.04 0 0 .4Q-.04 .8 .31 .8Q.68 .8 .62 .4Q.68 0 .31 0Z'};
+function legacy052Word(text,color,stroke,transform,klass){
+ let out='';for(let i=0;i<text.length;i++)out+='<path d="'+legacy052Letters[text[i]]+'" transform="translate('+(i*.83)+' 0)"/>';
+ return '<g class="'+klass+'" transform="'+transform+'" fill="none" stroke="'+color+'" stroke-width="'+stroke+'" stroke-linecap="round" stroke-linejoin="round">'+out+'</g>';
+}
+function legacy052BrandCap(state,opening){
+ if(state.model_id!=='msi-n480gtx-m2d15')return '';
+ const k=opening.radius*.34,color=state.icon_set==='miniature'?'#edf2f5':state.icon_set==='papercut'?'#29485c':state.ink;
+ return legacy052Word('MSI',color,.11,'translate('+(opening.cx-1.15*k)+' '+(opening.cy-.40*k)+') scale('+k+')','hardware-static-brand-label-vector');
+}
+function legacy052Badge(state,g){
+ if(state.model_id!=='msi-n480gtx-m2d15')return '';
+ const line=['notebook_line','notebook_color'].includes(state.icon_set),ink=line?state.ink:state.icon_set==='papercut'?'#f3dfbd':'#edf2f5';
+ const x=g.x+g.w*.35,y=g.y+g.h*.44,w=g.w*.21,h=g.h*.115;
+ return '<g class="hardware-source-model-badge">'+legacy052Rect(x,y,w,h,line?'none':'#26323c',line?'stroke="'+state.ink+'" stroke-width=".075"':'')+legacy052Word('N480GTX',ink,.085,'translate('+(x+w*.07)+' '+(y+h*.18)+') scale('+(w*.86/(7*.83))+')','hardware-model-code-vector')+'</g>';
+}
+
+function legacy052Fixed(state,g,holes) {
+    if(!state || state.kind!=='gpu' || state.model_id!=='msi-n480gtx-m2d15')return ''
+    return (holes.length===1?legacy052BrandCap(state,holes[0]):'')+legacy052Badge(state,g)
+}
+function legacy052FanTones(state,base) {
+    if(!state || state.kind!=='gpu' || state.model_id!=='gigabyte-gtx460-oc-1g-rev1' || state.icon_set!=='papercut')return base
+    // Repaint existing opening circles only; preserve their count and radii.
+    return base.replace(/(<g class="hardware-fan"[^>]*>)([\s\S]*?)(<\/g>)/g,function(all,start,body,end) {
+        return start+body.replace(/<circle r="3"[^>]*\/>/,function(tag){return tag.replace(/fill="[^"]*"/,'fill="#f3dfbd"')})
+            .replace(/<circle r="2.90"[^>]*\/>/,function(tag){return tag.replace(/\s*\/>$/,' stroke="#d39978" stroke-width=".065"/>')})+end
+    })
 }

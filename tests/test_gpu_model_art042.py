@@ -30,7 +30,7 @@ class GpuModelArt042Tests(unittest.TestCase):
     artwork=fixture.GpuModelArt041Tests.artwork
 
     def test_every_catalog_sku_has_a_guarded_source_record_and_explicit_unknowns(self):
-        count=0;traced=0
+        count=0;traced=0;inlined=set()
         for identity in fixture.GPU_ROWS:
             value=state(identity,'miniature')
             row=self.evaluate('Details.modelProfile('+json.dumps(value)+')')
@@ -39,11 +39,16 @@ class GpuModelArt042Tests(unittest.TestCase):
             self.assertTrue(row['sources'],identity)
             self.assertIsInstance(row['unknown'],list)
             self.assertLessEqual(len(row['traces']),8)
-            traced+=bool(row['traces']);count+=1
+            if row.get('inline_observed_face') is True:
+                self.assertIn(identity,('msi-n480gtx-m2d15','gigabyte-gtx460-oc-1g-rev1'))
+                self.assertEqual(row['traces'],[])
+                inlined.add(identity)
+            traced+=bool(row['traces']) or row.get('inline_observed_face') is True;count+=1
             wrong=dict(value,series_id='not_the_same_series')
             self.assertIsNone(self.evaluate('Details.modelProfile('+json.dumps(wrong)+')'))
-        self.assertEqual(count,147)
-        self.assertEqual(traced,147)
+        self.assertEqual(count,148)
+        self.assertEqual(traced,148)
+        self.assertEqual(inlined,{'msi-n480gtx-m2d15','gigabyte-gtx460-oc-1g-rev1'})
 
     def test_every_style_preserves_original_fan_planes_and_reviewed_blade_counts(self):
         for identity in fixture.GPU_ROWS:
@@ -61,7 +66,10 @@ class GpuModelArt042Tests(unittest.TestCase):
                 # A trace can be fully hidden by a real aperture. Unknown
                 # casing entries keep an empty list, never a fake detail mark.
                 row=self.evaluate('Details.modelProfile('+json.dumps(state(identity,style))+')')
-                if not row['traces']:self.assertIn('casing_geometry',row['unknown'])
+                if not row['traces']:
+                    if identity in ('msi-n480gtx-m2d15','gigabyte-gtx460-oc-1g-rev1'):
+                        self.assertIs(row.get('inline_observed_face'),True)
+                    else:self.assertIn('casing_geometry',row['unknown'])
                 ordered=sorted(rotors,key=lambda r:r['cx'])
                 complete=len(rotors)==(appearance.get('visible_fan_count') or appearance['fan_count'])
                 for rotor in rotors:

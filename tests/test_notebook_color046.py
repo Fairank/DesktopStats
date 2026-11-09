@@ -30,13 +30,54 @@ REPRESENTATIVES=('asus-astral-5090','amd-reference-rx7900xtx-24g','intel-limited
 def decode(uri):return unquote(uri.split(',',1)[1])
 
 
-def physical_tree(source):
-    """Ignore only declared pencil marks; keep every original contour/plane."""
+def dense_ink_contract():
+    """Read the finite reviewed table; never approximate a changed contour."""
+    values={};coverage=None
+    for line in (ROOT/'native/HardwareDenseInk052.js').read_text(encoding='utf8').splitlines():
+        if line.startswith('    case '):
+            key,value=line[9:].split(':return ',1)
+            radius,original=json.loads(key).split('|',1)
+            trimmed=json.loads(value.rstrip(';'))
+            if trimmed in values and values[trimmed]!=(float(radius),original):
+                raise AssertionError('Ambiguous dense-ink inverse')
+            values[trimmed]=(float(radius),original)
+        elif line.startswith('function coverage() {return '):
+            coverage=json.loads(line[len('function coverage() {return '):-1])
+    if coverage is None or len(values)!=coverage['templates']:
+        raise AssertionError('Complete generated dense-ink declaration required')
+    return values,{row['id']:row for row in coverage['covered']}
+
+
+DENSE_TRIMS,DENSE_MODELS=dense_ink_contract()
+
+
+def physical_tree(source,*,dense_identity=None,normalized=None):
+    """Keep every contour/plane, reversing only declared cap-occluded ink.
+
+    The 052 dense table clips invisible roots under a round hub and changes
+    two pen widths. Its independent curve/cap tests remain in test_dense_ink052.
+    Only exact tagged paths from that table may map back to the source curve;
+    model, leaf counts, rotations, centres and every other attribute stay locked.
+    """
+    model=DENSE_MODELS.get(dense_identity)
+    radii={row['hub_radius'] for row in model['rotors']} if model else set()
     def visit(node):
         classes=node.get('class','').split()
         if 'hardware-notebook-pencil' in classes or any(c.startswith('hardware-notebook-color-') for c in classes):return None
         attributes=dict(node.attrib)
         if classes:attributes['class']=' '.join(c for c in classes if c not in ('notebook_color','notebook_line'))
+        if model and 'hardware-fan-blade' in classes and attributes.get('data-contour')=='cap-occluded-source-leading-edge-and-tip':
+            if attributes.get('stroke-width')!='.15' or attributes.get('fill')!='none':
+                raise AssertionError('Exact declared dense leaf pen required')
+            radius,original=DENSE_TRIMS[attributes['d']]
+            if radius not in radii:raise AssertionError('Unreviewed model/hub template')
+            attributes.update(d=original,**{'stroke-width':'0.18','data-contour':'open-source-leading-edge-and-tip'})
+            if normalized is not None:normalized['leaves']+=1
+        if model and 'hardware-fan-hub' in classes and attributes.get('stroke-width')=='.16':
+            if float(attributes['r']) not in radii or attributes.get('fill')!='none':
+                raise AssertionError('Exact declared dense hub required')
+            attributes['stroke-width']='0.18'
+            if normalized is not None:normalized['hubs']+=1
         children=[visit(child) for child in node]
         return node.tag,attributes,node.text,tuple(child for child in children if child is not None)
     return visit(ET.fromstring(source))
@@ -135,16 +176,21 @@ Item {
     @staticmethod
     def colored(pixel):
         r,g,b,a=pixel;return a>=96 and max(r,g,b)-min(r,g,b)>=22
-    def test_all147_gpus_keep_model_outline_holes_blades_and_retained_planes(self):
-        self.assertEqual(len(GPU_ROWS),147)
+    def test_all148_gpus_keep_model_outline_holes_blades_and_retained_planes(self):
+        self.assertEqual(len(GPU_ROWS),148)
         for identity in GPU_ROWS:
             with self.subTest(identity=identity):
                 color=self.drawing(identity,'notebook_color');line=self.drawing(identity,'notebook_line')
-                self.assertEqual(physical_tree(decode(color['source'])),physical_tree(decode(line['source'])))
+                counts=dict(leaves=0,hubs=0)
+                self.assertEqual(physical_tree(decode(color['source'])),physical_tree(decode(line['source']),dense_identity=identity,normalized=counts))
+                reviewed=DENSE_MODELS.get(identity,{}).get('rotors',())
+                self.assertEqual(counts,dict(leaves=sum(row['blades'] for row in reviewed),hubs=len(reviewed)))
                 self.assertEqual(len(color['layers']['rotors']),len(line['layers']['rotors']))
+                retained=dict(leaves=0,hubs=0)
                 for a,b in zip(color['layers']['rotors'],line['layers']['rotors']):
                     self.assertEqual({k:v for k,v in a.items() if k!='source'},{k:v for k,v in b.items() if k!='source'})
-                    self.assertEqual(physical_tree(decode(a['source'])),physical_tree(decode(b['source'])))
+                    self.assertEqual(physical_tree(decode(a['source'])),physical_tree(decode(b['source']),dense_identity=identity,normalized=retained))
+                self.assertEqual(retained,counts)
                 tree=ET.fromstring(decode(color['source']))
                 self.assertTrue(any('hardware-notebook-color-wash' in n.get('class','') for n in tree.iter()))
                 self.assertNotIn('hardware-notebook-color-',decode(line['source']))

@@ -44,17 +44,23 @@ ColumnLayout {
         return root.config[prefix+"radiator_fan_layout"]!=="none"&&((root.config[prefix+"radiator_fan_model"]&&!fan)||!radiatorFanFits(prefix,fan))
     }
     function chooseGpuBrand(value) {gpuSeries="";gpuBrand=value}
+    function visibleFanMounts() {
+        return (root.catalog.fan_mounts || root.catalog.mounts || []).filter(row=>row.id!=="above_psu_shroud"
+            || root.caseInfo.case_id==="lian-li-lancool-iii"
+            || (root.config.case_fans || []).some(selected=>selected.mount===row.id))
+    }
     function changeFan(mount,key,value) {const row=Object.assign({},fan(mount));row[key]=value;stats.changeAssemblyFan(mount,row.model,Number(row.count),row.direction)}
     function fansFor(mount) {
         const caps=caseInfo.fan_mounts || []
         if(!caps.length)return root.catalog.fans || []
-        return (root.catalog.fans || []).filter(row=>!row.id || caps.some(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(row.size_mm)>=0))
+        const preserved=mount==="above_psu_shroud"?root.fan(mount).model:""
+        return (root.catalog.fans || []).filter(row=>!row.id || row.id===preserved || caps.some(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(row.size_mm)>=0))
     }
     function countsFor(mount,model) {
         const caps=caseInfo.fan_mounts || [],fan=(root.catalog.fans || []).find(row=>row.id===model)
         if(!caps.length||!fan)return root.counts
         const max=caps.filter(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(fan.size_mm)>=0).reduce((n,row)=>Math.max(n,row.count),0)
-        return root.counts.filter(row=>Number(row.id)<=max)
+        return root.counts.filter(row=>Number(row.id)<=max||(mount==="above_psu_shroud"&&Number(row.id)===Number(root.fan(mount).count)))
     }
     SettingsGroup {
         Layout.fillWidth:true;title:ui.t("配件与安装")
@@ -98,7 +104,7 @@ ColumnLayout {
         RowLayout {
             Layout.fillWidth:true;spacing:12;visible:root.coolerKind==="aio"||root.coolerKind==="custom_loop"
             Text {Layout.preferredWidth:90;text:ui.t("冷排位置");font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}
-            Choice {objectName:"assemblyRadiatorMountChoice";Layout.fillWidth:true;model:root.catalog.mounts || [];value:root.config.cooler_mount || "top"
+            Choice {objectName:"assemblyRadiatorMountChoice";Layout.fillWidth:true;model:root.catalog.radiator_mounts || root.catalog.mounts || [];value:root.config.cooler_mount || "top"
                 Accessible.name:ui.t("冷排位置");onPicked:selected=>stats.changeAssembly("cooler_mount",selected)}
         }
         Repeater {
@@ -177,7 +183,7 @@ ColumnLayout {
         Layout.fillWidth:true;title:ui.t("机箱风扇")
         note:ui.t("按安装面选择型号、数量与进排风；转速缺失时实测模式保持静止。")
         Repeater {
-            model:root.catalog.mounts || []
+            model:root.visibleFanMounts()
             ColumnLayout {
                 required property var modelData
                 readonly property string mount: modelData.id
@@ -185,7 +191,7 @@ ColumnLayout {
                 Layout.fillWidth:true;spacing:6
                 RowLayout {
                     Layout.fillWidth:true;spacing:10
-                    Text {Layout.preferredWidth:46;text:modelData.label;font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted}
+                    Text {Layout.preferredWidth:46;text:modelData.label;font.family:ui.fontFamily;font.pixelSize:12;color:ui.muted;wrapMode:Text.WordWrap}
                     Choice {Layout.fillWidth:true;model:root.fansFor(mount);value:selected.model || ""
                         Accessible.name:modelData.label+" "+ui.t("风扇型号");onPicked:value=>root.changeFan(mount,"model",value)}
                 }

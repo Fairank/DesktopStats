@@ -59,7 +59,11 @@ MODELS=(
      _connector('fan',.819,.985),_connector('fan',.862,.985),_connector('argb',.865,.011)),
     (_cover('vrm-top',_rect(.175,.035,.695,.150),22.,6),
      _cover('vrm-io',((.009,.033),(.110,.018),(.185,.090),(.190,.374),(.150,.494),(.004,.494)),28.,5),
-     _cover('m2-upper',((.164,.506),(.688,.506),(.706,.486),(.974,.486),(.974,.549),(.922,.577),(.164,.577)),6.,4),
+     # Official ROG-Strix-Z790-A-Gaming.png: the raised right tab starts
+     # outside the DIMM row, not beneath its four sockets. Fractions are an
+     # original photo reference, not CAD/manufacturing coordinates. Preserve
+     # the main strip, overall envelope and every CPU/DIMM anchor.
+     _cover('m2-upper',((.164,.506),(.902,.506),(.920,.486),(.974,.486),(.974,.549),(.922,.577),(.164,.577)),6.,4),
      _cover('chipset',((.607,.618),(.979,.605),(.979,.779),(.724,.813),(.424,.813)),7.,5),
      _cover('m2-middle',_rect(.631,.790,.971,.837),5.,3),
      _cover('m2-lower',((.163,.839),(.974,.839),(.974,.905),(.940,.925),(.163,.925)),6.,4)),

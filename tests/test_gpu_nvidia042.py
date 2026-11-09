@@ -73,8 +73,9 @@ QtObject {
         source=NVIDIA[id];a=appearance_for('gpu',source[-1][0])
         return {**a,'design_id':id,'model_id':id,'fan_count':a['visible_fan_count'],'icon_set':'miniature','ink':'#40505e'}
 
-    def test_exact_ninety_two_skus_and_safe_profile_lookup(self):
-        self.assertEqual(len(self.rows),92);self.assertEqual(set(self.rows),set(NVIDIA))
+    def test_exact_ninety_three_skus_and_safe_profile_lookup(self):
+        self.assertEqual(len(self.rows),93);self.assertEqual(set(self.rows),set(NVIDIA))
+        self.assertIn('gigabyte-fx5200-n52128d-rev10-reference',self.rows)
         for id in NVIDIA:
             self.assertEqual(self.call('row',self.appearance(id)),self.rows[id])
         valid=self.appearance(next(iter(NVIDIA)))
@@ -96,7 +97,8 @@ QtObject {
             self.assertFalse(self.call('initialized'))
         self.assertEqual(self.call('row',valid)['profile_ref'],valid['model_id'])
         self.assertTrue(self.call('initialized'))
-        self.assertEqual(len(self.rows),92)
+        self.assertEqual(len(self.rows),93)
+        self.assertIn('gigabyte-fx5200-n52128d-rev10-reference',self.rows)
 
     def test_every_trace_is_an_existing_original_front_facet_not_io_or_rotor(self):
         numbers=lambda d:list(map(float,re.findall(NUMBER,d)))
@@ -108,7 +110,16 @@ QtObject {
                 self.assertEqual(row['profile_ref'],id)
                 self.assertEqual(row['series_id'],state['series_id'])
                 self.assertEqual(row['recipe'],self.boards[id]['recipe'])
-                self.assertGreaterEqual(len(row['traces']),2);self.assertLessEqual(len(row['traces']),6)
+                if id in ('msi-n480gtx-m2d15','gigabyte-gtx460-oc-1g-rev1'):
+                    # These observed faces own their native semantic bank/body;
+                    # repeating old generic contours would draw a second grid.
+                    self.assertIs(row.get('inline_observed_face'),True)
+                    self.assertEqual(row['traces'],[])
+                    self.assertTrue(original['variant'])
+                else:
+                    self.assertGreaterEqual(len(row['traces']),2)
+                    self.assertNotIn('inline_observed_face',row)
+                self.assertLessEqual(len(row['traces']),6)
                 nodes=[n for n in ET.fromstring('<g>'+original['front']+'</g>').iter() if n.tag in shapes]
                 prefix=('HardwareBoardDesigns.variantFace:'+row['recipe'] if original['variant'] else 'HardwareSeriesShapes.face:'+row['series_id'])
                 seen=set()

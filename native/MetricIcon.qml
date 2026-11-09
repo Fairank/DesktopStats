@@ -104,8 +104,10 @@ Item {
     // A local decorative stress response: temperature and utilisation remain
     // independent real channels. Missing temperature never invents a hot reading.
     readonly property real processorLoadPressure:processorGlyph && compositeActive && loadActive?displayedLoad:0
-    readonly property var processorModelPackage: modelMode && name==="cpu" && hardwareAppearance && hardwareAppearance.cpu_package
-        ? CpuPackages.profile(hardwareAppearance.cpu_package.id) : null
+    readonly property string processorModelPackageId: modelMode && name==="cpu" && hardwareAppearance && hardwareAppearance.cpu_package
+        && typeof hardwareAppearance.cpu_package.id==="string" ? hardwareAppearance.cpu_package.id : ""
+    readonly property var processorModelPackage: processorModelPackageId!==""
+        ? CpuPackages.profile(processorModelPackageId) : null
     readonly property real processorWarmth:animationRunning && processorGlyph
         ?Math.max(thermalContext?thermalArcStrength:0,Math.max(0,(processorLoadPressure-.5)*2)):0
     readonly property var processorWarmColors:darkSurface

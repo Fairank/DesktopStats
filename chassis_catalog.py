@@ -142,6 +142,7 @@ _CASES = (
           ("https://www.asus.com/motherboards-components/cases/tuf-gaming/tuf-gaming-gt502/techspec/",),
           ("panoramic_glass",),
           (_mount("top", 3, 120), _mount("top", 2, 140), _mount("side", 3, 120),
+           _mount("bottom", 3, 120),
            _mount("rear", 1, 120))),
     _case("cooler-master-nr200p-v2", "Cooler Master NR200P V2 (TG)", "Cooler Master", 185, 292, 372,
           "compact", "solid", "glass", "mesh", ("Mini-ITX",), None,

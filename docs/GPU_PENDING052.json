@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "evidence_date": "2026-11-09",
+  "scope": "GPU叶型完整证据待核清单；不表示这些型号没有参考图形，也不表示未知转速可以转动。",
+  "whole_card_pending_count": 20,
+  "partial_card_count": 3,
+  "new_confirmed_counts": 0,
+  "all_complete": false,
+  "native": false,
+  "interpretation": {
+    "null_count": "该扇叶数未确认，不能按系列或邻近修订补数。",
+    "count_accuracy": "已知数值依据可见叶面/叶尖照片复核；不宣称隐藏根连接、CAD或制造尺寸已测量。",
+    "motion_policy": "仅已核叶型可在有效新鲜转速且许可门禁通过时转动；零值、过期、无许可或未知转速静止，未知叶型始终不因整卡聚合RPM获准。",
+    "inventory_scope": "只列本轮20个exact待核型号，不代表无限市场目录已覆盖；不计入新增产品或新增叶数。"
+  },
+  "records": [
+    {
+      "id": "gigabyte-aorus-4090-master",
+      "label": "GIGABYTE AORUS GeForce RTX 4090 MASTER 24G",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "stopped_photo_edges_ambiguous",
+      "evidence_gap": "三扇停止照片能见叶面，但宽叶横筋、反光和叶缘尚未逐片一致闭合。",
+      "next_evidence_needed": "exact RTX4090 MASTER 24G更高有效轮径的停止正视图或可复核的第二角度，逐片确认叶面和叶尖。",
+      "primary_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N4090AORUS-M-24GD"
+      ]
+    },
+    {
+      "id": "leadtek-hurricane-4090-24g",
+      "label": "Leadtek WinFast GeForce RTX 4090 HURRICANE 24GB",
+      "whole_card_pending": true,
+      "current_whole_partial": "partial",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        9,
+        null,
+        9
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "center_cover_occlusion",
+      "evidence_gap": "两外扇9片已确认；中间X形壳遮挡叶面和内缘，不能沿用外扇数量。",
+      "next_evidence_needed": "exact RTX4090 HURRICANE中扇无遮挡的官方拆解、服务图或停止正视图。",
+      "primary_urls": [
+        "https://www.leadtek.com/eng/news/product_news_detail/1693"
+      ]
+    },
+    {
+      "id": "inno3d-ichill-x4-3080",
+      "label": "INNO3D GeForce RTX 3080 iCHILL X4",
+      "whole_card_pending": true,
+      "current_whole_partial": "partial",
+      "physical_fan_count": 4,
+      "per_fan_blade_counts": [
+        11,
+        11,
+        11,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "three_front_confirmed_side_occluded",
+      "evidence_gap": "2020版RTX3080 iCHILL X4三前扇各11片可见叶面已复核；第四侧扇被轮毂和外壳遮挡，完整叶数与机械姿态未核，3D未放置该侧扇。",
+      "next_evidence_needed": "同一2020版RTX3080 X4侧扇完整停止图与可定位姿态；不外推12GB、Ti、3090或其他修订。",
+      "primary_urls": [
+        "https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4",
+        "https://www.nvidia.com/en-us/geforce/news/rtx-3080-3090-custom-card-roundup/",
+        "https://images.nvidia.com/aem-dam/Solutions/geforce/news/rtx-3080-3090-custom-card-roundup/Inno3D-GeForce-RTX-3080-ICHILL-X4-Photo-002.png"
+      ],
+      "per_fan_order": [
+        "front_left",
+        "front_center",
+        "front_right",
+        "side_fourth"
+      ],
+      "placed_front_fan_count": 3,
+      "unplaced_unknown_fan_count": 1
+    },
+    {
+      "id": "gigabyte-gaming-5070oc",
+      "label": "GIGABYTE GeForce RTX 5070 GAMING OC 12G",
+      "whole_card_pending": true,
+      "current_whole_partial": "partial",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        null,
+        7,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "outer_fans_motion_blurred",
+      "evidence_gap": "中扇7片已确认；exact官方图的两外扇有运动模糊，技术示意视频不能补齐实物叶数。",
+      "next_evidence_needed": "GV-N5070GAMING OC-12GD两外扇完整、停止且无遮挡的官方原图，分别闭合计数。",
+      "primary_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N5070GAMING-OC-12GD",
+        "https://store.aorus.com/geforce-rtx-5070-gaming-oc-12g-graphics-card/"
+      ]
+    },
+    {
+      "id": "zotac-airo-4080super",
+      "label": "ZOTAC GAMING GeForce RTX 4080 SUPER AMP Extreme AIRO",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "exact_documents_media_unavailable",
+      "evidence_gap": "官方产品与册子绑定ZT-D40820B-10P；高清图库/册子图尚未成功取得，小幅斜视包装图不足逐扇计数。",
+      "next_evidence_needed": "exact 10P AMP Extreme AIRO三扇停止原图；不借非SUPER、非Extreme AMP或5080叶型。",
+      "primary_urls": [
+        "https://www.zotac.com/sg/product/graphics_card/zotac-gaming-geforce-rtx-4080-super-amp-extreme-airo-16gb-gddr6x",
+        "https://www.zotac.com/download/mediadrivers/External/GraphicsCard/4080SUPER/Brochure/ZT-D40820B-10P-brochure.pdf"
+      ]
+    },
+    {
+      "id": "zotac-trinity-4080super",
+      "label": "ZOTAC GAMING GeForce RTX 4080 SUPER Trinity Black Edition",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "exact_documents_media_unavailable",
+      "evidence_gap": "官方产品与册子绑定ZT-D40820D-10P Black Edition；尚无可复核的新高清前图。",
+      "next_evidence_needed": "exact 10P Black Edition三扇停止原图；不借White OC、AMP、非SUPER或SOLID。",
+      "primary_urls": [
+        "https://www.zotac.com/jp/product/graphics_card/zotac-gaming-geforce-rtx-4080-super-trinity-black-edition-16gb-gddr6x",
+        "https://www.zotac.com/download/mediadrivers/External/GraphicsCard/4080SUPER/Brochure/ZT-D40820D-10P-brochure.pdf"
+      ]
+    },
+    {
+      "id": "nvidia-gtx780ti-reference",
+      "label": "NVIDIA GeForce GTX 780 Ti Reference",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "blower_individual_vanes_unclosed",
+      "evidence_gap": "原厂正视图可见整个离心叶缘环带，狭叶逐片编号与第二角复核尚未完成。",
+      "next_evidence_needed": "exact GTX780Ti公版完整狭叶逐片根尖核对或官方风扇图；不借其他公版芯片计数。",
+      "primary_urls": [
+        "https://www.nvidia.com/en-us/geforce/graphics-cards/geforce-gtx-780-ti/product-images/"
+      ]
+    },
+    {
+      "id": "msi-n480gtx-m2d15",
+      "label": "MSI N480GTX-M2D15",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "blower_cover_occlusion",
+      "evidence_gap": "单离心入口已确认；轮毂与罩缘遮住狭叶连接。银色散热格和外露管弧不是叶轮。",
+      "next_evidence_needed": "exact N480GTX-M2D15无遮挡离心轮正视或服务图；不借Lightning或其他公版。",
+      "primary_urls": [
+        "https://www.msi.com/Graphics-Card/N480GTXM2D15/Gallery",
+        "https://storage-asset.msi.com/datasheet/vga/global/N480GTXM2D15.pdf"
+      ]
+    },
+    {
+      "id": "gigabyte-gtx460-oc-1g-rev1",
+      "label": "GIGABYTE GV-N460OC-1GI Rev. 1.0",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 2,
+      "per_fan_blade_counts": [
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "revision_bound_photo_too_small",
+      "evidence_gap": "Rev1.0官方照片可绑定黑壳和蓝PCB，但双扇有效像素小，叶面反光与后方鳍片不能稳定分离。",
+      "next_evidence_needed": "Rev1.0板标/包装绑定的停止正视大图，两扇分别确认；不借Rev2.0/3.0。",
+      "primary_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI"
+      ]
+    },
+    {
+      "id": "msi-n260gtx-lightning",
+      "label": "MSI N260GTX Lightning",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 2,
+      "per_fan_blade_counts": [
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "leaf_reflection_fin_ambiguity",
+      "evidence_gap": "两轴流、银色拉丝盖板和外露热管可见；金属反光与后方鳍片仍妨碍叶片闭环。热管数量不等于叶数。",
+      "next_evidence_needed": "exact非Black Edition两轮高像素停止图和逐叶复核。",
+      "primary_urls": [
+        "https://storage-asset.msi.com/datasheet/vga/global/N260GTX_Lightning.pdf"
+      ]
+    },
+    {
+      "id": "msi-nx8800gts-320-oc",
+      "label": "MSI NX8800GTS-T2D320E-HD-OC",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "blower_photo_small_or_occluded",
+      "evidence_gap": "exact旧款离心轮图的帽与罩边遮挡根部，狭叶分离不足。",
+      "next_evidence_needed": "NX8800GTS-T2D320E-HD-OC完整离心轮官方图；不借640MB、512MB或G92改款。",
+      "primary_urls": [
+        "https://storage-asset.msi.com/datasheet/vga/global/NX8800GTST2D320EHDOC.pdf"
+      ]
+    },
+    {
+      "id": "gigabyte-fx5200-n52128d",
+      "label": "GIGABYTE GV-N52128D GeForce FX 5200",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "unrevisioned_source_variant_conflict",
+      "evidence_gap": "未标revision的base营销图与明确Rev1.0手册的帽色/风扇版本不同；独立Rev1.0参考型号的7叶不能转移到base。",
+      "next_evidence_needed": "厂商明确绑定未标revision销售SKU与PCB/散热器版本的资料。",
+      "primary_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N52128D"
+      ]
+    },
+    {
+      "id": "msi-hd4870-t2d512-oc-reference",
+      "label": "MSI Radeon HD 4870 R4870-T2D512-OC Reference",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "blower_photo_small_and_oblique",
+      "evidence_gap": "exact册子照片中离心轮小且倾斜，内帽与罩边遮挡狭叶。",
+      "next_evidence_needed": "exact R4870-T2D512-OC无遮挡或高像素正视；不借1GB或其他厂商版本。",
+      "primary_urls": [
+        "https://storage-asset.msi.com/datasheet/vga/global/R4870T2D512OC.pdf"
+      ]
+    },
+    {
+      "id": "msi-hd5870-pm2d1g-reference",
+      "label": "MSI Radeon HD 5870 R5870-PM2D1G Reference",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "blower_oblique_occlusion",
+      "evidence_gap": "官方照片可见红色离心轮的一部分，另一侧受透视和罩缘遮挡，未能闭合总数。",
+      "next_evidence_needed": "exact R5870-PM2D1G完整正视离心轮；不借Lightning或后代参考卡。",
+      "primary_urls": [
+        "https://storage-asset.msi.com/datasheet/vga/ua/R5870PM2D1G.pdf"
+      ]
+    },
+    {
+      "id": "asus-strix-r9fury-dc3-4g",
+      "label": "ASUS STRIX Radeon R9 Fury DC3 4G GAMING",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "legacy_primary_images_unavailable",
+      "evidence_gap": "官方报道和产品表绑定exact三扇DirectCU III WingBlade；旧报道图片不可用，产品表小图不足计数。",
+      "next_evidence_needed": "STRIX-R9FURY-DC3-4G-GAMING三扇高清停止图；不借Fury X、Nano、390或980Ti。",
+      "primary_urls": [
+        "https://rog.asus.com/articles/hands-on/unboxing-strix-r9-fury/",
+        "https://rog.asus.com/es/articles/article-gallery/asus-strix-r9-fury/",
+        "https://www.asus.com/event/2016/productguide/my/PG-VGA-April.pdf"
+      ]
+    },
+    {
+      "id": "msi-rx480-8g-reference",
+      "label": "MSI Radeon RX 480 8G Reference",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 1,
+      "per_fan_blade_counts": [
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "blower_oblique_occlusion",
+      "evidence_gap": "exact官方离心轮图有透视与罩边遮挡；帽上的红色标识不能据此认定旋转外连环。",
+      "next_evidence_needed": "exact RX480 8G完整停止离心轮正视图或服务图。",
+      "primary_urls": [
+        "https://storage-asset.msi.com/datasheet/vga/global/AMD-Radeon-RX-480-8G.pdf"
+      ]
+    },
+    {
+      "id": "acer-bifrost-a770-16g-oc",
+      "label": "Acer Predator BiFrost Intel Arc A770 OC 16GB",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 2,
+      "per_fan_blade_counts": [
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "mixed_fan_illustration_insufficient",
+      "evidence_gap": "轴流与离心混合结构已确认；官方技术示意的透明/气流层不能闭合两扇实物计数。笔记本Aeroblade资料不适用。",
+      "next_evidence_needed": "exact Predator BiFrost A770 OC 16GB停止实物前图及离心轮另一角。",
+      "primary_urls": [
+        "https://www.acer.com/us-en/predator/desktops-and-all-in-ones/components/predator-bifrost-intel-arc-a770-oc"
+      ]
+    },
+    {
+      "id": "zotac-infinity-5080-10a",
+      "label": "ZOTAC RTX 5080 AMP Extreme INFINITY (10A)",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 3,
+      "per_fan_blade_counts": [
+        null,
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "exact_revision_media_unavailable",
+      "evidence_gap": "exact ZT-B50800B-10A计数仍未知。官方BladeLink文字不是叶数，JP 10P照片不能证明10A叶型或连接组。",
+      "next_evidence_needed": "exact 10A三扇停止高清图与BladeLink实际连接关系；不得借10P九叶。",
+      "primary_urls": [
+        "https://www.zotac.com/download/mediadrivers/External/GraphicsCard/5080/Brochure/ZT-B50800B-10A-brochure.pdf"
+      ]
+    },
+    {
+      "id": "gigabyte-gtx460-oc-1g-rev2",
+      "label": "GIGABYTE GV-N460OC-1GI Rev.2.0",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 2,
+      "per_fan_blade_counts": [
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "revision_bound_photo_too_small",
+      "evidence_gap": "Rev2.0官方包装/卡图的轮径小、斜视且反光混叠；与Rev1.0/3.0保持隔离。",
+      "next_evidence_needed": "Rev2.0板标/包装绑定的双扇停止正视大图。",
+      "primary_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI-rev-20"
+      ]
+    },
+    {
+      "id": "gigabyte-gtx460-oc-1g-rev3",
+      "label": "GIGABYTE GV-N460OC-1GI Rev.3.0",
+      "whole_card_pending": true,
+      "current_whole_partial": "whole_pending_no_confirmed_counts",
+      "physical_fan_count": 2,
+      "per_fan_blade_counts": [
+        null,
+        null
+      ],
+      "full_fan_profile_render_ready": false,
+      "primary_photo_status": "revision_bound_primary_photo_unavailable",
+      "evidence_gap": "Exact Rev3.0仍缺可复核清晰前图及板标；共享手册不能证明与Rev1.0/2.0散热器或尺寸相同。",
+      "next_evidence_needed": "Rev3.0明确板标、停止前图与包络资料。",
+      "primary_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI-rev-30"
+      ]
+    }
+  ]
+}

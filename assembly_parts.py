@@ -5,6 +5,7 @@ from functools import lru_cache
 from assembly_config import CABLE_COLORS,validate_assembly
 
 MOUNT_LABELS={'front':'前部','top':'顶部','rear':'后部','bottom':'底部','side':'侧部'}
+FAN_MOUNT_LABELS={**MOUNT_LABELS,'above_psu_shroud':'电源罩上方'}
 
 
 @lru_cache(maxsize=1)
@@ -52,6 +53,8 @@ def choices(translate=lambda text:text):
         storage=empty('不放置存储设备')+[dict(row,label=row['label']+(' · '+translate('外观待核实') if (get_component(row['id']) or {}).get('appearance_unverified') else '')) for row in components('storage')],
         expansion=empty('不放置扩展卡')+list(components('expansion')),
         mounts=[dict(id=key,label=translate(label)) for key,label in MOUNT_LABELS.items()],
+        fan_mounts=[dict(id=key,label=translate(label)) for key,label in FAN_MOUNT_LABELS.items()],
+        radiator_mounts=[dict(id=key,label=translate(label)) for key,label in MOUNT_LABELS.items()],
         colors=[dict(id=key,label=translate(label)) for key,label in
             (('black','黑色'),('white','白色'),('red','红色'),('blue','蓝色'))],
         motion=[dict(id='measured',label=translate('使用实测转速')),
@@ -105,11 +108,21 @@ def fit_messages(spec,metadata):
         'unknown_component_model':'部分自选型号尚未收录，未放入模型。',
         'unsupported_radiator_mount':'所选机箱安装位不支持这款冷排。',
         'radiator_exceeds_mount_plane':'冷排超出所选安装面的参考范围。',
+        'unsupported_radiator_size_for_case':'所选冷排规格不在机箱厂商列出的该位置支持范围，整套散热组件未放入。',
+        'radiator_width_exceeds_case_limit':'冷排宽度超过机箱厂商列出的该位置上限，整套散热组件未放入。',
+        'radiator_memory_height_exceeds_case_limit':'当前参考内存高度超过机箱厂商列出的顶置冷排上限，整套散热组件未放入；内存型号与尺寸保持原样。',
         'radiator_fan_stack_exceeds_case_clearance':'冷排与风扇的总厚度超出机箱该安装位的官方上限，请选择其它安装位或更薄的组合。',
         'radiator_occupies_mount':'冷排已占用该安装面，请移除重复的机箱风扇。',
         'unsupported_fan_mount':'所选风扇尺寸或数量超出机箱已核安装位。',
         'fans_exceed_mount_plane':'风扇超出所选安装面的参考范围。',
         'case_fan_clearance_conflict':'机箱风扇与显卡或其它已选部件的参考空间冲突，整组风扇未放入；请调整安装位或配件。',
+        'case_fan_mount_reference_unavailable':'此安装位的参考安装面尚未确认，整组风扇未放入。',
+        'case_fan_psu_length_limit':'所选电源长度超出此风扇组合的机箱厂商条件，整组风扇未放入。',
+        'case_fan_depth_limit':'所选风扇厚度超过机箱厂商列出的该位置上限，整组风扇未放入。',
+        'air_cooler_height_exceeds_case':'所选风冷散热器高度超过机箱厂商上限，整套散热器未放入；型号和尺寸保持原样。',
+        'air_cooler_case_reference_unavailable':'此机箱的风冷限高参考失配，整套散热器未放入。',
+        'air_cooler_height_source_conflict':'厂商风冷限高资料有差异，当前无法确认这套散热器的安装，整套暂未放入。',
+        'case_cover_reference_clearance_unverified':'前置风扇与当前电源罩参考模型相交，整组暂未放入。机箱官方支持规格仍保留，需继续核实罩板位置。',
         'unsupported_psu_form':'所选电源规格尚不适配此机箱。',
         'no_expansion_slot':'所选扩展卡没有可用插槽。',
         'expansion_slot_obstructed':'所选扩展卡没有可用插槽。',

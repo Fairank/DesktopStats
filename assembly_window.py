@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabe
 
 from assembly_profiles import bake_profiles
 from assembly_config import HARDWARE_ICON_STYLES,detail_choices,style_choices
-from assembly_inspection import COMPONENT_LABELS,snapshot as inspection_snapshot
+from assembly_inspection import COMPONENT_LABELS,part_family,snapshot as inspection_snapshot
 from stats_config import ASSETS
 from top_bar_feedback import GPU_FAN_MAX_AGE
 from assembly_effects import component_family
@@ -128,7 +128,7 @@ class AssemblyWindow(QWidget):
             self.part_style_choice.addItem(controller.tr('跟随默认外观') if row['id']=='follow' else row['label'],row['id'])
         self.part_style_choice.setAccessibleName(controller.tr('此部件外观'))
         inspector_layout.addWidget(QLabel(controller.tr('此部件外观')));inspector_layout.addWidget(self.part_style_choice)
-        inspector_layout.addWidget(QLabel(controller.tr('显卡插拔演示')))
+        self.gpu_assembly_heading=QLabel(controller.tr('显卡插拔演示'));inspector_layout.addWidget(self.gpu_assembly_heading)
         gpu_controls=QHBoxLayout()
         self.gpu_remove=QPushButton(controller.tr('拔出查看'));self.gpu_remove.setObjectName('assemblyGpuRemove')
         self.gpu_insert=QPushButton(controller.tr('插回插槽'));self.gpu_insert.setObjectName('assemblyGpuInsert')
@@ -138,6 +138,29 @@ class AssemblyWindow(QWidget):
         self.gpu_assembly_hint.setStyleSheet('font-size:11px;');inspector_layout.addWidget(self.gpu_assembly_hint)
         self.gpu_remove.clicked.connect(lambda:self._preview_gpu_insertion(True))
         self.gpu_insert.clicked.connect(lambda:self._preview_gpu_insertion(False))
+        self.part_assembly_heading=QLabel(controller.tr('部件插拔'));inspector_layout.addWidget(self.part_assembly_heading)
+        part_controls=QHBoxLayout()
+        self.part_remove=QPushButton(controller.tr('取出查看'));self.part_remove.setObjectName('assemblyPartRemove')
+        self.part_insert=QPushButton(controller.tr('插回原位'));self.part_insert.setObjectName('assemblyPartInsert')
+        part_controls.addWidget(self.part_remove);part_controls.addWidget(self.part_insert);inspector_layout.addLayout(part_controls)
+        self.part_retention=QCheckBox(controller.tr('暂时隐藏固定扣具'));self.part_retention.setObjectName('assemblyPartRetentionHidden')
+        self.part_retention.setToolTip(controller.tr('仅用于检视；尚未模拟锁扣、螺丝的开合。'));inspector_layout.addWidget(self.part_retention)
+        self.part_mount_release=QCheckBox(controller.tr('参考解除安装固定与连接'));self.part_mount_release.setObjectName('assemblyPartMountReleased')
+        self.part_mount_release.setToolTip(controller.tr('仅在当前检视中确认手动解除固定并隐藏已核连接线；没有模拟真实螺丝和插头操作。'))
+        inspector_layout.addWidget(self.part_mount_release)
+        self.part_assembly_hint=QLabel();self.part_assembly_hint.setWordWrap(True);self.part_assembly_hint.setTextFormat(Qt.PlainText)
+        self.part_assembly_hint.setStyleSheet('font-size:11px;');inspector_layout.addWidget(self.part_assembly_hint)
+        visibility_row=QHBoxLayout()
+        self.part_hidden=QCheckBox(controller.tr('暂时隐藏此部件'));self.part_hidden.setObjectName('assemblyPartHidden')
+        self.part_hidden.setToolTip(controller.tr('只改变当前检视，不删除模型，也不改变硬件监控。'))
+        self.restore_hidden=QPushButton(controller.tr('全部显示'));self.restore_hidden.setObjectName('assemblyRestoreHidden')
+        visibility_row.addWidget(self.part_hidden);visibility_row.addWidget(self.restore_hidden);inspector_layout.addLayout(visibility_row)
+        self.part_remove.clicked.connect(lambda:self._preview_part_motion(True))
+        self.part_insert.clicked.connect(lambda:self._preview_part_motion(False))
+        self.part_retention.toggled.connect(self._toggle_retention)
+        self.part_mount_release.toggled.connect(self._toggle_mount_release)
+        self.part_hidden.toggled.connect(self._toggle_part_hidden)
+        self.restore_hidden.clicked.connect(self._restore_hidden)
         self.reference_choice=QComboBox();self.reference_choice.setObjectName('assemblyReferenceChoice')
         for label,key in (("载入参考装机",""),("风冷参考装机","air"),("一体水冷参考装机","aio"),("分体水冷参考装机","loop")):
             self.reference_choice.addItem(controller.tr(label),key)
@@ -184,6 +207,9 @@ class AssemblyWindow(QWidget):
         gpu_signal=getattr(self.viewport,'gpuAssemblyChanged',None)
         if gpu_signal is not None:
             gpu_signal.connect(self._sync_gpu_assembly);self._connections.append((gpu_signal,self._sync_gpu_assembly))
+        part_signal=getattr(self.viewport,'partAssemblyChanged',None)
+        if part_signal is not None:
+            part_signal.connect(self._sync_part_assembly);self._connections.append((part_signal,self._sync_part_assembly))
         for signal,slot in ((controller.assemblyChanged,self._controller_changed),
                             (controller.dataChanged,self.update_readings),
                             (controller.motionChanged,self.update_readings)):
@@ -291,6 +317,7 @@ class AssemblyWindow(QWidget):
         self._update_status()
         self._update_inspection()
         self._sync_gpu_assembly()
+        self._sync_part_assembly()
 
     def _gpu_assembly_state(self):
         method=getattr(self.viewport,'gpu_insertion_state',None)
@@ -298,6 +325,11 @@ class AssemblyWindow(QWidget):
         if (self._renderer_error or not self.controller.motionEnabled or self.property('modelMotionAllowed') is False):
             state=dict(state,available=False,reason='动效已关闭。')
         return state
+
+    def _part_family(self,name=None):
+        scene=getattr(self.viewport,'scene',None)
+        return part_family(self.selected_component if name is None else name,
+                           getattr(scene,'metadata',None))
 
     def _gpu_assembly_reason(self,state):
         reasons={
@@ -317,6 +349,8 @@ class AssemblyWindow(QWidget):
             '请先关闭展开组件，再演示显卡插拔。':'请先关闭展开组件，再演示显卡插拔。',
             '请先切换到整机或显卡视图。':'请先切换到整机或显卡视图。',
             '动效已关闭。':'动效已关闭。',
+            'return_other_part_first':'请先把当前部件插回原位。',
+            'target_hidden':'部件已暂时隐藏，请先恢复显示。',
         }
         return self.controller.tr(reasons.get(state.get('reason'),'当前模型尚未准备好。'))
 
@@ -324,6 +358,8 @@ class AssemblyWindow(QWidget):
         if self._closing:return
         state=self._gpu_assembly_state();enabled=state.get('available') is True and not state.get('active')
         if hasattr(self,'gpu_remove'):
+            visible=self._part_family() in ('all','gpu')
+            for control in (self.gpu_assembly_heading,self.gpu_remove,self.gpu_insert,self.gpu_assembly_hint):control.setVisible(visible)
             self.gpu_remove.setEnabled(enabled and state.get('progress',0.)<1.)
             self.gpu_insert.setEnabled(enabled and state.get('progress',0.)>0.)
             note=(self.controller.tr('沿插槽方向移动；未模拟螺丝、卡扣及电源线拔插。')
@@ -332,15 +368,106 @@ class AssemblyWindow(QWidget):
         if hasattr(self,'status'):self._update_status()
 
     def _preview_gpu_insertion(self,removed):
-        if self._closing:return False
+        if not self._can_interact():return False
         if not self._gpu_assembly_state().get('available'):
             self._sync_gpu_assembly();return False
         method=getattr(self.viewport,'preview_gpu_insertion',None)
         accepted=bool(callable(method) and method(removed))
         self._sync_gpu_assembly();return accepted
 
+    def _part_assembly_state(self):
+        method=getattr(self.viewport,'part_motion_state',None)
+        state=method() if callable(method) else dict(available=False,reason='choose_cpu_or_memory',active=False,progress=0.,hidden_parts=())
+        if self._renderer_error or not self.controller.motionEnabled or self.property('modelMotionAllowed') is False:
+            state=dict(state,available=False,reason='motion_disabled')
+        return state
+
+    def _part_assembly_reason(self,state):
+        labels={
+            'choose_cpu_or_memory':'选择处理器、单条内存或机箱风扇，查看装配方向。',
+            'choose_individual_case_fan':'请先选择一把机箱风扇。',
+            'case_fan_release_required':'请先确认参考解除这把风扇的安装固定与已核连接。',
+            'case_fan_mount_unverified':'尚未确认此风扇的安装面，暂不演示移动。',
+            'mount_plane_frame_missing':'此机箱缺少已记录的安装面信息，暂不演示移动。',
+            'fan_connections_unverified':'这把风扇的连接线尚未确认，暂不演示移动。',
+            'radiator_fan_internal_harness_unverified':'冷排风扇的内部线束尚未确认，暂不单独移动。',
+            'choose_individual_part':'请先选择一条内存。',
+            'target_hidden':'部件已暂时隐藏，请先恢复显示。',
+            'cooler_must_be_hidden_or_moved_first':'散热器挡住处理器，请先在检视中暂时隐藏散热器。',
+            'motion_path_blocked':'移动路线被其他部件挡住，请先检查或暂时隐藏遮挡部件。',
+            'open_retention_first':'请先在检视中隐藏固定扣具。',
+            'close_exploded_view':'请先关闭展开组件。',
+            'motion_disabled':'动效已关闭。',
+            'return_other_part_first':'请先把当前部件插回原位。',
+            'focus_selected_part':'请切换到整机或当前部件视图。',
+            'insufficient_case_clearance':'机箱内部空间不足，暂不演示这条移动路线。',
+            'sodimm_release_orientation_unverified':'尚未核实此内存插槽的开启角度。',
+            'clearance_budget_exceeded':'此组合的移动空间尚未确认，暂不演示。',
+            'connection_ownership_unverified':'尚未确认此部件的连接线，暂不演示。',
+        }
+        return self.controller.tr(labels.get(state.get('reason'),'此部件的装配方向尚未确认。'))
+
+    def _sync_part_assembly(self):
+        if self._closing:return
+        state=self._part_assembly_state();kind=self._part_family()
+        if hasattr(self,'part_remove'):
+            visible=kind in ('cpu','memory','fans')
+            for control in (self.part_assembly_heading,self.part_remove,self.part_insert,self.part_retention,self.part_assembly_hint):control.setVisible(visible)
+            self.part_retention.setVisible(visible and kind!='fans')
+            self.part_mount_release.setVisible(visible and kind=='fans')
+            allowed=state.get('allowed_mount_release_part_ids',())
+            released=self.selected_component in state.get('released_mounts',())
+            self.part_mount_release.blockSignals(True);self.part_mount_release.setChecked(released);self.part_mount_release.blockSignals(False)
+            self.part_mount_release.setEnabled(self.selected_component in allowed and not state.get('active')
+                and state.get('reason') not in ('motion_disabled','return_other_part_first','close_exploded_view'))
+            enabled=state.get('available') is True and not state.get('active')
+            self.part_remove.setEnabled(enabled and state.get('progress',0.)<1.)
+            self.part_insert.setEnabled(enabled and state.get('progress',0.)>0.)
+            self.part_retention.blockSignals(True);self.part_retention.setChecked(state.get('retention_hidden') is True);self.part_retention.blockSignals(False)
+            self.part_retention.setEnabled(bool(state.get('allowed_opened_mesh_names')) and not state.get('active'))
+            hidden=state.get('hidden_parts',())
+            self.part_hidden.blockSignals(True);self.part_hidden.setChecked(self.selected_component in hidden);self.part_hidden.blockSignals(False)
+            self.part_hidden.setEnabled(self.selected_component!='all' and callable(getattr(self.viewport,'set_part_hidden',None)))
+            self.restore_hidden.setEnabled(bool(hidden) or state.get('retention_hidden') is True or bool(state.get('released_mounts')))
+            if state.get('available'):
+                distance=state.get('distance_mm')
+                note=self.controller.tr('仅向机箱内侧脱离安装面；固定与接线仅为参考解除，不代表完整出箱。'
+                    if kind=='fans' else '仅沿插槽方向分离；未模拟锁扣和螺丝，不代表完整出箱。')
+                if type(distance) in (int,float):note+=f' {distance:.1f} mm'
+            else:note=self._part_assembly_reason(state)
+            if self.part_assembly_hint.text()!=note:self.part_assembly_hint.setText(note)
+        if hasattr(self,'status'):self._update_status()
+
+    def _preview_part_motion(self,removed):
+        if not self._can_interact() or not self._part_assembly_state().get('available'):return False
+        method=getattr(self.viewport,'preview_part_motion',None)
+        result=bool(callable(method) and method(removed));self._sync_part_assembly();return result
+
+    def _toggle_part_hidden(self,enabled):
+        method=getattr(self.viewport,'set_part_hidden',None)
+        result=bool(self._can_interact() and callable(method) and method(self.selected_component,enabled))
+        self._sync_part_assembly();self._sync_gpu_assembly();return result
+
+    def _restore_hidden(self):
+        method=getattr(self.viewport,'restore_hidden_parts',None)
+        result=bool(self._can_interact() and callable(method) and method())
+        self._sync_part_assembly();self._sync_gpu_assembly();return result
+
+    def _toggle_retention(self,enabled):
+        method=getattr(self.viewport,'set_retention_hidden',None)
+        result=bool(self._can_interact() and callable(method) and method(enabled))
+        self._sync_part_assembly();return result
+
+    def _toggle_mount_release(self,enabled):
+        method=getattr(self.viewport,'set_mount_released',None)
+        result=bool(self._can_interact() and callable(method) and method(enabled))
+        self._sync_part_assembly();return result
+
     def _focus_view(self,_index):
-        self.viewport.focus_component(self.focus_choice.currentData());self._sync_gpu_assembly()
+        selected=self.focus_choice.currentData();self.viewport.focus_component(selected)
+        if selected!='all':
+            self._component_selected(selected);self.viewport.select_component(selected)
+        self._sync_gpu_assembly();self._sync_part_assembly()
 
     def _choose_component(self,_index):
         self._component_selected(self.component_choice.currentData())
@@ -348,7 +475,7 @@ class AssemblyWindow(QWidget):
 
     def _component_selected(self,name):
         if self._closing:return
-        name=name if component_family(name) in COMPONENT_LABELS else 'all'
+        name=name if name=='all' or self._part_family(name)!='all' else 'all'
         changed=name!=self.selected_component
         self.selected_component=name
         self.component_choice.blockSignals(True)
@@ -356,6 +483,7 @@ class AssemblyWindow(QWidget):
         self.component_choice.blockSignals(False)
         if changed or self.inspection_state is None:self._update_inspection()
         self._sync_part_style()
+        self._sync_gpu_assembly();self._sync_part_assembly()
 
     def _sync_part_style(self):
         if not self._spec:return
@@ -398,8 +526,14 @@ class AssemblyWindow(QWidget):
 
     def _update_status(self):
         gpu=self._gpu_assembly_state()
+        part=self._part_assembly_state()
         if self._renderer_error:
             text=self.controller.tr("当前环境无法显示三维视图")
+        elif part.get('active'):
+            text=self.controller.tr('部件正在取出（参考）' if part.get('motion_target')==1. else '部件正在插回（参考）')
+        elif part.get('progress',0.)>0:
+            text=self.controller.tr('部件已与安装面分离（参考）；实际监控继续。'
+                if part.get('kind')=='case_fan' else '部件已与插槽分离（参考）；实际监控继续。')
         elif gpu.get('active'):
             text=self.controller.tr('模型正在脱离插槽（演示）' if gpu.get('target')==1. else '模型正在插回插槽（演示）')
         elif gpu.get('progress',0.)>0:
@@ -409,7 +543,7 @@ class AssemblyWindow(QWidget):
                 text=self.controller.tr("动效已关闭")
             elif self._spec['options'].get('fan_motion')=='demo':
                 text=self.controller.tr('参考转动（非实测）')+' · 1200 RPM / 120'
-            elif component_family(self.selected_component)=='cooler' and self._last_cpu_fan.get('available') is True:
+            elif self._part_family()=='cooler' and self._last_cpu_fan.get('available') is True:
                 text='CPU_FAN '+str(round(self._last_cpu_fan['rpm']))+' RPM · '+self.controller.tr('代表通道')
             elif self._last_fan.get('available') is True:
                 text=self.controller.tr("显卡风扇")+" "+str(round(self._last_fan['rpm']))+" RPM"
@@ -461,7 +595,22 @@ class AssemblyWindow(QWidget):
     def showEvent(self,event):
         super().showEvent(event);self.update_readings()
 
+    def _can_interact(self):
+        return (not self._closing and self.isVisible() and not self.isMinimized()
+                and self.property('modelMotionAllowed') is not False)
+
+    def _close_owned_popups(self):
+        # Qt popups are separate top-level surfaces: hiding/minimizing their
+        # owner does not reliably hide them. Close only this window's known
+        # menus/choices, without enumerating desktop windows or polling.
+        menu=getattr(self,'_context_menu',None)
+        if menu is not None:menu.close()
+        for name in ('focus_choice','component_choice','style_choice','detail_choice','part_style_choice','reference_choice'):
+            control=getattr(self,name,None)
+            if isinstance(control,QComboBox):control.hidePopup()
+
     def hideEvent(self,event):
+        self._close_owned_popups()
         self._clock_active(False)
         super().hideEvent(event)
 
@@ -469,7 +618,7 @@ class AssemblyWindow(QWidget):
         super().changeEvent(event)
         if hasattr(self,'viewport'):
             if hasattr(self.viewport,'refresh_visibility'):self.viewport.refresh_visibility()
-            if self.isMinimized():self._clock_active(False)
+            if self.isMinimized():self._close_owned_popups();self._clock_active(False)
             self.update_readings()
 
     def _dispose(self):

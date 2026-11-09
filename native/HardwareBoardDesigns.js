@@ -43,6 +43,12 @@ function colors(state,input) {
     if(row.heatsink_tone==="copper")out.metal="#b9865d"
     else if(row.heatsink_tone==="light")out.metal="#dce2e4"
     if(row.fan_profile)out.fanOverrides=row.fan_profile
+    // Exact old-board photo palettes; do not recolour other dark enclosures.
+    if(state.kind==='gpu' && ['msi-n480gtx-m2d15','gigabyte-gtx460-oc-1g-rev1'].indexOf(state.model_id)>=0) {
+        out.caseBody='#28333d';out.caseTop='#485862';out.caseShade='#1d2932'
+        out.side='#1d2932';out.metal='#bdc5c9';out.edge='#dce4e6';out.rim='#748b99'
+        if(state.model_id==='gigabyte-gtx460-oc-1g-rev1')out.pcb='#386e98'
+    }
     return out
 }
 
@@ -125,6 +131,14 @@ function depth(state,g) {
 function base(state,g,c) {
     var row=profile(state),bus=row && row.host_interface ? row.host_interface.bus:"unknown"
     var x=g.x,y=g.y,b=y+g.h,e=x+g.w,bx=Math.max(.12,x-.74)
+    if(fxAgpSegments(state,g).length) {
+        // Exact exposed FX front owns its three visible contact sections. A
+        // second generic tongue/bar here would paint a fourth connector under
+        // that front. Preserve only the real bracket's reference side plane.
+        return '<g class="hardware-board-base hardware-fx052-bracket">'
+            +path('M'+bx+' '+(y-.55)+'H'+(x+.7)+'V'+(y-.08)+'H'+(bx+.42)+'V'+(b+.52)+'H'+bx+'Z',c.rim)
+            +rect(bx+.14,y+.35,.30,Math.max(.4,g.h-.6),.10,c.metal)+'</g>'
+    }
     // A visible connector tongue, never a fabricated full-length bare board.
     var start=x+g.w*.18,width=g.w*.34
     var length=row && row.dimensions_mm && row.dimensions_mm.length
@@ -156,6 +170,16 @@ function base(state,g,c) {
     for(var f=1;f<18;f++){var fx=x+.55+(g.w-1.1)*f/18;fins+="M"+fx+" "+(b+.06)+"V"+(b+.43)}
     result+=path(fins,"none",c.metal,.095)
     return result+'</g>'
+}
+
+function fxAgpSegments(state,g) {
+    var row=profile(state)
+    if(!row || state.kind!=='gpu' || state.series_id!=='gigabyte_fx5200'
+        || ['gigabyte-fx5200-n52128d','gigabyte-fx5200-n52128d-rev10-reference'].indexOf(state.model_id)<0
+        || !row.host_interface || row.host_interface.bus!=='agp')return []
+    // Manual p5 photograph: three visible sections/two gaps. Their position
+    // is a reference study, not an electrical pin-count or clearance drawing.
+    return [[.385,.525],[.535,.647],[.658,.800]]
 }
 
 function finish(state,g,c) {

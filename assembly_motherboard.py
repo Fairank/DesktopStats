@@ -118,9 +118,9 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     def add(name,vertices,tone,position=(bx,by,bz)):
         if vertices:parts.append(Mesh(name,tuple(vertices),tone,position,'board'))
     def cube(name,size,pos,tone):add(name,box(*size),tone,pos)
-    def plate(name,polygon,depth,tone,outward=0.,holes=()):
+    def plate(name,polygon,depth,tone,outward=0.,holes=(),clip_walls=False):
         vertices=unit_polygon([list(p) for p in polygon],bw,bh)
-        shape=perforated_plate(vertices,holes,depth) if holes else bevel_extrude(vertices,depth,min(.7,depth*.2))
+        shape=perforated_plate(vertices,holes,depth,clip_walls=clip_walls) if holes else bevel_extrude(vertices,depth,min(.7,depth*.2))
         add(name,rotate_vertices(shape,'left'),tone,(bx-outward-depth/2,by,bz))
     # Through holes and annular solder masks remain open in the physical PCB.
     mounts=model['mount_uv']
@@ -132,6 +132,7 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     # Model-specific solid heatsink silhouettes, stepped lips and real grooves.
     for cover in model['heatsinks']:
         is_m2=cover['name'].startswith('m2');name='detail-board-m2-heatsink' if is_m2 else 'board-'+cover['name']+'-heatsink'
+        clip_cover_walls=model['id']=='asus-rog-strix-z790-a-wifi-d4' and cover['name']=='m2-upper'
         depth=cover['depth_mm'];poly=cover['polygon']
         cover_metal=color(cover.get('finish_color'),model['heatsink_color'])
         from assembly_detail import _point_inside
@@ -155,7 +156,7 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         if level!='eco' and cover['grooves'] and not vent:
             u0,u1=min(p[0] for p in poly),max(p[0] for p in poly);v0,v1=min(p[1] for p in poly),max(p[1] for p in poly)
             sample=min(cover['grooves']*(2 if level=='close' else 1),18)
-            recess=min(3.,depth*.42);plate(name,poly,depth-recess,cover_metal,1.,mechanical_holes);channels=list(mechanical_holes)
+            recess=min(3.,depth*.42);plate(name,poly,depth-recess,cover_metal,1.,mechanical_holes,clip_walls=clip_cover_walls);channels=list(mechanical_holes)
             for n in range(sample):
                 along=cover.get('groove_along')
                 if along is None:
@@ -163,6 +164,16 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
                     # supplies a different source-visible groove direction.
                     u=u0+(u1-u0)*(.20+.60*n/max(1,sample-1));v=v0+(v1-v0)*.50
                     cx,cy=(u-.5)*bw,(.5-v)*bh;channel=chamfer_rect(.65,(v1-v0)*bh*.68,.12)
+                    if model['id']=='asus-rog-strix-z790-a-wifi-d4' and cover['name']=='m2-upper':
+                        # The source-observed right step makes the bounding
+                        # rectangle taller than the main strip. Keep each
+                        # illustrative groove inside that real outline; an
+                        # out-of-bounds hole would create a detached metal wall.
+                        physical=unit_polygon([list(p) for p in poly],bw,bh)
+                        for attempt in range(12):
+                            if all(_point_inside((x+cx,y+cy),physical) for x,y in channel):break
+                            channel=tuple((x,y*.8) for x,y in channel)
+                        else:raise ValueError('M2 reference groove cannot fit its physical cover')
                     channels.append(tuple((x+cx,y+cy) for x,y in channel))
                 else:
                     direction=(along[0]*bw,-along[1]*bh);length=math.hypot(*direction)
@@ -179,9 +190,9 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
                                       for a,b in ((-1,-1),(1,-1),(1,1),(-1,1)))
                         if all(_point_inside(p,physical) for p in channel):channels.append(channel);break
                         half*=.80
-            cap=perforated_plate(unit_polygon([list(p) for p in poly],bw,bh),channels,recess)
+            cap=perforated_plate(unit_polygon([list(p) for p in poly],bw,bh),channels,recess,clip_walls=clip_cover_walls)
             add('board-heatsink-recessed-crown',rotate_vertices(cap,'left'),cover_metal,(bx-1.-depth+recess/2,by,bz))
-        else:plate(name,poly,depth,cover_metal,1.,mechanical_holes)
+        else:plate(name,poly,depth,cover_metal,1.,mechanical_holes,clip_walls=clip_cover_walls)
         if fan:
             center=point(fan['uv'],depth-1.8);radius=fan['diameter_mm']/2
             add('board-onboard-fan-recess-floor',rotate_vertices(ring(radius*.985,0.,.35,segments=32),'left'),dark,center)
@@ -274,7 +285,12 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
     for center in anchors['dimm_centers']:
         x,y,z=center
         dimm_parts.extend((((5.,139.,1.1),(x,y,z-1.7)),((5.,139.,1.1),(x,y,z+1.7)),((2.,1.3,4.5),(bx-2.,y+key_y,z))))
-        dimm_contacts.append(((.28,132.,1.9),(bx-1.9,y,z)))
+        # Two separated side banks leave the real insertion channel open.
+        # The previous solid gold strip crossed that channel and penetrated
+        # the populated PCB edge. These are bounded interface references, not
+        # a manufacturer spring/contact layout or manufacturing clearances.
+        for side in (-1,1):
+            dimm_contacts.append(((3.6,132.,.16),(bx-3.,y,z+side*.88)))
         for sign in (-1,1):dimm_latches.append(((7.,6.,5.5),(bx-4.2,y+sign*70.,z)))
     add('detail-board-populated-memory-sockets',_boxes(dimm_parts),dark,(0,0,0))
     add('detail-board-memory-socket-contact-wells',_boxes(dimm_contacts),copper,(0,0,0))
@@ -513,6 +529,7 @@ def enrich_motherboard(meshes,spec,anchors,level='balanced'):
         heatsink_recesses_are_open_geometry=True,socket_contact_pattern_is_sampling=True,
         socket_contact_topology='pga_receiving_wells' if model['socket']=='AM4' else 'sampled_lga_springs',
         socket_contact_dimensions_verified=False,
+        dimm_contact_topology='split_side_banks_open_channel_reference',dimm_contact_dimensions_verified=False,
         power_contact_count=power_contact_count,power_contacts_independent=True,
         connector_contact_shape_reference=True,connector_oem_identified=False,
         m2_receiving_channel_count=len(anchors['connectors']['m2']),m2_receiving_channel_open=True,

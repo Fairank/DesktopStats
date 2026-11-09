@@ -714,7 +714,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "form_factor": "itx",
       "label": "ASRock Z790 PG-ITX/TB4",
       "layout_status": "manual_reviewed",
@@ -723,7 +723,8 @@
       "socket": "LGA1700",
       "sources": [
         "https://download.asrock.com/Manual/Z790%20PG-ITXTB4.pdf",
-        "https://pg.asrock.com/mb/Intel/Z790%20PG-ITXTB4/index.asp"
+        "https://pg.asrock.com/mb/Intel/Z790%20PG-ITXTB4/index.asp",
+        "https://www.asrock.com/mb/photo/Z790%20PG-ITXTB4(L2).png"
       ]
     },
     {
@@ -771,7 +772,7 @@
         "height": 170.0,
         "width": 170.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "form_factor": "itx",
       "label": "ASRock B650I Lightning WiFi",
       "layout_status": "manual_reviewed",
@@ -780,7 +781,8 @@
       "socket": "AM5",
       "sources": [
         "https://download.asrock.com/Manual/B650I%20Lightning%20WiFi.pdf",
-        "https://pg.asrock.com/mb/AMD/B650I%20Lightning%20WiFi/index.asp"
+        "https://pg.asrock.com/mb/AMD/B650I%20Lightning%20WiFi/index.asp",
+        "https://www.asrock.com/mb/photo/B650I%20Lightning%20WiFi(L2).png"
       ]
     },
     {
@@ -847,7 +849,7 @@
         "height": 305.0,
         "width": 267.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "form_factor": "eatx",
       "label": "ASRock X670E Taichi",
       "layout_status": "manual_reviewed",
@@ -856,7 +858,8 @@
       "socket": "AM5",
       "sources": [
         "https://download.asrock.com/Manual/X670E%20Taichi_English.pdf",
-        "https://www.asrock.com/mb/AMD/X670E%20Taichi/index.asp"
+        "https://www.asrock.com/mb/AMD/X670E%20Taichi/index.asp",
+        "https://www.asrock.com/mb/photo/X670E%20Taichi(L2).png"
       ]
     },
     {
@@ -865,7 +868,7 @@
         "height": 305.0,
         "width": 244.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "form_factor": "atx",
       "label": "ASRock B650E Steel Legend WiFi",
       "layout_status": "manual_reviewed",
@@ -874,7 +877,8 @@
       "socket": "AM5",
       "sources": [
         "https://download.asrock.com/Manual/B650E%20Steel%20Legend%20WiFi.pdf",
-        "https://www.asrock.com/mb/AMD/B650E%20Steel%20Legend%20WiFi/index.asp"
+        "https://www.asrock.com/mb/AMD/B650E%20Steel%20Legend%20WiFi/index.asp",
+        "https://www.asrock.com/mb/photo/B650E%20Steel%20Legend%20WiFi(L2).png"
       ]
     },
     {
@@ -883,7 +887,7 @@
         "height": 244.0,
         "width": 244.0
       },
-      "finish_status": "unverified_reference",
+      "finish_status": "photo_reviewed",
       "form_factor": "matx",
       "label": "ASRock B650M PG Riptide WiFi",
       "layout_status": "manual_reviewed",
@@ -892,7 +896,8 @@
       "socket": "AM5",
       "sources": [
         "https://download.asrock.com/Manual/B650M%20PG%20Riptide%20WiFi.pdf",
-        "https://pg.asrock.com/mb/AMD/B650M%20PG%20Riptide%20WiFi/index.asp"
+        "https://pg.asrock.com/mb/AMD/B650M%20PG%20Riptide%20WiFi/index.asp",
+        "https://www.asrock.com/mb/photo/B650M%20PG%20Riptide%20WiFi(L2).png"
       ]
     },
     {
@@ -901,7 +906,7 @@
         "height": 305.0,
         "width": 260.0
       },
-      "finish_status": "pending_primary_photo",
+      "finish_status": "photo_reviewed",
       "form_factor": "eatx",
       "label": "GIGABYTE Z790 AORUS MASTER (rev.1.0)",
       "layout_status": "manual_reviewed",
@@ -910,7 +915,9 @@
       "socket": "LGA1700",
       "sources": [
         "https://download.gigabyte.com/FileList/Manual/mb_manual_z790-aorus-master_1003_e.pdf?v=1f20e5dc0c9024d7deb15884b210f135",
-        "https://www.gigabyte.com/Motherboard/Z790-AORUS-MASTER-rev-10/sp"
+        "https://www.gigabyte.com/Motherboard/Z790-AORUS-MASTER-rev-10/sp",
+        "https://static.gigabyte.com/StaticFile/Image/Global/cfdc92a87adda3585c6f1e67b49d9a58/ProductRemoveBg/32069",
+        "https://www.aorus.com/motherboards/z790-aorus-master-rev-10/gallery"
       ]
     },
     {

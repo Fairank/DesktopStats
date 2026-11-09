@@ -85,7 +85,8 @@ class NorthTrayGeometry049Tests(unittest.TestCase):
             self.assertTrue(all(row['name']=='case-motherboard-tray-reference' for row in anchors['obstacles'][1:]))
 
     def test_strict_route_algorithm_has_not_changed(self):
-        node=ast.parse(inspect.getsource(auxiliary.route_cable)).body[0]
+        from test_case_fan_cable_routing048 import historical_route_ast
+        node=historical_route_ast(inspect.getsource(auxiliary.route_cable))
         self.assertEqual(hashlib.sha256(ast.dump(node).encode()).hexdigest(),
                          'ee90555f30df246286921c5d625c610ebf54a57c4ea8c2d304779d554cbcd323')
 

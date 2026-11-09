@@ -311,12 +311,16 @@ def rounded_path(points,radius=7.,steps=4):
     out.append(clean[-1]);return tuple(out)
 
 
-def route_cable(start,end,start_normal,end_normal,obstacles=(),case_dimensions=(300,500,500),radius=7.,width=6.,waypoints=(),graph_boxes=(),tube_clearance=1.1):
+def route_cable(start,end,start_normal,end_normal,obstacles=(),case_dimensions=(300,500,500),radius=7.,width=6.,waypoints=(),graph_boxes=(),tube_clearance=1.1,normal_lead_mm=None):
     """Shortest static visibility route around actual padded component boxes.
 
     If an incompatible selection has no internal corridor, an exterior route
     remains visible and is reported, rather than clipping through the GPU.
     """
+    # This construction-only hint belongs to the exact H5 bottom-fan branch.
+    # It changes a free reference lead, never an anchor or factory cable length.
+    if normal_lead_mm is not None and (type(normal_lead_mm) not in (int,float) or normal_lead_mm!=2.):
+        return (),dict(routing_failed=True,external_route=False)
     sn,en=_unit(start_normal),_unit(end_normal)
     lead=max(14.,radius+width+3.);pad=radius+width+4.;boxes=tuple(obstacles)
     def ray_entry(point,normal,bounds):
@@ -344,7 +348,9 @@ def route_cable(start,end,start_normal,end_normal,obstacles=(),case_dimensions=(
                     if not any(segment_hits_box(point,destination,bounds,1.1) for bounds in boxes):distance=proposed
             if distance==old:break
         return _add(point,_mul(normal,distance))
-    a,b=escape(start,sn),escape(end,en);nodes=[a,b]
+    if normal_lead_mm is None:a,b=escape(start,sn),escape(end,en)
+    else:a,b=_add(start,_mul(sn,normal_lead_mm)),_add(end,_mul(en,normal_lead_mm))
+    nodes=[a,b]
     for low,high in (graph_boxes or boxes):
         nodes.extend(tuple((low[n]-pad if bits&(1<<n)==0 else high[n]+pad) for n in range(3)) for bits in range(8))
     def clear(x,y):return all(not segment_hits_box(x,y,bounds,pad) for bounds in boxes)
@@ -405,8 +411,48 @@ def route_cable(start,end,start_normal,end_normal,obstacles=(),case_dimensions=(
     blocked=any(segment_hits_box(x,y,bounds,1.1 if index in (0,len(path)-2) else tube_clearance)
                 for index,(x,y) in enumerate(zip(path,path[1:])) for bounds in boxes)
     if blocked and preferred_used:
-        return route_cable(start,end,start_normal,end_normal,obstacles,case_dimensions,radius,width,graph_boxes=graph_boxes,tube_clearance=tube_clearance)
+        return route_cable(start,end,start_normal,end_normal,obstacles,case_dimensions,radius,width,graph_boxes=graph_boxes,tube_clearance=tube_clearance,normal_lead_mm=normal_lead_mm)
     return path,dict(routing_failed=blocked,external_route=external or any(abs(p[n])>case_dimensions[n]/2 for p in path for n in range(3)),preferred_waypoints_used=preferred_used)
+
+
+def _h5_bottom_fan_normal_lead(case,source,target):
+    """A local reference lead only for an existing H5 fan/verified CHA socket."""
+    if not isinstance(case,dict) or case.get('id')!='nzxt-h5-flow-2024':return None
+    if not isinstance(source,dict) or not isinstance(target,dict):return None
+    if (source.get('owner') not in ('fans:bottom:0','fans:bottom:1') or source.get('role')!='case'
+            or source.get('kind')!='fan4' or source.get('connector_rendered') is not True
+            or target.get('kind')!='fan4' or target.get('owner')!='board'
+            or target.get('role')!='case_fan' or target.get('role_verified') is not True):return None
+    label=target.get('label');authority=target.get('role_source')
+    if (not isinstance(label,str) or not label.startswith('CHA_FAN') or not label[7:].isdigit()
+            or not isinstance(authority,str) or not authority.startswith('https://')):return None
+    if (tuple(source.get('normal',()))!=(1.,0.,0.)
+            or tuple(target.get('normal',()))!=(-1.,0.,0.)
+            or _point(source.get('position'),None) is None or _point(target.get('position'),None) is None):return None
+    return 2.
+
+
+def _fan_plug_clears_neighbor_headers(target,headers):
+    """Conservative current-reference fan bodies, not factory socket clearance.
+
+    Keep every other fan/pump header. Only the exact same labeled/posed mating
+    socket is exempt. Dimensions match the existing public board-header and
+    plug drawing primitives; bevels can only shrink their exterior bounds.
+    """
+    def bounds(endpoint,pin_width,short_height,depth,shift=0.):
+        u,v,n=_connector_basis(endpoint['normal'],endpoint.get('along'))
+        center=_add(endpoint['position'],_mul(n,shift))
+        reach=tuple(abs(u[k])*pin_width/2+abs(v[k])*short_height/2+abs(n[k])*depth/2 for k in range(3))
+        return _sub(center,reach),_add(center,reach)
+    plug=bounds(target,4*2.54+3.,2.54+2.,9.,4.5)
+    for raw in headers:
+        other=_endpoint(raw)
+        if other is None:return False
+        same=all(other.get(key)==target.get(key) for key in ('label','position','normal','along'))
+        if same:continue
+        body=bounds(other,4*2.54+1.4,2.54+1.8,4.)
+        if all(min(plug[1][k],body[1][k])-max(plug[0][k],body[0][k])>1e-6 for k in range(3)):return False
+    return True
 
 
 def tube(vertices,radius=1.2,sides=6):
@@ -1024,13 +1070,17 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                                    (front_x,target_y+18. if target.get('owner')=='gpu' else target_y,aperture_z)))
             else:points.append((rear_x,target_y,aperture_z))
             return tuple(points)
-        def connect(source,target,kind,index,*,record_failure=True):
+        def connect(source,target,kind,index,*,record_failure=True,_try_h5_local=True):
+            h5_lead=_h5_bottom_fan_normal_lead(case,source,target)
+            if h5_lead is not None and not _fan_plug_clears_neighbor_headers(target,connectors.get('fan') or ()):
+                return False
+            local_lead=h5_lead if _try_h5_local else None
             mesh_start=len(meshes)
             prefix='cable-'+str(index)+'-'+kind
             start=source['position'] if source.get('connector_rendered') or source.get('lead_rendered') else plug(source,'modular' if source.get('owner')=='psu' else source['kind'],prefix+'-source')
             end=plug(target,kind,prefix+'-target')
             slim=kind in ('sata_data','front_io','fan4','argb3')
-            preferred=tray_waypoints(source,target,start,end)
+            preferred=() if local_lead is not None else tray_waypoints(source,target,start,end)
             # An already modeled fan plug is the attachment surface, not a
             # foreign obstacle. Retain the cooler/fan body and every other
             # part; ignore only that matching connector's padded boundary.
@@ -1059,9 +1109,11 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                         else:low[axis]=start[axis]+clearance+.2
                         if all(a<b for a,b in zip(low,high)):bounds=(tuple(low),tuple(high))
                 route_obstacles.append(bounds)
-            path,state=route_cable(start,end,source['normal'],target['normal'],route_obstacles,dimensions,width=5. if slim else 10.,radius=4. if slim else 7.,waypoints=preferred,graph_boxes=graph_boxes,tube_clearance=clearance)
+            path,state=route_cable(start,end,source['normal'],target['normal'],route_obstacles,dimensions,width=5. if slim else 10.,radius=4. if slim else 7.,waypoints=preferred,graph_boxes=graph_boxes,tube_clearance=clearance,normal_lead_mm=local_lead)
             if not path or state['routing_failed']:
                 del meshes[mesh_start:]
+                if local_lead is not None:
+                    return connect(source,target,kind,index,record_failure=record_failure,_try_h5_local=False)
                 if record_failure:
                     issues.append('cable_clearance_requires_review')
                     omitted_routes.append(dict(kind=kind,count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner=target.get('owner')))
@@ -1086,6 +1138,8 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                 shifted_paths.append(shifted);vertices.extend(tube(shifted,1.,6 if level!='close' else 8))
             if any(segment_hits_box(a,b,bounds,1.1) for shifted in shifted_paths for a,b in zip(shifted,shifted[1:]) for bounds in route_obstacles):
                 del meshes[mesh_start:]
+                if local_lead is not None:
+                    return connect(source,target,kind,index,record_failure=record_failure,_try_h5_local=False)
                 if record_failure:
                     omitted_routes.append(dict(kind=kind,count=1,reason='cable_route_unavailable',source_owner=source.get('owner'),target_owner=target.get('owner')))
                     issues.append('cable_clearance_requires_review')
@@ -1099,7 +1153,9 @@ def auxiliary_stages(spec,anchors,level='balanced'):
                     'target_header_role_source':target.get('role_source','')} if kind=='fan4' else {}),
                 source_socket=source['position'],target_socket=target['position'],start=start,end=end,path=path,
                 rendered_strands=cable_strands,strand_count_is_sampling=True,layout_schematic=True,
-                routing_policy='rear_tray_grommet_reference' if state.get('preferred_waypoints_used') else 'clearance_visibility_reference',**state))
+                routing_policy='h5_bottom_header_main_chamber_reference' if local_lead is not None else 'rear_tray_grommet_reference' if state.get('preferred_waypoints_used') else 'clearance_visibility_reference',
+                **(dict(routing_reference_normal_lead_mm=local_lead,
+                        connector_lead_manufacturer_verified=False,factory_cable_length_modeled=False) if local_lead is not None else {}),**state))
             return True
         if psu_sockets:
             for index,target in enumerate(targets):

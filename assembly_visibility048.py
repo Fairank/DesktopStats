@@ -14,7 +14,8 @@ _CASE_SKINS = frozenset((
 # This pre-existing stand uses the panel category for transparency, but is a
 # support rather than a removable cover. Keep it and any future unknown casing.
 _PANEL_SUPPORTS = frozenset(('translucent-stand',))
-_PSU_COVERS = frozenset(('psu-shroud','top-psu-shroud','rear-chamber-shroud'))
+_PSU_COVERS = frozenset(('psu-shroud','top-psu-shroud','rear-chamber-shroud',
+    'helios-psu-front-cover','helios-psu-rear-cover','helios-psu-side-window'))
 
 
 def mesh_visible(mesh, inspection_cutaway=False, show_psu=False):

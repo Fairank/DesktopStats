@@ -289,8 +289,10 @@ class AssemblyStyleTests(unittest.TestCase):
         cpu=next(m for m in renderer.scene.meshes if m.component=='cpu')
         self.assertNotEqual(renderer._highlight_tone(cpu,'cpu'),cpu.color)
         self.assertEqual(renderer._highlight_tone(cpu,'cpu')[3],cpu.color[3])
+        selection_scene=Scene((Mesh('fixture-cpu',box(2.,3.,1.),(.4,.5,.6,1.),
+            component='cpu',part_id='cpu:0'),),(10.,10.,10.),{'visual_style':'miniature'})
         widget=SimpleNamespace(_selected='',_focus='all',_yaw=-34.,_pitch=18.,
-            componentSelected=Mock(),update=Mock())
+            _scene=selection_scene,componentSelected=Mock(),update=Mock())
         self.assertTrue(AssemblyViewport.select_component(widget,'cpu'))
         self.assertEqual((widget._focus,widget._yaw,widget._pitch),('all',-34.,18.))
         widget.componentSelected.emit.assert_called_once_with('cpu')

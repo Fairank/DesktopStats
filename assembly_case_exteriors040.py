@@ -112,10 +112,16 @@ def replace_shell(meshes, dimensions, case, level="balanced"):
                  4., x, dark)
             side("case-mod5-side-glass", ((-d*.34,-h*.24),(-d*.38,h*.18),(-d*.20,h*.32),
                  (d*.22,h*.28),(d*.36,h*.10),(d*.30,-h*.23)), 2., x*.98, glass, "panel")
-        for y in (-h*.36,h*.36):
+        member_y = (h*.36,) if case.get('id') == 'jonsbo-mod-5' else (-h*.36,h*.36)
+        for y in member_y:
             cube("case-mod5-reference-crossmembers", (w*.84,9.,d*.40), (0,y,-d*.08), silver)
-        for z in (-d*.27,d*.29):
-            cube("case-mod5-reference-feet", (w*.82,10.,42.), (0,-h*.49,z), dark)
+        if case.get('id') == 'jonsbo-mod-5':
+            from assembly_mod5_bottom052 import build as build_mod5_bottom
+            lower_material, _ = build_mod5_bottom(case, dimensions, dark)
+            kept.extend(lower_material)
+        else:
+            for z in (-d*.27,d*.29):
+                cube("case-mod5-reference-feet", (w*.82,10.,42.), (0,-h*.49,z), dark)
         # Empty removable tray, with a large opening: no fabricated installed PCB.
         for y in (-h*.27,h*.27):
             cube("case-mod5-reference-tray-rails", (5.,8.,d*.64), (w*.30,y,0), steel)
@@ -224,7 +230,13 @@ def replace_shell(meshes, dimensions, case, level="balanced"):
 
     if "elevated_glass_shell" in flags:
         kept=[m for m in kept if m.name not in ("case-foot","case-bottom")]
-        cube("case-elevated-reference-floor",(w-9.,3.,d-9.),(0,-h/2+32.,0),silver)
+        # The exact original Evolv X2 now supplies its independent lower
+        # support and fan tray. Do not put a second solid generic floor
+        # through that open cooling layer. Other callers keep this reference.
+        source_floor=(case.get('id')=='phanteks-evolv-x2' and any(
+            m.component=='case' and m.part_id=='case:lower-support-floor' for m in kept))
+        if not source_floor:
+            cube("case-elevated-reference-floor",(w-9.,3.,d-9.),(0,-h/2+32.,0),silver)
         cube("case-elevated-reference-plinth",(w*.93,6.,d*.93),(0,-h/2+3.,0),dark)
         for x in (-w*.39,w*.39):
             for z in (-d*.39,d*.39):
@@ -274,6 +286,8 @@ def replace_shell(meshes, dimensions, case, level="balanced"):
             y=-h*.39+row*h*.80/((10,16,22)[detail]-1)
             cube("case-fabric-front-reference-weave",(w*.73,.55,.2),(0,y,d/2+.35),color("#b2b3ad"),"panel")
 
-    additions=tuple(Mesh(name,tuple(vertices),tone,component=component)
+    additions=tuple(Mesh(name,tuple(vertices),tone,
+                    ((w*.36+8.)-w*.30,0.,0.) if case.get('id')=='jonsbo-mod-5'
+                    and name=='case-mod5-reference-tray-rails' else (0.,0.,0.),component=component)
                     for (name,tone,component),vertices in batches.items())
     return tuple((*kept,*additions))

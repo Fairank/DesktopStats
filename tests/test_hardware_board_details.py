@@ -567,8 +567,9 @@ QtObject {
                 else:self.assertEqual(len(result["key"].split("|")), 11)
                 self.assertEqual(hashlib.sha256(decode(result["source"]).encode()).hexdigest(), expected)
 
-    def test_completed_version_inventory_contains_all_fifty_six_exact_versions(self):
-        self.assertEqual(len(variants.RECORDS),56)
+    def test_completed_version_inventory_contains_all_exact_versions(self):
+        self.assertEqual(len(variants.RECORDS),57)
+        self.assertIn('gigabyte-fx5200-n52128d-rev10-reference',variants.RECORDS)
         self.assertEqual(set(variants.READY),set(variants.RECORDS))
         for identity,version in variants.READY.items():
             with self.subTest(model=identity):

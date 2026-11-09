@@ -20,6 +20,10 @@ from assembly_effects import SelectionEffect,component_family,effect_for,effect_
 from assembly_scene_cache import SceneCache
 from assembly_visibility048 import hidden_mesh_ids,psu_cover_mesh_ids
 from assembly_gpu_insertion049 import GpuInsertion,insertion_plan
+from assembly_pose052 import (valid_offsets,valid_hidden,hidden as pose_hidden,
+                             offset_for,posed_bounds,sphere as box_sphere)
+from assembly_part_motion052 import PartMotion,hidden_connections
+from assembly_inspection import part_family
 from top_bar_feedback import GPU_FAN_MAX_AGE
 
 GL_FLOAT=0x1406
@@ -298,6 +302,8 @@ class AssemblyRenderer:
         self._cutaway_hidden=frozenset()
         self._psu_cover_ids=frozenset()
         self._gpu_power_ids=frozenset()
+        self._pose_keys=frozenset();self._hidden_keys=frozenset();self._mesh_names=frozenset();self._pose_families={}
+        self._frame_part_offsets={};self._frame_hidden_parts=frozenset();self._frame_hidden_names=frozenset()
 
     def initialize(self):
         self.functions=QOpenGLFunctions_3_3_Core()
@@ -359,6 +365,13 @@ class AssemblyRenderer:
         self.buffer.allocate(raw,len(raw));self.buffer.release()
         del raw
         self.bounds,self.pick_bounds=scene_bounds(scene,self._selected,self._shift)
+        self._pose_keys=frozenset(key for key,_ in self.pick_bounds if key!='all')
+        self._hidden_keys=self._pose_keys|frozenset(mesh.component for mesh in scene.meshes)
+        self._mesh_names=frozenset(mesh.name for mesh in scene.meshes)
+        families={}
+        for mesh in scene.meshes:
+            if mesh.part_id:families.setdefault(mesh.part_id,set()).add('case' if mesh.component=='panel' else mesh.component)
+        self._pose_families={key:frozenset(value) for key,value in families.items()}
         self._pick_camera_key=None
         self.upload_count+=1
 
@@ -367,12 +380,16 @@ class AssemblyRenderer:
         return (focus=='all' or mesh.component==focus or bool(focus) and getattr(mesh,'part_id','')==focus
                 or focus=='case' and mesh.component=='panel')
 
-    def _visible(self,mesh,focus,inspection_cutaway=False,hide_gpu_power=False,show_psu=False):
-        return (self._selected(mesh,focus) and (inspection_cutaway is not True or id(mesh) not in self._cutaway_hidden)
+    def _visible(self,mesh,focus,inspection_cutaway=False,hide_gpu_power=False,show_psu=False,
+                 hidden_parts=None,hidden_names=None):
+        parts=self._frame_hidden_parts if hidden_parts is None else hidden_parts
+        names=self._frame_hidden_names if hidden_names is None else hidden_names
+        return (self._selected(mesh,focus) and not ((parts or names) and pose_hidden(mesh,parts,names))
+                and (inspection_cutaway is not True or id(mesh) not in self._cutaway_hidden)
                 and (show_psu is not True or id(mesh) not in self._psu_cover_ids)
                 and (not hide_gpu_power or id(mesh) not in self._gpu_power_ids))
 
-    def _shift(self,mesh,exploded,gpu_offset=None):
+    def _shift(self,mesh,exploded,gpu_offset=None,part_offsets=None):
         shift=(0,0,0)
         if exploded:
             w,h,d=self.scene.dimensions
@@ -382,7 +399,10 @@ class AssemblyRenderer:
                 'psu':(w*.42,-h*.22,-d*.20),'storage':(w*.45,-h*.15,d*.28),
                 'expansion':(-w*.40,-h*.22,d*.22)}.get(mesh.component,(0,0,0))
         if mesh.component=='gpu' and gpu_offset is not None:
-            return tuple(shift[n]+gpu_offset[n] for n in range(3))
+            shift=tuple(shift[n]+gpu_offset[n] for n in range(3))
+        if part_offsets:
+            offset=offset_for(mesh,part_offsets)
+            return tuple(shift[n]+offset[n] for n in range(3))
         return shift
 
     def _scalar(self,name,value):
@@ -390,11 +410,14 @@ class AssemblyRenderer:
         # can select an integer uniform overload for Python float arguments.
         self.functions.glUniform1f(self._uniforms[name],float(value))
 
-    def _shadow(self,projection,width,height,focus,exploded,gpu_offset=None):
+    def _shadow(self,projection,width,height,focus,exploded,gpu_offset=None,part_offsets=None):
         """A cached projected ground ellipse, not a scene mesh or a render target."""
-        key=(self._pick_camera_key,focus,exploded,tuple(gpu_offset) if gpu_offset is not None and component_family(focus)=='gpu' else None)
+        key=(self._pick_camera_key,focus,exploded,tuple(gpu_offset) if gpu_offset is not None and component_family(focus)=='gpu' else None,
+             tuple(part_offsets.items()) if part_offsets else ())
         if key==self._shadow_key:return self._shadow_parameters
         low,high=self.pick_bounds.get((focus,exploded),self.pick_bounds[('all',False)])
+        if part_offsets:
+            low,high=posed_bounds(self.pick_bounds,focus,exploded,part_offsets,families=self._pose_families) or (low,high)
         if gpu_offset is not None and component_family(focus)=='gpu':
             low,high=tuple(tuple(p[n]+gpu_offset[n] for n in range(3)) for p in (low,high))
         center=((low[0]+high[0])/2,low[1],(low[2]+high[2])/2)
@@ -411,12 +434,18 @@ class AssemblyRenderer:
         self._shadow_key=key;self._shadow_parameters=(point,inverse)
         return self._shadow_parameters
 
-    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False,inspection_cutaway=False,gpu_offset=None,hide_gpu_power=False,show_psu=False):
+    def draw(self,width,height,*,yaw=-34.,pitch=18.,zoom=1.,exploded=False,phase=0.,dark=False,focus='all',selected='',effect=None,pixel_scale=1.,transparent_background=False,inspection_cutaway=False,gpu_offset=None,hide_gpu_power=False,show_psu=False,
+             part_offsets=None,part_extents=None,hidden_parts=(),hidden_mesh_names=()):
         f=self.functions
         if f is None or self.scene is None:return
         if not (isinstance(gpu_offset,(tuple,list)) and len(gpu_offset)==3
                 and all(type(v) in (int,float) and math.isfinite(v) and abs(v)<=128 for v in gpu_offset)):
             gpu_offset=None
+        part_offsets=valid_offsets(part_offsets,self._pose_keys)
+        part_extents=valid_offsets(part_extents,self._pose_keys) or part_offsets
+        self._frame_part_offsets=part_offsets
+        self._frame_hidden_parts=valid_hidden(hidden_parts,self._hidden_keys)
+        self._frame_hidden_names=valid_hidden(hidden_mesh_names,self._mesh_names,maximum=4096)
         f.glViewport(0,0,max(1,width),max(1,height))
         original=self.policy['id']=='miniature'
         background=((.075,.095,.12,1.) if dark else (.94,.955,.965,1.)) if original else self.policy['dark_background' if dark else 'light_background']
@@ -428,6 +457,9 @@ class AssemblyRenderer:
         f.glBlendFuncSeparate(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ONE_MINUS_SRC_ALPHA)
         if focus!='all':exploded=False
         center,radius=self.bounds.get((focus,exploded),self.bounds[('all',False)])
+        if part_extents:
+            limits=posed_bounds(self.pick_bounds,focus,exploded,part_extents,include_origin=True,families=self._pose_families)
+            if limits is not None:center,radius=box_sphere(limits)
         distance=radius*3.6*max(.55,min(2.5,zoom))
         yaw,pitch=math.radians(yaw),math.radians(pitch)
         eye=QVector3D(center[0]+distance*math.sin(yaw)*math.cos(pitch),center[1]+distance*math.sin(pitch),center[2]+distance*math.cos(yaw)*math.cos(pitch))
@@ -435,13 +467,16 @@ class AssemblyRenderer:
         projection=QMatrix4x4();projection.perspective(34.,max(.1,width/max(1,height)),near,far)
         self._ink_projection=(ink_depth_bias(distance,radius),2/max(1,width),2/max(1,height))
         view=QMatrix4x4();view.lookAt(eye,QVector3D(*center),QVector3D(0,1,0))
-        camera_key=(width,height,yaw,pitch,zoom,exploded,focus)
+        camera_key=(width,height,yaw,pitch,zoom,exploded,focus,center,radius)
         if camera_key!=self._pick_camera_key:
             combined=projection*view;inverse,valid=combined.inverted()
             self._pick_inverse=inverse if valid else None;self._pick_projection=combined
             self._pick_camera_key=camera_key
         self._pick_state=dict(width=width,height=height,exploded=exploded,phase=phase,focus=focus,
                               inspection_cutaway=inspection_cutaway,gpu_offset=gpu_offset,hide_gpu_power=hide_gpu_power,show_psu=show_psu)
+        if part_offsets:self._pick_state['part_offsets']=part_offsets
+        if self._frame_hidden_parts:self._pick_state['hidden_parts']=self._frame_hidden_parts
+        if self._frame_hidden_names:self._pick_state['hidden_mesh_names']=self._frame_hidden_names
         self._frame_effect=effect if isinstance(effect,dict) and effect.get('active') is True else None
         self._frame_effect_samples={}
         self.program.bind();self.vao.bind()
@@ -449,6 +484,7 @@ class AssemblyRenderer:
         self.program.setUniformValue('paperColor',QVector4D(*background))
         target=self._frame_effect.get('component','') if self._frame_effect else ''
         limits=self.pick_bounds.get((target,exploded),self.pick_bounds[('all',False)])
+        if part_offsets:limits=posed_bounds(self.pick_bounds,target,exploded,part_offsets,families=self._pose_families) or limits
         effect_center=tuple((limits[0][n]+limits[1][n])/2 for n in range(3))
         if gpu_offset is not None and component_family(target)=='gpu':
             effect_center=tuple(effect_center[n]+gpu_offset[n] for n in range(3))
@@ -462,7 +498,7 @@ class AssemblyRenderer:
             f.glDisable(GL_DEPTH_TEST);f.glDepthMask(False)
             self._scalar('backgroundMode',1. if self.policy['paper_grid'] else 2.)
             self.program.setUniformValue('paperGridColor',QVector4D(*self.policy['grid_dark' if dark else 'grid_light']))
-            shadow_center,shadow_inverse=self._shadow(self._pick_projection,width,height,focus,exploded,gpu_offset)
+            shadow_center,shadow_inverse=self._shadow(self._pick_projection,width,height,focus,exploded,gpu_offset,part_offsets)
             self.program.setUniformValue('shadowCenter',QVector2D(*shadow_center))
             self.program.setUniformValue('shadowInverse',QVector4D(*shadow_inverse))
             self.program.setUniformValue('shadowColor',QVector4D(.01,.025,.04,self.policy['contact_shadow']*(.7 if dark else 1.)))
@@ -533,19 +569,23 @@ class AssemblyRenderer:
         if not length:return ''
         direction=tuple(v/length for v in direction);focus=state['focus']
         allowed=ASSEMBLY_COMPONENTS[1:] if focus=='all' else (focus,)
-        candidates=[]
+        candidates=set()
         for component in allowed:
             bounds=self.pick_bounds.get((component,state['exploded']))
+            if state.get('part_offsets'):
+                bounds=posed_bounds(self.pick_bounds,component,state['exploded'],state['part_offsets'],families=self._pose_families)
             if component_family(component)=='gpu' and bounds is not None and state.get('gpu_offset') is not None:
                 bounds=tuple(tuple(point[n]+state['gpu_offset'][n] for n in range(3)) for point in bounds)
-            if bounds is not None and ray_box(origin,direction,*bounds) is not None:candidates.append(component_family(component))
+            if bounds is not None and ray_box(origin,direction,*bounds) is not None:
+                candidates.update(self._pose_families.get(component,(component_family(component),)))
         hits={};opaque_case=float('inf')
         for mesh in self.scene.meshes:
             component='case' if mesh.component=='panel' else mesh.component
             if (component not in candidates or mesh.name.startswith('style-') or not self._visible(
-                    mesh,focus,state.get('inspection_cutaway',False),state.get('hide_gpu_power',False),state.get('show_psu',False))):continue
+                    mesh,focus,state.get('inspection_cutaway',False),state.get('hide_gpu_power',False),state.get('show_psu',False),
+                    state.get('hidden_parts',()),state.get('hidden_mesh_names',()))):continue
             target=getattr(mesh,'part_id','') or component
-            shift=self._shift(mesh,state['exploded'],state.get('gpu_offset'));vertices=mesh.vertices
+            shift=self._shift(mesh,state['exploded'],state.get('gpu_offset'),state.get('part_offsets'));vertices=mesh.vertices
             points=[posed_point(mesh,vertices[n:n+3],shift,state['phase']) for n in range(0,len(vertices),6)]
             for n in range(0,len(points),3):
                 hit=ray_triangle(origin,direction,*points[n:n+3])
@@ -562,7 +602,7 @@ class AssemblyRenderer:
         mesh,start,count=row
         policy=self._mesh_policies.get(id(mesh),self.policy)
         model=QMatrix4x4();x,y,z=mesh.position
-        shift=self._shift(mesh,exploded,gpu_offset);x+=shift[0];y+=shift[1];z+=shift[2]
+        shift=self._shift(mesh,exploded,gpu_offset,self._frame_part_offsets);x+=shift[0];y+=shift[1];z+=shift[2]
         model.translate(x,y,z)
         if mesh.rotor:model.rotate(mesh_phase(mesh,phase)*mesh.direction,*mesh.axis)
         self.program.setUniformValue('matrix',projection*view*model)
@@ -585,7 +625,7 @@ class AssemblyRenderer:
             if 'elapsed_ms' in effect:
                 identity=policy['id']
                 if identity not in self._frame_effect_samples:
-                    self._frame_effect_samples[identity]=effect_sample(identity,effect['elapsed_ms'],effect['component'])
+                    self._frame_effect_samples[identity]=effect_sample(identity,effect['elapsed_ms'],effect['component'],family=effect.get('family'))
                 sample=self._frame_effect_samples[identity]
             params=(number(sample.get('kind'),0,0,13),number(sample.get('progress'),1,0,1),
                     number(sample.get('amount'),0,0,1),1. if mode==GL_LINES else 0.)
@@ -609,6 +649,8 @@ class AssemblyRenderer:
         self._cutaway_hidden=frozenset()
         self._psu_cover_ids=frozenset()
         self._gpu_power_ids=frozenset()
+        self._pose_keys=frozenset();self._hidden_keys=frozenset();self._mesh_names=frozenset();self._pose_families={}
+        self._frame_part_offsets={};self._frame_hidden_parts=frozenset();self._frame_hidden_names=frozenset()
 
 
 class AssemblyViewport(QOpenGLWidget):
@@ -624,6 +666,7 @@ class AssemblyViewport(QOpenGLWidget):
     focusChanged=Signal(str)
     componentSelected=Signal(str)
     gpuAssemblyChanged=Signal()
+    partAssemblyChanged=Signal()
 
     def __init__(self,parent=None):
         super().__init__(parent)
@@ -640,6 +683,10 @@ class AssemblyViewport(QOpenGLWidget):
         self._demo=False;self._demo_phase=0.
         self._gpu_demo_phase=0.
         self._gpu_insertion=GpuInsertion();self._gpu_plan=insertion_plan(self._scene)
+        self._part_motion=PartMotion();self._part_planner=None;self._part_plan={};self._part_plan_key=None
+        self._hidden_parts=frozenset();self._hidden_connection_names=frozenset();self._opened_retention_names=frozenset()
+        self._released_mounts=frozenset()
+        self._changing_scene=False
         self._fan_expiry=0.
         self._effect=SelectionEffect();self._effect_active=False;self._clock_active_state=False
         self._motion=True;self._selection_effects=True
@@ -669,18 +716,32 @@ class AssemblyViewport(QOpenGLWidget):
 
     def set_scene(self,spec):
         scene=self._scene_cache.build(spec)
-        self.set_inspection_cutaway(spec.get('inspection_cutaway',False))
-        self.set_show_psu(spec.get('show_psu',False))
-        if scene==self._scene:return
+        self._changing_scene=True
+        try:
+            self.set_inspection_cutaway(spec.get('inspection_cutaway',False))
+            self.set_show_psu(spec.get('show_psu',False))
+        finally:self._changing_scene=False
+        if scene==self._scene:
+            AssemblyViewport._refresh_part_plan(self);return
         self._effect.cancel()
         self._gpu_insertion.reset()
+        AssemblyViewport._reset_part_motion(self)
+        planner=getattr(self,'_part_planner',None)
+        rebound=bool(planner is not None and planner.rebind_scene(scene))
+        if planner is not None and not rebound:planner.clear()
+        self._part_planner=planner if rebound else None
+        self._part_plan_key=None;self._opened_retention_names=frozenset();self._released_mounts=frozenset()
         self._scene=scene;self._pending=True
+        previous=getattr(self,'_hidden_parts',())
+        self._hidden_parts=frozenset(key for key in previous if any(AssemblyRenderer._selected(m,key) for m in scene.meshes))
+        self._hidden_connection_names=frozenset(hidden_connections(scene,self._hidden_parts))
         self._gpu_plan=insertion_plan(scene);self.gpuAssemblyChanged.emit()
         self._cpu_tach_usable=scene.metadata.get('cooling',{}).get('cpu_fan_tach_usable') is True
         self._real_cpu_rotor_parts=tuple(scene.metadata.get('cooling',{}).get('real_cpu_rotor_parts') or ())
         if ':' in self._selected and not any(getattr(mesh,'part_id','')==self._selected for mesh in scene.meshes):
             self._selected='';self.componentSelected.emit('all')
         if ':' in self._focus and not any(getattr(mesh,'part_id','')==self._focus for mesh in scene.meshes):self._focus='all'
+        AssemblyViewport._refresh_part_plan(self)
         self.sceneChanged.emit();self._update_animation_state();self.update()
 
     def set_transparent_background(self,enabled):
@@ -716,6 +777,124 @@ class AssemblyViewport(QOpenGLWidget):
         self._cpu_expiry=time.monotonic()+max(0.,GPU_FAN_MAX_AGE-age) if valid else 0.
         self._update_animation_state()
 
+    def _reset_part_motion(self):
+        motion=getattr(self,'_part_motion',None)
+        changed=bool(motion and motion.reset())
+        if changed:
+            self._renderer._pick_state=None
+            signal=getattr(self,'partAssemblyChanged',None)
+            if signal is not None:signal.emit()
+            self.update()
+        return changed
+
+    def _refresh_part_plan(self):
+        """Only explicit selection/scene/visibility changes may scan geometry."""
+        if not hasattr(self,'_part_motion') or getattr(self,'_changing_scene',False):return
+        if (not getattr(self,'_motion',True) or not self.isVisible() or self.window().isMinimized()):
+            # A hidden owner may receive configuration/visibility callbacks.
+            # Keep its detached result; defer even cache queries until active.
+            self._part_plan_key=None;return
+        target=getattr(self,'_selected','') or 'all'
+        key=(id(self._scene),target,self._hidden_parts,self._opened_retention_names,
+             getattr(self,'_released_mounts',frozenset()),
+             getattr(self,'_inspection_cutaway',False),getattr(self,'_show_psu',False))
+        if key==self._part_plan_key:return
+        family=part_family(target,self._scene.metadata)
+        if family not in ('cpu','memory','fans'):
+            plan=dict(available=False,target=target,reason='choose_cpu_or_memory',allowed_opened_mesh_names=())
+        elif target=='fans':
+            plan=dict(available=False,target=target,reason='choose_individual_case_fan',allowed_opened_mesh_names=())
+        else:
+            from assembly_part_motion052 import PartMotionPlanner
+            if self._part_planner is None:self._part_planner=PartMotionPlanner(self._scene)
+            plan=self._part_planner.plan(target,hidden_parts=self._hidden_parts,
+                opened_mesh_names=self._opened_retention_names,
+                released_mounts=getattr(self,'_released_mounts',()),
+                inspection_cutaway=getattr(self,'_inspection_cutaway',False),show_psu=getattr(self,'_show_psu',False))
+        plan['component_family']=family
+        self._part_plan=plan;self._part_plan_key=key;self.partAssemblyChanged.emit()
+
+    def part_motion_state(self):
+        """Detached status only; data/animation ticks never invoke the planner."""
+        state=dict(getattr(self,'_part_plan',{}));motion=getattr(self,'_part_motion',None)
+        state.update(active=bool(motion and motion.active),progress=motion.progress if motion else 0.,
+                     motion_target=motion.target if motion else 0.,
+                     hidden_parts=tuple(sorted(getattr(self,'_hidden_parts',()))),
+                     released_mounts=tuple(sorted(getattr(self,'_released_mounts',()))),
+                     retention_hidden=bool(getattr(self,'_opened_retention_names',())))
+        gpu=getattr(self,'_gpu_insertion',None)
+        target=state.get('target','')
+        if getattr(self,'_exploded',False):state.update(available=False,reason='close_exploded_view')
+        elif not getattr(self,'_motion',True):state.update(available=False,reason='motion_disabled')
+        elif gpu and (gpu.active or gpu.progress>0):state.update(available=False,reason='return_other_part_first')
+        elif getattr(self,'_focus','all') not in ('all',target,state.get('component_family',component_family(target))):
+            state.update(available=False,reason='focus_selected_part')
+        elif state.get('available') and state.get('allowed_opened_mesh_names') and not state.get('retention_hidden'):
+            state.update(available=False,reason='open_retention_first')
+        return state
+
+    def preview_part_motion(self,removed=True):
+        if (type(removed) is not bool or self._closed or self._error or not self.isVisible()
+                or self.window().isMinimized() or not self.part_motion_state().get('available')):return False
+        if not self._part_motion.start(removed):return False
+        self._renderer._pick_state=None
+        self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
+
+    def set_part_hidden(self,target,enabled):
+        """A temporary inspection mask, never a claim of mechanical removal."""
+        if (type(enabled) is not bool or not isinstance(target,str) or target=='all'
+                or not any(AssemblyRenderer._selected(m,target) for m in self._scene.meshes)):return False
+        current=getattr(self,'_hidden_parts',frozenset())
+        following=(current|{target}) if enabled else (current-{target})
+        if following==current:return True
+        if len(following)>64:return False
+        AssemblyViewport._reset_part_motion(self)
+        gpu=getattr(self,'_gpu_insertion',None)
+        if gpu and gpu.reset():self.gpuAssemblyChanged.emit()
+        self._hidden_parts=frozenset(following)
+        effect=getattr(self,'_effect',None)
+        if effect is not None:effect.cancel()
+        self._hidden_connection_names=frozenset(hidden_connections(self._scene,self._hidden_parts))
+        self._opened_retention_names=frozenset();self._renderer._pick_state=None
+        self._released_mounts=frozenset()
+        AssemblyViewport._refresh_part_plan(self)
+        self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
+
+    def restore_hidden_parts(self):
+        if not getattr(self,'_hidden_parts',()) and not getattr(self,'_opened_retention_names',()) and not getattr(self,'_released_mounts',()):return False
+        AssemblyViewport._reset_part_motion(self)
+        gpu=getattr(self,'_gpu_insertion',None)
+        if gpu and gpu.reset():self.gpuAssemblyChanged.emit()
+        self._hidden_parts=frozenset();self._hidden_connection_names=frozenset();self._opened_retention_names=frozenset()
+        self._released_mounts=frozenset()
+        self._renderer._pick_state=None;AssemblyViewport._refresh_part_plan(self)
+        self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
+
+    def set_retention_hidden(self,enabled):
+        if type(enabled) is not bool:return False
+        allowed=tuple(self._part_plan.get('allowed_opened_mesh_names',()))
+        if enabled and not allowed:return False
+        following=frozenset(allowed) if enabled else frozenset()
+        if following==self._opened_retention_names:return True
+        AssemblyViewport._reset_part_motion(self)
+        self._opened_retention_names=following;self._renderer._pick_state=None
+        AssemblyViewport._refresh_part_plan(self)
+        self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
+
+    def set_mount_released(self,enabled):
+        """Explicit reference release; never a physical screw/cable animation."""
+        if type(enabled) is not bool:return False
+        target=self._part_plan.get('target','')
+        allowed=self._part_plan.get('allowed_mount_release_part_ids',())
+        if enabled and (target not in allowed or not self._motion):return False
+        gpu=getattr(self,'_gpu_insertion',None)
+        if gpu and (gpu.active or gpu.progress>0):return False
+        following=frozenset((target,)) if enabled else frozenset()
+        if following==getattr(self,'_released_mounts',frozenset()):return True
+        AssemblyViewport._reset_part_motion(self);self._released_mounts=following
+        self._renderer._pick_state=None;AssemblyViewport._refresh_part_plan(self)
+        self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
+
     def set_motion_enabled(self,enabled):
         self._motion=enabled is True
         canceled=self._effect.cancel() if not self._motion else False
@@ -731,6 +910,10 @@ class AssemblyViewport(QOpenGLWidget):
         elif getattr(self,'_focus','all') not in ('all','gpu','gpu:0'):
             state.update(available=False,reason='请先切换到整机或显卡视图。')
         elif not getattr(self,'_motion',True):state.update(available=False,reason='动效已关闭。')
+        part=getattr(self,'_part_motion',None)
+        if part and (part.active or part.progress>0):state.update(available=False,reason='return_other_part_first')
+        if getattr(self,'_hidden_parts',()) and any(m.component=='gpu' and pose_hidden(m,self._hidden_parts) for m in self._scene.meshes):
+            state.update(available=False,reason='target_hidden')
         return state
 
     def preview_gpu_insertion(self,removed=True):
@@ -750,13 +933,18 @@ class AssemblyViewport(QOpenGLWidget):
     def preview_effect(self,component='case'):
         if (self._closed or self._error or not self._motion or not self._selection_effects
                 or not self.isVisible() or self.window().isMinimized()):return False
-        if self._focus!='all' and self._focus not in (component,component_family(component)):return False
-        if not any(AssemblyRenderer._matches_selection(mesh,component) for mesh in self._scene.meshes):return False
+        matched=[mesh for mesh in self._scene.meshes if AssemblyRenderer._matches_selection(mesh,component) and not pose_hidden(mesh,
+                   getattr(self,'_hidden_parts',()),getattr(self,'_hidden_connection_names',()))]
+        if not matched:return False
+        families={'case' if mesh.component=='panel' else mesh.component for mesh in matched}
+        if len(families)!=1:return False
+        family=next(iter(families))
+        if self._focus!='all' and self._focus not in (component,family):return False
         styles=self._scene.metadata.get('mesh_style_ids') or [self._scene.metadata.get('visual_style','miniature')]*len(self._scene.meshes)
         policies=[effect_for(style) for mesh,style in zip(self._scene.meshes,styles)
                   if AssemblyRenderer._matches_selection(mesh,component)]
         longest=max(policies,key=lambda policy:policy['duration_ms'])
-        if not self._effect.start(longest['style'],component):return False
+        if not self._effect.start(longest['style'],component,family=family if component_family(component) not in ASSEMBLY_COMPONENTS else None):return False
         self._update_animation_state();self.update();return True
 
     def _step_fans(self,elapsed_ms):
@@ -790,11 +978,15 @@ class AssemblyViewport(QOpenGLWidget):
         gpu=getattr(self,'_gpu_insertion',None)
         was_active=bool(gpu and gpu.active)
         insertion_changed=gpu.advance(elapsed_ms) if gpu and was_active else False
+        part=getattr(self,'_part_motion',None);part_was_active=bool(part and part.active)
+        part_changed=part.advance(elapsed_ms) if part_was_active else False
         if insertion_changed:self._renderer._pick_state=None
+        if part_changed:self._renderer._pick_state=None
         self._update_animation_state()
         if was_active and not gpu.active:self.gpuAssemblyChanged.emit()
-        if fan_changed or effect_changed or insertion_changed:self.update()
-        return fan_changed or effect_changed or insertion_changed
+        if part_was_active and not part.active:self.partAssemblyChanged.emit()
+        if fan_changed or effect_changed or insertion_changed or part_changed:self.update()
+        return fan_changed or effect_changed or insertion_changed or part_changed
 
     def set_exploded(self,enabled):
         if self._exploded!=(enabled is True):
@@ -805,16 +997,21 @@ class AssemblyViewport(QOpenGLWidget):
         enabled=enabled is True
         if self._inspection_cutaway==enabled:return
         self._inspection_cutaway=enabled
+        self._released_mounts=frozenset()
         # Never let a click between this toggle and the next paint use the old
         # cover visibility. The next regular draw restores the same camera ray.
         self._renderer._pick_state=None
+        if not getattr(self,'_changing_scene',False):
+            AssemblyViewport._reset_part_motion(self);AssemblyViewport._refresh_part_plan(self)
         self.update()
 
     def set_show_psu(self,enabled):
         """Temporarily remove only a real PSU cover; never rebuild hardware."""
         enabled=enabled is True
         if getattr(self,'_show_psu',False)==enabled:return
-        self._show_psu=enabled;self._renderer._pick_state=None;self.update()
+        self._show_psu=enabled;self._released_mounts=frozenset();self._renderer._pick_state=None;self.update()
+        if not getattr(self,'_changing_scene',False):
+            AssemblyViewport._reset_part_motion(self);AssemblyViewport._refresh_part_plan(self)
 
     def set_dark(self,enabled):
         if self._dark!=(enabled is True):self._dark=enabled is True;self.update()
@@ -835,9 +1032,14 @@ class AssemblyViewport(QOpenGLWidget):
         self.update()
 
     def focus_component(self,name):
-        if component_family(name) not in ASSEMBLY_COMPONENTS:return False
+        # Authored part IDs need not start with their component family (for
+        # example case-fan:0 is a fans mesh). Identity comes from the scene.
+        exact=any(mesh.part_id==name and mesh.component in ASSEMBLY_COMPONENTS for mesh in self._scene.meshes)
+        if component_family(name) not in ASSEMBLY_COMPONENTS and not exact:return False
         if name!='all' and not any(AssemblyRenderer._selected(mesh,name) for mesh in self._scene.meshes):return False
         if name!=self._focus:
+            AssemblyViewport._reset_part_motion(self)
+            self._released_mounts=frozenset();self._part_plan_key=None
             styles=self._scene.metadata.get('mesh_style_ids')
             if not isinstance(styles,(tuple,list)) or len(styles)!=len(self._scene.meshes):
                 styles=(self._scene.metadata.get('visual_style','miniature'),)
@@ -848,9 +1050,14 @@ class AssemblyViewport(QOpenGLWidget):
 
     def select_component(self,name):
         selected='' if name=='all' else name
-        if selected and component_family(selected) not in ASSEMBLY_COMPONENTS:return False
+        if selected and not any(AssemblyRenderer._selected(mesh,selected)
+                                and mesh.component in ASSEMBLY_COMPONENTS for mesh in self._scene.meshes):return False
         if selected!=self._selected:
+            AssemblyViewport._reset_part_motion(self)
+            if hasattr(self,'_opened_retention_names'):self._opened_retention_names=frozenset()
+            self._released_mounts=frozenset()
             self._selected=selected;self.componentSelected.emit(selected or 'all')
+            AssemblyViewport._refresh_part_plan(self)
             preview=getattr(self,'preview_effect',None)
             if selected and callable(preview):
                 if not preview(selected):self.update()
@@ -863,14 +1070,31 @@ class AssemblyViewport(QOpenGLWidget):
     def _update_animation_state(self):
         visible=bool(not self._closed and not self._error and self.isVisible() and not self.window().isMinimized())
         motion=getattr(self,'_motion',True)
+        if not visible or not motion:
+            planner=getattr(self,'_part_planner',None)
+            discard=getattr(planner,'discard_geometry_cache',None)
+            if callable(discard):discard()
+        elif getattr(self,'_part_plan_key','already_valid') is None:
+            AssemblyViewport._refresh_part_plan(self)
         insertion=getattr(self,'_gpu_insertion',None)
         if insertion and (not visible or not motion or self._exploded or self._focus not in ('all','gpu','gpu:0')):
             if insertion.reset():
                 self._renderer._pick_state=None;self.gpuAssemblyChanged.emit();self.update()
         gpu_paused=bool(insertion and (insertion.active or insertion.progress>0))
+        part=getattr(self,'_part_motion',None)
+        plan=getattr(self,'_part_plan',{})
+        if part and (not visible or not motion or self._exploded
+                     or self._focus not in ('all',plan.get('target'),plan.get('component_family',component_family(plan.get('target',''))))):
+            AssemblyViewport._reset_part_motion(self)
+            if getattr(self,'_released_mounts',()):
+                self._released_mounts=frozenset();AssemblyViewport._refresh_part_plan(self);self.update()
         def eligible(mesh):
             if not mesh.rotor or not AssemblyRenderer._selected(mesh,self._focus):return False
+            parts=getattr(self,'_hidden_parts',());names=getattr(self,'_hidden_connection_names',())
+            if (parts or names) and pose_hidden(mesh,parts,names):return False
             if mesh.component=='gpu' and gpu_paused:return False
+            if mesh.part_id in getattr(self,'_released_mounts',()):return False
+            if part and (part.active or part.progress>0) and mesh.part_id in plan.get('part_ids',()):return False
             if getattr(self,'_demo',False):return True
             if mesh.component=='gpu':return self._fan_available and self._rpm>0 and time.monotonic()<=self._fan_expiry
             if mesh.component=='cooler':return (getattr(mesh,'part_id','') in getattr(self,'_real_cpu_rotor_parts',())
@@ -882,9 +1106,10 @@ class AssemblyViewport(QOpenGLWidget):
         effect=getattr(self,'_effect',None)
         if effect is not None:
             if (not visible or not motion or not self._selection_effects
-                    or self._focus!='all' and self._focus not in (effect.component,component_family(effect.component))):effect.cancel()
+                    or self._focus!='all' and self._focus not in (effect.component,getattr(effect,'family',None) or component_family(effect.component))):effect.cancel()
             self._effect_active=bool(effect.active and visible and motion and self._selection_effects)
-        combined=active or getattr(self,'_effect_active',False) or bool(insertion and insertion.active and visible and motion)
+        combined=(active or getattr(self,'_effect_active',False) or bool(insertion and insertion.active and visible and motion)
+                  or bool(part and part.active and visible and motion))
         if combined!=getattr(self,'_clock_active_state',False):
             self._clock_active_state=combined;self.animationActiveChanged.emit(combined)
 
@@ -912,6 +1137,20 @@ class AssemblyViewport(QOpenGLWidget):
             insertion=getattr(self,'_gpu_insertion',None)
             if insertion and (insertion.active or insertion.progress>0):
                 options.update(gpu_offset=insertion.offset(self._gpu_plan),hide_gpu_power=True,inspection_cutaway=True)
+            part=getattr(self,'_part_motion',None)
+            hidden_names=getattr(self,'_hidden_connection_names',frozenset())|getattr(self,'_opened_retention_names',frozenset())
+            if getattr(self,'_released_mounts',()):
+                hidden_names=hidden_names|frozenset(self._part_plan.get('hide_mesh_names',()))
+                if isinstance(phase,dict):
+                    phase.update({key:0. for key in self._released_mounts})
+                    options['phase']=phase
+            if getattr(self,'_hidden_parts',()):options['hidden_parts']=self._hidden_parts
+            if part and (part.active or part.progress>0):
+                plan=self._part_plan;position=part.offset(plan)
+                options['part_offsets']={key:position for key in plan.get('part_ids',())}
+                options['part_extents']={key:tuple(v*plan['distance_mm'] for v in plan['direction']) for key in plan.get('part_ids',())}
+                hidden_names=hidden_names|frozenset(plan.get('hide_mesh_names',()))
+            if hidden_names:options['hidden_mesh_names']=hidden_names
             if self._transparent_background:options['transparent_background']=True
             if getattr(self,'_selected',''):options['selected']=self._selected
             effect=getattr(self,'_effect',None)
@@ -978,3 +1217,9 @@ class AssemblyViewport(QOpenGLWidget):
         self._scene_cache.clear();self._renderer.forget_scene()
         self._scene=Scene((),self._scene.dimensions,{})
         self._gpu_plan={}
+        planner=getattr(self,'_part_planner',None)
+        if planner is not None:planner.clear()
+        if getattr(self,'_part_motion',None):self._part_motion.reset()
+        self._part_planner=None;self._part_plan={};self._part_plan_key=None
+        self._hidden_parts=frozenset();self._hidden_connection_names=frozenset();self._opened_retention_names=frozenset()
+        self._released_mounts=frozenset()

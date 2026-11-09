@@ -159,8 +159,8 @@ Window {
 
     def test_every_current_model_has_valid_cartoon_art_in_both_surface_inks(self):
         appearances = all_appearances()
-        self.assertEqual(len(appearances), 178)
-        self.assertEqual(Counter(row["kind"] for row in appearances), dict(cpu=3, gpu=147, memory=28))
+        self.assertEqual(len(appearances), 179)
+        self.assertEqual(Counter(row["kind"] for row in appearances), dict(cpu=3, gpu=148, memory=28))
         self.assertEqual(len({row["id"] for row in appearances}), len(appearances))
         for value in appearances:
             for ink in ("#303a48", "#e6eef5"):

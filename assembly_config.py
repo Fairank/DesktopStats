@@ -20,7 +20,8 @@ PART_FIELDS = ("board_model","cooler_model","cooler_mount","case_fans","psu_mode
                "secondary_radiator_model","secondary_radiator_fan_model","secondary_radiator_fan_layout",
                "loop_components_mode","cpu_block_model","pump_model","pump_top_model","reservoir_model",
                "pump_reservoir_model","fitting_model","tubing_model","loop_tubes_visible","loop_fittings")
-FAN_MOUNTS = ("front","top","rear","bottom","side")
+COOLER_MOUNTS = ("front","top","rear","bottom","side")
+FAN_MOUNTS = (*COOLER_MOUNTS,"above_psu_shroud")
 CABLE_COLORS = {"black":"#252d35","white":"#dddfe3","red":"#a63f4b","blue":"#3c6d9b"}
 DETAIL_LEVELS = ("eco","balanced","close")
 WINDOW_MODES = ("inspect","desktop")
@@ -65,7 +66,7 @@ def target_screen(screens,bar,primary,native_identity):
     return next((identified[name.casefold()] for name in names
                  if isinstance(name,str) and identified.get(name.casefold()) is not None),None)
 _ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
-_PART_TARGET = re.compile(r"^(case|gpu|cpu|memory|board|cooler|fans|psu|storage|expansion|cables)(?::[a-z0-9][a-z0-9-]{0,63}){0,3}$")
+_PART_TARGET = re.compile(r"^(case|gpu|cpu|memory|board|cooler|fans|case-fan|radiator-fan|psu|storage|expansion|cables)(?::[a-z0-9][a-z0-9-]{0,63}){0,3}$")
 
 
 def validate_assembly(value=None):
@@ -103,14 +104,14 @@ def validate_assembly(value=None):
         if type(selected) is not str or selected and not _ID.fullmatch(selected):
             raise ValueError("配件型号设置不正确")
         result[field]=selected
-    for field,allowed in (("loop_components_mode",("reference","selected")),("cooler_mount",FAN_MOUNTS),("fan_motion",("measured","demo")),
+    for field,allowed in (("loop_components_mode",("reference","selected")),("cooler_mount",COOLER_MOUNTS),("fan_motion",("measured","demo")),
                           ("cable_color",CABLE_COLORS),("lighting_preview",("artwork","off","warm","mint","violet")),
                           ("radiator_fan_layout",("single","push_pull","none")),
                           ("secondary_radiator_fan_layout",("single","push_pull","none"))):
         selected=value.get(field,DEFAULT_ASSEMBLY[field])
         if type(selected) is not str or selected not in allowed:raise ValueError("配件安装设置不正确")
         result[field]=selected
-    for field,maximum in (("case_fans",5),("storage",8),("expansion_cards",3)):
+    for field,maximum in (("case_fans",len(FAN_MOUNTS)),("storage",8),("expansion_cards",3)):
         rows=value.get(field,[])
         if type(rows) is not list or len(rows)>maximum:raise ValueError("配件列表设置不正确")
         clean=[];seen=set()

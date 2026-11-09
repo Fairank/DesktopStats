@@ -58,6 +58,30 @@ class AssemblyInkPriority046Tests(unittest.TestCase):
         scene=self.reference_scene()
         beams=[m for m in scene.meshes if m.name in ('case-upright','case-width-rail','case-depth-rail')]
         self.assertEqual(len(beams),12)
+        # HAF's PSU belongs behind the motherboard. Its source-observed
+        # lower cooling bracket and motherboard tray replace the old filled
+        # main-chamber PSU cover; retain their complete primary outer rims.
+        shroud=scene.metadata['case_shroud']
+        self.assertEqual(shroud['case_id'],'cooler-master-haf-700-evo')
+        self.assertFalse(shroud['horizontal_psu_cover_present'])
+        self.assertEqual(shroud['psu_chamber'],'behind_motherboard_lower_rear')
+        self.assertTrue(shroud['layout_reference']['main_chamber_is_not_a_psu_bay'])
+        self.assertFalse(any(m.component=='case' and m.name=='psu-shroud' for m in scene.meshes))
+        source_names={'case:bottom-cooling-support':'case-bottom-cooling-support',
+                      'case:motherboard-tray':'case-haf-motherboard-tray'}
+        source_structures=[]
+        for identity,name in source_names.items():
+            rows=[m for m in scene.meshes if m.component=='case' and m.part_id==identity]
+            self.assertEqual(len(rows),1,identity)
+            self.assertEqual(rows[0].name,name)
+            declared=[r for r in shroud['parts'] if r['id']==identity]
+            self.assertEqual(len(declared),1,identity)
+            self.assertEqual((declared[0]['kind'],declared[0]['component'],declared[0]['model_id']),
+                             ('case_structure','case','cooler-master-haf-700-evo'))
+            self.assertFalse(declared[0]['dimensions_verified'])
+            self.assertTrue(declared[0]['source_urls'])
+            self.assertTrue(any(r['id']==identity for r in scene.metadata['hardware']['parts']))
+            source_structures.append(rows[0])
         for style in ('outline','notebook_line','sketch'):
             batches=edge_batches(scene.meshes,style);lookup={id(m):data for m,data in batches}
             self.assertLessEqual(sum(len(data)//12 for _,data in batches),MAX_STYLE_EDGES)
@@ -65,8 +89,25 @@ class AssemblyInkPriority046Tests(unittest.TestCase):
             for mesh in beams:
                 edges=crease_edges(mesh.vertices);self.assertEqual(len(edges),12)
                 self.assertTrue(all(retained(edge,lookup[id(mesh)]) for edge in edges),(style,mesh.name))
-            shroud=next(m for m in scene.meshes if m.name=='psu-shroud')
-            self.assertTrue(all(retained(edge,lookup[id(shroud)]) for edge in crease_edges(shroud.vertices)))
+            for mesh in source_structures:
+                edges=crease_edges(mesh.vertices);groups=_edge_groups(edges)
+                self.assertTrue(groups,(style,mesh.part_id))
+                maximum=max(span for _,span in groups)
+                physical_span=max(max(mesh.vertices[k::6])-min(mesh.vertices[k::6]) for k in range(3))
+                self.assertAlmostEqual(maximum,physical_span,places=3)
+                # Both faces of each primary perimeter must remain closed.
+                # Internal sampled vent/hole groups need not all consume the
+                #512-mesh/global8192 budget in this crowded complete host.
+                primary=[group for group,span in groups if span>=maximum*.9]
+                self.assertGreaterEqual(sum(map(len,primary)),8,(style,mesh.part_id))
+                for group in primary:
+                    degree={}
+                    for index in group:
+                        for point in edges[index]:degree[point]=degree.get(point,0)+1
+                    self.assertTrue(degree and all(value>=2 for value in degree.values()),
+                                    (style,mesh.part_id,'closed physical main perimeter'))
+                    self.assertTrue(all(retained(edges[index],lookup.get(id(mesh),())) for index in group),
+                                    (style,mesh.part_id,'complete source main perimeter'))
             tubes=[m for m in scene.meshes if m.name=='loop-reference-routed-tube']
             self.assertEqual(len(tubes),3)
             for mesh in tubes:

@@ -130,7 +130,7 @@ class GpuEvenodd046Tests(unittest.TestCase):
                         expected=min((u if .005<=u<=.5 else base/length)*length,
                                      (v if .005<=v<=.5 else base/width)*width)
                         self.assertAlmostEqual(fan['radius_mm'],expected,places=10)
-        self.assertEqual(count,147)
+        self.assertEqual(count,148)
 
     def test_unknown_physical_axis_keeps_scalar_fallback_without_claiming_fan_diameter(self):
         self.assertEqual(_fan_radius([.18,.52],63.2,None,120,2),63.2)

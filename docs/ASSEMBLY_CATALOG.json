@@ -9182,7 +9182,7 @@
     "loop_package_artifacts": 19,
     "loop_products": 75,
     "packs": 2,
-    "total_named_products": 828,
+    "total_named_products": 829,
     "total_optional_products": 314
   },
   "products": [
@@ -16242,6 +16242,28 @@
       "telemetry": "installed_identity_only"
     },
     {
+      "brand": "GIGABYTE",
+      "dimensions_mm": {
+        "height": null,
+        "length": null,
+        "thickness": null
+      },
+      "geometry_scope": "existing_hardware_profile",
+      "internal_pcb_routing": "unverified",
+      "kind": "gpu",
+      "label": "GIGABYTE GV-N52128D GeForce FX 5200 Rev.1.0 Manual Reference",
+      "model_id": "gigabyte-fx5200-n52128d-rev10-reference",
+      "model_status": "original_schematic",
+      "record_type": "product",
+      "series": "GIGABYTE · GeForce FX",
+      "source_urls": [
+        "https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd"
+      ],
+      "styles": "all_listed_styles",
+      "taxonomy_status": "classified",
+      "telemetry": "installed_identity_only"
+    },
+    {
       "brand": "INNO3D",
       "dimensions_mm": {
         "height": 118,
@@ -20629,14 +20651,14 @@
       "cpu": 3,
       "expansion": 3,
       "fan": 70,
-      "gpu": 147,
+      "gpu": 148,
       "memory": 28,
       "psu": 21,
       "radiator": 24,
       "storage": 29
     },
-    "products": 514,
-    "records": 515,
+    "products": 515,
+    "records": 516,
     "reference_combinations": 1,
     "series_pending": 96
   }

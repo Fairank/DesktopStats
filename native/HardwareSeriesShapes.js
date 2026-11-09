@@ -83,7 +83,12 @@ function geometry(state, base) {
         centers[0]=x+w-4.5
     var radii=centers.map(function(){return radius})
     var fanY=centers.map(function(){return y+h*.51})
-    if (state.series_id === "gigabyte_fx5200" && count === 1) radii[0]*=.65
+    if (state.series_id === "gigabyte_fx5200" && count === 1) {
+        // GV-N52128D manual p5 REV:1.0 front-layout reference. This cannot
+        // confirm the unversioned model's blade count/cap or measured diameter.
+        centers[0]=x+w*.556;fanY[0]=y+h*.610
+        radii[0]=Math.min(w*.144,h*.243)
+    }
     if (state.series_id === "colorful_advanced" && count === 3)
         radii=[radius*.88,radius*1.10,radius*.88]
     if (state.series_id === "galax_ex_gamer" && count === 3)

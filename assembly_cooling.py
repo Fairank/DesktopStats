@@ -713,10 +713,38 @@ def _special_air(builder,cooler,p,basis):
 
 
 _MOUNT_NORMALS={'front':(0.,0.,1.),'rear':(0.,0.,-1.),'top':(0.,1.,0.),'bottom':(0.,-1.,0.),'side':(1.,0.,0.)}
+_AUTHORED_FAN_CASES={'above_psu_shroud':'lian-li-lancool-iii'}
+_PART_MOUNT_IDS={'above_psu_shroud':'above-psu-shroud'}
+
+
+def _authored_fan_plane(mount,planes):
+    """Special brackets require their explicit frame; no generic side fallback.
+
+    This is a drawing-reference fan placement, never an observed extraction
+    direction. Keep it outside the canonical motion/radiator mount whitelist.
+    """
+    if mount not in _AUTHORED_FAN_CASES or not isinstance(planes,dict):return None
+    plane=planes.get(mount)
+    if not isinstance(plane,dict):return None
+    vectors=[plane.get(key) for key in ('position','normal','up')]
+    if not all(isinstance(v,(tuple,list)) and len(v)==3 and all(type(x) in (int,float) and math.isfinite(x) for x in v) for v in vectors):return None
+    _position,normal,up=vectors
+    if abs(_dot(normal,normal)-1.)>1e-7 or abs(_dot(up,up)-1.)>1e-7 or abs(_dot(normal,up))>1e-7:return None
+    if any(abs(normal[k]-(0.,-1.,0.)[k])>1e-7 for k in range(3)):return None
+    span=plane.get('span_mm')
+    if not isinstance(span,(tuple,list)) or len(span)!=2 or not all(type(x) in (int,float) and math.isfinite(x) and 0<x<=2000 for x in span):return None
+    if plane.get('source_capacity_size_mm')!=120 or plane.get('source_capacity_count')!=3:return None
+    if not isinstance(plane.get('source'),str) or not plane['source'].startswith('https://'):return None
+    return plane
 
 
 def _mount_plane(mount,dimensions,inset,planes=None):
-    w,h,d=dimensions;n=_MOUNT_NORMALS[mount]
+    w,h,d=dimensions
+    if mount in _AUTHORED_FAN_CASES:
+        explicit=_authored_fan_plane(mount,planes)
+        if explicit is None:raise ValueError('Special case-fan mount needs its authored reference frame')
+        n=tuple(explicit['normal'])
+    else:n=_MOUNT_NORMALS[mount]
     plane=planes.get(mount) if isinstance(planes,dict) else None
     if isinstance(plane,dict):
         p=plane.get('position');normal=plane.get('normal');up=plane.get('up',(0.,1.,0.))
@@ -1218,13 +1246,28 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
                     gpu_pcb=pcb
                 else:meta['warnings'].append('GPU block omitted: requires custom loop, explicit posed PCB reference and a separate supported full-size radiator mount; original GPU cooler retained.')
             manual_loop=kind=='custom_loop' and selection.get('loop_components_mode')=='selected'
-            if stack_check and not stack_check['within_limit']:
+            from assembly_radiator_fit052 import check as check_radiator_fit,radiator_planes
+            fit_checks=[];radiator_plane=planes
+            if cooler and fan:
+                primary_fit=check_radiator_fit(anchors,spec,cooler,mount,fan)
+                if primary_fit:fit_checks.append(dict(primary_fit,radiator_role='primary'))
+                radiator_plane=radiator_planes(anchors,planes,mount,fan)
+            if gpu_pcb is not None and secondary_cooler:
+                secondary_fan=_reference_fan(secondary_cooler)
+                secondary_fit=check_radiator_fit(anchors,spec,secondary_cooler,secondary_mount,secondary_fan)
+                if secondary_fit:fit_checks.append(dict(secondary_fit,radiator_role='secondary'))
+                if secondary_mount=='top':radiator_plane=radiator_planes(anchors,planes,secondary_mount,secondary_fan)
+            if fit_checks:meta['case_radiator_limit_checks']=fit_checks
+            failed_fit=next((row for row in fit_checks if row['rejected']),None)
+            if failed_fit:
+                meta['rejected'].append(dict(failed_fit,kind='cooler',model_id=cooler['id']))
+            elif stack_check and not stack_check['within_limit']:
                 meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],mount=mount,
                     reason='radiator_fan_stack_exceeds_case_clearance',required_mm=stack_check['required_mm'],
                     limit_mm=stack_check['limit_mm'],source=stack_check['source']))
             elif cooler is not None and manual_loop and check!='unsupported':
                 from assembly_loop046 import add_selected_loop
-                loop=add_selected_loop(builder,cooler,selection,spec,anchors,dimensions,planes,p,basis,mount,meshes)
+                loop=add_selected_loop(builder,cooler,selection,spec,anchors,dimensions,radiator_plane,p,basis,mount,meshes)
                 meta['selected_loop']=loop;meta['cooler']=cooler
                 meta['rejected'].extend(dict(row,kind='loop_component') for row in loop['issues'] if row['severity']=='error')
                 meta['loop_issues']=[row for row in loop['issues'] if row['severity']!='error']
@@ -1232,7 +1275,7 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
                 meta['fan_tach_mapping']='Independent loop components have no bound water temperature, flow or pump/fan tach.'
             elif cooler is None:pass
             elif check=='unsupported' :meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='unsupported_radiator_mount'))
-            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,planes,anchors.get('case_floor_deck'),secondary_cooler,meshes,case.get('id','')):
+            elif _liquid(builder,cooler,p,basis,mount,dimensions,gpu_pcb,secondary_mount,radiator_plane,anchors.get('case_floor_deck'),secondary_cooler,meshes,case.get('id','')):
                 occupied.add(mount);meta['cooler']=cooler;meta['radiator_mount_compatibility']=check
                 occupied.update(row['mount'] for row in builder.parts if row['kind']=='radiator')
                 meta['replace_gpu_cooler']=any(part['kind']=='gpu_waterblock' for part in builder.parts)
@@ -1243,13 +1286,20 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
                 meta['warnings'].append('Radiator fan-mount support does not verify radiator clearance; hose routes, fittings and pump internals are schematic.')
             else:meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],reason='radiator_exceeds_mount_plane'))
         else:
-            _air(builder,cooler,p,basis);meta['cooler']=cooler;meta['cpu_fan_tach_usable']=cooler['fan_count']>0
-            meta['fan_tach_mapping']=('Passive cooler: no installed fan or assigned CPU_FAN tachometer.' if cooler['fan_count']==0 else
-                'Selected air-cooler main fan(s): fresh CPU_FAN tach is a representative header only; multiple fans do not have independently measured RPM.')
-            main_fans=[fan for fan in builder.fans if fan['role']=='cpu_main']
-            if main_fans and all(fan.get('blade_geometry_reviewed') for fan in main_fans):
-                meta['real_cpu_rotor_parts']=['cooler:cpu']
-            elif cooler['fan_count']>0:meta['warnings'].append('Air-cooler leaf contours/count are reference geometry pending primary-photo review; real-RPM rotation is gated off, explicit demo remains available.')
+            from assembly_air_fit052 import check as check_air_fit
+            height_check=check_air_fit(anchors,spec,case,cooler)
+            if height_check:meta['air_cooler_height_check']=height_check
+            if height_check and height_check['rejected']:
+                meta['rejected'].append(dict(kind='cooler',model_id=cooler['id'],
+                    reason=height_check['reason'],source=height_check['source']))
+            else:
+                _air(builder,cooler,p,basis);meta['cooler']=cooler;meta['cpu_fan_tach_usable']=cooler['fan_count']>0
+                meta['fan_tach_mapping']=('Passive cooler: no installed fan or assigned CPU_FAN tachometer.' if cooler['fan_count']==0 else
+                    'Selected air-cooler main fan(s): fresh CPU_FAN tach is a representative header only; multiple fans do not have independently measured RPM.')
+                main_fans=[fan for fan in builder.fans if fan['role']=='cpu_main']
+                if main_fans and all(fan.get('blade_geometry_reviewed') for fan in main_fans):
+                    meta['real_cpu_rotor_parts']=['cooler:cpu']
+                elif cooler['fan_count']>0:meta['warnings'].append('Air-cooler leaf contours/count are reference geometry pending primary-photo review; real-RPM rotation is gated off, explicit demo remains available.')
         if 'cooler' in meta:
             meta['sources'].extend(cooler['sources'])
             if kind=='custom_loop' and meta.get('replace_gpu_cooler') and secondary_cooler:meta['sources'].extend(secondary_cooler['sources'])
@@ -1260,19 +1310,39 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
     for group in groups[:12]:
         if not isinstance(group,dict):meta['rejected'].append(dict(kind='case_fan',reason='invalid_group'));continue
         model=get_fan(group.get('model'));mount=group.get('mount');count=group.get('count');direction=group.get('direction','intake')
-        reason=''
+        reason='';floor_reference=None
         if not model:reason='unknown_model'
-        elif mount not in _MOUNT_NORMALS:reason='invalid_mount'
+        elif mount not in _MOUNT_NORMALS and mount not in _AUTHORED_FAN_CASES:reason='invalid_mount'
         elif type(count) is not int or not 1<=count<=4:reason='invalid_count'
         elif direction not in ('intake','exhaust'):reason='invalid_direction'
         elif mount in occupied:reason='radiator_occupies_mount'
         elif mount in used_mounts:reason='duplicate_mount_selection'
         elif _mount_check(case,mount,model['size_mm'],count)=='unsupported':reason='unsupported_fan_mount'
+        elif mount in _AUTHORED_FAN_CASES:
+            selected_case=spec.get('case')
+            exact_selected=isinstance(selected_case,dict) and selected_case.get('id')==_AUTHORED_FAN_CASES[mount]
+            if case.get('id')!=_AUTHORED_FAN_CASES[mount] or not exact_selected:reason='case_fan_mount_reference_unavailable'
+            elif model['size_mm']!=120 or count>3:reason='unsupported_fan_mount'
+            elif _authored_fan_plane(mount,planes) is None:reason='case_fan_mount_reference_unavailable'
+        if not reason:
+            from assembly_fan_fit052 import check as check_fan_fit
+            source_limit=check_fan_fit(anchors,spec,case,mount,model,count)
+            if source_limit:
+                meta.setdefault('case_fan_limit_checks',[]).append(source_limit)
+                if source_limit['rejected']:reason=source_limit['reason']
         if not reason:
             center,basis,span=_mount_plane(mount,dimensions,model['depth_mm']/2+10,planes)
             half=half_extents(model)
+            if mount=='bottom' and 'bottom' not in planes:
+                from assembly_floor_pose052 import reference_bottom_pose
+                floor_reference=reference_bottom_pose(meshes,dimensions,half,planes)
+                if floor_reference is not None:
+                    center,basis,span=(floor_reference[key] for key in ('center','basis','span'))
+                    meta.setdefault('case_fan_floor_references',[]).append(dict(floor_reference['meta'],mount=mount))
+                elif any(m.name=='case-bottom' and m.component=='case' for m in meshes):
+                    reason='case_fan_mount_reference_unavailable'
             stack_length=(count-1)*model['size_mm']+half[1]*2
-            if half[0]*2>span[0]+1 or stack_length>span[1]+1:reason='fans_exceed_mount_plane'
+            if not reason and (half[0]*2>span[0]+1 or stack_length>span[1]+1):reason='fans_exceed_mount_plane'
             # A legacy central rear plane put the exhaust fan directly through
             # expansion cards. Use an explicitly schematic upper-rear position
             # only when there is no authored mount plane; never move that plane.
@@ -1293,11 +1363,13 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
             if blocked:reason='case_fan_clearance_conflict'
         if reason:
             meta['rejected'].append(dict(kind='case_fan',model_id=group.get('model'),mount=mount,reason=reason,
-                **(dict(conflicting_parts=sorted(blocked),omitted_count=count) if blocked else {})))
+                **(dict(conflicting_parts=sorted(blocked),omitted_count=count) if blocked else
+                   dict(omitted_count=count) if reason in ('case_fan_psu_length_limit','case_fan_depth_limit','case_fan_mount_reference_unavailable')
+                   and type(count) is int and 1<=count<=4 else {})))
             continue
         used_mounts.add(mount)
         for i,position in enumerate(positions):
-            part='fans:'+mount+':'+str(i)
+            part='fans:'+_PART_MOUNT_IDS.get(mount,mount)+':'+str(i)
             fan_normal=basis[2] if direction=='intake' else _mul(basis[2],-1)
             wire_basis=_basis(fan_normal,basis[0]);default_sign=-1 if mount in ('rear','bottom') else 1
             def reference_tail(sign):
@@ -1309,8 +1381,9 @@ def add_cooling(meshes,spec,level='balanced',anchors=None):
             _fan(builder,model,position,fan_normal,basis[0],component='fans',part=part,role='case',direction=direction,wire_sign_override=wire_sign_override)
             builder.parts.append(dict(id=part,label=model['label']+' · '+mount+' '+str(i+1),kind='case_fan',model_id=model['id'],mount=mount,
                 compatibility=_mount_check(case,mount,model['size_mm'],count),
-                placement_method='authored_mount_plane' if planes.get(mount) else 'official_manual_rear_below_psu_reference' if placement_source else 'upper_rear_reference' if mount=='rear' else 'centered_mount_reference',
+                placement_method='reference_floor_and_main_bay' if floor_reference else 'authored_mount_plane' if planes.get(mount) else 'official_manual_rear_below_psu_reference' if placement_source else 'upper_rear_reference' if mount=='rear' else 'centered_mount_reference',
                 clearance_check='conservative_selected_solid_envelopes',cad_fit_verified=False,
+                **(dict(placement_reference=dict(floor_reference['meta'])) if floor_reference else {}),
                 **(dict(placement_source=placement_source,placement_source_page=39,mounting_hole_positions_verified=False) if placement_source else {})))
             fan_obstacles.append((part,'case-fan-swept-envelope',envelope(model,position,basis)))
         meta['sources'].extend(model['sources'])

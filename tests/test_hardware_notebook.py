@@ -146,7 +146,7 @@ Window {
     def test_all_registered_models_have_transparent_bounded_art_in_all_notebook_styles(self):
         values = drawing_fixture.all_appearances()
         counts = Counter(row["kind"] for row in values)
-        self.assertEqual(counts["gpu"], 147)
+        self.assertEqual(counts["gpu"], 148)
         self.assertEqual(counts["memory"], 28)
         self.assertIn(counts["cpu"], (3, 4))
         self.assertEqual(len({row["id"] for row in values}), len(values))

@@ -59,7 +59,8 @@ class AssemblyGeometryTests(unittest.TestCase):
 
     def test_existing_gpu_catalog_all_models_produce_bounded_finite_geometry(self):
         records=[row for row in CATALOG if row[1]=='gpu']
-        self.assertEqual(len(records),147)
+        self.assertEqual(len(records),148)
+        self.assertIn('gigabyte-fx5200-n52128d-rev10-reference',{row[0] for row in records})
         for row in records:
             value=appearance_for('gpu',row[-1][0])
             with self.subTest(model=row[0]):

@@ -2,6 +2,8 @@
 .import "HardwareFanDesigns.js" as Fans
 .import "HardwareSolid.js" as Solid
 .import "HardwareBoardDesigns.js" as Board
+.import "HardwareVariantGroupA.js" as VariantA
+.import "HardwareDenseInk052.js" as DenseInk
 .import "HardwareSketch.js" as Sketch
 .import "HardwareNotebook.js" as Notebook
 .import "HardwareCartoon.js" as Cartoon
@@ -109,7 +111,9 @@ function paint(source,state,fanProfile) {
         colors.blade=Notebook.pencilBladeColor(fanProfile)
         return Notebook.rotorInk(source,colors)
     }
-    if(["notebook_line","notebook_smile"].indexOf(style)>=0)
+    if(style==="notebook_line")
+        return DenseInk.apply(Notebook.rotorInk(source,{ink:state.ink}),state,fanProfile)
+    if(style==="notebook_smile")
         return Notebook.rotorInk(source,{ink:state.ink})
     if(style==="sketch")return Sketch.linework(source,Sketch.palette(state),"model-rotor",{rotor:true,wobble:false,keepTiny:true})
     if(style==="inkwash")return Variants.inkwash(Notebook.rotorInk(source,{ink:"#455360"}),Variants.palette(style,state.ink))
@@ -237,6 +241,11 @@ function body(state,base,collector) {
             red_label_edge:["msi-gtx980ti-gaming-6g","msi-vega64-8g-reference"].indexOf(state.model_id)>=0,
             light_label_edge:["biostar-radeon-rx7600-va7606rm81","biostar-radeon-rx7600-oc-va76s6rm81"].indexOf(state.model_id)>=0}
         rotor.body=paint(Fans.modelRotor(p,hints),state,p)
+        // An unreviewed cap is still replayed by the retained layer caller.
+        // Keep the exact static plain lettering in that same cap plane;
+        // known remains false and no fan motion is enabled by this detail.
+        if(state.model_id==='msi-n480gtx-m2d15' && p.blades===null)
+            rotor.body+=VariantA.legacy052BrandCap(state,{cx:0,cy:0,radius:rotor.basis||3})
     })
     var line=["outline","sketch","notebook_line","notebook_color","notebook_smile","inkwash"].indexOf(state.icon_set)>=0
     var fixed=""
@@ -251,5 +260,9 @@ function body(state,base,collector) {
             fixed+='<circle class="hardware-model-static-metal-cap" cx="'+n(h.cx)+'" cy="'+n(h.cy)+'" r="'+n(r)+'" fill="'+(line?'none':'#bdc9d0')+'" stroke="'+(line?state.ink:'#8c9eaa')+'" stroke-width=".065"/>'
         }
     })
+    // Exact static labels/opening tones remain outside all rotor layers.
+    // No general fan/body order or animation eligibility is changed.
+    if(state.model_id==='msi-n480gtx-m2d15')fixed+=VariantA.legacy052Fixed(state,faceGeometry(state),collector.length?[]:holes)
+    else if(state.model_id==='gigabyte-gtx460-oc-1g-rev1')base=VariantA.legacy052FanTones(state,base)
     return base+fixed
 }

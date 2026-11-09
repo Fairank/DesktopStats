@@ -398,11 +398,17 @@ def edge_batches(meshes,style,styles=None,*,focus='all'):
         edges=crease_edges(mesh.vertices,contour_limit,
                            repair_partitions=mesh.name.endswith('fan-pads'),
                            repair_under_cap=(mesh.name.startswith('loop-')
-                               or mesh.component=='gpu' and mesh.name=='gpu-cover-panel'))
+                               or mesh.component=='gpu' and mesh.name in ('gpu-cover-panel','gpu-cover-panel-tesla-brushed-metal')))
         tags=();smooth_groups=()
-        if mesh.name.startswith('loop-') and policy['line_only']:
+        if policy['line_only'] and (mesh.name.startswith('loop-') or mesh.component=='gpu' and mesh.name in (
+                'detail-gpu-fx5200-observed-capacitor-body-1','detail-gpu-fx5200-observed-capacitor-body-2',
+                'detail-gpu-fx5200-observed-capacitor-body-3','detail-gpu-fx5200-observed-capacitor-body-4',
+                'detail-gpu-fx5200-observed-capacitor-body-5','detail-gpu-fx5200-observed-capacitor-body-6')):
             # Retain complete real smooth-surface groups once at upload. Their
             # encoded adjacent normals let GPU/SVG/CPU gate by the same view.
+            # The six exact FX manual-reference capacitor bodies also need
+            # their real smooth cylinder sides. This does not change the
+            # global crease threshold or add freehand physical/fake edges.
             from liquid_silhouette046 import silhouette_edges
             edges,tags,smooth_groups=silhouette_edges(mesh.vertices,edges,
                 min(contour_limit,MAX_MESH_EDGES),split_long=bool(policy['wobble']))

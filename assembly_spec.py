@@ -6,6 +6,7 @@ from assembly_config import STYLE_LABELS,validate_assembly,visual_style
 from assembly_parts import selected_parts
 from hardware_appearance import metric_appearance, appearance_for
 from memory_appearance import appearance_for_memory
+from memory_dimensions052 import enrich as enrich_memory_dimensions
 from metrics import metric_info
 from top_bar_feedback import gpu_fan_feedback
 
@@ -112,6 +113,7 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
     if memory["modules"]:
         memory.update(appearance=memory["modules"][0]["appearance"],
                       label=memory["modules"][0]["label"], style=memory["modules"][0]["appearance"]["style"])
+    memory=enrich_memory_dimensions(memory)
     boards = firmware.get("baseboards", ()) if isinstance(firmware, dict) else ()
     board_name = text(boards[0].get("product")) if len(boards) == 1 and isinstance(boards[0], dict) else ""
     board = dict(label=board_name or "主板布局示意", form_factor="unknown", schematic=True)

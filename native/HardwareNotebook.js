@@ -76,6 +76,30 @@ function sourceShapes(input) {
 }
 function shapeStudy(state,g,c,front,layout) {
     var custom=cases[state.model_id],m=[g.w/100,0,0,g.h/100,g.x,g.y],seed=identity(state)
+    if(state.series_id==='gigabyte_fx5200' && ['gigabyte-fx5200-n52128d','gigabyte-fx5200-n52128d-rev10-reference'].indexOf(state.model_id)>=0) {
+        // Preserve the visible manual-reference components instead of reducing
+        // an exposed board to two casing trim strokes. Same eight packages and
+        // six large capacitors as the solid study; no extra tiny SMD scatter.
+        var mechanical='',memories=[[35.9,16.7,6.8,23.3],[46.9,16.7,6.8,23.3],[62.1,16.7,6.8,23.3],[72.3,16.7,6.8,23.3],
+            [91.4,20.8,13.5,12.6],[91.4,39.9,13.5,12.6],[91.4,68.1,13.5,12.6],[91.4,87.4,13.5,12.6]]
+        memories.forEach(function(v,i){
+            var d=Sketch.rectPath({x:v[0]-v[2]/2,y:(v[1]-v[3]/2)*.9,width:v[2],height:v[3]*.9,rx:.4})
+            mechanical+=path(Sketch.wobblyPath(d,seed+':memory:'+i,.35,7),c.ink,.65,undefined,'class="hardware-fx052-memory"')
+        })
+        var caps=[[9,6.8,1.8],[11.3,18.5,2.7],[27.1,7.7,2.8],[27.2,33.6,2.2],[31.1,44.9,2.7],[31.2,57.1,2.7]]
+        function oval(cx,cy,rx,ry) {
+            return 'M'+(cx-rx)+' '+cy+'Q'+(cx-rx)+' '+(cy-ry)+' '+cx+' '+(cy-ry)
+                +'Q'+(cx+rx)+' '+(cy-ry)+' '+(cx+rx)+' '+cy+'Q'+(cx+rx)+' '+(cy+ry)+' '+cx+' '+(cy+ry)
+                +'Q'+(cx-rx)+' '+(cy+ry)+' '+(cx-rx)+' '+cy+'Z'
+        }
+        caps.forEach(function(v,i){mechanical+=path(Sketch.wobblyPath(oval(v[0],v[1]*.9,v[2],v[2]*1.8),seed+':cap:'+i,.17,4),c.ink,.7,undefined,'class="hardware-fx052-capacitor"')})
+        mechanical+=path(oval(20,50.4,2.5,4.5)+oval(20,50.4,1.1,2.1),c.ink,.65)
+            +path(Sketch.rectPath({x:17.1,y:27.6,width:5.8,height:5.3,rx:.3}),c.ink,.6)
+            +path(Sketch.rectPath({x:31,y:83.7,width:6.1,height:4,rx:.3}),c.ink,.65)
+            +path('M52.5 83.7Q49 102 31 101Q23 99 27 91L34 85.9M52.5 84.4Q49 102.7 31 101.7Q23 99.7 27 91.7L34 86.6',c.ink,.55)
+        return {d:Sketch.wobblyPath('M0 0H100V90H80V100H65.8V90H64.7V100H53.5V90H52.5V100H38.5V90H0Z',seed+':board',.55,11),
+            m:m,trim:group(mechanical,matrixText(m)),custom:true}
+    }
     if(custom) {
         var trims="",globalTrims=""
         custom.trim.forEach(function(d,index){
@@ -340,6 +364,18 @@ function pencil(state,g,c,study,layout) {
 }
 function connector(state,g,c) {
     var row=Board.profile(state),bus=row && row.host_interface?row.host_interface.bus:"unknown"
+    var fx=Board.fxAgpSegments(state,g)
+    if(fx.length) {
+        var contacts=''
+        fx.forEach(function(v){
+            var x=g.x+g.w*v[0],w=g.w*(v[1]-v[0]),y=g.y+g.h*.90,h=g.h*.10
+            contacts+='<g class="hardware-fx052-agp-segment" data-u0="'+v[0]+'" data-u1="'+v[1]+'">'
+                +path(Sketch.wobblyPath(Sketch.rectPath({x:x,y:y,width:w,height:h,rx:.03}),identity(state)+':agp:'+v[0],.025,1),c.ink,.11)
+            for(var j=1;j<8;j++)contacts+=path('M'+n(x+w*j/8)+' '+n(y+h*.12)+'V'+n(y+h*.86),c.ink,.08)
+            contacts+='</g>'
+        })
+        return '<g class="hardware-notebook-edge" data-bus="agp">'+contacts+'</g>'
+    }
     var start=g.x+g.w*.18,width=g.w*.27,length=row && row.dimensions_mm && row.dimensions_mm.length
     if(typeof length==="number" && length>0) {
         start=g.x+g.w*Math.min(.28,(bus==="agp"?28:45)/length)
@@ -393,10 +429,27 @@ function gpu(state,collector) {
     // coordinates share the exact fixed view so zero-degree layers reassemble.
     return out
 }
+function legacy052Bank(state) {
+    if(state.model_id!=='msi-n480gtx-m2d15' || ['notebook_line','notebook_color'].indexOf(state.icon_set)<0)return ''
+    // Generic few-trims selection omits these observed horizontal ridges.
+    // Keep the bank reference layer, clipped against the same real fan hole.
+    var g=geometry(state),holes=fanLayout(state,g),region=[[g.x,g.y],[g.x+g.w,g.y],[g.x+g.w,g.y+g.h],[g.x,g.y+g.h]]
+    function point(u,v){return [g.x+u/100*g.w,g.y+v/100*g.h]}
+    var lines=''
+    for(var row=0;row<16;row++) {
+        var v=14+row*4.5,segments=v>=44&&v<=55.5?[[3,35],[56,59]]:[[3,59]]
+        segments.forEach(function(s){lines+=clippedStroke([point(s[0],v),point(s[1],v)],region,holes,.08)})
+    }
+    ;[14,26,38,50].forEach(function(u) {
+        var segments=u>=35&&u<=56?[[13,44],[55.5,87]]:[[13,87]]
+        segments.forEach(function(s){lines+=clippedStroke([point(u,s[0]),point(u,s[1])],region,holes,.10)})
+    })
+    return '<path class="hardware-observed-bank-pen" d="'+lines+'" fill="none" stroke="'+state.ink+'" stroke-opacity=".62" stroke-width=".08"/>'
+}
 function body(state,collector) {
     if(!state || ["cpu","gpu","memory"].indexOf(state.kind)<0)return ""
     if(state.kind!=="gpu")return Parts.body(state,collector)
-    return '<g class="hardware-notebook '+state.icon_set+'" stroke-linecap="round" stroke-linejoin="round">'+gpu(state,collector)+'</g>'
+    return '<g class="hardware-notebook '+state.icon_set+'" stroke-linecap="round" stroke-linejoin="round">'+gpu(state,collector)+'</g>'+legacy052Bank(state)
 }
 function generic(kind,color,moving,style,colorWash) {
     if(kind==="gpu")return body({kind:"gpu",style:"gpu_neutral",fan_count:-1,ink:color,icon_set:style||"notebook_line",notebookColorWash:colorWash})

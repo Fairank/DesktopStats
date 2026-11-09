@@ -353,7 +353,12 @@ def build_scene(spec=None):
     overrides (x_ratio along length, radius_mm, profile). No fan-mount support
     is interpreted as an installed case fan.
     """
-    spec=spec if isinstance(spec,dict) else {};case=spec.get('case') or {};dims=case.get('dimensions_mm') or {}
+    from memory_dimensions052 import enrich as enrich_memory_dimensions
+    # Direct/baked callers receive the same exact-model facts as build_spec.
+    # This construction-only detached copy never changes the caller's PCB scale.
+    spec=dict(spec) if isinstance(spec,dict) else {}
+    spec['memory']=enrich_memory_dimensions(spec.get('memory'))
+    case=spec.get('case') or {};dims=case.get('dimensions_mm') or {}
     w=number(dims.get('width'),230,60,800);h=number(dims.get('height'),470,60,900);d=number(dims.get('depth'),460,150,900)
     meshes=[];steel=color(case.get('color'),'#4d5965');edge=color('#a9b8c4');dark=color('#25313e');green=color('#2f5960');gold=color('#d7b36d')
     features=case.get('features') or []
@@ -366,7 +371,10 @@ def build_scene(spec=None):
     def cube(name,size,pos,tone=steel,component='case'):add(name,box(*size),tone,pos,component)
     # Actual case proportions, a light structural frame and removable side.
     rail=max(5.,min(9.,w*.028))
-    body_h=h-16;body_y=8;bottom=-h/2+16
+    # BGW67 lists435mm body plus20mm stands,455mm total. Its source body
+    # datum must not borrow the generic16mm base inside that external height.
+    body_base=20. if case.get('id')=='be-quiet-light-base-600-lx' else 16.
+    body_h=h-body_base;body_y=body_base/2;bottom=-h/2+body_base
     for x in (-(w-rail)/2,(w-rail)/2):
         for z in (-(d-rail)/2,(d-rail)/2):
             if (not open_frame and not((corner or 'pillarless_glass_corner' in features)
@@ -446,10 +454,22 @@ def build_scene(spec=None):
         for z in (-d*.13,d*.13):cube('carry-handle-post',(8,14,7),(0,h/2+3,z),edge)
         cube('carry-handle-grip',(10,7,d*.26+7),(0,h/2+10,0),dark)
     if 'fabric_carry_straps' in features:
+        # Original eight-section fabric reference, not a separate fastener or
+        # a manufacturer strap profile. Both short flat feet rest on the
+        # existing depth rails; adjacent solids share their full end section.
+        half=(w-rail)/2;arch_half=half-rail/2
+        peak=7.+16.*(1.-(.4/(7*.45))**2)+1.5  # Preserve the previous peak.
+        sections=[(-half,h/2),*((-arch_half+i*arch_half/3,
+            h/2+(peak-3.)*(1.-((-arch_half+i*arch_half/3)/arch_half)**2))
+            for i in range(7)),(half,h/2)]
         for at in (-d*.24,d*.24):
-            for index in range(8):
-                x=-w*.40+index*w*.80/7
-                cube('fabric-carry-strap',(w*.115,3,19),(x,h/2+7+16*(1-(x/(w*.45))**2),at),dark)
+            for (xa,ya),(xb,yb) in zip(sections,sections[1:]):
+                a,b,c,e=(xa,ya,-9.5),(xb,yb,-9.5),(xb,yb+3.,-9.5),(xa,ya+3.,-9.5)
+                f,g,j,k=(xa,ya,9.5),(xb,yb,9.5),(xb,yb+3.,9.5),(xa,ya+3.,9.5)
+                vertices=[]
+                for face in ((f,g,j,k),(b,a,e,c),(g,b,c,j),(a,f,k,e),(k,j,c,e),(a,b,g,f)):
+                    _quad(vertices,*face)
+                add('fabric-carry-strap',tuple(vertices),dark,(0.,0.,at))
     if 'side_glass_standoffs' in features:
         for y in (-h*.37,h*.37):
             for z in (-d*.37,d*.37):cube('glass-standoff',(w*.78,7,7),(0,y,z),edge)
@@ -511,23 +531,76 @@ def build_scene(spec=None):
             for i in range(12):cube('top-vent',(w*.78,1.6,2),(0,h/2-.8,-d*.4+i*d*.8/11),edge)
     for x in (-w*.34,w*.34):
         for z in (-d*.34,d*.34):cube('case-foot',(23,12,30),(x,-h/2+6,z),dark)
-    layout=case.get('layout','tower');dual=layout=='dual_chamber'
+    layout=case.get('layout','tower');dual=layout=='dual_chamber';shroud_meta={};helios_front_cover=None
+    reference_shroud=False;deferred_shroud=();case_pose={}
     board_x=0 if winged else -h*.12 if 'nas_split_chamber' in features else w*(.10 if dual else .36)
     if dual:
-        cube('rear-chamber-shroud',(w*.28,h*.23,d*.44),(w*.34,-h*.32,-d*.25),dark)
+        from assembly_case_shrouds052 import build as build_case_shroud,remove_replaced_parts
+        covers,shroud_meta=build_case_shroud(case,(w,h,d),dark)
+        reference_shroud=bool(shroud_meta)
+        if reference_shroud:
+            meshes=remove_replaced_parts(meshes,shroud_meta)
+            meshes.extend(covers)
+        else:cube('rear-chamber-shroud',(w*.28,h*.23,d*.44),(w*.34,-h*.32,-d*.25),dark)
     elif 'top_psu_shroud' in features:
-        cube('top-psu-shroud',(w-12,h*.15,d-12),(0,h*.405,0),dark)
+        from assembly_case_shrouds052 import build as build_case_shroud
+        covers,shroud_meta=build_case_shroud(case,(w,h,d),dark)
+        reference_shroud=bool(shroud_meta)
+        if reference_shroud:
+            from assembly_case_shrouds052 import remove_replaced_parts
+            meshes=remove_replaced_parts(meshes,shroud_meta)
+            meshes.extend(covers)
+        else:cube('top-psu-shroud',(w-12,h*.15,d-12),(0,h*.405,0),dark)
     elif layout not in ('compact','horizontal','open_frame'):
-        cube('psu-shroud',(w-12,h*.17,d-12),(0,-h*.405,0),dark)
+        shroud_vertices=()
+        if case.get('id')=='asus-rog-strix-helios-gx601':
+            from assembly_helios_shroud052 import prepare
+            covers,helios_front_cover,shroud_meta=prepare(case,(w,h,d),dark)
+            meshes.extend(covers)
+        elif case.get('id')=='fractal-north-xl-mesh':
+            from assembly_north_tray049 import shroud
+            shroud_vertices,shroud_meta=shroud(case,(w,h,d))
+        else:
+            from assembly_case_shrouds052 import build as build_case_shroud
+            covers,shroud_meta=build_case_shroud(case,(w,h,d),dark)
+            reference_shroud=bool(shroud_meta)
+            from assembly_case_shrouds052 import remove_replaced_parts
+            meshes=remove_replaced_parts(meshes,shroud_meta)
+            deferred_ids=frozenset(shroud_meta.get('deferred_part_ids',()))
+            deferred_shroud=tuple(m for m in covers if m.part_id in deferred_ids)
+            meshes.extend(m for m in covers if m.part_id not in deferred_ids)
+        if shroud_vertices:add('psu-shroud',shroud_vertices,dark,shroud_meta['position_mm'])
+        elif helios_front_cover is None and not reference_shroud:cube('psu-shroud',(w-12,h*.17,d-12),(0,-h*.405,0),dark)
     board=spec.get('board') or {};board_dims=board.get('dimensions_mm') or {}
     board_h=number(board_dims.get('height'),305,70,370);board_d=number(board_dims.get('width'),244,70,370)
     board_rear=-d/2+14.;board_z=board_rear+board_d/2;board_y=h*.02
+    if case.get('id')=='jonsbo-mod-5' and 'angular_modular_shell' in features:
+        # This open-frame case has a raised rear PSU option of its own. It
+        # must not inherit a closed tower's floor12 mounting datum. The
+        # exact helper declares a fixed original option02 reference, not a
+        # detected installation, measured CAD or a selected-part carve-out.
+        from assembly_mod5_bottom052 import layout_reference as mod5_layout_reference
+        case_pose=mod5_layout_reference(case,(w,h,d))
+    if reference_shroud:
+        from assembly_case_shrouds052 import layout_reference
+        case_pose=layout_reference(case,(w,h,d))
+        if 'board_x_mm' in case_pose:board_x=number(case_pose['board_x_mm'],board_x,-w/2,w/2)
+        if 'board_y_mm' in case_pose:board_y=number(case_pose['board_y_mm'],board_y,-h/2,h/2)
+        from assembly_rear_panel052 import build as build_rear_panel
+        back,rear_panel_meta=build_rear_panel(case,(w,h,d),case_pose,dark)
+        indexes=[i for i,m in enumerate(meshes) if m.component=='case' and m.name=='case-back']
+        if back is not None and len(indexes)==1:
+            # Keep the original draw position/order. This fixed source case
+            # aperture is independent of every selected PSU/GPU/board.
+            meshes[indexes[0]]=back
+            shroud_meta=dict(shroud_meta,parts=[*shroud_meta.get('parts',()),*rear_panel_meta.get('parts',())],
+                             rear_panel_reference=rear_panel_meta)
     from assembly_motherboard import (layout_anchors,enrich_motherboard,memory_slot_indices,final_anchors,
                                      augment_attachment_anchors,attachment_bounds)
     anchors=layout_anchors(spec,w,h,d,board_x,board_y,board_rear)
     if anchors:
         board_h=anchors['board']['height'];board_d=anchors['board']['width'];board_z=anchors['board']['z']
-    divider_aperture=None
+    divider_aperture=None;divider_reference={}
     if dual:
         # A side-fan mounting bay is a physical opening, not a full opaque wall
         # in front of every optional radiator. Its dimensions remain reference
@@ -547,7 +620,30 @@ def build_scene(spec=None):
             holes.append(tuple((x+cp[2],y+cp[1]) for x,y in chamfer_rect(140.,150.,16.)))
             for zz in (-d*.31,-d*.10):
                 holes.append(tuple((x+zz,y+h*.38) for x,y in chamfer_rect(82.,25.,4.)))
-        shape=perforated_plate(chamfer_rect(d-12,h-12,2.),holes,2.)
+        divider_top=case_pose.get('rear_divider_top_y_mm')
+        divider_bottom=case_pose.get('rear_divider_bottom_y_mm');source_divider_bounds=None
+        if (case.get('id')=='phanteks-nv7' and case_pose.get('case_id')==case['id']
+                and type(divider_top) in (int,float) and math.isfinite(divider_top)
+                and -h/2+20.<divider_top<h/2-10.):
+            # This fixed upper-bay edge comes from the NV7 architecture, not
+            # the chosen PSU. Its motherboard tray stops below the upper PSU
+            # compartment; a full-height generic divider cuts through it.
+            source_divider_bounds=(-h/2+6.,divider_top)
+        elif (case.get('id') in ('havn-hs-420','deepcool-ch780') and case_pose.get('case_id')==case['id']
+                and type(divider_bottom) in (int,float) and math.isfinite(divider_bottom)
+                and -h/2+20.<divider_bottom<h/2-10.):
+            # HS420's hybrid lower bay and CH780's raised tray have their
+            # own fixed source-reference edges above the broad lower intake.
+            # Neither is a full-height divider carved around selected parts.
+            source_divider_bounds=(divider_bottom,h/2-6.)
+        if source_divider_bounds:
+            divider_bottom,divider_top=source_divider_bounds;center_y=(divider_bottom+divider_top)/2
+            outer=tuple((z,y+center_y) for z,y in chamfer_rect(d-12,divider_top-divider_bottom,2.))
+            shape=perforated_plate(outer,holes,2.,clip_walls=True)
+            divider_reference=dict(case_id=case['id'],top_y_mm=divider_top,
+                bottom_y_mm=divider_bottom,source=case_pose.get('source',''),
+                positions_verified=False,dimensions_verified=False,selected_component_geometry_used=False)
+        else:shape=perforated_plate(chamfer_rect(d-12,h-12,2.),holes,2.)
         add('rear-chamber-divider',rotate_vertices(shape,'left'),steel,(board_x+5.,0.,0.))
         if case.get('id')=='hyte-y70' and divider_aperture:
             # Manual B17/18 shows the removable side mounting frame stepped
@@ -604,17 +700,21 @@ def build_scene(spec=None):
     actual_count=actual_count if type(actual_count) is int and 0<=actual_count<=256 else 0
     count=memory.get('rendered_count',min(actual_count,8))
     count=count if type(count) is int and 0<=count<=min(actual_count,8) else min(actual_count,8)
-    memory_models=[];modules=memory.get('modules')
+    from memory_geometry052 import layout as memory_layout
+    memory_models=[];memory_geometry=[];modules=memory.get('modules')
     for index in range(count):
         module=dict(memory)
         if isinstance(modules,list) and index<len(modules) and isinstance(modules[index],dict):module.update(modules[index])
         memory_appearance=module.get('appearance') or {};memory_models.append(memory_appearance.get('id',''))
         short=module.get('style',memory_appearance.get('style'))=='sodimm' or module.get('short_form') is True
-        memory_w=number(module.get('length_mm'),69.6 if short else 133.35,50,160)
-        memory_h=number(module.get('height_mm'),30 if short else 31,15,70)
+        shape=memory_layout(module,short)
+        memory_w=shape['pcb_width_mm'];memory_h=shape['pcb_height_mm']
+        memory_geometry.append(dict(model_id=memory_appearance.get('id',''),
+            **{key:value for key,value in shape.items() if key!='cover_polygon'}))
         pcb=unit_polygon(module.get('pcb_polygon'),memory_w,memory_h)
-        case_polygon=unit_polygon(module.get('case_polygon'),memory_w,memory_h,margin=2.)
-        bare=module.get('heat_spreader') is False or memory_appearance.get('shroud')=='bare'
+        case_polygon=unit_polygon(shape['cover_polygon'],shape['cover_width_mm'],memory_h,
+                                  margin=shape['required_polygon_margin'])
+        bare=not shape['has_cover'];pcb_thickness=shape['pcb_thickness_mm'];cover_thickness=shape['cover_thickness_mm']
         tones=module.get('colors') or {};pcb_color=color(tones.get('pcb'),'#2f5960')
         cover_color=color(tones.get('body'),'#879caa');diffuser_color=color(tones.get('glass'),'#d4e5e5')
         mx=board_x-4 if short else board_x-memory_h/2-2
@@ -625,15 +725,16 @@ def build_scene(spec=None):
             if slot_index<len(slots):my,mz=slots[slot_index][1:]
             else:my,mz=slots[-1][1],slots[-1][2]+(slot_index-len(slots)+1)*9.
         orient=(lambda vertices:rotate_vertices(vertices,'left')) if short else memory_plane
-        if pcb:add('ram-pcb',orient(extrude(pcb,1.2)),pcb_color,(mx,my,mz),'memory')
-        else:cube('ram-pcb',(1.2,memory_h,memory_w) if short else (memory_h,memory_w,1.2),(mx,my,mz),pcb_color,'memory')
+        if pcb:add('ram-pcb',orient(extrude(pcb,pcb_thickness)),pcb_color,(mx,my,mz),'memory')
+        else:cube('ram-pcb',(pcb_thickness,memory_h,memory_w) if short else (memory_h,memory_w,pcb_thickness),(mx,my,mz),pcb_color,'memory')
         if not bare:
-            if case_polygon:add('ram-spreader',orient(extrude(case_polygon,3.2)),cover_color,(mx,my,mz),'memory')
-            else:cube('ram-spreader',(3.2,memory_h*.81,memory_w*.96) if short else (memory_h*.81,memory_w*.96,3.2),
+            if case_polygon:add('ram-spreader',orient(extrude(case_polygon,cover_thickness)),cover_color,(mx,my,mz),'memory')
+            else:cube('ram-spreader',(cover_thickness,memory_h*.81,memory_w*.96) if short else (memory_h*.81,memory_w*.96,cover_thickness),
                       (mx,my+3,mz) if short else (mx-3,my,mz),cover_color,'memory')
-            if module.get('rgb_diffuser') is True or module.get('diffuser') is True:
-                cube('ram-diffuser',(3.8,3,memory_w*.94) if short else (3,memory_w*.94,3.8),
-                     (mx,my+memory_h*.55,mz) if short else (mx-memory_h*.55,my,mz),diffuser_color,'memory')
+            if shape['has_cap']:
+                cap_height=shape['cap_height_mm'];cap_offset=shape['cap_center_from_pcb_center_mm']
+                cube('ram-diffuser',(3.8,cap_height,shape['cover_width_mm']*.94) if short else (cap_height,shape['cover_width_mm']*.94,3.8),
+                     (mx,my+cap_offset,mz) if short else (mx-cap_offset,my,mz),diffuser_color,'memory')
     gpu=spec.get('gpu') or {};appearance=gpu.get('appearance') or {}
     fan_count=0;gpu_anchor_position=None;gpu_anchor_size=None
     if gpu and gpu.get('present',True) is not False and appearance.get('style')!='gpu_integrated':
@@ -729,13 +830,26 @@ def build_scene(spec=None):
     tilted='forward_tilted_open_frame' in features
     if tilted:
         from assembly_case_exteriors040 import torque_pose,hardware_pose
-    if layout in ('vertical','horizontal') or vertical_gpu or front_gpu or winged or bench or tilted:
+    top_io_reference=case_pose.get('board_pose') or {}
+    top_io=(case.get('id')=='geometric-future-model-8-cowboy'
+            and top_io_reference.get('kind')=='top_io_90'
+            and all(type(top_io_reference.get(k)) in (int,float) and math.isfinite(top_io_reference[k])
+                    for k in ('io_y_mm','rear_z_mm')))
+    if top_io:
+        original_center=(board_x,board_y,board_z)
+        target_center=(board_x,top_io_reference['io_y_mm']-board_d/2,
+                       top_io_reference['rear_z_mm']+board_h/2)
+    if layout in ('vertical','horizontal') or vertical_gpu or front_gpu or winged or bench or tilted or top_io:
         transformed=[]
         def vector_pose(p):
             if tilted:return torque_pose(p,vector=True)
             x,y,z=p
-            return (z,y,-x) if winged else (x,-z,y) if layout=='vertical' else (y,-x,z)
+            return (z,y,-x) if winged else (x,-z,y) if layout=='vertical' or top_io else (y,-x,z)
         def pose(p):
+            if top_io:
+                relative=tuple(p[k]-original_center[k] for k in range(3))
+                rotated=vector_pose(relative)
+                return tuple(target_center[k]+rotated[k] for k in range(3))
             x,y,z=vector_pose(p)
             return (x-board_y,y+board_x+66.3,z-board_z) if bench else (x,y,z)
         board_pose=pose;gpu_pose=pose;gpu_vector=vector_pose;board_vector=vector_pose
@@ -819,6 +933,9 @@ def build_scene(spec=None):
             attachment_anchors['case_mount_planes'][mount]=dict(position=(main_center,y,0.),normal=normal,up=(0.,0.,1.),
                 span_mm=(main_span,d-32.),method='official_manual_observed_main_chamber_mount_reference',
                 dimensions_verified=False,source='https://content.ibuypower.com/hyte/product-page-pdfs/y70-touch-15-language.pdf',page=11 if mount=='top' else 8)
+    if case_pose:
+        from assembly_case_shrouds052 import apply_layout_anchors
+        attachment_anchors=apply_layout_anchors(attachment_anchors,spec,case_pose)
     from assembly_cooling import add_cooling
     from assembly_auxiliary import add_auxiliary
     auxiliary_stage=None;collision_meshes=meshes
@@ -843,7 +960,15 @@ def build_scene(spec=None):
             kept_gpu={'gpu-pcb','gpu-bracket','gpu-gold-contacts','detail-gpu-separated-edge-contacts',
                       'detail-gpu-pcb-stack-edge','detail-gpu-port-recesses'}
             meshes=tuple(m for m in meshes if m.component!='gpu' or m.name in kept_gpu or m.name.startswith('gpu-reference-port-'))
-        meshes=tuple((*meshes,*cooling_meshes));attachment_anchors['cooling']=cooling_meta
+        meshes=tuple((*meshes,*cooling_meshes))
+        if reference_shroud:
+            from assembly_case_shrouds052 import finish as finish_case_shroud
+            meshes,shroud_meta=finish_case_shroud(case,tuple((*meshes,*deferred_shroud)),
+                                               cooling_meshes,cooling_meta,shroud_meta)
+        if helios_front_cover is not None:
+            from assembly_helios_shroud052 import finish
+            meshes,shroud_meta,cooling_meta=finish(meshes,helios_front_cover,cooling_meshes,cooling_meta,shroud_meta)
+        attachment_anchors['cooling']=cooling_meta
         attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
         if tray_meta:attachment_anchors=add_obstacles(attachment_anchors,tray_meta)
         # A transient reference supplies exact hollow GPU geometry for bounded
@@ -878,9 +1003,9 @@ def build_scene(spec=None):
     meta=dict(case_id=case.get('id',''),schematic=True,geometry_unit='mm',installed_case_fans_assumed=0,
               front_fan_count=fan_count-rear_count,rear_fan_count=rear_count,rotor_count=sum(mesh.rotor for mesh in meshes),memory_count=actual_count,memory_rendered_count=count,
               physical_total_fans=physical_count,unplaced_fans=max(0,physical_count-fan_count) if physical_count is not None else None,
-              memory_models=memory_models,cpu_model_mark=cpu_id if cpu_package_meta.get('model_mark_lines') or mark and mark[0]==style else '',
+              memory_models=memory_models,memory_geometry=memory_geometry,cpu_model_mark=cpu_id if cpu_package_meta.get('model_mark_lines') or mark and mark[0]==style else '',
               cpu_style=style,board_is_reference=board.get('schematic',True) is not False,gpu_model=appearance.get('id',''),case_layout=layout,
-              gpu_mount='front_vertical' if front_gpu else 'vertical' if vertical_gpu else 'case_vertical' if layout=='vertical' else 'horizontal',
+              gpu_mount='front_vertical' if front_gpu else 'vertical' if vertical_gpu else 'case_top_io' if top_io else 'case_vertical' if layout=='vertical' else 'horizontal',
               board_layout_schematic=True,connector_positions_schematic=True,
               dimensions_verified=case.get('dimensions_verified') is True,cad_or_fit_guarantee=False)
     if tilted:meta['hardware_pose_reference']=hardware_pose(case)
@@ -895,6 +1020,9 @@ def build_scene(spec=None):
                 gpu_mount_observation=gpu_mount_observation,
                 gpu_air_cooler_replaced=gpu_cooler_replaced,original_gpu_air_cooler_fans=original_gpu_air_cooler_fans)
     if tray_meta:meta['case_tray']=tray_meta
+    if shroud_meta:meta['case_shroud']=shroud_meta
+    if case_pose:meta['case_pose_reference']=case_pose
+    if divider_reference:meta['rear_divider_reference']=divider_reference
     hardware_parts=[]
     for component,identity,label in (('cpu','cpu:0',(spec.get('cpu') or {}).get('label','CPU')),
             ('gpu','gpu:0',gpu.get('label','GPU')),('board','board:0',motherboard_meta.get('model_label',board.get('label','Motherboard')))):
@@ -902,6 +1030,19 @@ def build_scene(spec=None):
     for index in range(len(memory_pcbs)):
         module=modules[index] if isinstance(modules,list) and index<len(modules) and isinstance(modules[index],dict) else {}
         hardware_parts.append(dict(id='memory:'+str(index),label=(module.get('label') or 'Memory')+' '+str(index+1),kind='memory',model_id=memory_models[index] if index<len(memory_models) else ''))
+    case_part_ids={m.part_id for m in meshes if m.component=='case' and m.part_id}
+    hardware_parts.extend(dict(row) for row in shroud_meta.get('parts',())
+                          if isinstance(row,dict) and row.get('id') in case_part_ids)
+    if case.get('id')=='jonsbo-mod-5' and case_part_ids:
+        from assembly_mod5_bottom052 import describe as describe_mod5_bottom
+        bottom_reference=describe_mod5_bottom(case,(w,h,d))
+        actual_parts=[dict(row) for row in bottom_reference.get('parts',())
+                      if isinstance(row,dict) and row.get('id') in case_part_ids]
+        if actual_parts:
+            # Metadata follows only rendered independent structures. Do not
+            # build a second model or register absent reference-only parts.
+            hardware_parts.extend(actual_parts)
+            meta['case_bottom_reference']=bottom_reference
     meta['hardware']=dict(parts=hardware_parts)
     from assembly_style import apply_model_styles
     meshes,style_meta=apply_model_styles(meshes,spec.get('visual_style'),spec.get('part_styles',{}),(w,h,d),panels,spec.get('lighting_preview','artwork'),

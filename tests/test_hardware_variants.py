@@ -106,8 +106,8 @@ Window {
 
     def test_all_three_schemes_keep_every_catalog_identity_and_transparent_bounds(self):
         values = drawing_fixture.all_appearances()
-        self.assertEqual(len(values), 178)
-        self.assertEqual(Counter(row["kind"] for row in values), dict(cpu=3, gpu=147, memory=28))
+        self.assertEqual(len(values), 179)
+        self.assertEqual(Counter(row["kind"] for row in values), dict(cpu=3, gpu=148, memory=28))
         for style in STYLES:
             for value in values:
                 with self.subTest(style=style, model=value["id"]):

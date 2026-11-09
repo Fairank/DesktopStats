@@ -81,8 +81,8 @@ Window {
 
     def test_every_current_model_has_valid_line_art_with_exact_identity_in_both_inks(self):
         appearances = drawing_fixture.all_appearances()
-        self.assertEqual(len(appearances), 178)
-        self.assertEqual(Counter(row["kind"] for row in appearances), dict(cpu=3, gpu=147, memory=28))
+        self.assertEqual(len(appearances), 179)
+        self.assertEqual(Counter(row["kind"] for row in appearances), dict(cpu=3, gpu=148, memory=28))
         for value in appearances:
             for ink in ("#303a48", "#e6eef5"):
                 with self.subTest(model=value["id"], ink=ink):

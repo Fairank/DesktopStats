@@ -566,7 +566,9 @@ PROFILES = {'asrock_phantom': {'model_ids': ('asrock-phantom-7900xtx-oc',),
                                 'cooler dimensions.')},
  'inno3d_ichill_x4': {'model_ids': ('inno3d-ichill-x4-3080',),
                       'label': 'INNO3D GeForce RTX 3080 iCHILL X4',
-                      'source_urls': ('https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4',),
+                      'source_urls': ('https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4',
+                                      'https://www.nvidia.com/en-us/geforce/news/rtx-3080-3090-custom-card-roundup/',
+                                      'https://images.nvidia.com/aem-dam/Solutions/geforce/news/rtx-3080-3090-custom-card-roundup/Inno3D-GeForce-RTX-3080-ICHILL-X4-Photo-002.png'),
                       'ports': [{'type': 'DP', 'count': 3}, {'type': 'HDMI', 'count': 1}],
                       'power_connectors': [{'type': '8pin', 'count': 2}],
                       'slot_width': 3,
@@ -587,6 +589,10 @@ PROFILES = {'asrock_phantom': {'model_ids': ('asrock-phantom-7900xtx-oc',),
                       'notes': ('Black/silver iCHILL armor with a small side fan in addition to the three front '
                                 'fans.',
                                 'Studded die-cast rear plate; the fourth side fan is not a fourth front opening.',
+                                'The original 2020 RTX 3080 official gallery shows eleven visible curved leaf '
+                                'surfaces on each of the three front fans. Cap-hidden mechanical roots and '
+                                'the fourth side fan blade count are not established. Its side mounting pose '
+                                'remains unverified/unplaced; do not copy RTX 3080 Ti, 12GB or RTX 3090 facts.',
                                 'Bare PCB length, connector positions and socket ordering are not inferred from '
                                 'cooler dimensions.')},
  'inno3d_twin_x2': {'model_ids': ('inno3d-twin-x2-4070',),
@@ -1163,19 +1169,25 @@ FAN_UPDATES = {'asrock_steel_legend': {'model_ids': ('asrock-steel-legend-7800xt
                         'The X-branded cap is a rounded polygon and the outer cover rim is fixed; do not '
                         'copy the MERC hub decoration or its thirteen-leaf count.')},
  'inno3d_ichill_x4': {'model_ids': ('inno3d-ichill-x4-3080',),
-                      'shape': 'neutral',
+                      'blades': None,
+                      'shape': 'wide',
+                      'fans': ({'blades': 11, 'shape': 'wide'},
+                               {'blades': 11, 'shape': 'wide'},
+                               {'blades': 11, 'shape': 'wide'},
+                               {'blades': None, 'shape': 'neutral'}),
                       'hub_ratio': 0.34,
                       'outer_ring': False,
                       'tone': 'dark',
-                      'source_url': 'https://www.inno3d.com/sites/default/files/2024-01/Asset%204_14.png',
+                      'source_url': 'https://images.nvidia.com/aem-dam/Solutions/geforce/news/rtx-3080-3090-custom-card-roundup/Inno3D-GeForce-RTX-3080-ICHILL-X4-Photo-002.png',
                       'evidence': 'official_front_view',
-                      'notes': ('Exact RTX 3080 iCHILL X4 official product views show dark independent '
-                                'scythe leaves and large dark iCHILL/star caps on the three front rotors.',
-                                'Perspective, cover corners and heatsink occlusion prevent a reliable closed '
-                                'root-to-tip count; keep neutral/count unknown rather than borrow the RTX '
-                                '4070 rotor.',
-                                'The manufacturer separately documents a 45 mm side rotor; its blurred '
-                                'feature image does not establish its blade count.')}}
+                      'count_status': 'partial_front_reviewed_side_unknown',
+                      'notes': ('Exact original 2020 RTX 3080 iCHILL X4 manufacturer-supplied NVIDIA gallery, '
+                                'Photo-002: eleven distinct curved visible leaves per front rotor, independently '
+                                'cross-checked for all three rotors. Cap-hidden mechanical roots are not measured.',
+                                'The separate 45 mm side fan retains unknown blade count, shape and mounting '
+                                'pose. It is not a fourth front opening and cannot inherit a front fan or RPM.',
+                                'All-card render readiness remains false. No RTX 3080 Ti, 12GB, RTX 3090 or '
+                                'unidentified PCB revision is covered by this exact study.')}}
 
 VERSION_FAMILIES = ({'series_id': 'asrock_taichi',
   'base_model_id': 'asrock-taichi-7900xtx-oc',

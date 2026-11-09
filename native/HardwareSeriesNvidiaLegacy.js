@@ -36,8 +36,8 @@ function profile(id) {
 }
 
 function p(d,fill) { return '<path d="'+d+'" fill="'+fill+'"/>' }
-function r(x,y,w,h,radius,fill) {
-    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+radius+'" fill="'+fill+'"/>'
+function r(x,y,w,h,radius,fill,tag) {
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+radius+'" fill="'+fill+'"'+(tag?' class="'+tag+'"':'')+'/>'
 }
 
 function fins(x,y,w,h,count,c) {
@@ -172,15 +172,29 @@ function face(state,g,c) {
             + p("M12 17H48L55 28L25 76H12Z",c.caseBody)
             + p("M63 9H91Q100 9 100 22V80Q100 91 91 91H63L68 78V23Z",c.caseShade)
     case "gigabyte_fx5200":
-        // This FX5200 is an active cooler on a largely exposed blue AGP PCB,
-        // not a modern continuous shroud or a made-up passive slab.
-        return p("M0 4H96L100 10V93H0Z",c.pcb || c.caseBody)
-            + r(25,24,48,56,2,c.caseShade)
-            + fins(23,19,52,65,10,c)
-            + r(8,13,12,10,1,c.disk) + r(8,34,12,10,1,c.disk)
-            + r(79,12,12,13,1,c.disk) + r(79,35,12,13,1,c.disk)
-            + r(78,60,14,11,1,c.caseTop)
-            + r(10,73,8,12,1,c.metal) + r(84,77,7,11,1,c.metal)
+        // Exact GV-N52128D REV:1.0 photo, manufacturer manual p5. Only this
+        // visible front layout is studied; heights/positions are reference,
+        // tiny unreadable SMD circuits and branded chip text are not invented.
+        var result=p("M0 0H100V90H80V100H65.8V90H64.7V100H53.5V90H52.5V100H38.5V90H0Z",c.pcb || c.caseBody)
+        var memory=[[35.9,16.7,6.8,23.3],[46.9,16.7,6.8,23.3],[62.1,16.7,6.8,23.3],[72.3,16.7,6.8,23.3],
+                    [91.4,20.8,13.5,12.6],[91.4,39.9,13.5,12.6],[91.4,68.1,13.5,12.6],[91.4,87.4,13.5,12.6]]
+        memory.forEach(function(v){result+=r(v[0]-v[2]/2,(v[1]-v[3]/2)*.9,v[2],v[3]*.9,.5,c.disk,'hardware-fx052-memory')})
+        var caps=[[9,6.8,1.8],[11.3,18.5,2.7],[27.1,7.7,2.8],[27.2,33.6,2.2],[31.1,44.9,2.7],[31.2,57.1,2.7]]
+        caps.forEach(function(v){result+='<ellipse class="hardware-fx052-capacitor" cx="'+v[0]+'" cy="'+(v[1]*.9)+'" rx="'+v[2]+'" ry="'+(v[2]*1.8)+'" fill="'+c.metal+'" stroke="'+c.caseShade+'" stroke-width=".7"/>'})
+        result+=r(17.1,27.6,5.8,5.3,.5,c.caseShade)
+            +'<ellipse cx="20" cy="50.4" rx="2.5" ry="4.5" fill="none" stroke="'+c.gold+'" stroke-width="1.5"/>'
+            +r(31,83.7,6.1,4,.5,c.edge)
+            +'<path d="M52.5 83.7Q49 102 31 101Q23 99 27 91L34 85.9" fill="none" stroke="'+c.caseShade+'" stroke-width=".8"/>'
+            +'<path d="M52.5 84.4Q49 102.7 31 101.7Q23 99.7 27 91.7L34 86.6" fill="none" stroke="'+c.accent+'" stroke-width=".7"/>'
+        // A fixed heatsink edge is not a made-up rotating blade count.
+        result+='<ellipse cx="55.6" cy="61.0" rx="15.4" ry="27.5" fill="'+c.caseShade+'"/>'
+        ;[[.385,.525],[.535,.647],[.658,.800]].forEach(function(v,i){
+            result+='<g class="hardware-fx052-agp-segment" data-u0="'+v[0]+'" data-u1="'+v[1]+'">'
+            // Eight readable pad samples per section are not a claimed pin count.
+            for(var j=0;j<8;j++)result+=r(v[0]*100+(v[1]-v[0])*100*(j+.15)/8,91.2,(v[1]-v[0])*100*.70/8,8,.05,c.gold)
+            result+='</g>'
+        })
+        return result
     }
     return ""
 }

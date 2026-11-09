@@ -36,7 +36,8 @@ class AssemblyProfileTests(unittest.TestCase):
         self.assertEqual(self.warnings,[]);self.native.assert_not_called();self.process.assert_not_called()
 
     def test_all_registered_components_have_reusable_model_profiles(self):
-        values=all_appearances();self.assertEqual(len(values),178)
+        values=all_appearances();self.assertEqual(len(values),179)
+        self.assertIn('gigabyte-fx5200-n52128d-rev10-reference',{value['id'] for value in values})
         for value in values:
             with self.subTest(model=value['id']):
                 profile=self.reader.read(value)

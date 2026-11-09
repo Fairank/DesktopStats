@@ -138,12 +138,12 @@
           ],
           "front_hub_tones": [
             {
-              "status": "unknown",
-              "value": null
+              "status": "known",
+              "value": "silver"
             },
             {
-              "status": "unknown",
-              "value": null
+              "status": "known",
+              "value": "silver"
             }
           ],
           "geometry_status": "pending",
@@ -4427,8 +4427,8 @@
           ],
           "front_hub_tones": [
             {
-              "status": "unknown",
-              "value": null
+              "status": "known",
+              "value": "light"
             }
           ],
           "geometry_status": "pending",
@@ -4540,10 +4540,12 @@
             "value": null
           },
           "blades": null,
-          "confirmed_front_indices": [],
+          "confirmed_front_indices": [
+            1
+          ],
           "front_blade_counts": [
             null,
-            null,
+            7,
             null
           ],
           "front_hub_tones": [
@@ -4566,13 +4568,12 @@
             "value": 3
           },
           "source_urls": [
-            "https://www.gigabyte.com/dk/Graphics-Card/GV-N5070GAMING-OC-12GD"
+            "https://www.gigabyte.com/Graphics-Card/GV-N5070GAMING-OC-12GD"
           ],
-          "status": "unknown",
+          "status": "partial",
           "technology": "hawk_blackwell",
           "unknown_front_indices": [
             0,
-            1,
             2
           ],
           "visible_front_fans": {
@@ -4642,7 +4643,8 @@
       "series_id": "gigabyte_gaming_oc",
       "source_urls": [
         "https://www.gigabyte.com/ch/Graphics-Card/GV-N5070GAMING-OC-12GD/sp",
-        "https://www.gigabyte.com/dk/Graphics-Card/GV-N5070GAMING-OC-12GD"
+        "https://www.gigabyte.com/dk/Graphics-Card/GV-N5070GAMING-OC-12GD",
+        "https://www.gigabyte.com/Graphics-Card/GV-N5070GAMING-OC-12GD"
       ]
     },
     {
@@ -4858,7 +4860,9 @@
         }
       },
       "exterior_source_urls": [
-        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI"
+        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI",
+        "https://static.gigabyte.com/StaticFile/Image/Global/929a862e10697401732e1a6d3f88dcff/ProductRemoveBg/3282",
+        "https://www.gigabyte.com/press/news/908"
       ],
       "kind": "gpu",
       "label": "GIGABYTE GV-N460OC-1GI Rev. 1.0",
@@ -4866,7 +4870,9 @@
       "model_id": "gigabyte-gtx460-oc-1g-rev1",
       "series_id": "gigabyte_windforce_fermi",
       "source_urls": [
-        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI"
+        "https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI",
+        "https://static.gigabyte.com/StaticFile/Image/Global/929a862e10697401732e1a6d3f88dcff/ProductRemoveBg/3282",
+        "https://www.gigabyte.com/press/news/908"
       ]
     },
     {
@@ -5153,11 +5159,15 @@
             "value": null
           },
           "blades": null,
-          "confirmed_front_indices": [],
+          "confirmed_front_indices": [
+            0,
+            1,
+            2
+          ],
           "front_blade_counts": [
-            null,
-            null,
-            null
+            11,
+            11,
+            11
           ],
           "front_hub_tones": [
             {
@@ -5179,15 +5189,11 @@
             "value": 4
           },
           "source_urls": [
-            "https://www.inno3d.com/sites/default/files/2024-01/Asset%204_14.png"
+            "https://images.nvidia.com/aem-dam/Solutions/geforce/news/rtx-3080-3090-custom-card-roundup/Inno3D-GeForce-RTX-3080-ICHILL-X4-Photo-002.png"
           ],
-          "status": "unknown",
+          "status": "known",
           "technology": "inno3d_scythe",
-          "unknown_front_indices": [
-            0,
-            1,
-            2
-          ],
+          "unknown_front_indices": [],
           "visible_front_fans": {
             "status": "known",
             "value": 3
@@ -5245,7 +5251,9 @@
         }
       },
       "exterior_source_urls": [
-        "https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4"
+        "https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4",
+        "https://www.nvidia.com/en-us/geforce/news/rtx-3080-3090-custom-card-roundup/",
+        "https://images.nvidia.com/aem-dam/Solutions/geforce/news/rtx-3080-3090-custom-card-roundup/Inno3D-GeForce-RTX-3080-ICHILL-X4-Photo-002.png"
       ],
       "kind": "gpu",
       "label": "INNO3D GeForce RTX 3080 iCHILL X4",
@@ -5254,7 +5262,8 @@
       "series_id": "inno3d_ichill_x4",
       "source_urls": [
         "https://inno3d.com/product/inno3d-geforce-rtx-3080-ichill-x4",
-        "https://www.inno3d.com/sites/default/files/2024-01/Asset%204_14.png"
+        "https://www.nvidia.com/en-us/geforce/news/rtx-3080-3090-custom-card-roundup/",
+        "https://images.nvidia.com/aem-dam/Solutions/geforce/news/rtx-3080-3090-custom-card-roundup/Inno3D-GeForce-RTX-3080-ICHILL-X4-Photo-002.png"
       ]
     },
     {
@@ -14875,8 +14884,10 @@
       ],
       "kind": "gpu",
       "market_exhaustive": false,
-      "retail_version_scope": "representative_only",
-      "reviewed_version_ids": [],
+      "retail_version_scope": "reviewed_additions_only",
+      "reviewed_version_ids": [
+        "gigabyte-fx5200-n52128d-rev10-reference"
+      ],
       "series_id": "gigabyte_fx5200"
     },
     {
@@ -15821,10 +15832,10 @@
   "summary": {
     "base_gpu_field_statuses": {
       "fans": {
-        "known": 84,
+        "known": 85,
         "not_applicable": 2,
-        "partial": 1,
-        "unknown": 16
+        "partial": 2,
+        "unknown": 14
       },
       "pcb_internal_layout": {
         "unverified": 103
@@ -15854,12 +15865,12 @@
       "memory": 16
     },
     "pending_versions": 0,
-    "reviewed_version_records": 56,
-    "runtime_supported_models": 178,
-    "supported_versions": 56,
+    "reviewed_version_records": 57,
+    "runtime_supported_models": 179,
+    "supported_versions": 57,
     "version_statuses": {
       "supported_independent": 34,
-      "supported_shared": 22
+      "supported_shared": 23
     }
   },
   "versions": [
@@ -18361,6 +18372,134 @@
         "https://www.corsair.com/ww/en/p/memory/cmt32gx5m2b5600c36/dominatora-platinum-rgb-32gb-2x16gb-ddr5-dram-5600mhz-c36-memory-kit-a-black-cmt32gx5m2b5600c36",
         "https://www.kingston.com/datasheets/KF560C36BBEK2-32.pdf",
         "https://www.corsair.com/us/en/p/ddr5-ram/cmt32gx5m2b5600c36w/dominatora-platinum-rgb-32gb-2x16gb-ddr5-dram-5600mhz-c36-memory-kit-a-white-cmt32gx5m2b5600c36w"
+      ],
+      "status": "supported_shared",
+      "visual_relation": "shared"
+    },
+    {
+      "aliases": [
+        "GIGABYTE GV-N52128D GeForce FX 5200 Rev.1.0 Manual Reference",
+        "GV-N52128D Rev. 1.0 Manual Reference",
+        "GV-N52128D Rev.1.0 手册参考"
+      ],
+      "base_model_id": "gigabyte-fx5200-n52128d",
+      "coverage": {
+        "dimensions_mm": {
+          "height": {
+            "status": "unknown",
+            "value": null
+          },
+          "length": {
+            "status": "unknown",
+            "value": null
+          },
+          "thickness": {
+            "status": "unknown",
+            "value": null
+          }
+        },
+        "fans": {
+          "blade_pattern": {
+            "status": "unknown",
+            "value": null
+          },
+          "blades": 7,
+          "confirmed_front_indices": [
+            0
+          ],
+          "front_blade_counts": [
+            7
+          ],
+          "front_hub_tones": [
+            {
+              "status": "known",
+              "value": "dark"
+            }
+          ],
+          "geometry_status": "reviewed",
+          "inherited_from_model_id": "gigabyte-fx5200-n52128d",
+          "physical_fans": {
+            "status": "known",
+            "value": 1
+          },
+          "source_urls": [
+            "https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd"
+          ],
+          "status": "known",
+          "technology": "legacy_small_axial",
+          "unknown_front_indices": [],
+          "visible_front_fans": {
+            "status": "known",
+            "value": 1
+          }
+        },
+        "host_interface": {
+          "bus": {
+            "status": "known",
+            "value": "agp"
+          },
+          "generation": {
+            "status": "known",
+            "value": 8
+          },
+          "lanes": {
+            "status": "unknown",
+            "value": null
+          }
+        },
+        "illustration_status": "simplified",
+        "pcb_internal_layout": {
+          "status": "unverified",
+          "value": null
+        },
+        "pcb_length": {
+          "status": "unknown",
+          "value": null
+        },
+        "ports": {
+          "groups": [
+            {
+              "count": 1,
+              "subtype": "DVI-I",
+              "type": "dvi"
+            },
+            {
+              "count": 1,
+              "type": "tv_out"
+            },
+            {
+              "count": 1,
+              "type": "vga"
+            }
+          ],
+          "status": "known"
+        },
+        "power": {
+          "connection_mode": "positions_unverified",
+          "groups": null,
+          "position": {
+            "status": "unknown",
+            "value": null
+          },
+          "status": "unknown"
+        }
+      },
+      "exterior_source_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N52128D",
+        "https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd"
+      ],
+      "inherits_chip_specifications": false,
+      "inherits_live_telemetry": false,
+      "kind": "gpu",
+      "label": "GIGABYTE GV-N52128D GeForce FX 5200 Rev.1.0 Manual Reference",
+      "match_status": "validated_exact",
+      "model_id": "gigabyte-fx5200-n52128d-rev10-reference",
+      "recipe": null,
+      "series_id": "gigabyte_fx5200",
+      "sharing_scope": "exterior_illustration_only",
+      "source_urls": [
+        "https://www.gigabyte.com/Graphics-Card/GV-N52128D",
+        "https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd"
       ],
       "status": "supported_shared",
       "visual_relation": "shared"

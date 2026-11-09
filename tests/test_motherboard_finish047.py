@@ -126,6 +126,8 @@ LEGACY_STYLE_SHA = {'asrock-b550m-itx-ac': '0cd2e2c41c10f397db7e9ec3afe34360c5ab
 
 SIX=('miniature','cartoon','notebook_color','notebook_line','sticker','papercut')
 ASUS_INSETS={'asus-rog-strix-z790-a-wifi-d4','asus-rog-strix-x670e-e-wifi','asus-rog-maximus-z790-hero'}
+ASUS_M2_OLD=((.164,.506),(.688,.506),(.706,.486),(.974,.486),(.974,.549),(.922,.577),(.164,.577))
+ASUS_M2_052=((.164,.506),(.902,.506),(.920,.486),(.974,.486),(.974,.549),(.922,.577),(.164,.577))
 
 def canonical(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
@@ -154,6 +156,10 @@ def legacy_header_metadata051(testcase,row):
             role_verified=True,role_source=ASUS_Z790_MANUAL,role_source_page=14))
         testcase.assertIs(value['role_verified'],True)
         for key in keys:del old[key]
+    # One independently source-reviewed052 polygon correction. Keep the old
+    # whole-row digest instead of replacing it or exempting this model.
+    upper=next(c for c in restored['heatsinks'] if c['name']=='m2-upper')
+    testcase.assertEqual(upper['polygon'],ASUS_M2_052);upper['polygon']=ASUS_M2_OLD
     return restored
 
 
@@ -173,6 +179,58 @@ def board_meshes(identity,level='balanced',model=None):
         anchors=layout_anchors(spec,400.,600.,500.,90.,0.,-150.)
     meshes,meta=enrich_motherboard((),spec,anchors,level)
     return meshes,meta,anchors
+
+
+def legacy_socket_geometry052(testcase,identity,meshes,anchors):
+    """Reverse only declared052 socket banks and exact-ASUS upper M2 fixes."""
+    from assembly_detail import _boxes
+    values=meshes
+    if identity=='asus-rog-strix-z790-a-wifi-d4':
+        import assembly_detail
+        from assembly_geometry import unit_polygon
+        model=get_model(identity);next(c for c in model['heatsinks'] if c['name']=='m2-upper')['polygon']=ASUS_M2_OLD
+        original_plate=assembly_detail.perforated_plate
+        upper=next(c for c in model['heatsinks'] if c['name']=='m2-upper')
+        bw=anchors['board']['width'];bh=anchors['board']['height']
+        outer=unit_polygon([list(p) for p in ASUS_M2_OLD],bw,bh)
+        recess=min(3.,upper['depth_mm']*.42)
+        old_channels=[((u-.5)*bw,(.5-v)*bh,3.2) for u,v in model['mount_uv']
+                      if assembly_detail._point_inside((u,v),ASUS_M2_OLD)]
+        u0,u1=min(p[0] for p in ASUS_M2_OLD),max(p[0] for p in ASUS_M2_OLD)
+        v0,v1=min(p[1] for p in ASUS_M2_OLD),max(p[1] for p in ASUS_M2_OLD)
+        for n in range(upper['grooves']):
+            u=u0+(u1-u0)*(.20+.60*n/max(1,upper['grooves']-1));v=v0+(v1-v0)*.50
+            cx,cy=(u-.5)*bw,(.5-v)*bh
+            channel=assembly_detail.chamfer_rect(.65,(v1-v0)*bh*.68,.12)
+            old_channels.append(tuple((x+cx,y+cy) for x,y in channel))
+        def old_upper_walls(*args,**kwargs):
+            # Only the newly enabled exact-ASUS upper plinth/crown supply
+            # True here. All other calls retain their original default.
+            if kwargs.get('clip_walls') is True:
+                testcase.assertEqual(args[0],outer)
+                kwargs=dict(kwargs,clip_walls=False)
+                if args[2]==recess:
+                    # Reverse only052's bounded groove-height containment.
+                    # The unchanged old full payload still verifies every
+                    # original groove, mount-hole wall and all other parts.
+                    testcase.assertEqual(len(args[1]),len(old_channels))
+                    args=(args[0],old_channels,*args[2:])
+            return original_plate(*args,**kwargs)
+        with patch.object(assembly_detail,'perforated_plate',new=old_upper_walls):
+            values,_meta,legacy_anchors=board_meshes(identity,model=model)
+        testcase.assertEqual(legacy_anchors['dimm_centers'],anchors['dimm_centers'])
+        first=next(i for i,m in enumerate(meshes) if m.name=='detail-board-m2-heatsink')
+        testcase.assertEqual(meshes[first+1].name,'board-heatsink-recessed-crown')
+        testcase.assertEqual([m for i,m in enumerate(meshes) if i not in (first,first+1)],
+                             [m for i,m in enumerate(values) if i not in (first,first+1)])
+    bx=anchors['board']['x'];new_banks=[];old_strips=[]
+    for _x,y,z in anchors['dimm_centers']:
+        for side in (-1,1):new_banks.append(((3.6,132.,.16),(bx-3.,y,z+side*.88)))
+        old_strips.append(((.28,132.,1.9),(bx-1.9,y,z)))
+    contacts=[m for m in values if m.name=='detail-board-memory-socket-contact-wells']
+    testcase.assertEqual(len(contacts),1);testcase.assertEqual(contacts[0].vertices,_boxes(new_banks))
+    return tuple(replace(m,vertices=_boxes(old_strips)) if m.name=='detail-board-memory-socket-contact-wells' else m for m in values)
+
 
 class MotherboardFinish047Tests(unittest.TestCase):
     def setUp(self):
@@ -292,8 +350,8 @@ class MotherboardFinish047Tests(unittest.TestCase):
 
     def test_untouched_scene_bytes_and_six_actual_assembly_contracts(self):
         for identity,expected in LEGACY_GEOMETRY.items():
-            meshes,board_meta,_=board_meshes(identity)
-            self.assertEqual(payload_sha(meshes),expected,identity)
+            meshes,board_meta,anchors=board_meshes(identity)
+            self.assertEqual(payload_sha(legacy_socket_geometry052(self,identity,meshes,anchors)),expected,identity)
             self.assertNotIn('finish_materials',board_meta)
             colors=[]
             for style in SIX:

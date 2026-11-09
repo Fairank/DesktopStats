@@ -1,0 +1,145 @@
+{
+  "measurement_type": "scoped_software_fixtures_only",
+  "native_application_acceptance": false,
+  "installed_app_changed": false,
+  "whole_application_memory_measured": false,
+  "whole_application_cpu_measured": false,
+  "widget_identity": {
+    "scope": "One 360px actual QML widget in offscreen/software/basic; cached synthetic Controller data, no collector or animation during timings.",
+    "groups": 7,
+    "updates_per_group": 500,
+    "cpu_model_median_cpu_seconds_before": 0.203125,
+    "cpu_model_median_cpu_seconds_after": 0.09375,
+    "cpu_model_median_cpu_reduction_percent": 53.84615384615385,
+    "gpu_model_median_cpu_seconds_before": 0.171875,
+    "gpu_model_median_cpu_seconds_after": 0.171875,
+    "equal_identity_shape_key_calls_per_100_updates_before": 100,
+    "equal_identity_shape_key_calls_per_100_updates_after": 0,
+    "svg_rebuilds_per_100_equal_identity_updates_before": 0,
+    "svg_rebuilds_per_100_equal_identity_updates_after": 0,
+    "reliable_memory_reduction_claim": false,
+    "source_sha256": {
+      "native/DesktopHardwareModel.qml": "95fffa41989d17c58113a09b6fa98aa656bf1d9e05b76f8e6b4e995aa2db9a67",
+      "native/MetricIcon.qml": "f079d7d2f0bcec70587f0b2e4f6886ebc56c6334affbd37d24af06f793d2717a"
+    },
+    "limits": [
+      "Windows process CPU timing is quantized; seven groups share one process per kind and version.",
+      "GPU median did not improve in this fixture.",
+      "Both versions already retained SVG sources and rotor textures. This removes identity recomputation, not 100 SVG rebuilds.",
+      "These figures cannot be converted to installed Stats CPU percentage, RSS or game FPS."
+    ]
+  },
+  "planner_hidden_cache_release": {
+    "scope": "Historical pre-envelope Helios capture with398 meshes and four plans; Python planner ownership only. Not the later399-mesh current snapshot and not app RSS.",
+    "source_sha256": "922ec897c9dd1fec0ec9778bd717bda0fe3e43b26af7904d9a3391d4356e91b8",
+    "planner_bytes_before_discard": 3909308,
+    "planner_bytes_after_discard": 170508,
+    "released_bytes": 3738800,
+    "bounds_retained": 398,
+    "plans_retained": 4,
+    "geometry_triangles_before": 2784,
+    "geometry_triangles_after": 0,
+    "geometry_cache_entries_before": 3,
+    "geometry_cache_entries_after": 0,
+    "retained_plan_signatures_equal": true,
+    "bounds_rescanned_on_cache_discard": false,
+    "whole_application_memory_claim": false
+  },
+  "cpu_ram_planner_phase1": {
+    "scope": "One explicit reference scene planner; Python ownership only. Excludes the scene, QML, rendering buffers and app RSS. Historical frozen phase1, not a measurement of later fan/cache changes.",
+    "source_sha256": "d19af94f2bb08483264bb39d3d09e3c802fc94ad5747be0553eda82164418a73",
+    "lazy_index_seconds": 0.3934084000065923,
+    "cpu_default_blocked_query_seconds": 0.005109100020490587,
+    "cpu_cooler_hidden_query_seconds": 0.05882259999634698,
+    "memory0_uncached_query_seconds": 0.06895649997750297,
+    "memory1_uncached_query_seconds": 0.0773868000251241,
+    "planner_python_retained_bytes": 4347560,
+    "planner_python_peak_bytes": 9926232,
+    "planner_after_clear_bytes": 56,
+    "per_frame_clearance_queries": 0,
+    "added_samplers": 0,
+    "added_runtime_workers": 0,
+    "additional_motion_timers": 0,
+    "limits": [
+      "One source-qualified reference, not all model combinations or GUI event latency.",
+      "Planning runs on explicit selection/scene/inspection changes only and has fixed budgets.",
+      "Animation uses the existing shared clock and retained physical arrays; finite motion stops at rest."
+    ]
+  },
+  "memory_dimension_construction052": {
+    "scope": "Pure Python construction kernels; two actual earlier baked DIMM descriptors and eight repeated synthetic descriptors. Not Qt, a frame, a sensor tick or whole-app resource usage.",
+    "groups": 7,
+    "iterations_per_group": 500,
+    "cpu_time_quantized_on_windows": true,
+    "two_modules": {
+      "deepcopy_median_microseconds": 125.0,
+      "enrich_raw_median_microseconds": 125.0,
+      "enrich_already_median_microseconds": 187.5,
+      "enrich_already_single_traced_peak_bytes": 31240
+    },
+    "eight_synthetic_modules": {
+      "deepcopy_median_microseconds": 343.75,
+      "enrich_raw_median_microseconds": 437.5,
+      "enrich_already_median_microseconds": 562.5,
+      "enrich_already_single_traced_peak_bytes": 95560
+    },
+    "production_deduplication_change_made": false,
+    "limits": [
+      "No before/after application reduction is claimed.",
+      "The defensive construction-time recheck clears stale model facts; it is retained.",
+      "Traced temporary allocation is not the process working set or persistent RAM."
+    ]
+  },
+  "assembly_readout_build_gate052": {
+    "test_file": "tests/test_memory_build_efficiency052.py",
+    "tests": 6,
+    "skips": 0,
+    "passed": true,
+    "test_seconds": 0.105,
+    "inactive_updates": 100,
+    "inactive_builds": 0,
+    "active_readout_only_updates": 100,
+    "additional_model_builds": 0,
+    "all_readout_updates_delivered": true,
+    "real_refresh_fingerprint_and_window_cache_consumers": true,
+    "viewport_and_profile_are_explicit_fixtures": true,
+    "actual_geometry_or_Qml_rendered_in_this_fixture": false,
+    "new_samplers": 0,
+    "new_clocks": 0,
+    "whole_application_memory_claim": false
+  },
+  "widget_functional_matrix052": {
+    "layout_cells": 126,
+    "core_state_cells": 270,
+    "additional_gate_assertions": 150,
+    "actual_Qt_software": true,
+    "single_worker_wall_seconds": 37.531,
+    "worker_priority": "BelowNormal",
+    "native_acceptance": false,
+    "whole_application_memory_claim": false,
+    "minimum_desktop_logical_size_dip": 220,
+    "editor180_preview_is_not_native180_support": true,
+    "source_code_fence_files": 287,
+    "review": "Functional checks passed; selected actual PNGs visually reviewed. Some small eleven-leaf linework remains dense."
+  },
+  "astral_topology_repair": {
+    "scope": "Exact Astral six cover meshes, three static LODs; source geometry only, not app RSS or game FPS",
+    "added_triangles": {
+      "eco": 514,
+      "balanced": 652,
+      "close": 904
+    },
+    "additional_F32_vertex_bytes": {
+      "eco": 37008,
+      "balanced": 46944,
+      "close": 65088
+    },
+    "other_mesh_fields_and_scene_metadata_unchanged": true,
+    "added_hardware": 0,
+    "added_samplers": 0,
+    "added_timers": 0,
+    "per_frame_refinement": false,
+    "temporary_index_only_on_scene_rebuild": true,
+    "native_application_measured": false
+  }
+}

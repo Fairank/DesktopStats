@@ -264,7 +264,7 @@ class AssemblyDetailTests(unittest.TestCase):
         self.assertTrue(over['memory_population_exceeds_documented_slots'])
 
     def test_all_147_gpu_models_preserve_finite_geometry_and_balanced_budget(self):
-        rows=[row for row in CATALOG if row[1]=='gpu'];self.assertEqual(len(rows),147)
+        rows=[row for row in CATALOG if row[1]=='gpu'];self.assertEqual(len(rows),148)
         for row in rows:
             with self.subTest(model=row[0]):
                 appearance=appearance_for('gpu',row[-1][0]);scene=build_scene({'gpu':dict(appearance=appearance)})

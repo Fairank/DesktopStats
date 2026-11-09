@@ -919,7 +919,8 @@ PROFILES = {'asus_dual': {'model_ids': ('asus-dual-4060-oc',),
                       'dimensions_mm': {'length': 265, 'height': 120, 'thickness': 33},
                       'slot_width': None,
                       'pcb_length': 'unknown',
-                      'shroud_tone': 'mixed',
+                      'shroud_tone': 'dark',
+                      'recipe': 'a_msi_480_observed',
                       'backplate': None,
                       'host_interface': {'bus': 'pcie',
                                          'generation': 2,
@@ -935,19 +936,26 @@ PROFILES = {'asus_dual': {'model_ids': ('asus-dual-4060-oc',),
                                    'and D-Sub in sheet are adapter outputs, not extra sockets. Power audit: exact official '
                                    'specification/PDF and all five Gallery views were checked; they show package/front/I-O-side '
                                    'artwork without a readable auxiliary socket face. N480GTX Lightning is a different board and its '
-                                   'three-input design was excluded.'
+                                   'three-input design was excluded. Gallery5 shows a horizontal silver ridge bank with cross-supports, '
+                                   'four visible overlapping outer pipe-arc segments and a black N480GTX plaque. Arc segments '
+                                   'are not a total heatpipe count; hidden joins, exact ridge count and positions remain reference. '
+                                   'Warm factory-label regions are simplified colour fields without copied label artwork.'
                                ),
                       'status': 'documented_specs_partial_pcb'},
  'gigabyte_windforce_fermi': {'model_ids': ('gigabyte-gtx460-oc-1g-rev1',),
                               'representative': 'GIGABYTE GV-N460OC-1GI Rev. 1.0',
-                              'source_urls': ('https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI',),
+                              'source_urls': ('https://www.gigabyte.com/Graphics-Card/GV-N460OC-1GI',
+                                              'https://static.gigabyte.com/StaticFile/Image/Global/929a862e10697401732e1a6d3f88dcff/ProductRemoveBg/3282',
+                                              'https://www.gigabyte.com/press/news/908'),
                               'ports': ({'type': 'dvi', 'count': 2, 'subtypes': ('dvi_i', 'dvi_i')},
                                         {'type': 'mini_hdmi', 'count': 1}),
                               'power_connectors': ({'type': '6pin', 'count': 2},),
                               'dimensions_mm': {'length': None, 'height': None, 'thickness': None},
                               'slot_width': None,
                               'pcb_length': 'unknown',
-                              'shroud_tone': 'mixed',
+                              'shroud_tone': 'dark',
+                      'recipe': 'a_gigabyte_460_rev1_observed',
+                      'pcb_tone': 'blue',
                               'backplate': None,
                               'host_interface': {'bus': 'pcie',
                                                  'generation': 2,
@@ -960,7 +968,9 @@ PROFILES = {'asus_dual': {'model_ids': ('asus-dual-4060-oc',),
                               'power_position': 'unknown',
                               'notes': 'Rev1.0 anti-turbulence open WINDFORCE 2X cooler; two DVI-I and one '
                                        'mini-HDMI. Rev2/Rev3 are different inventory records and cannot '
-                                       'inherit this artwork.',
+                                       'inherit this artwork. Official Rev1 product photograph shows blue PCB and black cover; '
+                                       'the reference lobe silhouette and both unreviewed fan discs remain unchanged. '
+                                       'Two copper heatpipes are documented, but hidden routing is not reconstructed.',
                               'status': 'documented_specs_partial_pcb'},
  'msi_lightning_tesla': {'model_ids': ('msi-n260gtx-lightning',),
                          'representative': 'MSI N260GTX Lightning',
@@ -1398,6 +1408,17 @@ FAN_UPDATES = {'gigabyte_windforce': {'model_ids': ('gigabyte-windforce-4060-oc'
                    'outer_ring': False,
                    'group_size': 1,
                    'source_image_url': 'https://assets.nvidia.partners/images/png/0676233_660548.png'},
+ 'acer_bifrost_arc_a770': {'model_ids': ('acer-bifrost-a770-16g-oc',),
+                          'blades': None,
+                          'shape': 'neutral',
+                          'source_url': 'https://www.acer.com/us-en/predator/desktops-and-all-in-ones/components/predator-bifrost-intel-arc-a770-oc',
+                          'evidence': 'official_front_view',
+                          'count_status': 'unconfirmed',
+                          'fans': ({'technology': 'acer_aeroblade5', 'blades': None, 'shape': 'neutral',
+                                    'hub_ratio': 0.64, 'hub_tone': 'silver', 'outer_ring': False, 'group_size': 1},
+                                   {'technology': 'acer_frostblade2', 'blades': None, 'shape': 'neutral',
+                                    'hub_ratio': 0.28, 'hub_tone': 'silver', 'outer_ring': False, 'group_size': 1}),
+                          'notes': 'Exact A770 manufacturer2000px cooling closeups show two machined silver caps: an all-metal blower and an axial FrostBlade2.0. Correct cap material only; transparent/occluded leaves do not establish either count. No89-blade laptop transfer, no RPM or manufactured pitch claim.'},
  'nvidia_founders_pascal': {'model_ids': ('nvidia-gtx1080-founders',),
                             'blades': 53,
                             'source_url': 'https://www.nvidia.com/en-us/geforce/news/geforce-gtx-1080-founders-edition/',
@@ -1529,7 +1550,7 @@ FAN_UPDATES = {'gigabyte_windforce': {'model_ids': ('gigabyte-windforce-4060-oc'
                          'blades': None,
                          'source_url': 'https://storage-asset.msi.com/datasheet/vga/global/N260GTX_Lightning.pdf',
                          'count_status': 'unconfirmed',
-                         'notes': '本SKU官方PDF提取三张产品图，确认双扇为烟色半透明弯叶/较大轮毂；原图500px且反光重，叶片与鳍片重叠处不能可靠核数。',
+                         'notes': '本SKU原始PDF与官方N260GTX Lightning Technical Briefing第15页1277px整卡/1033px侧照复核：薄拉丝金属盖板、开放长侧、烟色双扇、5根热管总数及两段可见U弯；叶根/叶尖仍与鳍片反光交叠，未据此确认两扇叶数。侧部管径/位置与鳍片采样是原创参考，不是CAD；未重建其余内部管路。',
                          'shape': 'swept',
                          'evidence': 'official_front_view',
                          'hub_ratio': 0.41,
@@ -1554,6 +1575,7 @@ FAN_UPDATES = {'gigabyte_windforce': {'model_ids': ('gigabyte-windforce-4060-oc'
                      'notes': '亲看GV-N52128D官方450px包装+板卡图，蓝色AGP PCB上的小黑色主动风扇与径向散热鳍片；叶轮有效直径不足70px，鳍片不能算成扇叶，叶数/轮毂比例未知。',
                      'shape': 'swept',
                      'evidence': 'official_front_view',
+                     'hub_tone': 'light',
                      'tone': 'dark',
                      'outer_ring': False,
                      'group_size': 1},
@@ -2231,3 +2253,36 @@ VERSION_FAMILIES = ({'series_id': 'asus_dual',
                                               'evidence': 'explicit_count'}},
                 'notes': '与现有RTX4090 SUPRIM '
                          'X的336×142×78mm、TORX5九叶/三叶连组明显不同：本5090为359×150×76mm、三枚STORMFORCE七叶风扇，金属八边形风口与三角切面、银色斜栅大开孔背板。OC完整型号的官方PDF正面/背面图片均已亲看。循环叶尖围环未取得足够独立特写证据，outer_ring=False表示未确认，不能用导风罩圆框当旋转联环。different仅备妥实际覆盖数据，须绘图实现后才可匹配；不直接复用4090外壳。'})})
+
+
+# Explicit manufacturer-manual specimen, not a revision inferred from the chip
+# or the unversioned marketing photo. Complete aliases require a manual label.
+VERSION_FAMILIES += ({
+    'series_id': 'gigabyte_fx5200',
+    'base_model_id': 'gigabyte-fx5200-n52128d',
+    'source_urls': ('https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd',),
+    'variants': ({
+        'model_id': 'gigabyte-fx5200-n52128d-rev10-reference',
+        'label': 'GIGABYTE GV-N52128D GeForce FX 5200 Rev.1.0 Manual Reference',
+        'aliases': ('GIGABYTE GV-N52128D GeForce FX 5200 Rev.1.0 Manual Reference',
+                    'GV-N52128D Rev. 1.0 Manual Reference', 'GV-N52128D Rev.1.0 手册参考'),
+        'visual_relation': 'shared',
+        'source_urls': ('https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd',),
+        'overrides': {
+            'pcb_tone': 'blue', 'cover_style': 'exposed_board',
+            'edge_key_count': 2, 'power_connectors': None,
+            'dimensions_mm': {'length': None, 'height': None, 'thickness': None},
+            'fan_profile': {'blades': 7, 'shape': 'wide', 'tone': 'dark',
+                            'hub_tone': 'dark', 'hub_ratio': .48,
+                            'outer_ring': False, 'group_size': 1,
+                            'evidence': 'official_front_view', 'count_status': 'confirmed',
+                            'source_url': 'https://download1.gigabyte.com/Files/Manual/vga_manual_n52128_e.pdf?v=26f5e035240719cc61a6b774d7ded4cd'},
+        },
+        'notes': '厂商原安装手册第5页1313×725内嵌正面照片，板丝印GV-N52128D REV:1.0。'
+                 '独立逐叶复核7片弯叶；8个显存封装（上4/右4）、6大电容、铜环线圈/灰电感、两线扇插头、'
+                 '三段AGP接点与双缺口可见。局部位置/高度/法线曲面为原创照片参考，不是CAD；'
+                 '不画不可辨SMD/芯片文字，不宣称背面电路已核。未标revision的base仍叶数未知；'
+                 '与当前小商品图轮毂画法不同只记录图版本，不据此宣称已证明物理改款。'
+                 '无官方整卡尺寸，参考包络不作为已核兼容尺寸；并未证明无需外接供电。',
+    },),
+},)

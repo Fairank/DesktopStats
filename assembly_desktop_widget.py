@@ -156,9 +156,10 @@ class AssemblyWidgetWindow(AssemblyWindow):
 
     def _component_selected(self,name):
         if self._closing:return
-        name=name if component_family(name) in COMPONENT_LABELS else 'all'
+        name=name if name=='all' or self._part_family(name)!='all' else 'all'
         changed=name!=self.selected_component;self.selected_component=name
         if changed or self.inspection_state is None:self._update_inspection()
+        self._sync_part_assembly();self._sync_gpu_assembly()
 
     def _update_inspection(self):
         if self._closing or not self._spec or not self.isVisible() or self.isMinimized():return
@@ -167,7 +168,7 @@ class AssemblyWidgetWindow(AssemblyWindow):
             scene_metadata=getattr(getattr(self.viewport,'scene',None),'metadata',{}))
         if state==self.inspection_state:return
         self.inspection_state=state
-        family=component_family(self.selected_component)
+        family=self._part_family()
         identity=(self.controller.tr('整机概览') if self._desktop_frame else self._spec['case']['label']) if family=='all' else ' · '.join(state['identity_parts'])
         self.components.setText(self.controller.tr(identity));self.components.setToolTip(self.controller.tr(identity))
         if family=='all':
@@ -205,7 +206,7 @@ class AssemblyWidgetWindow(AssemblyWindow):
         self.viewport.select_component(identity)
 
     def _show_menu(self,position):
-        if self._closing:return
+        if not self._can_interact():return
         if self._context_menu is not None:self._context_menu.close()
         menu=QMenu(self);self._context_menu=menu
         menu.setStyleSheet('QMenu{background:'+('#263340' if self._dark else '#f7fafc')
@@ -231,13 +232,43 @@ class AssemblyWidgetWindow(AssemblyWindow):
                 action=parts.addAction(row['label'])
                 action.triggered.connect(lambda _checked=False,key=row['id']:self._select_part(key))
         menu.addAction(self.controller.tr('重置视角'),self.viewport.reset_camera)
-        gpu_state=self._gpu_assembly_state()
-        for label,removed in (('拔出查看',True),('插回插槽',False)):
-            action=menu.addAction(self.controller.tr(label),lambda _checked=False,value=removed:self._preview_gpu_insertion(value))
-            action.setEnabled(gpu_state.get('available') is True and not gpu_state.get('active')
-                              and (gpu_state.get('progress',0.)<1. if removed else gpu_state.get('progress',0.)>0.))
-            action.setToolTip(self.controller.tr('沿插槽方向移动；未模拟螺丝、卡扣及电源线拔插。')
-                              if gpu_state.get('available') else self._gpu_assembly_reason(gpu_state))
+        kind=self._part_family()
+        if kind in ('cpu','memory','fans'):
+            state=self._part_assembly_state()
+            for label,removed,name in (('取出查看',True,'assemblyPartRemoveAction'),('插回原位',False,'assemblyPartInsertAction')):
+                action=menu.addAction(self.controller.tr(label),lambda _checked=False,value=removed:self._preview_part_motion(value))
+                action.setObjectName(name)
+                action.setEnabled(state.get('available') is True and not state.get('active')
+                                  and (state.get('progress',0.)<1. if removed else state.get('progress',0.)>0.))
+                action.setToolTip(self.controller.tr('仅沿已核参考方向分离；未模拟固定件和插头操作，不代表完整出箱。')
+                                  if state.get('available') else self._part_assembly_reason(state))
+            if kind=='fans':
+                release=menu.addAction(self.controller.tr('参考解除安装固定与连接'));release.setObjectName('assemblyPartMountReleaseAction')
+                release.setCheckable(True);release.setChecked(self.selected_component in state.get('released_mounts',()))
+                release.setEnabled(self.selected_component in state.get('allowed_mount_release_part_ids',()) and not state.get('active')
+                    and state.get('reason') not in ('motion_disabled','return_other_part_first','close_exploded_view'))
+                release.triggered.connect(self._toggle_mount_release)
+            else:
+                retention=menu.addAction(self.controller.tr('暂时隐藏固定扣具'));retention.setObjectName('assemblyPartRetentionAction')
+                retention.setCheckable(True);retention.setChecked(state.get('retention_hidden') is True)
+                retention.setEnabled(bool(state.get('allowed_opened_mesh_names')) and not state.get('active'))
+                retention.triggered.connect(self._toggle_retention)
+        elif kind in ('all','gpu'):
+            gpu_state=self._gpu_assembly_state()
+            for label,removed in (('拔出查看',True),('插回插槽',False)):
+                action=menu.addAction(self.controller.tr(label),lambda _checked=False,value=removed:self._preview_gpu_insertion(value))
+                action.setEnabled(gpu_state.get('available') is True and not gpu_state.get('active')
+                                  and (gpu_state.get('progress',0.)<1. if removed else gpu_state.get('progress',0.)>0.))
+                action.setToolTip(self.controller.tr('沿插槽方向移动；未模拟螺丝、卡扣及电源线拔插。')
+                                  if gpu_state.get('available') else self._gpu_assembly_reason(gpu_state))
+        state=self._part_assembly_state()
+        hide_part=menu.addAction(self.controller.tr('暂时隐藏此部件'));hide_part.setObjectName('assemblyPartHiddenAction')
+        hide_part.setCheckable(True);hide_part.setChecked(self.selected_component in state.get('hidden_parts',()))
+        hide_part.setEnabled(self.selected_component!='all' and callable(getattr(self.viewport,'set_part_hidden',None)))
+        hide_part.triggered.connect(self._toggle_part_hidden)
+        restore=menu.addAction(self.controller.tr('全部显示'));restore.setObjectName('assemblyRestoreHiddenAction')
+        restore.setEnabled(bool(state.get('hidden_parts')) or state.get('retention_hidden') is True or bool(state.get('released_mounts')))
+        restore.triggered.connect(self._restore_hidden)
         size_menu=QMenu(self.controller.tr('小组件大小'),menu);menu.addMenu(size_menu)
         menu._submenus=(parts,size_menu)
         for label,size in (('紧凑尺寸',(320,380)),('标准尺寸',(420,480)),('大尺寸',(520,600))):

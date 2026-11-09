@@ -493,6 +493,9 @@ def _gpu_detail(meshes,spec,level):
             windows.append(((.04,-thickness*.38),(.96,-thickness*.38),
                             (.96,thickness*.23),(.04,thickness*.23)))
         if windows:edge_windows[i]=tuple(windows)
+    if appearance.get('id')=='msi-n260gtx-lightning':
+        from assembly_gpu_legacy052 import side_windows
+        edge_windows.update(side_windows(appearance['id'],outer,width,thickness))
     shell_holes=tuple(polygon for points in gpu.get('shell_holes') or ()
                       if (polygon:=unit_polygon(points,length,width)))
     body=hollow_cover(outer,holes,thickness,segments=segments,
@@ -512,6 +515,10 @@ def _gpu_detail(meshes,spec,level):
         from assembly_gpu_exterior049 import refine
         completed,exterior=refine(completed,spec,level,outer=outer,front_holes=holes,rear_hole=rear_hole,
             edge_windows=edge_windows,edge_recesses=edge_recesses,front_cutouts=shell_holes,port_holes=port_holes)
+        fin_count=exterior.get('fin_sampling_count',fin_count)
+    elif appearance.get('id') in ('msi-n260gtx-lightning','gigabyte-fx5200-n52128d','gigabyte-fx5200-n52128d-rev10-reference'):
+        from assembly_gpu_legacy052 import refine
+        completed,exterior=refine(completed,spec,level)
         fin_count=exterior.get('fin_sampling_count',fin_count)
     return completed,dict(heatsink_fins=fin_count,ports=len(ports),port_types=tuple(ports),
         connector_pads=contact_count,backplate=backplate,layout_schematic=True,pcb_dimensions_schematic=True,
@@ -534,6 +541,7 @@ def _gpu_detail(meshes,spec,level):
 
 def _memory_detail(meshes,spec,level):
     from assembly_geometry import Mesh,color,memory_plane,rotate_vertices,unit_polygon
+    from memory_geometry052 import layout as memory_layout
     memory=spec.get('memory') or {};modules=memory.get('modules') or ();index=0;out=[];extras=[];records=[]
     pcbs=[m for m in meshes if m.name=='ram-pcb']
     for mesh in meshes:
@@ -548,9 +556,13 @@ def _memory_detail(meshes,spec,level):
             if index<len(modules) and isinstance(modules[index],dict):module.update(modules[index])
         appearance=module.get('appearance') or {};facts=appearance.get('board_details') or {}
         short=module.get('short_form') is True or module.get('style',appearance.get('style'))=='sodimm'
+        shape=memory_layout(module,short)
         pcb=pcbs[index];extent=_extent(pcb);length=extent[2] if short else extent[1];height=extent[1] if short else extent[0]
         orient=(lambda vertices:rotate_vertices(vertices,'left')) if short else memory_plane
-        poly=unit_polygon(module.get('pcb_polygon' if mesh.name=='ram-pcb' else 'case_polygon'),length,height,margin=.3)
+        is_pcb=mesh.name=='ram-pcb'
+        poly=unit_polygon(module.get('pcb_polygon') if is_pcb else shape['cover_polygon'],
+            length if is_pcb else shape['cover_width_mm'],height,
+            margin=.3 if is_pcb else shape['required_polygon_margin'])
         if not poly:
             if mesh.name=='ram-spreader':
                 cover_extent=_extent(mesh)
@@ -564,7 +576,8 @@ def _memory_detail(meshes,spec,level):
                     poly=((-length/2,bottom),(key-half,bottom),(key-half,top),(key+half,top),(key+half,bottom),
                           (length/2,bottom),(length/2,height/2),(-length/2,height/2))
                 else:poly=chamfer_rect(length,height,.6)
-        out.append(replace(mesh,vertices=orient(bevel_extrude(poly,1.2 if mesh.name=='ram-pcb' else 3.2,.12 if mesh.name=='ram-pcb' else .45))))
+        out.append(replace(mesh,vertices=orient(bevel_extrude(poly,
+            shape['pcb_thickness_mm'] if is_pcb else shape['cover_thickness_mm'],.12 if is_pcb else .45))))
         if mesh.name!='ram-pcb':continue
         ratio=facts.get('notch_ratio');ratio=ratio if type(ratio) in (int,float) and 0<ratio<1 else None
         pins=facts.get('pins');pins=pins if type(pins) is int and 1<pins<=400 else None

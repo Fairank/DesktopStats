@@ -59,9 +59,29 @@ class GpuExterior049Tests(unittest.TestCase):
         value=copy.deepcopy(self.spec);value['detail_level']=level;return build_scene(value)
 
     def test_exact_envelope_and_all_lods_have_finite_unit_normals_with_bounded_growth(self):
+        import assembly_gpu_exterior049 as exterior
         stats=[]
+        expected_refinement={'eco':(910,1424),'balanced':(1198,1850),'close':(1682,2586)}
+        real_conforming=exterior._conforming_panel_edges
         for level in ('eco','balanced','close'):
-            scene=self.scene(level);shell=next(m for m in scene.meshes if m.name=='gpu-shroud')
+            measured=[]
+            def measure(panels):
+                result=real_conforming(panels)
+                self.assertEqual(len(panels),6);self.assertEqual(len(result),6)
+                self.assertTrue(all(panels));self.assertTrue(all(result))
+                measured.append((sum(len(v)//18 for v in panels),sum(len(v)//18 for v in result)))
+                return result
+            with patch.object(exterior,'_conforming_panel_edges',side_effect=measure) as refinement:
+                scene=self.scene(level)
+            self.assertEqual(refinement.call_count,1)
+            self.assertEqual(measured,[expected_refinement[level]])
+            refinement_delta=measured[0][1]-measured[0][0]
+            self.assertEqual(refinement_delta,{'eco':514,'balanced':652,'close':904}[level])
+            actual_panels=[m for m in scene.meshes if m.name=='gpu-cover-panel']
+            self.assertEqual(len(actual_panels),6)
+            self.assertEqual(sum(len(m.vertices)//18 for m in actual_panels),measured[0][1])
+            self.assertNotIn('silver_panel_bevel_fallback',scene.metadata['detail']['gpu'])
+            shell=next(m for m in scene.meshes if m.name=='gpu-shroud')
             old=lambda meshes,*args,**kwargs:(meshes,{})
             with patch('assembly_gpu_exterior049.refine',side_effect=old),patch(
                     'assembly_gpu_exterior049.prepare_front_fans',side_effect=lambda meshes,*a:(meshes,{})):before=self.scene(level)
@@ -69,7 +89,10 @@ class GpuExterior049Tests(unittest.TestCase):
                 self.assertAlmostEqual(max(shell.vertices[axis::6])-min(shell.vertices[axis::6]),expected,places=6)
             old_gpu=sum(len(m.vertices)//18 for m in before.meshes if m.component=='gpu')
             gpu=[m for m in scene.meshes if m.component=='gpu'];new_gpu=sum(len(m.vertices)//18 for m in gpu)
-            self.assertLessEqual(new_gpu-old_gpu,3000 if level=='close' else 2600)
+            # Preserve the original exterior budget. Account separately for
+            # only the actual measured source-T repair, whose bounded cost is
+            # asserted above; unrelated geometry growth cannot consume it.
+            self.assertLessEqual(new_gpu-old_gpu-refinement_delta,3000 if level=='close' else 2600)
             self.assertLessEqual(len(gpu)-sum(m.component=='gpu' for m in before.meshes),6)
             for mesh in gpu:
                 for n in range(0,len(mesh.vertices),6):

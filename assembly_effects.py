@@ -37,26 +37,28 @@ def effect_for(style):
                 event="selection",geometry_transform=False,continuous=False)
 
 
-def effect_sample(style,elapsed_ms,component="gpu"):
+def effect_sample(style,elapsed_ms,component="gpu",*,family=None):
     policy=effect_for(style)
     valid=type(elapsed_ms) in (int,float) and math.isfinite(elapsed_ms)
     elapsed=max(0.,float(elapsed_ms)) if valid else float(policy['duration_ms'])
     progress=min(1.,elapsed/policy['duration_ms'])
-    known=component_family(component) in COMPONENTS
+    known=component_family(component) in COMPONENTS or family in COMPONENTS
     active=known and valid and elapsed<policy['duration_ms']
-    return dict(style=policy['style'],component=component if known else '',
+    state=dict(style=policy['style'],component=component if known else '',
                 kind=policy['kind'],progress=progress,amount=math.sin(math.pi*progress)**2 if active else 0.,
                 active=active,elapsed_ms=elapsed)
+    if family in COMPONENTS:state['family']=family
+    return state
 
 
 class SelectionEffect:
     """One bounded transient; completion cannot restart itself."""
     def __init__(self):
-        self.style='miniature';self.component='';self.elapsed_ms=0.;self.active=False
+        self.style='miniature';self.component='';self.family=None;self.elapsed_ms=0.;self.active=False
 
-    def start(self,style,component):
-        if component_family(component) not in COMPONENTS:return False
-        self.style=effect_for(style)['style'];self.component=component
+    def start(self,style,component,*,family=None):
+        if component_family(component) not in COMPONENTS and family not in COMPONENTS:return False
+        self.style=effect_for(style)['style'];self.component=component;self.family=family if family in COMPONENTS else None
         self.elapsed_ms=0.;self.active=True;return True
 
     def cancel(self):
@@ -71,7 +73,7 @@ class SelectionEffect:
         return True
 
     def sample(self):
-        state=effect_sample(self.style,self.elapsed_ms,self.component)
+        state=effect_sample(self.style,self.elapsed_ms,self.component,family=self.family)
         if not self.active:state.update(active=False,amount=0.)
         return state
 
