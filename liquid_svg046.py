@@ -305,24 +305,36 @@ def art(kind,model_id,style='miniature'):
     return art_from_reference(row,style)
 
 
-def art_from_reference(row,style='miniature',cancel=None):
-    """Project one detached validated row; no store, catalog or shared cache.
+def project_meshes(meshes,style='miniature',cancel=None,*,max_triangles=MAX_TRIANGLES,view_direction=None):
+    """Project caller-owned static meshes; return SVG and geometry statistics only.
 
-    Optional callers resolve/validate the reference before dispatching it. A
-    cancellation exception is intentionally not converted to an unknown model.
+    Loop callers keep their original 2600 cap. A radiator caller may explicitly
+    use its existing eco cap of2800; no source/part/form/telemetry is inferred.
+    This has no cache, loader, renderer, thread, timer or component builder.
     """
-    if not isinstance(row,dict) or row.get('part_kind') not in KINDS or style not in STYLES:return {}
-    kind=row['part_kind'];model_id=row.get('id')
-    if not isinstance(model_id,str) or not _ID.fullmatch(model_id) or len(model_id)>64:return {}
-    checkpoint(cancel)
-    from liquid_geometry046 import build_component
+    if (type(style) is not str or style not in STYLES or type(max_triangles) is not int
+            or not 1<=max_triangles<=2800):return {}
+    # Default calls retain the exact existing camera tuples and arithmetic.
+    # Explicit views are local: source positions/normals and globals never move.
+    eye,right,up=_EYE,_RIGHT,_UP
+    if view_direction is not None:
+        if not isinstance(view_direction,(tuple,list)) or len(view_direction)!=3:return {}
+        try:
+            if any(type(v) not in (int,float) or not math.isfinite(v) for v in view_direction):return {}
+        except (OverflowError,TypeError):return {}
+        scale=max(abs(v) for v in view_direction)
+        if not scale:return {}
+        vector=tuple(v/scale for v in view_direction)
+        length=math.hypot(*vector)
+        eye=tuple(v/length for v in vector)
+        transverse=_cross(eye,(0.,1.,0.));length=math.hypot(*transverse)
+        if not length:return {}
+        right=tuple(v/length for v in transverse);up=_cross(right,eye)
+        if not all(math.isfinite(v) for axis in (eye,right,up) for v in axis):return {}
     from assembly_style import apply_colors,edge_batches,style_for
     from liquid_silhouette046 import clip_edge
-    try:meshes,physical=build_component(row,'eco')
-    except ValueError:return {}
-    checkpoint(cancel)
     count=sum(len(mesh.vertices)//18 for mesh in meshes)
-    if not meshes or count>MAX_TRIANGLES:return {}
+    if not meshes or count>max_triangles:return {}
     digest=hashlib.sha256();low_x=low_y=math.inf;high_x=high_y=-math.inf
     for mesh in meshes:
         checkpoint(cancel)
@@ -332,7 +344,7 @@ def art_from_reference(row,style='miniature',cancel=None):
             if not all(math.isfinite(v) for v in chunk):return {}
             digest.update(struct.pack('<6d',*chunk))
             point=tuple(chunk[k]+mesh.position[k] for k in range(3))
-            x,y=_dot(point,_RIGHT),-_dot(point,_UP)
+            x,y=_dot(point,right),-_dot(point,up)
             if x<low_x:low_x=x
             if x>high_x:high_x=x
             if y<low_y:low_y=y
@@ -341,8 +353,8 @@ def art_from_reference(row,style='miniature',cancel=None):
     scale=min(108./max(high[0]-low[0],1e-8),88./max(high[1]-low[1],1e-8))
     center=tuple((low[k]+high[k])/2 for k in (0,1))
     def project(point):
-        return (60.+(_dot(point,_RIGHT)-center[0])*scale,
-                50.+(-_dot(point,_UP)-center[1])*scale,_dot(point,_EYE))
+        return (60.+(_dot(point,right)-center[0])*scale,
+                50.+(-_dot(point,up)-center[1])*scale,_dot(point,eye))
     styled=apply_colors(meshes,style);policy=style_for(style);draw=[];shape=hashlib.sha256();faces=[]
     # Triangle cap holes remain real holes. No rectangle/silhouette replacement,
     # copied logo, separate invented OEM port or source-image trace is used.
@@ -390,7 +402,7 @@ def art_from_reference(row,style='miniature',cancel=None):
                     # gate depends on the tag, never on phase or position.
                     keep=view_tags.get(tag)
                     if keep is None:
-                        keep=bool(clip_edge(world_a,world_b,tag,direction=_EYE))
+                        keep=bool(clip_edge(world_a,world_b,tag,direction=eye))
                         if len(view_tags)<512:view_tags[tag]=keep
                     if not keep:filtered_edges+=1;continue
                 a,b=project(world_a),project(world_b)
@@ -435,8 +447,31 @@ def art_from_reference(row,style='miniature',cancel=None):
         pending.append(path)
     flush();checkpoint(cancel);body=_svg(''.join(fragments))
     if len(body.encode('utf8'))>MAX_SVG_BYTES:return {}
-    # Meshes and reference records are local variables, never retained in a
-    # module cache. The outer gallery's existing 16-item cache owns SVG only.
+    return dict(svg=body,art_details=dict(triangle_count=count,projected_triangle_count=front_count,
+            merged_face_count=len(faces),merge_work=merge_work,visible_face_polygons=visible_polygons,
+            crease_edge_count=edge_count,view_filtered_smooth_edges=filtered_edges,
+            smooth_tag_memo_entries=len(view_tags),occlusion_work=visibility.work,occlusion_clipping=True,
+            geometry_digest=digest.hexdigest(),shape_path_digest=shape.hexdigest()))
+
+
+def art_from_reference(row,style='miniature',cancel=None):
+    """Project one detached validated row; no store, catalog or shared cache.
+
+    Optional callers resolve/validate the reference before dispatching it. A
+    cancellation exception is intentionally not converted to an unknown model.
+    """
+    if not isinstance(row,dict) or row.get('part_kind') not in KINDS or style not in STYLES:return {}
+    kind=row['part_kind'];model_id=row.get('id')
+    if not isinstance(model_id,str) or not _ID.fullmatch(model_id) or len(model_id)>64:return {}
+    checkpoint(cancel)
+    from liquid_geometry046 import build_component
+    try:meshes,physical=build_component(row,'eco')
+    except ValueError:return {}
+    checkpoint(cancel)
+    projection=project_meshes(meshes,style,cancel,max_triangles=MAX_TRIANGLES)
+    if not projection:return {}
+    body=projection['svg']
+    # No local cache. The existing gallery's16-item cache owns SVG only.
     return dict(id=model_id,kind=kind,label=row['label'],brand=row['brand'],style=style,
         svg=body,body_svg=body,foreground_svg='',rotors=[],reference_details=True,
         sources=list(row['sources']),fidelity='actual_mesh_projection_reference',
@@ -444,12 +479,7 @@ def art_from_reference(row,style='miniature',cancel=None):
         reference_notes='The same bounded component mesh as the 3D reference. Fine contours, unverified dimensions, '
                         'contacts and mounting details remain schematic. No live water temperature, flow or pump speed.',
         art_details=dict(geometry_source='liquid_geometry046.build_component',detail_level='eco',
-            geometry_family=row['geometry_family'],form=row['form'],triangle_count=count,
-            projected_triangle_count=front_count,merged_face_count=len(faces),merge_work=merge_work,
-            visible_face_polygons=visible_polygons,crease_edge_count=edge_count,
-            view_filtered_smooth_edges=filtered_edges,smooth_tag_memo_entries=len(view_tags),
-            occlusion_work=visibility.work,occlusion_clipping=True,
-            geometry_digest=digest.hexdigest(),shape_path_digest=shape.hexdigest(),
+            geometry_family=row['geometry_family'],form=row['form'],**projection['art_details'],
             dimensions_mm=physical['dimensions_mm'],reference_envelope_mm=physical['reference_envelope_mm'],
             dimensions_verified=row['dimensions_verified'],coordinates_verified=False,
             physical_shape_shared_across_styles=True,telemetry_bound=False,reference_camera=True))

@@ -30,7 +30,7 @@ class AccessoryArtTests(unittest.TestCase):
         artwork.clear_cache()
         rows=artwork.choices()
         self.assertEqual({key:len(value) for key,value in rows.items()},
-                         dict(cases=96,coolers=66,psus=21,fans=70,cpu_blocks=0,loop_pumps=0,
+                         dict(cases=96,coolers=66,psus=21,fans=70,radiators=24,cpu_blocks=0,loop_pumps=0,
                               loop_reservoirs=0,loop_combos=0,loop_fittings=0,loop_tubing=0,gpu_blocks=0))
         catalog_rows=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                       component_catalog.choices('psu'),cooling_catalog.choices_fans())
@@ -51,10 +51,12 @@ class AccessoryArtTests(unittest.TestCase):
         else:
             self.fail('Shared hardware style IDs were not found')
 
-    def test_all_current_artworks_are_safe_detached_svg_and_keep_the_model(self):
+    def test_all_bundled_svg_collections_are_safe_detached_and_keep_the_model(self):
         required={'id','kind','label','brand','style','svg','body_svg','foreground_svg',
                   'rotors','reference_details','sources'}
-        for key,rows in artwork.choices().items():
+        # Mesh projections have their own geometry/visibility contracts. This
+        # exhaustive legacy collection check covers the standalone SVG exports.
+        for key,rows in artwork.builtin_choices().items():
             kind=KINDS[key]
             for row in rows:
                 counts=set()

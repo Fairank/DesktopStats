@@ -161,8 +161,8 @@ class AssemblyTools(WorkspaceTools):
     @Slot(str,str,str,result='QVariantMap')
     def accessoryModelArt(self,kind,model,style):
         if not self._accessory_gallery_active:return {}
-        from accessory_art import art,cached_art,model_key,_LOOP_KINDS
-        if kind in _LOOP_KINDS:
+        from accessory_art import art,cached_art,model_key,_ASYNC_KINDS
+        if kind in _ASYNC_KINDS:
             key=model_key(kind,model,style)
             if not key:return {}
             cached=cached_art(key)
@@ -181,21 +181,20 @@ class AssemblyTools(WorkspaceTools):
     @Slot('QVariantList')
     def setAccessoryArtDemand(self,rows):
         if not self._accessory_gallery_active:return
-        from accessory_art import model_key,has_cached,publish_art,_LOOP_KINDS
+        from accessory_art import model_key,has_cached,publish_art,_ASYNC_KINDS
         from hardware_packs import library_generation
         keys=[]
         if not isinstance(rows,(list,tuple)):rows=[]
         for row in rows[:16]:
-            if not isinstance(row,dict) or row.get('kind') not in _LOOP_KINDS:continue
+            if not isinstance(row,dict) or row.get('kind') not in _ASYNC_KINDS:continue
             key=model_key(row.get('kind'),row.get('id'),row.get('style'))
             if key and key not in keys:keys.append(key)
         if self._accessory_jobs is None:
             if not any(not has_cached(key) for key in keys):return
             from accessory_jobs047 import ArtJobs
-            from liquid_svg046 import art_from_reference
-            from liquid_component_runtime046 import get_component
-            self._accessory_jobs=ArtJobs(lambda key:get_component(key[0],key[1],retain=False),
-                art_from_reference,has_cached,publish_art,library_generation,self)
+            from accessory_art import prepare_async_reference,project_async_reference
+            self._accessory_jobs=ArtJobs(prepare_async_reference,
+                project_async_reference,has_cached,publish_art,library_generation,self)
             self._accessory_jobs.changed.connect(self._accessory_art_ready)
             self._accessory_jobs.activate(True)
         self._accessory_jobs.demand(keys)

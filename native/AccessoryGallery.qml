@@ -28,7 +28,7 @@ Popup {
             .sort((a,b)=>a.y-b.y || a.x-b.x).slice(0,16).map(item=>({kind:category,id:item.artModelId,style:selectedStyle})):[]
         stats.setAccessoryArtDemand(rows)
     }
-    readonly property string catalogKey:({case:"cases",cooler:"coolers",psu:"psus",fan:"fans",
+    readonly property string catalogKey:({case:"cases",cooler:"coolers",psu:"psus",fan:"fans",radiator:"radiators",
         cpu_block:"cpu_blocks",gpu_block:"gpu_blocks",pump:"loop_pumps",reservoir:"loop_reservoirs",pump_reservoir:"loop_combos",fitting:"loop_fittings",tubing:"loop_tubing"})[category]
     readonly property var entries:library[catalogKey] || []
     readonly property var brands:[{id:"",label:ui.t("全部品牌")}].concat([...new Set(entries.map(row=>row.brand).filter(Boolean))].sort().map(value=>({id:value,label:value})))
@@ -80,6 +80,7 @@ Popup {
             Repeater {
                 model:[{id:"case",key:"cases",label:ui.t("机箱")},{id:"cooler",key:"coolers",label:ui.t("CPU 散热器")},
                        {id:"psu",key:"psus",label:ui.t("电源")},{id:"fan",key:"fans",label:ui.t("机箱风扇")},
+                       {id:"radiator",key:"radiators",label:ui.t("独立冷排")},
                        {id:"cpu_block",key:"cpu_blocks",label:ui.t("CPU 冷头")},{id:"gpu_block",key:"gpu_blocks",label:ui.t("GPU 冷头")},
                        {id:"pump",key:"loop_pumps",label:ui.t("水泵／泵盖")},
                        {id:"reservoir",key:"loop_reservoirs",label:ui.t("水箱")},{id:"pump_reservoir",key:"loop_combos",label:ui.t("泵箱组合")},
@@ -174,6 +175,9 @@ Popup {
         }
         Text {objectName:"accessoryStandaloneNote";Layout.fillWidth:true;visible:root.category==="gpu_block"
             text:ui.t("独立外观检视；显卡安装与连管尚未验证。")
+            font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
+        Text {objectName:"accessoryRadiatorNote";Layout.fillWidth:true;visible:root.category==="radiator"
+            text:ui.t("冷排本体；风扇和接头需单独选择，安装容量不代表已装数量。")
             font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap}
         Text {Layout.fillWidth:true;text:ui.t("参考插画；演示以转速的 1/120 播放，不绑定本机测速。")
             font.family:ui.fontFamily;font.pixelSize:10;color:ui.muted;wrapMode:Text.WordWrap}

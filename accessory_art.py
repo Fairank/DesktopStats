@@ -24,7 +24,8 @@ STYLES = ('miniature', 'cartoon', 'notebook_color', 'notebook_line', 'sticker',
           'notebook_smile')
 _LOOP_KINDS = ('cpu_block','pump','reservoir','pump_reservoir','fitting','tubing','gpu_block')
 _LOOP_KEYS = ('cpu_blocks','loop_pumps','loop_reservoirs','loop_combos','loop_fittings','loop_tubing','gpu_blocks')
-_KINDS = ('case', 'cooler', 'psu', 'fan', *_LOOP_KINDS)
+_ASYNC_KINDS = (*_LOOP_KINDS, 'radiator')
+_KINDS = ('case', 'cooler', 'psu', 'fan', *_ASYNC_KINDS)
 _ID = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z', re.ASCII)
 _MAX_ENTRIES = 16
 _CACHE = OrderedDict()
@@ -1058,7 +1059,10 @@ def _picker_choices(catalogs):
 
 
 def builtin_choices():
-    """Detached bundled-only artwork inventory, without profile/pack access."""
+    """Bundled standalone SVG collections, without profile/pack access.
+
+    Mesh-projected gallery parts have no standalone collection export here.
+    """
     # Cooling's application pickers also read installed optional packs. Export
     # only its immutable bundled rows so another user's profile cannot alter it.
     return _picker_choices((chassis_catalog.choices(),cooling_catalog._COOLERS,
@@ -1083,8 +1087,31 @@ def choices():
         loop=grouped_choices()
         _CHOICES.update({key:[dict(r,fidelity='schematic_reference') for r in loop[kind]]
                          for kind,key in zip(_LOOP_KINDS,_LOOP_KEYS)})
+        from liquid_cooling_catalog044 import records
+        from cooling_pack_runtime045 import radiator_choices
+        _CHOICES['radiators']=[dict(id=r['id'],label=r['label'],brand=r['brand'],
+                                   fidelity='schematic_reference')
+                              for r in (*records(),*radiator_choices())]
         _CHOICES_GENERATION=_library_generation()
     return deepcopy(_CHOICES)
+
+
+def prepare_async_reference(key):
+    """Resolve only the requested row; never construct a mesh on the GUI thread."""
+    if key[0]=='radiator':
+        from radiator_svg053 import reference
+        return reference(key[1])
+    from liquid_component_runtime046 import get_component
+    return get_component(key[0],key[1],retain=False)
+
+
+def project_async_reference(row,style,cancel=None):
+    """One existing gallery worker handles both loop parts and radiators."""
+    if row.get('category')=='radiator':
+        from radiator_svg053 import art_from_reference
+    else:
+        from liquid_svg046 import art_from_reference
+    return art_from_reference(row,style,cancel)
 
 
 def model_key(kind,model_id,style):
@@ -1119,6 +1146,13 @@ def art(kind, model_id, style='miniature'):
     key=model_key(kind,model_id,style)
     if key is None:return {}
     if key in _CACHE:return cached_art(key)
+    if kind=='radiator':
+        from radiator_svg053 import art
+        result=art(model_id,style)
+        if not result:return {}
+        _CACHE[key]=result
+        while len(_CACHE)>_MAX_ENTRIES:_CACHE.popitem(last=False)
+        return deepcopy(result)
     if kind in _LOOP_KINDS:
         from liquid_svg046 import art as loop_art
         result=loop_art(kind,model_id,style)

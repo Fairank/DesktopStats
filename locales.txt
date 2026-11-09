@@ -1199,6 +1199,7 @@ be quiet! Dark Rock TF2 夹层扇 · Silent Wings135|be quiet! Dark Rock TF2 中
 主冷排|主冷排|Primary radiator|||||
 第二冷排|第二冷排|Second radiator|||||
 独立冷排|獨立冷排|Standalone radiator|||||
+冷排本体；风扇和接头需单独选择，安装容量不代表已装数量。|冷排本體；風扇和接頭需單獨選擇，安裝容量不代表已裝數量。|Radiator body only. Choose fans and fittings separately; mounting capacity is not the number installed.|ラジエーター本体のみ。ファンと継手は別途選択してください。取付容量は装着数を示すものではありません。|라디에이터 본체입니다. 팬과 피팅은 별도로 선택하며, 장착 용량은 설치된 개수가 아닙니다.|Nur der Radiator. Lüfter und Anschlüsse separat auswählen; die Montagekapazität ist nicht die Anzahl eingebauter Lüfter.|Radiateur seul. Choisir séparément les ventilateurs et raccords ; la capacité de montage n’indique pas le nombre installé.|Solo el radiador. Elige ventiladores y racores por separado; la capacidad de montaje no indica cuántos hay instalados.
 冷排风扇|冷排風扇|Radiator fans|||||
 风扇布局|風扇配置|Fan layout|||||
 单面风扇|單面風扇|Single side|||||

@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 119486,
-      "sha256": "c6633788843144670e139057179c32eaa14502fa9b2b06e26a705f7d77ab65d3"
+      "bytes": 119822,
+      "sha256": "75c5efef09391ba5f405687237030fca17b593cf403b1b0f9299ba4257588566"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -64,8 +64,8 @@
     },
     {
       "path": "accessory_art.py",
-      "bytes": 64947,
-      "sha256": "f5191bdde660146958fbba0f40b3f488bec1f4fc29259b1e1441f835226a2b5e"
+      "bytes": 66335,
+      "sha256": "bfdf1007dcf2662e7ffcc998b27b1cbcbb247886c71352778b9b9373f824d4f3"
     },
     {
       "path": "accessory_cancel047.py",
@@ -364,8 +364,8 @@
     },
     {
       "path": "assembly_tools.py",
-      "bytes": 15281,
-      "sha256": "7cc5ea57863a56939fe3ce2345123ab5c4a8f2f3b30b85b65dcaa502a1ffba62"
+      "bytes": 15224,
+      "sha256": "a51d737d141b67b57e9b3d5ab7ff7c56a8985a0db8f90048c0cfca485bf00c3e"
     },
     {
       "path": "assembly_torrent_shroud052.py",
@@ -1549,8 +1549,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 9055,
-      "sha256": "dbb8df0e9ef5eecf6c0b37e18879c9a78390270b688e85a14740bdde51537e0e"
+      "bytes": 14734,
+      "sha256": "6d1712a6fa17554f3fd07f6d24c67af94a16c4f977167c7ba89b44dcecd2306b"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -2329,13 +2329,13 @@
     },
     {
       "path": "liquid_svg046.py",
-      "bytes": 23262,
-      "sha256": "3e47b0996def90591880942c2c18ec332043252257739cba69b8b8eec6516a6e"
+      "bytes": 24916,
+      "sha256": "c74b2728f1a2873b92ede054f14d01d3b53f03f82434c8cb22ebbff9d58451e0"
     },
     {
       "path": "locales.txt",
-      "bytes": 341008,
-      "sha256": "3f31b885d95cd05aafcaadcc8cf9283eeca49a1e625ce78787da775386b0ccba"
+      "bytes": 341934,
+      "sha256": "221086ad9365145b6ba32772d1c5b069d47d5a52146507f5c715f1299940f0ee"
     },
     {
       "path": "localization.py",
@@ -2654,8 +2654,8 @@
     },
     {
       "path": "native/AccessoryGallery.qml",
-      "bytes": 12262,
-      "sha256": "51e42ff18143bb2a37470d0388822850b73752b8b0c09c21e5778ed0b4a2959c"
+      "bytes": 12677,
+      "sha256": "eb0f184d91e74275d6192ae2bf471b621d8e23626022d2977bc6fed2adaab3ab"
     },
     {
       "path": "native/AccessoryGlyph.qml",
@@ -3198,6 +3198,11 @@
       "sha256": "25989efd01bf1a0e0c7021721e47f994c5d22a108afd509c4ced66f9a979d496"
     },
     {
+      "path": "radiator_svg053.py",
+      "bytes": 6970,
+      "sha256": "3526fdd654bcb7fc6cb6545def56bc109ef39b5f61957e309b00adaaa10f96f1"
+    },
+    {
       "path": "raster_blur_material.py",
       "bytes": 13011,
       "sha256": "89359412431ff2f9aebb993505f86f87f3a6bb1384871da407ab1ae9834a629b"
@@ -3283,6 +3288,11 @@
       "sha256": "0848d3aea6616871eac5de566aedccb9d6a9ba3d5a09ec823a4abfdff5d961a7"
     },
     {
+      "path": "tests/fixtures/liquid_svg046_pre053.py.txt",
+      "bytes": 23262,
+      "sha256": "3e47b0996def90591880942c2c18ec332043252257739cba69b8b8eec6516a6e"
+    },
+    {
       "path": "tests/test_above_shroud_config052.py",
       "bytes": 9052,
       "sha256": "0ad1fe3edcf8923d1bf54948962e0c3c44934edc4c30463f18b25407f5ddf683"
@@ -3299,8 +3309,8 @@
     },
     {
       "path": "tests/test_accessory_art.py",
-      "bytes": 11905,
-      "sha256": "3e9a1bbbdec9b0ca3d96718ea7f173b235ad6bb2160f36508bccef517c668fe3"
+      "bytes": 12087,
+      "sha256": "c5e6e0557decfdd78c965be6b6dba3a550ad2abd72d57c8fb8de78bab4ce273a"
     },
     {
       "path": "tests/test_accessory_art_export.py",
@@ -4483,9 +4493,29 @@
       "sha256": "cca436ce3d818d1e54069905e9b3817f6eb25801cdcabd19892b6adf28049343"
     },
     {
+      "path": "tests/test_radiator_camera053.py",
+      "bytes": 10496,
+      "sha256": "7916310c99fa84e7021490faf316c8593a629f20b2c1e1626fd7f1a4a86b4dc9"
+    },
+    {
+      "path": "tests/test_radiator_discovery053.py",
+      "bytes": 3252,
+      "sha256": "3f3c146e033049b3b700e7643fe7bafce2d0334b5f71fa89ab89031338369b30"
+    },
+    {
+      "path": "tests/test_radiator_gallery053.py",
+      "bytes": 7875,
+      "sha256": "e041776a7cae8903faa64e683eba37f37c05050c4f4ff971685db503c5cf9a5e"
+    },
+    {
       "path": "tests/test_radiator_memory_limits052.py",
       "bytes": 5388,
       "sha256": "4989c6e4b8e90dbbf32d543036e6542e16063ba293e7048478fcf5cfaefdcf1f"
+    },
+    {
+      "path": "tests/test_radiator_svg053.py",
+      "bytes": 9320,
+      "sha256": "a381f515b346adbca703d723087dae06e8a5dfe1579ac204538dbe74165d5d01"
     },
     {
       "path": "tests/test_raster_blur_material.py",
@@ -4954,8 +4984,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 36786,
-      "sha256": "5275a57d521ae01ab0f4a7c2e2c512dc9420fe3d5182bdd1c8796e031cc5cdd4"
+      "bytes": 37023,
+      "sha256": "0728a23257c0b2b1af7c14aa14378a733f1a0061296f1bfc96a9993d2f9f097d"
     },
     {
       "path": "tools/build_collector.py",
