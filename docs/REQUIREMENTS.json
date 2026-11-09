@@ -262,7 +262,7 @@
         "在现有类别、型号、真实细节与六版一致性缺口闭环之前，不新增外观。"
       ],
       "id": "style_versions",
-      "implementation": "六套固定编号miniature/cartoon/notebook_color/notebook_line/sticker/papercut与13个保存值共存；原版无笑脸，只有明确的可爱／笑脸手绘方案可表情。",
+      "implementation": "六套固定编号miniature/cartoon/notebook_color/notebook_line/sticker/papercut与13个保存值共存；原版无笑脸，只有明确的可爱／笑脸手绘方案可表情。 0.52已核两套整机六版软件图与真实QML小组件静图／动图；原版无笑脸，13保存值不变。静态图集179个既有身份、1074组风格源图；不是新增1074产品或全市场验收。",
       "native_acceptance_pending": false,
       "requirement": "原版不得加笑脸；保留可爱/手绘/线条等六版编号及所有13保存选项。 保留上传版12的布局／动效与原图标，新方案不能替换掉旧方案。",
       "source_files": [
@@ -290,7 +290,7 @@
         "更多未收录水路产品、GPU冷头、线材与外围设备在六版中同样仍缺；0.47的12个GPU冷头仅独立外观检视，不代表整卡安装或全部型号完成。"
       ],
       "id": "same_model_all_styles",
-      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。 0.49专款模型增加真实厚度/曲叶与孔口，六版共享物理形体；四套彩色主风格启用现有哑光明暗，纯线保透视/轮廓/遮挡，原版无笑脸。 0.51在不增加网格或风格的条件下继续做已支持GPU前叶轮体积；源阶段的121款／314前叶轮不是314新产品，盖板共面分区已做全147款×3精度专项，最终逐图结果仍待归档。 0.51进一步修正已知GPU转子在可爱／彩色手绘／奶油贴纸中与盖板同色而近乎消失的问题：只调整既有配色层级，暗凹腔、轮毂及叶片区分；原版、纯线条和物理几何不变。旧低对比图不作为最终验收；r4中ASUS Dual六版实图已目视确认，不再有放射状假划痕，其他最终媒体范围／数据入口待归档。 后续清除盖板帽面三角分区的共面伪线，真孔rim、凹腔外缘和厚度边保留，未靠删硬件细节掩盖问题。GPU最终定向45项、0跳过通过，13个自有代码文件冻结；材料／帽面边与混搭／Renderer另有18项阶段检查，覆盖有重叠不累加。",
+      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。 0.49专款模型增加真实厚度/曲叶与孔口，六版共享物理形体；四套彩色主风格启用现有哑光明暗，纯线保透视/轮廓/遮挡，原版无笑脸。 0.51在不增加网格或风格的条件下继续做已支持GPU前叶轮体积；源阶段的121款／314前叶轮不是314新产品，盖板共面分区已做全147款×3精度专项，最终逐图结果仍待归档。 0.51进一步修正已知GPU转子在可爱／彩色手绘／奶油贴纸中与盖板同色而近乎消失的问题：只调整既有配色层级，暗凹腔、轮毂及叶片区分；原版、纯线条和物理几何不变。旧低对比图不作为最终验收；r4中ASUS Dual六版实图已目视确认，不再有放射状假划痕，其他最终媒体范围／数据入口待归档。 后续清除盖板帽面三角分区的共面伪线，真孔rim、凹腔外缘和厚度边保留，未靠删硬件细节掩盖问题。GPU最终定向45项、0跳过通过，13个自有代码文件冻结；材料／帽面边与混搭／Renderer另有18项阶段检查，覆盖有重叠不累加。 0.52 C1两套精选参考整机的六版共用实际物理数组，局部CPU封装、GPU三前扇、两条RAM和PSU是同一模型的独立截图。前置冷排三扇在内侧近景可见；没有为预览隐藏、缩放或贴图替代实体。其余全型号／隐藏内部与制造尺寸仍按原待核范围。",
       "native_acceptance_pending": true,
       "requirement": "每套硬件数量、型号与结构跟原版一致，不能不同风格换壳/减配。 各版均应保留真实三维厚度、曲面与遮挡关系，不能只把图案贴在平面上。",
       "source_files": [
@@ -512,7 +512,7 @@
         "0.51真实游戏时帧活动与合成器负担未实测；未知传感器的静止表现是刻意安全行为。"
       ],
       "id": "model_widget_animation",
-      "implementation": "MetricIcon/HardwareGlyph沿用已有时钟与数据时效，Runtime控制modelMotionAllowed。",
+      "implementation": "MetricIcon/HardwareGlyph沿用已有时钟与数据时效，Runtime控制modelMotionAllowed。 0.52真实WidgetPreview／MetricIcon／HardwareGlyph软件QML已生成24帧2秒单次GIF，使用既有共享时钟和1200合成RPM、相位慢放120；不是实测转速。当前82文件闭包经18个CPU／FE／未知源图层与QUrl输出桥接，保留历史81文件捕获来源；不冒称原81文件全部未改或Windows原生验收。",
       "native_acceptance_pending": true,
       "requirement": "CPU效果/GPU叶轮是动态图标；只改变换，不添加轮询，隐藏/锁屏/游戏时停止。",
       "source_files": [
@@ -544,7 +544,7 @@
         "CPU、单条DIMM和4把参考机箱扇仅有限脱槽／离安装面；另外3把被实物参考模型阻挡，密封AIO、M.2、电源、螺丝及插头机械拆装未完成。"
       ],
       "id": "desktop_3d_inspection",
-      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。 0.48增加内部检视：只调整外盖与电源罩的绘制及拾取可见性，保留原始物理场景和正常完整外壳。 0.49有限插槽方向演示接入检视按钮及桌面菜单，三角/线稿/点选/特效共用位移；仅动作期间借用既有共享时钟，真实监控不改变。 0.49新增独立show_psu偏好：默认保电源罩，真实PSU与线束始终保留；可选移罩展示或单独focus，三角/线稿/点选一致且不重建。额定功率沿用产品属性，实际功率无独立传感器时未知。 原生Scene保存独立Mesh及部件身份，实际渲染三角形／法线；预览PNG／GIF由这些实体导出，不将整机合并成一张图。完整逐件机械拆装仍是明确待做项。 0.51关闭时拆出纯CPU forget_scene与viewport退场清理，不再等待Qt wrapper实际销毁才清_scene、绘制／拾取列表和base cache；无currentContext也能清CPU引用。保留owner wrapper的真实weakref专项证明所测旧Scene／Mesh已释放，关闭幂等。 0.51 PSU单独检视被整机墨线预算挤空的问题已作焦点优先修复：新4项与原upload5项阶段通过，默认all与现有边线cap不变。仅墨线重分配，但显式有效changed focus会一次重打包并重传完整单VBO（physical prefix字节相等，并未免除传输）；samefocus、原版无ink、相机和动画tick不重传。PSU新六版软件静图已目视确认轮廓可读，整机all六版边线与原版PNG逐字节不变；这不证明动效或原生显示。 0.52接通CPU／单条DIMM／确切机箱风扇的有界连续参考路线、显式参考解除和实际三角／线稿／点选共同位移；所测7把机箱扇4可分离、3因实际阻挡拒绝。隐藏／最小化或关闭动效释放临时几何缓存，不在隐藏时重新查询路线。",
+      "implementation": "已有桌面整机窗口、旋转缩放、拾取、部件状态快照和可选边框。 0.48增加内部检视：只调整外盖与电源罩的绘制及拾取可见性，保留原始物理场景和正常完整外壳。 0.49有限插槽方向演示接入检视按钮及桌面菜单，三角/线稿/点选/特效共用位移；仅动作期间借用既有共享时钟，真实监控不改变。 0.49新增独立show_psu偏好：默认保电源罩，真实PSU与线束始终保留；可选移罩展示或单独focus，三角/线稿/点选一致且不重建。额定功率沿用产品属性，实际功率无独立传感器时未知。 原生Scene保存独立Mesh及部件身份，实际渲染三角形／法线；预览PNG／GIF由这些实体导出，不将整机合并成一张图。完整逐件机械拆装仍是明确待做项。 0.51关闭时拆出纯CPU forget_scene与viewport退场清理，不再等待Qt wrapper实际销毁才清_scene、绘制／拾取列表和base cache；无currentContext也能清CPU引用。保留owner wrapper的真实weakref专项证明所测旧Scene／Mesh已释放，关闭幂等。 0.51 PSU单独检视被整机墨线预算挤空的问题已作焦点优先修复：新4项与原upload5项阶段通过，默认all与现有边线cap不变。仅墨线重分配，但显式有效changed focus会一次重打包并重传完整单VBO（physical prefix字节相等，并未免除传输）；samefocus、原版无ink、相机和动画tick不重传。PSU新六版软件静图已目视确认轮廓可读，整机all六版边线与原版PNG逐字节不变；这不证明动效或原生显示。 0.52接通CPU／单条DIMM／确切机箱风扇的有界连续参考路线、显式参考解除和实际三角／线稿／点选共同位移；所测7把机箱扇4可分离、3因实际阻挡拒绝。隐藏／最小化或关闭动效释放临时几何缓存，不在隐藏时重新查询路线。 0.52两机六版总览与四类近景已核对；GPU／RAM各3.36秒单次参考往返，H5 GPU38.186mm，其余所列GPU／RAM52mm。原版独立GLB399物理网格、113608三角形、435节点、7参考clip／64通道；5个PSU网格仅作索引前面方向格式修正，保POSITION／NORMAL和节点／材质／动画。玩家查看器控制clip并发与循环，不冒称完整机械拆卸、安装器导入或六版GLB。",
       "native_acceptance_pending": true,
       "requirement": "桌面可旋转缩放3D机箱加硬件；点选配件查看状态，有框或无框。 支持显卡沿实际插槽方向的有限拔出、停留查看和插回演示。 电源默认收在电源仓，可单独选择展示；如展示额定功率须区别实际功耗。 整机必须由独立三维零件组成，保留可分别选择、移动和拆装的身份；图片只用于预览。",
       "source_files": [
@@ -591,7 +591,8 @@
         "North XL保留0.49托盘，Helios在0.51有独立托盘专项；其他普通塔式机箱的托盘、开口及背线间隙仍需逐型号核实。",
         "该专项仅27款／49组前置风扇配置，其余69款未由该专项覆盖，不是全部96款通过。固定罩板厚度、安装坐标和通风孔比例仍有参考量，不能当制造CAD。",
         "新增实际薄材检查发现Torrent TG顶部旧通用仓的参考包络穿插（120／140三扇配置5.1／35.1mm）；已按官方短后上仓与开放底架修正，并通过精选完整风冷装机材料检查。RGB条、细格栅、扣具和全组合仍未完成；原38组有限未见证不作全目录净空通过。",
-        "新增17款精选风冷主机的102项阶段检查已过；当前差分回归已通过；完整水路及接线仍待验。MOD5新增3独立结构及保留箱体的9项检查通过；C700M底扇虽有限未见证，独立厂商安装架尚未建完。"
+        "新增17款精选风冷主机的102项阶段检查已过；当前差分回归已通过；完整水路及接线仍待验。MOD5新增3独立结构及保留箱体的9项检查通过；C700M底扇虽有限未见证，独立厂商安装架尚未建完。",
+        "C700M私有8项纯草稿未应用；首完整P12主机job60秒超时，已有8条主板／GPU穿保留后墙见证，余7job未运行。外层rear−325与缩短body rear−305.5／通用锚不一，底架、其它材料及接线尚未闭合，不作整机通过。"
       ],
       "id": "case_library",
       "implementation": "已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。 0.49只为North XL补固定主板托盘和原厂可见开口参考，分段实体进入走线避让，不随主板或线缆动态挖孔。 0.51 Helios阶段修正60／90度stack参考与独立固定托盘（早期180三角形，最终524三角形／37,728B／17个碰撞分段），现有9项专项通过。Helios前置LFIII导向的过度对称问题已阶段修正，原嘴／轴／lead不移，最终来源围栏、媒体和实物装配仍待验。 0.52扩大核对27款前置安装声明、49组配置，查出12款中18组旧实心罩初始穿插。按各自手册细分薄罩、独立安装板、开放下支架和竖置电源；逐型号来源与真实缺项单列。新增17款精选风冷主机的102项阶段检查通过，最终统一回归仍在进行。 0.52另修Torrent TG的后上短电源仓、开放底部支架与固定安装面；真实主板姿态保留，固定PSU参考floor升2.15mm后精选120／140各前置三把加底部三把完整装机通过。只在两件罩／架增加232三角形和16704B F32顶点流，不代表整款RAM或drawcall变化。",
@@ -903,7 +904,7 @@
         "0.51数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
       ],
       "id": "github_optional_packs",
-      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。",
+      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。",
       "native_acceptance_pending": false,
       "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
       "source_files": [
@@ -939,10 +940,11 @@
         "0.50仅指定6件，0.51仅新增指定10件候选，不覆盖SVG／JSON扩展包、实时生成全库或每个小Mesh。051的21源父组中20支持，透明外盖有效容量0未标；无钥CQA不拥有提取能力。GLB软件四视图有真实像素差，不是原生或零差验收。",
         "JPEG、有损重编码、调色板重新量化、几何重建/量化/单位重写或烘焙等不保证保留标记；21源父组支持（18非空part_id和3组件回退组）不等于每个小Mesh或任意片段都可独立提取。",
         "正式权利人密钥尚未备份或做恢复演练；已有备份验证仅用合成测试密钥。",
-        "标记与签名仅辅助来源核对；本地哈希或时间不能自动证明创作归属、侵权、司法采纳或胜诉。第三方provenance不得标成自己的水印。"
+        "标记与签名仅辅助来源核对；本地哈希或时间不能自动证明创作归属、侵权、司法采纳或胜诉。第三方provenance不得标成自己的水印。",
+        "0.52仅保护列出的13份副本和20／23可支持参考组，三组容量不足，图集与全目录未标；无钥检查不独立提取秘密选位的载荷。"
       ],
       "id": "copyright_noncommercial",
-      "implementation": "原PolyForm非商用全文与第三方/既有授权例外保留；转载Required Notice含作者和仓库来源。0.50正式密钥已签发1GLB/3PNG/2GIF，六件验签、精确SHA和提取匹配且0误码；未标记原件与错误秘密均阴性。受测元数据改动仍可识别，但修改件不冒称原签名文件。050签发候选、固定数据入口及最终r2相关验证已完成，最终发布结果见候选最终提交说明；049原件未追称有本次水印。 0.51另签发1GLB／8PNG／1GIF候选（10件），owner标记提取0误码；独立无钥CQA验签、核字节及几何／颜色／四视图，不冒称独立提取。早期r1虽标记通过却有私有GLB配色错，未发布；r4仅修真实原版palette后重签GLB，九图片签名字节不变。0.51固定数据已原子上传，32个远端文件与已审签名字节相同；当前0.52新预览尚未签发／上传；不改变原非商用与第三方例外。",
+      "implementation": "原PolyForm非商用全文与第三方/既有授权例外保留；转载Required Notice含作者和仓库来源。0.50正式密钥已签发1GLB/3PNG/2GIF，六件验签、精确SHA和提取匹配且0误码；未标记原件与错误秘密均阴性。受测元数据改动仍可识别，但修改件不冒称原签名文件。050签发候选、固定数据入口及最终r2相关验证已完成，最终发布结果见候选最终提交说明；049原件未追称有本次水印。 0.51另签发1GLB／8PNG／1GIF候选（10件），owner标记提取0误码；独立无钥CQA验签、核字节及几何／颜色／四视图，不冒称独立提取。早期r1虽标记通过却有私有GLB配色错，未发布；r4仅修真实原版palette后重签GLB，九图片签名字节不变。0.51固定数据已原子上传，32个远端文件与已审签名字节相同；0.52的本地签发与数据候选见本轮追加范围；原许可与第三方例外不变。 0.52正式发行副本为3PNG／9GIF／1GLB共13件；发行方提取0误码与原件／错误主钥负控有签名收据，无钥QA只独立验签、字节和数值，不冒独立提取。GLB20／23参考组容量足够，panel0、PSU后罩64、透明窗0不足；图集JSON／SVG未标。公开数值最大位移0.000129475mm、整体bbox差0、0翻转及0新增／移除退化，索引／法线／材质／节点／动画不变；不证明不可去除、全目录覆盖或法律结论。",
       "native_acceptance_pending": false,
       "requirement": "上传GitHub并标版权，原创作品禁止商业使用盈利，保留应有第三方例外。转载保留作者、项目来源与许可；为原创作品加入肉眼难察且可提取的隐形来源水印，以辅助维权。",
       "source_files": [
@@ -977,7 +979,7 @@
         "0.51软件回归、10资产／独立CQA、候选包18项及文档同步后的同18项复检、离线签名数据审计均已通过；源码与数据作为候选资料提供，固定提交的远端读回结果另存发行核对记录。未安装，CPU温度、磨砂、游戏、屏幕二与整款占用原生验收均未完成。"
       ],
       "id": "github_publish_merge_install",
-      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。 0.51数据候选已生成固定提交与索引、真实owner签发及独立CQA；源码与数据按固定索引作为候选分支提供；候选包18项隔离检查及文档同步后同18项复检通过，安装／原生仍未做。",
+      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。 0.51数据候选已生成固定提交与索引、真实owner签发及独立CQA；源码与数据按固定索引作为候选分支提供；候选包18项隔离检查及文档同步后同18项复检通过，安装／原生仍未做。 0.52源码producer固定f68f1f1dc7488b24b1635ebb17755a12869bacb8，本地数据候选固定f09e0b74815dbbd81233ea8f1e62335292f0df28；38文件／14签名／模型ZIP9与图集ZIP7及Git树逐文件OID已独立核对。C2仅同步现有文档与生成账本；远端发布、候选包与隔离自检各自单列，不预写未完成结果，不发stable、不安装或重启。",
       "native_acceptance_pending": true,
       "requirement": "合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。",
       "source_files": [
@@ -1028,7 +1030,7 @@
         "核对完成不代表全部产品功能交付；任何未完成类别、型号、实时来源与实测项继续保留。"
       ],
       "id": "readme_full_requirements_ledger",
-      "implementation": "保留29组原ID及历史记录，显卡插拔和真实3D体积仍在对应组；0.50将转载来源、非商用与真正隐形标记要求加入原版权组，并列明未覆盖资产和待核结果。不用文档、签名或测试通过代替观感、全部硬件细节或新版原生验收。 0.51继续在同一29组逐项更新既有缺陷、性能范围与未完成项；首轮99模块1253项、1原有跳过，1旧整行哈希夹具失败已保留；另在读审后实修查询失败消费端，源码返修及PSU墨线切焦补测后，最终r2实际100模块1261项、1原有权限跳过，其余通过，无失败／超时；583代码文件前后SHA稳定，1116.109秒。专项124项不与主回归累计；数据签发、候选包及原生分别验收。 Phase2补固定数据候选入口及r1配色返修历史，区分583本地围栏与582固定Git代码，未把签名或本地数据核验当成已发布／原生通过。 Phase3归档首build与18项隔离检查、独立离线数据11签名／32Git blob／ZIP10成员精确一致；文档同步后的同18项复检已通过，固定提交远端读回另存独立发行记录；不把初包哈希作最终值。 0.52继续在原29组记录实际初始穿插、PCB／模块尺寸语义、顶部冷排限制及未完成路线；阶段测试与旧场景媒体分开，不把目录数量或一次画面当完工。",
+      "implementation": "保留29组原ID及历史记录，显卡插拔和真实3D体积仍在对应组；0.50将转载来源、非商用与真正隐形标记要求加入原版权组，并列明未覆盖资产和待核结果。不用文档、签名或测试通过代替观感、全部硬件细节或新版原生验收。 0.51继续在同一29组逐项更新既有缺陷、性能范围与未完成项；首轮99模块1253项、1原有跳过，1旧整行哈希夹具失败已保留；另在读审后实修查询失败消费端，源码返修及PSU墨线切焦补测后，最终r2实际100模块1261项、1原有权限跳过，其余通过，无失败／超时；583代码文件前后SHA稳定，1116.109秒。专项124项不与主回归累计；数据签发、候选包及原生分别验收。 Phase2补固定数据候选入口及r1配色返修历史，区分583本地围栏与582固定Git代码，未把签名或本地数据核验当成已发布／原生通过。 Phase3归档首build与18项隔离检查、独立离线数据11签名／32Git blob／ZIP10成员精确一致；文档同步后的同18项复检已通过，固定提交远端读回另存独立发行记录；不把初包哈希作最终值。 0.52继续在原29组记录实际初始穿插、PCB／模块尺寸语义、顶部冷排限制及未完成路线；阶段测试与旧场景媒体分开，不把目录数量或一次画面当完工。 0.52保留29个原组ID、历史失败和阶段计数，补入真实两机六版、有限往返／合成动效、13标识资产与20／23参考组范围。167去重模块／1882项／1跳过是阶段组合，最新14／131与其余153分别溯源，非单次当前全库；C700M私有首主机超时及后墙穿插仍开放，20GPU待核、全市场及新版原生／整个程序资源缺口不关闭。",
       "native_acceptance_pending": false,
       "requirement": "全文所有重点写入README；全部完成后逐一核对并汇报问题和缺项。",
       "source_files": [
@@ -2436,7 +2438,7 @@
     "gpu_new_fully_verified_leaf_profiles": 0
   },
   "software_validation_052": {
-    "status": "final_related_regression_not_completed_yet",
+    "status": "differential_evidence_available_native_and_package_checks_separate",
     "native_acceptance": false,
     "visible_windows": false,
     "native_GL": false,
@@ -2451,7 +2453,7 @@
       "exact GPU source and revision isolation",
       "connected carry straps and DIMM/M2 geometry"
     ],
-    "outstanding": "Final related replay/package selfcheck, actual installed temperature/glass/game behavior and whole-application resources.",
+    "outstanding": "Latest explicit rerun and candidate build/selfcheck retain independent receipts; installed temperature/glass/game/screen2 and whole-application resources remain open.",
     "current_stages_are_not_final_chain": true
   },
   "ongoing_geometry_052": {
@@ -2524,7 +2526,7 @@
       "r3_source_stable": true
     },
     "fan_source_conditions": "DUBILI bottom 2x120/1x140 and PSU>180mm limit one;7 pure source tests pass. Max-depth gate implemented for source32mm:32 retained/33 refused, Y70 full host still pending.",
-    "old_gpu_exteriors": "Two exact old GPU IDs native six-style front drawing refined; other177x6 actual payloads exact in frozen GPU phase. Unknown fan leaves stay static; pending20 unchanged. New final atlas still pending.",
+    "old_gpu_exteriors": "Two exact old GPU IDs native six-style front drawing refined; other177x6 actual payloads exact in frozen GPU phase. Unknown fan leaves stay static; pending20 unchanged. Current C1 static179identity/1074style atlas ZIP is built and statically checked; browser/native acceptance remains false.",
     "special_case_public_hosts": {
       "cases": 4,
       "configurations": 6,
@@ -2544,7 +2546,13 @@
       "air_height_tests": 6,
       "whole_new_rear_host_acceptance": false,
       "whole_case_library_acceptance": false,
-      "source_positions_manufacturer_verified": false
+      "source_positions_manufacturer_verified": false,
+      "selected_public_AIR_hosts": {
+        "cases": 17,
+        "stage_methods_passed": 102,
+        "not_all_case_library": true,
+        "wiring_or_AIO_or_native_acceptance": false
+      }
     },
     "bottom_r5": {
       "configurations": 55,
@@ -2635,6 +2643,26 @@
       "positive": 0,
       "source_stable": true,
       "limits": "Historic narrow material filter; not all actual case material. Separate3configuration expansion found2MOD5 fan-frame witnesses, then fixed and checked by MOD5r3; C700M120/140 finite no witness is not a bracket/fit certificate."
+    },
+    "C700M_bottom_bracket": {
+      "public_runtime_implemented": false,
+      "private_pure_draft_tests": 8,
+      "manufacturer_dimensions_verified": false,
+      "remaining_gap": true,
+      "first_complete_P12_host_private_job": {
+        "status": "timeout",
+        "limit_seconds": 60,
+        "kept_rearwall_material_witnesses": 8,
+        "part_families": [
+          "motherboard",
+          "gpu"
+        ],
+        "remaining_queued_jobs_not_run": 7,
+        "other_material_and_wiring_not_completed": true,
+        "outer_reference_rear_z_mm": -325,
+        "shortened_body_rear_z_mm": -305.5,
+        "full_host_passed": false
+      }
     }
   },
   "final_differential_regression052": {
@@ -2652,5 +2680,73 @@
     "all_requirements_complete": false,
     "native": false,
     "source_export_native_closure_added_cases": 5
+  },
+  "publication_052": {
+    "source_producer_commit": "f68f1f1dc7488b24b1635ebb17755a12869bacb8",
+    "data_commit": "f09e0b74815dbbd81233ea8f1e62335292f0df28",
+    "local_data_files": 38,
+    "marked_assets": {
+      "png": 3,
+      "gif": 9,
+      "glb": 1,
+      "total": 13
+    },
+    "authenticated_records": 14,
+    "model_archive_members": 9,
+    "model_archive_bytes": 1371262,
+    "atlas_archive_members": 7,
+    "atlas_archive_bytes": 1980510,
+    "release_index_sha256": "3a377f2bff5a7d61ac0d83d00a0327192840b95a906e2a86a27f945579523e96",
+    "reference_marker_groups": 23,
+    "supported_reference_marker_groups": 20,
+    "unsupported_reference_groups": [
+      {
+        "label": "panel",
+        "capacity": 0
+      },
+      {
+        "label": "case:psu-rear-cover",
+        "capacity": 64
+      },
+      {
+        "label": "case:psu-side-window",
+        "capacity": 0
+      }
+    ],
+    "numeric_keyless_QA": {
+      "max_world_displacement_mm": 0.000129475118651844,
+      "max_whole_bbox_delta_mm": 0,
+      "orientation_flips": 0,
+      "new_degenerate": 0,
+      "removed_degenerate": 0,
+      "secret_payload_extracted_by_keyless_QA": false
+    },
+    "reference_media": {
+      "case_RPM_duration_seconds": 2,
+      "widget_duration_seconds": 2,
+      "motion_duration_seconds": 3.36,
+      "GIF_loop_extension_present": false,
+      "h5_GPU_distance_mm": 38.186,
+      "other_listed_GPU_RAM_distance_mm": 52,
+      "installed_restored_raw_byte_exact_checks": 36,
+      "source_request_pool_per_case": 46,
+      "new_detail_RAW": 48,
+      "reused_RAW": 504,
+      "new_motion_3D_frames": 0
+    },
+    "source_scope": "C1 frozen runtime; C2 documents only; dataD1 local fixed candidate. Remote checks and final candidate package/selfcheck are separate.",
+    "installed": false,
+    "native_acceptance": false,
+    "all_requirements_complete": false,
+    "all_catalog_marked": false,
+    "whole_application_resource_measured": false,
+    "Stats_default_asset_loading": false,
+    "download_urls": {
+      "RELEASE_INDEX.json": "https://raw.githubusercontent.com/Fairank/DesktopStats/f09e0b74815dbbd81233ea8f1e62335292f0df28/RELEASE_INDEX.json",
+      "public-summary052.json": "https://raw.githubusercontent.com/Fairank/DesktopStats/f09e0b74815dbbd81233ea8f1e62335292f0df28/public-summary052.json",
+      "public-model-quality052.json": "https://raw.githubusercontent.com/Fairank/DesktopStats/f09e0b74815dbbd81233ea8f1e62335292f0df28/public-model-quality052.json",
+      "DesktopStats-protected-reference052.zip": "https://raw.githubusercontent.com/Fairank/DesktopStats/f09e0b74815dbbd81233ea8f1e62335292f0df28/DesktopStats-protected-reference052.zip",
+      "desktopstats-native-six-atlas052.zip": "https://raw.githubusercontent.com/Fairank/DesktopStats/f09e0b74815dbbd81233ea8f1e62335292f0df28/desktopstats-native-six-atlas052.zip"
+    }
   }
 }

@@ -1,5 +1,31 @@
 # Changes
 
+## 0.52.0-preview.1 (code/software evidence; native acceptance pending)
+
+- Keep the six numbered styles and all thirteen saved choices; original has no
+  smile. Refine actual sockets, individual RAM envelopes, sourced case bays,
+  fixed open supports and independent component identities without a new sampler.
+- Add bounded CPU/DIMM/exact-case-fan reference disengagement with shared
+  solid/ink/picking poses and explicit dependency masks. This is not full
+  fastener/connector animation, physical extraction or manufacturer CAD.
+- Record C1 (`f68f1f1dc7488b24b1635ebb17755a12869bacb8`) two-case six-style software previews, independent CPU/GPU/
+  RAM/PSU inspections and actual finite GIF readback. H5 GPU moves 38.186 mm;
+  listed Helios GPU/RAM paths 52 mm. Six motion GIFs last 3.36 s, RPM/widget GIFs 2 s,
+  without a loop extension; synthetic values are not live hardware readings.
+- Stage fixed data candidate `f09e0b74815dbbd81233ea8f1e62335292f0df28`: 38 files, 13 marked copies
+  (3PNG/9GIF/1GLB), public receipts and 14 verified signatures. GLB 20 of 23
+  reference groups support markers; three do not. The optional 179-identity
+  staticSVG atlas is unmarked, not native/browser-performance acceptance.
+- Preserve first-run failures and the 167-module/1882-case/1-skip deduplicated
+  differential scope; latest 14/131 and carried 153 retain separate provenance.
+  This is not a single full current run. C700M private 8 pure checks remain an
+  unapplied draft; its first complete P12 host timed out after 60 s with 8 retained rearwall
+  witnesses, 7 jobs unrun and other materials/wiring unverified. 20 GPU references,
+  whole-market coverage and full mechanics remain open.
+- No stable release, installation, restart, elevation or live sensor check.
+  Native temperature/glass/screen2/game behavior and whole-Stats CPU/RSS remain
+  unaccepted. C2 changes existing documentation only; package gates are separate.
+
 ## 0.47.0-preview.1 (development candidate)
 
 - Correct the default rear case-fan reference pose and check whole fan groups

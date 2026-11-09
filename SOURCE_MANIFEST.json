@@ -14,8 +14,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 71626,
-      "sha256": "819b86048b5d4a06460b18395cadf1104b2c39ca6c63748f699a6d2c6ccae45e"
+      "bytes": 73553,
+      "sha256": "2f3ec704276c3a4d2e7b627892014c58339962a0d2e657c7645fc60d80a36d60"
     },
     {
       "path": "HARDWARE-APPEARANCE.md",
@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 107535,
-      "sha256": "a732ac6d500ac19bdcb30117ccd3a889c0bd16461a29a825f0d79651080bec26"
+      "bytes": 114894,
+      "sha256": "e24a855701b0768c2cfa4cd5dc3ce1e4a41c59d50d87ab209402bd40ab9d5dbe"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1539,8 +1539,8 @@
     },
     {
       "path": "docs/DEVELOPMENT052.md",
-      "bytes": 6677,
-      "sha256": "da70c8197ab56030824989b3572ffdfd698c4f80c6f126bfc6722baf01bfcb30"
+      "bytes": 7863,
+      "sha256": "ad623b6a9a704671f2fd173c14c77595161507c62ca47fd8c936bb7bc7370023"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -1639,13 +1639,13 @@
     },
     {
       "path": "docs/QUALITY052.md",
-      "bytes": 24617,
-      "sha256": "881bf523a53e5260872db08fb75fa6278e9b21b8e4eb0b52a07309de15e85445"
+      "bytes": 28038,
+      "sha256": "22b07fa1345cc74e330f56d68534c9941679ab56d312b90f71e3154dd5d942f8"
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 134866,
-      "sha256": "08a931aa7d57958989ec342bbf1da400cab385a09fba4f900786293c6858d0c0"
+      "bytes": 142180,
+      "sha256": "317316f2f1ec3c96b71c98babb06dd0b355eb76df4bec2ea383ac0d8254b62ae"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",
