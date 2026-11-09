@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 119839,
-      "sha256": "1735f0ee0313215cf06d7803e3ededdbcafafb33c8d2c14754ea13ba45df858f"
+      "bytes": 120241,
+      "sha256": "03f50dcd3b247bb30dd1c4cf9fa11e38c97d94ded4bc82b77227f0616137b377"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -64,8 +64,8 @@
     },
     {
       "path": "accessory_art.py",
-      "bytes": 66335,
-      "sha256": "bfdf1007dcf2662e7ffcc998b27b1cbcbb247886c71352778b9b9373f824d4f3"
+      "bytes": 66432,
+      "sha256": "f60ad20e9b6cd1a0ff789b735ecf1528c84fedbbfad4e8d194971a39050c2fef"
     },
     {
       "path": "accessory_cancel047.py",
@@ -364,8 +364,8 @@
     },
     {
       "path": "assembly_tools.py",
-      "bytes": 15224,
-      "sha256": "a51d737d141b67b57e9b3d5ab7ff7c56a8985a0db8f90048c0cfca485bf00c3e"
+      "bytes": 15437,
+      "sha256": "30c72283a09c3ef5734345196d55b7254fa1f104ca7130431cd282a943984043"
     },
     {
       "path": "assembly_torrent_shroud052.py",
@@ -1549,8 +1549,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 16374,
-      "sha256": "4d733b8f066422dadf97ad88e0397006fb51c99f8ada48a714c2c3c70cf39a1d"
+      "bytes": 18934,
+      "sha256": "8ceb9ffcabe9141ff5b5cf13cd364fdac2b8fe495cf706d6bf04cda8cb84464c"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -1736,6 +1736,11 @@
       "path": "gpu_fan_sensor.py",
       "bytes": 15647,
       "sha256": "d088da5f59244bf0c3fc66d6d3b40ea0db9922833a3bf244e08caa75c6a48d2c"
+    },
+    {
+      "path": "gpu_gallery053.py",
+      "bytes": 1844,
+      "sha256": "c777bcad7224eb035961babd408818a10cadee946710ba32c3fca24e996771d9"
     },
     {
       "path": "gpu_verified046.py",
@@ -2334,8 +2339,8 @@
     },
     {
       "path": "locales.txt",
-      "bytes": 341934,
-      "sha256": "221086ad9365145b6ba32772d1c5b069d47d5a52146507f5c715f1299940f0ee"
+      "bytes": 343037,
+      "sha256": "eda468cec4d92578d3950608ac81853cdda1bfa0cb64736776c308f58df82466"
     },
     {
       "path": "localization.py",
@@ -2654,8 +2659,8 @@
     },
     {
       "path": "native/AccessoryGallery.qml",
-      "bytes": 12677,
-      "sha256": "eb0f184d91e74275d6192ae2bf471b621d8e23626022d2977bc6fed2adaab3ab"
+      "bytes": 18934,
+      "sha256": "bd22dbb747a63d2e7c176ab6a2d7f29b89adf1016af09a668ffaa1b3fb6729bb"
     },
     {
       "path": "native/AccessoryGlyph.qml",
@@ -2804,8 +2809,8 @@
     },
     {
       "path": "native/HardwareGlyph.qml",
-      "bytes": 6965,
-      "sha256": "d0886c6ce1b47f4322e29d599b75d154e2f9e2559e5a7aab178ba54249d9702f"
+      "bytes": 7182,
+      "sha256": "06c706a1e5dbb1c284d171c2b5296a7a8e0a8b831c1ce83bc8d606a5ef0a5c01"
     },
     {
       "path": "native/HardwareMemoryShapes.js",
@@ -3309,8 +3314,8 @@
     },
     {
       "path": "tests/test_accessory_art.py",
-      "bytes": 12087,
-      "sha256": "c5e6e0557decfdd78c965be6b6dba3a550ad2abd72d57c8fb8de78bab4ce273a"
+      "bytes": 12096,
+      "sha256": "a53952d36488cea41462ebc7f42533d9ca532ddf985b8cc02902c84a02f43120"
     },
     {
       "path": "tests/test_accessory_art_export.py",
@@ -3896,6 +3901,16 @@
       "path": "tests/test_gpu_fan_rpm_sensor.py",
       "bytes": 26514,
       "sha256": "84784c07b5f4795037a16214ab56388013381b9271c9cdf4e3ba6994531412f8"
+    },
+    {
+      "path": "tests/test_gpu_gallery053.py",
+      "bytes": 5828,
+      "sha256": "9e1bf4b505c17f49948d0dbf0ab7f34c34d0da50192f39281d7200d78f3800e2"
+    },
+    {
+      "path": "tests/test_gpu_gallery_ui053.py",
+      "bytes": 16460,
+      "sha256": "546bc940f0b501dd0a73e15299d32ac12f61100ba4c52db12362518485a21d04"
     },
     {
       "path": "tests/test_gpu_inno_partial052.py",
@@ -4989,8 +5004,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 37061,
-      "sha256": "5d7780bb2aa169e6d26abd189cc95e52c5b8c95ff58549362921f02b9afed1c9"
+      "bytes": 37161,
+      "sha256": "b792999b5dccb0d3ae6c1b23d181448b7eec14daf5115b9c7bb19394850075fa"
     },
     {
       "path": "tools/build_collector.py",

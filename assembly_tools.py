@@ -158,6 +158,12 @@ class AssemblyTools(WorkspaceTools):
         from accessory_art import choices
         return choices()
 
+    @Slot(str,result='QVariantMap')
+    def accessoryGpuReference(self,model):
+        if not self._accessory_gallery_active:return {}
+        from gpu_gallery053 import reference
+        return reference(model)
+
     @Slot(str,str,str,result='QVariantMap')
     def accessoryModelArt(self,kind,model,style):
         if not self._accessory_gallery_active:return {}

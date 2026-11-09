@@ -30,7 +30,7 @@ class AccessoryArtTests(unittest.TestCase):
         artwork.clear_cache()
         rows=artwork.choices()
         self.assertEqual({key:len(value) for key,value in rows.items()},
-                         dict(cases=96,coolers=66,psus=21,fans=70,radiators=24,cpu_blocks=0,loop_pumps=0,
+                         dict(cases=96,coolers=66,psus=21,fans=70,radiators=24,gpus=148,cpu_blocks=0,loop_pumps=0,
                               loop_reservoirs=0,loop_combos=0,loop_fittings=0,loop_tubing=0,gpu_blocks=0))
         catalog_rows=(chassis_catalog.choices(),cooling_catalog.choices_coolers(),
                       component_catalog.choices('psu'),cooling_catalog.choices_fans())

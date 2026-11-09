@@ -1092,6 +1092,8 @@ def choices():
         _CHOICES['radiators']=[dict(id=r['id'],label=r['label'],brand=r['brand'],
                                    fidelity='schematic_reference')
                               for r in (*records(),*radiator_choices())]
+        from gpu_gallery053 import choices as gpu_choices
+        _CHOICES['gpus']=gpu_choices()
         _CHOICES_GENERATION=_library_generation()
     return deepcopy(_CHOICES)
 

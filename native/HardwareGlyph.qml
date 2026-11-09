@@ -9,6 +9,9 @@ Item {
     id: root
     property var appearance: ({})
     property bool modelMode: false
+    // Standalone browsing can release data-URL images instead of warming Qt
+    // history. Normal widgets retain their existing default cache behavior.
+    property bool cacheArtwork: true
     property color ink: "#69788c"
     property bool fanMotionEnabled: false
     property real fanRotation: 0
@@ -90,7 +93,7 @@ Item {
             : root.rasterEdge(root.wideGpu?Math.max(root.width,root.height):root.height,false)
         fillMode: root.wideGpu ? Image.PreserveAspectCrop : Image.PreserveAspectFit
         asynchronous: false
-        cache: true
+        cache: root.cacheArtwork
         smooth: true
         mipmap: false
     }
@@ -122,7 +125,7 @@ Item {
                         sourceSize.width: root.rasterEdge(rotor.width,true)
                         sourceSize.height: root.rasterEdge(rotor.height,true)
                         fillMode: Image.PreserveAspectFit
-                        asynchronous: false; cache: true; smooth: true; mipmap: false
+                        asynchronous: false; cache: root.cacheArtwork; smooth: true; mipmap: false
                     }
                 }
             }
