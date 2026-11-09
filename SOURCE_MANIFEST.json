@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 119822,
-      "sha256": "75c5efef09391ba5f405687237030fca17b593cf403b1b0f9299ba4257588566"
+      "bytes": 119839,
+      "sha256": "1735f0ee0313215cf06d7803e3ededdbcafafb33c8d2c14754ea13ba45df858f"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -179,8 +179,8 @@
     },
     {
       "path": "assembly_detail.py",
-      "bytes": 47394,
-      "sha256": "9233087fcc8d5c474ea78302a1aa4da68897b0d56b55f905712027601aa8a61e"
+      "bytes": 48028,
+      "sha256": "1ed44882650bba545b5e51851a9f5b0e4a1f3e98af1455f4460802a2fe3eb482"
     },
     {
       "path": "assembly_effects.py",
@@ -214,8 +214,8 @@
     },
     {
       "path": "assembly_gpu_exterior053.py",
-      "bytes": 7405,
-      "sha256": "9c915c688e5eb392116b96c4c0ff86023bcad424e394ffbf82fcfd9d17c75024"
+      "bytes": 14379,
+      "sha256": "4059a1a28b37a2f97f2e002fa7be8250c452328e7f772b527f88cd0c97349c78"
     },
     {
       "path": "assembly_gpu_insertion049.py",
@@ -1549,8 +1549,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 14734,
-      "sha256": "6d1712a6fa17554f3fd07f6d24c67af94a16c4f977167c7ba89b44dcecd2306b"
+      "bytes": 16374,
+      "sha256": "4d733b8f066422dadf97ad88e0397006fb51c99f8ada48a714c2c3c70cf39a1d"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -4118,6 +4118,11 @@
       "sha256": "27f56d1f366109f98704e28523d3c0d8829538a1bfbdd592e209b3c3fb60e21d"
     },
     {
+      "path": "tests/test_kepler_window053.py",
+      "bytes": 16173,
+      "sha256": "e7009bd256e1907bbbc9e985457b63f3d2a76b8875909181da0fe75706786f45"
+    },
+    {
       "path": "tests/test_layout_assist.py",
       "bytes": 21939,
       "sha256": "7626c26d62aa29f871b1b9fe168e493e6412cac521494922387e846ad30a3c3b"
@@ -4984,8 +4989,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 37023,
-      "sha256": "0728a23257c0b2b1af7c14aa14378a733f1a0061296f1bfc96a9993d2f9f097d"
+      "bytes": 37061,
+      "sha256": "5d7780bb2aa169e6d26abd189cc95e52c5b8c95ff58549362921f02b9afed1c9"
     },
     {
       "path": "tools/build_collector.py",

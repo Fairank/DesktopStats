@@ -700,6 +700,7 @@ SOURCES = (
     'tests/test_gpu_exterior053.py',
     'tests/test_gpu_cutouts053.py',
     'tests/test_leadtek_fixed_x053.py',
+    'tests/test_kepler_window053.py',
     'radiator_svg053.py',
     'tests/test_radiator_discovery053.py',
     'tests/test_radiator_gallery053.py',

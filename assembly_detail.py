@@ -364,13 +364,23 @@ def _gpu_detail(meshes,spec,level):
         for row in (gpu.get('detail_polygons') or ())[:6]:
             points=row.get('points') if isinstance(row,dict) else row
             polygons.append(unit_polygon(points,length,width,margin=.3))
+        paint_holes=holes
+        if appearance.get('id')=='nvidia-gtx780ti-reference':
+            from assembly_gpu_exterior053 import kepler_front_reference
+            kepler=kepler_front_reference(gpu,length,width,thickness,holes,len(polygons))
+            if kepler:
+                observed_front_cutouts=kepler['cutouts']
+                paint_holes=(*holes,*kepler['paint_head_seats'])
+                # Replace the old flat fin/background drawing with actual
+                # window-depth samples. Keep the original two frame contours.
+                for index in kepler['replaced_source_layers']:polygons[index]=()
         fixed_partition={}
         if appearance.get('id')=='leadtek-hurricane-4090-24g':
             from assembly_gpu_exterior053 import fixed_front_layers
             fixed_front=fixed_front_layers(gpu,len(polygons),holes)
             if fixed_front:
                 fixed_partition=dict(layer_fan_indices=fixed_front['fan_indices'],layer_depths=fixed_front['depths'])
-        paint_vertices,paint_metadata=partition(tuple(polygons),holes,.3,segments=segments,
+        paint_vertices,paint_metadata=partition(tuple(polygons),paint_holes,.3,segments=segments,
             front_cutouts=observed_front_cutouts,**fixed_partition)
     rear_u=(589.-45.)/659.;rear_v=(370.-238.)/256.
     rear_radius=min(105./659.*length,105./256.*width)
