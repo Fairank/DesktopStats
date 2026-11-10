@@ -706,6 +706,9 @@ SOURCES = (
     'tests/test_pack_entry053.py',
     'radiator_svg053.py',
     'gpu_gallery053.py',
+    'processor_memory_gallery053.py',
+    'tests/test_processor_memory_gallery053.py',
+    'tests/test_processor_memory_gallery_ui053.py',
     'tests/test_gpu_gallery053.py',
     'tests/test_gpu_gallery_ui053.py',
     'tests/test_radiator_discovery053.py',
@@ -714,6 +717,7 @@ SOURCES = (
     'tests/test_radiator_camera053.py',
     'tests/fixtures/liquid_svg046_pre053.py.txt',
     'docs/DEVELOPMENT053.md',
+    'docs/PCBS_CONTENT_GAPS053.md',
     'docs/OPEN_HARDWARE_SOURCES053.md',
     'docs/OPEN_HARDWARE_SOURCES053.json',
 )

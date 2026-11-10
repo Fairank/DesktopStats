@@ -42,8 +42,8 @@ def actual_methods():
 
 class EmptyStore:
     def __init__(self): self.index_calls = []
-    def choices(self, category):
-        assert category in ('cooler', 'fan', 'loop', 'radiator')
+    def choices(self, category='cpu'):
+        assert category in ('cpu', 'cooler', 'fan', 'loop', 'radiator')
         self.index_calls.append(category)
         return []
     def get_model(self, *args, **kwargs):

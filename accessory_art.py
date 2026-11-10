@@ -1094,6 +1094,9 @@ def choices():
                               for r in (*records(),*radiator_choices())]
         from gpu_gallery053 import choices as gpu_choices
         _CHOICES['gpus']=gpu_choices()
+        from processor_memory_gallery053 import choices as component_choices
+        _CHOICES['cpus']=component_choices('cpu')
+        _CHOICES['memory']=component_choices('memory')
         _CHOICES_GENERATION=_library_generation()
     return deepcopy(_CHOICES)
 

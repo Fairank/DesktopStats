@@ -11,7 +11,7 @@ class IndexStore(base.EmptyStore):
     def __init__(self):
         super().__init__(); self.generation = 0; self.available = False
 
-    def choices(self, category):
+    def choices(self, category='cpu'):
         super().choices(category)
         if category == 'loop' and self.available:
             return [dict(id='fixture-cpu-block', label='Metadata fixture CPU block',

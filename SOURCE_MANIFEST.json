@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 121882,
-      "sha256": "1589a4e84dcc5ccfab6836daf77251f8e8f9c8bc5a8899b165c3c28901a4fc7b"
+      "bytes": 122717,
+      "sha256": "43472a174535e3aa28613cb60f158bdc8d95c69bfefb8e685b25c1be20201e02"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -64,8 +64,8 @@
     },
     {
       "path": "accessory_art.py",
-      "bytes": 66432,
-      "sha256": "f60ad20e9b6cd1a0ff789b735ecf1528c84fedbbfad4e8d194971a39050c2fef"
+      "bytes": 66614,
+      "sha256": "8de7047014b9a130792fe12547a143a830a0960fcd2a1da8d48cc31c3659d2bb"
     },
     {
       "path": "accessory_cancel047.py",
@@ -369,8 +369,8 @@
     },
     {
       "path": "assembly_tools.py",
-      "bytes": 15437,
-      "sha256": "30c72283a09c3ef5734345196d55b7254fa1f104ca7130431cd282a943984043"
+      "bytes": 15683,
+      "sha256": "7614a4d97a19f34d09d27516711480ee66f17839feb5c13d6bffbca0e1e90f8c"
     },
     {
       "path": "assembly_torrent_shroud052.py",
@@ -1554,8 +1554,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 25898,
-      "sha256": "34ae2b6d243adf5f8f1424ca332a47c2a989c3d5d4e5d5eb0cb32a35df809507"
+      "bytes": 29121,
+      "sha256": "e9dcab884413959faf6b5f3ff64e40bf70d3bf2b89a81e287945d685bc0165c2"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -1636,6 +1636,11 @@
       "path": "docs/PCBS_COMPARISON.json",
       "bytes": 4151,
       "sha256": "4bb045b0e3b09817628c564d8296381a85aa9f8089a439ab5dda8a8f6829f319"
+    },
+    {
+      "path": "docs/PCBS_CONTENT_GAPS053.md",
+      "bytes": 6693,
+      "sha256": "9d498befb98b405ebc18deda56fe9f1f7801cca700106fa1434ed8ceba868b7f"
     },
     {
       "path": "docs/PCBS_GAP_ANALYSIS.md",
@@ -2674,8 +2679,8 @@
     },
     {
       "path": "native/AccessoryGallery.qml",
-      "bytes": 20354,
-      "sha256": "d7d0ab77fb3a9522da534b1f66916466e2519052b9650bbc75ca64eb11e54963"
+      "bytes": 21191,
+      "sha256": "b2bc1c166e0de6c075e80250f2b9481c2e6365b6de8348a6029fcd922f78562f"
     },
     {
       "path": "native/AccessoryGlyph.qml",
@@ -3198,6 +3203,11 @@
       "sha256": "a3fa855964f7d73d532fc676e2fee4b37080f970078edf83f6789796dfab3c9a"
     },
     {
+      "path": "processor_memory_gallery053.py",
+      "bytes": 4857,
+      "sha256": "23ac1e52d76749438fd5dd042dc41310729f80ed82a2dee6021362d7b2008142"
+    },
+    {
       "path": "product_version.py",
       "bytes": 29,
       "sha256": "d92a7e9e28ec800175f241c3c70fc6e9b41d70592655f588dcff1d48c9b92dff"
@@ -3329,8 +3339,8 @@
     },
     {
       "path": "tests/test_accessory_art.py",
-      "bytes": 12096,
-      "sha256": "a53952d36488cea41462ebc7f42533d9ca532ddf985b8cc02902c84a02f43120"
+      "bytes": 12113,
+      "sha256": "22f7d30556a25121f9c9b1a84880cc4cf1915b9c8e63045b8ceb70d89ef48aa7"
     },
     {
       "path": "tests/test_accessory_art_export.py",
@@ -3924,8 +3934,8 @@
     },
     {
       "path": "tests/test_gpu_gallery_ui053.py",
-      "bytes": 16460,
-      "sha256": "546bc940f0b501dd0a73e15299d32ac12f61100ba4c52db12362518485a21d04"
+      "bytes": 16473,
+      "sha256": "6a7121f58010d5419e255e46366c869bbacd086afe746acfac0e16795403a856"
     },
     {
       "path": "tests/test_gpu_inno_partial052.py",
@@ -4429,8 +4439,8 @@
     },
     {
       "path": "tests/test_pack_entry053.py",
-      "bytes": 6282,
-      "sha256": "12693ded193133cec186568c0c5c56e7d0b6d51e9f8a64f50876680f5996f908"
+      "bytes": 6288,
+      "sha256": "1bfb2cc628bee319abbf6d70dcbf3b523fe3b40fca7548296d37cffc4eeb11fe"
     },
     {
       "path": "tests/test_part_identity052.py",
@@ -4506,6 +4516,16 @@
       "path": "tests/test_process_usage_qml.py",
       "bytes": 14727,
       "sha256": "e686652340b80f49f951474bc3a2ca4d99525fa24ec893e66bbb260596d91097"
+    },
+    {
+      "path": "tests/test_processor_memory_gallery053.py",
+      "bytes": 9153,
+      "sha256": "8a0dc12d5fa40e2bd1f26f0484596e4265c5a504e9a921d68668630c4f7b0ef4"
+    },
+    {
+      "path": "tests/test_processor_memory_gallery_ui053.py",
+      "bytes": 9690,
+      "sha256": "8a0db7394da785999c6a2828c36511120bf323ac1fdf5d1ab33e2b17169cbf91"
     },
     {
       "path": "tests/test_product.py",
@@ -5029,8 +5049,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 37348,
-      "sha256": "250451cc15a8d4de460afcc16aa0980ef350350f2c427d625259f70ca85096dd"
+      "bytes": 37523,
+      "sha256": "88f5dadce9bb518fc61f89532c0f6f50f3956c9dd691ff5f1f2e0c381b0d36f0"
     },
     {
       "path": "tools/build_collector.py",
