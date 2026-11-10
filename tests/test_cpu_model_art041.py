@@ -10,7 +10,7 @@ from xml.etree import ElementTree as ET
 os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
 os.environ.setdefault('QT_QUICK_BACKEND','software')
 from PySide6.QtCore import QUrl,Qt
-from PySide6.QtGui import QGuiApplication,QImage,QPainter
+from PySide6.QtGui import QFontDatabase,QGuiApplication,QImage,QPainter
 from PySide6.QtQml import QQmlComponent,QQmlEngine,QQmlExpression,qmlContext
 from PySide6.QtSvg import QSvgRenderer
 
@@ -26,6 +26,15 @@ class CpuModelArt041Tests(unittest.TestCase):
     def setUpClass(cls):
         cls.app=QGuiApplication.instance() or QGuiApplication([])
         assert cls.app.platformName()=='offscreen'
+        # Windows' offscreen platform can expose no fonts at all. Register
+        # existing system faces in this test process; never install font files
+        # or accept empty/tofu glyphs as evidence of readable product artwork.
+        if os.name=='nt' and 'Segoe UI' not in QFontDatabase.families():
+            folder=Path(os.environ.get('WINDIR','C:/Windows'))/'Fonts'
+            for name in ('segoeui.ttf','seguisb.ttf','segoeuib.ttf'):
+                if (folder/name).is_file():
+                    assert QFontDatabase.addApplicationFont(str(folder/name))>=0
+            assert 'Segoe UI' in QFontDatabase.families(),'Software art verification requires an available system typeface'
 
     def setUp(self):
         self.enterContext(patch('ctypes.WinDLL',side_effect=AssertionError('No native/device API')))
@@ -41,6 +50,8 @@ QtObject {
  function contours(v){return JSON.stringify(Cpu.paths(v))}
  function profile(id){return JSON.stringify(Cpu.profile(id))}
  function old(v){return Cpu.body(v)}
+ function insets(v){return JSON.stringify(Model.lidInsetPoints(v[0],v[1]))}
+ function family(v){return Model.familyMark(v)}
 }''',QUrl.fromLocalFile(str(ROOT/'tests/CpuModelArt041Fixture.qml')))
         self.object=self.component.create()
         self.assertIsNotNone(self.object,[e.toString() for e in self.component.errors()])
@@ -82,7 +93,9 @@ QtObject {
                     self.assertNotIn('NaN',source);self.assertNotIn('Infinity',source)
                     texts=[node.text for node in root.findall('.//{'+SVG+'}text')]
                     label=row['cpu_package']['label_ascii']
-                    self.assertEqual(texts,[row['cpu_package']['vendor'].upper(),label.split()[-1]])
+                    self.assertEqual(texts[0],row['cpu_package']['vendor'].upper())
+                    self.assertEqual(texts[-1],label.split()[-1])
+                    self.assertEqual(len(texts),3)
                     self.assertNotIn(label,texts)
                     for tag in ('image','filter','animate','animateTransform','foreignObject'):
                         self.assertFalse(root.findall('.//{'+SVG+'}'+tag))

@@ -1,12 +1,12 @@
 # 直接使用开源三维模型
 
-本轮把已取得的第三方模型接入实际检视代码。开发源码提供“开源 3D”入口，能够读取风扇、风冷、水冷、通用整机、CPU和RTX 3080六件参考、旋转缩放、点选部件、聚焦、隐藏和恢复，并切换原有六套风格。它们不再只用于生成说明图片。
+已取得的第三方模型接入实际检视代码。开发源码提供“开源 3D”入口，能够读取风扇、风冷、水冷、通用整机、CPU、RTX 3080、SSD和通用电源八件参考，旋转缩放、点选部件、聚焦、隐藏和恢复，并切换原有六套风格。它们不再只用于生成说明图片。
 
-**本机正在运行的 Stats 没有被替换。** 这些入口属于包含本次改动的新构建；游戏期间未安装、重启或显示原生测试窗。真实桌面上的原生画面与驱动占用还待验证。
+**本机正在运行的原版 Stats 没有被替换。** 新代码继续作为独立第二版：屏幕二的顶部栏、设置与顶部栏详情已经过有限原生验证，原版和前台保持不变；参考模型自身的原生驱动画面、真实磨砂与GPU占用仍待核。范围见 [055记录](DEVELOPMENT055.md)。
 
 ## 下载与打开
 
-1. 从[散热模型目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054)下载风冷或水冷 ZIP，从[整机目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/whole-pc054)下载 `DesktopStats-MIT-whole-PC054.zip`，或从[CPU／GPU目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/ccby-components054)下载CPU或RTX 3080 ZIP。通用风扇沿用[此前的 MIT 风扇包](https://github.com/Fairank/DesktopStats/blob/861420f4b2457cd2a661e99fd73cc4dd47349b20/additional/pc-anatomy053/DesktopStats-open-fan-reference053.zip)。
+1. 从[全部已适配参考目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional)选择单件 ZIP；[散热目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054)、[整机目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/whole-pc054)、[CPU／GPU目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/ccby-components054)与[SSD／电源目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/ccby-components055)分别下载。通用风扇沿用[此前的 MIT 风扇包](https://github.com/Fairank/DesktopStats/blob/861420f4b2457cd2a661e99fd73cc4dd47349b20/additional/pc-anatomy053/DesktopStats-open-fan-reference053.zip)。
 2. 在包含本次改动的版本中打开“硬件型号图鉴 → 开源 3D → 载入模型 ZIP…”。无需解压、导入原有型号库或修改硬件设置。
 3. 拖动旋转、滚轮缩放；单击模型或从部件列表选择，按需开启“只看所选”或“隐藏所选”。关闭窗口后释放这件模型，再选下一件。
 
@@ -22,8 +22,10 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 | 通用整机 | 25个独立部件，含机箱、主板、CPU、GPU、内存、电源、线缆与存储 | 1,395,020 B | 2,403,576 B |
 | 通用CPU，作者参考 | 两个源部件，426个三角形 | 494,297 B | 30,672 B |
 | RTX 3080，作者参考与既有LOD | 27个独立分区，56,742个三角形 | 3,164,655 B | 4,085,424 B |
+| Samsung 990 PRO 1TB SSD，作者标注参考 | 两个源分区，2,038个三角形；原贴图尚未接入检视 | 888,683 B | 146,736 B |
+| 通用电源，作者参考 | 43个源分区，12,229个三角形；不是某款已核零售电源 | 357,252 B | 880,488 B |
 
-表中的缓冲是送给现有三维渲染器的只读位置／法线数组，不包含 Qt、驱动、边线、上传副本等，**不能当作整个 Stats 的内存占用**。六件是通用教育结构或作者参考，不是六款经过厂家认证的零售精模；不按原版／修订版或六种风格重复计算产品。
+表中的缓冲是送给现有三维渲染器的只读位置／法线数组，不包含 Qt、驱动、边线、上传副本等，**不能当作整个 Stats 的内存占用**。八件是通用教育结构或作者参考，不是八款经过厂家认证的零售精模；不按原版／修订版或六种风格重复计算产品。
 
 风冷 ZIP SHA-256：`546c330b40122064195871973dbe60147aeb0cddb496bb0cc3abee310b88dbe7`。
 
@@ -34,6 +36,12 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 CPU ZIP SHA-256：`94357b19f5d9c5a25ba91d74b7d21470c96e37f2997b07096483580000bcdffa`，19成员展开598,860B。
 
 RTX 3080 ZIP SHA-256：`112f442b4351f190fa035da9f89af273f5bafa1888ef73c5694005d9d0ddb853`，17成员展开9,109,750B。
+
+SSD ZIP SHA-256：`7927ac45ac5aa821a8f3f536e0137ea72faee5bc25e7a01234ab9eb7a49fd307`，19成员展开1,183,278B。电源 ZIP SHA-256：`3ced5dacea73adfb05e96e3ff817bb9539105826f059f2a82efe58a61cd429d0`，15成员展开1,873,388B。两份最终ZIP均通过真实公共入口、句柄关闭、六版共用缓冲与模型释放检查；没有减面、删部件、修原法线或扩大12MiB包限制，原GLB／索引／UV／贴图／许可和新增质量记录全部保留。5项新控制通过，精确范围见[055质量记录](QUALITY055.json)。
+
+SSD来自 [lime.ball.animations／M.2 NVME SSD Samsung 990 Pro 1TB 3D model](https://sketchfab.com/3d-models/41b7bfda7eab40f8b13330913fd66fc2)，电源来自 [Groovex／PSU Power Supply Unit](https://sketchfab.com/3d-models/69ccd1be3a77497cb2acc9e39e7c52b3)，保留各自CC BY 4.0。前者是作者标注的产品身份，后者仅通用电源，不改称RM1000x等零售型号。
+
+电源六版静态软件图已检查到机身、格栅、模组接口与立体源文字；源游离小几何及线条拥挤仍待修。SSD六张实际图因原UV／albedo尚未接入而呈浅色薄板，外观验收未过。内存参考在转换中新增有效面退化和方向错误，两种原点候选都产生新回归，因此未开放为可用包。读取成功、可点选和六种配色不等于完整材质、逐型号精模或装机适配完成。
 
 [当前公共线条六版预览](https://github.com/Fairank/DesktopStats/blob/codex/open-model-references-v053/additional/whole-pc-lines054/whole-pc-six-canonical054.png)使用同一模型和镜头，仅隐藏独立侧板以观察内部，原始数据和其他实体不删除。四个源文件已确认的风扇绘制分区在纯线条画法中改用真实面法向识别折线，中心保留、后置风扇外框较清晰；CPU叶片、全型号细节及六套完整观感仍待完善。原版源材质仍较暗。
 

@@ -586,6 +586,12 @@ def build_scene(spec=None):
         case_pose=layout_reference(case,(w,h,d))
         if 'board_x_mm' in case_pose:board_x=number(case_pose['board_x_mm'],board_x,-w/2,w/2)
         if 'board_y_mm' in case_pose:board_y=number(case_pose['board_y_mm'],board_y,-h/2,h/2)
+        if case.get('id')=='cooler-master-cosmos-c700m' and 'board_rear_z_mm' in case_pose:
+            # The COSMOS external wraps are deeper than its metal body.
+            # One fixed body datum moves board/CPU/GPU/RAM and every anchor
+            # together; no selected hardware dimensions or ports are changed.
+            board_rear=number(case_pose['board_rear_z_mm'],board_rear,-d/2,d/2)
+            board_z=board_rear+board_d/2
         from assembly_rear_panel052 import build as build_rear_panel
         back,rear_panel_meta=build_rear_panel(case,(w,h,d),case_pose,dark)
         indexes=[i for i,m in enumerate(meshes) if m.component=='case' and m.name=='case-back']
@@ -918,6 +924,11 @@ def build_scene(spec=None):
         from assembly_case_layout051 import add_helios_tray
         from assembly_north_tray049 import add_obstacles
         meshes,tray_meta=add_helios_tray(meshes,case,(w,h,d))
+    elif case.get('id')=='cooler-master-cosmos-c700m':
+        from assembly_c700m_case055 import add_tray
+        from assembly_north_tray049 import add_obstacles
+        meshes,tray_meta=add_tray(meshes,case,(w,h,d))
+        shroud_meta=dict(shroud_meta,parts=[*shroud_meta.get('parts',()),*tray_meta.get('parts',())])
     attachment_anchors=augment_attachment_anchors(attachment_anchors,meshes)
     if tray_meta:attachment_anchors=add_obstacles(attachment_anchors,tray_meta)
     if case.get('id')=='hyte-y70':

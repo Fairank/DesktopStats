@@ -146,7 +146,7 @@ def render(root=ROOT):
         f"核对日期：{data['reviewed']}；当前 {data['target_version']} 源码候选。重复要求合并为 29 项，原有组 ID、核心约束和后续补充全部保留。",
         '**当前没有达到“全部做完”的交付条件。** 源码存在、离屏测试通过、旧版实测与当前新版原生验收分别记录；不能用候选包生成或旧版温度读数给新版打勾。',
         '用户要求逐项核对、报告问题与缺项；未完成项继续保留，不因本轮上传或文档更新而关闭。',
-        f'{short_version} 尚未安装。游戏期间只做代码、后台和离屏检查，不重启 Stats，不弹出系统授权或可见测试窗；原生验收等待后续允许的桌面时段。','',
+        f'{short_version} 按用户最新选择作为独立第二版开发，不安装或重启现有版。第二版原生测试限定屏幕二、不抢焦点；无法确认桌面或目标屏幕时隐藏，不弹系统授权。需要前台切换的验收另留适当桌面时段，原版配置、历史与工作区保持不动。','',
         '**外观顺序约束：** '+ '、'.join(f"{row['number']} {row['label']}（`{row['id']}`）" for row in style['showcase'])+'。原版无笑脸；13 个旧保存选项继续保留。**先完成现有类别、型号与六版一致性缺口，不新增外观。**','',
         f"**{short_version} 统计口径：** 本体 {coverage['base_products']} 个具名产品＋{coverage['reference_combinations']} 套参考组合；可选 {coverage['optional_products']} 个产品＝{coverage['optional_cpu_products']} CPU＋{coverage['optional_cooling_products']} 冷却（{coverage['optional_cooling_by_kind']['radiator']} 冷排／{coverage['optional_cooling_by_kind']['fan']} 风扇／{coverage['optional_cooling_by_kind']['cooler']} 散热器）＋{coverage['optional_loop_products']} 独立水路，合计 **{coverage['total_products']} 个具名产品**。不按风格或下载分组重复计数；共壳 SKU 不等于独立高精度外壳，参考组合不计为产品。",
         f"冷却包共 {coverage['cooling_package_artifacts']} 个候选数据文件：{coverage['cooling_collection_packages']} 类集合包或 {coverage['cooling_brand_category_packages']} 个按品牌、类别划分的小包，分组可能重叠，**同一型号不可重复安装**。未装目录默认不加载，不预载全库网格，不新增后台查询；其它品类尚不能全部按包选装。",'',
@@ -177,9 +177,9 @@ def render(root=ROOT):
         f"**硬件覆盖与质量未完成项：** 原账仍有 {pending['gpu_leaf_profiles_pending']} 个 GPU 叶型待核，本轮没有新增完整叶型核实；新增风扇中 {pending['new_fan_leaf_evidence_pending']} 款叶片证据未完整；{pending['motherboard_finish_pending']} 款主板 finish 仍待官方来源。两款板载小风扇仅有 MSI 无叶片风扇槽与 ASUS 网罩参考，另 {pending['unplaced_onboard_heatsink_fans']} 款内部位置未知；两款叶片、方向和 RPM 都未知。",
         '全品牌全系列、全部旧代非公显卡、机箱／主板／散热器仍未覆盖。GPU 冷头的安装孔位与整卡替换／连管、更多接头／管材规格、线材与外围设备类别仍缺；单纯芯片名不能确认冷头兼容。',
         '参考组合不等于已有独立零售 SKU；水路部件需要拆开的身份、尺寸、端口与验收字段见 [独立水冷缺口](docs/LIQUID_COMPONENT_GAPS.md)。',
-        '机箱／GPU／内存／主板／电源／存储等运行时可选包，以及网络逐进程 Top5、真实单盘进程归因仍未完成；进程总读写 I/O 已实现，不能冒称当前物理盘占用。',
+        '完整逐型号机箱／GPU／内存／主板／电源／存储内容仍不全；已支持的手动第三方3D参考包不等于全部类别精模与固定装机。网络逐进程Top5、真实单盘进程归因仍未完成；进程总读写I/O不能冒称当前物理盘占用。',
         '现有冷排、机箱与硬件都保留未核孔位、内部 PCB、细小封装或安装间隙标记。不得把“有这个型号”写成“所有细节已核”。',
-        f'**原生验收未完成项：** {short_version} 重启后的 CPU 温度授权恢复、顶部栏／设置／详情真实磨砂、屏幕二定位、游戏隐藏与恢复、关闭资源释放及整款程序 CPU／RAM／GPU 占用。历史图层、模块和离屏测量保留原范围，不能替代本轮实测。',
+        '**原生验收范围：** 独立第二版顶部栏／设置／顶部栏详情已在屏幕二实测，栏内CPU温度76°C；当前源码另有5秒预热＋15秒CPU／私有内存样本，详见[055实测与缺项](docs/DEVELOPMENT055.md)。原版重启授权、最终DWM模糊像素、其余窗口路由／热插拔、同屏真实游戏隐藏恢复、所有资源路径释放、GPU／长期与最坏占用仍未验完，不能用离屏模块或局部通过代替。',
         '具体源码、测试路径和逐项缺口以 [结构化需求清单](docs/REQUIREMENTS.json) 为准；逐产品进度见 [覆盖清单](docs/ASSEMBLY_CATALOG.json)。',
         END]
     return '\n'.join(rows),dict(Counter(r['status'] for r in items))

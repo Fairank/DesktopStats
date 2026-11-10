@@ -13,6 +13,7 @@ from pathlib import Path
 
 from product_version import VERSION
 from profile_paths import POINTER_NAME, resolve_profile_paths
+from secondary_mode055 import active as secondary_active
 
 DIRECTORY = Path(os.environ["LOCALAPPDATA"]) / "Programs/DesktopStats"
 REGISTRY = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\DesktopStats"
@@ -41,6 +42,8 @@ def startup_command(executable=None):
 
 
 def set_autostart(enabled, executable=None):
+    if secondary_active():
+        raise RuntimeError("第二版不会更改原版开机启动。")
     with winreg.CreateKey(winreg.HKEY_CURRENT_USER, RUN_KEY) as key:
         if enabled:
             winreg.SetValueEx(key, "DesktopStats", 0, winreg.REG_SZ, startup_command(executable))
@@ -95,6 +98,8 @@ def _valid_status(status):
 
 def close_existing():
     """Return the last clean pre-quit status only after confirmed termination."""
+    if secondary_active():
+        raise RuntimeError("第二版不会关闭原版。")
     from native_ipc import send
 
     status = send({"command": "status"}, timeout=1200)
@@ -410,6 +415,8 @@ def _installed_autostart(target):
 
 
 def install(*, background=False):
+    if secondary_active():
+        raise RuntimeError("第二版不安装或覆盖原版。")
     if not getattr(sys, "frozen", False):
         raise RuntimeError("Use the packaged DesktopStats.exe to install")
     source_root = Path(sys.executable).parent.resolve()
@@ -514,6 +521,8 @@ def install(*, background=False):
 
 
 def remove_registration():
+    if secondary_active():
+        raise RuntimeError("第二版不会移除原版注册信息。")
     set_autostart(False)
     for folder in (shell_folder(0x10), shell_folder(2)):
         link = folder / "Desktop Stats.lnk"

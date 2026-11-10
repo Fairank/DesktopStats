@@ -29,6 +29,7 @@ from memory_identity import modules as memory_modules, requested as memory_ident
 from stats_config import BASE, load
 from storage_sensor import StorageHealth
 from top_bar_layout import metric_icon
+from secondary_mode055 import active as secondary_active
 
 INSPECT_UNTIL = 0
 EXTERNAL_RESCAN = 0
@@ -770,7 +771,8 @@ class Sampler:
         self.storage = StorageHealth(BASE)
         self.battery = Battery()
         self.cpu_power = CpuPackagePower()
-        self.cpu_thermal = AsusCpuTemperature()
+        from secondary_mode055 import temperature_reader
+        self.cpu_thermal = temperature_reader(reader_factory=AsusCpuTemperature)
         self.activity = Activity()
         self.external = ExternalEngine()
         self.nvml_retry = 0
@@ -782,8 +784,11 @@ class Sampler:
         self._closed = False
         self._memory_modules = None
         try:
-            self.asus = AsusTemperature()
-            self.asus_status = dict(state="connected", reason="", error={})
+            if not secondary_active():
+                self.asus = AsusTemperature()
+                self.asus_status = dict(state="connected", reason="", error={})
+            else:
+                self.asus_status = dict(state="disabled",reason="secondary_shared_cache_only",error={})
         except OSError as error:
             self.asus_retry = time.monotonic() + ASUS_RETRY_SECONDS
             self.asus_status = dict(state="waiting_retry", reason="initialization_failed",
@@ -838,6 +843,8 @@ class Sampler:
                 logging.exception("ASUS sensor cleanup failed")
 
     def _ensure_asus(self):
+        if secondary_active():
+            return
         if self.asus is not None or time.monotonic() < getattr(self, "asus_retry", 0):
             return
         try:

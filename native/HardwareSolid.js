@@ -154,7 +154,8 @@ function gpu(state, colors) {
     const cy=y+g.h*.51
     if (state.style === "gpu_blower" && state.fan_count === 1) {
         result += turbine(g.centers.length?g.centers[0]:end-4.5,cy,Math.min(3.55,g.h*.37),colors)
-            + p("M"+(x+2)+" "+(y+2.4)+"H"+(x+7.5)+"M"+(x+2)+" "+(y+4.1)+"H"+(x+7.5)
+        if(!(state.model_id==="nvidia-gtx1080-founders"&&state.series_id==="nvidia_founders_pascal"))
+            result += p("M"+(x+2)+" "+(y+2.4)+"H"+(x+7.5)+"M"+(x+2)+" "+(y+4.1)+"H"+(x+7.5)
                 +"M"+(x+2)+" "+(y+5.8)+"H"+(x+7.5),"none",.7,colors.disk,.85)
     } else if (g.centers.length) {
         g.centers.forEach(function(cx,index){result+=(g.blowers && g.blowers.indexOf(index)>=0?turbine:fan)(cx,g.fan_y?g.fan_y[index]:cy,g.radii?g.radii[index]:g.radius,colors)})

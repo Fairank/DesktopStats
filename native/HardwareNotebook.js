@@ -4,6 +4,7 @@
 .import "HardwareBoardDesigns.js" as Board
 .import "HardwareFanDesigns.js" as Fans
 .import "HardwareNotebookParts.js" as Parts
+.import "HardwareGpuPascal055.js" as Pascal055
 
 // Notebook pen studies. Only the reviewed exterior, a few trim strokes and
 // source-backed open blade sweeps survive: this is not a wireframe repaint.
@@ -76,6 +77,20 @@ function sourceShapes(input) {
 }
 function shapeStudy(state,g,c,front,layout) {
     var custom=cases[state.model_id],m=[g.w/100,0,0,g.h/100,g.x,g.y],seed=identity(state)
+    if(state.model_id==="nvidia-gtx1080-founders"&&state.series_id==="nvidia_founders_pascal") {
+        var physical=Pascal055.creasePaths().concat(Pascal055.finPaths(),Pascal055.headPaths()),inked=""
+        physical.unshift(Pascal055.windowPath())
+        var outer=Sketch.wobblyPath(Pascal055.outerPath(),seed+":case",1.1,12)
+        var region=casePolygon({d:outer,m:m})
+        physical.forEach(function(d,index){
+            var loose=Sketch.wobblyPath(d,seed+":pascal055:"+index,.55,10)
+            var points=casePolygon({d:loose,m:m})
+            if(/[Zz]\s*$/.test(loose)&&points.length)points.push(points[0])
+            inked+=path(clippedStroke(points,region,layout,.13),c.ink,.13)
+        })
+        return {d:outer,m:m,
+            trim:'<g class="hardware-pascal055-creases">'+inked+'</g>',custom:true}
+    }
     if(state.series_id==='gigabyte_fx5200' && ['gigabyte-fx5200-n52128d','gigabyte-fx5200-n52128d-rev10-reference'].indexOf(state.model_id)>=0) {
         // Preserve the visible manual-reference components instead of reducing
         // an exposed board to two casing trim strokes. Same eight packages and

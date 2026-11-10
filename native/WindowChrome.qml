@@ -6,9 +6,13 @@ Item {
     id: root
     required property var targetWindow
     property string titleText: "Desktop Stats"
+    property bool allowSystemMove: true
+    property bool allowSystemResize: true
+    property bool allowMaximize: true
     readonly property bool maximized: targetWindow.visibility === Window.Maximized
     Theme { id: ui }
     function toggleMaximized() {
+        if (!allowMaximize) return
         if (maximized) targetWindow.showNormal()
         else targetWindow.showMaximized()
     }
@@ -20,6 +24,7 @@ Item {
             objectName: "windowTitleDrag"
             anchors.left: parent.left; anchors.right: windowButtons.left
             height: parent.height; acceptedButtons: Qt.LeftButton
+            enabled: root.allowSystemMove
             onPressed: root.targetWindow.startSystemMove()
             onDoubleClicked: root.toggleMaximized()
         }
@@ -37,6 +42,7 @@ Item {
                     required property string modelData
                     objectName: "window_" + modelData
                     width: 46; height: 34; padding: 0; focusPolicy: Qt.TabFocus
+                    enabled: modelData !== "maximize" || root.allowMaximize
                     readonly property string actionLabel: ui.t(modelData === "close" ? "关闭" : modelData === "minimize" ? "最小化" : root.maximized ? "还原" : "最大化")
                     Accessible.name: actionLabel
                     ToolTip.visible: hovered; ToolTip.delay: 700; ToolTip.text: actionLabel
@@ -72,7 +78,7 @@ Item {
             readonly property bool bottomEdge: !!(modelData & Qt.BottomEdge)
             readonly property bool corner: (leftEdge || rightEdge) && (topEdge || bottomEdge)
             objectName: "windowResize_" + modelData
-            visible: !root.maximized
+            visible: !root.maximized && root.allowSystemResize
             z: 1000
             x: rightEdge ? root.width - width : corner || leftEdge ? 0 : 7
             y: bottomEdge ? root.height - height : corner || topEdge ? 0 : 34

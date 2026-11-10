@@ -81,7 +81,8 @@ def build_spec(data, config, firmware, modules, *, identify_case=None):
                       else text(device.get("gpu_name") or device.get("label"))) or "显卡未识别",
                selection_source=appearance.get("selection_source", "automatic"),
                length_mm=number(dimensions.get("length")), width_mm=number(dimensions.get("height")),
-               thickness_mm=number(dimensions.get("thickness")), dimensions_verified=bool(dimensions),
+               thickness_mm=number(dimensions.get("thickness")),
+               dimensions_verified=all(number(dimensions.get(axis)) is not None for axis in ("length", "height", "thickness")),
                telemetry_bound=appearance.get('selection_source')!='reference',detected_label=text(device.get('gpu_name') or device.get('label')))
     cpu_appearance = appearance_for("cpu", data.get("cpu_name"))
     if options['cpu_model']:

@@ -653,10 +653,10 @@ class TopBarManager(QObject):
     """One reserved host per selected screen, one optional shared details window."""
 
     def __init__(self, runtime, *, adapter=None, window_factory=None,
-                 fullscreen_guard_factory=None):
+                 fullscreen_guard_factory=None, adapter_factory=None):
         super().__init__(runtime if isinstance(runtime, QObject) else None)
         self.runtime, self.app, self.controller = runtime, runtime.app, runtime.controller
-        self.adapter = adapter if adapter is not None else WindowsTopBarAdapter()
+        self.adapter = adapter if adapter is not None else (adapter_factory or WindowsTopBarAdapter)()
         self._injected = adapter is not None
         self._window_factory = window_factory
         self.hosts, self.retired, self._components = {}, [], {}

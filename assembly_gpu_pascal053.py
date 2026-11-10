@@ -7,21 +7,18 @@ nor hidden screws are verified. Existing 53-blade/rim/hub/interface data stay.
 import hashlib
 import json
 import math
+from gpu_pascal_surface055 import WINDOW_UV,HEAD_UV
 
 IDENTITY='nvidia-gtx1080-founders'
 SOURCE='https://images.nvidia.com/aem-dam/Solutions/geforce/news/geforce-gtx-1080-founders-edition/nvidia-geforce-gtx-1080-Front.png'
-WINDOW_UV=((.14,.21875),(.49,.135417),(.6,.3125),(.6,.739583),(.47,.864583),(.15,.864583))
 # Actual ProfileReader map: only the dark inset / flat fin background / first
 # flat fin are bound. The other three observed facet layers remain authored.
 BOUND_LAYER_SHA256={0:'0c6c94910361d8c2a34ae2ea27f86766fc62ccd3bb2455fc958b399042e4cf4b',
     4:'7eae46cff4a2280517dc0f1321f535c49d526fd02d1e3d6482e41a3063bf35ab',
     5:'3d855dc8dce94185439a1dee94bfce492db0432473a25f2993edd5121739182f'}
+HORIZONTAL_FIN_LAYER055_SHA256='92db219436f0f1480ba0e1a1296d1780e4d42eccd58b2f0732be2b44e1b88851'
 HEAD_PHOTO_PIXELS=((518.,231.),(919.,251.),(518.,634.),(919.,614.),
                    (1101.,241.),(1573.,242.),(1101.,631.),(1573.,631.))
-HEAD_UV=((.2258852258852259,.1397727903958016),(.4706959706959707,.07479578776420266),
-         (.2258852258852259,.9298003913043478),(.4706959706959707,.9157532622906636),
-         (.6414072039072038,.1826574693422519),(.9295634920634921,.1843297101449275),
-         (.6414072039072038,.8348313823857302),(.9295634920634921,.8348313823857302))
 
 def front_reference(gpu,length,width,thickness,fan_holes):
     """Fixed source binding; unknown nominal dimensions never gain facts."""
@@ -37,14 +34,15 @@ def front_reference(gpu,length,width,thickness,fan_holes):
                 or any(type(v) not in (int,float) or not -.3<=v<=1.3 or not math.isfinite(v) for v in p) for p in points)):return {}
         if index in BOUND_LAYER_SHA256:
             raw=json.dumps(points,separators=(',',':'),allow_nan=False).encode()
-            if hashlib.sha256(raw).hexdigest()!=BOUND_LAYER_SHA256[index]:return {}
+            checksum=hashlib.sha256(raw).hexdigest()
+            if checksum!=BOUND_LAYER_SHA256[index] and not(index==5 and checksum==HORIZONTAL_FIN_LAYER055_SHA256):return {}
     if (not isinstance(fan_holes,(tuple,list)) or len(fan_holes)!=1 or not isinstance(fan_holes[0],(tuple,list))
             or len(fan_holes[0])!=3 or not all(type(v) in (int,float) and abs(v)<1e6 and math.isfinite(v) for v in fan_holes[0])
             or fan_holes[0][2]<=0):return {}
     outline=tuple(((u-.5)*length,(.5-v)*width) for u,v in WINDOW_UV)
     heads=tuple(((u-.5)*length,(.5-v)*width) for u,v in HEAD_UV)
     recess=min(.5,thickness*.06);head_depth=min(.45,recess*.9)
-    return dict(cutouts=(outline,),window_outline=outline,source_bound_layers=(0,4,5),
+    return dict(cutouts=(outline,),window_outline=outline,source_bound_layers=(0,4,5),fan_holes=tuple(tuple(h)for h in fan_holes),
         replaced_source_layers=(4,5),preserved_source_frame_layers=(1,2,3),
         paint_head_seats=tuple((u,v,2.35) for u,v in heads),head_centers=heads,
         head_radius=2.2,head_depth=head_depth,head_back_y=recess,
@@ -88,13 +86,15 @@ def refine(meshes,spec,level):
              (gx,gy-thickness/2+ref['pane_center_y'],gz),'gpu',part_id=part),
         Mesh('detail-gpu-pascal-fixed-heads',tuple(heads),color('#bac1c7'),shell.position,'gpu',part_id=part),
         Mesh('detail-gpu-pascal-head-recesses',tuple(recesses),color('#242a2e'),shell.position,'gpu',part_id=part))
-    return tuple((*meshes,*added)),dict(pascal_front_source=SOURCE,front_window_geometry='exact_source_profile_photo_reference_not_CAD',
+    from gpu_pascal_surface055 import relief_meshes
+    relief,relief_metadata=relief_meshes(shell,ref,level)
+    return tuple((*meshes,*added,*relief)),dict(pascal_front_source=SOURCE,front_window_geometry='exact_source_profile_photo_reference_not_CAD',
         front_window_uv=WINDOW_UV,source_bound_layers=(0,4,5),original_source_frame_layers_preserved=(1,2,3),
-        replaced_flat_fin_source_layers=(4,5),added_meshes=4,fin_sampling_count=count,
+        replaced_flat_fin_source_layers=(4,5),added_meshes=4+len(relief),fin_sampling_count=count,
         source_observed_screw_heads=8,head_photo_pixels=HEAD_PHOTO_PIXELS,head_reference_uv=HEAD_UV,
         head_reference_projection='Fixed local source-art registration, photo-window edge / captured fan-centre landmarks; not calibrated manufactured holes',
         screw_positions_accuracy='photo_reference_unmeasured',screw_geometry='visible_heads_and_unidentified_recesses_only',
         window_face_accuracy='visually_clear_photo_reference_chemistry_and_thickness_unverified',
         reference_depth_unmeasured=True,manufacturer_dimensions_verified=False,hidden_heatpipes_modelled=False,
         source_existing_blade_count=53,rotor_geometry_changed=False,blade_counts_changed=False,fixed_rim_geometry_preserved=True,
-        full_tessellated_body_3D_modelled=False,rear_split_geometry_modelled=False)
+        full_tessellated_body_3D_modelled=False,rear_split_geometry_modelled=False,**relief_metadata)

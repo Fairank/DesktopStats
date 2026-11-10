@@ -160,8 +160,8 @@ Window {
                     InspectorSection {width:parent.width;title:ui.t("常规")
                         SettingRow {Layout.fillWidth:true;label:ui.t("显示语言");Choice {objectName:"languageChoice";width:200;model:stats.catalog.languages;value:root.draftConfig.language;onPicked:selected=>stats.change("language",selected)}}
                         SettingRow {Layout.fillWidth:true;label:ui.t("外观模式");OptionTabs {options:[{id:"light",label:ui.t("浅色")},{id:"dark",label:ui.t("深色")}];value:root.draftConfig.theme;onPicked:selected=>stats.change("theme",selected)}}
-                        SettingRow {Layout.fillWidth:true;label:ui.t("登录时自动启动");Toggle {objectName:"autostartToggle";checked:root.draftConfig.autostart;Accessible.name:ui.t("登录时自动启动");onToggled:stats.change("autostart",checked)}}
-                        SettingRow {Layout.fillWidth:true;label:ui.t("启动时恢复 CPU 温度");note:ui.t("需已有 ASUS 服务；每次启动提示管理员授权，全屏时延后。");Toggle {objectName:"cpuTemperatureStartupToggle";checked:root.draftConfig.cpu_temperature_prompt_on_start===true;Accessible.name:ui.t("启动时恢复 CPU 温度");onToggled:stats.change("cpu_temperature_prompt_on_start",checked)}}
+                        SettingRow {Layout.fillWidth:true;label:ui.t("登录时自动启动");Toggle {objectName:"autostartToggle";enabled:!stats.secondaryMode;checked:root.draftConfig.autostart;Accessible.name:ui.t("登录时自动启动");onToggled:stats.change("autostart",checked)}}
+                        SettingRow {Layout.fillWidth:true;label:ui.t("启动时恢复 CPU 温度");note:stats.secondaryMode?ui.t("第二版仅共享已验证原版的温度缓存，不启动新的温度服务。"):ui.t("需已有 ASUS 服务；每次启动提示管理员授权，全屏时延后。");Toggle {objectName:"cpuTemperatureStartupToggle";enabled:!stats.secondaryMode;checked:root.draftConfig.cpu_temperature_prompt_on_start===true;Accessible.name:ui.t("启动时恢复 CPU 温度");onToggled:stats.change("cpu_temperature_prompt_on_start",checked)}}
                         SettingRow {Layout.fillWidth:true;label:ui.t("检测频率");note:ui.t("范围：0.01–5 秒");SamplingControl {id:frequency}}
                         Text {Layout.fillWidth:true;text:ui.t("更短的间隔会增加系统开销。应用后从下一轮采样生效。");font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:ui.muted;wrapMode:Text.WordWrap}
                     }
@@ -200,7 +200,7 @@ Window {
             ActionButton {objectName:"applyButton";visible:root.page!==4;text:ui.t(stats.replacementPending?"应用全部设置":root.page===3?"应用顶部栏":root.currentScope==="preferences"?"应用偏好":"应用到桌面");enabled:root.currentDirty;accent:root.currentDirty;quiet:!root.currentDirty;onClicked:root.applySettings()}
         }
     }
-    WindowChrome {objectName:"settingsWindowChrome";anchors.fill:parent;targetWindow:root.frameWindow||root;titleText:"Desktop Stats"}
+    WindowChrome {objectName:"settingsWindowChrome";anchors.fill:parent;targetWindow:root.frameWindow||root;titleText:stats.secondaryMode?"DesktopStats 第二版":"Desktop Stats";allowSystemMove:!stats.secondaryMode;allowSystemResize:!stats.secondaryMode;allowMaximize:!stats.secondaryMode}
     Gallery {id:gallery;backdropSource:settingsBody;readingsActive:root.uiActive;onDismissed:root.restoreGalleryFocus();onChosen:key=>root.selectWidget(key)}
     Loader {
         objectName:"accessoryGalleryLoader"

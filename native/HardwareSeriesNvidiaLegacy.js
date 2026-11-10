@@ -1,4 +1,5 @@
 .pragma library
+.import "HardwareGpuPascal055.js" as Pascal055
 
 // Original era-specific casing/board illustrations, distilled from the exact
 // official front views in hardware_catalog_nvidia_legacy.py. Raw 100 x 100
@@ -58,7 +59,8 @@ function face(state,g,c) {
             + p("M0 20L6 2H35L24 16L14 23H4Z M49 15L35 2H60L68 13L60 32Z",c.caseTop)
             + p("M60 2H92L100 19L90 15L81 26L68 13Z M89 75L100 81L92 98H61L68 85Z",c.caseShade)
             + p("M6 98L14 77L47 85L60 98Z M24 16L35 2L49 15Z",c.edge)
-            + fins(17,27,35,45,9,c)
+            + Pascal055.fins(c)
+            + Pascal055.face(c)
     case "msi_aero_itx_pascal":
         // AERO ITX is a truly short card with a broad end panel and round bay.
         return p("M0 9H24L30 2H84L98 15V86L87 98H3L0 87Z",c.caseBody)

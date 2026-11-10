@@ -53,6 +53,7 @@ from responsive_layout import (
 from sensor_diagnostics import cooling_noise_rows, reading_source, source_rows, unavailable_reason
 from skin_styles import GLASS_SKINS, effective_skin
 from stats_config import DEFAULT, MAX_WIDGETS, MODULES, SKINS, load, save, validate
+from secondary_mode055 import active as secondary_active
 from top_bar_feedback import hardware_feedback
 from top_bar_layout import present_metric
 from top_bar_profiles import (
@@ -73,6 +74,7 @@ def choices(value):
 
 
 class Controller(AssemblyTools):
+    secondaryMode = Property(bool, lambda self: secondary_active(), constant=True)
     draftChanged = Signal()
     savedChanged = Signal()
     dataChanged = Signal()
@@ -2398,6 +2400,9 @@ class Controller(AssemblyTools):
         before = self._saved
         try:
             value = validate(merge_scope(self._saved, self._draft, scope) if scope else self._draft)
+            if secondary_active():
+                value["autostart"] = False
+                value["cpu_temperature_prompt_on_start"] = False
             if value == before and not force_rearrange and self._replacement_backup is None:
                 self._applied_status("设置已同步")
                 return True
@@ -2418,12 +2423,12 @@ class Controller(AssemblyTools):
             if capacity:
                 self.set_status(capacity, error=True)
                 return False
-            if value["autostart"] != before["autostart"]:
+            if not secondary_active() and value["autostart"] != before["autostart"]:
                 set_autostart(value["autostart"])
             try:
                 save(value)
             except Exception:
-                if value["autostart"] != before["autostart"]:
+                if not secondary_active() and value["autostart"] != before["autostart"]:
                     set_autostart(before["autostart"])
                 raise
             self._saved = value

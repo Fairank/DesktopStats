@@ -273,6 +273,29 @@ class TestPascalFront053(unittest.TestCase):
         self.assertEqual(self.helper.front_reference(bad,310.,135.,55.,holes),{})
         self.assertIsNone(spec['gpu']['appearance']['board_details']['dimensions_mm']['thickness'])
 
+    def test_legacy_vertical_fin_and_current_photo_correct_horizontal_fin_keep_the_same_window_and_rotor(self):
+        # The historical 053 fixture remains a compatibility input. Current
+        # 055 QML has a wide horizontal sample, independently captured from
+        # the same first five source layers; it is not the old narrow sample.
+        meshes,legacy=_fixture(self.appearance,self.profile,self.map)
+        before,holes=self.reference(legacy,meshes);self.assertTrue(before)
+        current=copy.deepcopy(legacy)
+        current['gpu']['detail_polygons'][5]['points']=[
+            [.1825,.267708],[.5575,.267708],[.559375,.268359],
+            [.56,.270312],[.56,.271875],[.5575,.274479],
+            [.1825,.274479],[.180625,.273828],[.18,.271875],[.18,.270312]]
+        after=self.helper.front_reference(current['gpu'],310.,135.,55.,holes)
+        self.assertTrue(after)
+        self.assertNotEqual(current['gpu']['detail_polygons'][5],legacy['gpu']['detail_polygons'][5])
+        self.assertEqual(before,after)
+        self.assertEqual(current['gpu']['detail_polygons'][:5],legacy['gpu']['detail_polygons'][:5])
+        self.assertEqual(current['gpu']['fans'],legacy['gpu']['fans'])
+        points=current['gpu']['detail_polygons'][5]['points']
+        self.assertGreater(max(p[0]for p in points)-min(p[0]for p in points),
+            20*(max(p[1]for p in points)-min(p[1]for p in points)))
+        current['gpu']['detail_polygons'][5]['points'][0][0]+=.000001
+        self.assertEqual(self.helper.front_reference(current['gpu'],310.,135.,55.,holes),{})
+
     def test_real_window_positive_negative_rays_preserved_facet_materials_and_first_opaque_fin(self):
         (old,_),(new,_),inputs,spec=self.pair()
         shell=next(m for m in new if m.name=='gpu-shroud');gx,gy,gz=shell.position
@@ -290,14 +313,49 @@ class TestPascalFront053(unittest.TestCase):
         self.assertEqual(_hits(tuple(m for m in new if m.color[3]>=.999),x,z)[0][1].name,fin.name)
         self.assertNotEqual(_hits(old,x,z)[0][1].name,fin.name)
 
-    def test_three_lod_dynamic_inventory_nonempty_f32_normals_closed_face_and_same_bounds(self):
+    def test_three_lod_original_bounds_and_bounded_relief_with_exact_topology(self):
+        import gpu_pascal_surface055 as surface
         for level,count in zip(LEVELS,(16,32,48)):
             (old,_),(new,metadata),_,_=self.pair(level)
-            self.assertEqual(_bounds(old),_bounds(new));self.assertEqual(metadata['fin_sampling_count'],count)
+            relief=tuple(m for m in new if m.name.startswith('detail-gpu-pascal-relief055-'))
+            self.assertEqual(len(relief),23)
+            retained=tuple(m for m in new if not m.name.startswith('detail-gpu-pascal-relief055-'))
+            prior_bounds=_bounds(old);bounds=_bounds(new)
+            self.assertEqual(prior_bounds,_bounds(retained))
+            self.assertEqual((bounds[0],bounds[2],bounds[1][1]),(prior_bounds[0],prior_bounds[2],prior_bounds[1][1]))
+            # Added front relief is explicitly authored reference geometry,
+            # not a newly measured nominal card thickness. Preserve the old
+            # envelope and separately constrain every new point to its own
+            # source facet's center plane and +/- half-depth below.
+            self.assertLess(bounds[1][0],prior_bounds[1][0])
+            self.assertGreaterEqual(bounds[1][0],prior_bounds[1][0]-(.74+.08))
+            self.assertEqual(metadata['relief_center_offset_mm_reference'],(.18,.74))
+            self.assertEqual(metadata['relief_plate_thickness_mm_reference'],.16)
+            self.assertFalse(metadata['manufacturer_dimensions_verified'])
+            self.assertEqual(metadata['fin_sampling_count'],count)
+            shell=next(m for m in new if m.name=='gpu-shroud')
+            width,thickness,length=(b-a for a,b in _bounds((shell,)))
+            half=struct.unpack('<f',struct.pack('<f',.08))[0]
+            for index,m in enumerate(relief):
+                self.assertEqual(m.name,'detail-gpu-pascal-relief055-'+str(index))
+                self.assertEqual(m.position,(shell.position[0],shell.position[1]-thickness/2,shell.position[2]))
+                a,b,c=(surface.POINTS[key]for key in surface.FACETS[index][:3])
+                denominator=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1])
+                self.assertNotEqual(denominator,0.)
+                for at in range(0,len(m.vertices),6):
+                    x,y,z=m.vertices[at:at+3]
+                    u=(z/length+.5)*100.;v=(.5+x/width)*100.
+                    wa=((b[1]-c[1])*(u-c[0])+(c[0]-b[0])*(v-c[1]))/denominator
+                    wb=((c[1]-a[1])*(u-c[0])+(a[0]-c[0])*(v-c[1]))/denominator
+                    center=.18+.7*(wa*a[2]+wb*b[2]+(1-wa-wb)*c[2])
+                    self.assertAlmostEqual(abs(-y-center),half,places=12)
+                    uploaded_y=struct.unpack('<f',struct.pack('<f',y))[0]
+                    expected={struct.unpack('<f',struct.pack('<f',-(center+sign*half)))[0]for sign in(-1,1)}
+                    self.assertIn(uploaded_y,expected)
             additions=tuple(m for m in new if m.name in ADDED)
             self.assertEqual({m.name for m in additions},set(ADDED));self.assertEqual(len(additions),4)
             # Actual inventory is derived rather than assuming Kepler's seven.
-            observed=tuple(m for m in new if m.name in (*ADDED,'gpu-shroud','gpu-cover-panel'))
+            observed=tuple(m for m in new if m.name in (*ADDED,'gpu-shroud','gpu-cover-panel')or m.name.startswith('detail-gpu-pascal-relief055-'))
             self.assertTrue(observed)
             for m in observed:
                 self.assertGreater(len(m.vertices),0);self.assertEqual(len(m.vertices)%18,0)
@@ -312,12 +370,14 @@ class TestPascalFront053(unittest.TestCase):
                             normal=values[n+k+3:n+k+6];self.assertAlmostEqual(sum(x*x for x in normal),1.,places=5)
                             self.assertGreater(sum(x*y for x,y in zip(normal,face)),0.)
             pane=next(m for m in additions if m.name=='detail-gpu-pascal-clear-reference');self.assertEqual(pane.color[3],.12)
-            values=struct.unpack('<'+str(len(pane.vertices))+'f',_f32(pane.vertices));incidence=Counter();winding=Counter()
-            for n in range(0,len(values),18):
-                points=[tuple(values[n+k:n+k+3]) for k in (0,6,12)]
-                for a,b in zip(points,(*points[1:],points[0])):
-                    edge=tuple(sorted((a,b)));incidence[edge]+=1;winding[edge]+=1 if a<b else -1
-            self.assertTrue(incidence);self.assertTrue(all(v==2 for v in incidence.values()));self.assertTrue(all(v==0 for v in winding.values()))
+            for m in(pane,*relief):
+                for values in(m.vertices,struct.unpack('<'+str(len(m.vertices))+'f',_f32(m.vertices))):
+                    incidence=Counter();winding=Counter()
+                    for n in range(0,len(values),18):
+                        points=[tuple(values[n+k:n+k+3]) for k in (0,6,12)]
+                        for a,b in zip(points,(*points[1:],points[0])):
+                            edge=tuple(sorted((a,b)));incidence[edge]+=1;winding[edge]+=1 if a<b else -1
+                    self.assertTrue(incidence);self.assertTrue(all(v==2 for v in incidence.values()));self.assertTrue(all(v==0 for v in winding.values()))
 
     def test_existing_known53_input_rotor_rim_hub_ports_power_pose_and_spec_are_preserved(self):
         (old,_),(new,metadata),inputs,spec=self.pair()

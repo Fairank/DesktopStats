@@ -15,20 +15,21 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "尚未在本机安装0.52验证真实交互；现有测试文件不等于本轮全部通过。"
+        "公共悬停／固定路由已实测；CPU／GPU真实历史曲线和其他交互仍待核。"
       ],
       "id": "topbar_history",
-      "implementation": "顶部栏、悬停详情、点击固定与历史存储路径均保留，并有专门测试。",
+      "implementation": "顶部栏、悬停详情、点击固定与历史存储路径均保留，并有专门测试。 055原生第二版已在屏幕二显示正式顶部栏，保留既有历史实现；本轮尚未实际操作悬停/固定历史详情。 055当前第二版真实顶部栏、悬停与固定详情路径在屏幕二通过；为避免游戏期间启动进程排行，仅选无电池的电量项，未以此冒称CPU/GPU实际历史曲线或Top5通过。",
       "native_acceptance_pending": true,
       "requirement": "保留原顶部栏；悬停/点击看历史趋势；可只留顶部栏。",
       "source_files": [
         "top_bar_runtime.py",
         "history_store.py",
         "native/TopBarDetails.qml",
-        "native/HistoryPage.qml"
+        "native/HistoryPage.qml",
+        "docs/QUALITY055.json"
       ],
       "status": "implemented_source_native_pending",
-      "status_label": "已实现；新版原生待验",
+      "status_label": "悬停／固定路径实测；CPU／GPU曲线待验",
       "test_files": [
         "tests/test_top_bar_workflow.py",
         "tests/test_top_bar_history_identity.py",
@@ -40,24 +41,30 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "0.52尚未在实际屏幕2验收；系统UAC提示不能限定到屏幕2。"
+        "顶部栏／设置／顶部栏详情已在屏幕二实测；热插拔、整机／选择器等其余窗口与全屏转场仍待验。原版不安装或重启。"
       ],
       "id": "screen_two",
-      "implementation": "存在按稳定显示器身份选择、保存和路由窗口的实现，本次不读取实际显示器或用户配置。",
+      "implementation": "存在按稳定显示器身份选择、保存和路由窗口的实现，本次不读取实际显示器或用户配置。 055按用户选择准备独立第二版：独立标记配置/IPC，严格非主屏身份，无主屏回退，NoActivate浮动栏不注册AppBar或改变工作区。七项浮动控制与23项隔离/进程租约/启动控制分批通过；真实窗口、工作区、焦点及热插拔仍待验。 055原生第二版采用Windows稳定设备身份，修正Qt友好名称误判后在屏幕二以NoActivate浮动栏运行；原版栏/工作区与前台窗口保持不变。24项隔离控制及一次真实启动通过；显示器热插拔、设置/详情所有窗口路由尚待完整原生验证。 055当前第二版修复隐藏窗口初生主屏导致迁入自锁；保持目标屏幕固定区域与显示前真实native屏幕／全矩形校验。顶部栏、设置、悬停／固定详情四窗实际均在屏幕二NoActivate显示，原版与前台不变；热插拔、整机／选择器等其他窗口仍待验。",
       "native_acceptance_pending": true,
       "requirement": "Stats优先屏幕2，持久化所选显示器且适配显示器变化。",
       "source_files": [
         "top_bar_config.py",
         "top_bar_runtime.py",
         "assembly_config.py",
-        "native_runtime.py"
+        "native_runtime.py",
+        "secondary_mode055.py",
+        "secondary_top_bar055.py",
+        "docs/QUALITY055.json"
       ],
       "status": "implemented_source_native_pending",
-      "status_label": "已实现；新版原生待验",
+      "status_label": "三类窗口屏幕二实测；其他路由待验",
       "test_files": [
         "tests/test_top_bar_monitor_selection.py",
         "tests/test_top_bar_display_config.py",
-        "tests/test_workspace_routing.py"
+        "tests/test_workspace_routing.py",
+        "tests/test_secondary_mode055.py",
+        "tests/test_secondary_top_bar055.py",
+        "tests/test_secondary_startup055.py"
       ]
     },
     {
@@ -120,7 +127,7 @@
         "自动恢复默认需用户开启且依赖支持来源；无法保证所有电脑都有CPU温度。"
       ],
       "id": "cpu_temperature_restart",
-      "implementation": "有启动恢复开关、一次会话只授权一次、游戏延后、桥接文件校验与跟随父进程退出。 0.51修正残留Shell全屏通知及缓存查询失败导致长期等待的问题；安全桌面正面确认，延期检查每两秒至多一次，授权前再复核。启动偏好、固定桥接校验与每会话一次授权保留，4相关模块111项合成测试通过。",
+      "implementation": "有启动恢复开关、一次会话只授权一次、游戏延后、桥接文件校验与跟随父进程退出。 0.51修正残留Shell全屏通知及缓存查询失败导致长期等待的问题；安全桌面正面确认，延期检查每两秒至多一次，授权前再复核。启动偏好、固定桥接校验与每会话一次授权保留，4相关模块111项合成测试通过。 055原版只读基线发现已有ASUS CPU缓存38–45°C有效更新，但不代表窗口显示通过。独立第二版可显式复用经路径、PID、创建时间、同用户/会话和存活句柄验证的原版缓存；每次缓存快返前检查存活，原版退出清空并关闭映射，不启动第二桥接。六项租约控制包含在23项隔离控制中通过。原版重启恢复仍未重启实测。 055原生第二版两次实际QML可见文字均为75°C，对应不同新鲜ASUS缓存时间，后续产品读数80°C；只共享已有原版桥接，不再提权/连接ASUS。原版未重启，原版每次启动授权恢复仍未在本轮实测。 055当前第二版修正后真实栏帧显示76°C，继续只读已验证原版进程拥有的ASUS缓存，不启动新桥接或提权；原版每次启动授权恢复仍不在本轮游戏期间测试。",
       "native_acceptance_pending": true,
       "requirement": "CPU温度在每次启动Stats时通过一次授权恢复；只读会话桥接随Stats退出，不开机启动。",
       "source_files": [
@@ -128,24 +135,29 @@
         "cpu_temperature_launcher.py",
         "collector/AsusCpuTemperatureBridge.cs",
         "tools/build_cpu_temperature_bridge.py",
-        "native_runtime.py"
+        "native_runtime.py",
+        "secondary_mode055.py",
+        "cpu_temperature_owner055.py",
+        "docs/QUALITY055.json"
       ],
       "status": "implemented_source_native_pending",
-      "status_label": "已实现；新版原生待验",
+      "status_label": "第二版显示76°C；原版重启保留待验",
       "test_files": [
         "tests/test_cpu_temperature.py",
         "tests/test_cpu_temperature_launcher.py",
         "tests/test_sensor_source_isolation.py",
-        "tests/test_cpu_temperature_recovery051.py"
+        "tests/test_cpu_temperature_recovery051.py",
+        "tests/test_cpu_temperature_owner055.py",
+        "tests/test_secondary_startup055.py"
       ]
     },
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "顶部栏、设置、详情三个真实Windows窗口仍待0.51桌面验收；不能以离屏底色冒充真实磨砂。"
+        "三处自身半透明前景和材质准备已核；最终DWM桌面模糊像素尚未取得证据。"
       ],
       "id": "glass_three_surfaces",
-      "implementation": "三类窗口保留原生材质、宿主桥接和有限生命周期。0.51修复准备结果跨DPI、最小化／曝光丢失后错误复用，以及非首帧客户端在同步DPI回调中丢失恢复；真实恢复原因等当前首帧后传递，重复重绘不重施。9相关模块234项合成／离屏测试通过，不代表实际磨砂已验收。",
+      "implementation": "三类窗口保留原生材质、宿主桥接和有限生命周期。0.51修复准备结果跨DPI、最小化／曝光丢失后错误复用，以及非首帧客户端在同步DPI回调中丢失恢复；真实恢复原因等当前首帧后传递，重复重绘不重施。9相关模块234项合成／离屏测试通过，不代表实际磨砂已验收。 055原生第二版自己的顶部栏帧已离线核对：98.68%像素部分透明，8800空白背景像素为RGBA(255,255,255,82)，排除该区全幅不透明白盖层；未以此冒称DWM模糊像素通过，设置和详情仍待核。 055当前第二版三处自有前景、屏二显示、首帧和磨砂模块准备实际通过；捕获只含自己的Quick内容，不能代表DWM最终桌面模糊像素。新系统合成验证另行准备，不用API成功代替真实磨砂。",
       "native_acceptance_pending": true,
       "requirement": "顶部栏、设置、详情都应恢复真实磨砂，并保留颜色底色与连续透明度。",
       "source_files": [
@@ -153,10 +165,11 @@
         "material_policy.py",
         "settings_material_bridge.py",
         "settings_acrylic_material.py",
-        "top_bar_runtime.py"
+        "top_bar_runtime.py",
+        "docs/QUALITY055.json"
       ],
       "status": "implemented_source_native_pending",
-      "status_label": "已实现；新版原生待验",
+      "status_label": "三处前景与准备通过；最终模糊待验",
       "test_files": [
         "tests/test_native_glass.py",
         "tests/test_settings_material_integration.py",
@@ -170,13 +183,10 @@
     {
       "evidence_scope": "Source paths are checked. Candidate software test results are reported separately; source presence and older captures are not current native acceptance.",
       "gaps": [
-        "没有0.51安装版静置或游戏状态的整款程序CPU／RAM／GPU实测，也未完成关闭后进程／原生资源回收验收。",
-        "历史隔离设置首用约65MiB差值、0.43典型GPU基础图层39.85%像素预算减少均有限定范围；不是0.51常驻内存或显存降幅。",
-        "打开3D、浏览图鉴与仅顶部栏的负担不同；离屏生成耗时、单模块内存和包体积不能作为通用占用上限。",
-        "新SVG最坏构建时延仍在优化，未标记性能全部完成；本机游戏状态与静置的整款程序CPU／RAM／GPU占用仍待安装后原生验收。"
+        "当前顶部栏有5秒预热＋15秒／16点样本；GPU、所有瞬态子进程、长期资源稳定和最坏占用上限仍待测。"
       ],
       "id": "low_overhead",
-      "implementation": "保留共享时钟、按需采集与模型缓存；独立水路6次索引扫描合为1次。隔离热选择器微基准CPU中位约减少81%；63产品索引对象63170B、至多8记录79963B只属递归Python对象图，不含模块／Qt／mesh／GL或进程RAM。 图库只为可见项串行准备复杂图形，关闭取消旧结果；小组件最小化暂停快照，恢复读取最新状态。局部响应测量不当作CPU用时下降或整款内存。 内置离线图集只读内置目录，不导入用户扩展包或配置目录；程序内图库照常保留可选配件。 0.51按旧363网格同一输入优化打包与检视边界；打包临时Python分配46,510,210→15,570,620B、CPU中位减少73.42%，边界CPU中位减少78.05%但临时分配增加32,288B。只属离线内核，不是整款RSS／显存／原生上传／FPS；结果与范围见QUALITY051。 后续关闭路径增加显式CPU Scene／拾取／绘制引用清理，4相关模块36项阶段检查通过；weakref只证明所测对象不再被owner保留，未测进程RSS或驱动显存。最终583源下另以同一旧363mesh输入重测r3，字节／bounds精确相等，报告模块SHA与最终代码围栏一致；此前r2的79.27%独立保留，不冒充本次78.05%。 054四个指定参考风扇修正后，整景边线仍8,167段，每网格512／整景8192上限未增加，原始PN2,403,576B及全部引用身份保持；未新增采样或定时器。这里只证明该场景几何与边线预算不增，不是整款程序RAM、CPU、GPU实测下降。",
+      "implementation": "保留共享时钟、按需采集与模型缓存；独立水路6次索引扫描合为1次。隔离热选择器微基准CPU中位约减少81%；63产品索引对象63170B、至多8记录79963B只属递归Python对象图，不含模块／Qt／mesh／GL或进程RAM。 图库只为可见项串行准备复杂图形，关闭取消旧结果；小组件最小化暂停快照，恢复读取最新状态。局部响应测量不当作CPU用时下降或整款内存。 内置离线图集只读内置目录，不导入用户扩展包或配置目录；程序内图库照常保留可选配件。 0.51按旧363网格同一输入优化打包与检视边界；打包临时Python分配46,510,210→15,570,620B、CPU中位减少73.42%，边界CPU中位减少78.05%但临时分配增加32,288B。只属离线内核，不是整款RSS／显存／原生上传／FPS；结果与范围见QUALITY051。 后续关闭路径增加显式CPU Scene／拾取／绘制引用清理，4相关模块36项阶段检查通过；weakref只证明所测对象不再被owner保留，未测进程RSS或驱动显存。最终583源下另以同一旧363mesh输入重测r3，字节／bounds精确相等，报告模块SHA与最终代码围栏一致；此前r2的79.27%独立保留，不冒充本次78.05%。 054四个指定参考风扇修正后，整景边线仍8,167段，每网格512／整景8192上限未增加，原始PN2,403,576B及全部引用身份保持；未新增采样或定时器。这里只证明该场景几何与边线预算不增，不是整款程序RAM、CPU、GPU实测下降。 055一次5秒旧0.36版被动基线：24逻辑CPU上的整机CPU均值0.18043%，私有提交291.03–292.15MiB，RSS317.17–318.30MiB；桥接私有提交29.80MiB，短样本CPU增量低于计时分辨率。数字是旧版短样本，不是新版上限；GPU/DWM、新版稳态与长期内存增长尚未验收。第二版复用现有温度缓存并禁止第二ASUS连接/桥接，不新增相关采样时钟。 055原生第二版另经5秒预热/5秒无观察器采样：24逻辑处理器归一化CPU均值0.104157%，主进程加稳定观察到的一子进程私有提交177.301–177.500MiB；56线程/834句柄短窗口不变。主快照复用到顺序子进程采样，原版与共享旧桥接不计入此增量；角色未知子进程不称采集器。GPU/瞬态子进程/长期稳定/最坏上限未验证，不与旧版不同状态算降幅。 055当前第二版绑定当前312运行时输入另测5秒预热＋15.000518秒／16点：主进程与一个稳定自有子进程平均0.0911427%整机CPU（24逻辑处理器）、私有提交174.828–175.547MiB，合计930句柄／59线程不变；主进程834／56不变。主快照复用、成员身份与采样时钟保留，原版、共享桥、GPU、测量程序及未观察瞬态子进程未计；不是长期／最坏上限，不与旧版异条件样本算降幅。",
       "native_acceptance_pending": true,
       "requirement": "持续优化CPU/内存/GPU负担，并最终报告实际控制到多少。",
       "source_files": [
@@ -200,10 +210,13 @@
         "native/DesktopHardwareModel.qml",
         "assembly_part_motion052.py",
         "assembly_pose052.py",
-        "docs/SCOPED_PERFORMANCE052.json"
+        "docs/SCOPED_PERFORMANCE052.json",
+        "secondary_mode055.py",
+        "cpu_temperature_owner055.py",
+        "docs/QUALITY055.json"
       ],
       "status": "partial",
-      "status_label": "部分完成",
+      "status_label": "当前15秒后台样本通过；长期／GPU待验",
       "test_files": [
         "tests/test_runtime_lazy_settings.py",
         "tests/test_runtime_lazy_widgets.py",
@@ -419,8 +432,8 @@
         "其余25个PCB高度与散热片／扩散罩分层尺寸仍未知；参考PCB、实心外包络和3mm灯条厚度不是厂商内部构造。"
       ],
       "id": "cpu_memory_variants",
-      "implementation": "基础3款CPU、可选72款CPU与28个内存型号有共享目录；同封装CPU诚实共用结构。 0.52将内存整条包络与PCB独立建账：28个精确身份中22项官方明确整条高度、5项ADATA轴映射推导、1项未知；PCB仅3项已核。不得把44mm整条高度当44mm PCB，也不得借PCB高度认证冷排净空。",
-      "native_acceptance_pending": false,
+      "implementation": "基础3款CPU、可选72款CPU与28个内存型号有共享目录；同封装CPU诚实共用结构。 0.52将内存整条包络与PCB独立建账：28个精确身份中22项官方明确整条高度、5项ADATA轴映射推导、1项未知；PCB仅3项已核。不得把44mm整条高度当44mm PCB，也不得借PCB高度认证冷排净空。 055保留七种CPU封装/顶盖外轮廓，修正AM5平行内倒角并按明确型号文字加系列名；75条记录/13历史风格相关的10项定向检查及七封装六版实图已通过有限核对。普通顶部栏三个本体身份六版SVG保持原行为。七种共用封装不等于75套独立精模；内存与全市场CPU细节继续开放。 055当前第二版逐面诊断RAM原局部有效面转worldF32新增27退化／30反向，两个仅换原点候选又引入新坏面，均不采纳。保留全36622三角及原文件，不删面放宽门槛，不开放有损公共RAM包；需完整局部变换处理。",
+      "native_acceptance_pending": true,
       "requirement": "不同CPU/内存品牌与型号结构也要分开，所有风格均覆盖。",
       "source_files": [
         "cpu_catalog.py",
@@ -431,10 +444,12 @@
         "assembly_part_motion052.py",
         "assembly_motherboard.py",
         "memory_dimensions052.py",
-        "memory_geometry052.py"
+        "memory_geometry052.py",
+        "native/HardwareCpuModel.js",
+        "docs/QUALITY055.json"
       ],
       "status": "partial",
-      "status_label": "部分完成",
+      "status_label": "CPU有限细化；RAM转换缺陷待修",
       "test_files": [
         "tests/test_cpu_catalog.py",
         "tests/test_hardware_structure_qml.py",
@@ -444,7 +459,8 @@
         "tests/test_assembly_part_motion052.py",
         "tests/test_memory_dimensions052.py",
         "tests/test_memory_geometry052.py",
-        "tests/test_memory_envelope052.py"
+        "tests/test_memory_envelope052.py",
+        "tests/test_cpu_widget_detail055.py"
       ]
     },
     {
@@ -596,8 +612,8 @@
         "C700M私有8项纯草稿未应用；首完整P12主机job60秒超时，已有8条主板／GPU穿保留后墙见证，余7job未运行。外层rear−325与缩短body rear−305.5／通用锚不一，底架、其它材料及接线尚未闭合，不作整机通过。"
       ],
       "id": "case_library",
-      "implementation": "已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。 0.49只为North XL补固定主板托盘和原厂可见开口参考，分段实体进入走线避让，不随主板或线缆动态挖孔。 0.51 Helios阶段修正60／90度stack参考与独立固定托盘（早期180三角形，最终524三角形／37,728B／17个碰撞分段），现有9项专项通过。Helios前置LFIII导向的过度对称问题已阶段修正，原嘴／轴／lead不移，最终来源围栏、媒体和实物装配仍待验。 0.52扩大核对27款前置安装声明、49组配置，查出12款中18组旧实心罩初始穿插。按各自手册细分薄罩、独立安装板、开放下支架和竖置电源；逐型号来源与真实缺项单列。新增17款精选风冷主机的102项阶段检查通过，最终统一回归仍在进行。 0.52另修Torrent TG的后上短电源仓、开放底部支架与固定安装面；真实主板姿态保留，固定PSU参考floor升2.15mm后精选120／140各前置三把加底部三把完整装机通过。只在两件罩／架增加232三角形和16704B F32顶点流，不代表整款RAM或drawcall变化。",
-      "native_acceptance_pending": false,
+      "implementation": "已有96款机箱、26品牌和多种布局，共享全部风格；自动识别只允许已核固件匹配。 0.49只为North XL补固定主板托盘和原厂可见开口参考，分段实体进入走线避让，不随主板或线缆动态挖孔。 0.51 Helios阶段修正60／90度stack参考与独立固定托盘（早期180三角形，最终524三角形／37,728B／17个碰撞分段），现有9项专项通过。Helios前置LFIII导向的过度对称问题已阶段修正，原嘴／轴／lead不移，最终来源围栏、媒体和实物装配仍待验。 0.52扩大核对27款前置安装声明、49组配置，查出12款中18组旧实心罩初始穿插。按各自手册细分薄罩、独立安装板、开放下支架和竖置电源；逐型号来源与真实缺项单列。新增17款精选风冷主机的102项阶段检查通过，最终统一回归仍在进行。 0.52另修Torrent TG的后上短电源仓、开放底部支架与固定安装面；真实主板姿态保留，固定PSU参考floor升2.15mm后精选120／140各前置三把加底部三把完整装机通过。只在两件罩／架增加232三角形和16704B F32顶点流，不代表整款RAM或drawcall变化。 055修正C700M内部后沿基准与开放薄板/固定冷却支架/主板托盘参考；九项纯逻辑及一套真实公共构建P12装机检查通过，旧八条后墙穿插保留正对照。后续同一完整主机用两把P14的真实公共构建检查也通过，六风格共几何并释放；两次均关闭接线。其他组合、I/O/PCIe制造孔位、公差和接线仍待核，不扩大成96机箱或市场全通过。",
+      "native_acceptance_pending": true,
       "requirement": "机箱要多、各品牌系列结构像实物，支持风格切换并自动匹配。",
       "source_files": [
         "chassis_catalog.py",
@@ -620,7 +636,8 @@
         "assembly_rear_bay_group_c052.py",
         "assembly_rear_panel052.py",
         "assembly_mod5_bottom052.py",
-        "assembly_auxiliary.py"
+        "assembly_auxiliary.py",
+        "assembly_c700m_case055.py"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -648,7 +665,8 @@
         "tests/test_rear_panel052.py",
         "tests/test_rear_case_hosts052.py",
         "tests/test_mod5_bottom052.py",
-        "tests/test_h5_fan_route052.py"
+        "tests/test_h5_fan_route052.py",
+        "tests/test_c700m_fixed_assembly055.py"
       ]
     },
     {
@@ -721,7 +739,7 @@
         "12个GPU冷头已有具体兼容来源，但完整市场覆盖、实际安装姿态／整卡替换和连管仍缺；更多接头／管材、线材、外设与输入输出设备继续待补。"
       ],
       "id": "all_other_parts",
-      "implementation": "本体21电源、29存储、3扩展；原63可选水路继续保留，0.47增加的12个严格来源GPU冷头独立模型（8 Alphacool/2 Watercool/2 Corsair）。具体显卡/修订与端子变体分开；缺安装pose不接整卡替换或连管。",
+      "implementation": "本体21电源、29存储、3扩展；原63可选水路继续保留，0.47增加的12个严格来源GPU冷头独立模型（8 Alphacool/2 Watercool/2 Corsair）。具体显卡/修订与端子变体分开；缺安装pose不接整卡替换或连管。 055当前第二版新增仅作者标注的Samsung990PRO SSD及Groovex通用PSU源参考，保留2038／12229三角与原许可。电源六版软件结构可辨但游离几何／密线待修；SSD原UV和albedo未接，六张实际图外观未过，不计独立精模完成。",
       "native_acceptance_pending": false,
       "requirement": "电源、存储、扩展卡等装机模拟器有的品类都要有，型号/外形也需逐类完善。",
       "source_files": [
@@ -732,10 +750,11 @@
         "liquid_block_pump_expansion046.py",
         "liquid_fitting_tube_expansion046.py",
         "liquid_gpu_blocks047.py",
-        "liquid_gpu_schema047.py"
+        "liquid_gpu_schema047.py",
+        "docs/QUALITY055.json"
       ],
       "status": "partial",
-      "status_label": "部分完成",
+      "status_label": "新增可读源参考；零售外观仍待细化",
       "test_files": [
         "tests/test_assembly_auxiliary.py",
         "tests/test_component_storage043.py",
@@ -908,7 +927,7 @@
         "开源3D参考检视与零售配件装配分开；尚未支持任意GLB、全部已下载CC BY原件、完整PBR或原动画时间线。"
       ],
       "id": "github_optional_packs",
-      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。 054将已有MIT风扇、风冷、水冷实际接入手动ZIP三维检视，并继续接入含25个独立部件的MIT通用整机；六版复用只读几何，选择、聚焦、隐藏和关闭释放沿用现有窗口。首批源码与两份新ZIP已原子上传并逐文件读回，既有20条模型路径保留；这些通用参考不按零售精模或六种新产品计数，完整装配、材质、转速和原生验收仍未完成。 随后将已下载的CC BY通用CPU与RTX 3080既有LOD接入同一公共ZIP入口，两份最终包实际读取、六版共享及关闭释放通过；完整原件、材质与贴图、署名许可和修改说明保留，贴图不在检视时解码。源世界单位未校准，当前只独立检视，不自动放入机箱或替换本机型号。Windows解压目录大小写冲突已修复，旧散热与风扇分派优先。",
+      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。 054将已有MIT风扇、风冷、水冷实际接入手动ZIP三维检视，并继续接入含25个独立部件的MIT通用整机；六版复用只读几何，选择、聚焦、隐藏和关闭释放沿用现有窗口。首批源码与两份新ZIP已原子上传并逐文件读回，既有20条模型路径保留；这些通用参考不按零售精模或六种新产品计数，完整装配、材质、转速和原生验收仍未完成。 随后将已下载的CC BY通用CPU与RTX 3080既有LOD接入同一公共ZIP入口，两份最终包实际读取、六版共享及关闭释放通过；完整原件、材质与贴图、署名许可和修改说明保留，贴图不在检视时解码。源世界单位未校准，当前只独立检视，不自动放入机箱或替换本机型号。Windows解压目录大小写冲突已修复，旧散热与风扇分派优先。 055当前第二版新增SSD／通用PSU两个实际可读手动ZIP，5新控制与两最终ZIP公共入口、句柄关闭、六版同PN及引用释放通过。总可读第三方参考8件，未预载、未扩大12MiB包限制；不是8款独立零售精模。RAM有效面转换失真保持拒收，贴图与原生模型显示仍待完善。",
       "native_acceptance_pending": false,
       "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
       "source_files": [
@@ -928,10 +947,11 @@
         "open_reference_window054.py",
         "open_whole_pc054.py",
         "docs/OPEN_REFERENCE_MODELS054.md",
-        "open_ccby_components054.py"
+        "open_ccby_components054.py",
+        "docs/QUALITY055.json"
       ],
       "status": "partial",
-      "status_label": "部分完成",
+      "status_label": "新增SSD／电源可选参考；内容仍不全",
       "test_files": [
         "tests/test_hardware_packs.py",
         "tests/test_hardware_pack_integration.py",
@@ -994,20 +1014,23 @@
         "0.51软件回归、10资产／独立CQA、候选包18项及文档同步后的同18项复检、离线签名数据审计均已通过；源码与数据作为候选资料提供，固定提交的远端读回结果另存发行核对记录。未安装，CPU温度、磨砂、游戏、屏幕二与整款占用原生验收均未完成。"
       ],
       "id": "github_publish_merge_install",
-      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。 0.51数据候选已生成固定提交与索引、真实owner签发及独立CQA；源码与数据按固定索引作为候选分支提供；候选包18项隔离检查及文档同步后同18项复检通过，安装／原生仍未做。 0.52源码producer固定f68f1f1dc7488b24b1635ebb17755a12869bacb8，本地数据候选固定f09e0b74815dbbd81233ea8f1e62335292f0df28；38文件／14签名／模型ZIP9与图集ZIP7及Git树逐文件OID已独立核对。C2仅同步现有文档与生成账本；远端发布、候选包与隔离自检各自单列，不预写未完成结果，不发stable、不安装或重启。",
+      "implementation": "PR#1已合并（历史记录）；旧版本发布与证据保留。0.49返工模型体积、管路及显卡插槽演示；0.50新增离线发布工具和指定资产来源标记，不改变Stats运行路径，不安装或重启。当前标记资产、候选包与原生验收分别记录，不能以某一项代替其它项。 0.51继续修CPU温度、磨砂缓存、CPU小组件和既有GPU／机箱模型，尚未安装；最终回归及候选包结果单独记录，不把水印签发当作硬件软件全部完成。 0.51最终r2已完成100模块1261项／1原有跳过，583代码围栏稳定；这只闭合本轮受影响软件回归，未安装，也不代替候选包或独立资产签发。 0.51数据候选已生成固定提交与索引、真实owner签发及独立CQA；源码与数据按固定索引作为候选分支提供；候选包18项隔离检查及文档同步后同18项复检通过，安装／原生仍未做。 0.52源码producer固定f68f1f1dc7488b24b1635ebb17755a12869bacb8，本地数据候选固定f09e0b74815dbbd81233ea8f1e62335292f0df28；38文件／14签名／模型ZIP9与图集ZIP7及Git树逐文件OID已独立核对。C2仅同步现有文档与生成账本；远端发布、候选包与隔离自检各自单列，不预写未完成结果，不发stable、不安装或重启。 用户最新选择为“可以不安装，先一直当第二个版本”；当前继续开发隔离第二版，不安装、不重启原版。历史发布记录保留，第二版的原生验收与后续上传仍须实际完成后记录。 055当前第二版按用户最新选择继续独立开发，不安装、不覆盖、不重启原版；本轮有限UI和短时占用已验，源码与手动参考包准备开发分支检查点，不作完整成品或替换安装版发布。",
       "native_acceptance_pending": true,
       "requirement": "合并PR#1到main、上传新版、安装测试通过再发布；当前阶段禁止重启。",
       "source_files": [
         "product_version.py",
         "tools/export_source.py",
         "README.md",
-        "docs/ARTWORK051_INDEX.json"
+        "docs/ARTWORK051_INDEX.json",
+        "secondary_mode055.py",
+        "docs/QUALITY055.json"
       ],
       "status": "prior_publication_evidence_current_candidate_pending",
-      "status_label": "源码候选；安装／原生待验",
+      "status_label": "独立第二版；不安装或重启原版",
       "test_files": [
         "tests/test_source_export.py",
-        "tests/test_selfcheck.py"
+        "tests/test_selfcheck.py",
+        "tests/test_secondary_startup055.py"
       ]
     },
     {
@@ -1067,7 +1090,7 @@
     "Keep current Stats session running while user is gaming",
     "No visible windows, native GL, UAC, installation or restart during gaming"
   ],
-  "reviewed": "2026-11-09",
+  "reviewed": "2026-11-10",
   "schema_version": 1,
   "target_version": "0.52.0-preview.1",
   "native_045_accepted": false,
@@ -2877,5 +2900,14 @@
       "CPU_fan_blade_artwork_complete": false,
       "all_six_complete_artwork_or_native_accepted": false
     }
+  },
+  "development055_current_checkpoint": {
+    "original_installed_app_untouched": true,
+    "fixed_styles_retained": 6,
+    "all_requirements_complete": false,
+    "native_three_roles_four_frames_proof": "c306284e9dca17551d5d33304e9088af690ef551df5c532049cd9d0c33bce535",
+    "current_topbar_resource_sample_proof": "601a78217ca176000aff25d261455416709729f20444cda608481fa8267bfcca",
+    "two_optional_reference_ZIP_consumer_proof": "160c430a872017c74ec188491a388261cb6bd87b8c3b55bb86330ebddf478897",
+    "runtime_model_appearance_and_manufacturing_fit_complete": false
   }
 }

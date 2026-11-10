@@ -56,12 +56,73 @@ function path(d,fill,stroke,width,extra) {
 }
 function scaled(value) {return 'translate(12 12) scale('+n(value)+') translate(-12 -12)'}
 
+function familyMark(value) {
+    // Read the supplied SKU label; never infer a CPU family from live load,
+    // a socket, an abbreviated number or another processor's identity.
+    var text=Cpu.label(value),match
+    if((match=/^INTEL CORE ULTRA ([579]) /.exec(text)))return "CORE ULTRA "+match[1]
+    if((match=/^INTEL CORE (I[3579])(?:-| )/.exec(text)))return "CORE "+match[1]
+    if(/^INTEL PENTIUM /.test(text))return "PENTIUM"
+    if(/^INTEL CELERON /.test(text))return "CELERON"
+    if((match=/^AMD RYZEN ([3579]) /.exec(text)))return "RYZEN "+match[1]
+    if(/^AMD THREADRIPPER PRO /.test(text))return "THREADRIPPER PRO"
+    if(/^AMD THREADRIPPER /.test(text))return "THREADRIPPER"
+    if(/^AMD ATHLON /.test(text))return "ATHLON"
+    return ""
+}
+
+function lidInsetPoints(descriptor,amount) {
+    // Parallel visual bevel inside the existing reviewed lid polygon. Scaling
+    // around its centre distorts AM5's inward notches. This is original finish
+    // artwork, not an additional measured IHS contour or manufacturing depth.
+    var p=descriptor && Cpu.profile(descriptor.id)
+    if(!p || !Number.isFinite(amount) || amount<=0 || amount>.25)return []
+    var factor=18/Math.max(p.reference_size[0],p.reference_size[1])
+    var points=p.lid.map(function(v){return [12+(v[0]-.5)*p.reference_size[0]*factor,
+        12+(v[1]-.5)*p.reference_size[1]*factor]})
+    var area=0,result=[],count=points.length
+    for(var at=0;at<count;at++)area+=points[at][0]*points[(at+1)%count][1]-points[(at+1)%count][0]*points[at][1]
+    if(!Number.isFinite(area) || area===0)return []
+    var direction=area>0?1:-1
+    for(var index=0;index<count;index++) {
+        var previous=points[(index+count-1)%count],point=points[index],next=points[(index+1)%count]
+        var ax=point[0]-previous[0],ay=point[1]-previous[1],bx=next[0]-point[0],by=next[1]-point[1]
+        var al=Math.hypot(ax,ay),bl=Math.hypot(bx,by)
+        if(!(al>0 && bl>0))return []
+        ax/=al;ay/=al;bx/=bl;by/=bl
+        var first=[point[0]-direction*ay*amount,point[1]+direction*ax*amount]
+        var second=[point[0]-direction*by*amount,point[1]+direction*bx*amount]
+        var cross=ax*by-ay*bx
+        if(Math.abs(cross)<1e-10)return []
+        var t=((second[0]-first[0])*by-(second[1]-first[1])*bx)/cross
+        var inset=[first[0]+t*ax,first[1]+t*ay]
+        if(!Number.isFinite(inset[0]) || !Number.isFinite(inset[1])
+                || Math.hypot(inset[0]-point[0],inset[1]-point[1])>amount*3)return []
+        result.push(inset)
+    }
+    return result
+}
+
+function lidInset(descriptor,amount) {
+    var points=lidInsetPoints(descriptor,amount)
+    return points.length?points.map(function(point,index){return (index?"L":"M")+n(point[0])+" "+n(point[1])}).join("")+"Z":""
+}
+
+function engravingText(id,css,text,y,size,widthScale,weight,tracking) {
+    // Lay out glyphs at a usable font size, then scale the vector text into
+    // the 24-unit drawing. A 1px font can have bounds but empty hinted glyphs.
+    var factor=size/16
+    return '<text id="'+id+'"'+(css?' class="'+css+'"':'')+' x="0" y="0" font-size="16"'
+        +' transform="translate(12 '+n(y)+') scale('+n(factor*widthScale)+' '+n(factor)+')"'
+        +' font-weight="'+weight+'" letter-spacing="'+n(tracking/factor)+'">'+text+'</text>'
+}
+
 function modelBody(state) {
     var descriptor=state && state.cpu_package,p=descriptor && Cpu.profile(descriptor.id)
     if(!p || descriptor.vendor!==p.vendor)return ""
     var shapes=Cpu.paths(descriptor),style=styles.indexOf(state.icon_set)>=0?state.icon_set:"miniature"
     var ink=hex(state.ink,"#425564"),c=paint(style,ink)
-    var label=Cpu.label(descriptor.label_ascii),mark=label?label.split(' ').pop():""
+    var label=Cpu.label(descriptor.label_ascii),mark=label?label.split(' ').pop():"",family=familyMark(label)
     var brand=p.vendor==="intel"?"INTEL":"AMD"
     var scale=18/Math.max(p.reference_size[0],p.reference_size[1]),w=p.reference_size[0]*scale,h=p.reference_size[1]*scale
     var seed=p.id+":"+style,packagePath=shapes.package.d,lidPath=shapes.lid.d
@@ -83,8 +144,9 @@ function modelBody(state) {
     out+='<g class="cpu-model-lid-lip-reference" transform="translate(0 .17)">'
         +path(lidPath,c.line?c.paper:c.low,c.edge,c.width*.75)+'</g>'
     out+=path(lidPath,c.gradient?'url(#cpuModelMetal)':c.lid,c.hand?'none':c.edge,c.width,'class="cpu-model-lid-outline"')
-    out+='<g class="cpu-model-metal-bevel-reference" transform="'+scaled(.966)+'">'
-        +path(c.hand?penPath(lidPath,seed+":bevel",.14):lidPath,"none",c.line?c.edge:c.light,c.width*.72,'opacity="'+(c.line?'.34':'.88')+'"')+'</g>'
+    var bevel=lidInset(descriptor,.14)
+    if(bevel)out+='<g class="cpu-model-metal-bevel-reference" data-bevel="parallel-reference">'
+        +path(c.hand?penPath(bevel,seed+":bevel",.14):bevel,"none",c.line?c.edge:c.light,c.width*.72,'opacity="'+(c.line?'.34':'.88')+'"')+'</g>'
     if(c.hand) {
         out+=path(penPath(packagePath,seed+":pcb",style==='sketch'?.34:.25),"none",c.edge,c.width,'class="cpu-model-hand-contour"')
             +path(penPath(lidPath,seed+":lid",style==='sketch'?.30:.22),"none",c.edge,c.width,'class="cpu-model-hand-contour"')
@@ -103,8 +165,18 @@ function modelBody(state) {
     if(mark) {
         var fontSize=Math.min(1.65,w*.61/Math.max(4,mark.length)*1.6)
         out+='<g class="cpu-model-engraving-reference" text-anchor="middle" fill="'+c.mark+'" font-family="Segoe UI,Arial,sans-serif">'
-            +'<text x="12" y="9.8" font-size="1.03" letter-spacing=".18" font-weight="500">'+brand+'</text>'
-            +'<text x="12" y="12.15" font-size="'+n(fontSize)+'" font-weight="600">'+mark+'</text></g>'
+            +engravingText('cpu-model-vendor','',brand,family?9.25:9.8,1.03,1,500,.18)
+        if(family) {
+            // QtSvg can quantize sub-unit fonts to a whole pixel. Keep a clear
+            // 1-unit face and fit long family names inside this actual lid.
+            var lidLow=1,lidHigh=0
+            for(var position=0;position<p.lid.length;position++) {
+                lidLow=Math.min(lidLow,p.lid[position][0]);lidHigh=Math.max(lidHigh,p.lid[position][0])
+            }
+            var familyScale=Math.min(1,((lidHigh-lidLow)*w-.8)/(family.length*.79))
+            out+=engravingText('cpu-model-family','cpu-model-family-reference',family,10.8,1,familyScale,400,.04)
+        }
+        out+=engravingText('cpu-model-sku','',mark,family?12.6:12.15,fontSize,1,600,0)+'</g>'
     }
     if(style==="cartoon" || style==="notebook_smile")out+='<g class="cpu-model-cute-face" fill="none" stroke="'+c.edge+'" stroke-width=".20">'
         +'<path d="M10.9 13.75v.32M13.1 13.75v.32M11.1 14.55Q12 15.2 12.9 14.55"/></g>'

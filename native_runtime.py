@@ -50,6 +50,7 @@ from settings_backdrop_host import SettingsBackdropHost
 from settings_blur_material import SettingsBlurMaterial
 from settings_material_bridge import SettingsMaterialBridge
 from stats_config import ASSETS, CONFIG, MODULES, PROFILE_PATHS, SKINS, load
+from secondary_mode055 import active as secondary_active, display_name as session_display_name, target_native_id as secondary_target, status as session_status, screen_native_id as secondary_screen_id
 from top_bar_runtime import TopBarManager
 from widget_catalog import TEMPLATES
 from widget_material_geometry import backdrop_shapes, rounded_mask
@@ -101,7 +102,8 @@ class _DesktopAwareTopBarManager(TopBarManager):
     def _model_monitors(self):
         return {**getattr(self.runtime,'_model_guard_monitors',{}),
                 **getattr(self.runtime,'_assembly_guard_monitors',{}),
-                **getattr(self.runtime,'_reference_import_monitors',{})}
+                **getattr(self.runtime,'_reference_import_monitors',{}),
+                **getattr(self.runtime,'_secondary_guard_monitors',{})}
 
     def _queue_foreground_visibility(self):
         if self._model_monitors():
@@ -185,7 +187,7 @@ class Runtime(QObject):
                 application, on_enter=self.begin_move, on_exit=self.queue_end_move
             )
         )
-        screen = self.app.primaryScreen().availableGeometry()
+        screen = Runtime._placement_screen(self).availableGeometry()
         self.controller.set_preview_area(screen.width(), screen.height())
         qmlRegisterType(HardwareCard, "DesktopStats", 1, 0, "HardwareCard")
         qmlRegisterType(MaterialSurface, "DesktopStats", 1, 0, "MaterialSurface")
@@ -204,7 +206,12 @@ class Runtime(QObject):
         # The top bar has its own component. Compile desktop cards only when
         # a real card is first created; keep one reusable component thereafter.
         self.component = None
-        self.top_bar = _DesktopAwareTopBarManager(self)
+        if secondary_active():
+            from secondary_top_bar055 import create_secondary_top_bar
+            self.top_bar = create_secondary_top_bar(self, manager_class=_DesktopAwareTopBarManager,
+                target_native_id=secondary_target(), gap_dip=6, desktop_ready=_desktop_session_ready)
+        else:
+            self.top_bar = _DesktopAwareTopBarManager(self)
         self.controller.motionChanged.connect(lambda:Runtime.refresh_model_motion(self))
         self.app.applicationStateChanged.connect(lambda *_:Runtime.refresh_model_motion(self))
         self.controller.applyRequested.connect(self.apply)
@@ -225,7 +232,7 @@ class Runtime(QObject):
         self.tray = None
         if not headless:
             self.tray = QSystemTrayIcon(QIcon(str(ASSETS / "assets/icon.ico")), self)
-            self.tray.setToolTip("Desktop Stats")
+            self.tray.setToolTip(session_display_name())
             self.tray.activated.connect(
                 lambda reason: (
                     self.show_settings("")
@@ -262,6 +269,117 @@ class Runtime(QObject):
         for warning in warnings:
             logging.warning("Native interface: %s", warning.toString())
 
+    def _secondary_screen(self):
+        wanted=secondary_target()
+        if not secondary_active()or not wanted:return None
+        matches=[screen for screen in self.app.screens()if secondary_screen_id(screen).casefold()==wanted.casefold()]
+        return matches[0]if len(matches)==1 else None
+
+    def _allowed_screens(self):
+        if not secondary_active():return list(self.app.screens())
+        target=Runtime._secondary_screen(self)
+        return [target]if target is not None else[]
+
+    def _placement_screen(self):
+        return Runtime._secondary_screen(self)if secondary_active()else self.app.primaryScreen()
+
+    def _secondary_admitted(self,*,query=True):
+        if not secondary_active():return True
+        try:
+            target=Runtime._secondary_screen(self)
+            if target is None or _desktop_session_ready()is not True:return False
+            identifier,rect=Runtime._model_screen_fact(self,target)
+            self._secondary_guard_monitors={identifier:rect}
+            bar=self.top_bar;bar._ensure_fullscreen_guard()
+            if query:bar._read_foreground_visibility()
+            guard=getattr(bar,'_fullscreen_guard',None)
+            return bool(guard is not None and getattr(guard,'_known',False)is True
+                and not getattr(guard,'closed',True)and not getattr(guard,'failure',None)
+                and not getattr(bar,'_fullscreen_guard_error',None)
+                and identifier not in getattr(bar,'_foreground_hidden_screens',()))
+        except(AttributeError,RuntimeError,TypeError,ValueError,OSError):return False
+
+    def _secondary_window_context(self,window):
+        if not Runtime._secondary_admitted(self):return None
+        target=Runtime._secondary_screen(self)
+        if target is None:return None
+        adapter=self.top_bar.adapter
+        identity=adapter.screen_identity(target)
+        info=adapter._monitor_info(identity.monitor_handle)
+        work=info.rcWork
+        # Authorize pending placement into the confirmed target work area.
+        # A hidden native owner can initially belong to another monitor; the
+        # separate Show gate still requires its actual native target and bounds.
+        return dict(admitted=True,native_id=identity.native_id,
+            work=tuple(int(getattr(work,key))for key in('left','top','right','bottom')))
+
+    def register_secondary_window(self,window):
+        if not secondary_active():return True
+        if self.shutting_down or self.headless or self.app.platformName()!='windows':return False
+        target=Runtime._secondary_screen(self)
+        if target is None or _desktop_session_ready()is not True:return False
+        owner=window
+        if callable(getattr(window,'windowHandle',None)):
+            window.setWindowFlag(Qt.WindowDoesNotAcceptFocus,True)
+            window.setAttribute(Qt.WA_ShowWithoutActivating,True)
+            window.winId()  # Explicit own hidden QWidget; never a foreign HWND.
+            owner=window.windowHandle()
+        if owner is None:return False
+        top=getattr(owner,'isTopLevel',None)
+        if callable(top)and top()is False:return True
+        owner.setFlag(Qt.WindowDoesNotAcceptFocus,True)
+        owner.setScreen(target)
+        guard=getattr(self,'_secondary_window_guard',None)
+        if guard is None:
+            from secondary_window_guard055 import create_secondary_window_guard
+            guard=create_secondary_window_guard(self.app,lambda item:Runtime._secondary_window_context(self,item))
+            self._secondary_window_guard=guard
+        if not guard.watch(owner):return False
+        owner.create()  # Hidden first setup is allowed before adapter.prepare.
+        if not guard.bind(owner,int(owner.winId())):
+            owner.hide();return False
+        return True
+
+    def _secondary_window_admitted(self,window):
+        if not secondary_active():return True
+        owner=window.windowHandle()if callable(getattr(window,'windowHandle',None))else window
+        guard=getattr(self,'_secondary_window_guard',None)
+        return bool(owner is not None and guard is not None and guard.allowed(owner))
+
+    def _close_secondary_window_guard(self):
+        guard=getattr(self,'_secondary_window_guard',None)
+        if guard is None:return
+        result=guard.close()
+        if not result.get('complete'):raise RuntimeError('V2 window protection cleanup incomplete: '+str(result.get('errors')))
+        self._secondary_window_guard=None
+
+    def _secondary_refresh_panels(self):
+        if not secondary_active()or getattr(self,'_secondary_refreshing',False):return
+        self._secondary_refreshing=True
+        try:
+            allowed=Runtime._secondary_admitted(self,query=False)
+            hidden=getattr(self,'_secondary_hidden_widgets',{})
+            for key,window in tuple(getattr(self,'widgets',{}).items()):
+                if not allowed and window.isVisible():
+                    hidden[key]=window;window.hide()
+                elif allowed and hidden.get(key)is window:
+                    if Runtime._secondary_window_admitted(self,window):
+                        window.show();window.lower()
+                        if Runtime._secondary_window_admitted(self,window):hidden.pop(key,None)
+                        else:window.hide()
+            self._secondary_hidden_widgets=hidden
+            # Settings/details are not automatically reopened after a game;
+            # a new explicit request rechecks the exact target and desktop.
+            if not allowed:
+                for window in(getattr(self,'details',None),Runtime._settings_window(self)):
+                    if window is not None and window.isVisible():window.hide()
+            else:
+                for window in(getattr(self,'details',None),Runtime._settings_window(self)):
+                    if (window is not None and window.isVisible()
+                            and not Runtime._secondary_window_admitted(self,window)):window.hide()
+        except(RuntimeError,AttributeError,TypeError):pass
+        finally:self._secondary_refreshing=False
+
     def ensure_settings(self):
         """Create the editor once, preserving its draft and existing glass lifecycle."""
         if self.shutting_down or self._settings_loading:
@@ -280,6 +398,12 @@ class Runtime(QObject):
                         getattr(owner, method)()
                     except Exception:
                         logging.exception("Could not release incomplete settings: %s", owner_name)
+                    else:
+                        if secondary_active() and owner_name in ("settings_material", "settings_host"):
+                            try:
+                                owner.deleteLater()
+                            except Exception:
+                                logging.exception("Could not delete incomplete secondary settings: %s", owner_name)
                 setattr(self, owner_name, None)
             for root in self.engine.rootObjects():
                 if root not in roots:
@@ -311,6 +435,16 @@ class Runtime(QObject):
                 return None
             self.settings_host = (SettingsBackdropHost(settings)
                 if not self.headless and self.app.platformName() == "windows" else None)
+            if secondary_active():
+                settings.setTitle(session_display_name())
+                target=Runtime._secondary_screen(self)
+                if target is None:raise RuntimeError('Second-version target screen unavailable')
+                settings.setScreen(target)
+                settings.setFlag(Qt.WindowDoesNotAcceptFocus,True)
+                if self.settings_host is not None:
+                    self.settings_host.setTitle(session_display_name())
+                    self.settings_host.setScreen(target)
+                    self.settings_host.setFlag(Qt.WindowDoesNotAcceptFocus,True)
             if cancelled():
                 return None
             self.settings_blur = (ThinRasterAcrylicMaterial(paint_background=self.settings_host.paint_background)
@@ -322,7 +456,7 @@ class Runtime(QObject):
                 Runtime._settings_window(self), self, backend="system-blur",
                 frame_source=settings if self.settings_host is not None else None,
                 allow_hidden_prepare=self.settings_host is not None,
-                wait_for_first_frame=True, activation_requests=self.settings_host is not None,
+                wait_for_first_frame=True, activation_requests=self.settings_host is not None and not secondary_active(),
                 compose_once=self._settings_material_request, policy_reader=transparency_policy,
                 publish=self._publish_settings_material, release_surface=self._release_settings_surface)
             if cancelled():
@@ -332,6 +466,11 @@ class Runtime(QObject):
                 self.settings_host.paintFailed.connect(self._settings_paint_failed)
             if self.settings_material:
                 self.settings_material.start()
+            if secondary_active():
+                # The material bridge must observe the first hidden native
+                # surface; registration may create it before hidden prepare.
+                if not Runtime.register_secondary_window(self,Runtime._settings_window(self)):
+                    raise RuntimeError('Second-version settings bounds protection unavailable')
             if cancelled():
                 return None
             return settings
@@ -918,6 +1057,8 @@ class Runtime(QObject):
     def show_settings(self, key=""):
         if self.shutting_down or getattr(self, "_settings_loading", False):
             return
+        if secondary_active() and not Runtime._secondary_admitted(self):
+            return
         if getattr(self, "settings", None) is None:
             try:
                 if Runtime.ensure_settings(self) is None:
@@ -947,7 +1088,7 @@ class Runtime(QObject):
         if not current():
             return
         window = Runtime._settings_window(self)
-        available = [screen.availableGeometry() for screen in self.app.screens()]
+        available = [screen.availableGeometry() for screen in Runtime._allowed_screens(self)]
         if getattr(self, "settings_host", None) is not None:
             # The user's existing Show action may create the native host. Its
             # actual frame margins then keep the caption inside the work area.
@@ -955,7 +1096,7 @@ class Runtime(QObject):
             if not current():
                 return
             margins = window.frameMargins()
-            screen = self.app.primaryScreen().availableGeometry()
+            screen = Runtime._placement_screen(self).availableGeometry()
             if not window.isVisible():
                 window.resize(min(1280, screen.width()-48-margins.left()-margins.right()),
                               min(640, screen.height()-48-margins.top()-margins.bottom()))
@@ -972,7 +1113,7 @@ class Runtime(QObject):
             if not current():
                 return
         elif not self.settings.isVisible():
-            screen = self.app.primaryScreen().availableGeometry()
+            screen = Runtime._placement_screen(self).availableGeometry()
             self.settings.resize(min(1280, screen.width() - 48), min(640, screen.height() - 48))
             if not current():
                 return
@@ -997,16 +1138,19 @@ class Runtime(QObject):
                 return
         if not current():
             return
+        if secondary_active() and not Runtime._secondary_window_admitted(self,window):return
         window.showNormal()
+        if secondary_active() and not Runtime._secondary_window_admitted(self,window):
+            window.hide();return
         if not current():
             return
         self.compose(self.settings, "settings")
         if not current():
             return
-        window.raise_()
+        if not secondary_active():window.raise_()
         if not current():
             return
-        window.requestActivate()
+        if not secondary_active():window.requestActivate()
 
     def desktop_widget_component(self):
         if self.component is None:
@@ -1029,12 +1173,15 @@ class Runtime(QObject):
             self.top_bar.apply(self.controller._saved)
         if self.headless:
             return
+        if secondary_active() and not Runtime._secondary_admitted(self):
+            Runtime._secondary_refresh_panels(self)
+            return
         config = self.controller._saved
         self.controller.set_motion_enabled(animations_enabled())
         for key in list(self.motion):
             self.cancel_motion(key)
         self.drag_origins.clear()
-        screen = self.app.primaryScreen().availableGeometry()
+        screen = Runtime._placement_screen(self).availableGeometry()
         screens = self.screen_inventory()
         self.controller.set_preview_area(screen.width(), screen.height())
         self.controller.set_screen_inventory(screens, self.positions)
@@ -1072,12 +1219,11 @@ class Runtime(QObject):
             native_frame = False
             desired_flags = int(widget_flags(native_frame))
             if spec.get("layer") == "pinned":
-                from PySide6.QtCore import Qt
-
                 desired_flags = int(
                     (widget_flags(native_frame) & ~Qt.WindowStaysOnBottomHint)
                     | Qt.WindowStaysOnTopHint
                 )
+            if secondary_active():desired_flags|=int(Qt.WindowDoesNotAcceptFocus)
             setup_frame = window is None or int(window.flags()) != desired_flags
             if window:
                 window.setProperty("registered", False)
@@ -1099,17 +1245,20 @@ class Runtime(QObject):
                 if not window:
                     raise RuntimeError("Native widget could not load")
                 self.widgets[key] = window
+                if secondary_active():
+                    window.setTitle(session_display_name()+' · 小组件')
                 window.installEventFilter(self)
                 for signal in (window.visibleChanged,window.visibilityChanged,window.screenChanged):
                     signal.connect(lambda *_:Runtime.refresh_model_motion(self))
+            if secondary_active()and not Runtime.register_secondary_window(self,window):
+                window.hide()
+                raise RuntimeError('Second-version widget bounds protection unavailable')
             if self.frame_bridge:
                 if native_frame and setup_frame and not self.frame_bridge.register(window, key):
                     window.hide()
                     self.frame_bridge.unregister(window)
                     fallback_flags = widget_flags(False)
                     if spec.get("layer") == "pinned":
-                        from PySide6.QtCore import Qt
-
                         fallback_flags = (
                             fallback_flags & ~Qt.WindowStaysOnBottomHint
                         ) | Qt.WindowStaysOnTopHint
@@ -1125,8 +1274,12 @@ class Runtime(QObject):
         # briefly published over a game and hidden by a later exposure event.
         model_windows=Runtime._admit_model_windows(self)
         for key, window in self.widgets.items():
+            if secondary_active() and not Runtime._secondary_window_admitted(self,window):
+                window.hide();continue
             if key not in model_windows:window.show()
             elif not window.isVisible():continue
+            if secondary_active() and not Runtime._secondary_window_admitted(self,window):
+                window.hide();continue
             spec = window.property("spec")
             if hasattr(spec, "toVariant"):
                 spec = spec.toVariant()
@@ -1143,7 +1296,7 @@ class Runtime(QObject):
     def arrange(self, specs, rearrange):
         if not specs:
             return
-        rectangles = [item.availableGeometry() for item in self.app.screens()]
+        rectangles = [item.availableGeometry() for item in Runtime._allowed_screens(self)]
         config = self.controller._saved
         _, planned = desktop_plan(config, self.screen_inventory(), self.positions, bool(rearrange))
         for spec in specs:
@@ -1191,7 +1344,7 @@ class Runtime(QObject):
         config = self.controller._saved
         areas = [
             (r.x(), r.y(), r.width(), r.height())
-            for r in (s.availableGeometry() for s in self.app.screens())
+            for r in (s.availableGeometry() for s in Runtime._allowed_screens(self))
         ]
         others = [
             (w.x(), w.y(), w.width(), w.height())
@@ -1204,7 +1357,7 @@ class Runtime(QObject):
                 window.y(),
                 window.width(),
                 window.height(),
-                [s.availableGeometry() for s in self.app.screens()],
+                [s.availableGeometry() for s in Runtime._allowed_screens(self)],
             )
             window.setPosition(x, y)
             self.position(key, x, y)
@@ -1421,6 +1574,7 @@ class Runtime(QObject):
                 if window.property('modelMotionAllowed') is not allowed:window.setProperty('modelMotionAllowed',allowed)
             Runtime._update_assembly_motion(self,known,session,bar)
             Runtime._update_reference_import_guard(self,known,session,bar)
+            Runtime._secondary_refresh_panels(self)
         except Exception:
             # Any query/identity failure leaves every owned model quiet.
             for key,window in tuple(getattr(self,'widgets',{}).items()):
@@ -1432,6 +1586,7 @@ class Runtime(QObject):
                 except RuntimeError:pass
             Runtime._update_assembly_motion(self,False,False,getattr(self,'top_bar',None))
             Runtime._update_reference_import_guard(self,False,False,getattr(self,'top_bar',None))
+            Runtime._secondary_refresh_panels(self)
         finally:self._model_motion_refreshing=False
 
     def _update_assembly_motion(self,known,session,bar):
@@ -1440,8 +1595,9 @@ class Runtime(QObject):
         identifiers=getattr(self,'_assembly_guard_monitors',{})
         safe=bool(known and session and identifiers
                   and not set(identifiers)&set(getattr(bar,'_foreground_hidden_screens',())))
+        if secondary_active()and not Runtime._secondary_window_admitted(self,window):safe=False
         desktop=getattr(window,'window_mode',None)=='desktop'
-        guarded=desktop or getattr(window,'window_mode',None)=='reference'
+        guarded=secondary_active()or desktop or getattr(window,'window_mode',None)=='reference'
         minimized=window.isMinimized() is True
         if guarded and not safe and window.isVisible() is True and not minimized:
             self._assembly_guard_hidden=True;window.hide()
@@ -1462,6 +1618,7 @@ class Runtime(QObject):
         monitors=getattr(self,'_reference_import_monitors',{})
         safe=bool(known and session and monitors
                   and not set(monitors)&set(getattr(bar,'_foreground_hidden_screens',())))
+        if secondary_active()and not Runtime._secondary_window_admitted(self,dialog):safe=False
         if not safe:
             try:dialog.reject()
             except RuntimeError:
@@ -1470,7 +1627,7 @@ class Runtime(QObject):
     def screen_inventory(self):
         primary = self.app.primaryScreen()
         result = []
-        for screen in self.app.screens():
+        for screen in Runtime._allowed_screens(self):
             area = screen.availableGeometry()
             native_id, native_error = "", ""
             if not getattr(self, "headless", True) and self.app.platformName() == "windows":
@@ -1499,6 +1656,7 @@ class Runtime(QObject):
         self.show_settings("__top_bar__")
 
     def show_details(self, key, index, x, y):
+        if secondary_active() and not Runtime._secondary_admitted(self):return
         if getattr(self, "details", None) is None:
             component = QQmlComponent(
                 self.engine, QUrl.fromLocalFile(str(ASSETS / "native/Details.qml"))
@@ -1510,9 +1668,15 @@ class Runtime(QObject):
             self.details_component = component
             if self.details is None:
                 return
+        if secondary_active():
+            target=Runtime._secondary_screen(self)
+            if target is None:return
+            self.details.setScreen(target);self.details.setTitle(session_display_name()+' · 详情')
+            self.details.setFlag(Qt.WindowDoesNotAcceptFocus,True)
+            if not Runtime.register_secondary_window(self,self.details):return
         self.details.setProperty("widgetKey", key)
         self.details.setProperty("metricIndex", index)
-        areas = [screen.availableGeometry() for screen in self.app.screens()]
+        areas = [screen.availableGeometry() for screen in Runtime._allowed_screens(self)]
         px, py = fit(
             round(x - self.details.width() / 2),
             round(y + 8),
@@ -1521,11 +1685,15 @@ class Runtime(QObject):
             areas,
         )
         self.details.setPosition(px, py)
+        if secondary_active() and not Runtime._secondary_window_admitted(self,self.details):return
         self.details.show()
-        self.details.requestActivate()
+        if secondary_active() and not Runtime._secondary_window_admitted(self,self.details):
+            self.details.hide();return
+        if not secondary_active():self.details.requestActivate()
 
     def _assembly_target_allowed(self,target):
         """Use the same screen-aware guard before creating/showing an own view."""
+        if secondary_active() and target is not Runtime._secondary_screen(self):return False
         identifier,rect=Runtime._model_screen_fact(self,target)
         self._assembly_guard_monitors={identifier:rect}
         bar=self.top_bar;bar._ensure_fullscreen_guard();bar._read_foreground_visibility()
@@ -1543,8 +1711,8 @@ class Runtime(QObject):
         dialog=None
         try:
             from assembly_config import target_screen
-            target=target_screen(self.app.screens(),self.controller.saved.get('top_bar',{}),
-                self.app.primaryScreen(),lambda screen:self.top_bar.adapter.screen_identity(screen).native_id)
+            target=target_screen(Runtime._allowed_screens(self),self.controller.saved.get('top_bar',{}),
+                Runtime._placement_screen(self),lambda screen:self.top_bar.adapter.screen_identity(screen).native_id)
             if (target is None or _desktop_session_ready() is not True
                     or not Runtime._assembly_target_allowed(self,target)):
                 self.controller.set_status('所选屏幕当前不适合打开模型。',error=True)
@@ -1558,11 +1726,16 @@ class Runtime(QObject):
             dialog.setNameFilter('DesktopStats open references (*.zip)')
             dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
             dialog.setAttribute(Qt.WA_DeleteOnClose,True)
-            dialog.setAttribute(Qt.WA_ShowWithoutActivating,foreground_fullscreen() is not False)
+            dialog.setAttribute(Qt.WA_ShowWithoutActivating,secondary_active()or foreground_fullscreen() is not False)
+            if secondary_active():
+                dialog.setWindowFlag(Qt.WindowDoesNotAcceptFocus,True)
+                dialog.setWindowTitle(session_display_name()+' · 导入模型')
             area=target.availableGeometry()
             width=min(760,max(280,area.width()-48));height=min(520,max(240,area.height()-48))
             dialog.resize(width,height)
             dialog.winId();dialog.windowHandle().setScreen(target)
+            if secondary_active()and not Runtime.register_secondary_window(self,dialog):
+                dialog.reject();return
             dialog.move(area.x()+max(0,(area.width()-width)//2),area.y()+max(0,(area.height()-height)//2))
             identifier,rect=Runtime._model_screen_fact(self,target)
             self._reference_file_dialog=dialog;self._reference_import_monitors={identifier:rect}
@@ -1581,7 +1754,8 @@ class Runtime(QObject):
                 finally:Runtime.refresh_model_motion(self,query=False)
             dialog.fileSelected.connect(selected);dialog.finished.connect(finished)
             dialog.windowHandle().screenChanged.connect(lambda *_:Runtime.refresh_model_motion(self))
-            if _desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target):
+            if (_desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target)
+                    or secondary_active()and not Runtime._secondary_window_admitted(self,dialog)):
                 dialog.reject();return
             dialog.open()
         except Exception:
@@ -1606,7 +1780,7 @@ class Runtime(QObject):
         try:
             configured = self.controller.saved.get("top_bar", {})
             from assembly_config import target_screen
-            target = target_screen(self.app.screens(),configured,self.app.primaryScreen(),
+            target = target_screen(Runtime._allowed_screens(self),configured,Runtime._placement_screen(self),
                 lambda screen:self.top_bar.adapter.screen_identity(screen).native_id)
             if target is None:
                 self.controller.set_status("所选屏幕不可用", error=True)
@@ -1647,8 +1821,13 @@ class Runtime(QObject):
             width = min(420,max(minimum_width,area.width()-32)) if mode=='desktop' else min(1080,max(minimum_width,area.width()-64))
             height = min(480,max(minimum_height,area.height()-32)) if mode=='desktop' else min(800,max(minimum_height,area.height()-64))
             window.resize(width, height)
+            if secondary_active():
+                window.setWindowFlag(Qt.WindowDoesNotAcceptFocus,True)
+                window.setWindowTitle(session_display_name()+' · 整机检视')
             window.winId()
             window.windowHandle().setScreen(target)
+            if secondary_active()and not Runtime.register_secondary_window(self,window):
+                window.close();return
             window.move(area.x() + max(0, (area.width() - width) // 2),
                         area.y() + max(0, (area.height() - height) // 2))
             if current is None:
@@ -1662,12 +1841,15 @@ class Runtime(QObject):
                 window.closed.connect(closed)
             # A queued foreground/secure-desktop change during profile baking
             # must be checked again before publishing the newly built surface.
-            if _desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target):
+            if (_desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target)
+                    or secondary_active()and not Runtime._secondary_window_admitted(self,window)):
                 window.close();previous_monitors={};return
             admitted=True
-            activate = mode in ('inspect','reference') and foreground_fullscreen() is False
+            activate = not secondary_active() and mode in ('inspect','reference') and foreground_fullscreen() is False
             window.setAttribute(Qt.WA_ShowWithoutActivating,not activate)
             window.showNormal()
+            if secondary_active()and not Runtime._secondary_window_admitted(self,window):
+                window.hide()
             if mode=='desktop':window.lower()
             elif activate:
                 window.raise_();window.activateWindow()
@@ -1688,6 +1870,7 @@ class Runtime(QObject):
             self.settings.grabWindow().save(str(output.with_suffix(".png")))
         report = {
             "version": self.controller.version,
+            "application_mode": session_status(),
             "windows": {},
             "composition": self.composition,
             "settings_visible": Runtime._settings_visible(self),
@@ -1761,6 +1944,7 @@ class Runtime(QObject):
             owner = getattr(self, owner_name, None)
             if owner is not None:
                 attempt(owner_name, getattr(owner, method))
+        attempt("secondary window protection",lambda:Runtime._close_secondary_window_guard(self))
         if errors:
             original = errors[0][1]
             for label, error in errors[1:]:
@@ -1880,6 +2064,7 @@ class LocalServer(QLocalServer):
                     }
                 response = {
                     "ok": True,
+                    "application_mode": session_status(),
                     "version": self.runtime.controller.version,
                     "widgets": len(self.runtime.widgets),
                     "native": True,

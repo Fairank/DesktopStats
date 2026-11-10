@@ -125,13 +125,14 @@ class _Mapping:
 
 
 class AsusCpuTemperature:
-    def __init__(self, *, api=None, app_pid=None, clock=None, wall_clock=None, enabled=None):
-        self.app_pid = os.getpid() if app_pid is None else app_pid
+    def __init__(self, *, api=None, app_pid=None, clock=None, wall_clock=None, enabled=None, owner_lease=None):
+        self._owner_lease = owner_lease
+        self.app_pid = owner_lease.pid if owner_lease is not None else os.getpid() if app_pid is None else app_pid
         self._api = api
         self._clock = clock or time.monotonic
         self._wall = wall_clock or time.time
         self._enabled = (os.environ.get("DESKTOP_STATS_CPU_BRIDGE_DISABLED") != "1"
-                         if enabled is None else bool(enabled))
+                         and (True if enabled is None else bool(enabled)))
         self._next = 0.0
         self._last_clock = None
         self._cached = {}
@@ -168,6 +169,8 @@ class AsusCpuTemperature:
             "closed": "CPU 温度桥接已关闭。",
             "invalid_value": "CPU 温度快照身份、格式或数值无效，已拒绝。",
             "query_failed": "CPU 温度共享内存读取失败；其他采样继续。",
+            "owner_exited": "原版已退出，第二版已停止读取并清除温度；不会自行启动桥接。",
+            "owner_unavailable": "原版温度缓存的进程身份无法验证，已拒绝共享。",
         }.get(self.state, "本轮没有可验证的 CPU 温度。")
         return dict(state=self.state, requested=bool(requested), api=API, detail=detail,
                     error=dict(self.error))
@@ -180,6 +183,12 @@ class AsusCpuTemperature:
             self._release()
             self._next = 0
             self.state, self.error = "idle", {}
+            return {}
+        # Check retained owner identity BEFORE the interval/cache return. An
+        # exited original must never leave a reused cached value in V2.
+        if self._owner_lease is not None and not self._owner_lease.alive():
+            self._failure("owner_exited" if self._owner_lease.state == "owner_exited" else "owner_unavailable")
+            self._release()
             return {}
         now, wall = self._clock(), self._wall()
         if self._last_clock is not None and now < self._last_clock:
@@ -240,4 +249,6 @@ class AsusCpuTemperature:
         self._closed = True
         self._discard()
         self._release()
+        if self._owner_lease is not None:
+            self._owner_lease.close()
         self.state = "closed"

@@ -1,4 +1,4 @@
-"""Lazy approved CC BY CPU/GPU packets; no runtime codec, image decoder or I/O.
+"""Lazy approved CC BY hardware packets; no runtime codec, image decoder or I/O.
 
 Application adapter code follows the application LICENSE. Model authors retain
 CC BY 4.0 rights; this code adds neither an NC override nor an ownership mark.
@@ -32,6 +32,20 @@ APPROVED = {
         attribution='GeForce RTX 3080 Graphics Card · _surovic_ / samuelsurovic · CC BY 4.0',
         parent_sha256='7662c59ec1332c804eed0554a62bac663320d16899ab1bf1ec14f908b060e7b9',
         lod_sha256='01822c53e1b74bb7fc79ce78a63b4c7d556d780703966e6ed8db823055c20394'),
+    'dbc376326f9c1b6214d2f3a398076a5a9a45e11ac3b8e60bd660ad1752475487': dict(
+        asset='storage', manifest_bytes=9951, draws=2, triangles=2038, nodes=6, meshes=2,
+        source_sha256='6f0657646486fc7eb5cdc4cfc7b7ec2ea8bd767a04123d770340f55e85eaa22a',
+        indexed_sha256='cbcbebeee6fcc41746b2899d12af5a19a1b21fff2e4219ec937fde1eeff2b143',
+        source_url='https://sketchfab.com/3d-models/41b7bfda7eab40f8b13330913fd66fc2',
+        attribution='M.2 NVME SSD Samsung 990 Pro 1TB 3D model · lime.ball.animations · CC BY 4.0',
+        parent_sha256=None, lod_sha256=None),
+    '36006f94d97e8d80d93e465bec563e36e33d1151468259ef83a1a4e89762f86a': dict(
+        asset='psu', manifest_bytes=83860, draws=43, triangles=12229, nodes=83, meshes=43,
+        source_sha256='60aa4b6c959cdc0cde5b99c7979066ac1dcfe24e8cdbe951f061cbec8db65f04',
+        indexed_sha256='287322d1b876af4605fd589a7259e813307533dfc11fbdd13fd95192c4563019',
+        source_url='https://sketchfab.com/3d-models/69ccd1be3a77497cb2acc9e39e7c52b3',
+        attribution='PSU Power Supply Unit · Groovex · CC BY 4.0',
+        parent_sha256=None, lod_sha256=None),
 }
 FILES = {
     'cpu': (
@@ -59,6 +73,32 @@ FILES = {
         ('mesh053.json', 150257, '8722e2ebf3d3336eed97229c2433547a9c2e3cb42cc6b2b8462def4bf6e25f8f'),
         ('source-original.glb', 1412620, '027b9135933e71839572007c5cd5208a137da598ab8d122f64bacaaf3682522b'),
         ('CHANGES054.txt', 600, '8f86555cd9773e17746f04b3c354129076d4838f9608c2ec7da79d96ac6b3922'),
+    ) + _NOTICES,
+    'storage': (
+        ('world-PN054.bin', 146736, 'e064433c85d58beaa930e31e6eb1e3659d49530df7e2d1ac8febcb80b97d4009'),
+        ('geometry053.bin', 110470, 'e9d8b413946fa89bb7f4418f24ac3fe8d24714e8ecb1c18451359f9e00168dcd'),
+        ('tangent053.bin', 8512, 'f852ab9b38fccce21eee6304dea492c6dd6ec12d20f84c1f9e8c65e602ebee1d'),
+        ('image-0.webp', 67110, '3392b524f8c04f4f1127e0872da2cb0f7a5609e85d555ec465f7e93e01eb4906'),
+        ('image-1.webp', 84562, '31e148c72d68c7b6a29660db3b45ad460d5de900aa6e68da97ac50c5dd2fc5ae'),
+        ('image-2.webp', 107040, 'fb97dfb61f9fa993cc73364a3fd72e3c275bdd2054190efad65dbc426e92376d'),
+        ('image-3.webp', 143420, '28194db87b66705873b477d553bdee0b5786059f84a7a5cb098e830c4ad0a2a2'),
+        ('color053.bin', 0, 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'),
+        ('mesh053.json', 11590, 'cbcbebeee6fcc41746b2899d12af5a19a1b21fff2e4219ec937fde1eeff2b143'),
+        ('source-original.glb', 429224, '6f0657646486fc7eb5cdc4cfc7b7ec2ea8bd767a04123d770340f55e85eaa22a'),
+        ('source-quality053.json', 11694, '0a75c5b1ce66a539e580d5108b38562273521da0c5d73a532f88a98d2d936097'),
+        ('PN-QUALITY055.json', 5247, '6e98f397f58a3f49aed8a8700cbe5f3dc2ae32b092960559b265a2c7f7b67317'),
+        ('CHANGES054.txt', 640, '8e98c51a78d578f757325ff0ed9c08db34f19585de3f138ddedec14db7514514'),
+    ) + _NOTICES,
+    'psu': (
+        ('world-PN054.bin', 880488, 'e58241fdeccd17424ca3fbe9e1b961e709d8493a3a5d8376a299535216a980d3'),
+        ('geometry053.bin', 434560, 'bcd0be4263140eb9fcd96da4101517dd0c0e42193958c74c22f08218c463733b'),
+        ('tangent053.bin', 0, 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'),
+        ('color053.bin', 0, 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'),
+        ('mesh053.json', 101300, '287322d1b876af4605fd589a7259e813307533dfc11fbdd13fd95192c4563019'),
+        ('source-original.glb', 139236, '60aa4b6c959cdc0cde5b99c7979066ac1dcfe24e8cdbe951f061cbec8db65f04'),
+        ('source-quality053.json', 129814, 'e0f30dd76cf10ca7cdbdc4626fbcd89d8057ae0c78bfa2684566b0d713ac7e5c'),
+        ('PN-QUALITY055.json', 56467, '731559dec6d85657250016691a6b83fffaa2a21b0db55a9886dd6ad7c29dcd83'),
+        ('CHANGES054.txt', 607, '934b7c5a0261837659bd516973ae3260b028a35f7db1b40730bb9eb4868afef6'),
     ) + _NOTICES,
 }
 
@@ -100,7 +140,7 @@ def from_package(package):
     raw = package.read(MANIFEST_FILE, max(row['manifest_bytes'] for row in APPROVED.values()))
     approved = APPROVED.get(_sha(raw))
     _require(approved is not None and len(raw) == approved['manifest_bytes'],
-             '此CPU或显卡模型尚未纳入已核对的开源参考包。')
+             '此硬件模型尚未纳入已核对的开源参考包。')
     doc = _json(raw)
     validate_source_identity(doc, approved)
     draws, triangles = approved['draws'], approved['triangles']

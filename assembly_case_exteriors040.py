@@ -61,7 +61,12 @@ def replace_shell(meshes, dimensions, case, level="balanced"):
     w, h, d = dimensions
     detail = 0 if level == "eco" else 2 if level == "close" else 1
     complete = bool(flags & FULL_SHELL_FLAGS)
-    kept = [m for m in meshes if not complete or m.component not in ("case", "panel")]
+    c700m_keep = frozenset()
+    if case.get('id') == 'cooler-master-cosmos-c700m':
+        from assembly_c700m_case055 import FLOOR_ID, SUPPORT_ID
+        c700m_keep = frozenset((FLOOR_ID, SUPPORT_ID))
+    kept = [m for m in meshes if not complete or m.component not in ("case", "panel")
+            or m.component == 'case' and m.part_id in c700m_keep]
     batches = {}
     steel = color(case.get("color"), "#63717b")
     silver, dark, glass = color("#aebbc3"), color("#24343e"), color("#9ab7c5", alpha=.17)
@@ -192,7 +197,15 @@ def replace_shell(meshes, dimensions, case, level="balanced"):
 
     elif "cosmos_wrap_handles" in flags:
         bodyw, bodyh, bodyd = w*.88,h*.88,d*.94
-        cube("case-cosmos-metal-body", (bodyw,3.,bodyd), (0,-bodyh/2,0), dark)
+        if case.get('id') == 'cooler-master-cosmos-c700m':
+            from assembly_c700m_case055 import FLOOR_ID, floor_mesh
+            if not any(mesh.part_id == FLOOR_ID for mesh in kept):
+                floor = floor_mesh(case, dimensions, dark)
+                if floor is None:
+                    raise ValueError('C700M fixed body floor reference unavailable')
+                kept.append(floor)
+        else:
+            cube("case-cosmos-metal-body", (bodyw,3.,bodyd), (0,-bodyh/2,0), dark)
         cube("case-cosmos-metal-body", (2.,bodyh,bodyd), (bodyw/2,0,0), steel)
         cube("case-cosmos-metal-body", (bodyw,bodyh,2.), (0,0,-bodyd/2), dark)
         cube("case-cosmos-front-aluminium", (bodyw,bodyh,3.), (0,0,bodyd/2), steel, "panel")

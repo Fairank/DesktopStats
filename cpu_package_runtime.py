@@ -8,11 +8,11 @@ from functools import lru_cache
 import re
 
 _BASE = {
-    'intel-13700kf': ('intel_lga1700_1851', 'LGA1700', 37.5, 45., 'intel_rectangle', 'lga', 1700, 'INTEL 13700KF',
+    'intel-13700kf': ('intel_lga1700_1851', 'LGA1700', 37.5, 45., 'intel_rectangle', 'lga', 1700, 'INTEL CORE I7 13700KF',
         'https://www.intel.com/content/www/us/en/products/sku/230489/intel-core-i713700kf-processor-30m-cache-up-to-5-40-ghz/specifications.html'),
-    'amd-9950x': ('amd_am5', 'AM5', 40., 40., 'amd_am5_notched', 'lga', 1718, 'AMD 9950X',
+    'amd-9950x': ('amd_am5', 'AM5', 40., 40., 'amd_am5_notched', 'lga', 1718, 'AMD RYZEN 9 9950X',
         'https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-9-9950x.html'),
-    'amd-7800x3d': ('amd_am5', 'AM5', 40., 40., 'amd_am5_notched', 'lga', 1718, 'AMD 7800X3D',
+    'amd-7800x3d': ('amd_am5', 'AM5', 40., 40., 'amd_am5_notched', 'lga', 1718, 'AMD RYZEN 7 7800X3D',
         'https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800X3d.html'),
 }
 

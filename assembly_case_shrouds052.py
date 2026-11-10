@@ -4,6 +4,7 @@ from copy import deepcopy
 import math
 
 _GROUPS={
+    'assembly_c700m_case055':('cooler-master-cosmos-c700m',),
     'assembly_rear_bay_group_a052':('lian-li-o11d-evo-rgb','nzxt-h6-flow-2023',
         'corsair-6500x','hyte-y60','asus-tuf-gt502'),
     'assembly_rear_bay_group_b052':('phanteks-nv7','antec-c8-argb','msi-mag-pano-100r-pz','lian-li-o11-vision',
