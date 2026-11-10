@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 120936,
-      "sha256": "88bb4b04d2a1c3e1b7980c66c7b28f0e98267f113b2286214448cdd8a308f99a"
+      "bytes": 121882,
+      "sha256": "1589a4e84dcc5ccfab6836daf77251f8e8f9c8bc5a8899b165c3c28901a4fc7b"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1554,8 +1554,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 22924,
-      "sha256": "c68edc0c13aa9a8139e05094ac57fed37c00bf93184de3028d721e193fc6af33"
+      "bytes": 25898,
+      "sha256": "34ae2b6d243adf5f8f1424ca332a47c2a989c3d5d4e5d5eb0cb32a35df809507"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
