@@ -1,12 +1,12 @@
 # 直接使用开源三维模型
 
-本轮把已取得的 MIT 模型接入实际检视代码。开发源码提供“开源 3D”入口，能够读取风扇、风冷、水冷及通用整机四件参考、旋转缩放、点选部件、聚焦、隐藏和恢复，并切换原有六套风格。它们不再只用于生成说明图片。
+本轮把已取得的第三方模型接入实际检视代码。开发源码提供“开源 3D”入口，能够读取风扇、风冷、水冷、通用整机、CPU和RTX 3080六件参考、旋转缩放、点选部件、聚焦、隐藏和恢复，并切换原有六套风格。它们不再只用于生成说明图片。
 
 **本机正在运行的 Stats 没有被替换。** 这些入口属于包含本次改动的新构建；游戏期间未安装、重启或显示原生测试窗。真实桌面上的原生画面与驱动占用还待验证。
 
 ## 下载与打开
 
-1. 从[散热模型目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054)下载风冷或水冷 ZIP，或从[整机目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/whole-pc054)下载 `DesktopStats-MIT-whole-PC054.zip`。通用风扇沿用[此前的 MIT 风扇包](https://github.com/Fairank/DesktopStats/blob/861420f4b2457cd2a661e99fd73cc4dd47349b20/additional/pc-anatomy053/DesktopStats-open-fan-reference053.zip)。
+1. 从[散热模型目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054)下载风冷或水冷 ZIP，从[整机目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/whole-pc054)下载 `DesktopStats-MIT-whole-PC054.zip`，或从[CPU／GPU目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/ccby-components054)下载CPU或RTX 3080 ZIP。通用风扇沿用[此前的 MIT 风扇包](https://github.com/Fairank/DesktopStats/blob/861420f4b2457cd2a661e99fd73cc4dd47349b20/additional/pc-anatomy053/DesktopStats-open-fan-reference053.zip)。
 2. 在包含本次改动的版本中打开“硬件型号图鉴 → 开源 3D → 载入模型 ZIP…”。无需解压、导入原有型号库或修改硬件设置。
 3. 拖动旋转、滚轮缩放；单击模型或从部件列表选择，按需开启“只看所选”或“隐藏所选”。关闭窗口后释放这件模型，再选下一件。
 
@@ -18,14 +18,20 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 | 风冷散热器 | 冷板、导热层、热管、鳍片、顶盖、风扇、卡扣、扣具 | 564,932 B | 1,174,464 B |
 | 一体水冷 | 冷排、风扇组、泵体、泵叶、冷板与微鳍片、水管、内部冷却液、接头 | 787,376 B | 2,719,728 B |
 | 通用整机 | 25个独立部件，含机箱、主板、CPU、GPU、内存、电源、线缆与存储 | 1,395,020 B | 2,403,576 B |
+| 通用CPU，作者参考 | 两个源部件，426个三角形 | 494,297 B | 30,672 B |
+| RTX 3080，作者参考与既有LOD | 27个独立分区，56,742个三角形 | 3,164,655 B | 4,085,424 B |
 
-表中的缓冲是送给现有三维渲染器的只读位置／法线数组，不包含 Qt、驱动、边线、上传副本等，**不能当作整个 Stats 的内存占用**。四件参考是通用教育结构，不是四款经过厂家认证的零售精模；不按原版／修订版或六种风格重复计算产品。
+表中的缓冲是送给现有三维渲染器的只读位置／法线数组，不包含 Qt、驱动、边线、上传副本等，**不能当作整个 Stats 的内存占用**。六件是通用教育结构或作者参考，不是六款经过厂家认证的零售精模；不按原版／修订版或六种风格重复计算产品。
 
 风冷 ZIP SHA-256：`546c330b40122064195871973dbe60147aeb0cddb496bb0cc3abee310b88dbe7`。
 
 水冷 ZIP SHA-256：`e0b17b50b00dfbf5339ee9b7d8dd71fbae5f30d318f5024b77ce6f230f619487`。
 
 整机 ZIP SHA-256：`c90db67c40404d674aae6f10f9f9b2e99de98f220d55919e3448b835cde2456d`。11个成员展开4,214,552B，其中保留的八份源文件逐字节不变。
+
+CPU ZIP SHA-256：`94357b19f5d9c5a25ba91d74b7d21470c96e37f2997b07096483580000bcdffa`，19成员展开598,860B。
+
+RTX 3080 ZIP SHA-256：`112f442b4351f190fa035da9f89af273f5bafa1888ef73c5694005d9d0ddb853`，17成员展开9,109,750B。
 
 [整机六版静态预览](https://github.com/Fairank/DesktopStats/blob/codex/open-model-references-v053/additional/whole-pc054/whole-pc-six054.png)使用同一模型和镜头，仅隐藏独立侧板以观察内部，原始数据和其他实体不删除。原版源材质较暗，纯线条的CPU／机箱风扇轮廓仍缺较多，图中明确标为待完善；这不是六版观感、拆装动效或原生画面的最终验收。
 
@@ -49,6 +55,8 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 
 整机另有四项新检查通过，覆盖延迟分派、固定来源核验、解码器许可哈希与冷导入不读取文件。最终ZIP实际通过公开`load_reference`入口，67个Mesh的25部件、33,383三角形和2,403,576B缓冲匹配；六版共用同一几何所有者，返回前ZIP关闭，使用后模型／Scene／全部Mesh引用释放。该次读取约0.075秒墙钟、0.078秒CPU，不等同于帧率或整款程序负担。
 
+CPU／GPU新增六项控制分别有通过证据：首批五项，之后新增一个Windows目录大小写优先级控制；原五项方法保持相同，没有冒称一次六项重跑。先检测原有散热器／风扇身份，再检测CC BY参考，避免解压后的`REFERENCE054.json`被Windows当成新`reference054.json`。最终两份CPU／GPU ZIP在修复后的公共入口实际读取，分别保留426／56,742三角形、2／27部件；六版共用只读缓冲，ZIP在模型使用前关闭，全部模型／Scene／Mesh引用释放。最后一批新控制加两份ZIP读取合计约0.103秒墙钟、0.094秒CPU，无图片解码、原生渲染或真实硬件访问。
+
 ## 原始许可与剩余工作
 
 风扇、风冷和水冷原作者：[Yoseph / PC Anatomy](https://github.com/Yoosseph/pc-anatomy/tree/9ca9c9635a19abd189cd9978396d26be7a5d0858)，固定源版本 `9ca9c9635a19abd189cd9978396d26be7a5d0858`。包内保留 PC Anatomy、Three.js、Canvas 的完整 MIT 许可与署名，并说明法线衍生修改。
@@ -57,6 +65,10 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 
 整机保留原始51个节点的层级变换、默认形变权重、全部67个绘制网格和33,383个三角形；25个语义部件可独立选择。源动画和形变仍保存在包中，运行时只读预转换的位置／法线，不运行Node、WASM或上游应用。当前没有播放原拆装时间线，也不把它的21段动画称为21套独立、经机械验证的插拔动作。原始尺寸与固定孔位尚未制造核验。
 
-项目原创应用代码仍遵守[非商用条款](../LICENSING.md)，这些第三方 MIT 素材继续遵守其原许可，不叠加本项目非商用限制，不加入本项目独占水印。
+CPU来源：[apleesee / PC CPU processor](https://sketchfab.com/3d-models/efb6b95b255c4a37a9661df178ea3bb3)。GPU来源：[_surovic_／samuelsurovic / GeForce RTX 3080 Graphics Card](https://sketchfab.com/3d-models/geforce-rtx-3080-graphics-card-8b947ee1bf7a4e3d8ffa1c24893ac160)。两件沿用各自[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)，完整署名、许可、原始文件、索引／材质／贴图与修改说明随ZIP保留。
+
+CPU保留全部426个源三角形；RTX 3080沿用此前已核的56,742三角形LOD及闲置顶点压紧结果，没有再次减面或删部件，不能宣称它仍是原105,530三角形完整精度。两件只在运行时读取已转换的不可变PN；原贴图、UV和切线留在包里，当前不显示法线贴图或完整PBR。源世界单位未校准，独立检视按界限自动取景，不能直接替换到机箱固定安装位或冒充已验证实物尺寸；RTX 3080也不自动匹配本机其他型号。
+
+项目原创应用代码仍遵守[非商用条款](../LICENSING.md)，这些第三方 MIT、CC BY 素材继续遵守其原许可，不叠加本项目非商用限制，不加入本项目独占水印。
 
 当前三维材质使用颜色与简化因子；原始贴图和光源数据保留在包内，尚未完整还原PBR、发光、透射。原框架极小面、制造尺寸与固定孔位未全部核验。逐品牌型号、完整整机装配、真实扣具／线缆／水路拆装、传感器与转速映射、CPU温度恢复及原生性能继续列在[内容差距清单](PCBS_CONTENT_GAPS053.md)，不因引入开源素材而自动算完成。

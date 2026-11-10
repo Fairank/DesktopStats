@@ -907,7 +907,7 @@
         "开源3D参考检视与零售配件装配分开；尚未支持任意GLB、全部已下载CC BY原件、完整PBR或原动画时间线。"
       ],
       "id": "github_optional_packs",
-      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。 054将已有MIT风扇、风冷、水冷实际接入手动ZIP三维检视，并继续接入含25个独立部件的MIT通用整机；六版复用只读几何，选择、聚焦、隐藏和关闭释放沿用现有窗口。首批源码与两份新ZIP已原子上传并逐文件读回，既有20条模型路径保留；这些通用参考不按零售精模或六种新产品计数，完整装配、材质、转速和原生验收仍未完成。",
+      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。 054将已有MIT风扇、风冷、水冷实际接入手动ZIP三维检视，并继续接入含25个独立部件的MIT通用整机；六版复用只读几何，选择、聚焦、隐藏和关闭释放沿用现有窗口。首批源码与两份新ZIP已原子上传并逐文件读回，既有20条模型路径保留；这些通用参考不按零售精模或六种新产品计数，完整装配、材质、转速和原生验收仍未完成。 随后将已下载的CC BY通用CPU与RTX 3080既有LOD接入同一公共ZIP入口，两份最终包实际读取、六版共享及关闭释放通过；完整原件、材质与贴图、署名许可和修改说明保留，贴图不在检视时解码。源世界单位未校准，当前只独立检视，不自动放入机箱或替换本机型号。Windows解压目录大小写冲突已修复，旧散热与风扇分派优先。",
       "native_acceptance_pending": false,
       "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
       "source_files": [
@@ -926,7 +926,8 @@
         "open_reference_models054.py",
         "open_reference_window054.py",
         "open_whole_pc054.py",
-        "docs/OPEN_REFERENCE_MODELS054.md"
+        "docs/OPEN_REFERENCE_MODELS054.md",
+        "open_ccby_components054.py"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -942,7 +943,8 @@
         "tests/test_open_reference_view054.py",
         "tests/test_open_reference_runtime054.py",
         "tests/test_open_reference_entry054.py",
-        "tests/test_open_whole_pc054.py"
+        "tests/test_open_whole_pc054.py",
+        "tests/test_open_ccby_components054.py"
       ]
     },
     {
@@ -2825,6 +2827,25 @@
     "whole_application_cpu_ram_gpu_tested": false,
     "new_verified_retail_fine_models": 0,
     "third_party_license_preserved": true,
-    "all_market_or_all_requirements_complete": false
+    "all_market_or_all_requirements_complete": false,
+    "whole_pc_published_source_commit": "c6b9b3003cb70858bd4fcf91849bc8425ba6b1bf",
+    "whole_pc_published_data_commit": "69ee2e5fef35c29da2a541d6eacb54781ac39c87",
+    "manual_reference_models": 6,
+    "ccby_models": [
+      "generic CPU by apleesee",
+      "RTX 3080 reviewed compact LOD by _surovic_ / samuelsurovic"
+    ],
+    "ccby_public_zip_consumers_passed": true,
+    "ccby_added_formal_controls": 6,
+    "ccby_formal_evidence": "first five passed; final casefold control passed separately, original five AST unchanged",
+    "ccby_final_zip_intake_worker_seconds": 0.10299,
+    "ccby_final_zip_intake_cpu_seconds": 0.09375,
+    "ccby_CPU_geometry_bytes": 30672,
+    "ccby_GPU_geometry_bytes": 4085424,
+    "ccby_GPU_triangles": 56742,
+    "ccby_GPU_is_prior_reviewed_LOD": true,
+    "ccby_source_units_calibrated": false,
+    "ccby_runtime_images_decoded_or_retained": false,
+    "ccby_runtime_automatic_assembly": false
   }
 }

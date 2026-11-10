@@ -2,7 +2,7 @@
 
 No directory discovery, profile, sensor, timer, Qt or decoder process is used.
 Original adapter code follows this project's LICENSE; each source model retains
-its upstream MIT grant and source-specific author notices. No project
+its upstream license grant and source-specific author notices. No project
 noncommercial restriction or ownership watermark is applied to imported data.
 """
 from array import array
@@ -498,6 +498,9 @@ def load_reference(path):
             return _component(package, package.read('component053.json', MAX_DOCUMENT_BYTES))
         if package.exists('models/generic-fan-derived.glb'):
             return _fan(package)
+        if package.exists('reference054.json'):
+            from open_ccby_components054 import from_package
+            return from_package(package)
         raise ModelError('未找到支持的开源参考模型；请选择对应完整模型包。')
     except ModelError:
         raise

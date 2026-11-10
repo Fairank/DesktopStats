@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 125101,
-      "sha256": "9da10c7d4f9ab4d9c4518309f213911850511b8524df5a3b63af27c7f1a30ee3"
+      "bytes": 125760,
+      "sha256": "4d3df7af19a33a02bf89bd26f993680240ac7a557e91959cdde98a5719827f3b"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -1554,8 +1554,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 35622,
-      "sha256": "916047cf6e07c0928f85f8b87d238f755c8fd5312d2f7fe0c208293c310c5912"
+      "bytes": 38094,
+      "sha256": "51c8a8f9801c810e5fb32530e355df1016f0daa47b91a23e0339bdec660b4b10"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -1634,8 +1634,8 @@
     },
     {
       "path": "docs/OPEN_REFERENCE_MODELS054.md",
-      "bytes": 8201,
-      "sha256": "2441b9e96bfc2a5f08590368ba5cba3354550b75852ec7d55c5a797fd5afa016"
+      "bytes": 10485,
+      "sha256": "2448115c9ca5f9b46a5d3750ba0624f84033cb84278c2188eda3909bf603b84c"
     },
     {
       "path": "docs/PCBS_COMPARISON.json",
@@ -1644,8 +1644,8 @@
     },
     {
       "path": "docs/PCBS_CONTENT_GAPS053.md",
-      "bytes": 6917,
-      "sha256": "ed43e8a8d47bf0176478c09c35962e7b2018340ead18fd879a3ecba3625584c3"
+      "bytes": 7435,
+      "sha256": "4a32452ebaaac3b7dce9997f28f7fa1d12d449e050c361045469f1c1188ddcb6"
     },
     {
       "path": "docs/PCBS_GAP_ANALYSIS.md",
@@ -1679,8 +1679,8 @@
     },
     {
       "path": "docs/REQUIREMENTS.json",
-      "bytes": 146766,
-      "sha256": "9c6e5074106d533c8ca8907409e7efd36cc3f5c1701b09aaf069850eea5e08e6"
+      "bytes": 148232,
+      "sha256": "afdbd8dde8f85d7316a6b74bedb518153f391553995cfcf767883f3487675a7c"
     },
     {
       "path": "docs/SCOPED_PERFORMANCE045.json",
@@ -3188,9 +3188,14 @@
       "sha256": "b7c0befe647e0cc6978897e0fba8799062f6a66dd127d89959f5469bfb749a5d"
     },
     {
+      "path": "open_ccby_components054.py",
+      "bytes": 10304,
+      "sha256": "1e0ce75c3f56b9e6167c5dd177895019229d07d1f8646d5b7e3046f2670b9c66"
+    },
+    {
       "path": "open_reference_models054.py",
-      "bytes": 25694,
-      "sha256": "38ac013a4b3fb9c9b2bd0a6b12c9f2f7a83ca3daf46265cb7fcf0bf91caf4568"
+      "bytes": 25848,
+      "sha256": "3faf0ba317c9948e34bb833ceec0a3a842bd87dda303f2780fd5e327662e84bd"
     },
     {
       "path": "open_reference_window054.py",
@@ -4458,6 +4463,11 @@
       "sha256": "1b1cd26db7f906f3ea426d802527c9eebc1b70b5b796cd7c024097909651ebba"
     },
     {
+      "path": "tests/test_open_ccby_components054.py",
+      "bytes": 5802,
+      "sha256": "83e67f49d9e16c03c3fb602222c7ebb9ac09f55410091fd8a023486a9e972205"
+    },
+    {
       "path": "tests/test_open_reference_entry054.py",
       "bytes": 4389,
       "sha256": "7040307439eedc4c2288f6ae26d1d198f566b4add4e11a7ead7132061cfa5376"
@@ -5094,8 +5104,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 37880,
-      "sha256": "e28ad5e8f2629c5f7c84eae0c2cc24c97647b723d32f124ad97fa54a5c8bfa07"
+      "bytes": 37959,
+      "sha256": "e25e033cf751a054e2024589c60b4d70f9a210258f0f1715bf3427e25a19279c"
     },
     {
       "path": "tools/build_collector.py",
