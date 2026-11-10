@@ -972,7 +972,7 @@ class Controller(AssemblyTools):
     screenChoices = Property(
         "QVariantList",
         lambda self: (
-            [dict(id="", label=self.tr("主显示器"))]
+            [dict(id="", label=self.tr("第二版目标屏幕" if secondary_active() else "主显示器"))]
             + [dict(id=s["id"], label=s.get("label", s["id"])) for s in self._preview_screens]
         ),
         notify=previewChanged,
@@ -2419,6 +2419,12 @@ class Controller(AssemblyTools):
                 )
             )
             rearrange = rearrange or force_rearrange
+            if value["reflow_on_resize"]:
+                rearrange = rearrange or any(
+                    before["widgets"].get(key, {}).get(field) != prefs.get(field)
+                    for key, prefs in value["widgets"].items()
+                    for field in ("width", "height")
+                )
             capacity = self.layout_error(value, rearrange)
             if capacity:
                 self.set_status(capacity, error=True)

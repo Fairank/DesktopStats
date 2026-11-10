@@ -52,6 +52,10 @@ class AssemblyWindow(QWidget):
         self._geometry_key=None;self._last_fan={};self._last_cpu_fan={};self._spec=None;self._renderer_error=False
         self._profile_key=None;self._profile_shapes=None
         self.selected_component='all';self.inspection_state=None;self._inspection_columns=0
+        self._motion_hidden_parts=set();self._motion_blocker_key=None;self._motion_blocker_cache=()
+        self._assembly_save_feedback=''
+        self._visibility_signature='';self._visibility_user_parts=set();self._visibility_families=set()
+        self._visibility_syncing=False;self._visibility_mask_key=None;self._visibility_notice=''
 
     def _build_inspector(self,controller,viewport_factory,dark):
         layout=QVBoxLayout(self);layout.setContentsMargins(18,16,18,14);layout.setSpacing(8)
@@ -66,6 +70,9 @@ class AssemblyWindow(QWidget):
             self.focus_choice.addItem(controller.tr(COMPONENT_LABELS[key]),key)
         header.addWidget(self.focus_choice)
         reset=QPushButton(controller.tr("重置视角"));header.addWidget(reset)
+        self.save_assembly_button=QPushButton(controller.tr('保存主机方案'))
+        self.save_assembly_button.setObjectName('assemblySavePlanButton')
+        self.save_assembly_button.clicked.connect(self._save_assembly);header.addWidget(self.save_assembly_button)
         layout.addLayout(header)
         self.hint=QLabel(controller.tr("拖动旋转 · 滚轮缩放")+" · "+controller.tr("单击部件查看状态")
                         +" · "+controller.tr("风扇按实际转速的 1/120 展示"))
@@ -150,9 +157,19 @@ class AssemblyWindow(QWidget):
         inspector_layout.addWidget(self.part_mount_release)
         self.part_assembly_hint=QLabel();self.part_assembly_hint.setWordWrap(True);self.part_assembly_hint.setTextFormat(Qt.PlainText)
         self.part_assembly_hint.setStyleSheet('font-size:11px;');inspector_layout.addWidget(self.part_assembly_hint)
+        self.hide_motion_blockers=QPushButton(controller.tr('隐藏遮挡（仅检视）'))
+        self.hide_motion_blockers.setObjectName('assemblyHideMotionBlockers')
+        self.hide_motion_blockers.setToolTip(controller.tr('仅暂时隐藏已确认挡住处理器的配件；不代表已拆下硬件。'))
+        inspector_layout.addWidget(self.hide_motion_blockers)
+        self.restore_motion_blockers=QPushButton(controller.tr('恢复临时遮挡'))
+        self.restore_motion_blockers.setObjectName('assemblyRestoreMotionBlockers')
+        self.restore_motion_blockers.setToolTip(controller.tr('只恢复本操作临时隐藏的配件，保留你原先隐藏的部件。'))
+        inspector_layout.addWidget(self.restore_motion_blockers)
+        self.hide_motion_blockers.clicked.connect(self._hide_motion_blockers)
+        self.restore_motion_blockers.clicked.connect(self._restore_motion_blockers)
         visibility_row=QHBoxLayout()
-        self.part_hidden=QCheckBox(controller.tr('暂时隐藏此部件'));self.part_hidden.setObjectName('assemblyPartHidden')
-        self.part_hidden.setToolTip(controller.tr('只改变当前检视，不删除模型，也不改变硬件监控。'))
+        self.part_hidden=QCheckBox(controller.tr('隐藏此部件'));self.part_hidden.setObjectName('assemblyPartHidden')
+        self.part_hidden.setToolTip(controller.tr('有独立标识的部件显示状态随主机方案保存；没有独立标识时仅临时检视。'))
         self.restore_hidden=QPushButton(controller.tr('全部显示'));self.restore_hidden.setObjectName('assemblyRestoreHidden')
         visibility_row.addWidget(self.part_hidden);visibility_row.addWidget(self.restore_hidden);inspector_layout.addLayout(visibility_row)
         self.part_remove.clicked.connect(lambda:self._preview_part_motion(True))
@@ -172,6 +189,8 @@ class AssemblyWindow(QWidget):
         inspector_scroll.setWidget(inspector);scene_row.addWidget(inspector_scroll);layout.addLayout(scene_row,1)
         tools=QHBoxLayout()
         self.exploded=QCheckBox(controller.tr("展开组件"));tools.addWidget(self.exploded)
+        self.cutaway=QCheckBox(controller.tr('查看内部'));self.cutaway.setObjectName('assemblyInspectionCutawayCheck')
+        tools.addWidget(self.cutaway)
         self.show_psu=QCheckBox(controller.tr('展示电源'));self.show_psu.setObjectName('assemblyShowPsuCheck')
         self.show_psu.setToolTip(controller.tr('有电源仓时临时移开遮罩；开放式机箱仍按实际布局显示。'));tools.addWidget(self.show_psu)
         self.animate=QCheckBox(controller.tr("风扇随转速转动"));tools.addWidget(self.animate)
@@ -180,6 +199,7 @@ class AssemblyWindow(QWidget):
         self.status.setWordWrap(True);self.status.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Preferred)
         layout.addLayout(tools)
         self.exploded.toggled.connect(lambda value:controller.changeAssembly("exploded",value))
+        self.cutaway.toggled.connect(lambda value:controller.changeAssembly('inspection_cutaway',value))
         self.show_psu.toggled.connect(lambda value:controller.changeAssembly('show_psu',value))
         self.animate.toggled.connect(lambda value:controller.changeAssembly("fan_animation",value))
         self.style_choice.currentIndexChanged.connect(
@@ -214,9 +234,35 @@ class AssemblyWindow(QWidget):
                             (controller.dataChanged,self.update_readings),
                             (controller.motionChanged,self.update_readings)):
             signal.connect(slot);self._connections.append((signal,slot))
+        save_signal=getattr(controller,'assemblySaveChanged',None)
+        if save_signal is not None:
+            save_signal.connect(self._sync_assembly_save);self._connections.append((save_signal,self._sync_assembly_save))
         self._viewer_active=True
         controller.set_assembly_viewer_active(True)
         self.synchronize(spec)
+        self._sync_assembly_save()
+
+    def _sync_assembly_save(self):
+        dirty=getattr(self.controller,'assemblyDirty',False)is True
+        if dirty and self._assembly_save_feedback=='saved':self._assembly_save_feedback=''
+        if hasattr(self,'save_assembly_button'):
+            self.save_assembly_button.setEnabled(dirty and self._can_interact()
+                and callable(getattr(self.controller,'saveAssembly',None)))
+            note=self.controller.tr('部件显示状态随主机方案保存；临时检视状态不保存（临时遮挡与拆装姿态）。')
+            if self._assembly_save_feedback=='failed':
+                reason=getattr(self.controller,'commitError','')
+                if type(reason)is str and reason:note+='\n'+reason
+            self.save_assembly_button.setToolTip(note)
+        if hasattr(self,'status'):self._update_status()
+
+    def _save_assembly(self):
+        if not self._can_interact():return False
+        method=getattr(self.controller,'saveAssembly',None)
+        try:passed=bool(callable(method)and method()is True)
+        except Exception:passed=False
+        self._assembly_save_feedback='saved'if passed else'failed'
+        self._sync_assembly_save()
+        return passed
 
     def _controller_changed(self):
         spec=self.controller.assembly_specification()
@@ -232,7 +278,7 @@ class AssemblyWindow(QWidget):
         self.style_choice.blockSignals(True)
         self.style_choice.setCurrentIndex(self.style_choice.findData(options.get('appearance_style','follow')))
         self.style_choice.blockSignals(False)
-        for control,field in ((self.exploded,'exploded'),(self.show_psu,'show_psu'),(self.animate,'fan_animation')):
+        for control,field in ((self.exploded,'exploded'),(self.cutaway,'inspection_cutaway'),(self.show_psu,'show_psu'),(self.animate,'fan_animation')):
             control.blockSignals(True);control.setChecked(options.get(field,False));control.blockSignals(False)
         self.selection_effects.blockSignals(True);self.selection_effects.setChecked(options.get('selection_effects',True))
         self.selection_effects.blockSignals(False)
@@ -244,6 +290,7 @@ class AssemblyWindow(QWidget):
     def _apply_scene(self,spec):
         """Shared bounded scene/profile cache, independent of window chrome."""
         if self._closing:return False
+        from assembly_cache_projection056 import cache_key_input,current_reference_metadata
         previous_spec=self._spec
         self._spec=copy.deepcopy(spec)
         geometry={key:spec[key] for key in ('case','gpu','cpu','memory','board')}
@@ -257,14 +304,14 @@ class AssemblyWindow(QWidget):
         detail=spec.get('detail_level','balanced')
         if detail not in ('eco','balanced','close'):detail='balanced'
         geometry['detail_level']=detail
-        signature=json.dumps(geometry,sort_keys=True,ensure_ascii=True)
+        signature=json.dumps(cache_key_input(geometry),sort_keys=True,ensure_ascii=True)
         if signature!=self._geometry_key:
-            profile_key=json.dumps({key:spec[key] for key in ('gpu','cpu','memory')},sort_keys=True,ensure_ascii=True)
+            profile_key=json.dumps(cache_key_input(spec,('gpu','cpu','memory')),sort_keys=True,ensure_ascii=True)
             if profile_key!=self._profile_key:
                 baked=bake_profiles(spec,self.engine)
                 self._profile_shapes={key:baked[key] for key in ('gpu','cpu','memory')}
                 self._profile_key=profile_key
-            else:baked=dict(spec,**copy.deepcopy(self._profile_shapes))
+            else:baked=dict(spec,**current_reference_metadata(copy.deepcopy(self._profile_shapes),spec))
             baked['visual_style']=resolved
             baked['detail_level']=detail
             try:self.viewport.set_scene(baked)
@@ -274,11 +321,109 @@ class AssemblyWindow(QWidget):
                 self.fit_notice.setVisible(True)
                 return False
             self._geometry_key=signature
+            self._visibility_mask_key=None
             self._refresh_part_choices()
             from assembly_parts import fit_messages
             notes=fit_messages(spec,getattr(getattr(self.viewport,'scene',None),'metadata',{}))
             self.fit_notice.setText(' · '.join(self.controller.tr(note) for note in notes))
             self.fit_notice.setVisible(bool(notes))
+        self._sync_saved_visibility(spec)
+        return True
+
+    def _visibility_exact_ids(self):
+        scene=getattr(self.viewport,'scene',None)
+        return frozenset(mesh.part_id for mesh in getattr(scene,'meshes',())
+                         if type(getattr(mesh,'part_id',None))is str and ':'in mesh.part_id)
+
+    def _visibility_key(self,signature,parts):
+        return(id(getattr(self.viewport,'scene',None)),signature,tuple(sorted(parts)),
+               tuple(sorted(self._motion_hidden_parts)),tuple(sorted(self._visibility_families)))
+
+    def _sync_saved_visibility(self,spec):
+        if self._visibility_syncing or getattr(self.viewport,'_reference_scene_mode',False):return
+        method=getattr(self.viewport,'set_hidden_parts',None)
+        if not callable(method):return
+        from assembly_visibility056 import selection_signature,selected_hidden
+        signature=selection_signature(spec);known=self._visibility_exact_ids()
+        if signature!=self._visibility_signature:
+            self._motion_hidden_parts.clear();self._visibility_families.clear()
+        parts=set(selected_hidden(spec.get('options',{}),spec,known))
+        self._motion_hidden_parts.intersection_update(known)
+        key=self._visibility_key(signature,parts)
+        if key==self._visibility_mask_key:return
+        requested=parts|self._motion_hidden_parts
+        if len(requested)+len(self._visibility_families)>64:
+            self._visibility_notice='显示状态过多，请先恢复临时遮挡。';return
+        if method(requested,temporary_families=self._visibility_families)is not True:
+            self._visibility_notice='未能应用部件显示状态。';return
+        self._visibility_signature=signature;self._visibility_user_parts=parts;self._visibility_mask_key=key
+        # A stale/missing-live-ID record is deliberately kept in the draft;
+        # selected_hidden only decides what this window may apply.
+
+    def _visibility_targets(self,target):
+        if target=='all':return (),False
+        meshes=getattr(getattr(self.viewport,'scene',None),'meshes',())
+        selected=[mesh for mesh in meshes if getattr(mesh,'part_id','')==target or mesh.component==target
+                  or target=='case'and mesh.component=='panel']
+        known=self._visibility_exact_ids()
+        if not selected:return (),False
+        if all(getattr(mesh,'part_id','')in known for mesh in selected):
+            return tuple(sorted({mesh.part_id for mesh in selected})),True
+        return (),False  # No invented case IDs or partial family persistence.
+
+    def _visibility_selection_hidden(self,state):
+        hidden=set(state.get('hidden_parts',()))
+        if self.selected_component in hidden:return True
+        targets,exact=self._visibility_targets(self.selected_component)
+        return bool(exact and targets and set(targets)<=hidden)
+
+    def _edit_visibility(self,parts,changed,*,clear_temporary=False):
+        if not self._can_interact()or self._visibility_syncing:return False
+        from assembly_visibility056 import selection_signature
+        signature=selection_signature(self._spec)
+        known=self._visibility_exact_ids();parts=set(parts)
+        if not signature or not parts<=known:return False
+        method=getattr(self.viewport,'set_hidden_parts',None)
+        change=getattr(self.controller,'changeAssemblyVisibility',None)
+        if not callable(method)or not callable(change):return False
+        old_user=set(self._visibility_user_parts);old_temp=set(self._motion_hidden_parts);old_families=set(self._visibility_families)
+        temp=set()if clear_temporary else old_temp-set(changed)
+        families=set()if clear_temporary else old_families
+        if len(parts|temp)+len(families)>64:return False
+        self._visibility_syncing=True
+        accepted=False
+        try:
+            self._visibility_user_parts=parts;self._motion_hidden_parts=temp;self._visibility_families=families
+            if method(parts|temp,temporary_families=families)is not True:return False
+            accepted=change(signature,sorted(parts))is True
+            if not accepted:return False
+            self._visibility_signature=signature;self._visibility_mask_key=self._visibility_key(signature,parts)
+            self._visibility_notice=''
+            return True
+        except Exception:return False
+        finally:
+            if not accepted:
+                self._visibility_user_parts=old_user;self._motion_hidden_parts=old_temp;self._visibility_families=old_families
+                try:method(old_user|old_temp,temporary_families=old_families)
+                except Exception:pass
+                self._visibility_mask_key=None;self._visibility_notice='配件已变更或显示设置未被接受，请等待视图同步。'
+            self._visibility_syncing=False
+
+    def _set_user_part_hidden(self,target,enabled):
+        if type(enabled)is not bool or not self._can_interact():return False
+        targets,exact=self._visibility_targets(target)
+        if exact:
+            parts=(self._visibility_user_parts|set(targets))if enabled else(self._visibility_user_parts-set(targets))
+            return self._edit_visibility(parts,targets)
+        # Keep existing case-surface/family inspection local and explicitly
+        # unsaved when the authored scene has no complete exact identity.
+        if target not in COMPONENT_LABELS or target=='all':return False
+        families=(self._visibility_families|{target})if enabled else(self._visibility_families-{target})
+        method=getattr(self.viewport,'set_hidden_parts',None)
+        if not callable(method)or len(self._visibility_user_parts|self._motion_hidden_parts)+len(families)>64:return False
+        if method(self._visibility_user_parts|self._motion_hidden_parts,temporary_families=families)is not True:return False
+        self._visibility_families=families;self._visibility_mask_key=None
+        self._visibility_notice='此项仅临时检视；缺少独立部件标识，不会保存。'
         return True
 
     def _apply_motion_options(self,options):
@@ -426,7 +571,9 @@ class AssemblyWindow(QWidget):
             self.part_retention.blockSignals(True);self.part_retention.setChecked(state.get('retention_hidden') is True);self.part_retention.blockSignals(False)
             self.part_retention.setEnabled(bool(state.get('allowed_opened_mesh_names')) and not state.get('active'))
             hidden=state.get('hidden_parts',())
-            self.part_hidden.blockSignals(True);self.part_hidden.setChecked(self.selected_component in hidden);self.part_hidden.blockSignals(False)
+            _,exact=self._visibility_targets(self.selected_component)
+            self.part_hidden.setText(self.controller.tr('隐藏此部件'if exact or self.selected_component=='all'else'临时隐藏（不保存）'))
+            self.part_hidden.blockSignals(True);self.part_hidden.setChecked(self._visibility_selection_hidden(state));self.part_hidden.blockSignals(False)
             self.part_hidden.setEnabled(self.selected_component!='all' and callable(getattr(self.viewport,'set_part_hidden',None)))
             self.restore_hidden.setEnabled(bool(hidden) or state.get('retention_hidden') is True or bool(state.get('released_mounts')))
             if state.get('available'):
@@ -436,7 +583,72 @@ class AssemblyWindow(QWidget):
                 if type(distance) in (int,float):note+=f' {distance:.1f} mm'
             else:note=self._part_assembly_reason(state)
             if self.part_assembly_hint.text()!=note:self.part_assembly_hint.setText(note)
+        self._sync_motion_visibility_actions(state)
         if hasattr(self,'status'):self._update_status()
+
+    def _motion_blocker_ids(self,state):
+        """Cache only exact source part identities; never scan vertex buffers."""
+        scene=getattr(self.viewport,'scene',None)
+        required=state.get('required_first',())
+        if (self._part_family()!='cpu' or state.get('reason')!='cooler_must_be_hidden_or_moved_first'
+                or not isinstance(required,(tuple,list)) or not 0<len(required)<=16
+                or any(type(key)is not str or not key or len(key)>160 for key in required)):
+            return ()
+        key=(id(scene),self.selected_component,tuple(required))
+        if key!=getattr(self,'_motion_blocker_key',None):
+            cooler_ids={mesh.part_id for mesh in getattr(scene,'meshes',())
+                        if getattr(mesh,'component','')=='cooler' and getattr(mesh,'part_id','')}
+            # No family-name fallback: only source-attested cooler IDs qualify.
+            self._motion_blocker_cache=tuple(dict.fromkeys(part for part in required if part in cooler_ids))
+            self._motion_blocker_key=key
+        return self._motion_blocker_cache
+
+    def _sync_motion_visibility_actions(self,state):
+        hidden=set(state.get('hidden_parts',()))
+        owned=getattr(self,'_motion_hidden_parts',set())
+        owned.intersection_update(hidden);self._motion_hidden_parts=owned
+        targets=tuple(part for part in self._motion_blocker_ids(state) if part not in hidden)
+        if hasattr(self,'hide_motion_blockers'):
+            self.hide_motion_blockers.setVisible(bool(targets))
+            self.hide_motion_blockers.setEnabled(bool(targets) and self._can_interact())
+            self.restore_motion_blockers.setVisible(bool(owned))
+            self.restore_motion_blockers.setEnabled(bool(owned) and self._can_interact())
+
+    def _hide_motion_blockers(self):
+        if not self._can_interact():return False
+        state=self._part_assembly_state();hidden=set(state.get('hidden_parts',()))
+        targets=tuple(part for part in self._motion_blocker_ids(state) if part not in hidden)
+        method=getattr(self.viewport,'set_part_hidden',None)
+        if not targets or not callable(method):return False
+        added=[];complete=True
+        try:
+            for part in targets:
+                if method(part,True)is not True:complete=False;break
+                added.append(part)
+        except Exception:complete=False
+        if not complete:
+            # Undo only this action's successful new masks, never user masks.
+            for part in tuple(reversed(added)):
+                try:
+                    if method(part,False)is True:added.remove(part)
+                except Exception:pass
+        self._motion_hidden_parts.update(added)
+        self._sync_part_assembly();self._sync_gpu_assembly()
+        return complete
+
+    def _restore_motion_blockers(self):
+        if not self._can_interact():return False
+        state=self._part_assembly_state();hidden=set(state.get('hidden_parts',()))
+        method=getattr(self.viewport,'set_part_hidden',None)
+        if not callable(method):return False
+        pending=set(self._motion_hidden_parts)&hidden;complete=True
+        for part in sorted(pending):
+            try:restored=method(part,False)is True
+            except Exception:restored=False
+            if restored:self._motion_hidden_parts.discard(part)
+            else:complete=False
+        self._sync_part_assembly();self._sync_gpu_assembly()
+        return complete
 
     def _preview_part_motion(self,removed):
         if not self._can_interact() or not self._part_assembly_state().get('available'):return False
@@ -444,13 +656,13 @@ class AssemblyWindow(QWidget):
         result=bool(callable(method) and method(removed));self._sync_part_assembly();return result
 
     def _toggle_part_hidden(self,enabled):
-        method=getattr(self.viewport,'set_part_hidden',None)
-        result=bool(self._can_interact() and callable(method) and method(self.selected_component,enabled))
+        result=self._set_user_part_hidden(self.selected_component,enabled)
         self._sync_part_assembly();self._sync_gpu_assembly();return result
 
     def _restore_hidden(self):
         method=getattr(self.viewport,'restore_hidden_parts',None)
-        result=bool(self._can_interact() and callable(method) and method())
+        result=self._edit_visibility((),(),clear_temporary=True)
+        if result and callable(method):method()
         self._sync_part_assembly();self._sync_gpu_assembly();return result
 
     def _toggle_retention(self,enabled):
@@ -551,6 +763,12 @@ class AssemblyWindow(QWidget):
                 text=self.controller.tr("风扇转速不可用，保持静止")
         else:
             text=self.controller.tr("比例示意 · 未知部件保留标记")
+        feedback=getattr(self,'_assembly_save_feedback','')
+        save_note=('主机方案保存失败'if feedback=='failed'else'主机方案未保存'
+                   if getattr(self.controller,'assemblyDirty',False)is True else'主机方案已保存'if feedback=='saved'else'')
+        if save_note:text+=' · '+self.controller.tr(save_note)
+        notice=getattr(self,'_visibility_notice','')
+        if notice:text+=' · '+self.controller.tr(notice)
         if self.status.text()!=text:self.status.setText(text)
 
     def _load_reference(self,index):
@@ -593,7 +811,7 @@ class AssemblyWindow(QWidget):
         self.viewport.advance_animations(elapsed)
 
     def showEvent(self,event):
-        super().showEvent(event);self.update_readings()
+        super().showEvent(event);self.update_readings();self._sync_assembly_save()
 
     def _can_interact(self):
         return (not self._closing and self.isVisible() and not self.isMinimized()

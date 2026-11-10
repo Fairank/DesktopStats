@@ -12,6 +12,7 @@ Item {
     property bool devicesOpen:false
     property bool positionOpen:false
     property bool displayOpen:false
+    property bool preciseModelSize:false
     property alias previewHost:previewHost
     readonly property real commonHeight:sizeRow.implicitHeight+(frameRow.visible?frameRow.implicitHeight+16:0)+(modelFields.visible?modelFields.implicitHeight+16:0)+(styleFields.visible?styleFields.implicitHeight+16:0)
     implicitHeight:fields.implicitHeight+(inlineMode?0:76)
@@ -20,6 +21,17 @@ Item {
     readonly property var prefs:root.config.widgets[widgetKey] || ({})
     readonly property bool glassSkin:root.prefs.skinFrame !== false && ["glass","frost","tint"].includes(root.prefs.skin || root.config.skin)
     readonly property bool hardwareModel:root.prefs.presentation === "hardware"
+    readonly property var modelSizeOptions: [
+        {id:"compact",label:ui.t("紧凑"),width:root.prefs.kind==="gpu"?280:240,height:240},
+        {id:"standard",label:ui.t("标准"),width:root.prefs.kind==="gpu"?320:280,height:root.prefs.kind==="gpu"?260:280},
+        {id:"large",label:ui.t("大图"),width:root.prefs.kind==="gpu"?440:360,height:root.prefs.kind==="gpu"?300:360},
+        {id:"custom",label:ui.t("自定义…")}
+    ]
+    readonly property string modelSizeId: {
+        if(preciseModelSize)return "custom"
+        const current=modelSizeOptions.find(option=>option.width===dimensions.width && option.height===dimensions.height)
+        return current?current.id:"custom"
+    }
     property var hardwareChoices:[]
     readonly property var dimensions:root.canvas.dimensions
     readonly property bool percentFirst:{const draft=root.config;const ids=root.canvas.contents;return !!ids.length && stats.metricInfoFor(widgetKey,ids[0]).unit==="%"}
@@ -34,9 +46,17 @@ Item {
     Component.onCompleted:refreshHealth()
     Connections {target:stats;enabled:root.active;function onDataChanged(){root.refreshHealth()}function onDraftChanged(){root.refreshHealth()}}
     function commitSize(field){if(field.userEdited && field.targetKey===widgetKey){if(!stats.setWidgetDimensions(widgetKey,Number(widthInput.text),Number(heightInput.text)))sizeNotice.text=ui.t("尺寸未更改，请检查输入范围与布局。");else sizeNotice.text=""}widthInput.userEdited=false;heightInput.userEdited=false;widthInput.text=Qt.binding(()=>String(root.dimensions.width || 168));heightInput.text=Qt.binding(()=>String(root.dimensions.height || 168))}
+    function chooseModelSize(selected){
+        if(selected==="custom"){preciseModelSize=true;return}
+        const option=modelSizeOptions.find(item=>item.id===selected)
+        if(!hardwareModel || !option || !option.width || !option.height)return
+        if(stats.setWidgetDimensions(widgetKey,option.width,option.height)){
+            preciseModelSize=false;sizeNotice.text=""
+        }else sizeNotice.text=ui.t("尺寸未更改，请检查输入范围与布局。")
+    }
     function revealFocus(){const win=root.Window.window,item=win?win.activeFocusItem:null,flick=scroll.contentItem;if(!item || !flick || flick.contentY===undefined)return;let ancestor=item;while(ancestor && ancestor!==fields)ancestor=ancestor.parent;if(ancestor!==fields)return;const p=item.mapToItem(fields,0,0);if(p.y<flick.contentY+5)flick.contentY=Math.max(0,p.y-5);else if(p.y+item.height>flick.contentY+scroll.availableHeight-5)flick.contentY=Math.min(Math.max(0,flick.contentHeight-scroll.availableHeight),p.y+item.height-scroll.availableHeight+5)}
     Connections {target:root.Window.window;function onActiveFocusItemChanged(){Qt.callLater(root.revealFocus)}}
-    onWidgetKeyChanged:{advanced=false;devicesOpen=false;positionOpen=false;displayOpen=false;refreshHealth()}
+    onWidgetKeyChanged:{advanced=false;devicesOpen=false;positionOpen=false;displayOpen=false;preciseModelSize=false;refreshHealth()}
     ColumnLayout {
         anchors.fill:parent;anchors.margins:root.inlineMode?0:16;spacing:12
         OptionTabs {visible:!root.inlineMode;Layout.fillWidth:true;options:[{id:"style",label:ui.t("外观"),objectName:"widgetStyleTab"},{id:"devices",label:ui.t("数据"),objectName:"widgetDevicesTab"},{id:"position",label:ui.t("位置"),objectName:"widgetPositionTab"}];value:root.section;onPicked:selected=>root.selectSection(selected)}
@@ -49,12 +69,14 @@ Item {
                 RowLayout {
                     id:sizeRow;Layout.fillWidth:true;spacing:8
                     Text {text:ui.t("尺寸");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:ui.captionSize}
-                    TextField {id:widthInput;objectName:"widgetWidthInput";Layout.preferredWidth:72;implicitHeight:34;property bool userEdited:false;property string targetKey:"";text:String(root.dimensions.width || 168);validator:IntValidator {bottom:80;top:4096}
+                    Choice {objectName:"widgetModelSizePreset";visible:root.hardwareModel && !root.preciseModelSize;Layout.preferredWidth:136;model:root.modelSizeOptions;value:root.modelSizeId;onPicked:selected=>root.chooseModelSize(selected)}
+                    TextField {id:widthInput;objectName:"widgetWidthInput";visible:!root.hardwareModel || root.preciseModelSize;Layout.preferredWidth:72;implicitHeight:34;property bool userEdited:false;property string targetKey:"";text:String(root.dimensions.width || 168);validator:IntValidator {bottom:80;top:4096}
                         font.family:ui.fontFamily;font.pixelSize:ui.bodySize;color:ui.ink;selectByMouse:true;onTextEdited:{userEdited=true;targetKey=root.widgetKey}onEditingFinished:root.commitSize(widthInput);Accessible.name:ui.t("宽度");background:GlassSurface {tone:"field";radius:7}}
-                    Text {text:"×";color:ui.muted}
-                    TextField {id:heightInput;objectName:"widgetHeightInput";Layout.preferredWidth:72;implicitHeight:34;property bool userEdited:false;property string targetKey:"";text:String(root.dimensions.height || 168);validator:IntValidator {bottom:32;top:2160}
+                    Text {text:"×";visible:!root.hardwareModel || root.preciseModelSize;color:ui.muted}
+                    TextField {id:heightInput;objectName:"widgetHeightInput";visible:!root.hardwareModel || root.preciseModelSize;Layout.preferredWidth:72;implicitHeight:34;property bool userEdited:false;property string targetKey:"";text:String(root.dimensions.height || 168);validator:IntValidator {bottom:32;top:2160}
                         font.family:ui.fontFamily;font.pixelSize:ui.bodySize;color:ui.ink;selectByMouse:true;onTextEdited:{userEdited=true;targetKey=root.widgetKey}onEditingFinished:root.commitSize(heightInput);Accessible.name:ui.t("高度");background:GlassSurface {tone:"field";radius:7}}
-                    Text {text:"px";color:ui.muted;font.family:ui.fontFamily;font.pixelSize:ui.metaSize}
+                    Text {text:"px";visible:!root.hardwareModel;color:ui.muted;font.family:ui.fontFamily;font.pixelSize:ui.metaSize}
+                    ActionButton {objectName:"widgetModelSizeReturn";visible:root.hardwareModel && root.preciseModelSize;text:ui.t("预设");quiet:true;implicitHeight:32;leftPadding:7;rightPadding:7;onClicked:{if(widthInput.userEdited)root.commitSize(widthInput);else if(heightInput.userEdited)root.commitSize(heightInput);root.preciseModelSize=false}}
                     Item {Layout.fillWidth:true}
                     Text {text:ui.t("显示标题");font.family:ui.fontFamily;font.pixelSize:ui.captionSize;color:ui.ink}
                     Toggle {objectName:"showTitleToggle";checked:root.prefs.show_title!==false;Accessible.name:ui.t("显示标题");onToggled:stats.changeWidget(root.widgetKey,"show_title",checked)}
@@ -154,7 +176,7 @@ value:root.prefs[device.modelData.field];onPicked:selected=>stats.changeWidget(r
                     visible:root.inlineMode?root.positionOpen:root.section==="position";Layout.fillWidth:true;spacing:14
                     FormField {Layout.fillWidth:true;label:ui.t("放置位置");Choice {objectName:"widgetDock";Layout.fillWidth:true;model:[{id:"free",label:ui.t("自由放置")},{id:"top",label:ui.t("屏幕顶部")}];value:root.prefs.dock || "free";onPicked:selected=>stats.changeWidget(root.widgetKey,"dock",selected)}}
                     FormField {Layout.fillWidth:true;label:ui.t("窗口层级");Choice {objectName:"widgetLayer";Layout.fillWidth:true;model:[{id:"desktop",label:ui.t("仅在桌面")},{id:"pinned",label:ui.t("始终置顶")}];value:root.prefs.layer || "desktop";onPicked:selected=>stats.changeWidget(root.widgetKey,"layer",selected)}}
-                    FormField {Layout.fillWidth:true;visible:root.prefs.dock==="top";label:ui.t("显示器");Choice {objectName:"widgetScreen";Layout.fillWidth:true;model:stats.screenChoices;value:root.prefs.screen_target || "";onPicked:selected=>stats.changeWidget(root.widgetKey,"screen_target",selected)}}
+                    FormField {Layout.fillWidth:true;label:ui.t("显示器");Choice {objectName:"widgetScreen";Layout.fillWidth:true;model:stats.screenChoices;value:root.prefs.screen_target || "";onPicked:selected=>stats.changeWidget(root.widgetKey,"screen_target",selected)}}
                     Text {Layout.fillWidth:true;text:ui.t(root.prefs.layer==="pinned"?"置顶会覆盖其他窗口的一小部分，可右击暂时隐藏。":"桌面层级位于其他窗口下方，不遮挡工作。");color:ui.muted;font.family:ui.fontFamily;font.pixelSize:11;wrapMode:Text.WordWrap}
                     SettingRow {Layout.fillWidth:true;visible:root.config.mode==="mixed";label:ui.t("放入组合面板");Toggle {checked:root.prefs.grouped || false;onToggled:stats.changeWidget(root.widgetKey,"grouped",checked)}}
                 }

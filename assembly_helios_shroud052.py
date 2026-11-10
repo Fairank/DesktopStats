@@ -94,15 +94,15 @@ def prepare(case,dimensions,tone):
             (rear+span*.40,bottom+(top-bottom)*.75),
             (rear+span*.04,bottom+(top-bottom)*.75))
     rear_vertices=_cover((rear,rear),split,bottom,top,-half,half,thickness,window)
-    front_vertices=_cover(split,(front,front),bottom,top,-half,half,thickness,None)
+    from assembly_helios_front055 import make_front,SOURCE_PAGE as FRONT_PART_SOURCE
+    front_mesh,front_material=make_front(dimensions,tone)
     glass=[];x=-half+thickness/2
     for at in range(0,len(values:=extrude(tuple((-z,y) for z,y in window),.8)),6):
         u,v,depth,nu,nv,nw=values[at:at+6];glass.extend((x+depth,v,-u,nw,nv,-nu))
     rear_mesh=Mesh(_NAMES['rear'],rear_vertices,tone,component='case',part_id=_IDS['rear'])
-    front_mesh=Mesh(_NAMES['front'],front_vertices,tone,component='case',part_id=_IDS['front'])
     pane=Mesh(_NAMES['window'],tuple(glass),(.32,.41,.47,.24),component='case',part_id=_IDS['window'])
     meta=dict(case_id=CASE_ID,method='official_separate_cover_and_window_photo_reference',
-        source_urls=(SOURCE,USER,SERVICE,PHOTO),user_manual_printed_pages=(6,31),service_manual_printed_page=30,
+        source_urls=(SOURCE,USER,SERVICE,PHOTO,FRONT_PART_SOURCE),user_manual_printed_pages=(6,31),service_manual_printed_page=30,
         service_part_number='90DC0020-B001JC',dimensions_verified=False,thickness_verified=False,
         positions_verified=False,window_shape_verified=False,cad_verified=False,thickness_mm=thickness,
         glass_thickness_mm=.8,glass_thickness_verified=False,
@@ -113,17 +113,25 @@ def prepare(case,dimensions,tone):
         official_front_fans=dict(count=3,size_mm=140,preinstalled=True,supported=True,source_url=SOURCE),
         chamber_is_solid=False,far_side_wall_added=False,
         assembly_state='awaiting_actual_cooling',parts=[_part('rear'),_part('window')],removed_parts=[],
-        exact_decoration_and_fixings_modeled=False,window_is_display=False,actual_power_sensor_bound=False)
+        exact_decoration_and_fixings_modeled=False,window_is_display=False,actual_power_sensor_bound=False,
+        _front_material055=front_material,
+        front_topology055=dict(reference_only=True,dimensions_verified=False,fixing_ears_placed=False,
+            mount_planes_changed=False,material_query='actual_f32_boundary_and_tetrahedra',
+            thickness_reference_mm=1.2,bridge_height_reference_mm=2.5))
     return (rear_mesh,pane),front_mesh,meta
 
 
-def _front_fan_intersection(meshes,meta):
+def _front_fan_intersection(meshes,meta,material=None,identity_issue=None):
     """Strict actual-triangle/material overlap, bounded and construction-only.
 
     The front L has two convex material regions: its thin side below the fold
     and its thin roof. The empty lower compartment is NOT an obstacle. This
     refuses an unresolved reference pose without asserting factory inability.
     """
+    if ('front_topology055' in meta or '_front_material055' in meta or identity_issue is not None):
+        from assembly_helios_front055 import query_front_fans
+        return query_front_fans(meshes,meta,material,identity_issue=identity_issue)
+    # Retain the original reference predicate for explicit legacy fixtures only.
     low,high=(meta['reference_bounds_world_mm'][k] for k in ('min','max'))
     thick=meta['thickness_mm'];under=high[1]-thick
     a,b=meta['split_world_z_bottom_top_mm'];slope=(b-a)/(high[1]-low[1]);intercept=a-slope*low[1]
@@ -160,7 +168,17 @@ def _front_fan_intersection(meshes,meta):
 def finish(meshes,front_candidate,cooling_meshes,cooling_meta,meta):
     """Resolve physical cover state before final anchors/aux/lighting indices."""
     if front_candidate is None or not meta:return meshes,meta,cooling_meta
-    result=deepcopy(meta);parts=cooling_meta.get('parts',()) if isinstance(cooling_meta,dict) else ()
+    material=meta.get('_front_material055');material_issue=None
+    if 'front_topology055' in meta or '_front_material055' in meta:
+        from assembly_helios_front055 import material_identity_problem
+        material_issue=material_identity_problem(front_candidate,material)
+    # Do not deepcopy/retain the temporary material graph in Scene metadata.
+    # The caller's input metadata stays unchanged, preserving the existing API.
+    result=deepcopy({key:value for key,value in meta.items() if key!='_front_material055'})
+    if 'front_topology055' in meta or '_front_material055' in meta:
+        result['front_material_review055']=dict(paired=material_issue is None,reason=material_issue,
+                                               manufacturing_fit_verified=False)
+    parts=cooling_meta.get('parts',()) if isinstance(cooling_meta,dict) else ()
     sources=[]
     for row in parts:
         if not isinstance(row,dict) or row.get('kind')!='radiator' or row.get('mount')!='front':continue
@@ -185,10 +203,11 @@ def finish(meshes,front_candidate,cooling_meshes,cooling_meta,meta):
     for model in dict.fromkeys(row.get('model_id') for row in parts if isinstance(row,dict) and row.get('kind')=='case_fan' and row.get('mount')=='front'):
         group=[row for row in parts if row.get('kind')=='case_fan' and row.get('mount')=='front' and row.get('model_id')==model]
         ids={row['id'] for row in group};actual=[m for m in cooling_meshes if m.part_id in ids]
-        proof=_front_fan_intersection(actual,meta)
+        proof=_front_fan_intersection(actual,meta,material=material,identity_issue=material_issue)
         if proof:
             withdrawn.update(ids);reviews.append(dict(model_id=model,mount='front',part_ids=sorted(ids),omitted_count=len(ids),
-                reason='case_cover_reference_clearance_unverified',conflicting_parts=[_IDS['front']],
+                reason=('front_cover_material_unverified' if proof.get('reference_review') else
+                        'case_cover_reference_clearance_unverified'),conflicting_parts=[_IDS['front']],
                 reference_only_conflict=True,real_product_support_rejected=False,source_url=SOURCE,proof=proof))
     if withdrawn:
         # The caller uses this detached metadata before final auxiliary routes

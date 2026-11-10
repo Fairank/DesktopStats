@@ -8,9 +8,22 @@ from assembly_config import detail_choices,style_choices
 from workspace_tools import WorkspaceTools
 
 
+def _fan_mount_capacity(mount, fan, caps):
+    """Known catalogue capacity only; None keeps an unverified choice intact."""
+    if not isinstance(fan, dict) or not isinstance(caps, (list, tuple)) or not caps:
+        return None
+    size = fan.get('size_mm')
+    if type(size) not in (int, float) or size <= 0:
+        return None
+    return max((row.get('count', 0) for row in caps if isinstance(row, dict)
+                and row.get('position') == mount and size in row.get('size_mm', ())
+                and type(row.get('count')) is int and row['count'] >= 0), default=0)
+
+
 class AssemblyTools(WorkspaceTools):
     assemblyChanged = Signal()
     assemblyCasesChanged = Signal()
+    assemblySaveChanged = Signal()
     assemblyViewRequested = Signal(dict)
     referenceModelImportRequested = Signal()
     hardwarePacksChanged = Signal()
@@ -35,6 +48,40 @@ class AssemblyTools(WorkspaceTools):
         self.draftChanged.connect(self._refresh_assembly)
         self.languageChanged.connect(self.assemblyCasesChanged)
         self.languageChanged.connect(self.hardwarePacksChanged)
+        self.savedChanged.connect(self.assemblySaveChanged.emit)
+        self.draftChanged.connect(self.assemblySaveChanged.emit)
+
+    assemblyDirty = Property(bool, lambda self: self._saved.get('assembly') != self._draft.get('assembly'),
+                             notify=assemblySaveChanged)
+
+    @Slot(result=bool)
+    def saveAssembly(self):
+        """Save only this assembly through the existing atomic commit path."""
+        if not self._commit(scope='assembly'):
+            return False
+        self._applied_status('主机方案已保存')
+        return True
+
+    @Slot(str, 'QVariantList', result=bool)
+    def changeAssemblyVisibility(self, signature, hidden_parts):
+        """Edit only an exact-part view mask for the current detached scene."""
+        from assembly_visibility056 import selection_signature, validate_visibility
+        try:
+            record = validate_visibility(dict(signature=signature, hidden_parts=hidden_parts))
+        except ValueError:
+            return False
+        # Never refresh/probe here. A stale displayed selection must synchronize
+        # before its mask can become part of the current draft.
+        spec = self._assembly_spec
+        if (not spec or self._assembly_firmware is None or self._assembly_modules is None
+                or component_fingerprint(self._data, self._draft, self._assembly_firmware,
+                                         self._assembly_modules) != self._assembly_fingerprint
+                or not signature or signature != selection_signature(spec)):
+            self.set_status('配件已变更，请等待视图同步后再修改显示状态。', error=True)
+            return False
+        value = copy.deepcopy(self._draft)
+        value['assembly']['part_visibility'] = record
+        return self.edit(value, merge_key=('assembly', 'part_visibility')) is True
 
     @Property('QVariantMap', notify=hardwarePacksChanged)
     def hardwarePacks(self):
@@ -304,6 +351,23 @@ class AssemblyTools(WorkspaceTools):
         from assembly_config import FAN_MOUNTS
         if mount not in FAN_MOUNTS:return
         value=copy.deepcopy(self._draft)
+        previous=next((row for row in value['assembly']['case_fans'] if row['mount']==mount),None)
+        # Only an explicit model change chooses a fitting count. Case changes,
+        # manual counts and direction edits never silently rewrite the group.
+        if model and (previous is None or previous['model']!=model):
+            from chassis_catalog import get_case
+            from cooling_catalog import get_fan
+            case_id=value['assembly'].get('case_model','')
+            case=get_case(case_id) if case_id else {}
+            cached=self._assembly_spec or {}
+            if not case_id and cached.get('options',{}).get('case_model')=='':
+                case=cached.get('case',{})
+            capacity=_fan_mount_capacity(mount,get_fan(model),(case or {}).get('fan_mounts'))
+            if capacity==0:
+                self.set_status('此安装位不支持所选风扇，请选择其它型号或安装位。',error=True)
+                return
+            if capacity is not None and type(count) is int and count>capacity:
+                count=capacity
         rows=[row for row in value['assembly']['case_fans'] if row['mount']!=mount]
         if model:rows.append(dict(model=model,mount=mount,count=count,direction=direction))
         value['assembly']['case_fans']=rows

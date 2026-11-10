@@ -50,17 +50,34 @@ ColumnLayout {
             || (root.config.case_fans || []).some(selected=>selected.mount===row.id))
     }
     function changeFan(mount,key,value) {const row=Object.assign({},fan(mount));row[key]=value;stats.changeAssemblyFan(mount,row.model,Number(row.count),row.direction)}
+    function fanCapacity(mount,model) {
+        const caps=caseInfo.fan_mounts || [],selected=(root.catalog.fans || []).find(row=>row.id===model)
+        if(!caps.length||!selected)return null
+        return caps.filter(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(selected.size_mm)>=0).reduce((n,row)=>Math.max(n,row.count),0)
+    }
+    function fanIssue(mount) {
+        const selected=root.fan(mount)
+        if(!selected.model)return ""
+        if(!(root.catalog.fans || []).some(row=>row.id===selected.model))return ui.t("当前风扇型号尚未收录，请重新选择。")
+        const capacity=root.fanCapacity(mount,selected.model)
+        if(capacity===null)return ""
+        if(capacity===0)return ui.t("此安装位不支持当前风扇，已保留选择；请选择其它型号或移除。")
+        if(Number(selected.count)>capacity)return ui.t("当前数量超出安装位容量，请调整数量。")
+        return ""
+    }
     function fansFor(mount) {
         const caps=caseInfo.fan_mounts || []
-        if(!caps.length)return root.catalog.fans || []
-        const preserved=mount==="above_psu_shroud"?root.fan(mount).model:""
-        return (root.catalog.fans || []).filter(row=>!row.id || row.id===preserved || caps.some(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(row.size_mm)>=0))
+        const preserved=root.fan(mount).model,all=root.catalog.fans || []
+        let rows=all.filter(row=>!row.id || row.id===preserved || !caps.length || caps.some(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(row.size_mm)>=0))
+        rows=rows.map(row=>row.id===preserved&&root.fanCapacity(mount,row.id)===0
+            ?Object.assign({},row,{label:row.label+" · "+ui.t("当前选择，安装不兼容")}):row)
+        if(preserved&&!rows.some(row=>row.id===preserved))rows=rows.concat([{id:preserved,label:ui.t("未收录型号")+" · "+preserved}])
+        return rows
     }
     function countsFor(mount,model) {
-        const caps=caseInfo.fan_mounts || [],fan=(root.catalog.fans || []).find(row=>row.id===model)
-        if(!caps.length||!fan)return root.counts
-        const max=caps.filter(cap=>cap.position===mount&&(cap.size_mm || []).indexOf(fan.size_mm)>=0).reduce((n,row)=>Math.max(n,row.count),0)
-        return root.counts.filter(row=>Number(row.id)<=max||(mount==="above_psu_shroud"&&Number(row.id)===Number(root.fan(mount).count)))
+        const capacity=root.fanCapacity(mount,model),current=Number(root.fan(mount).count)
+        if(capacity===null)return root.counts
+        return root.counts.filter(row=>Number(row.id)<=capacity||Number(row.id)===current)
     }
     SettingsGroup {
         Layout.fillWidth:true;title:ui.t("配件与安装")
@@ -202,6 +219,11 @@ ColumnLayout {
                     Choice {Layout.preferredWidth:70;model:root.countsFor(mount,selected.model);value:String(selected.count || 1);onPicked:value=>root.changeFan(mount,"count",Number(value))}
                     Choice {Layout.fillWidth:true;model:[{id:"intake",label:ui.t("进风")},{id:"exhaust",label:ui.t("排风")}]
                         value:selected.direction;onPicked:value=>root.changeFan(mount,"direction",value)}
+                }
+                Text {
+                    objectName:"assemblyFanSelectionIssue_"+mount
+                    Layout.fillWidth:true;visible:text.length>0;text:root.fanIssue(mount)
+                    font.family:ui.fontFamily;font.pixelSize:11;color:ui.muted;wrapMode:Text.WordWrap
                 }
             }
         }

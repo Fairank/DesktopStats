@@ -916,6 +916,39 @@ class AssemblyViewport(QOpenGLWidget):
         AssemblyViewport._refresh_part_plan(self)
         self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
 
+    def set_hidden_parts(self,parts,*,temporary_families=()):
+        """One exact-part mask application, separate from unsaved family inspection.
+
+        This never rebuilds/uploads a scene. The window alone binds persisted
+        exact IDs to its physical selection signature; family masks stay local.
+        """
+        if getattr(self,'_reference_scene_mode',False):return False
+        if not isinstance(parts,(tuple,list,set,frozenset))or not isinstance(temporary_families,(tuple,list,set,frozenset)):
+            return False
+        if len(parts)>64 or len(temporary_families)>len(ASSEMBLY_COMPONENTS):return False
+        if any(type(key)is not str or ':'not in key or len(key)>160 for key in parts):return False
+        if len(set(parts))!=len(parts)or len(set(temporary_families))!=len(temporary_families):return False
+        known={mesh.part_id for mesh in self._scene.meshes if getattr(mesh,'part_id','')}
+        if any(key not in known for key in parts):return False
+        if any(type(key)is not str or key=='all'or key not in ASSEMBLY_COMPONENTS
+               or not any(AssemblyRenderer._selected(mesh,key)for mesh in self._scene.meshes)
+               for key in temporary_families):return False
+        following=frozenset(parts)|frozenset(temporary_families)
+        if len(following)>64:return False
+        if following==getattr(self,'_hidden_parts',frozenset()):return True
+        try:connections=frozenset(hidden_connections(self._scene,following))
+        except(ValueError,TypeError,KeyError):return False
+        AssemblyViewport._reset_part_motion(self)
+        gpu=getattr(self,'_gpu_insertion',None)
+        if gpu and gpu.reset():self.gpuAssemblyChanged.emit()
+        self._hidden_parts=following;self._hidden_connection_names=connections
+        self._opened_retention_names=frozenset();self._released_mounts=frozenset()
+        effect=getattr(self,'_effect',None)
+        if effect is not None:effect.cancel()
+        self._renderer._pick_state=None
+        AssemblyViewport._refresh_part_plan(self)
+        self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
+
     def restore_hidden_parts(self):
         if not getattr(self,'_hidden_parts',()) and not getattr(self,'_opened_retention_names',()) and not getattr(self,'_released_mounts',()):return False
         AssemblyViewport._reset_part_motion(self)

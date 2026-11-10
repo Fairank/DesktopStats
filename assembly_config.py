@@ -12,7 +12,7 @@ DEFAULT_ASSEMBLY = dict(case_model="", exploded=False, inspection_cutaway=False,
                         secondary_radiator_model="",secondary_radiator_fan_model="",secondary_radiator_fan_layout="single",
                         loop_components_mode="reference",cpu_block_model="",pump_model="",pump_top_model="",
                         reservoir_model="",pump_reservoir_model="",fitting_model="",tubing_model="",
-                        loop_tubes_visible=True,loop_fittings={})
+                        loop_tubes_visible=True,loop_fittings={},part_visibility=dict(signature='',hidden_parts=[]))
 PART_FIELDS = ("board_model","cooler_model","cooler_mount","case_fans","psu_model","storage",
                "expansion_cards","cables_enabled","cable_color","fan_motion","gpu_waterblock","part_styles",
                "cpu_model","gpu_model","memory_models","lighting_preview","inspection_cutaway","show_psu",
@@ -152,4 +152,6 @@ def validate_assembly(value=None):
     if type(models) is not list or len(models)>8 or any(type(model) is not str or not _ID.fullmatch(model) for model in models):
         raise ValueError('配件列表设置不正确')
     result['memory_models']=list(models)
+    from assembly_visibility056 import validate_visibility
+    result['part_visibility']=validate_visibility(value.get('part_visibility'))
     return result

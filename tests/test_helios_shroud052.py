@@ -1,5 +1,6 @@
 """GX601 split cover/window and actual built-radiator assembly state."""
 import copy
+from collections import Counter
 import math
 import unittest
 from unittest.mock import patch
@@ -68,6 +69,13 @@ class HeliosShroud052Tests(unittest.TestCase):
                 volume+=(a[0]*(b[1]*c[2]-b[2]*c[1])+a[1]*(b[2]*c[0]-b[0]*c[2])+a[2]*(b[0]*c[1]-b[1]*c[0]))/6
                 edges.extend(zip(t,(*t[1:],t[0])))
             self.assertGreater(volume,0.)
+            if mesh.part_id=='case:psu-front-cover':
+                # 055 front uses an exact F32 boundary, with no T splits. Keep
+                # the stricter linear check bounded as the new detail grows.
+                directed=Counter(edges)
+                for (a,b),count in directed.items():
+                    self.assertEqual(count,1);self.assertEqual(directed[(b,a)],1)
+                continue
             # Exact geometric closure, including an edge split by a disjoint
             # cap triangulation. Do not confuse a T tessellation with a hole.
             for index,(a,b) in enumerate(edges):
@@ -169,7 +177,7 @@ class HeliosShroud052Tests(unittest.TestCase):
             self.assertEqual(sum(name=='allocate' for name,args in r.buffer.calls),1)
             r.close()
 
-    def test_front_p14_reference_conflict_withdraws_whole_group_but_preserves_factory_support_and_neighbors(self):
+    def test_front_120_140_fixed_roof_retains_factory_support_and_neighbor_groups(self):
         from assembly_parts import fit_messages
         baseline_neighbors={}
         for model in ('arctic-p12-pwm','arctic-p14-pwm'):
@@ -181,7 +189,7 @@ class HeliosShroud052Tests(unittest.TestCase):
                     cooling=dict(cpu_cooler=cooler,radiator_mount='top',case_fans=groups))
                 scene=build_scene(spec);meta=scene.metadata['cooling']
                 fronts=[m for m in scene.meshes if m.part_id.startswith('fans:front:')]
-                self.assertEqual(bool(fronts),model=='arctic-p12-pwm')
+                self.assertTrue(fronts)
                 neighbors={m.part_id for m in scene.meshes if m.component=='fans' and not m.part_id.startswith('fans:front:')}
                 if model=='arctic-p12-pwm':baseline_neighbors[cooler]=neighbors
                 self.assertEqual(neighbors,baseline_neighbors[cooler])
@@ -191,17 +199,14 @@ class HeliosShroud052Tests(unittest.TestCase):
                 self.assertEqual(meta['triangle_count'],sum(m.vertex_count//3 for m in scene.meshes if m.component in ('cooler','fans')))
                 self.assertEqual(scene.metadata['case_shroud']['assembly_state'],'both_covers_installed')
                 self.assertTrue(scene.metadata['case_shroud']['official_front_fans']['supported'])
-                if model=='arctic-p14-pwm':
-                    self.assertFalse(any(row.get('id','').startswith('fans:front:') for row in meta['parts']))
-                    self.assertFalse(any(row.get('part_id','').startswith('fans:front:') for row in meta['fans']))
-                    self.assertFalse(any(row.get('owner','').startswith('fans:front:') for row in meta['wire_anchors']))
-                    self.assertFalse(any(str(row.get(key,'')).startswith('fans:front:') for row in scene.metadata['auxiliary'].get('cables',()) for key in ('source_owner','target_owner')))
-                    reviews=[r for r in meta['rejected'] if r['reason']=='case_cover_reference_clearance_unverified']
-                    self.assertEqual(len(reviews),1);self.assertEqual(reviews[0]['omitted_count'],3)
-                    self.assertFalse(reviews[0]['real_product_support_rejected'])
-                    self.assertEqual(reviews[0]['part_ids'],['fans:front:0','fans:front:1','fans:front:2'])
-                    messages=fit_messages(spec,scene.metadata)
-                    self.assertIn('前置风扇与当前电源罩参考模型相交，整组暂未放入。机箱官方支持规格仍保留，需继续核实罩板位置。',messages)
+                ids={'fans:front:'+str(index)for index in range(3)}
+                self.assertTrue(ids.issubset({row.get('id')for row in meta['parts']}))
+                self.assertTrue(ids.issubset({row.get('part_id')for row in meta['fans']}))
+                self.assertFalse(scene.metadata['case_shroud']['front_fan_reference_clearance_reviews'])
+                self.assertFalse(any(r['reason']in('case_cover_reference_clearance_unverified','front_cover_material_unverified')
+                                     for r in meta['rejected']))
+                messages=fit_messages(spec,scene.metadata)
+                self.assertNotIn('前置风扇与当前电源罩参考模型相交，整组暂未放入。机箱官方支持规格仍保留，需继续核实罩板位置。',messages)
 
 
 if __name__=='__main__':unittest.main()

@@ -123,6 +123,7 @@ def fit_messages(spec,metadata):
         'air_cooler_case_reference_unavailable':'此机箱的风冷限高参考失配，整套散热器未放入。',
         'air_cooler_height_source_conflict':'厂商风冷限高资料有差异，当前无法确认这套散热器的安装，整套暂未放入。',
         'case_cover_reference_clearance_unverified':'前置风扇与当前电源罩参考模型相交，整组暂未放入。机箱官方支持规格仍保留，需继续核实罩板位置。',
+        'front_cover_material_unverified':'前盖与风扇的实体边界尚未完成核验，整组暂未放入；机箱官方支持规格仍保留。',
         'unsupported_psu_form':'所选电源规格尚不适配此机箱。',
         'no_expansion_slot':'所选扩展卡没有可用插槽。',
         'expansion_slot_obstructed':'所选扩展卡没有可用插槽。',

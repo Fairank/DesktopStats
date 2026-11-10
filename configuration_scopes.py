@@ -17,8 +17,12 @@ SCOPE_FIELDS = {
 
 
 def merge_scope(base, source, scope):
-    """Project one stable region, leaving all other branches independent."""
-    fields = SCOPE_FIELDS[scope]
+    """Project a UI region or the explicit assembly-only save transaction.
+
+    The internal assembly projection is deliberately outside SCOPE_FIELDS: the
+    settings UI still owns exactly three independent regions and dirty badges.
+    """
+    fields = frozenset({'assembly'}) if scope == 'assembly' else SCOPE_FIELDS[scope]
     result = copy.deepcopy(base)
     for field in fields:
         result[field] = copy.deepcopy(source[field])

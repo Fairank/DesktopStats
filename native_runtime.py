@@ -1737,6 +1737,10 @@ class Runtime(QObject):
             if secondary_active()and not Runtime.register_secondary_window(self,dialog):
                 dialog.reject();return
             dialog.move(area.x()+max(0,(area.width()-width)//2),area.y()+max(0,(area.height()-height)//2))
+            if secondary_active():
+                # A hidden QWidget can cache move() until Show. Synchronize its
+                # existing native owner before the strict native-monitor gate.
+                dialog.windowHandle().setGeometry(dialog.geometry())
             identifier,rect=Runtime._model_screen_fact(self,target)
             self._reference_file_dialog=dialog;self._reference_import_monitors={identifier:rect}
             chosen=[]
@@ -1830,6 +1834,10 @@ class Runtime(QObject):
                 window.close();return
             window.move(area.x() + max(0, (area.width() - width) // 2),
                         area.y() + max(0, (area.height() - height) // 2))
+            if secondary_active():
+                # A hidden QWidget can cache move() until Show. Synchronize its
+                # existing native owner before the strict native-monitor gate.
+                window.windowHandle().setGeometry(window.geometry())
             if current is None:
                 self._assembly_window = window
                 window.installEventFilter(self)
