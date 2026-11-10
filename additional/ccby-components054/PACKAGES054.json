@@ -1,0 +1,63 @@
+{
+  "format": "DesktopStats.optional-CCBY-reference-packages.054.1",
+  "packages": [
+    {
+      "id": "ccby-cpu-world-PN054",
+      "asset": "cpu",
+      "file": "DesktopStats-CCBY-CPU054.zip",
+      "bytes": 494297,
+      "sha256": "94357b19f5d9c5a25ba91d74b7d21470c96e37f2997b07096483580000bcdffa",
+      "members": 19,
+      "expanded_bytes": 598860,
+      "manifest_sha256": "733bfe8d09420baabc2520a3eda3a16b32a72755fde1e9061cfbb5b53f8db426",
+      "geometry_bytes": 30672,
+      "geometry_sha256": "eba6f94a56cef9af9d95843de902e7c35c7697c2071d0176e17cf827ded4371a",
+      "triangles": 426,
+      "draws": 2,
+      "source_urls": [
+        "https://sketchfab.com/3d-models/efb6b95b255c4a37a9661df178ea3bb3",
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "attribution": "PC CPU processor · apleesee · CC BY 4.0",
+      "license": "CC-BY-4.0",
+      "changes": "保留全部源三角形，未减面、重拓扑或删部件；仅将源世界坐标转为静态F32位置/法线，按显示比例乘1000；未核定制造尺寸。",
+      "parent_metadata_sha256": null,
+      "reviewed_LOD_indices_sha256": null,
+      "runtime_material_limit": "保留源材质、贴图、UV和切线文件；当前静态因子着色不显示贴图、法线贴图或完整PBR。",
+      "verified_manufacturer_SKU": false,
+      "mechanical_fit_verified": false,
+      "telemetry_bound": false,
+      "NC_override": false,
+      "watermark_applied": false
+    },
+    {
+      "id": "ccby-gpu-world-PN054",
+      "asset": "gpu",
+      "file": "DesktopStats-CCBY-RTX3080-compact054.zip",
+      "bytes": 3164655,
+      "sha256": "112f442b4351f190fa035da9f89af273f5bafa1888ef73c5694005d9d0ddb853",
+      "members": 17,
+      "expanded_bytes": 9109750,
+      "manifest_sha256": "bce17130167b2cfb6c2f92d991ab1342e1dbb2cec8da3e6efcb8eecaa68328f6",
+      "geometry_bytes": 4085424,
+      "geometry_sha256": "33869c0d61c124f26fb69fbbed457a850c51342e1c6cbd72571a78d619feb7d2",
+      "triangles": 56742,
+      "draws": 27,
+      "source_urls": [
+        "https://sketchfab.com/3d-models/geforce-rtx-3080-graphics-card-8b947ee1bf7a4e3d8ffa1c24893ac160",
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "attribution": "GeForce RTX 3080 Graphics Card · _surovic_ / samuelsurovic · CC BY 4.0",
+      "license": "CC-BY-4.0",
+      "changes": "已沿用此前审核的LOD及逐图元顶点压紧，未再次减面、重拓扑或删部件；仅将源世界坐标转为静态F32位置/法线，按显示比例乘1000；未核定制造尺寸。",
+      "parent_metadata_sha256": "7662c59ec1332c804eed0554a62bac663320d16899ab1bf1ec14f908b060e7b9",
+      "reviewed_LOD_indices_sha256": "01822c53e1b74bb7fc79ce78a63b4c7d556d780703966e6ed8db823055c20394",
+      "runtime_material_limit": "保留源材质、贴图、UV和切线文件；当前静态因子着色不显示贴图、法线贴图或完整PBR。",
+      "verified_manufacturer_SKU": false,
+      "mechanical_fit_verified": false,
+      "telemetry_bound": false,
+      "NC_override": false,
+      "watermark_applied": false
+    }
+  ]
+}
