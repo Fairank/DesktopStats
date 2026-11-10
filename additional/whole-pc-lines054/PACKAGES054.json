@@ -1,0 +1,55 @@
+{
+  "format": "DesktopStats.optional-reference-previews.054.1",
+  "packages": [],
+  "previews": [
+    {
+      "file": "whole-pc-six-canonical054.png",
+      "bytes": 386961,
+      "sha256": "bfe8686d327311edcb9a42010e23f798f8633848b0ef186b9f06e23c7dd89f33",
+      "offline_CPU_software_static": true,
+      "native_screenshot": false
+    },
+    {
+      "file": "whole-pc-face-crease054.png",
+      "bytes": 236406,
+      "sha256": "655f9ee76807583ec736900594b71cada518b8ba713edbeac244b31c90ee9042",
+      "offline_CPU_software_static": true,
+      "native_screenshot": false
+    }
+  ],
+  "source_attribution": "PC Components Manual · mdrayyanhussain2006 · MIT（上游README声明）；meshoptimizer · MIT",
+  "source_urls": [
+    "https://github.com/mdrayyanhussain2006/pc-components-manual/tree/1aabb3b1a537f47b2d91d83e9113cd9454013c1e"
+  ],
+  "source_license": "MIT (upstream README declaration)",
+  "source_model_manifest_sha256": "14d40b608c29cda125274d0a1f1d122733030861af5b42ccb919bd959505d52d",
+  "source_PN_sha256": "7600c2f1d9dcab468724ad9debad748da3939ab96e7f3e2a843ef4b24f5a0df5",
+  "source_code_sha256": {
+    "assembly_style.py": "5629c04bd9ec7c3e7f9548e725f46ddb6060cbab432b7975b0a323de90fa281c",
+    "open_reference_models054.py": "3faf0ba317c9948e34bb833ceec0a3a842bd87dda303f2780fd5e327662e84bd",
+    "assembly_geometry.py": "fd331d1162211938d859b8701ac9ed38f128ada6cb8cd660de740447ca22b480",
+    "top_bar_config.py": "9c96dfb6df67594ce9be454bfcd9a3117aeb91d0956701c6bfa5667b392c51c1"
+  },
+  "public_crease_proof_sha256": "f6791425f13c1deaa286f0b0fb1a4ae18cf286a68ce9da2f0d4c3efe8ffbde51",
+  "source_world_PN_unchanged": true,
+  "physical_draws": 67,
+  "triangles": 33383,
+  "logical_parts": 25,
+  "hidden_preview_parts": [
+    "reference:CASE_SIDE_PANEL"
+  ],
+  "rendering_scope": "Four canonical public edge builds/renders; miniature and accepted pure-line reused; static factor-only CPU renderer",
+  "accepted_fix_scope": "Only four source-attested MAT_FAN_PLASTIC draws use true face normals to classify line-style creases",
+  "quality_open": [
+    "CPU fan blade artwork detail",
+    "Six complete detailed visual styles",
+    "Native UI and resource measurements",
+    "Manufacturer SKU coverage",
+    "Real RPM and animation",
+    "Full PBR"
+  ],
+  "renderer_sha256": "322811c24132f5f3867d0030ffc750e1a149c6a5c106f433a3a49d7dfaaa38b1",
+  "no_new_geometry_or_ZIP": true,
+  "NC_override": false,
+  "own_watermark_applied": false
+}
