@@ -1,0 +1,41 @@
+{
+  "format": "DesktopStats.open-reference-downloads.054.1",
+  "source": "PC Anatomy / Yoseph",
+  "license": "MIT",
+  "packages": [
+    {
+      "id": "pc-anatomy-air-cooler-normal054",
+      "file": "DesktopStats-MIT-air-cooler054.zip",
+      "bytes": 564932,
+      "sha256": "546c330b40122064195871973dbe60147aeb0cddb496bb0cc3abee310b88dbe7",
+      "members": 27,
+      "expanded_bytes": 2638702,
+      "source_data_files": 24,
+      "compression_level": 1,
+      "CRC_readback": true,
+      "all_members_byte_exact": true,
+      "license": "MIT",
+      "retail_SKU_count": 0,
+      "source_reference_models": 1,
+      "component_sha256": "56e3ffa2127ddd5a416ae4aeb173891e10e4093dad61e99c6834e43486398092",
+      "geometry_sha256": "b107d61a9e641f58eb70bc00133acd581e1f963f3141aaabde8104f359266274"
+    },
+    {
+      "id": "pc-anatomy-aio-normal054",
+      "file": "DesktopStats-MIT-liquid-cooler054.zip",
+      "bytes": 787376,
+      "sha256": "e0b17b50b00dfbf5339ee9b7d8dd71fbae5f30d318f5024b77ce6f230f619487",
+      "members": 33,
+      "expanded_bytes": 4012777,
+      "source_data_files": 30,
+      "compression_level": 1,
+      "CRC_readback": true,
+      "all_members_byte_exact": true,
+      "license": "MIT",
+      "retail_SKU_count": 0,
+      "source_reference_models": 1,
+      "component_sha256": "8d47e1d8461d999c2a80a553ec7f77a2601c5062ac8cff7eb144a90c2301d5b7",
+      "geometry_sha256": "6db7a1f1150740a0b7be81da1fd97787fcf569a6e7971886099085abc9ebee60"
+    }
+  ]
+}
