@@ -1,0 +1,35 @@
+{
+  "format": "DesktopStats.optional-reference-packages.054.1",
+  "packages": [
+    {
+      "id": "whole-PC-basepose054",
+      "loader_model_id": "pc-components-manual-whole-PC-basepose054",
+      "file": "DesktopStats-MIT-whole-PC054.zip",
+      "bytes": 1395020,
+      "sha256": "c90db67c40404d674aae6f10f9f9b2e99de98f220d55919e3448b835cde2456d",
+      "members": 11,
+      "expanded_bytes": 4214552,
+      "source_manifest_sha256": "14d40b608c29cda125274d0a1f1d122733030861af5b42ccb919bd959505d52d",
+      "geometry_bytes": 2403576,
+      "draws": 67,
+      "triangles": 33383,
+      "logical_parts": 25,
+      "source_url": "https://github.com/mdrayyanhussain2006/pc-components-manual/tree/1aabb3b1a537f47b2d91d83e9113cd9454013c1e",
+      "license": "MIT (upstream README declaration)",
+      "attribution": "PC Components Manual · mdrayyanhussain2006 · MIT（上游README声明）；meshoptimizer · MIT",
+      "NC_override": false,
+      "watermark_applied": false
+    }
+  ],
+  "preview": {
+    "file": "whole-pc-six054.png",
+    "bytes": 348490,
+    "sha256": "a921025c3f4c1f9f602d1d939790c73bbedc0602c597b6c1c6cfef4027297978",
+    "offline_software_static": true,
+    "hidden_parts": [
+      "reference:CASE_SIDE_PANEL"
+    ],
+    "visual_accepted": false,
+    "quality_open": "Pure-line CPU and case-fan blade contours mostly absent"
+  }
+}
