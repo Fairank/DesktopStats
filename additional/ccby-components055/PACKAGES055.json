@@ -1,0 +1,97 @@
+{
+  "format": "DesktopStats.optional-reference-packages.055.1",
+  "runtime_loader": "open_reference_models054.load_reference",
+  "intake": "manual ZIP selection; one active model only",
+  "default_preload": false,
+  "automatic_identification": false,
+  "automatic_assembly": false,
+  "telemetry_bound": false,
+  "source_images_decoded": false,
+  "source_quality_accepted": false,
+  "units_verified": false,
+  "NC_override": false,
+  "exclusive_watermark_applied": false,
+  "styles": [
+    "miniature",
+    "cartoon",
+    "notebook_color",
+    "notebook_line",
+    "sticker",
+    "papercut"
+  ],
+  "formal_controls": {
+    "run": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "final_ZIP_public_consumers": {
+    "run": 2,
+    "passed": true
+  },
+  "packages": [
+    {
+      "asset": "storage",
+      "file": "DesktopStats-CCBY-Samsung990PRO-SSD055.zip",
+      "bytes": 888683,
+      "sha256": "7927ac45ac5aa821a8f3f536e0137ea72faee5bc25e7a01234ab9eb7a49fd307",
+      "expanded_bytes": 1183278,
+      "members": 19,
+      "manifest_sha256": "dbc376326f9c1b6214d2f3a398076a5a9a45e11ac3b8e60bd660ad1752475487",
+      "source_sha256": "6f0657646486fc7eb5cdc4cfc7b7ec2ea8bd767a04123d770340f55e85eaa22a",
+      "draws": 2,
+      "triangles": 2038,
+      "PN_bytes": 146736,
+      "attribution": "M.2 NVME SSD Samsung 990 Pro 1TB 3D model · lime.ball.animations · CC BY 4.0",
+      "source_url": "https://sketchfab.com/3d-models/41b7bfda7eab40f8b13330913fd66fc2",
+      "license": "CC-BY-4.0",
+      "all_source_triangles_retained": true,
+      "source_quality_in_all_three_representations": {
+        "exact_zero": 4,
+        "thin": 4,
+        "opposed": 1
+      },
+      "new_quality_transitions": 0,
+      "draws_describe_source_selection_partitions_not_verified_physical_parts": true,
+      "software_six_frame_appearance_passed": false,
+      "missing": "PN-only viewer has no original UV/albedo surface detail"
+    },
+    {
+      "asset": "psu",
+      "file": "DesktopStats-CCBY-generic-PSU055.zip",
+      "bytes": 357252,
+      "sha256": "3ced5dacea73adfb05e96e3ff817bb9539105826f059f2a82efe58a61cd429d0",
+      "expanded_bytes": 1873388,
+      "members": 15,
+      "manifest_sha256": "36006f94d97e8d80d93e465bec563e36e33d1151468259ef83a1a4e89762f86a",
+      "source_sha256": "60aa4b6c959cdc0cde5b99c7979066ac1dcfe24e8cdbe951f061cbec8db65f04",
+      "draws": 43,
+      "triangles": 12229,
+      "PN_bytes": 880488,
+      "attribution": "PSU Power Supply Unit · Groovex · CC BY 4.0",
+      "source_url": "https://sketchfab.com/3d-models/69ccd1be3a77497cb2acc9e39e7c52b3",
+      "license": "CC-BY-4.0",
+      "retail_brand_model_or_wattage_inferred": false,
+      "all_source_triangles_retained": true,
+      "source_quality_in_all_three_representations": {
+        "exact_zero": 18,
+        "thin": 18,
+        "opposed": 6
+      },
+      "new_quality_transitions": 0,
+      "draws_describe_source_selection_partitions_not_verified_physical_parts": true,
+      "unclassified_source_object": {
+        "name": "Cone_45",
+        "node": 78,
+        "mesh": 40,
+        "triangles": 62,
+        "removed": false
+      },
+      "software_six_frame_appearance_scope": "limited source structure; floating object and dense linework still open"
+    }
+  ],
+  "RAM": {
+    "approved": false,
+    "status": "HOLD: valid faces regress during F32 representation; translation-only candidates rejected"
+  }
+}

@@ -1,5 +1,7 @@
 # 可直接载入开发版的 MIT 三维参考
 
+[全部八件已适配的可选三维参考](../README.md)（含CPU、显卡、SSD与通用电源）；按需单件下载。
+
 已接入[DesktopStats 开发源码的“开源 3D”入口](https://github.com/Fairank/DesktopStats/blob/codex/fixed-mount-fit-v053/docs/OPEN_REFERENCE_MODELS054.md)。在包含本次改动的版本中打开“硬件型号图鉴 → 开源 3D → 载入模型 ZIP…”，无需解压。当前本机安装版未因此自动升级。
 
 | 下载 | 大小 | 结构 |
