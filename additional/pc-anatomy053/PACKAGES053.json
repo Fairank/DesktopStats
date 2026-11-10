@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "kind": "independent-open-reference-downloads",
+  "scope": "Two generic educational components; not retail SKUs, complete AIOs, or installed Stats models",
+  "packages": [
+    {
+      "file": "DesktopStats-open-fan-reference053.zip",
+      "bytes": 166183,
+      "sha256": "7d3617e62ea51b812bafb6f69ee695ced9d5f30619e16b4881fa88ceaaad7822",
+      "generic_components": 1,
+      "retail_model": null,
+      "files": 8,
+      "uncompressed_bytes": 629265,
+      "content": "Generic fan: frame/impeller, original export and normal/winding derivative GLBs",
+      "upstream": {
+        "repository": "https://github.com/Yoosseph/pc-anatomy",
+        "source_commit": "9ca9c9635a19abd189cd9978396d26be7a5d0858",
+        "author": "Yoseph",
+        "copyright_year": 2026,
+        "license": "MIT",
+        "source_paths": [
+          "lib/parts.ts",
+          "lib/geometry-cache.ts"
+        ]
+      },
+      "formats": [
+        "glTF2 GLB"
+      ],
+      "notices": [
+        "licenses/LICENSE-PC-ANATOMY.txt",
+        "licenses/LICENSE-THREE.txt"
+      ],
+      "source_units_and_mounts": "Reference only; manufacturing dimensions and mounting frame not calibrated",
+      "whole_model_quality_accepted": false,
+      "native_six_style_verified": false,
+      "installation_verified": false,
+      "real_RPM_verified": false,
+      "Stats_dspack": false,
+      "project_NC_overrides_upstream": false,
+      "project_ownership_watermark_added": false
+    },
+    {
+      "file": "DesktopStats-open-radiator-reference053.zip",
+      "bytes": 164686,
+      "sha256": "5fcdb5b35129b95ec164d764e46276d75630fcd408bfbced0d8bedb5a77dbd38",
+      "generic_components": 1,
+      "retail_model": null,
+      "files": 13,
+      "uncompressed_bytes": 718861,
+      "content": "Radiator subgroup only: indexed JSON/BIN and original procedural texture maps; no fans/pump/hoses/fittings",
+      "upstream": {
+        "repository": "https://github.com/Yoosseph/pc-anatomy",
+        "source_commit": "9ca9c9635a19abd189cd9978396d26be7a5d0858",
+        "author": "Yoseph",
+        "copyright_year": 2026,
+        "license": "MIT",
+        "source_paths": [
+          "lib/liquid.ts"
+        ]
+      },
+      "formats": [
+        "component053 JSON",
+        "indexed binary",
+        "PNG",
+        "RGBA"
+      ],
+      "notices": [
+        "LICENSE-PC-ANATOMY.txt",
+        "LICENSE-THREE.txt",
+        "LICENSE-CANVAS.txt"
+      ],
+      "source_units_and_mounts": "Reference only; manufacturing dimensions and mounting frame not calibrated",
+      "whole_model_quality_accepted": false,
+      "native_six_style_verified": false,
+      "installation_verified": false,
+      "real_RPM_verified": false,
+      "Stats_dspack": false,
+      "project_NC_overrides_upstream": false,
+      "project_ownership_watermark_added": false
+    }
+  ],
+  "license_policy": "Original upstream MIT rights and full notices remain in each ZIP; project NC terms do not replace them",
+  "checksums_scope": "ZIP bytes only; does not itself attest remote upload or runtime compatibility"
+}
