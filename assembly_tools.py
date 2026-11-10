@@ -12,6 +12,7 @@ class AssemblyTools(WorkspaceTools):
     assemblyChanged = Signal()
     assemblyCasesChanged = Signal()
     assemblyViewRequested = Signal(dict)
+    referenceModelImportRequested = Signal()
     hardwarePacksChanged = Signal()
     accessoryArtChanged = Signal()
 
@@ -62,6 +63,22 @@ class AssemblyTools(WorkspaceTools):
         from PySide6.QtGui import QDesktopServices
         from hardware_packs import PACK_RELEASE_URL
         QDesktopServices.openUrl(QUrl(PACK_RELEASE_URL))
+
+    @Slot()
+    def openReferenceModel(self):
+        """An explicit gallery request; the runtime checks its target screen."""
+        if not self._accessory_gallery_active:
+            return
+        self.referenceModelImportRequested.emit()
+
+    @Slot()
+    def openReferenceModelsDownload(self):
+        if not self._accessory_gallery_active:
+            return
+        from PySide6.QtCore import QUrl
+        from PySide6.QtGui import QDesktopServices
+        QDesktopServices.openUrl(QUrl(
+            'https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054'))
 
     @Slot()
     def importHardwarePack(self):

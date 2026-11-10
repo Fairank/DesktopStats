@@ -100,7 +100,8 @@ class _DesktopAwareTopBarManager(TopBarManager):
     """
     def _model_monitors(self):
         return {**getattr(self.runtime,'_model_guard_monitors',{}),
-                **getattr(self.runtime,'_assembly_guard_monitors',{})}
+                **getattr(self.runtime,'_assembly_guard_monitors',{}),
+                **getattr(self.runtime,'_reference_import_monitors',{})}
 
     def _queue_foreground_visibility(self):
         if self._model_monitors():
@@ -175,6 +176,7 @@ class Runtime(QObject):
         self._model_motion_refreshing = False
         self._assembly_guard_hidden = False
         self.controller.assemblyViewRequested.connect(self.open_assembly_view)
+        self.controller.referenceModelImportRequested.connect(self.import_reference_model)
         self.controller.set_motion_enabled(not headless and animations_enabled())
         self.frame_bridge = (
             None
@@ -1387,8 +1389,15 @@ class Runtime(QObject):
                     identifier,rect=Runtime._model_screen_fact(self,assembly.screen())
                     self._assembly_guard_monitors={identifier:rect}
                 except (AttributeError,RuntimeError,TypeError,ValueError):self._assembly_guard_monitors={}
+            dialog=getattr(self,'_reference_file_dialog',None)
+            if dialog is not None:
+                try:
+                    identifier,rect=Runtime._model_screen_fact(self,dialog.screen())
+                    self._reference_import_monitors={identifier:rect}
+                except (AttributeError,RuntimeError,TypeError,ValueError):self._reference_import_monitors={}
             bar=getattr(self,'top_bar',None)
-            all_monitors={**monitors,**getattr(self,'_assembly_guard_monitors',{})}
+            all_monitors={**monitors,**getattr(self,'_assembly_guard_monitors',{}),
+                          **getattr(self,'_reference_import_monitors',{})}
             if bar is not None:
                 if all_monitors and not stopped:bar._ensure_fullscreen_guard()
                 elif not getattr(bar,'hosts',{}):bar._stop_fullscreen_guard()
@@ -1411,6 +1420,7 @@ class Runtime(QObject):
                 allowed=bool(hardware and safe and window.isVisible() is True and window.isExposed() is True)
                 if window.property('modelMotionAllowed') is not allowed:window.setProperty('modelMotionAllowed',allowed)
             Runtime._update_assembly_motion(self,known,session,bar)
+            Runtime._update_reference_import_guard(self,known,session,bar)
         except Exception:
             # Any query/identity failure leaves every owned model quiet.
             for key,window in tuple(getattr(self,'widgets',{}).items()):
@@ -1421,6 +1431,7 @@ class Runtime(QObject):
                         self._model_guard_hidden[key]=window;window.hide()
                 except RuntimeError:pass
             Runtime._update_assembly_motion(self,False,False,getattr(self,'top_bar',None))
+            Runtime._update_reference_import_guard(self,False,False,getattr(self,'top_bar',None))
         finally:self._model_motion_refreshing=False
 
     def _update_assembly_motion(self,known,session,bar):
@@ -1430,10 +1441,11 @@ class Runtime(QObject):
         safe=bool(known and session and identifiers
                   and not set(identifiers)&set(getattr(bar,'_foreground_hidden_screens',())))
         desktop=getattr(window,'window_mode',None)=='desktop'
+        guarded=desktop or getattr(window,'window_mode',None)=='reference'
         minimized=window.isMinimized() is True
-        if desktop and not safe and window.isVisible() is True and not minimized:
+        if guarded and not safe and window.isVisible() is True and not minimized:
             self._assembly_guard_hidden=True;window.hide()
-        elif desktop and safe and getattr(self,'_assembly_guard_hidden',False) and not minimized:
+        elif guarded and safe and getattr(self,'_assembly_guard_hidden',False) and not minimized:
             self._assembly_guard_hidden=False
             window.setAttribute(Qt.WA_ShowWithoutActivating,True);window.showNormal();window.lower()
         allowed=bool(safe and window.isVisible() is True and not minimized
@@ -1442,7 +1454,18 @@ class Runtime(QObject):
         if not allowed:
             window._clock_active(False)
             window.viewport.set_motion_enabled(False)
-        window.update_readings()
+        if getattr(window,'window_mode',None)!='reference':window.update_readings()
+
+    def _update_reference_import_guard(self,known,session,bar):
+        dialog=getattr(self,'_reference_file_dialog',None)
+        if dialog is None:return
+        monitors=getattr(self,'_reference_import_monitors',{})
+        safe=bool(known and session and monitors
+                  and not set(monitors)&set(getattr(bar,'_foreground_hidden_screens',())))
+        if not safe:
+            try:dialog.reject()
+            except RuntimeError:
+                self._reference_file_dialog=None;self._reference_import_monitors={}
 
     def screen_inventory(self):
         primary = self.app.primaryScreen()
@@ -1512,6 +1535,67 @@ class Runtime(QObject):
                 and not getattr(guard,'failure',None) and not getattr(bar,'_fullscreen_guard_error',None)
                 and identifier not in getattr(bar,'_foreground_hidden_screens',()))
 
+    def import_reference_model(self):
+        """Open an owned, screen-bound chooser only after an explicit request."""
+        if self.headless or self.shutting_down:return
+        if getattr(self,'_reference_file_dialog',None) is not None:return
+        previous=getattr(self,'_assembly_guard_monitors',{}).copy()
+        dialog=None
+        try:
+            from assembly_config import target_screen
+            target=target_screen(self.app.screens(),self.controller.saved.get('top_bar',{}),
+                self.app.primaryScreen(),lambda screen:self.top_bar.adapter.screen_identity(screen).native_id)
+            if (target is None or _desktop_session_ready() is not True
+                    or not Runtime._assembly_target_allowed(self,target)):
+                self.controller.set_status('所选屏幕当前不适合打开模型。',error=True)
+                return
+            from PySide6.QtWidgets import QDialog,QFileDialog
+            # Runtime owns this chooser. A replaced model window must not
+            # destroy the chooser halfway through its fileSelected signal.
+            dialog=QFileDialog(None,self.controller.tr('载入开源三维模型'))
+            dialog.setOption(QFileDialog.Option.DontUseNativeDialog,True)
+            dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+            dialog.setNameFilter('DesktopStats open references (*.zip)')
+            dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+            dialog.setAttribute(Qt.WA_DeleteOnClose,True)
+            dialog.setAttribute(Qt.WA_ShowWithoutActivating,foreground_fullscreen() is not False)
+            area=target.availableGeometry()
+            width=min(760,max(280,area.width()-48));height=min(520,max(240,area.height()-48))
+            dialog.resize(width,height)
+            dialog.winId();dialog.windowHandle().setScreen(target)
+            dialog.move(area.x()+max(0,(area.width()-width)//2),area.y()+max(0,(area.height()-height)//2))
+            identifier,rect=Runtime._model_screen_fact(self,target)
+            self._reference_file_dialog=dialog;self._reference_import_monitors={identifier:rect}
+            chosen=[]
+            def selected(path):
+                if self._reference_file_dialog is not dialog:return
+                if type(path) is str:chosen[:]=[path]
+            def finished(result):
+                owns=getattr(self,'_reference_file_dialog',None) is dialog
+                if owns:self._reference_file_dialog=None;self._reference_import_monitors={}
+                try:
+                    # finished(Accepted) is delivered after the chooser hides;
+                    # fileSelected itself is emitted while it is still open.
+                    if owns and result==QDialog.DialogCode.Accepted and chosen:
+                        Runtime.open_reference_view(self,chosen[0])
+                finally:Runtime.refresh_model_motion(self,query=False)
+            dialog.fileSelected.connect(selected);dialog.finished.connect(finished)
+            dialog.windowHandle().screenChanged.connect(lambda *_:Runtime.refresh_model_motion(self))
+            if _desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target):
+                dialog.reject();return
+            dialog.open()
+        except Exception:
+            if dialog is not None:dialog.close()
+            logging.exception('Open reference chooser could not open')
+            self.controller.set_status('无法打开模型选择器。',error=True)
+        finally:
+            self._assembly_guard_monitors=previous
+            Runtime.refresh_model_motion(self)
+
+    def open_reference_view(self,path):
+        if type(path) is not str or not path or len(path)>32767:return
+        Runtime.open_assembly_view(self,dict(reference_package=path,options={'window_mode':'reference'}))
+
     def open_assembly_view(self, specification):
         """A user-requested native viewer, kept on the selected bar screen."""
         if self.headless or self.shutting_down:
@@ -1535,18 +1619,24 @@ class Runtime(QObject):
                 return
             options=specification.get('options',{})
             mode=options.get('window_mode','inspect') if isinstance(options,dict) else 'inspect'
-            mode=mode if type(mode) is str and mode in ('inspect','desktop') else 'inspect'
-            activate = mode=='inspect' and foreground_fullscreen() is False
+            mode=mode if type(mode) is str and mode in ('inspect','desktop','reference') else 'inspect'
+            if mode=='reference' and (type(specification.get('reference_package')) is not str
+                    or not specification['reference_package']):return
             current = self._assembly_window
             current_mode=getattr(current,'window_mode','inspect')
             if type(current_mode) is not str:current_mode='inspect'
-            if current is not None and current_mode!=mode:
+            if current is not None and (current_mode!=mode or mode=='reference'):
                 current.close()
                 if self._assembly_window is current:self._assembly_window=None
                 current=None;previous_monitors={}
             if current is not None:
                 current.synchronize(specification)
                 window = current
+            elif mode=='reference':
+                from open_reference_models054 import load_reference
+                from open_reference_window054 import OpenReferenceWindow
+                model=load_reference(Path(specification['reference_package']))
+                window=OpenReferenceWindow(model,self.controller)
             else:
                 from assembly_window import create_assembly_window
                 window = create_assembly_window(self.controller, self.engine, specification)
@@ -1575,6 +1665,7 @@ class Runtime(QObject):
             if _desktop_session_ready() is not True or not Runtime._assembly_target_allowed(self,target):
                 window.close();previous_monitors={};return
             admitted=True
+            activate = mode in ('inspect','reference') and foreground_fullscreen() is False
             window.setAttribute(Qt.WA_ShowWithoutActivating,not activate)
             window.showNormal()
             if mode=='desktop':window.lower()
@@ -1636,6 +1727,7 @@ class Runtime(QObject):
                 errors.append((label, error))
 
         for owner_name, method in (
+            ("_reference_file_dialog", "reject"),
             ("_assembly_window", "close"),
             ("cpu_temperature_launcher", "close"),
             ("settings_material", "close"), ("settings_blur", "close"),

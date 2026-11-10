@@ -44,8 +44,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 122717,
-      "sha256": "43472a174535e3aa28613cb60f158bdc8d95c69bfefb8e685b25c1be20201e02"
+      "bytes": 123653,
+      "sha256": "cf426449c51ef4438667411585974cac2d2a031ed4d54a8c9ba0728c1e6c7804"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
@@ -369,8 +369,8 @@
     },
     {
       "path": "assembly_tools.py",
-      "bytes": 15683,
-      "sha256": "7614a4d97a19f34d09d27516711480ee66f17839feb5c13d6bffbca0e1e90f8c"
+      "bytes": 16343,
+      "sha256": "de185605c6873ae0bdf51600594f245dab36cb3f64e55ea67936b75f4c564a12"
     },
     {
       "path": "assembly_torrent_shroud052.py",
@@ -379,8 +379,8 @@
     },
     {
       "path": "assembly_viewer.py",
-      "bytes": 71742,
-      "sha256": "83c5f24ce9e7f52720e5078463ba5fe28e5ac6c2d7b10befacd85546ab5b3254"
+      "bytes": 75710,
+      "sha256": "13e015c7aea9c8bcf40731844dd724b32ba6d4faf4b0d3bbacf5e5e506daf65b"
     },
     {
       "path": "assembly_visibility048.py",
@@ -1554,8 +1554,8 @@
     },
     {
       "path": "docs/DEVELOPMENT053.md",
-      "bytes": 29121,
-      "sha256": "e9dcab884413959faf6b5f3ff64e40bf70d3bf2b89a81e287945d685bc0165c2"
+      "bytes": 32205,
+      "sha256": "f074d949158d08693e29e0f7c985e1d58c961130d7fd725a3a9bfdab77293b21"
     },
     {
       "path": "docs/GPU_BLOCKS047.md",
@@ -1631,6 +1631,11 @@
       "path": "docs/OPEN_HARDWARE_SOURCES053.md",
       "bytes": 13847,
       "sha256": "3da15b214df1dfe2d9a024480b9577593ce820e3491612664bd58ca7a8892866"
+    },
+    {
+      "path": "docs/OPEN_REFERENCE_MODELS054.md",
+      "bytes": 5904,
+      "sha256": "70b29372489a0cf4ae272f390419f860b0d79dc7df4b9e19801bb58420b64031"
     },
     {
       "path": "docs/PCBS_COMPARISON.json",
@@ -2679,8 +2684,8 @@
     },
     {
       "path": "native/AccessoryGallery.qml",
-      "bytes": 21191,
-      "sha256": "b2bc1c166e0de6c075e80250f2b9481c2e6365b6de8348a6029fcd922f78562f"
+      "bytes": 22036,
+      "sha256": "e7ef9cf08209346fa8556ff7c7ff6d818500c7af61e7c568553a2df832f64468"
     },
     {
       "path": "native/AccessoryGlyph.qml",
@@ -3159,8 +3164,8 @@
     },
     {
       "path": "native_runtime.py",
-      "bytes": 89268,
-      "sha256": "913838b4ba4de0e791b97a53fbb7912db26b011e51e88bfcea1c0e8f0a0e75e0"
+      "bytes": 95125,
+      "sha256": "fde501ce6c6bb2da336eab752c691c9b855f6da4172fc573381342c70de90dae"
     },
     {
       "path": "native_selfcheck.py",
@@ -3181,6 +3186,16 @@
       "path": "network_snapshot.py",
       "bytes": 8260,
       "sha256": "b7c0befe647e0cc6978897e0fba8799062f6a66dd127d89959f5469bfb749a5d"
+    },
+    {
+      "path": "open_reference_models054.py",
+      "bytes": 25540,
+      "sha256": "571a4fb2a594f1fc56a7afd282d0f443edb0762d94f524ddb84cbfdd85fb8ab9"
+    },
+    {
+      "path": "open_reference_window054.py",
+      "bytes": 12008,
+      "sha256": "f611bb4b90ad0acfe21c8a6e57eba52b709e35de0482acd605f78d3f28c33195"
     },
     {
       "path": "presets.py",
@@ -4438,6 +4453,26 @@
       "sha256": "1b1cd26db7f906f3ea426d802527c9eebc1b70b5b796cd7c024097909651ebba"
     },
     {
+      "path": "tests/test_open_reference_entry054.py",
+      "bytes": 4389,
+      "sha256": "7040307439eedc4c2288f6ae26d1d198f566b4add4e11a7ead7132061cfa5376"
+    },
+    {
+      "path": "tests/test_open_reference_models054.py",
+      "bytes": 7585,
+      "sha256": "3bd6eb0732700e3252611bf1144926f5c8012d06e3f3bc714703e0d2ccf61861"
+    },
+    {
+      "path": "tests/test_open_reference_runtime054.py",
+      "bytes": 12307,
+      "sha256": "7d9540b1f0dc4c581395cd4b99ee1c26ac4a95a8d79e9949001dee65641e5269"
+    },
+    {
+      "path": "tests/test_open_reference_view054.py",
+      "bytes": 9574,
+      "sha256": "9bd5772475eb747218fa67ef2ef865886e6a328e29f585cf880bd341af762497"
+    },
+    {
       "path": "tests/test_pack_entry053.py",
       "bytes": 6288,
       "sha256": "1bfb2cc628bee319abbf6d70dcbf3b523fe3b40fca7548296d37cffc4eeb11fe"
@@ -5049,8 +5084,8 @@
     },
     {
       "path": "tools/build.py",
-      "bytes": 37523,
-      "sha256": "88f5dadce9bb518fc61f89532c0f6f50f3956c9dd691ff5f1f2e0c381b0d36f0"
+      "bytes": 37815,
+      "sha256": "92f3c825c4e4fdaca8993c67cc4472afa11ca30ef1648f6732080583eee83460"
     },
     {
       "path": "tools/build_collector.py",

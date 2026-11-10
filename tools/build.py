@@ -718,6 +718,13 @@ SOURCES = (
     'tests/fixtures/liquid_svg046_pre053.py.txt',
     'docs/DEVELOPMENT053.md',
     'docs/PCBS_CONTENT_GAPS053.md',
+    'open_reference_models054.py',
+    'open_reference_window054.py',
+    'tests/test_open_reference_models054.py',
+    'tests/test_open_reference_view054.py',
+    'tests/test_open_reference_runtime054.py',
+    'tests/test_open_reference_entry054.py',
+    'docs/OPEN_REFERENCE_MODELS054.md',
     'docs/OPEN_HARDWARE_SOURCES053.md',
     'docs/OPEN_HARDWARE_SOURCES053.json',
 )

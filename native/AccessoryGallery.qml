@@ -90,7 +90,7 @@ Popup {
     background:GlassSurface {tone:"window";radius:18}
     onAboutToShow:{stats.setAccessoryGalleryActive(true);selectedStyle=initialStyle;library=stats.accessoryCatalog;scheduleDemand()}
     onClosed:{demoMotion=false;clearGpuPreview();selectedGpuId="";library=({});stats.setAccessoryGalleryActive(false)}
-    onAboutToHide:clearGpuPreview()
+    onAboutToHide:{openReferenceMenu.close();clearGpuPreview()}
     onOwnerActiveChanged:if(!ownerActive){clearGpuPreview();close()}
     onVisibleChanged:{if(!visible)clearGpuPreview();else synchronizeGpuSelection();scheduleDemand()}
     onSelectedStyleChanged:{if(referenceMode)refreshGpuPreview();scheduleDemand()}
@@ -114,6 +114,19 @@ Popup {
                 objectName:"accessoryPacksDownload";text:ui.t("硬件扩展包");quiet:true
                 enabled:typeof stats.openHardwarePacksDownload==="function"
                 onClicked:stats.openHardwarePacksDownload()
+            }
+            ActionButton {
+                objectName:"accessoryOpenReference";text:ui.t("开源 3D");quiet:true
+                enabled:typeof stats.openReferenceModel==="function"
+                onClicked:openReferenceMenu.open()
+                Menu {
+                    id:openReferenceMenu
+                    objectName:"accessoryOpenReferenceMenu"
+                    MenuItem {objectName:"referenceLoadZip";text:ui.t("载入模型 ZIP…");onTriggered:stats.openReferenceModel()}
+                    MenuItem {objectName:"referenceDownloadModels";text:ui.t("下载开源模型");onTriggered:stats.openReferenceModelsDownload()}
+                }
+                ToolTip.visible:hovered
+                ToolTip.text:ui.t("手动载入开源模型，旋转和选择部件；关闭后释放。")
             }
             ActionButton {objectName:"accessoryDownload";visible:["case","cooler","psu","fan"].includes(root.category);text:ui.t("下载 SVG 图集");quiet:true;onClicked:stats.downloadAccessoryArt(root.category)
                 ToolTip.visible:hovered;ToolTip.text:ui.t("应用已自带这些外观；下载的是独立 SVG 图集。")}

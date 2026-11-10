@@ -6,6 +6,7 @@ Original code/art: PolyForm Noncommercial 1.0.0, see LICENSE and LICENSING.md.
 """
 import math
 import struct
+import sys
 import time
 
 from PySide6.QtCore import Qt, Signal
@@ -288,6 +289,23 @@ def surface_format():
     return fmt
 
 
+def renderer_vertex_bytes(scene):
+    """Pack reviewed typed PN owners without creating Python float objects.
+
+    Existing generated scenes retain their original packing path. Imported
+    reference geometry already owns readonly native-f32 PN buffers; on the
+    supported little-endian host those bytes are the actual vertex ABI.
+    """
+    if sys.byteorder=='little' and all(
+            isinstance(mesh.vertices,memoryview) and mesh.vertices.readonly
+            and type(mesh.vertices.obj) is bytes
+            and mesh.vertices.ndim==1 and mesh.vertices.format=='f'
+            and mesh.vertices.itemsize==4 and mesh.vertices.c_contiguous
+            for mesh in scene.meshes):
+        return b''.join(mesh.vertices.cast('B') for mesh in scene.meshes)
+    return vertex_bytes(scene)
+
+
 class AssemblyRenderer:
     """Small context-owned VBO renderer, also usable with a hidden FBO proof."""
     def __init__(self):
@@ -331,7 +349,7 @@ class AssemblyRenderer:
 
     def upload(self,scene,*,ink_focus='all'):
         if self.program is None:raise RuntimeError('3-D context is not ready')
-        self.scene=scene;raw=vertex_bytes(scene)
+        self.scene=scene;raw=renderer_vertex_bytes(scene)
         self._cutaway_hidden=hidden_mesh_ids(scene.meshes)
         self._psu_cover_ids=psu_cover_mesh_ids(scene.meshes)
         prefixes=tuple(row['mesh_prefix'] for row in scene.metadata.get('auxiliary',{}).get('cables',())
@@ -668,12 +686,17 @@ class AssemblyViewport(QOpenGLWidget):
     gpuAssemblyChanged=Signal()
     partAssemblyChanged=Signal()
 
-    def __init__(self,parent=None):
+    def __init__(self,parent=None,*,reference_scene=None):
         super().__init__(parent)
         self.setFormat(surface_format());self.setUpdateBehavior(QOpenGLWidget.NoPartialUpdate)
         self.setMinimumSize(320,240);self.setFocusPolicy(Qt.StrongFocus)
         self.setAccessibleName('3D assembly preview')
-        self._renderer=AssemblyRenderer();self._scene=build_scene({});self._pending=True
+        if reference_scene is not None and not isinstance(reference_scene,Scene):
+            raise TypeError('A reviewed reference Scene is required')
+        self._reference_scene_mode=reference_scene is not None
+        self._renderer=AssemblyRenderer()
+        self._scene=build_scene({}) if reference_scene is None else reference_scene
+        self._pending=True
         self._scene_cache=SceneCache()
         self._yaw=-34.;self._pitch=18.;self._zoom=1.;self._exploded=False;self._dark=False
         self._phase=0.;self._rpm=0.;self._fan_available=False;self._animate=False;self._active=False
@@ -682,14 +705,15 @@ class AssemblyViewport(QOpenGLWidget):
         self._real_cpu_rotor_parts=()
         self._demo=False;self._demo_phase=0.
         self._gpu_demo_phase=0.
-        self._gpu_insertion=GpuInsertion();self._gpu_plan=insertion_plan(self._scene)
+        self._gpu_insertion=GpuInsertion()
+        self._gpu_plan={} if self._reference_scene_mode else insertion_plan(self._scene)
         self._part_motion=PartMotion();self._part_planner=None;self._part_plan={};self._part_plan_key=None
         self._hidden_parts=frozenset();self._hidden_connection_names=frozenset();self._opened_retention_names=frozenset()
         self._released_mounts=frozenset()
         self._changing_scene=False
         self._fan_expiry=0.
         self._effect=SelectionEffect();self._effect_active=False;self._clock_active_state=False
-        self._motion=True;self._selection_effects=True
+        self._motion=not self._reference_scene_mode;self._selection_effects=not self._reference_scene_mode
         self._focus='all'
         self._selected='';self._press_position=None;self._dragging=False
         self._pointer=None;self._error='';self._closed=False
@@ -715,6 +739,8 @@ class AssemblyViewport(QOpenGLWidget):
                     framebuffer_cap='host controls widget dimensions; no multisampling or post-processing')
 
     def set_scene(self,spec):
+        if getattr(self,'_reference_scene_mode',False):
+            raise RuntimeError('A manual reference cannot build a monitored assembly')
         scene=self._scene_cache.build(spec)
         self._changing_scene=True
         try:
@@ -744,6 +770,36 @@ class AssemblyViewport(QOpenGLWidget):
         AssemblyViewport._refresh_part_plan(self)
         self.sceneChanged.emit();self._update_animation_state();self.update()
 
+    def set_reference_scene(self,scene):
+        """Replace only an explicitly opened reference; never run a factory.
+
+        Palette switches share the same immutable PN owners. A pending upload
+        happens on the next ordinary paint, with no timer or hidden preload.
+        Reference inspection deliberately has no mechanical or RPM actions.
+        """
+        if not getattr(self,'_reference_scene_mode',False):
+            raise RuntimeError('Only a manual reference viewport accepts this scene')
+        if not isinstance(scene,Scene) or not scene.meshes:
+            raise ValueError('A nonempty reviewed reference Scene is required')
+        self._effect.cancel();self._gpu_insertion.reset()
+        AssemblyViewport._reset_part_motion(self)
+        self._scene_cache.clear()
+        self._renderer.forget_scene()
+        self._scene=scene;self._pending=True;self._gpu_plan={}
+        self._motion=False;self._selection_effects=False;self._animate=False;self._demo=False
+        self._fan_available=False;self._cpu_available=False
+        self._cpu_tach_usable=False;self._real_cpu_rotor_parts=()
+        self._part_plan={};self._part_plan_key=None;self._part_planner=None
+        self._opened_retention_names=frozenset();self._released_mounts=frozenset()
+        self._hidden_parts=frozenset(key for key in self._hidden_parts
+            if any(mesh.part_id==key or mesh.component==key for mesh in scene.meshes))
+        self._hidden_connection_names=frozenset()
+        if self._selected and not any(AssemblyRenderer._selected(mesh,self._selected) for mesh in scene.meshes):
+            self._selected='';self.componentSelected.emit('all')
+        if self._focus!='all' and not any(AssemblyRenderer._selected(mesh,self._focus) for mesh in scene.meshes):
+            self._focus='all';self.focusChanged.emit('all')
+        self.sceneChanged.emit();self._update_animation_state();self.update()
+
     def set_transparent_background(self,enabled):
         """Real zero-alpha FBO clear, with no color-key or background quad."""
         enabled=enabled is True
@@ -764,10 +820,10 @@ class AssemblyViewport(QOpenGLWidget):
         self._update_animation_state()
 
     def set_fan_animation_enabled(self,enabled):
-        self._animate=enabled is True;self._update_animation_state()
+        self._animate=enabled is True and not getattr(self,'_reference_scene_mode',False);self._update_animation_state()
 
     def set_fan_motion(self,mode):
-        self._demo=mode=='demo';self._update_animation_state()
+        self._demo=mode=='demo' and not getattr(self,'_reference_scene_mode',False);self._update_animation_state()
 
     def set_cpu_fan_state(self,rpm,available=True,timestamp=None):
         valid=available is True and type(rpm) in (int,float) and math.isfinite(rpm) and 0<=rpm<=12000
@@ -896,7 +952,7 @@ class AssemblyViewport(QOpenGLWidget):
         self._update_animation_state();self.partAssemblyChanged.emit();self.update();return True
 
     def set_motion_enabled(self,enabled):
-        self._motion=enabled is True
+        self._motion=enabled is True and not getattr(self,'_reference_scene_mode',False)
         canceled=self._effect.cancel() if not self._motion else False
         self._update_animation_state()
         if canceled:self.update()
@@ -925,7 +981,7 @@ class AssemblyViewport(QOpenGLWidget):
         self._update_animation_state();self.gpuAssemblyChanged.emit();self.update();return True
 
     def set_selection_effects_enabled(self,enabled):
-        self._selection_effects=enabled is True
+        self._selection_effects=enabled is True and not getattr(self,'_reference_scene_mode',False)
         canceled=self._effect.cancel() if not self._selection_effects else False
         self._update_animation_state()
         if canceled:self.update()
@@ -989,6 +1045,7 @@ class AssemblyViewport(QOpenGLWidget):
         return fan_changed or effect_changed or insertion_changed or part_changed
 
     def set_exploded(self,enabled):
+        if getattr(self,'_reference_scene_mode',False):return
         if self._exploded!=(enabled is True):
             self._exploded=enabled is True;self._update_animation_state();self.update()
 
@@ -1208,6 +1265,15 @@ class AssemblyViewport(QOpenGLWidget):
         self.makeCurrent();self._renderer.close();self.doneCurrent();self._pending=True
 
     def closeEvent(self,event):
+        if getattr(self,'_reference_scene_mode',False):
+            self._closed=True
+            try:
+                self._update_animation_state();self.release_resources()
+            finally:
+                # Context loss may prevent native deletion. Never let it keep
+                # source mesh owners alive in a closed reference window.
+                self._retire_cpu_scene();super().closeEvent(event)
+            return
         self._closed=True;self._update_animation_state();self.release_resources();self._retire_cpu_scene();super().closeEvent(event)
 
     def _retire_cpu_scene(self):
