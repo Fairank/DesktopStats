@@ -24,6 +24,12 @@
 插画不提供商标授权，不表示硬件厂商参与、认可或背书。参考来源用于核对外观和
 规格，厂商产品照片不作为本项目原创插画重新授权或随源码包发布。
 
+手动下载的第三方三维参考及其衍生模型另按原许可：PC Anatomy与PC Components
+Manual的MIT参考、各作者署名的CC BY 4.0参考，均保留各自来源、通知与修改说明。
+本项目的非商业限制不覆盖这些模型数据，重新配色或转换为位置／法线缓冲也不改变
+其原许可；发行时不加本项目独占水印。原创适配和检视代码仍属应用代码范围。
+具体来源、可读取包及未完成项见[开源三维模型说明](docs/OPEN_REFERENCE_MODELS054.md)。
+
 公开 GitHub 仓库允许浏览、fork 和下载。许可证约束使用权，不能从技术上阻止
 下载、复制或违规使用，也不保证侵权行为不会发生。需要商业授权时，请联系仓库
 所有者 Fairank；仓库公开、下载免费或提交 issue 均不构成商业授权。
@@ -77,6 +83,12 @@ Hardware product names and trademarks remain with their respective owners.
   notice and prior MIT permissions; its unchanged build inputs keep their
   existing rights. This narrow exception does not license the new main
   application under MIT.
+- **Optional reference model data:** PC Anatomy and PC Components Manual models
+  retain their source MIT declarations and notices. Separately attributed CC BY
+  4.0 models retain their own credits and license. Source files and model-data
+  derivatives are not covered by this application's noncommercial restriction
+  or an exclusive project watermark. Original adapter/viewer code remains
+  application code. See [model sources and limits](docs/OPEN_REFERENCE_MODELS054.md).
 - **Niangao artwork:** the existing FieldDock identity and previously distributed
   artwork retain the applicable upstream/prior MIT permissions. Adding a status
   curve does not revoke rights in the original face. Provenance is documented in

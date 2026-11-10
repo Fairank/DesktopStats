@@ -903,10 +903,11 @@
       "gaps": [
         "集合、类别、品牌文件可能含同型号，不能重复安装或把分组文件数计作产品数。",
         "机箱／GPU／内存／主板／电源／存储等运行时可选包仍缺；HTML／SVG图鉴不是可导入数据包。",
-        "0.51数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。"
+        "0.51数据路径与离屏检查不代表已安装原生验收，模块／作者脚本内存不等于整款Stats常驻占用。",
+        "开源3D参考检视与零售配件装配分开；尚未支持任意GLB、全部已下载CC BY原件、完整PBR或原动画时间线。"
       ],
       "id": "github_optional_packs",
-      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。",
+      "implementation": "可选规模统一采用上方当前结构化统计；集合、类别、品牌文件是有重叠的替代下载，不重复计产品。原15水路包、32冷却包和2CPU包保留，0.47增加的GPU冷头4包含12个独立参考。未装目录默认不导入，已选记录共享8条LRU，无新增采样；内置离线图集不读用户包。 0.51另提供固定数据提交的10项签名预览／独立GLB候选及压缩包入口，不塞应用基础包、不在启动预载；这是展示资产，不是新增10个产品或可导入硬件data pack。 0.52另提供固定数据提交f09e0b74815dbbd81233ea8f1e62335292f0df28的38文件手动下载：13个PNG／GIF／GLB标识副本、模型ZIP9成员和静态图集ZIP7成员，Stats不默认加载。它们是展示资产，不是13个新产品或可导入.dspack；运行时其它品类选装缺口仍保留。 054将已有MIT风扇、风冷、水冷实际接入手动ZIP三维检视，并继续接入含25个独立部件的MIT通用整机；六版复用只读几何，选择、聚焦、隐藏和关闭释放沿用现有窗口。首批源码与两份新ZIP已原子上传并逐文件读回，既有20条模型路径保留；这些通用参考不按零售精模或六种新产品计数，完整装配、材质、转速和原生验收仍未完成。",
       "native_acceptance_pending": false,
       "requirement": "GitHub按类拓展包下载，自选喜欢的模型且轻量，不预载全部网格。",
       "source_files": [
@@ -921,7 +922,11 @@
         "tools/export_loop_packs046.py",
         "docs/LOOP_PACKS_INDEX.json",
         "liquid_gpu_schema047.py",
-        "docs/ARTWORK051_INDEX.json"
+        "docs/ARTWORK051_INDEX.json",
+        "open_reference_models054.py",
+        "open_reference_window054.py",
+        "open_whole_pc054.py",
+        "docs/OPEN_REFERENCE_MODELS054.md"
       ],
       "status": "partial",
       "status_label": "部分完成",
@@ -932,7 +937,12 @@
         "tests/test_cooling_pack_schema045.py",
         "tests/test_cooling_pack_runtime045.py",
         "tests/test_liquid_geometry046.py",
-        "tests/test_liquid_gpu_blocks047.py"
+        "tests/test_liquid_gpu_blocks047.py",
+        "tests/test_open_reference_models054.py",
+        "tests/test_open_reference_view054.py",
+        "tests/test_open_reference_runtime054.py",
+        "tests/test_open_reference_entry054.py",
+        "tests/test_open_whole_pc054.py"
       ]
     },
     {
@@ -2788,5 +2798,33 @@
       "全部组合碰撞与净空",
       "新版实际安装与整款程序资源实测"
     ]
+  },
+  "open_reference_054": {
+    "date": "2026-11-10",
+    "first_source_commit": "bcec84b02b0e11df866149ef16b1e0771a60ca94",
+    "first_data_commit": "712e5db0387f2d48ea59f5bbc3a2566b42903b32",
+    "first_manual_models": [
+      "MIT generic fan",
+      "MIT generic air cooler",
+      "MIT generic AIO"
+    ],
+    "first_formal_targeted_checks": 21,
+    "whole_pc_source_commit": "1aabb3b1a537f47b2d91d83e9113cd9454013c1e",
+    "whole_pc_parts": 25,
+    "whole_pc_draws": 67,
+    "whole_pc_triangles": 33383,
+    "whole_pc_geometry_bytes": 2403576,
+    "whole_pc_private_basepose_consumer_passed": true,
+    "whole_pc_public_zip_consumer_passed": true,
+    "whole_pc_added_formal_checks": 4,
+    "whole_pc_pure_line_fan_outline_quality_open": true,
+    "six_styles_share_physical_buffers": true,
+    "native_gl_tested": false,
+    "installed": false,
+    "restarted": false,
+    "whole_application_cpu_ram_gpu_tested": false,
+    "new_verified_retail_fine_models": 0,
+    "third_party_license_preserved": true,
+    "all_market_or_all_requirements_complete": false
   }
 }

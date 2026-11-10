@@ -1,12 +1,12 @@
 # 直接使用开源三维模型
 
-本轮把已取得的 MIT 模型接入实际检视代码。开发源码提供“开源 3D”入口，能够读取下面三件参考、旋转缩放、点选部件、聚焦、隐藏和恢复，并切换原有六套风格。它们不再只用于生成说明图片。
+本轮把已取得的 MIT 模型接入实际检视代码。开发源码提供“开源 3D”入口，能够读取风扇、风冷、水冷及通用整机四件参考、旋转缩放、点选部件、聚焦、隐藏和恢复，并切换原有六套风格。它们不再只用于生成说明图片。
 
 **本机正在运行的 Stats 没有被替换。** 这些入口属于包含本次改动的新构建；游戏期间未安装、重启或显示原生测试窗。真实桌面上的原生画面与驱动占用还待验证。
 
 ## 下载与打开
 
-1. 从[开源模型下载目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054)下载风冷或水冷 ZIP。通用风扇沿用[此前的 MIT 风扇包](https://github.com/Fairank/DesktopStats/blob/861420f4b2457cd2a661e99fd73cc4dd47349b20/additional/pc-anatomy053/DesktopStats-open-fan-reference053.zip)。
+1. 从[散热模型目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/pc-anatomy054)下载风冷或水冷 ZIP，或从[整机目录](https://github.com/Fairank/DesktopStats/tree/codex/open-model-references-v053/additional/whole-pc054)下载 `DesktopStats-MIT-whole-PC054.zip`。通用风扇沿用[此前的 MIT 风扇包](https://github.com/Fairank/DesktopStats/blob/861420f4b2457cd2a661e99fd73cc4dd47349b20/additional/pc-anatomy053/DesktopStats-open-fan-reference053.zip)。
 2. 在包含本次改动的版本中打开“硬件型号图鉴 → 开源 3D → 载入模型 ZIP…”。无需解压、导入原有型号库或修改硬件设置。
 3. 拖动旋转、滚轮缩放；单击模型或从部件列表选择，按需开启“只看所选”或“隐藏所选”。关闭窗口后释放这件模型，再选下一件。
 
@@ -17,12 +17,17 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 | 通用风扇 | 框架、叶轮与轮毂；九片叶片 | 166,183 B | 510,480 B |
 | 风冷散热器 | 冷板、导热层、热管、鳍片、顶盖、风扇、卡扣、扣具 | 564,932 B | 1,174,464 B |
 | 一体水冷 | 冷排、风扇组、泵体、泵叶、冷板与微鳍片、水管、内部冷却液、接头 | 787,376 B | 2,719,728 B |
+| 通用整机 | 25个独立部件，含机箱、主板、CPU、GPU、内存、电源、线缆与存储 | 1,395,020 B | 2,403,576 B |
 
-表中的缓冲是送给现有三维渲染器的只读位置／法线数组，不包含 Qt、驱动、边线、上传副本等，**不能当作整个 Stats 的内存占用**。三件参考是通用教育结构，不是三款经过厂家认证的零售精模；不按原版／修订版或六种风格重复计算产品。
+表中的缓冲是送给现有三维渲染器的只读位置／法线数组，不包含 Qt、驱动、边线、上传副本等，**不能当作整个 Stats 的内存占用**。四件参考是通用教育结构，不是四款经过厂家认证的零售精模；不按原版／修订版或六种风格重复计算产品。
 
 风冷 ZIP SHA-256：`546c330b40122064195871973dbe60147aeb0cddb496bb0cc3abee310b88dbe7`。
 
 水冷 ZIP SHA-256：`e0b17b50b00dfbf5339ee9b7d8dd71fbae5f30d318f5024b77ce6f230f619487`。
+
+整机 ZIP SHA-256：`c90db67c40404d674aae6f10f9f9b2e99de98f220d55919e3448b835cde2456d`。11个成员展开4,214,552B，其中保留的八份源文件逐字节不变。
+
+[整机六版静态预览](https://github.com/Fairank/DesktopStats/blob/codex/open-model-references-v053/additional/whole-pc054/whole-pc-six054.png)使用同一模型和镜头，仅隐藏独立侧板以观察内部，原始数据和其他实体不删除。原版源材质较暗，纯线条的CPU／机箱风扇轮廓仍缺较多，图中明确标为待完善；这不是六版观感、拆装动效或原生画面的最终验收。
 
 ## 结构、风格和占用
 
@@ -42,9 +47,15 @@ ZIP 是数据，不执行其中代码。这里只支持已经适配的参考包�
 
 检视窗口的纯源码检查覆盖旧装机路径保留、参考路径不调用整机生成器、静态交互、只读缓冲上传以及丢失上下文后的CPU清理。运行时测试覆盖目标屏幕、解析前后检查、切回游戏时不抢焦点、选择器接受后才解析以及过期回调。软件图鉴入口检查与原生驱动／真实窗口画面分别记录，不能互相替代。
 
+整机另有四项新检查通过，覆盖延迟分派、固定来源核验、解码器许可哈希与冷导入不读取文件。最终ZIP实际通过公开`load_reference`入口，67个Mesh的25部件、33,383三角形和2,403,576B缓冲匹配；六版共用同一几何所有者，返回前ZIP关闭，使用后模型／Scene／全部Mesh引用释放。该次读取约0.075秒墙钟、0.078秒CPU，不等同于帧率或整款程序负担。
+
 ## 原始许可与剩余工作
 
-原作者：[Yoseph / PC Anatomy](https://github.com/Yoosseph/pc-anatomy/tree/9ca9c9635a19abd189cd9978396d26be7a5d0858)，固定源版本 `9ca9c9635a19abd189cd9978396d26be7a5d0858`。包内保留 PC Anatomy、Three.js、Canvas 的完整 MIT 许可与署名，并说明法线衍生修改。
+风扇、风冷和水冷原作者：[Yoseph / PC Anatomy](https://github.com/Yoosseph/pc-anatomy/tree/9ca9c9635a19abd189cd9978396d26be7a5d0858)，固定源版本 `9ca9c9635a19abd189cd9978396d26be7a5d0858`。包内保留 PC Anatomy、Three.js、Canvas 的完整 MIT 许可与署名，并说明法线衍生修改。
+
+整机原作者：[mdrayyanhussain2006 / PC Components Manual](https://github.com/mdrayyanhussain2006/pc-components-manual/tree/1aabb3b1a537f47b2d91d83e9113cd9454013c1e)，固定源版本 `1aabb3b1a537f47b2d91d83e9113cd9454013c1e`。保留原压缩GLB、解码后的原始数据、原README中的MIT声明与来源，以及meshoptimizer的完整MIT通知。没有把缺少单独LICENSE文件当成拒用理由，也不替作者编造版权年份或声明。
+
+整机保留原始51个节点的层级变换、默认形变权重、全部67个绘制网格和33,383个三角形；25个语义部件可独立选择。源动画和形变仍保存在包中，运行时只读预转换的位置／法线，不运行Node、WASM或上游应用。当前没有播放原拆装时间线，也不把它的21段动画称为21套独立、经机械验证的插拔动作。原始尺寸与固定孔位尚未制造核验。
 
 项目原创应用代码仍遵守[非商用条款](../LICENSING.md)，这些第三方 MIT 素材继续遵守其原许可，不叠加本项目非商用限制，不加入本项目独占水印。
 

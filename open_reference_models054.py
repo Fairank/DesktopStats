@@ -1,9 +1,9 @@
 """Explicit, bounded use of reviewed open hardware models in the native viewer.
 
 No directory discovery, profile, sensor, timer, Qt or decoder process is used.
-Original adapter code follows this project's LICENSE; the source model data
-remains MIT, copyright Yoseph / Three.js authors / Canvas contributors. No
-project noncommercial restriction or ownership watermark is applied to it.
+Original adapter code follows this project's LICENSE; each source model retains
+its upstream MIT grant and source-specific author notices. No project
+noncommercial restriction or ownership watermark is applied to imported data.
 """
 from array import array
 from dataclasses import dataclass, replace
@@ -491,6 +491,9 @@ def load_reference(path):
     package = None
     try:
         package = _Package(path)
+        if package.exists('whole-pc-reference054.json'):
+            from open_whole_pc054 import from_package
+            return from_package(package)
         if package.exists('component053.json'):
             return _component(package, package.read('component053.json', MAX_DOCUMENT_BYTES))
         if package.exists('models/generic-fan-derived.glb'):
