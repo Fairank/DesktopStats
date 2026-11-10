@@ -176,7 +176,7 @@
         "新SVG最坏构建时延仍在优化，未标记性能全部完成；本机游戏状态与静置的整款程序CPU／RAM／GPU占用仍待安装后原生验收。"
       ],
       "id": "low_overhead",
-      "implementation": "保留共享时钟、按需采集与模型缓存；独立水路6次索引扫描合为1次。隔离热选择器微基准CPU中位约减少81%；63产品索引对象63170B、至多8记录79963B只属递归Python对象图，不含模块／Qt／mesh／GL或进程RAM。 图库只为可见项串行准备复杂图形，关闭取消旧结果；小组件最小化暂停快照，恢复读取最新状态。局部响应测量不当作CPU用时下降或整款内存。 内置离线图集只读内置目录，不导入用户扩展包或配置目录；程序内图库照常保留可选配件。 0.51按旧363网格同一输入优化打包与检视边界；打包临时Python分配46,510,210→15,570,620B、CPU中位减少73.42%，边界CPU中位减少78.05%但临时分配增加32,288B。只属离线内核，不是整款RSS／显存／原生上传／FPS；结果与范围见QUALITY051。 后续关闭路径增加显式CPU Scene／拾取／绘制引用清理，4相关模块36项阶段检查通过；weakref只证明所测对象不再被owner保留，未测进程RSS或驱动显存。最终583源下另以同一旧363mesh输入重测r3，字节／bounds精确相等，报告模块SHA与最终代码围栏一致；此前r2的79.27%独立保留，不冒充本次78.05%。",
+      "implementation": "保留共享时钟、按需采集与模型缓存；独立水路6次索引扫描合为1次。隔离热选择器微基准CPU中位约减少81%；63产品索引对象63170B、至多8记录79963B只属递归Python对象图，不含模块／Qt／mesh／GL或进程RAM。 图库只为可见项串行准备复杂图形，关闭取消旧结果；小组件最小化暂停快照，恢复读取最新状态。局部响应测量不当作CPU用时下降或整款内存。 内置离线图集只读内置目录，不导入用户扩展包或配置目录；程序内图库照常保留可选配件。 0.51按旧363网格同一输入优化打包与检视边界；打包临时Python分配46,510,210→15,570,620B、CPU中位减少73.42%，边界CPU中位减少78.05%但临时分配增加32,288B。只属离线内核，不是整款RSS／显存／原生上传／FPS；结果与范围见QUALITY051。 后续关闭路径增加显式CPU Scene／拾取／绘制引用清理，4相关模块36项阶段检查通过；weakref只证明所测对象不再被owner保留，未测进程RSS或驱动显存。最终583源下另以同一旧363mesh输入重测r3，字节／bounds精确相等，报告模块SHA与最终代码围栏一致；此前r2的79.27%独立保留，不冒充本次78.05%。 054四个指定参考风扇修正后，整景边线仍8,167段，每网格512／整景8192上限未增加，原始PN2,403,576B及全部引用身份保持；未新增采样或定时器。这里只证明该场景几何与边线预算不增，不是整款程序RAM、CPU、GPU实测下降。",
       "native_acceptance_pending": true,
       "requirement": "持续优化CPU/内存/GPU负担，并最终报告实际控制到多少。",
       "source_files": [
@@ -290,7 +290,7 @@
         "更多未收录水路产品、GPU冷头、线材与外围设备在六版中同样仍缺；0.47的12个GPU冷头仅独立外观检视，不代表整卡安装或全部型号完成。"
       ],
       "id": "same_model_all_styles",
-      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。 0.49专款模型增加真实厚度/曲叶与孔口，六版共享物理形体；四套彩色主风格启用现有哑光明暗，纯线保透视/轮廓/遮挡，原版无笑脸。 0.51在不增加网格或风格的条件下继续做已支持GPU前叶轮体积；源阶段的121款／314前叶轮不是314新产品，盖板共面分区已做全147款×3精度专项，最终逐图结果仍待归档。 0.51进一步修正已知GPU转子在可爱／彩色手绘／奶油贴纸中与盖板同色而近乎消失的问题：只调整既有配色层级，暗凹腔、轮毂及叶片区分；原版、纯线条和物理几何不变。旧低对比图不作为最终验收；r4中ASUS Dual六版实图已目视确认，不再有放射状假划痕，其他最终媒体范围／数据入口待归档。 后续清除盖板帽面三角分区的共面伪线，真孔rim、凹腔外缘和厚度边保留，未靠删硬件细节掩盖问题。GPU最终定向45项、0跳过通过，13个自有代码文件冻结；材料／帽面边与混搭／Renderer另有18项阶段检查，覆盖有重叠不累加。 0.52 C1两套精选参考整机的六版共用实际物理数组，局部CPU封装、GPU三前扇、两条RAM和PSU是同一模型的独立截图。前置冷排三扇在内侧近景可见；没有为预览隐藏、缩放或贴图替代实体。其余全型号／隐藏内部与制造尺寸仍按原待核范围。",
+      "implementation": "支持的型号在六套展示方案及13个保存值中共用尺寸、型号、叶轮数量、转轴与结构目录；逐件混搭只调画法，不减配或套另一型号的壳。 0.48修正拥挤线稿里RAM、电源、冷头／软管与供电线主要轮廓的分配顺序，保留既有边线预算；同数量仍需实际逐图核对。 0.49专款模型增加真实厚度/曲叶与孔口，六版共享物理形体；四套彩色主风格启用现有哑光明暗，纯线保透视/轮廓/遮挡，原版无笑脸。 0.51在不增加网格或风格的条件下继续做已支持GPU前叶轮体积；源阶段的121款／314前叶轮不是314新产品，盖板共面分区已做全147款×3精度专项，最终逐图结果仍待归档。 0.51进一步修正已知GPU转子在可爱／彩色手绘／奶油贴纸中与盖板同色而近乎消失的问题：只调整既有配色层级，暗凹腔、轮毂及叶片区分；原版、纯线条和物理几何不变。旧低对比图不作为最终验收；r4中ASUS Dual六版实图已目视确认，不再有放射状假划痕，其他最终媒体范围／数据入口待归档。 后续清除盖板帽面三角分区的共面伪线，真孔rim、凹腔外缘和厚度边保留，未靠删硬件细节掩盖问题。GPU最终定向45项、0跳过通过，13个自有代码文件冻结；材料／帽面边与混搭／Renderer另有18项阶段检查，覆盖有重叠不累加。 0.52 C1两套精选参考整机的六版共用实际物理数组，局部CPU封装、GPU三前扇、两条RAM和PSU是同一模型的独立截图。前置冷排三扇在内侧近景可见；没有为预览隐藏、缩放或贴图替代实体。其余全型号／隐藏内部与制造尺寸仍按原待核范围。 054对开源整机中四个来源已确认的MAT_FAN_PLASTIC绘制分区作有限修正：仅在线条画法提取折线时使用实际三角面法向，模型位置与着色法线保持。5项新控制通过，67网格的98,004个边线浮点值与已查看候选逐字节一致，仍为8,167段；旧模型六版示例输出字节相同。轮毂保留、后置风扇部分边框较清晰，CPU叶片与全型号六版精细观感仍未完成。",
       "native_acceptance_pending": true,
       "requirement": "每套硬件数量、型号与结构跟原版一致，不能不同风格换壳/减配。 各版均应保留真实三维厚度、曲面与遮挡关系，不能只把图案贴在平面上。",
       "source_files": [
@@ -335,7 +335,8 @@
         "tests/test_socket_detail052.py",
         "tests/test_carry_strap052.py",
         "tests/test_gpu_evidence052.py",
-        "tests/test_dense_ink052.py"
+        "tests/test_dense_ink052.py",
+        "tests/test_reference_face_creases054.py"
       ]
     },
     {
@@ -2846,6 +2847,35 @@
     "ccby_GPU_is_prior_reviewed_LOD": true,
     "ccby_source_units_calibrated": false,
     "ccby_runtime_images_decoded_or_retained": false,
-    "ccby_runtime_automatic_assembly": false
+    "ccby_runtime_automatic_assembly": false,
+    "reference_fan_crease_054": {
+      "scope": "line_only policies; four exact source-attested fan draw name/part/component tuples",
+      "source_material": "MAT_FAN_PLASTIC",
+      "triangle_positions_and_shading_normals_changed": false,
+      "new_meshes_or_sampling_or_clocks": false,
+      "crease_degrees": 35,
+      "per_mesh_segment_cap": 512,
+      "scene_segment_cap": 8192,
+      "scene_segments_before": 8167,
+      "scene_segments_after": 8167,
+      "final_public_controls_passed": 5,
+      "final_public_67_mesh_edge_floats": 98004,
+      "final_public_candidate_edge_bytes_identical": true,
+      "six_legacy_sample_buffers_identical": true,
+      "geometry_bytes": 2403576,
+      "geometry_views_and_hashes_unchanged": true,
+      "all_tested_model_scene_mesh_objects_released": true,
+      "worker_wall_seconds": 0.499105,
+      "worker_cpu_seconds": 0.46875,
+      "proof_sha256": "f6791425f13c1deaa286f0b0fb1a4ae18cf286a68ce9da2f0d4c3efe8ffbde51",
+      "public_style_sha256": "5629c04bd9ec7c3e7f9548e725f46ddb6060cbab432b7975b0a323de90fa281c",
+      "rejected_silhouette_candidate_adopted": false,
+      "visual_acceptance_scope": "one static software camera; hub retained and some rear-frame creases clearer; not full fan artwork",
+      "canonical_sheet_new_frames": 4,
+      "canonical_sheet_cached_frames": 2,
+      "canonical_sheet_native_screenshot": false,
+      "CPU_fan_blade_artwork_complete": false,
+      "all_six_complete_artwork_or_native_accepted": false
+    }
   }
 }

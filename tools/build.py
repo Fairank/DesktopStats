@@ -728,6 +728,7 @@ SOURCES = (
     'tests/test_open_reference_entry054.py',
     'tests/test_open_whole_pc054.py',
     'tests/test_open_ccby_components054.py',
+    'tests/test_reference_face_creases054.py',
     'docs/OPEN_REFERENCE_MODELS054.md',
     'docs/OPEN_HARDWARE_SOURCES053.md',
     'docs/OPEN_HARDWARE_SOURCES053.json',

@@ -19,6 +19,14 @@ _GPU_FAN_INKS={"cartoon":(69/255,90/255,100/255),"notebook_color":(73/255,101/25
 _SOURCE_FINISH_BOARDS = frozenset(('asrock-z790-pg-itx-tb4','asrock-b650i-lightning-wifi',
     'asrock-x670e-taichi','asrock-b650e-steel-legend-wifi','asrock-b650m-pg-riptide-wifi',
     'gigabyte-z790-aorus-master'))
+# These fixed open-model draws use the upstream MAT_FAN_PLASTIC material.
+# They are structural references, without changing their rendering normals.
+_SOURCE_REFERENCE_FANS054 = {
+    'whole-pc:CPU_COOLER:1': ('reference:CPU_COOLER', 'cooler'),
+    'whole-pc:CASE_FAN_01:0': ('reference:CASE_FAN_01', 'fans'),
+    'whole-pc:CASE_FAN_02:0': ('reference:CASE_FAN_02', 'fans'),
+    'whole-pc:CASE_FAN_03:0': ('reference:CASE_FAN_03', 'fans'),
+}
 
 
 def rgba(value, alpha=1.):
@@ -322,7 +330,18 @@ def _contour_sample(edges,limit,groups=None):
     return tuple(edge for n,edge in enumerate(edges) if n in chosen)
 
 
-def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False,repair_under_cap=False):
+def _geometric_face_normal054(row):
+    """Use real face geometry for imported smooth-normal crease analysis."""
+    a,b,c=(row[n:n+3] for n in (0,6,12))
+    u=tuple(b[k]-a[k] for k in range(3));v=tuple(c[k]-a[k] for k in range(3))
+    cross=(u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0])
+    length=math.hypot(*cross)
+    if length==0. or not math.isfinite(length):return None
+    return tuple(value/length for value in cross)
+
+
+def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False,repair_under_cap=False,
+                 geometric_normals=False):
     """Return boundary/crease edges, excluding coplanar triangulation diagonals."""
     if type(limit) is not int or limit<=0:return ()
     limit=min(limit,MAX_STYLE_EDGES);edges={};point_keys={};normal_keys={}
@@ -335,7 +354,8 @@ def crease_edges(vertices,limit=MAX_MESH_EDGES,*,repair_partitions=False,repair_
             key=point_keys.get(point)
             if key is None:key=_key(point);point_keys[point]=key
             keyed.append(key)
-        normal=tuple(row[3:6])
+        normal=_geometric_face_normal054(row) if geometric_normals else tuple(row[3:6])
+        if normal is None:continue
         normal=normal_keys.setdefault(normal,normal)
         for a,b in ((0,1),(1,2),(2,0)):
             p,q=keyed[a],keyed[b]
@@ -398,7 +418,9 @@ def edge_batches(meshes,style,styles=None,*,focus='all'):
         edges=crease_edges(mesh.vertices,contour_limit,
                            repair_partitions=mesh.name.endswith('fan-pads'),
                            repair_under_cap=(mesh.name.startswith('loop-')
-                               or mesh.component=='gpu' and mesh.name in ('gpu-cover-panel','gpu-cover-panel-tesla-brushed-metal')))
+                               or mesh.component=='gpu' and mesh.name in ('gpu-cover-panel','gpu-cover-panel-tesla-brushed-metal')),
+                           geometric_normals=(policy['line_only'] and
+                               _SOURCE_REFERENCE_FANS054.get(mesh.name)==(mesh.part_id,mesh.component)))
         tags=();smooth_groups=()
         if policy['line_only'] and (mesh.name.startswith('loop-') or mesh.component=='gpu' and mesh.name in (
                 'detail-gpu-fx5200-observed-capacitor-body-1','detail-gpu-fx5200-observed-capacitor-body-2',
